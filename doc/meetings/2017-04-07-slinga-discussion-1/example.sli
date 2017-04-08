@@ -1,0 +1,100 @@
+org (organisaztional, ...; which org I belong  to)
+
+scope : scope in which the service is visible
+
+service
+
+context (service instance for a given of class of use cases/consumers)
+
+contract
+   
+   clause
+
+component
+
+label:
+
+   [ what, circumstances, states, ownership ]
+   --> lbl-space : uri-like 
+   --> actual lbl : uri-like : + value -- encoded in the lbl
+       [NS]/foo/boo/hshjhsj?value=6
+
+
+/context/ns/actual-lbl
+
+
+
+within this org [URI]
+    we have this service [NAME]
+       that is made out of this sort of things:
+            component [NAME] that uses code|service [URI] + (with some lbl formula for creative carving)
+                with these dependencies on service|local-component (?) [URI] + (with some lbl formula for creative carving)
+            ...
+            ...
+       
+
+within this org [URI]
+    contract [name]
+        scope [name]
+           org who-am-i-visible-to|* 
+              clause for this type of comsuners [some lbl formulae]
+           use this context [URI]
+           with lbls
+
+        ... multiple scopes ...
+
+
+        icontext [name]
+            ownership: dedicated | shared | shared-incremental
+            service uri
+
+            growth | allocation schemes | limits | ... 
+            affinity
+
+            ..
+            ..
+            ..
+
+
+/org/someorg/anotheorg:
+	svc/kafka:
+	    labels:
+		a: b
+	    components:
+		kafka:
+			labels: ...
+			code: ...
+			dependencies:
+				/org/someorg/anotherorg/contract/zookeeper:
+					a: b
+	svc/zookeeper:
+		...
+
+/org/somtestrg/anotherorg:a
+        contract/kafkaa:
+            svc: /org/someorg/anotherorg/contract/kafka
+           
+	    context/mock:
+
+               svc: /org/someorg/anotherorg/contract/moc-kafka
+               ownership : shared-with-all
+
+	    context/test:
+               ownership : shared-with-all
+               
+
+	    context/staging:
+            context/prod:
+               ownership : shared-within-scope
+
+            context/prod-high-prio:
+               ownership: dedicated-per-consumer
+ 
+        scope scary-people
+              */eng/dev
+                    CLAUSE: {stage/in-test && ...}
+                    CLAUSE: ...
+
+              context/test
+              
+     
