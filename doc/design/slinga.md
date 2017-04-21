@@ -42,27 +42,25 @@ Object Types:
 company_a.team_1.platform/service/kafka:
   labels:
     app: analytics
-    aptomi/display_name: "Apache Kafka"
-    aptomi/description: "Super Fancy Kafka Service from Platform team"
+    display_name: "Apache Kafka"
+    description: "Super Fancy Kafka Service from Platform team"
+    # for example: service/type: "analytics-iot"
   components:
     kafka:
-      labels: []
       code:
         aptomi/orch/kubernetes-helm:
           - name: kafka
             version: 1.13.2
             repository: http://storage.googleapis.com/kubernetes-charts-incubator
             values:
-              a: b
+              helm-value: some-expression-based-on-label
       dependencies:
-        - company_a.team_1.platform/contract/zookeeper:
-            a: b
+        - company_a.team_1.platform/contract/zookeeper: context_name
 
 ---
 company_a.team_1.platform/contract/kafka:
   services:
-    - company_a.team_1.platform/service/kafka:
-        a: b
+    - company_a.team_1.platform/service/kafka
   contexts:
     mock:
       services:
