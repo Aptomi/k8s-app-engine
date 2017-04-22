@@ -1,0 +1,20 @@
+Master:
+  Image: frostman/kapp-spark
+  ImageTag: "2017042201"
+
+WebUi:
+  serviceType: NodePort
+  nodePort: 31000
+
+Worker:
+  Image: frostman/kapp-spark
+  ImageTag: "2017042201"
+  Replicas: 2
+
+Zeppelin:
+  Image: frostman/kapp-zeppelin
+  ImageTag: "2017042201"
+  serviceType: NodePort
+  nodePort: 31001
+
+monitoring: false

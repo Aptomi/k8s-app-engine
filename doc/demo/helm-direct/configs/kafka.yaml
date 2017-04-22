@@ -1,0 +1,22 @@
+replicas: 3
+antiAffinity: soft
+probeInitialDelaySeconds: 5
+probeTimeoutSeconds: 2
+
+image:
+  repository: frostman/kapp-kafka
+  tag: "2017042201"
+
+monitoring: false
+
+zookeeper:
+  replicas: 3
+  antiAffinity: soft
+  probeInitialDelaySeconds: 5
+  probeTimeoutSeconds: 2
+
+  image:
+    repository: frostman/kapp-zookeeper
+    tag: "2017042201"
+
+  monitoring: false
