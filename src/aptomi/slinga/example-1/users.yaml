@@ -1,0 +1,7 @@
+user:
+  name: John
+  labels:
+    priority: 0
+    org: some_company_1.platform_team
+    prod: false
+    dev: true

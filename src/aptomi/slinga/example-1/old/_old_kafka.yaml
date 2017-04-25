@@ -1,0 +1,27 @@
+# Definition of Kafka service
+name: kafka
+
+labels:
+  a: b
+  c: d
+  
+code:
+  helm
+
+contexts:
+  # Test context for Kafka
+  test:
+    labels:
+      a: b
+      c: d
+    instances:
+      - test-{{user.team}} => priority >= 2
+
+  # Production context for Kafka
+  prod:
+    labels:
+      a: b
+      c: d
+    instances:
+      - big => priority >= 5 && org == 'mirantis'
+      - small => org == 'mirantis'
