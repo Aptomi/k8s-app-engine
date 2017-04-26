@@ -1,10 +1,11 @@
-package main
+package slinga
 
 import (
 	"fmt"
 	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"path/filepath"
 )
 
 type Allocation struct {
@@ -33,7 +34,29 @@ type GlobalState struct {
 	Contexts	[]Context
 }
 
-func loadService(filename string) Service {
+// Loads state from a directory
+func loadGlobalState(dir string) GlobalState {
+	s := GlobalState{}
+
+	// read all services
+	files, _ := filepath.Glob(dir + "service.*.yaml")
+	for _, f := range files {
+		fmt.Println("Loading service from: ", f)
+		s.Services = append(s.Services, loadServiceFromFile(f))
+	}
+
+	// read all contexts
+	files, _ = filepath.Glob(dir + "context.*.yaml")
+	for _, f := range files {
+		fmt.Println("Loading context from: ", f)
+		s.Contexts = append(s.Contexts, loadContextFromFile(f))
+	}
+
+	return s
+}
+
+// Loads service from YAML file
+func loadServiceFromFile(filename string) Service {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
 		panic(e)
@@ -46,7 +69,8 @@ func loadService(filename string) Service {
 	return t
 }
 
-func loadContext(filename string) Context {
+// Loads context from YAML file
+func loadContextFromFile(filename string) Context {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
 		panic(e)
@@ -59,8 +83,8 @@ func loadContext(filename string) Context {
 	return t
 }
 
-// Dump slinga service onto screen
-func dumpService(t Service) {
+// Prints Service object onto screen
+func printService(t Service) {
 	d, e := yaml.Marshal(&t)
 	if e != nil {
 		log.Fatalf("error: %v", e)
@@ -75,8 +99,8 @@ func dumpService(t Service) {
 	fmt.Printf("%v\n\n", m)
 }
 
-// Dump slinga context onto screen
-func dumpContext(t Context) {
+// Prints Context object onto screen
+func printContext(t Context) {
 	d, e := yaml.Marshal(&t)
 	if e != nil {
 		log.Fatalf("error: %v", e)
@@ -91,14 +115,3 @@ func dumpContext(t Context) {
 	fmt.Printf("%v\n\n", m)
 }
 
-func main() {
-	dir := "/Users/ralekseenkov/go/src/aptomi-workspace/aptomi/slinga/example-1/"
-
-	filenameSvc := dir + "service.kafka.yaml"
-	s := loadService(filenameSvc)
-	dumpService(s)
-
-	filenameCtx := dir + "context.test.kafka.yaml"
-	c := loadContext(filenameCtx)
-	dumpContext(c)
-}
