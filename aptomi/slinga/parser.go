@@ -28,7 +28,11 @@ type Service struct {
 	Labels   	map[string]map[string]string
 }
 
-// Load slinga service from file
+type GlobalState struct {
+	Services	[]Service
+	Contexts	[]Context
+}
+
 func loadService(filename string) Service {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
@@ -42,7 +46,6 @@ func loadService(filename string) Service {
 	return t
 }
 
-// Load slinga service from file
 func loadContext(filename string) Context {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
@@ -89,7 +92,7 @@ func dumpContext(t Context) {
 }
 
 func main() {
-	dir := "/Users/ralekseenkov/go/src/aptomi-workspace/src/aptomi/slinga/example-1/"
+	dir := "/Users/ralekseenkov/go/src/aptomi-workspace/aptomi/slinga/example-1/"
 
 	filenameSvc := dir + "service.kafka.yaml"
 	s := loadService(filenameSvc)
