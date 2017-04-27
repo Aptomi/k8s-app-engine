@@ -28,16 +28,11 @@ type Context struct {
 	Allocations []Allocation
 }
 
-type Dependency struct {
-	Service string
-	Labels  LabelOperations
-}
-
 type ServiceComponent struct {
 	Name         string
 	Service      string
 	Code         string
-	Dependencies []Dependency
+	Dependencies []string
 	Labels       LabelOperations
 }
 

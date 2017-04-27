@@ -7,30 +7,29 @@ labels:
 
 components:
 
-  - name: zope
+  - name: component1
     service: zookeeper
-    dependencies:
-      - service: <name>
-        labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a: b
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
       remove:
         a: b
-
-  - name: zope
-    code: <helm...>
     dependencies:
-      - service: <name>
-        labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a: b
+      - component2
+      - component3
+
+  - name: component2
+    code: <helm...>
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a: b
+    dependencies:
+      - component3
+
+  - name: component3
+    code: <helm...>
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
