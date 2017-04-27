@@ -5,5 +5,33 @@ labels:
   set:
     a: b
 
-code:
-  helm
+components:
+  - name: zope
+    service: zookeeper
+    dependencies:
+      - service: <name>
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a: b
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a: b
+  - name: zope
+    code:
+      <helm...>
+    dependencies:
+      - service: <name>
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a: b
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a: b

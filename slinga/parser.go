@@ -8,25 +8,26 @@ import (
 	"path/filepath"
 )
 
+type LabelOperations map[string]map[string]string
+
 type Allocation struct {
 	Name     	string
 	Criteria	[]string
-	Labels   	map[string]map[string]string
+	Labels   	LabelOperations
 }
 
 type Context struct {
 	Name     	string
 	Service     string
 	Criteria	[]string
-	Labels   	map[string]map[string]string
+	Labels   	LabelOperations
 
 	Allocations []Allocation
 }
 
 type Service struct {
 	Name     	string
-	Code     	string
-	Labels   	map[string]map[string]string
+	Labels   	LabelOperations
 }
 
 type GlobalState struct {
