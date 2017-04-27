@@ -6,6 +6,7 @@ labels:
     a: b
 
 components:
+
   - name: zope
     service: zookeeper
     dependencies:
@@ -20,9 +21,9 @@ components:
         some-test-context-specific-label: some-value
       remove:
         a: b
+
   - name: zope
-    code:
-      <helm...>
+    code: <helm...>
     dependencies:
       - service: <name>
         labels:

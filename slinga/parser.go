@@ -21,13 +21,26 @@ type Context struct {
 	Service     string
 	Criteria	[]string
 	Labels   	LabelOperations
-
 	Allocations []Allocation
+}
+
+type Dependency struct {
+	Service 	string
+	Labels  	LabelOperations
+}
+
+type ServiceComponent struct {
+	Name     		string
+	Service     	string
+	Code			string
+	Dependencies 	[]Dependency
+	Labels  		LabelOperations
 }
 
 type Service struct {
 	Name     	string
 	Labels   	LabelOperations
+	Components  []ServiceComponent
 }
 
 type GlobalState struct {
@@ -36,7 +49,7 @@ type GlobalState struct {
 }
 
 // Loads state from a directory
-func loadGlobalState(dir string) GlobalState {
+func loadGlobalStateFromDir(dir string) GlobalState {
 	s := GlobalState{}
 
 	// read all services
