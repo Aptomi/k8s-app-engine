@@ -1,6 +1,7 @@
 To install dependencies:
 # go get gopkg.in/yaml.v2
 # go get github.com/stretchr/testify
+# go get github.com/Knetic/govaluate
 
 To build a package:
 # go build aptomi/slinga

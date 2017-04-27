@@ -8,44 +8,48 @@ import (
 	"path/filepath"
 )
 
+/*
+ 	This file declares all the necessary structures for Slinga YAML file to be successfully parsed
+  */
+
 type LabelOperations map[string]map[string]string
 
 type Allocation struct {
-	Name     	string
-	Criteria	[]string
-	Labels   	LabelOperations
+	Name     string
+	Criteria []string
+	Labels   LabelOperations
 }
 
 type Context struct {
-	Name     	string
+	Name        string
 	Service     string
-	Criteria	[]string
-	Labels   	LabelOperations
+	Criteria    []string
+	Labels      LabelOperations
 	Allocations []Allocation
 }
 
 type Dependency struct {
-	Service 	string
-	Labels  	LabelOperations
+	Service string
+	Labels  LabelOperations
 }
 
 type ServiceComponent struct {
-	Name     		string
-	Service     	string
-	Code			string
-	Dependencies 	[]Dependency
-	Labels  		LabelOperations
+	Name         string
+	Service      string
+	Code         string
+	Dependencies []Dependency
+	Labels       LabelOperations
 }
 
 type Service struct {
-	Name     	string
-	Labels   	LabelOperations
-	Components  []ServiceComponent
+	Name       string
+	Labels     LabelOperations
+	Components []ServiceComponent
 }
 
 type GlobalState struct {
-	Services	[]Service
-	Contexts	[]Context
+	Services []Service
+	Contexts []Context
 }
 
 // Loads state from a directory
@@ -128,4 +132,3 @@ func printContext(t Context) {
 	}
 	fmt.Printf("%v\n\n", m)
 }
-
