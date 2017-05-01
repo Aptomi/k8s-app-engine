@@ -96,8 +96,9 @@ func loadContextFromFile(filename string) Context {
 	return t
 }
 
-// Prints Service object onto screen
-func printService(t Service) {
+// Prints slinga object onto screen
+//noinspection GoUnusedFunction
+func printSlingaObject(t interface{}) {
 	d, e := yaml.Marshal(&t)
 	if e != nil {
 		log.Fatalf("error: %v", e)
@@ -112,18 +113,3 @@ func printService(t Service) {
 	fmt.Printf("%v\n\n", m)
 }
 
-// Prints Context object onto screen
-func printContext(t Context) {
-	d, e := yaml.Marshal(&t)
-	if e != nil {
-		log.Fatalf("error: %v", e)
-	}
-	fmt.Printf("--- dump:\n%s\n", string(d))
-
-	m := make(map[interface{}]interface{})
-	e = yaml.Unmarshal([]byte(string(d)), &m)
-	if e != nil {
-		log.Fatalf("error: %v", e)
-	}
-	fmt.Printf("%v\n\n", m)
-}

@@ -1,7 +1,15 @@
-user:
-  name: John
+- id: 1
+  name: Alice
   labels:
-    priority: 0
-    org: some_company_1.platform_team
-    prod: false
+    priority: 3
+    org: platform_team
     dev: true
+    prod: false
+
+- id: 2
+  name: Bob
+  labels:
+    priority: 20
+    org: platform_team
+    dev: false
+    prod: true

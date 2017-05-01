@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Evaluate an
+// Evaluate an expression, given a set of labels
 func evaluate(expression string, params LabelSet) bool {
 	// Create an expression
 	expressionObject, e := govaluate.NewEvaluableExpression(expression);
@@ -19,7 +19,6 @@ func evaluate(expression string, params LabelSet) bool {
 	parameters := make(map[string]interface{}, len(params.Labels))
 	for k, v := range params.Labels {
 		// all labels are strings. we need to cast them to the appropriate type before evaluation
-
 		if vInt, err := strconv.Atoi(v); err == nil {
 			parameters[k] = vInt;
 		} else {
