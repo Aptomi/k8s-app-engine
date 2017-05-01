@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
 	"path/filepath"
+	"sort"
 )
 
 /*
@@ -44,15 +45,16 @@ type Service struct {
 
 type GlobalState struct {
 	Services []Service
-	Contexts []Context
+	Contexts map[string][]Context
 }
 
 // Loads state from a directory
 func loadGlobalStateFromDir(dir string) GlobalState {
-	s := GlobalState{}
+	s := GlobalState{Contexts: make(map[string][]Context)}
 
 	// read all services
 	files, _ := filepath.Glob(dir + "service.*.yaml")
+	sort.Strings(files)
 	for _, f := range files {
 		fmt.Println("Loading service from: ", f)
 		s.Services = append(s.Services, loadServiceFromFile(f))
@@ -60,9 +62,11 @@ func loadGlobalStateFromDir(dir string) GlobalState {
 
 	// read all contexts
 	files, _ = filepath.Glob(dir + "context.*.yaml")
+	sort.Strings(files)
 	for _, f := range files {
 		fmt.Println("Loading context from: ", f)
-		s.Contexts = append(s.Contexts, loadContextFromFile(f))
+		context := loadContextFromFile(f)
+		s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
 	}
 
 	return s
