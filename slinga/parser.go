@@ -16,6 +16,7 @@ type LabelOperations map[string]map[string]string
 
 type Allocation struct {
 	Name     string
+	NameResolved string
 	Criteria []string
 	Labels   LabelOperations
 }

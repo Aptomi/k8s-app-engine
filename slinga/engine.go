@@ -56,7 +56,13 @@ func (state *GlobalState) resolve(user User, serviceName string) (interface{}, e
 		log.Printf("No allocation matched (context = %s, service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
 		return nil, nil
 	}
-	log.Printf("Matched allocation: '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, contextMatched.Name, service.Name, user.Name)
+	err := allocationMatched.resolveName(user)
+	if err != nil {
+		log.Printf("Cannot resolve name for an allocation: '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, contextMatched.Name, service.Name, user.Name)
+		return nil, nil
+	}
+
+	log.Printf("Matched allocation: '%s' -> '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, allocationMatched.NameResolved, contextMatched.Name, service.Name, user.Name)
 
 	return nil, nil
 }

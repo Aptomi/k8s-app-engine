@@ -1,5 +1,12 @@
 package slinga
 
+import (
+	"text/template"
+	"bytes"
+	"errors"
+	"strings"
+)
+
 /*
  	This file declares all utility structures and methods required for Slinga processing
   */
@@ -13,6 +20,7 @@ type LabelSet struct {
 func (user *User) getLabelSet() LabelSet {
 	return LabelSet{Labels: user.Labels}
 }
+
 // Apply set of transformations to labels
 func (src *LabelSet) applyTransform(ops LabelOperations) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
@@ -53,4 +61,39 @@ func (allocation *Allocation) matches(labels LabelSet) bool {
 		}
 	}
 	return false
+}
+
+// Resolve name for an allocation
+func (allocation *Allocation) resolveName(user User) error {
+	result, err := evaluateTemplate(allocation.Name, user)
+	allocation.NameResolved = result
+	return err
+}
+
+// Evaluates a template
+func evaluateTemplate(templateStr string, user User) (string, error) {
+
+	type Parameters struct {
+		User User
+	}
+	param := Parameters{User: user}
+
+	tmpl, err := template.New("").Parse(templateStr)
+	if err != nil {
+		return "", errors.New("Invalid template " + templateStr)
+	}
+
+	var doc bytes.Buffer
+	err = tmpl.Execute(&doc, param)
+
+	if err != nil {
+		return "", errors.New("Cannot evaluate template " + templateStr)
+	}
+
+	result := doc.String()
+	if strings.Contains(result, "<no value>") {
+		return "", errors.New("Cannot evaluate template " + templateStr)
+	}
+
+	return doc.String(), nil
 }
