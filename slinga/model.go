@@ -1,7 +1,7 @@
 package slinga
 
 /*
- 	This file declares all the structures and methods required for Slinga processing (which don't exist in YAML)
+ 	This file declares all utility structures and methods required for Slinga processing
   */
 
 // Set of labels that will be manipulated
@@ -10,7 +10,11 @@ type LabelSet struct {
 }
 
 // Apply set of transformations to labels
-func (src LabelSet) applyTransform(ops LabelOperations) LabelSet {
+func (user *User) getLabelSet() LabelSet {
+	return LabelSet{Labels: user.Labels}
+}
+// Apply set of transformations to labels
+func (src *LabelSet) applyTransform(ops LabelOperations) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
 
 	// copy original labels
@@ -29,4 +33,24 @@ func (src LabelSet) applyTransform(ops LabelOperations) LabelSet {
 	}
 
 	return result
+}
+
+// Check if context criteria is satisfied
+func (context *Context) matches(labels LabelSet) bool {
+	for _, c := range context.Criteria {
+		if evaluate(c, labels) {
+			return true
+		}
+	}
+	return false
+}
+
+// Check if allocation criteria is satisfied
+func (allocation *Allocation) matches(labels LabelSet) bool {
+	for _, c := range allocation.Criteria {
+		if evaluate(c, labels) {
+			return true
+		}
+	}
+	return false
 }

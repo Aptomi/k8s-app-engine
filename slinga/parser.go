@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"fmt"
 	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
@@ -44,27 +43,31 @@ type Service struct {
 }
 
 type GlobalState struct {
-	Services []Service
+	Services map[string]Service
 	Contexts map[string][]Context
 }
 
 // Loads state from a directory
 func loadGlobalStateFromDir(dir string) GlobalState {
-	s := GlobalState{Contexts: make(map[string][]Context)}
+	s := GlobalState{
+		Services: make(map[string]Service),
+		Contexts: make(map[string][]Context),
+	}
 
 	// read all services
 	files, _ := filepath.Glob(dir + "service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
-		fmt.Println("Loading service from: ", f)
-		s.Services = append(s.Services, loadServiceFromFile(f))
+		log.Printf("Loading service from %s", f)
+		service := loadServiceFromFile(f)
+		s.Services[service.Name] = service
 	}
 
 	// read all contexts
 	files, _ = filepath.Glob(dir + "context.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
-		fmt.Println("Loading context from: ", f)
+		log.Printf("Loading context from %s", f)
 		context := loadContextFromFile(f)
 		s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
 	}
@@ -107,13 +110,13 @@ func printSlingaObject(t interface{}) {
 	if e != nil {
 		log.Fatalf("error: %v", e)
 	}
-	fmt.Printf("--- dump:\n%s\n", string(d))
+	log.Printf("--- dump:\n%s\n", string(d))
 
 	m := make(map[interface{}]interface{})
 	e = yaml.Unmarshal([]byte(string(d)), &m)
 	if e != nil {
 		log.Fatalf("error: %v", e)
 	}
-	fmt.Printf("%v\n\n", m)
+	log.Printf("%v\n\n", m)
 }
 

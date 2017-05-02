@@ -3,7 +3,7 @@ name: test
 service: kafka
 
 criteria:
-  - env == test
+  - dev == "yes" && prod == "no"
 
 labels:
   set:

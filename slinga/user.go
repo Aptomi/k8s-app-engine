@@ -15,7 +15,7 @@ import (
 type User struct {
 	Id       string
 	Name     string
-	Labels	 LabelSet
+	Labels	 map[string]string
 }
 
 type GlobalUsers struct {

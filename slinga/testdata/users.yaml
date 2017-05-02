@@ -2,14 +2,16 @@
   name: Alice
   labels:
     priority: 3
-    org: platform_team
-    dev: true
-    prod: false
+    org: corporate_it
+    team: platform_services
+    dev: yes
+    prod: no
 
 - id: 2
   name: Bob
   labels:
     priority: 20
-    org: platform_team
-    dev: false
-    prod: true
+    org: corporate_it
+    team: platform_services
+    dev: no
+    prod: yes
