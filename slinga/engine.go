@@ -40,7 +40,7 @@ func (state *GlobalState) resolve(user User, serviceName string) (interface{}, e
 	}
 	log.Printf("Matched context: '%s' (service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
 
-	// Transform labels
+	// Transform labels (on the level of Context)
 	labels = labels.applyTransform(contextMatched.Labels)
 
 	// See which allocation matches
@@ -52,6 +52,7 @@ func (state *GlobalState) resolve(user User, serviceName string) (interface{}, e
 		}
 	}
 
+	// Check errors and resolve allocation name (it can be dynamic, depending on user labels)
 	if allocationMatched == nil {
 		log.Printf("No allocation matched (context = %s, service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
 		return nil, nil
@@ -63,6 +64,9 @@ func (state *GlobalState) resolve(user User, serviceName string) (interface{}, e
 	}
 
 	log.Printf("Matched allocation: '%s' -> '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, allocationMatched.NameResolved, contextMatched.Name, service.Name, user.Name)
+
+	// Transform labels (on the level of Allocation)
+	labels = labels.applyTransform(allocationMatched.Labels)
 
 	return nil, nil
 }
