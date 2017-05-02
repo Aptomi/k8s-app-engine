@@ -13,7 +13,8 @@ components:
       set: # add/modify
         some-test-context-specific-label: some-value
       remove:
-        a: b
+        a:
+        b:
     dependencies:
       - component2
       - component3
@@ -24,7 +25,8 @@ components:
       set: # add/modify
         some-test-context-specific-label: some-value
       remove:
-        a: b
+        a:
+        b:
     dependencies:
       - component3
 
@@ -34,4 +36,5 @@ components:
       set: # add/modify
         some-test-context-specific-label: some-value
       remove:
-        a: b
+        a:
+        b:

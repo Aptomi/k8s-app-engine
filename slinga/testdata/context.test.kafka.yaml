@@ -9,7 +9,8 @@ labels:
   set:
     some-test-context-specific-label: some-value
   remove:
-    a: b
+    a:
+    b:
 
 allocations:
 
@@ -20,7 +21,8 @@ allocations:
       set:
         some-test-context-specific-label: some-value
       remove:
-        a: b
+        a:
+        b:
 
   - name: test-{{user.team}}
     criteria:
@@ -29,4 +31,5 @@ allocations:
       set:
         some-test-context-specific-label: some-value
       remove:
-        a: b
+        a:
+        b:
