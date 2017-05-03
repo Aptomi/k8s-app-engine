@@ -16,9 +16,11 @@ type LabelOperations map[string]map[string]string
 
 type Allocation struct {
 	Name     string
-	NameResolved string
 	Criteria []string
 	Labels   LabelOperations
+
+	// Evaluated field (when parameters in name are substituted with real values)
+	NameResolved string
 }
 
 type Context struct {
@@ -41,6 +43,10 @@ type Service struct {
 	Name       string
 	Labels     LabelOperations
 	Components []ServiceComponent
+
+	// Evaluated field (when components are sorted in instantiation order)
+	ComponentsMap     map[string]ServiceComponent
+	ComponentsOrdered []ServiceComponent
 }
 
 type GlobalState struct {
@@ -120,4 +126,3 @@ func printSlingaObject(t interface{}) {
 	}
 	log.Printf("%v\n\n", m)
 }
-

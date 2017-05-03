@@ -1,6 +1,6 @@
 name: prod
 
-service: kafka
+service: zookeeper
 
 criteria:
   - dev == "no" && prod == "yes"
