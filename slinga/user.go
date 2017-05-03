@@ -31,12 +31,12 @@ func loadUserByIDFromDir(dir string, id string) User {
 func loadUsersFromDir(dir string) GlobalUsers {
 	dat, e := ioutil.ReadFile(dir + "users.yaml")
 	if e != nil {
-		panic(e)
+		log.Fatalf("Unable to read file: %v", e)
 	}
 	t := []User{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		log.Fatalf("error: %v", e)
+		log.Fatalf("Unable to unmarshal user: %v", e)
 	}
 	r := GlobalUsers{Users: make(map[string]User)}
 	for _, u := range t {

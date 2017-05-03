@@ -9,34 +9,31 @@ import (
  	Core engine for Slinga processing and evaluation
   */
 
-// Allocation structure - who is using what
-type AllocationState struct {
-
-}
-
-
 // Evaluate "<user> needs <service>" statement
-func (state *Policy) resolve(user User, serviceName string) (interface{}, error) {
-	return state.resolveWithLabels(user, serviceName, user.getLabelSet())
+func (state *Policy) resolve(user User, serviceName string) (ServiceUsageState, error) {
+	result := NewServiceUsageState()
+	result.recordDependency(user, serviceName)
+	err := state.resolveWithLabels(user, serviceName, user.getLabelSet(), &result)
+	return result, err
 }
 
 // Evaluate "<user> needs <service>" statement
-func (state *Policy) resolveWithLabels(user User, serviceName string, labels LabelSet) (interface{}, error) {
+func (state *Policy) resolveWithLabels(user User, serviceName string, labels LabelSet, result *ServiceUsageState) (error) {
 
 	// Locate the service
 	service, err := state.getService(serviceName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Match the context
 	context, err := state.getMatchedContext(*service, user, labels)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// If no matching context is found, let's just exit
 	if context == nil {
-		return nil, nil
+		return nil
 	}
 
 	// Process context and transform labels
@@ -45,11 +42,11 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 	// Match the allocation
 	allocation, err := state.getMatchedAllocation(*service, user, *context, labels)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// If no matching allocation is found, let's just exit
 	if allocation == nil {
-		return nil, nil
+		return nil
 	}
 
 	// Process allocation and transform labels
@@ -58,8 +55,11 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 	// Now, sort all components in topological order
 	err = service.sortComponentsTopologically()
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	// Record usage of a given service
+	result.recordUsage(user, service, context, allocation, nil)
 
 	// Resolve every component
 	for _, component := range service.ComponentsOrdered {
@@ -68,20 +68,22 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 
 		// Is it a code?
 		if component.Code != "" {
-			// TODO
-			log.Println("Processing code execution: " + component.Name + " (in " + service.Name + ")")
+			log.Println("Processing dependency on code execution: " + component.Name + " (in " + service.Name + ")")
 		} else if component.Service != "" {
-			log.Println("Processing service recursively: " + component.Name + " -> " + component.Service + " (in " + service.Name + ")")
-			_, err := state.resolveWithLabels(user, component.Service, labels)
+			log.Println("Processing dependency on another service: " + component.Name + " -> " + component.Service + " (in " + service.Name + ")")
+			err := state.resolveWithLabels(user, component.Service, labels, result)
 			if err != nil {
-				return nil, err
+				return err
 			}
-	 	} else {
+		} else {
 			log.Fatal("Invalid component: " + component.Name + " " + service.Name)
 		}
+
+		// Record usage of a given component
+		result.recordUsage(user, service, context, allocation, &component)
 	}
 
-	return nil, nil
+	return nil
 }
 
 // Topologically sort components and return true if there is a cycle detected
@@ -91,7 +93,7 @@ func (service *Service) dfsComponentSort(u ServiceComponent, colors map[string]i
 	for _, vName := range u.Dependencies {
 		v, exists := service.ComponentsMap[vName]
 		if !exists {
-			log.Fatal("Invalid dependency in service "+ service.Name + ": " + vName)
+			log.Fatal("Invalid dependency in service " + service.Name + ": " + vName)
 		}
 		if vColor, ok := colors[v.Name]; !ok {
 			// not visited yet -> visit and exit if a cycle was found

@@ -86,12 +86,12 @@ func loadGlobalStateFromDir(dir string) Policy {
 func loadServiceFromFile(filename string) Service {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
-		panic(e)
+		log.Fatalf("Unable to read file: %v", e)
 	}
 	t := Service{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		log.Fatalf("error: %v", e)
+		log.Fatalf("Unable to unmarshal service: %v", e)
 	}
 	return t
 }
@@ -100,27 +100,32 @@ func loadServiceFromFile(filename string) Service {
 func loadContextFromFile(filename string) Context {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
-		panic(e)
+		log.Fatalf("Unable to read file: %v", e)
 	}
 	t := Context{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		log.Fatalf("error: %v", e)
+		log.Fatalf("Unable to unmarshal context: %v", e)
 	}
 	return t
 }
 
-// Prints slinga object onto screen
-//noinspection GoUnusedFunction
-func printSlingaObject(t interface{}) {
+// Serialize object into YAML
+func serializeObject(t interface{}) string {
 	d, e := yaml.Marshal(&t)
 	if e != nil {
 		log.Fatalf("error: %v", e)
 	}
-	log.Printf("--- dump:\n%s\n", string(d))
+	return string(d)
+}
+
+// Prints slinga object onto screen
+//noinspection GoUnusedFunction
+func printObject(t interface{}) {
+	log.Printf("--- dump:\n%s\n", serializeObject(t))
 
 	m := make(map[interface{}]interface{})
-	e = yaml.Unmarshal([]byte(string(d)), &m)
+	e := yaml.Unmarshal([]byte(serializeObject(t)), &m)
 	if e != nil {
 		log.Fatalf("error: %v", e)
 	}

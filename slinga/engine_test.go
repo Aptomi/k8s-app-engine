@@ -11,12 +11,12 @@ func TestEngine(t *testing.T) {
 	users := loadUsersFromDir("testdata/")
 
 	alice := users.Users["1"]
-	_, err := state.resolve(alice, "kafka")
+	usageState, err := state.resolve(alice, "kafka")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO:
+	assert.Equal(t, 7, len(usageState.ResolvedLinks), "Policy resolution should result in correct amount of usage entries")
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
