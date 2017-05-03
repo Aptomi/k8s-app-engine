@@ -49,14 +49,14 @@ type Service struct {
 	ComponentsOrdered []ServiceComponent
 }
 
-type GlobalState struct {
+type Policy struct {
 	Services map[string]Service
 	Contexts map[string][]Context
 }
 
 // Loads state from a directory
-func loadGlobalStateFromDir(dir string) GlobalState {
-	s := GlobalState{
+func loadGlobalStateFromDir(dir string) Policy {
+	s := Policy{
 		Services: make(map[string]Service),
 		Contexts: make(map[string][]Context),
 	}

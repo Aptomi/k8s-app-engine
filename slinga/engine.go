@@ -9,13 +9,19 @@ import (
  	Core engine for Slinga processing and evaluation
   */
 
+// Allocation structure - who is using what
+type AllocationState struct {
+
+}
+
+
 // Evaluate "<user> needs <service>" statement
-func (state *GlobalState) resolve(user User, serviceName string) (interface{}, error) {
+func (state *Policy) resolve(user User, serviceName string) (interface{}, error) {
 	return state.resolveWithLabels(user, serviceName, user.getLabelSet())
 }
 
 // Evaluate "<user> needs <service>" statement
-func (state *GlobalState) resolveWithLabels(user User, serviceName string, labels LabelSet) (interface{}, error) {
+func (state *Policy) resolveWithLabels(user User, serviceName string, labels LabelSet) (interface{}, error) {
 
 	// Locate the service
 	service, err := state.getService(serviceName)
@@ -70,6 +76,8 @@ func (state *GlobalState) resolveWithLabels(user User, serviceName string, label
 			if err != nil {
 				return nil, err
 			}
+	 	} else {
+			log.Fatal("Invalid component: " + component.Name + " " + service.Name)
 		}
 	}
 
@@ -81,7 +89,10 @@ func (service *Service) dfsComponentSort(u ServiceComponent, colors map[string]i
 	colors[u.Name] = 1
 
 	for _, vName := range u.Dependencies {
-		v := service.ComponentsMap[vName]
+		v, exists := service.ComponentsMap[vName]
+		if !exists {
+			log.Fatal("Invalid dependency in service "+ service.Name + ": " + vName)
+		}
 		if vColor, ok := colors[v.Name]; !ok {
 			// not visited yet -> visit and exit if a cycle was found
 			if service.dfsComponentSort(v, colors) {
@@ -127,7 +138,7 @@ func (service *Service) sortComponentsTopologically() error {
 }
 
 // Helper to get a service
-func (state *GlobalState) getService(serviceName string) (*Service, error) {
+func (state *Policy) getService(serviceName string) (*Service, error) {
 	// Locate the service
 	service, ok := state.Services[serviceName]
 	if !ok {
@@ -137,7 +148,7 @@ func (state *GlobalState) getService(serviceName string) (*Service, error) {
 }
 
 // Helper to get a matched context
-func (state *GlobalState) getMatchedContext(service Service, user User, labels LabelSet) (*Context, error) {
+func (state *Policy) getMatchedContext(service Service, user User, labels LabelSet) (*Context, error) {
 	// Locate the list of contexts for service
 	contexts, ok := state.Contexts[service.Name]
 	if !ok {
@@ -162,7 +173,7 @@ func (state *GlobalState) getMatchedContext(service Service, user User, labels L
 }
 
 // Helper to get a matched allocation
-func (state *GlobalState) getMatchedAllocation(service Service, user User, context Context, labels LabelSet) (*Allocation, error) {
+func (state *Policy) getMatchedAllocation(service Service, user User, context Context, labels LabelSet) (*Allocation, error) {
 	// See which allocation matches
 	var allocationMatched *Allocation
 	for _, a := range context.Allocations {

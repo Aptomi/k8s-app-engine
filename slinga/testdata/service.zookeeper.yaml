@@ -16,7 +16,7 @@ components:
         a:
         b:
     dependencies:
-      - component3
+      - component2
 
   - name: component2
     code: <helm...>
