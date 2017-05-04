@@ -17,6 +17,7 @@ func TestEngine(t *testing.T) {
 	}
 
 	assert.Equal(t, 7, len(usageState.ResolvedLinks), "Policy resolution should result in correct amount of usage entries")
+	// usageState.storeServiceUsageState()
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {

@@ -14,6 +14,9 @@ type ServiceUsageState struct {
 
 	// resolved triples <service, context, allocation, component> -> list of users
 	ResolvedLinks map[string][]string
+
+	// the order in which components/services have to be instantiated
+	ProcessingOrder []string
 }
 
 func NewServiceUsageState() ServiceUsageState {
@@ -37,13 +40,14 @@ func (state ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (state ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent) {
+func (state *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent) {
 	key := state.createUsageKey(service, context, allocation, component)
 	state.ResolvedLinks[key] = append(state.ResolvedLinks[key], user.Id)
+	state.ProcessingOrder = append(state.ProcessingOrder, key)
 }
 
 // Records requested dependency
-func (state ServiceUsageState) recordDependency(user User, serviceName string) {
+func (state *ServiceUsageState) recordDependency(user User, serviceName string) {
 	key := state.createDependencyKey(serviceName)
 	state.Dependencies[key] = append(state.Dependencies[key], user.Id)
 }

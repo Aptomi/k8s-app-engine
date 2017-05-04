@@ -58,9 +58,6 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 		return err
 	}
 
-	// Record usage of a given service
-	result.recordUsage(user, service, context, allocation, nil)
-
 	// Resolve every component
 	for _, component := range service.ComponentsOrdered {
 		// Process component and transform labels
@@ -82,6 +79,9 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 		// Record usage of a given component
 		result.recordUsage(user, service, context, allocation, &component)
 	}
+
+	// Record usage of a given service
+	result.recordUsage(user, service, context, allocation, nil)
 
 	return nil
 }
