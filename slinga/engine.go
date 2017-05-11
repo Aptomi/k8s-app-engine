@@ -9,25 +9,34 @@ import (
  	Core engine for Slinga processing and evaluation
   */
 
-// Evaluate "<user> needs <service>" statement
-func (state *Policy) resolve(user User, serviceName string) (ServiceUsageState, error) {
-	result := NewServiceUsageState()
-	result.recordDependency(user, serviceName)
-	err := state.resolveWithLabels(user, serviceName, user.getLabelSet(), &result)
-	return result, err
+// Evaluates all recorded "<user> needs <service>" dependencies
+func (usage *ServiceUsageState) resolveUsage(users *GlobalUsers) (error) {
+	for serviceName, userIds := range usage.Dependencies {
+		for _, userId := range userIds {
+			user := users.Users[userId]
+			err := usage.resolveWithLabels(user, serviceName, user.getLabelSet())
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // Evaluate "<user> needs <service>" statement
-func (state *Policy) resolveWithLabels(user User, serviceName string, labels LabelSet, result *ServiceUsageState) (error) {
+func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet) (error) {
+
+	// Policy
+	policy := usage.Policy
 
 	// Locate the service
-	service, err := state.getService(serviceName)
+	service, err := policy.getService(serviceName)
 	if err != nil {
 		return err
 	}
 
 	// Match the context
-	context, err := state.getMatchedContext(*service, user, labels)
+	context, err := policy.getMatchedContext(*service, user, labels)
 	if err != nil {
 		return err
 	}
@@ -40,7 +49,7 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 	labels = labels.applyTransform(context.Labels)
 
 	// Match the allocation
-	allocation, err := state.getMatchedAllocation(*service, user, *context, labels)
+	allocation, err := policy.getMatchedAllocation(*service, user, *context, labels)
 	if err != nil {
 		return err
 	}
@@ -68,7 +77,7 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 			log.Println("Processing dependency on code execution: " + component.Name + " (in " + service.Name + ")")
 		} else if component.Service != "" {
 			log.Println("Processing dependency on another service: " + component.Name + " -> " + component.Service + " (in " + service.Name + ")")
-			err := state.resolveWithLabels(user, component.Service, labels, result)
+			err := usage.resolveWithLabels(user, component.Service, labels)
 			if err != nil {
 				return err
 			}
@@ -77,11 +86,11 @@ func (state *Policy) resolveWithLabels(user User, serviceName string, labels Lab
 		}
 
 		// Record usage of a given component
-		result.recordUsage(user, service, context, allocation, &component)
+		usage.recordUsage(user, service, context, allocation, &component)
 	}
 
 	// Record usage of a given service
-	result.recordUsage(user, service, context, allocation, nil)
+	usage.recordUsage(user, service, context, allocation, nil)
 
 	return nil
 }
@@ -140,9 +149,9 @@ func (service *Service) sortComponentsTopologically() error {
 }
 
 // Helper to get a service
-func (state *Policy) getService(serviceName string) (*Service, error) {
+func (policy *Policy) getService(serviceName string) (*Service, error) {
 	// Locate the service
-	service, ok := state.Services[serviceName]
+	service, ok := policy.Services[serviceName]
 	if !ok {
 		return nil, errors.New("Service " + serviceName + " not found")
 	}
@@ -150,9 +159,9 @@ func (state *Policy) getService(serviceName string) (*Service, error) {
 }
 
 // Helper to get a matched context
-func (state *Policy) getMatchedContext(service Service, user User, labels LabelSet) (*Context, error) {
+func (policy *Policy) getMatchedContext(service Service, user User, labels LabelSet) (*Context, error) {
 	// Locate the list of contexts for service
-	contexts, ok := state.Contexts[service.Name]
+	contexts, ok := policy.Contexts[service.Name]
 	if !ok {
 		return nil, errors.New("No contexts found for " + service.Name)
 	}
@@ -175,7 +184,7 @@ func (state *Policy) getMatchedContext(service Service, user User, labels LabelS
 }
 
 // Helper to get a matched allocation
-func (state *Policy) getMatchedAllocation(service Service, user User, context Context, labels LabelSet) (*Allocation, error) {
+func (policy *Policy) getMatchedAllocation(service Service, user User, context Context, labels LabelSet) (*Allocation, error) {
 	// See which allocation matches
 	var allocationMatched *Allocation
 	for _, a := range context.Allocations {

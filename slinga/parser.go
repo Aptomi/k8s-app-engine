@@ -54,8 +54,8 @@ type Policy struct {
 	Contexts map[string][]Context
 }
 
-// Loads state from a directory
-func loadGlobalStateFromDir(dir string) Policy {
+// Loads policy from a directory
+func loadPolicyFromDir(dir string) Policy {
 	s := Policy{
 		Services: make(map[string]Service),
 		Contexts: make(map[string][]Context),

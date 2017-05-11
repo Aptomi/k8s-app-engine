@@ -6,7 +6,7 @@ import (
 )
 
 func TestParsing(t *testing.T) {
-	state := loadGlobalStateFromDir("testdata/")
+	state := loadPolicyFromDir("testdata/")
 
 	assert.Equal(t, 2, len(state.Services), "Two services should be loaded");
 

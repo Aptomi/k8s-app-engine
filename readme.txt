@@ -19,3 +19,14 @@ To run all tests:
 
 Directory 'testdata' is excluded from processing by 'go' tool:
 https://golang.org/cmd/go/#hdr-Description_of_package_lists
+
+
+
+
+Issues observed:
+
+1) With the current definition of serives and contexts, there is NO way to provide different
+   implementation of the same "service interface"
+      - e.g. SQL service -> MySQL or MariaDB
+
+2) Duplication of data in context definitions

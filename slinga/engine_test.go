@@ -7,21 +7,27 @@ import (
 )
 
 func TestEngine(t *testing.T) {
-	state := loadGlobalStateFromDir("testdata/")
+	policy := loadPolicyFromDir("testdata/")
 	users := loadUsersFromDir("testdata/")
 
 	alice := users.Users["1"]
-	usageState, err := state.resolve(alice, "kafka")
+	bob := users.Users["2"]
+
+	usageState := NewServiceUsageState(&policy)
+	usageState.addDependency(alice, "kafka")
+	usageState.addDependency(bob, "kafka")
+	err := usageState.resolveUsage(&users)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	assert.Equal(t, 7, len(usageState.ResolvedLinks), "Policy resolution should result in correct amount of usage entries")
+	assert.Equal(t, 14, len(usageState.ResolvedLinks), "Policy resolution should result in correct amount of usage entries")
 	// usageState.saveServiceUsageState()
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
-	state := loadGlobalStateFromDir("testdata/")
+	state := loadPolicyFromDir("testdata/")
 	service := state.Services["kafka"]
 
 	err := service.sortComponentsTopologically()
