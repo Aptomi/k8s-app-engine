@@ -26,10 +26,10 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 	was := make(map[string]bool)
 
 	// Add box/subgraph for users
-	addSubgraphOnce(graph,"Main", "cluster_Users", map[string]string{"label": "Users"}, was)
+	addSubgraphOnce(graph, "Main", "cluster_Users", map[string]string{"label": "Users"}, was)
 
 	// Add box/subgraph for services
-	addSubgraphOnce(graph,"Main", "cluster_Services", map[string]string{"label": "Services"}, was);
+	addSubgraphOnce(graph, "Main", "cluster_Services", map[string]string{"label": "Services"}, was);
 
 	// How many colors have been used
 	usedColors := 0
@@ -38,14 +38,14 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 	// First of all, let's show all dependencies (who requested what)
 	for service, userIds := range usage.Dependencies {
 		// Add a node with service
-		addNodeOnce(graph,"cluster_Services", service, nil, was)
+		addNodeOnce(graph, "cluster_Services", service, nil, was)
 
 		// For every user who has a dependency on this service
 		for _, userId := range userIds {
 			color := getUserColor(userId, colorForUser, &usedColors)
 
 			// Add a node with user
-			addNodeOnce(graph,"cluster_Users", userId, nil, was)
+			addNodeOnce(graph, "cluster_Users", userId, nil, was)
 
 			// Add an edge from user to a service
 			addEdge(graph, userId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
@@ -63,13 +63,13 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 		componentLabel := service + "_" + component
 
 		// Add box/subgraph for a given context/allocation
-		addSubgraphOnce(graph,"Main", "cluster_" + contextAndAllocation, map[string]string{"label": "Context/Allocation: " + contextAndAllocation}, was)
+		addSubgraphOnce(graph, "Main", "cluster_"+contextAndAllocation, map[string]string{"label": "Context/Allocation: " + contextAndAllocation}, was)
 
 		// Add a node with service
-		addNodeOnce(graph,"cluster_Services", service, nil, was)
+		addNodeOnce(graph, "cluster_Services", service, nil, was)
 
 		// Add a node with component
-		addNodeOnce(graph, "cluster_" + contextAndAllocation, componentKey, map[string]string{"label": componentLabel}, was)
+		addNodeOnce(graph, "cluster_"+contextAndAllocation, componentKey, map[string]string{"label": componentLabel}, was)
 
 		// Add an edge from service to allocation box
 		for _, userId := range userIds {
@@ -85,10 +85,10 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 			serviceName2 := component.Service
 			if serviceName2 != "" {
 				// Add a node with service1
-				addNodeOnce(graph,"cluster_Services", serviceName1, nil, was)
+				addNodeOnce(graph, "cluster_Services", serviceName1, nil, was)
 
 				// Add a node with service2
-				addNodeOnce(graph,"cluster_Services", serviceName2, nil, was)
+				addNodeOnce(graph, "cluster_Services", serviceName2, nil, was)
 
 				// Show dependency
 				addEdge(graph, serviceName1, serviceName2, map[string]string{"color": "gray60"})
@@ -96,23 +96,38 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 		}
 	}
 
-
-	fileNameDot := getAptomiDB() + "/" + "db.dot"
+	fileNameDot := getAptomiDB() + "/" + "graph_full.dot"
+	fileNameDotFlat := getAptomiDB() + "/" + "graph_flat.dot"
 	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644);
 	if err != nil {
 		log.Fatal("Unable to write to a file: " + fileNameDot)
 	}
 
+	// Call graphviz to flatten an image
+	{
+		cmd := "unflatten"
+		args := []string{"-f", "-l", "4", "-o" + fileNameDotFlat, fileNameDot}
+		command := exec.Command(cmd, args...)
+		var outb, errb bytes.Buffer
+		command.Stdout = &outb
+		command.Stderr = &errb
+		if err := command.Run(); err != nil {
+			log.Fatal("Unable to execute graphviz: "+outb.String()+" "+errb.String(), err)
+		}
+	}
+
 	// Call graphviz to generate an image
-	cmd := "dot"
-	fileNamePng := getAptomiDB() + "/" + "db.png"
-	args := []string{"-Tpng", "-o" + fileNamePng, fileNameDot}
-	command := exec.Command(cmd, args...)
-	var outb, errb bytes.Buffer
-	command.Stdout = &outb
-	command.Stderr = &errb
-	if err := command.Run(); err != nil {
-		log.Fatal("Unable to execute graphviz: "+outb.String()+" "+errb.String(), err)
+	{
+		cmd := "dot"
+		fileNamePng := getAptomiDB() + "/" + "graph.png"
+		args := []string{"-Tpng", "-o" + fileNamePng, fileNameDotFlat}
+		command := exec.Command(cmd, args...)
+		var outb, errb bytes.Buffer
+		command.Stdout = &outb
+		command.Stderr = &errb
+		if err := command.Run(); err != nil {
+			log.Fatal("Unable to execute graphviz: "+outb.String()+" "+errb.String(), err)
+		}
 	}
 }
 func getUserColor(userId string, colorForUser map[string]int, usedColors *int) int {
