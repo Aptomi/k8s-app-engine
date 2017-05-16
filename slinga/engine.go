@@ -73,7 +73,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		labels = labels.applyTransform(component.Labels)
 
 		// Is it a code?
-		if component.Code != "" {
+		if component.Code != nil {
 			log.Println("Processing dependency on code execution: " + component.Name + " (in " + service.Name + ")")
 		} else if component.Service != "" {
 			log.Println("Processing dependency on another service: " + component.Name + " -> " + component.Service + " (in " + service.Name + ")")
