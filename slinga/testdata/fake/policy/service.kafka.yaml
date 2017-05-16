@@ -20,7 +20,9 @@ components:
       - component3
 
   - name: component2
-    code: <helm...>
+    code:
+      type: aptomi/code/fake
+      content: component2
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -31,7 +33,9 @@ components:
       - component3
 
   - name: component3
-    code: <helm...>
+    code:
+      type: aptomi/code/fake
+      content: component3
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

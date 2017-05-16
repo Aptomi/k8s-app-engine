@@ -31,10 +31,15 @@ type Context struct {
 	Allocations []Allocation
 }
 
+type Code struct {
+	Type	string
+	Content string
+}
+
 type ServiceComponent struct {
 	Name         string
 	Service      string
-	Code         string
+	Code         *Code
 	Dependencies []string
 	Labels       LabelOperations
 }
