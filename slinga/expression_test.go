@@ -23,8 +23,6 @@ func TestExpressions(t *testing.T) {
 	// simple case with missing integer variable
 	assert.Equal(t, false, evaluate("foo > 5 && missingLabel == 239", labels), "Evaluate expression with missing integer label");
 
-	// simple case with string variable
-
-	// TODO: this test will not pass because we are explititly converting all integer-like labels to integers
-	// assert.Equal(t, true, evaluate("foo == '10'", labels), "Evaluate expression with string '10' variable equals to '10");
+	// we are explicitly converting all integer-like labels to integers, so this will always be false (expected behavior)
+	assert.Equal(t, false, evaluate("foo == '10'", labels), "All integer values are always converted to ints, they should never be equal to a string");
 }

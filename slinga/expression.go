@@ -30,6 +30,7 @@ func evaluate(expression string, params LabelSet) bool {
 	result, e := expressionObject.Evaluate(parameters);
 	if e != nil {
 		// see if it's missing parameter? then return false
+		// TODO: this is a hack to deal with missing labels. Will need to rewrite it
 		if strings.Contains(e.Error(), "No parameter") && strings.Contains(e.Error(), "found") {
 			return false
 		}
