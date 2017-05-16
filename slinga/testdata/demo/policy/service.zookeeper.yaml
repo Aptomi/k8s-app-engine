@@ -1,0 +1,14 @@
+# Definition of Zookeeper service
+name: zookeeper
+
+components:
+  - name: zookeeper
+    code:
+      type: aptomi/orch/kubernetes-helm-chart
+      content:
+        name: zookeeper
+        version: 1.42.5
+        repository: http://storage.googleapis.com/kubernetes-charts-incubator
+        values:
+          replicas: 3
+          antiAffinity: {{ .Labels.antiaffinity }}

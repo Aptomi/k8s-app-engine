@@ -1,0 +1,33 @@
+# Definition of Kafka service
+name: kafka
+
+labels:
+  set:
+    a: b
+
+components:
+
+  - name: zookeper
+    service: zookeeper
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+
+  - name: kafka
+    code:
+      type: aptomi/orch/kubernetes-helm-chart
+      content:
+        name: kafka
+        version: 1.13.2
+        repository: http://storage.googleapis.com/kubernetes-charts-incubator
+        values:
+          replicas: 3
+          antiAffinity: {{ .Labels.antiaffinity }}
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+    dependencies:
+      - zookeper
