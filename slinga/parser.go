@@ -62,7 +62,7 @@ func loadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all services
-	files, _ := filepath.Glob(dir + "service.*.yaml")
+	files, _ := filepath.Glob(dir + "/policy/service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		log.Printf("Loading service from %s", f)
@@ -71,7 +71,7 @@ func loadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all contexts
-	files, _ = filepath.Glob(dir + "context.*.yaml")
+	files, _ = filepath.Glob(dir + "/policy/context.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		log.Printf("Loading context from %s", f)

@@ -36,7 +36,7 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	for service, userIds := range usage.Dependencies {
+	for service, userIds := range usage.Dependencies.Dependencies {
 		// Add a node with service
 		addNodeOnce(graph, "cluster_Services", service, nil, was)
 
@@ -45,7 +45,7 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 			color := getUserColor(userId, colorForUser, &usedColors)
 
 			// Add a node with user
-			addNodeOnce(graph, "cluster_Users", userId, nil, was)
+			addNodeOnce(graph, "cluster_Users", userId, map[string]string{"style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
 			// Add an edge from user to a service
 			addEdge(graph, userId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})

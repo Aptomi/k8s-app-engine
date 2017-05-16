@@ -11,7 +11,7 @@ import (
 
 // Evaluates all recorded "<user> needs <service>" dependencies
 func (usage *ServiceUsageState) resolveUsage(users *GlobalUsers) (error) {
-	for serviceName, userIds := range usage.Dependencies {
+	for serviceName, userIds := range usage.Dependencies.Dependencies {
 		for _, userId := range userIds {
 			user := users.Users[userId]
 			err := usage.resolveWithLabels(user, serviceName, user.getLabelSet())

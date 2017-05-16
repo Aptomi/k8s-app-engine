@@ -14,8 +14,8 @@ type ServiceUsageState struct {
 	// reference to a policy
 	Policy *Policy
 
-	// recorded initial dependencies <service> -> list of users
-	Dependencies map[string][]string
+	// reference to dependencies
+	Dependencies *GlobalDependencies
 
 	// resolved triples <service, context, allocation, component> -> list of users
 	ResolvedLinks map[string][]string
@@ -24,10 +24,10 @@ type ServiceUsageState struct {
 	ProcessingOrder []string
 }
 
-func NewServiceUsageState(policy *Policy) ServiceUsageState {
+func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
 	return ServiceUsageState{
 		Policy: policy,
-		Dependencies: make(map[string][]string),
+		Dependencies: dependencies,
 		ResolvedLinks: make(map[string][]string)}
 }
 
@@ -57,7 +57,7 @@ func (usage *ServiceUsageState) recordUsage(user User, service *Service, context
 // Records requested dependency
 func (usage *ServiceUsageState) addDependency(user User, serviceName string) {
 	key := usage.createDependencyKey(serviceName)
-	usage.Dependencies[key] = append(usage.Dependencies[key], user.Id)
+	usage.Dependencies.Dependencies[key] = append(usage.Dependencies.Dependencies[key], user.Id)
 }
 
 // Return aptomi DB directory
