@@ -39,9 +39,9 @@ var showCmdPolicy = &cobra.Command{
 	},
 }
 
-var showCmdAllocations = &cobra.Command{
-	Use:   "allocations",
-	Short: "Show aptomi allocations (what has been allocated and who is using what)",
+var showCmdGraph = &cobra.Command{
+	Use:   "graph",
+	Short: "Show the current allocation graph (what has been allocated and who is using what)",
 	Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
 		usage := slinga.LoadServiceUsageState()
@@ -57,7 +57,7 @@ var showCmdAllocations = &cobra.Command{
 func init() {
 	showCmd.AddCommand(showCmdConfig)
 	showCmd.AddCommand(showCmdPolicy)
-	showCmd.AddCommand(showCmdAllocations)
+	showCmd.AddCommand(showCmdGraph)
 
 	RootCmd.AddCommand(showCmd)
 }
