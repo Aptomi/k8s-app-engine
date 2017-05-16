@@ -96,8 +96,8 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 		}
 	}
 
-	fileNameDot := getAptomiDB() + "/" + "graph_full.dot"
-	fileNameDotFlat := getAptomiDB() + "/" + "graph_flat.dot"
+	fileNameDot := GetAptomiDB() + "/" + "graph_full.dot"
+	fileNameDotFlat := GetAptomiDB() + "/" + "graph_flat.dot"
 	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644);
 	if err != nil {
 		log.Fatal("Unable to write to a file: " + fileNameDot)
@@ -119,7 +119,7 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 	// Call graphviz to generate an image
 	{
 		cmd := "dot"
-		fileNamePng := getAptomiDB() + "/" + "graph.png"
+		fileNamePng := GetAptomiDB() + "/" + "graph.png"
 		args := []string{"-Tpng", "-o" + fileNamePng, fileNameDotFlat}
 		command := exec.Command(cmd, args...)
 		var outb, errb bytes.Buffer

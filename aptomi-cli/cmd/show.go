@@ -4,6 +4,8 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"fmt"
+	"os/exec"
+	"aptomi/slinga"
 )
 
 var showCmd = &cobra.Command{
@@ -15,9 +17,9 @@ var showCmd = &cobra.Command{
 	},
 }
 
-var showCmdA = &cobra.Command{
-	Use:   "vars",
-	Short: "Show aptomi variables",
+var showCmdConfig = &cobra.Command{
+	Use:   "config",
+	Short: "Show aptomi configuration variables",
 	Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
 		vars := []string{"APTOMI_POLICY", "APTOMI_DB"}
@@ -29,7 +31,7 @@ var showCmdA = &cobra.Command{
 	},
 }
 
-var showCmdB = &cobra.Command{
+var showCmdPolicy = &cobra.Command{
 	Use:   "policy",
 	Short: "Show aptomi policy",
 	Long: "",
@@ -37,18 +39,23 @@ var showCmdB = &cobra.Command{
 	},
 }
 
-var showCmdC = &cobra.Command{
+var showCmdAllocations = &cobra.Command{
 	Use:   "allocations",
 	Short: "Show aptomi allocations (what has been allocated and who is using what)",
 	Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
+		pngFile := slinga.GetAptomiDB() + "/" + "graph.png"
+		command := exec.Command("open", []string{pngFile}...)
+		if err := command.Run(); err != nil {
+			fmt.Print("Allocations (PNG): " + pngFile)
+		}
 	},
 }
 
 func init() {
-	showCmd.AddCommand(showCmdA)
-	showCmd.AddCommand(showCmdB)
-	showCmd.AddCommand(showCmdC)
+	showCmd.AddCommand(showCmdConfig)
+	showCmd.AddCommand(showCmdPolicy)
+	showCmd.AddCommand(showCmdAllocations)
 
 	RootCmd.AddCommand(showCmd)
 }

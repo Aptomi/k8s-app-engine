@@ -61,7 +61,7 @@ func (usage *ServiceUsageState) addDependency(user User, serviceName string) {
 }
 
 // Return aptomi DB directory
-func getAptomiDB() string {
+func GetAptomiDB() string {
 	aptomiDB, ok := os.LookupEnv("APTOMI_DB")
 	if !ok {
 		log.Fatal("Attempting to load/save state from disk, but APTOMI_DB environment variable is not present. Must point to a directory")
@@ -74,7 +74,7 @@ func getAptomiDB() string {
 
 // Stores usage state in a file
 func loadServiceUsageState() ServiceUsageState {
-	fileName := getAptomiDB() + "/" + "db.yaml"
+	fileName := GetAptomiDB() + "/" + "db.yaml"
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
 		log.Fatalf("Unable to read file: %v", e)
@@ -89,7 +89,7 @@ func loadServiceUsageState() ServiceUsageState {
 
 // Stores usage state in a file
 func (usage ServiceUsageState) saveServiceUsageState() {
-	fileName := getAptomiDB() + "/" + "db.yaml"
+	fileName := GetAptomiDB() + "/" + "db.yaml"
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644);
 	if err != nil {
 		log.Fatal("Unable to write to a file: " + fileName)
