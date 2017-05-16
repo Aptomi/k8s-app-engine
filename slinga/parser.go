@@ -55,7 +55,7 @@ type Policy struct {
 }
 
 // Loads policy from a directory
-func loadPolicyFromDir(dir string) Policy {
+func LoadPolicyFromDir(dir string) Policy {
 	s := Policy{
 		Services: make(map[string]Service),
 		Contexts: make(map[string][]Context),

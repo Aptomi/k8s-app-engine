@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"os"
 	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
@@ -60,21 +59,9 @@ func (usage *ServiceUsageState) addDependency(user User, serviceName string) {
 	usage.Dependencies.Dependencies[key] = append(usage.Dependencies.Dependencies[key], user.Id)
 }
 
-// Return aptomi DB directory
-func GetAptomiDB() string {
-	aptomiDB, ok := os.LookupEnv("APTOMI_DB")
-	if !ok {
-		log.Fatal("Attempting to load/save state from disk, but APTOMI_DB environment variable is not present. Must point to a directory")
-	}
-	if stat, err := os.Stat(aptomiDB); err != nil || !stat.IsDir() {
-		log.Fatal("Directory APTOMI_DB doesn't exist: " + aptomiDB)
-	}
-	return aptomiDB
-}
-
 // Stores usage state in a file
-func loadServiceUsageState() ServiceUsageState {
-	fileName := GetAptomiDB() + "/" + "db.yaml"
+func LoadServiceUsageState() ServiceUsageState {
+	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
 		log.Fatalf("Unable to read file: %v", e)
@@ -88,12 +75,10 @@ func loadServiceUsageState() ServiceUsageState {
 }
 
 // Stores usage state in a file
-func (usage ServiceUsageState) saveServiceUsageState() {
-	fileName := GetAptomiDB() + "/" + "db.yaml"
+func (usage ServiceUsageState) SaveServiceUsageState() {
+	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644);
 	if err != nil {
 		log.Fatal("Unable to write to a file: " + fileName)
 	}
-
-	usage.storeServiceUsageStateVisual()
 }

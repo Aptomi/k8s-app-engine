@@ -44,10 +44,12 @@ var showCmdAllocations = &cobra.Command{
 	Short: "Show aptomi allocations (what has been allocated and who is using what)",
 	Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
-		pngFile := slinga.GetAptomiDB() + "/" + "graph.png"
-		command := exec.Command("open", []string{pngFile}...)
+		usage := slinga.LoadServiceUsageState()
+		usage.DrawVisualAndStore()
+
+		command := exec.Command("open", []string{usage.GetVisualFileNamePNG()}...)
 		if err := command.Run(); err != nil {
-			fmt.Print("Allocations (PNG): " + pngFile)
+			fmt.Print("Allocations (PNG): " + usage.GetVisualFileNamePNG())
 		}
 	},
 }

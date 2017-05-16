@@ -14,8 +14,13 @@ import (
 const colorScheme = "set19"
 const colorCount = 9
 
+// Returns name of the file where visual is stored
+func (usage ServiceUsageState) GetVisualFileNamePNG() string {
+	return GetAptomiDBDir() + "/" + "graph.png"
+}
+
 // Stores usage state visual into a file
-func (usage ServiceUsageState) storeServiceUsageStateVisual() {
+func (usage ServiceUsageState) DrawVisualAndStore() {
 
 	// Write graph into a file
 	graph := gographviz.NewEscape()
@@ -96,8 +101,8 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 		}
 	}
 
-	fileNameDot := GetAptomiDB() + "/" + "graph_full.dot"
-	fileNameDotFlat := GetAptomiDB() + "/" + "graph_flat.dot"
+	fileNameDot := GetAptomiDBDir() + "/" + "graph_full.dot"
+	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_flat.dot"
 	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644);
 	if err != nil {
 		log.Fatal("Unable to write to a file: " + fileNameDot)
@@ -119,8 +124,7 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 	// Call graphviz to generate an image
 	{
 		cmd := "dot"
-		fileNamePng := GetAptomiDB() + "/" + "graph.png"
-		args := []string{"-Tpng", "-o" + fileNamePng, fileNameDotFlat}
+		args := []string{"-Tpng", "-o" + usage.GetVisualFileNamePNG(), fileNameDotFlat}
 		command := exec.Command(cmd, args...)
 		var outb, errb bytes.Buffer
 		command.Stdout = &outb
@@ -130,6 +134,7 @@ func (usage ServiceUsageState) storeServiceUsageStateVisual() {
 		}
 	}
 }
+
 func getUserColor(userId string, colorForUser map[string]int, usedColors *int) int {
 	color, ok := colorForUser[userId]
 	if !ok {

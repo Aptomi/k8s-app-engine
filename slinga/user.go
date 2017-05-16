@@ -23,13 +23,13 @@ type GlobalUsers struct {
 }
 
 // Loads users from YAML file
-func loadUserByIDFromDir(dir string, id string) User {
-	return loadUsersFromDir(dir).Users[id]
+func LoadUserByIDFromDir(dir string, id string) User {
+	return LoadUsersFromDir(dir).Users[id]
 }
 
 // Loads users from YAML file
-func loadUsersFromDir(dir string) GlobalUsers {
-	dat, e := ioutil.ReadFile(dir + "users.yaml")
+func LoadUsersFromDir(dir string) GlobalUsers {
+	dat, e := ioutil.ReadFile(dir + "/users.yaml")
 	if e != nil {
 		log.Fatalf("Unable to read file: %v", e)
 	}

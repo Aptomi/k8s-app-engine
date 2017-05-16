@@ -10,7 +10,7 @@ import (
   */
 
 // Evaluates all recorded "<user> needs <service>" dependencies
-func (usage *ServiceUsageState) resolveUsage(users *GlobalUsers) (error) {
+func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) (error) {
 	for serviceName, userIds := range usage.Dependencies.Dependencies {
 		for _, userId := range userIds {
 			user := users.Users[userId]

@@ -21,8 +21,8 @@ type GlobalDependencies struct {
 }
 
 // Loads users from YAML file
-func loadDependenciesFromDir(dir string) GlobalDependencies {
-	dat, e := ioutil.ReadFile(dir + "dependencies.yaml")
+func LoadDependenciesFromDir(dir string) GlobalDependencies {
+	dat, e := ioutil.ReadFile(dir + "/dependencies.yaml")
 	if e != nil {
 		log.Fatalf("Unable to read file: %v", e)
 	}
