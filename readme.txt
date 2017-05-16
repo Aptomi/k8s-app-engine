@@ -33,6 +33,7 @@ To run Aptomi CLI without compilation:
 # cd aptomi-cli
 # go run main.go show config
 # go run main.go policy apply
+# go run main.go policy apply --noop
 # go run main.go show graph
 
 

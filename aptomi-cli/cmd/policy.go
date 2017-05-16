@@ -6,6 +6,8 @@ import (
 	"aptomi/slinga"
 )
 
+var noop bool
+
 var policyCmd = &cobra.Command{
 	Use:   "policy",
 	Short: "Process policy and execute an action",
@@ -17,7 +19,7 @@ var policyCmd = &cobra.Command{
 
 var policyCmdApply = &cobra.Command{
 	Use:   "apply",
-	Short: "Evaluate a policy and apply changes",
+	Short: "Process policy and apply changes (supports noop mode)",
 	Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
 		policyDir := slinga.GetAptomiPolicyDir()
@@ -33,21 +35,20 @@ var policyCmdApply = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		usageState.SaveServiceUsageState()
-	},
-}
+		// TODO: implement
+		if noop {
+			// do not apply changes
+		} else {
+			// apply changes
+		}
 
-var policyCmdNoop = &cobra.Command{
-	Use:   "noop",
-	Short: "Evaluate a policy and print expected changes (noop mode)",
-	Long: "",
-	Run: func(cmd *cobra.Command, args []string) {
+		usageState.SaveServiceUsageState()
 	},
 }
 
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
-	policyCmd.AddCommand(policyCmdNoop)
-
 	RootCmd.AddCommand(policyCmd)
+
+	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
 }
