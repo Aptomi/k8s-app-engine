@@ -4,6 +4,8 @@ import (
 	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"strings"
+	"os"
 )
 
 const componentRootName = "root"
@@ -31,7 +33,7 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) Serv
 }
 
 // Create key for the map
-func (usage ServiceUsageState) createUsageKey(service *Service, context *Context, allocation *Allocation, component *ServiceComponent) string {
+func (usage ServiceUsageState) createServiceUsageKey(service *Service, context *Context, allocation *Allocation, component *ServiceComponent) string {
 	var componentName string
 	if component != nil {
 		componentName = component.Name
@@ -41,6 +43,16 @@ func (usage ServiceUsageState) createUsageKey(service *Service, context *Context
 	return service.Name + "#" + context.Name + "#" + allocation.NameResolved + "#" + componentName
 }
 
+// Parse key
+func parseServiceUsageKey(key string) (string, string, string, string) {
+	keyArray := strings.Split(key, "#")
+	service := keyArray[0]
+	context := keyArray[1]
+	allocation := keyArray[2]
+	component := keyArray[3]
+	return service, context, allocation, component
+}
+
 // Create key for the map
 func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 	return serviceName
@@ -48,7 +60,7 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 
 // Records usage event
 func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent) {
-	key := usage.createUsageKey(service, context, allocation, component)
+	key := usage.createServiceUsageKey(service, context, allocation, component)
 	usage.ResolvedLinks[key] = append(usage.ResolvedLinks[key], user.Id)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
 }
@@ -62,7 +74,16 @@ func (usage *ServiceUsageState) addDependency(user User, serviceName string) {
 // Stores usage state in a file
 func LoadServiceUsageState() ServiceUsageState {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
+
 	dat, e := ioutil.ReadFile(fileName)
+
+	// If the file doesn't exist, it means that DB is empty and we are starting from scratch
+	if os.IsNotExist(e) {
+		return ServiceUsageState{}
+	} else if e != nil {
+		log.Fatalf("Unable to read file: %v", e)
+	}
+
 	if e != nil {
 		log.Fatalf("Unable to read file: %v", e)
 	}

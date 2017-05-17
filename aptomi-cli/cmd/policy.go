@@ -22,27 +22,36 @@ var policyCmdApply = &cobra.Command{
 	Short: "Process policy and apply changes (supports noop mode)",
 	Long: "",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Load the previous usage state
+		prevUsageState := slinga.LoadServiceUsageState()
+
+		// Generate the next usage state
 		policyDir := slinga.GetAptomiPolicyDir()
 
 		policy := slinga.LoadPolicyFromDir(policyDir)
 		users := slinga.LoadUsersFromDir(policyDir)
 		dependencies := slinga.LoadDependenciesFromDir(policyDir)
 
-		usageState := slinga.NewServiceUsageState(&policy, &dependencies)
-		err := usageState.ResolveUsage(&users)
+		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies)
+		err := nextUsageState.ResolveUsage(&users)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// TODO: implement
+		// Process differences
+		diff := nextUsageState.ProcessDifference(&prevUsageState)
+
 		if noop {
 			// do not apply changes
+			diff.Print()
 		} else {
 			// apply changes
-		}
+			// TODO: implement
 
-		usageState.SaveServiceUsageState()
+			// save new state
+			nextUsageState.SaveServiceUsageState()
+		}
 	},
 }
 
