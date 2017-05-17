@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/golang/glog"
 	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/golang/glog"
+	"github.com/spf13/cobra"
 )
 
 var noop bool
@@ -11,7 +11,7 @@ var noop bool
 var policyCmd = &cobra.Command{
 	Use:   "policy",
 	Short: "Process policy and execute an action",
-	Long: "",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -20,7 +20,7 @@ var policyCmd = &cobra.Command{
 var policyCmdApply = &cobra.Command{
 	Use:   "apply",
 	Short: "Process policy and apply changes (supports noop mode)",
-	Long: "",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load the previous usage state
 		prevUsageState := slinga.LoadServiceUsageState()

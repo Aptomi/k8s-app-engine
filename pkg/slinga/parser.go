@@ -1,16 +1,16 @@
 package slinga
 
 import (
-	"io/ioutil"
+	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"path/filepath"
 	"sort"
-	"github.com/golang/glog"
 )
 
 /*
- 	This file declares all the necessary structures for Slinga YAML file to be successfully parsed
-  */
+	This file declares all the necessary structures for Slinga YAML file to be successfully parsed
+*/
 
 type LabelOperations map[string]map[string]string
 
@@ -32,8 +32,8 @@ type Context struct {
 }
 
 type Code struct {
-	Type	string
-	Content	map[string]map[string]string
+	Type    string
+	Content map[string]map[string]string
 }
 
 type ServiceComponent struct {

@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"os"
 	"github.com/golang/glog"
+	"os"
 )
 
 // Return aptomi DB directory

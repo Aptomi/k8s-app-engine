@@ -2,13 +2,13 @@ package slinga
 
 import (
 	"github.com/golang/glog"
-	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 /*
- 	This file declares all the necessary structures for Dependencies (User -> Service)
-  */
+	This file declares all the necessary structures for Dependencies (User -> Service)
+*/
 
 type Dependency struct {
 	UserId  string

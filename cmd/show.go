@@ -1,17 +1,17 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/spf13/cobra"
 	"os"
-	"fmt"
 	"os/exec"
-	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 var showCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show an object",
-	Long: "",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -20,7 +20,7 @@ var showCmd = &cobra.Command{
 var showCmdConfig = &cobra.Command{
 	Use:   "config",
 	Short: "Show aptomi configuration variables",
-	Long: "",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		vars := []string{"APTOMI_POLICY", "APTOMI_DB"}
 
@@ -34,7 +34,7 @@ var showCmdConfig = &cobra.Command{
 var showCmdPolicy = &cobra.Command{
 	Use:   "policy",
 	Short: "Show aptomi policy",
-	Long: "",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }
@@ -42,7 +42,7 @@ var showCmdPolicy = &cobra.Command{
 var showCmdGraph = &cobra.Command{
 	Use:   "graph",
 	Short: "Show the current allocation graph (what has been allocated and who is using what)",
-	Long: "",
+	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		usage := slinga.LoadServiceUsageState()
 		usage.DrawVisualAndStore()

@@ -1,16 +1,16 @@
 package slinga
 
 import (
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 /*
- 	This file declares all the necessary structures for Users to be retrieved
- 	For now it loads users with labels from a YAML file
- 	Later this will be replaced with LDAP integration
-  */
+	This file declares all the necessary structures for Users to be retrieved
+	For now it loads users with labels from a YAML file
+	Later this will be replaced with LDAP integration
+*/
 
 type User struct {
 	Id     string
@@ -40,7 +40,7 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 	}
 	r := GlobalUsers{Users: make(map[string]User)}
 	for _, u := range t {
-		r.Users[u.Id] = u;
+		r.Users[u.Id] = u
 	}
 	return r
 }

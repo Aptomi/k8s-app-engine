@@ -2,15 +2,15 @@ package slinga
 
 import (
 	"github.com/Knetic/govaluate"
+	"github.com/golang/glog"
 	"strconv"
 	"strings"
-	"github.com/golang/glog"
 )
 
 // Evaluate an expression, given a set of labels
 func evaluate(expression string, params LabelSet) bool {
 	// Create an expression
-	expressionObject, e := govaluate.NewEvaluableExpression(expression);
+	expressionObject, e := govaluate.NewEvaluableExpression(expression)
 	if e != nil {
 		glog.Fatalf("Invalid expression: %v", e)
 	}
@@ -20,14 +20,14 @@ func evaluate(expression string, params LabelSet) bool {
 	for k, v := range params.Labels {
 		// all labels are strings. we need to cast them to the appropriate type before evaluation
 		if vInt, err := strconv.Atoi(v); err == nil {
-			parameters[k] = vInt;
+			parameters[k] = vInt
 		} else {
-			parameters[k] = v;
+			parameters[k] = v
 		}
 	}
 
 	// Evaluate
-	result, e := expressionObject.Evaluate(parameters);
+	result, e := expressionObject.Evaluate(parameters)
 	if e != nil {
 		// see if it's missing parameter? then return false
 		// TODO: this is a hack to deal with missing labels. Will need to rewrite it

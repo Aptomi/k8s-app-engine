@@ -1,11 +1,11 @@
 package slinga
 
 import (
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
-	"strings"
-	"os"
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 const componentRootName = "root"
@@ -98,7 +98,7 @@ func LoadServiceUsageState() ServiceUsageState {
 // Stores usage state in a file
 func (usage ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
-	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644);
+	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
 	if err != nil {
 		glog.Fatal("Unable to write to a file: %s", fileName)
 	}

@@ -1,9 +1,9 @@
 package slinga
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"github.com/golang/glog"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestEngine(t *testing.T) {

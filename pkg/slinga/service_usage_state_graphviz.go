@@ -1,13 +1,13 @@
 package slinga
 
 import (
-	"io/ioutil"
-	"github.com/awalterschulze/gographviz"
-	"os/exec"
-	"strings"
 	"bytes"
-	"strconv"
+	"github.com/awalterschulze/gographviz"
 	"github.com/golang/glog"
+	"io/ioutil"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -34,7 +34,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 	addSubgraphOnce(graph, "Main", "cluster_Users", map[string]string{"label": "Users"}, was)
 
 	// Add box/subgraph for services
-	addSubgraphOnce(graph, "Main", "cluster_Services", map[string]string{"label": "Services"}, was);
+	addSubgraphOnce(graph, "Main", "cluster_Services", map[string]string{"label": "Services"}, was)
 
 	// How many colors have been used
 	usedColors := 0
@@ -103,7 +103,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 
 	fileNameDot := GetAptomiDBDir() + "/" + "graph_full.dot"
 	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_flat.dot"
-	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644);
+	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 	if err != nil {
 		glog.Fatalf("Unable to write to a file: %s", fileNameDot)
 	}
@@ -138,7 +138,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 func getUserColor(userId string, colorForUser map[string]int, usedColors *int) int {
 	color, ok := colorForUser[userId]
 	if !ok {
-		*usedColors++;
+		*usedColors++
 		if *usedColors > colorCount {
 			*usedColors = 1
 		}
@@ -155,7 +155,7 @@ func addEdge(g *gographviz.Escape, src string, dst string, attrs map[string]stri
 
 // Adds a subgraph if it doesn't exist already
 func addSubgraphOnce(g *gographviz.Escape, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
-	wasKey := "SUBGRAPH" + "#" + parentGraph + "#" + name;
+	wasKey := "SUBGRAPH" + "#" + parentGraph + "#" + name
 	if !was[wasKey] {
 		g.AddSubGraph(parentGraph, name, attrs)
 		was[wasKey] = true
@@ -164,7 +164,7 @@ func addSubgraphOnce(g *gographviz.Escape, parentGraph string, name string, attr
 
 // Adds a node if it doesn't exist already
 func addNodeOnce(g *gographviz.Escape, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
-	wasKey := "NODE" + "#" + parentGraph + "#" + name;
+	wasKey := "NODE" + "#" + parentGraph + "#" + name
 	if !was[wasKey] {
 		g.AddNode(parentGraph, name, attrs)
 		was[wasKey] = true

@@ -1,15 +1,15 @@
 package slinga
 
 import (
-	"text/template"
 	"bytes"
 	"errors"
 	"strings"
+	"text/template"
 )
 
 /*
- 	This file declares all utility structures and methods required for Slinga processing
-  */
+	This file declares all utility structures and methods required for Slinga processing
+*/
 
 // Set of labels that will be manipulated
 type LabelSet struct {
@@ -27,17 +27,17 @@ func (src *LabelSet) applyTransform(ops LabelOperations) LabelSet {
 
 	// copy original labels
 	for k, v := range src.Labels {
-		result.Labels[k] = v;
+		result.Labels[k] = v
 	}
 
 	// set labels
 	for k, v := range ops["set"] {
-		result.Labels[k] = v;
+		result.Labels[k] = v
 	}
 
 	// remove labels
 	for k, _ := range ops["remove"] {
-		delete(result.Labels, k);
+		delete(result.Labels, k)
 	}
 
 	return result

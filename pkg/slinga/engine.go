@@ -6,11 +6,11 @@ import (
 )
 
 /*
- 	Core engine for Slinga processing and evaluation
-  */
+	Core engine for Slinga processing and evaluation
+*/
 
 // Evaluates all recorded "<user> needs <service>" dependencies
-func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) (error) {
+func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 	for serviceName, userIds := range usage.Dependencies.Dependencies {
 		for _, userId := range userIds {
 			user := users.Users[userId]
@@ -24,7 +24,7 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) (error) {
 }
 
 // Evaluate "<user> needs <service>" statement
-func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet) (error) {
+func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet) error {
 
 	// Policy
 	policy := usage.Policy
@@ -107,16 +107,16 @@ func (service *Service) dfsComponentSort(u ServiceComponent, colors map[string]i
 		if vColor, ok := colors[v.Name]; !ok {
 			// not visited yet -> visit and exit if a cycle was found
 			if service.dfsComponentSort(v, colors) {
-				return true;
+				return true
 			}
 		} else if vColor == 1 {
-			return true;
+			return true
 		}
 	}
 
 	service.ComponentsOrdered = append(service.ComponentsOrdered, u)
-	colors[u.Name] = 2;
-	return false;
+	colors[u.Name] = 2
+	return false
 }
 
 // Orders all components in a topological way
