@@ -62,14 +62,14 @@ func (next *ServiceUsageState) ProcessDifference(prev *ServiceUsageState) Servic
 		uPrev := toMap(userIdsPrev)
 		uNext := toMap(userIdsNext)
 
-		// see if a user needs to be detached from component
+		// see if a user needs to be detached from a component
 		for u, _ := range uPrev {
 			if !uNext[u] {
 				result.ComponentDetachUser = append(result.ComponentDetachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
 		}
 
-		// see if a user needs to be attached from component
+		// see if a user needs to be attached to a component
 		for u, _ := range uNext {
 			if !uPrev[u] {
 				result.ComponentAttachUser = append(result.ComponentAttachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
