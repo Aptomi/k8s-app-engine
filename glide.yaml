@@ -1,0 +1,14 @@
+package: github.com/Frostman/aptomi
+import:
+- package: gopkg.in/yaml.v2
+- package: github.com/golang/glog
+- package: github.com/Knetic/govaluate
+  version: ^3.0.0
+- package: github.com/awalterschulze/gographviz
+  version: ^2.0.0
+- package: github.com/spf13/cobra
+testImport:
+- package: github.com/stretchr/testify
+  version: ^1.1.4
+  subpackages:
+  - assert

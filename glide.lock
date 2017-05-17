@@ -1,0 +1,36 @@
+hash: f7c37f9176792de56670c1d0e0a4ab6e8bbcacabff139e79be65f815fe927962
+updated: 2017-05-17T10:17:59.313967021-07:00
+imports:
+- name: github.com/awalterschulze/gographviz
+  version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
+  subpackages:
+  - ast
+  - internal/errors
+  - internal/lexer
+  - internal/parser
+  - internal/token
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/Knetic/govaluate
+  version: d216395917cc49052c7c7094cf57f09657ca08a8
+- name: github.com/spf13/cobra
+  version: 4cdb38c072b86bf795d2c81de50784d9fdd6eb77
+- name: github.com/spf13/pflag
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+- name: gopkg.in/yaml.v2
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - assert
