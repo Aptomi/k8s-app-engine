@@ -1,57 +1,49 @@
 # Aptomi
 
-To install dependencies:
+## Dependencies
+
+All Go dependencies are managed using [Glide](https://glide.sh/).
+* Install dependencies (vendor dir) with versions from ```glide.lock``` file:
+  ```glide install```
+* Update dependencies versions (in ```glide.lock``` file): ```glide update```
+
+Currently there is only one external dependency -
+[GraphViz](http://www.graphviz.org/Download..php) and it could be installed on
+macOS using ```brew install graphviz```.
+
+# How to test
+
+To run tests on a project:
 
 ```shell
-go get gopkg.in/yaml.v2
-go get github.com/stretchr/testify
-go get github.com/Knetic/govaluate
-go get github.com/awalterschulze/gographviz
-go get github.com/golang/glog
-# there will be also dependency on cobra for CLI
+make test
 ```
 
-Also:
-http://www.graphviz.org/Download..php
-(mac os you can just ```brew install graphviz```)
-
-To build a package:
+Or to run tests on concrete package:
 
 ```shell
-go build aptomi/slinga
+go test -v ./pkg/slinga
 ```
 
-To run tests on a package:
-
-```shell
-go test aptomi/slinga
-```
-
-To run all tests:
-
-```shell
-go test -v ./...
-```
-
-To build a CLI named "aptomi" (instead of aptomi-cli):
-
-```shell
-go build -o aptomi   (relative path, if in aptomi-cli directory)
-go build -o aptomi aptomi/aptomi-cli   (absolute path)
-```
+## How to build and run
 
 Directory 'testdata' is excluded from processing by 'go' tool:
 https://golang.org/cmd/go/#hdr-Description_of_package_lists
+
+To build a binary (named ```aptomi```):
+
+```shell
+make build
+```
 
 Must define environment variables:
 
 * ```APTOMI_DB``` = <path to the directory where usage/allocation state will be serialized"
 * ```APTOMI_POLICY``` = <path to the directory where policy will be taken from"
 
-To run Aptomi CLI without compilation:
+To run ```aptomi``` without compilation:
 
 ```shell
-cd aptomi-cli
 go run main.go show config
 go run main.go policy apply
 go run main.go policy apply --noop
