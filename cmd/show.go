@@ -5,7 +5,7 @@ import (
 	"os"
 	"fmt"
 	"os/exec"
-	"aptomi/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 var showCmd = &cobra.Command{
