@@ -3,6 +3,7 @@ To install dependencies:
 # go get github.com/stretchr/testify
 # go get github.com/Knetic/govaluate
 # go get github.com/awalterschulze/gographviz
+# go get github.com/golang/glog
 # there will be also dependency on cobra for CLI
 
 Also:

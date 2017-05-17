@@ -1,11 +1,11 @@
 package slinga
 
 import (
-	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
 	"strings"
 	"os"
+	"github.com/golang/glog"
 )
 
 const componentRootName = "root"
@@ -27,8 +27,8 @@ type ServiceUsageState struct {
 
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
 	return ServiceUsageState{
-		Policy: policy,
-		Dependencies: dependencies,
+		Policy:        policy,
+		Dependencies:  dependencies,
 		ResolvedLinks: make(map[string][]string)}
 }
 
@@ -81,16 +81,16 @@ func LoadServiceUsageState() ServiceUsageState {
 	if os.IsNotExist(e) {
 		return ServiceUsageState{}
 	} else if e != nil {
-		log.Fatalf("Unable to read file: %v", e)
+		glog.Fatalf("Unable to read file: %v", e)
 	}
 
 	if e != nil {
-		log.Fatalf("Unable to read file: %v", e)
+		glog.Fatalf("Unable to read file: %v", e)
 	}
 	t := ServiceUsageState{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		log.Fatalf("Unable to unmarshal service usage state: %v", e)
+		glog.Fatalf("Unable to unmarshal service usage state: %v", e)
 	}
 	return t
 }
@@ -100,6 +100,6 @@ func (usage ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644);
 	if err != nil {
-		log.Fatal("Unable to write to a file: " + fileName)
+		glog.Fatal("Unable to write to a file: %s", fileName)
 	}
 }

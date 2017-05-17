@@ -1,7 +1,7 @@
 package slinga
 
 import (
-	"log"
+	"github.com/golang/glog"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
 )
@@ -11,8 +11,8 @@ import (
   */
 
 type Dependency struct {
-	UserId       string
-	Service     string
+	UserId  string
+	Service string
 }
 
 type GlobalDependencies struct {
@@ -24,12 +24,12 @@ type GlobalDependencies struct {
 func LoadDependenciesFromDir(dir string) GlobalDependencies {
 	dat, e := ioutil.ReadFile(dir + "/dependencies.yaml")
 	if e != nil {
-		log.Fatalf("Unable to read file: %v", e)
+		glog.Fatalf("Unable to read file: %v", e)
 	}
 	t := []Dependency{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		log.Fatalf("Unable to unmarshal user: %v", e)
+		glog.Fatalf("Unable to unmarshal user: %v", e)
 	}
 	r := GlobalDependencies{Dependencies: make(map[string][]string)}
 	for _, d := range t {

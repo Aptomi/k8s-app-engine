@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"github.com/Knetic/govaluate"
-	"log"
 	"strconv"
 	"strings"
+	"github.com/golang/glog"
 )
 
 // Evaluate an expression, given a set of labels
@@ -12,7 +12,7 @@ func evaluate(expression string, params LabelSet) bool {
 	// Create an expression
 	expressionObject, e := govaluate.NewEvaluableExpression(expression);
 	if e != nil {
-		log.Fatalf("Invalid expression: %v", e)
+		glog.Fatalf("Invalid expression: %v", e)
 	}
 
 	// Populate parameter map
@@ -34,13 +34,13 @@ func evaluate(expression string, params LabelSet) bool {
 		if strings.Contains(e.Error(), "No parameter") && strings.Contains(e.Error(), "found") {
 			return false
 		}
-		log.Fatalf("Cannot evaluate expression: %v", e)
+		glog.Fatalf("Cannot evaluate expression: %v", e)
 	}
 
 	// Convert result to bool
 	resultBool, ok := result.(bool)
 	if !ok {
-		log.Fatalf("Expression doesn't evaluate to boolean: %v", result)
+		glog.Fatalf("Expression doesn't evaluate to boolean: %v", result)
 	}
 
 	return resultBool

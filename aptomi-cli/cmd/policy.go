@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"log"
 	"aptomi/slinga"
+	"github.com/golang/glog"
 )
 
 var noop bool
@@ -36,7 +36,7 @@ var policyCmdApply = &cobra.Command{
 		err := nextUsageState.ResolveUsage(&users)
 
 		if err != nil {
-			log.Fatal(err)
+			glog.Fatal(err)
 		}
 
 		// Process differences

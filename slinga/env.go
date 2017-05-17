@@ -2,17 +2,17 @@ package slinga
 
 import (
 	"os"
-	"log"
+	"github.com/golang/glog"
 )
 
 // Return aptomi DB directory
 func getAptomiEnvVarAsDir(key string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		log.Fatal(key + " environment variable is not present. Must point to a directory")
+		glog.Fatalf("%s environment variable is not present. Must point to a directory", key)
 	}
 	if stat, err := os.Stat(value); err != nil || !stat.IsDir() {
-		log.Fatal("Directory " + key + " doesn't exist: " + value)
+		glog.Fatalf("Directory %s doesn't exist: %s", key, value)
 	}
 	return value
 }
@@ -26,4 +26,3 @@ func GetAptomiDBDir() string {
 func GetAptomiPolicyDir() string {
 	return getAptomiEnvVarAsDir("APTOMI_POLICY")
 }
-

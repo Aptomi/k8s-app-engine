@@ -1,9 +1,9 @@
 package slinga
 
 import (
-	"log"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"github.com/golang/glog"
 )
 
 /*
@@ -13,9 +13,9 @@ import (
   */
 
 type User struct {
-	Id       string
-	Name     string
-	Labels	 map[string]string
+	Id     string
+	Name   string
+	Labels map[string]string
 }
 
 type GlobalUsers struct {
@@ -31,12 +31,12 @@ func LoadUserByIDFromDir(dir string, id string) User {
 func LoadUsersFromDir(dir string) GlobalUsers {
 	dat, e := ioutil.ReadFile(dir + "/users.yaml")
 	if e != nil {
-		log.Fatalf("Unable to read file: %v", e)
+		glog.Fatalf("Unable to read file: %v", e)
 	}
 	t := []User{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		log.Fatalf("Unable to unmarshal user: %v", e)
+		glog.Fatalf("Unable to unmarshal user: %v", e)
 	}
 	r := GlobalUsers{Users: make(map[string]User)}
 	for _, u := range t {

@@ -1,13 +1,13 @@
 package slinga
 
 import (
-	"log"
 	"io/ioutil"
 	"github.com/awalterschulze/gographviz"
 	"os/exec"
 	"strings"
 	"bytes"
 	"strconv"
+	"github.com/golang/glog"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -105,7 +105,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_flat.dot"
 	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644);
 	if err != nil {
-		log.Fatal("Unable to write to a file: " + fileNameDot)
+		glog.Fatalf("Unable to write to a file: %s", fileNameDot)
 	}
 
 	// Call graphviz to flatten an image
@@ -117,7 +117,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			log.Fatal("Unable to execute graphviz: "+outb.String()+" "+errb.String(), err)
+			glog.Fatalf("Unable to execute graphviz (%s): %s %s", cmd, outb.String(), errb.String(), err)
 		}
 	}
 
@@ -130,7 +130,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			log.Fatal("Unable to execute graphviz: "+outb.String()+" "+errb.String(), err)
+			glog.Fatalf("Unable to execute graphviz (%s): %s %s", cmd, outb.String(), errb.String(), err)
 		}
 	}
 }

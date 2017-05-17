@@ -2,7 +2,7 @@ package slinga
 
 import (
 	"errors"
-	"log"
+	"github.com/golang/glog"
 )
 
 /*
@@ -74,15 +74,15 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 
 		// Is it a code?
 		if component.Code != "" {
-			log.Println("Processing dependency on code execution: " + component.Name + " (in " + service.Name + ")")
+			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
 		} else if component.Service != "" {
-			log.Println("Processing dependency on another service: " + component.Name + " -> " + component.Service + " (in " + service.Name + ")")
+			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
 			err := usage.resolveWithLabels(user, component.Service, labels)
 			if err != nil {
 				return err
 			}
 		} else {
-			log.Fatal("Invalid component: " + component.Name + " " + service.Name)
+			glog.Fatalf("Invalid component: %s (in %s)", component.Name, service.Name)
 		}
 
 		// Record usage of a given component
@@ -102,7 +102,7 @@ func (service *Service) dfsComponentSort(u ServiceComponent, colors map[string]i
 	for _, vName := range u.Dependencies {
 		v, exists := service.ComponentsMap[vName]
 		if !exists {
-			log.Fatal("Invalid dependency in service " + service.Name + ": " + vName)
+			glog.Fatalf("Invalid dependency in service %s: %s", service.Name, vName)
 		}
 		if vColor, ok := colors[v.Name]; !ok {
 			// not visited yet -> visit and exit if a cycle was found
@@ -176,9 +176,9 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 	}
 
 	if contextMatched != nil {
-		log.Printf("Matched context: '%s' (service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
+		glog.Infof("Matched context: '%s' (service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
 	} else {
-		log.Printf("No context matched (service = %s, user = %s)", service.Name, user.Name)
+		glog.Infof("No context matched (service = %s, user = %s)", service.Name, user.Name)
 	}
 	return contextMatched, nil
 }
@@ -198,12 +198,12 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	if allocationMatched != nil {
 		err := allocationMatched.resolveName(user)
 		if err != nil {
-			log.Printf("Cannot resolve name for an allocation: '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, context.Name, service.Name, user.Name)
+			glog.Infof("Cannot resolve name for an allocation: '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, context.Name, service.Name, user.Name)
 			return nil, nil
 		}
-		log.Printf("Matched allocation: '%s' -> '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, allocationMatched.NameResolved, context.Name, service.Name, user.Name)
+		glog.Infof("Matched allocation: '%s' -> '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, allocationMatched.NameResolved, context.Name, service.Name, user.Name)
 	} else {
-		log.Printf("No allocation matched (context = %s, service = %s, user = %s)", context.Name, service.Name, user.Name)
+		glog.Infof("No allocation matched (context = %s, service = %s, user = %s)", context.Name, service.Name, user.Name)
 	}
 
 	return allocationMatched, nil
