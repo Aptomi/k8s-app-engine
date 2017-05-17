@@ -73,7 +73,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		labels = labels.applyTransform(component.Labels)
 
 		// Is it a code?
-		if component.Code != "" {
+		if component.Code != nil {
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
 		} else if component.Service != "" {
 			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)

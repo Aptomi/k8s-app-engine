@@ -8,7 +8,12 @@ labels:
 components:
 
   - name: component1
-    code: <helm...>
+    code:
+      type: aptomi/code/fake
+      content:
+        metadata:
+          service: zookeeper
+          component: component1
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -19,7 +24,12 @@ components:
       - component2
 
   - name: component2
-    code: <helm...>
+    code:
+      type: aptomi/code/fake
+      content:
+        metadata:
+          service: zookeeper
+          component: component2
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
