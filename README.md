@@ -50,14 +50,23 @@ go run main.go policy apply --noop
 go run main.go show graph
 ```
 
-Issues observed:
+## Tools
+
+* ```make fmt``` runs fmt that will ensure code style and print changed files
+* ```make vet``` runs vet that examines Go source code and reports suspicious
+  constructs, such as Printf calls whose arguments do not align with the format
+  string. Vet uses heuristics that do not guarantee all reports are genuine
+  problems, but it can find errors not caught by the compilers
+* ```make lint``` runs linter for Go source code
+
+## Issues observed:
 1. With the current definition of services and contexts, there is NO way to provide different
    implementation of the same "service interface"
       - e.g. SQL service -> MySQL or MariaDB
 2. Duplication of data in context definitions
 
 
-Questions:
+## Questions:
 1. How service developer workflow would change with aptomi? How to roll out a change to a service?
    Code change -> container rebuild -> push a change to production
    We need to make emphasis on "as code" (!)
