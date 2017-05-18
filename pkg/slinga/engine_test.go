@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"github.com/golang/glog"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -14,10 +13,7 @@ func TestEngine(t *testing.T) {
 	usageState := NewServiceUsageState(&policy, &dependencies)
 	err := usageState.ResolveUsage(&users)
 
-	if err != nil {
-		glog.Fatal(err)
-	}
-
+	assert.Equal(t, nil, err, "Policy usage should be resolved without errors")
 	assert.Equal(t, 14, len(usageState.ResolvedLinks), "Policy resolution should result in correct amount of usage entries")
 }
 

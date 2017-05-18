@@ -36,7 +36,7 @@ var policyCmdApply = &cobra.Command{
 		err := nextUsageState.ResolveUsage(&users)
 
 		if err != nil {
-			glog.Fatal(err)
+			glog.Fatalf("Cannot resolve usage: %v", err)
 		}
 
 		// Process differences

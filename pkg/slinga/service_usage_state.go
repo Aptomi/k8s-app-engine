@@ -100,6 +100,6 @@ func (usage ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
 	if err != nil {
-		glog.Fatal("Unable to write to a file: %s", fileName)
+		glog.Fatalf("Unable to write to a file: %s", fileName)
 	}
 }
