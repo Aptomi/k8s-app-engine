@@ -66,22 +66,27 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 		contextAndAllocation := keyArray[1] + "#" + keyArray[2]
 		component := keyArray[3]
 
-		componentKey := service + "_" + contextAndAllocation + "_" + component
-		componentLabel := service + "_" + component
+		// only add edges to "root" components (i.e. services)
+		if component != componentRootName {
+			continue
+		}
 
-		// Add box/subgraph for a given context/allocation
-		addSubgraphOnce(graph, "Main", "cluster_"+contextAndAllocation, map[string]string{"label": "Context/Allocation: " + contextAndAllocation}, was)
+		// Key for allocation
+		serviceAllocationKey := service + "_" + contextAndAllocation
 
 		// Add a node with service
 		addNodeOnce(graph, "cluster_Services", service, nil, was)
 
-		// Add a node with component
-		addNodeOnce(graph, "cluster_"+contextAndAllocation, componentKey, map[string]string{"label": componentLabel}, was)
+		// Add box/subgraph for a given service, containing all its allocations
+		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_" + service, map[string]string{"label": "Allocations: " + service}, was)
+
+		// Add a node with allocation
+		addNodeOnce(graph, "cluster_Service_Allocations_" + service, serviceAllocationKey, map[string]string{"label": contextAndAllocation}, was)
 
 		// Add an edge from service to allocation box
 		for _, userId := range linkStruct.UserIds {
 			color := getUserColor(userId, colorForUser, &usedColors)
-			addEdge(graph, service, componentKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+			addEdge(graph, service, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 
