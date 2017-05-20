@@ -104,3 +104,31 @@ Processing flow:
 5.1. labels+=component.labels
 5.2. labels+=context.labels
 5.3. labels+=allocation.labels
+
+## What needs to be done:
+
+1. [RA] add labels to dependencies
+2. [RA] recursively process folders when loading policy
+3. [RA] dry run
+4. [SL] service discovery
+5. [SL] support for multiple k8s clusters
+6. [SL] support deployment of specific versions, as well as
+   deploy "latest" (or matching by regex) from docker registry
+
+## Demo scenario:
+
+1. Show policy
+   - Data Analytics Pipeline
+   - Twitter Real-Time Stats
+
+2. Allocate instances for users
+   - Shared DPP and separate "prod" TRSs for two users
+
+3. U1 makes a code change and deploys to staging
+   - allocate "staging" TRS with a code change (background color + h1)
+
+4. U1 propagates a change to production
+   - "prod" TRS updated
+
+5. U2 gets marked as "untrusted"
+   - loses access to his "prod"
