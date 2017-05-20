@@ -70,14 +70,14 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Resolve every component
 	for _, component := range service.ComponentsOrdered {
 		// Process component and transform labels
-		labels = labels.applyTransform(component.Labels)
+		componentLabels := labels.applyTransform(component.Labels)
 
 		// Is it a code?
 		if component.Code != nil {
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
 		} else if component.Service != "" {
 			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
-			err := usage.resolveWithLabels(user, component.Service, labels)
+			err := usage.resolveWithLabels(user, component.Service, componentLabels)
 			if err != nil {
 				return err
 			}

@@ -88,15 +88,28 @@ func toMap(p []string) map[string]bool {
 	return result
 }
 
-func (diff ServiceUsageStateDiff) Print() {
+func (diff ServiceUsageStateDiff) isEmpty() bool {
+	if len(diff.ComponentInstantiate) > 0 {
+		return false
+	}
+	if len(diff.ComponentAttachUser) > 0 {
+		return false
+	}
+	if len(diff.ComponentDetachUser) > 0 {
+		return false
+	}
+	if len(diff.ComponentDestruct) > 0 {
+		return false
+	}
+	return true
+}
 
-	printed := false
+func (diff ServiceUsageStateDiff) Print() {
 	if len(diff.ComponentInstantiate) > 0 {
 		fmt.Println("New components instantiated:")
 		for k, _ := range diff.ComponentInstantiate {
 			fmt.Println("[+] " + k)
 		}
-		printed = true
 	}
 
 	if len(diff.ComponentAttachUser) > 0 {
@@ -104,7 +117,6 @@ func (diff ServiceUsageStateDiff) Print() {
 		for _, cu := range diff.ComponentAttachUser {
 			fmt.Println("[+] " + cu.User + " -> " + cu.ComponentKey)
 		}
-		printed = true
 	}
 
 	if len(diff.ComponentDetachUser) > 0 {
@@ -112,7 +124,6 @@ func (diff ServiceUsageStateDiff) Print() {
 		for _, cu := range diff.ComponentDetachUser {
 			fmt.Println("[-] " + cu.User + " -> " + cu.ComponentKey)
 		}
-		printed = true
 	}
 
 	if len(diff.ComponentDestruct) > 0 {
@@ -120,10 +131,20 @@ func (diff ServiceUsageStateDiff) Print() {
 		for k, _ := range diff.ComponentDestruct {
 			fmt.Println("[-] " + k)
 		}
-		printed = true
 	}
 
-	if !printed {
+	if diff.isEmpty() {
+		fmt.Println("[*] No changes to apply")
+	}
+}
+
+func (diff ServiceUsageStateDiff) Apply() {
+	// TODO: implement
+
+	// save new state
+	diff.Next.SaveServiceUsageState()
+
+	if diff.isEmpty() {
 		fmt.Println("[*] No changes to apply")
 	}
 }

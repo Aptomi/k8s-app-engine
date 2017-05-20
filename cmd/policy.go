@@ -47,10 +47,7 @@ var policyCmdApply = &cobra.Command{
 			diff.Print()
 		} else {
 			// apply changes
-			// TODO: implement
-
-			// save new state
-			nextUsageState.SaveServiceUsageState()
+			diff.Apply()
 		}
 	},
 }

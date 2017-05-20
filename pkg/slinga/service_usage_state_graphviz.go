@@ -123,6 +123,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 
 	// Call graphviz to generate an image
 	{
+		// -Kfdp will call a different engine
 		cmd := "dot"
 		args := []string{"-Tpng", "-o" + usage.GetVisualFileNamePNG(), fileNameDotFlat}
 		command := exec.Command(cmd, args...)
