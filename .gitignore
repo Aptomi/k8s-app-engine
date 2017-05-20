@@ -5,6 +5,9 @@ test.go
 
 .idea
 
+# ignore downloaded helm charts
+*.tgz
+
 # Created by https://www.gitignore.io/api/go,osx,vim,linux,intellij
 
 ### Go ###
