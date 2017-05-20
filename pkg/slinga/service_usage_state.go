@@ -27,7 +27,7 @@ type ServiceUsageState struct {
 
 type ResolvedLinkUsageStruct struct {
 	UserIds []string
-	Labels LabelSet
+	CalculatedLabels LabelSet
 }
 
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
@@ -68,7 +68,7 @@ func (usage *ServiceUsageState) recordUsage(user User, service *Service, context
 	key := usage.createServiceUsageKey(service, context, allocation, component)
 
 	if _, ok := usage.ResolvedLinks[key]; !ok {
-		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{Labels: LabelSet{}}
+		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
 	}
 	usage.ResolvedLinks[key].append(user.Id, labels)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
@@ -79,7 +79,7 @@ func (usageStruct *ResolvedLinkUsageStruct) append(userId string, labelSet Label
 	usageStruct.UserIds = append(usageStruct.UserIds, userId)
 
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
-	usageStruct.Labels = labelSet
+	usageStruct.CalculatedLabels = labelSet
 }
 
 // Records requested dependency
