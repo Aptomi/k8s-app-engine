@@ -107,7 +107,7 @@ Processing flow:
 
 ## What needs to be done:
 
-1. [RA] add labels to dependencies
+1. [Done - RA] add labels to dependencies
 2. [Done - RA] recursively process folders when loading policy
 3. [RA] dry run
 4. [SL] service discovery

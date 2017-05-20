@@ -74,24 +74,18 @@ func (usage *ServiceUsageState) recordUsage(user User, service *Service, context
 	if _, ok := usage.ResolvedLinks[key]; !ok {
 		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
 	}
-	usage.ResolvedLinks[key].append(user.Id, labels)
+	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.Id, labels)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
 
 	return key
 }
 
 // Adds user and set of labels to the entry
-func (usageStruct *ResolvedLinkUsageStruct) append(userId string, labelSet LabelSet) {
+func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userId string, labelSet LabelSet) {
 	usageStruct.UserIds = append(usageStruct.UserIds, userId)
 
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
 	usageStruct.CalculatedLabels = labelSet
-}
-
-// Records requested dependency
-func (usage *ServiceUsageState) addDependency(user User, serviceName string) {
-	key := usage.createDependencyKey(serviceName)
-	usage.Dependencies.Dependencies[key] = append(usage.Dependencies.Dependencies[key], user.Id)
 }
 
 // Stores usage state in a file

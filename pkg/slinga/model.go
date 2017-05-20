@@ -43,6 +43,23 @@ func (src *LabelSet) applyTransform(ops *LabelOperations) LabelSet {
 	return result
 }
 
+// Merge two sets of labels
+func (src LabelSet) addLabels(ops LabelSet) LabelSet {
+	result := LabelSet{Labels: make(map[string]string)}
+
+	// copy original labels
+	for k, v := range src.Labels {
+		result.Labels[k] = v
+	}
+
+	// put new labels
+	for k, v := range ops.Labels {
+		result.Labels[k] = v
+	}
+
+	return result
+}
+
 // Check if context criteria is satisfied
 func (context *Context) matches(labels LabelSet) bool {
 	for _, c := range context.Criteria {

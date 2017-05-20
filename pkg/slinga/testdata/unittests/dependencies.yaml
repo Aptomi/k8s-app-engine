@@ -3,3 +3,5 @@
 
 - userid: 2
   service: kafka
+  labels:
+    important: yes

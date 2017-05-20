@@ -11,10 +11,18 @@ import (
 
 // Evaluates all recorded "<user> needs <service>" dependencies
 func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
-	for serviceName, userIds := range usage.Dependencies.Dependencies {
-		for _, userId := range userIds {
-			user := users.Users[userId]
-			err := usage.resolveWithLabels(user, serviceName, user.getLabelSet())
+	for serviceName, dependencies := range usage.Dependencies.Dependencies {
+		for _, d := range dependencies {
+			user := users.Users[d.UserId]
+
+			// take user labels
+			labels := user.getLabelSet()
+
+			// combine them with dependency labels
+			labels = labels.addLabels(d.getLabelSet())
+
+			// resolve usage via applying policy
+			err := usage.resolveWithLabels(user, serviceName, labels)
 			if err != nil {
 				return err
 			}

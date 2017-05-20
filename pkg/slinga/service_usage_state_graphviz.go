@@ -42,19 +42,19 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 
 	// First of all, let's show all dependencies (who requested what)
 	if usage.Dependencies != nil {
-		for service, userIds := range usage.Dependencies.Dependencies {
+		for service, dependencies := range usage.Dependencies.Dependencies {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
 			// For every user who has a dependency on this service
-			for _, userId := range userIds {
-				color := getUserColor(userId, colorForUser, &usedColors)
+			for _, d := range dependencies {
+				color := getUserColor(d.UserId, colorForUser, &usedColors)
 
 				// Add a node with user
-				addNodeOnce(graph, "cluster_Users", userId, map[string]string{"style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
+				addNodeOnce(graph, "cluster_Users", d.UserId, map[string]string{"style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
 				// Add an edge from user to a service
-				addEdge(graph, userId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+				addEdge(graph, d.UserId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 			}
 		}
 	}
