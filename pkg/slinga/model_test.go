@@ -20,6 +20,9 @@ func TestLabelOperations(t *testing.T) {
 	assert.Equal(t, "b", labelsAfter.Labels["a"], "Label 'a' should be added")
 	assert.Equal(t, "d", labelsAfter.Labels["c"], "Label 'c' should be added")
 	assert.Equal(t, "", labelsAfter.Labels["l1"], "Label 'l1' should not be present")
+
+	labelsAfter = labelsAfter.applyTransform(nil)
+	assert.Equal(t, 4, len(labelsAfter.Labels), "Correct number of labels should be retained after transform")
 }
 
 func TestTemplateEvaluation(t *testing.T) {

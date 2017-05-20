@@ -30,14 +30,16 @@ func (src *LabelSet) applyTransform(ops *LabelOperations) LabelSet {
 		result.Labels[k] = v
 	}
 
-	// set labels
-	for k, v := range (*ops)["set"] {
-		result.Labels[k] = v
-	}
+	if ops != nil {
+		// set labels
+		for k, v := range (*ops)["set"] {
+			result.Labels[k] = v
+		}
 
-	// remove labels
-	for k, _ := range (*ops)["remove"] {
-		delete(result.Labels, k)
+		// remove labels
+		for k, _ := range (*ops)["remove"] {
+			delete(result.Labels, k)
+		}
 	}
 
 	return result
