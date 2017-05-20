@@ -67,6 +67,8 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		return err
 	}
 
+	componentDepMap := make(map[string]string)
+
 	// Resolve every component
 	for _, component := range componentsOrdered {
 		// Process component and transform labels
@@ -86,11 +88,14 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		usage.recordUsage(user, service, context, allocation, component, componentLabels)
+		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels)
+		componentDepMap[component.Name] = componentKey
 	}
 
 	// Record usage of a given service
-	usage.recordUsage(user, service, context, allocation, nil, labels)
+	serviceKey := usage.recordUsage(user, service, context, allocation, nil, labels)
+
+	usage.ComponentInstanceMap[serviceKey] = componentDepMap
 
 	return nil
 }

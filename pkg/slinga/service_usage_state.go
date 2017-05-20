@@ -23,6 +23,9 @@ type ServiceUsageState struct {
 
 	// the order in which components/services have to be processed
 	ProcessingOrder []string
+
+	// map from service instance key to map from component name to component instance key
+	ComponentInstanceMap map[string]map[string]string
 }
 
 type ResolvedLinkUsageStruct struct {
@@ -34,7 +37,8 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) Serv
 	return ServiceUsageState{
 		Policy:        policy,
 		Dependencies:  dependencies,
-		ResolvedLinks: make(map[string]*ResolvedLinkUsageStruct)}
+		ResolvedLinks: make(map[string]*ResolvedLinkUsageStruct),
+		ComponentInstanceMap: make(map[string]map[string]string)}
 }
 
 // Create key for the map
@@ -64,7 +68,7 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet) {
+func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet) string {
 	key := usage.createServiceUsageKey(service, context, allocation, component)
 
 	if _, ok := usage.ResolvedLinks[key]; !ok {
@@ -72,6 +76,8 @@ func (usage *ServiceUsageState) recordUsage(user User, service *Service, context
 	}
 	usage.ResolvedLinks[key].append(user.Id, labels)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
+
+	return key
 }
 
 // Adds user and set of labels to the entry
