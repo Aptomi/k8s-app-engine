@@ -68,16 +68,29 @@ func runCmd(cmdName string, cmdArgs ...string) error {
 	cmd := exec.Command(cmdName, cmdArgs...)
 	glog.Infof("Running command '%s' with args: %s", cmdName, cmdArgs)
 
-	cmdReader, err := cmd.StdoutPipe()
+	cmdStdoutReader, err := cmd.StdoutPipe()
 	if err != nil {
 		glog.Errorf("Failed running command '%s' (with args: %s): %s", cmdName, cmdArgs, err)
 		return err
 	}
 
-	scanner := bufio.NewScanner(cmdReader)
+	cmdStdoutScanner := bufio.NewScanner(cmdStdoutReader)
 	go func() {
-		for scanner.Scan() {
-			glog.Infof("%s | %s\n", cmdName, scanner.Text())
+		for cmdStdoutScanner.Scan() {
+			glog.Infof("%s out | %s\n", cmdName, cmdStdoutScanner.Text())
+		}
+	}()
+
+	cmdStderrReader, err := cmd.StderrPipe()
+	if err != nil {
+		glog.Errorf("Failed running command '%s' (with args: %s): %s", cmdName, cmdArgs, err)
+		return err
+	}
+
+	cmdStderrScanner := bufio.NewScanner(cmdStderrReader)
+	go func() {
+		for cmdStderrScanner.Scan() {
+			glog.Infof("%s err | %s\n", cmdName, cmdStderrScanner.Text())
 		}
 	}()
 
