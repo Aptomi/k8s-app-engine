@@ -9,7 +9,7 @@ components:
 
   - name: component1
     code:
-      type: aptomi/code/fake
+      type: aptomi/code/unittests
       content:
         metadata:
           service: zookeeper
@@ -25,7 +25,7 @@ components:
 
   - name: component2
     code:
-      type: aptomi/code/fake
+      type: aptomi/code/unittests
       content:
         metadata:
           service: zookeeper

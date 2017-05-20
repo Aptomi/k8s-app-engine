@@ -124,14 +124,14 @@ func (diff ServiceUsageStateDiff) Print() {
 	}
 
 	if len(diff.ComponentAttachUser) > 0 {
-		fmt.Println("Add users for components:")
+		fmt.Println("Add users to components:")
 		for _, cu := range diff.ComponentAttachUser {
 			fmt.Println("[+] " + cu.User + " -> " + cu.ComponentKey)
 		}
 	}
 
 	if len(diff.ComponentDetachUser) > 0 {
-		fmt.Println("Delete users for components:")
+		fmt.Println("Delete users from components:")
 		for _, cu := range diff.ComponentDetachUser {
 			fmt.Println("[-] " + cu.User + " -> " + cu.ComponentKey)
 		}

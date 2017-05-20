@@ -13,6 +13,7 @@ macOS using ```brew install graphviz```.
 
 # How to test
 
+
 To run tests on a project:
 
 ```shell
@@ -71,3 +72,35 @@ go run main.go show graph
    Code change -> container rebuild -> push a change to production
    We need to make emphasis on "as code" (!)
 2. Service, context - use IDs instead of names?
+
+
+Another event to update component in addition to existing 4 events?
+
+
+
+Add property "aliases" to top of the context, it'll mean for which service requests this context will be found.
+
+Example context "context.test.kafka.yaml":
+
+name: test
+service: kafka
+aliases:
+  - mq
+  - MessageQueue
+
+
+if we implement aliases in services, then what happens if we request "db"?
+- we need to match a context first
+- then the context points us to a specific service
+
+
+Processing flow:
+
+1. user defines dependency on service "kafka", labels+=user.labels
+2. search contexts with service or alias "kafka"
+3. process criteria for each found context and select first matching, labels+=context.service.labels
+4. find corresponding allocation
+5. for each component:
+5.1. labels+=component.labels
+5.2. labels+=context.labels
+5.3. labels+=allocation.labels

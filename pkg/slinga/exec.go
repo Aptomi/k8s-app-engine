@@ -17,7 +17,7 @@ func (code *Code) GetCodeExecutor() (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
 		return HelmCodeExecutor{code}, nil
-	case "aptomi/code/fake", "fake":
+	case "aptomi/code/unittests", "unittests":
 		return FakeCodeExecutor{code}, nil
 	default:
 		return nil, errors.New("CodeExecutor not found: " + code.Type)

@@ -6,6 +6,6 @@ import (
 )
 
 func TestLoadDependencies(t *testing.T) {
-	dependencies := LoadDependenciesFromDir("testdata/fake")
+	dependencies := LoadDependenciesFromDir("testdata/unittests")
 	assert.Equal(t, 2, len(dependencies.Dependencies["kafka"]), "Service should have two dependencies")
 }

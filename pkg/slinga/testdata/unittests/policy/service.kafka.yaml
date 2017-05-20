@@ -21,7 +21,7 @@ components:
 
   - name: component2
     code:
-      type: aptomi/code/fake
+      type: aptomi/code/unittests
       content:
         metadata:
           service: kafka
@@ -37,7 +37,7 @@ components:
 
   - name: component3
     code:
-      type: aptomi/code/fake
+      type: aptomi/code/unittests
       content:
         metadata:
           service: kafka

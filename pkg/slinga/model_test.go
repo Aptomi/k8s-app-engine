@@ -23,7 +23,7 @@ func TestLabelOperations(t *testing.T) {
 }
 
 func TestTemplateEvaluation(t *testing.T) {
-	alice := LoadUserByIDFromDir("testdata/fake", "1")
+	alice := LoadUserByIDFromDir("testdata/unittests", "1")
 
 	result, err := evaluateTemplate("test-{{.User.Labels.team}}", alice)
 	assert.Equal(t, nil, err, "Template should evaluate without errors")

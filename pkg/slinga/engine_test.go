@@ -6,9 +6,9 @@ import (
 )
 
 func TestEngine(t *testing.T) {
-	policy := LoadPolicyFromDir("testdata/fake")
-	users := LoadUsersFromDir("testdata/fake")
-	dependencies := LoadDependenciesFromDir("testdata/fake")
+	policy := LoadPolicyFromDir("testdata/unittests")
+	users := LoadUsersFromDir("testdata/unittests")
+	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
 	usageState := NewServiceUsageState(&policy, &dependencies)
 	err := usageState.ResolveUsage(&users)
@@ -18,7 +18,7 @@ func TestEngine(t *testing.T) {
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
-	state := LoadPolicyFromDir("testdata/fake")
+	state := LoadPolicyFromDir("testdata/unittests")
 	service := state.Services["kafka"]
 
 	c, err := service.getComponentsSortedTopologically()
