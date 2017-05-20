@@ -41,19 +41,21 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	for service, userIds := range usage.Dependencies.Dependencies {
-		// Add a node with service
-		addNodeOnce(graph, "cluster_Services", service, nil, was)
+	if usage.Dependencies != nil {
+		for service, userIds := range usage.Dependencies.Dependencies {
+			// Add a node with service
+			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
-		// For every user who has a dependency on this service
-		for _, userId := range userIds {
-			color := getUserColor(userId, colorForUser, &usedColors)
+			// For every user who has a dependency on this service
+			for _, userId := range userIds {
+				color := getUserColor(userId, colorForUser, &usedColors)
 
-			// Add a node with user
-			addNodeOnce(graph, "cluster_Users", userId, map[string]string{"style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
+				// Add a node with user
+				addNodeOnce(graph, "cluster_Users", userId, map[string]string{"style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
-			// Add an edge from user to a service
-			addEdge(graph, userId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+				// Add an edge from user to a service
+				addEdge(graph, userId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+			}
 		}
 	}
 
@@ -84,21 +86,25 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 	}
 
 	// Third, show cross-service dependencies
-	for serviceName1, service1 := range usage.Policy.Services {
-		// Resolve every component
-		for _, component := range service1.Components {
-			serviceName2 := component.Service
-			if serviceName2 != "" {
-				// Add a node with service1
-				addNodeOnce(graph, "cluster_Services", serviceName1, nil, was)
+	if usage.Policy != nil {
+		for serviceName1, service1 := range usage.Policy.Services {
+			// Resolve every component
+			for _, component := range service1.Components {
+				serviceName2 := component.Service
+				if serviceName2 != "" {
+					// Add a node with service1
+					addNodeOnce(graph, "cluster_Services", serviceName1, nil, was)
 
-				// Add a node with service2
-				addNodeOnce(graph, "cluster_Services", serviceName2, nil, was)
+					// Add a node with service2
+					addNodeOnce(graph, "cluster_Services", serviceName2, nil, was)
 
-				// Show dependency
-				addEdge(graph, serviceName1, serviceName2, map[string]string{"color": "gray60"})
+					// Show dependency
+					addEdge(graph, serviceName1, serviceName2, map[string]string{"color": "gray60"})
+				}
 			}
 		}
+	} else {
+		addNodeOnce(graph, "", "Empty", nil, was)
 	}
 
 	fileNameDot := GetAptomiDBDir() + "/" + "graph_full.dot"
