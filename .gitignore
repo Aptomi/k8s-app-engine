@@ -1,6 +1,8 @@
 aptomi
 vendor
 db.yaml
+graph*.png
+graph*.dot
 test.go
 
 .idea
