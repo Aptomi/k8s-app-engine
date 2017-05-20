@@ -24,7 +24,7 @@ type ServiceUsageStateDiff struct {
 }
 
 // Calculate difference between two usage states
-func (next *ServiceUsageState) ProcessDifference(prev *ServiceUsageState) ServiceUsageStateDiff {
+func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) ServiceUsageStateDiff {
 	// resulting difference
 	result := ServiceUsageStateDiff{
 		Prev:                 prev,
@@ -106,28 +106,28 @@ func (diff ServiceUsageStateDiff) isEmpty() bool {
 
 func (diff ServiceUsageStateDiff) Print() {
 	if len(diff.ComponentInstantiate) > 0 {
-		fmt.Println("New components instantiated:")
+		fmt.Println("New components to instantiate:")
 		for k, _ := range diff.ComponentInstantiate {
 			fmt.Println("[+] " + k)
 		}
 	}
 
 	if len(diff.ComponentAttachUser) > 0 {
-		fmt.Println("New users for components:")
+		fmt.Println("Add users for components:")
 		for _, cu := range diff.ComponentAttachUser {
 			fmt.Println("[+] " + cu.User + " -> " + cu.ComponentKey)
 		}
 	}
 
 	if len(diff.ComponentDetachUser) > 0 {
-		fmt.Println("Deleted users for components:")
+		fmt.Println("Delete users for components:")
 		for _, cu := range diff.ComponentDetachUser {
 			fmt.Println("[-] " + cu.User + " -> " + cu.ComponentKey)
 		}
 	}
 
 	if len(diff.ComponentDestruct) > 0 {
-		fmt.Println("Components destructed (no usage):")
+		fmt.Println("Components to destruct (no usage):")
 		for k, _ := range diff.ComponentDestruct {
 			fmt.Println("[-] " + k)
 		}
@@ -139,12 +139,25 @@ func (diff ServiceUsageStateDiff) Print() {
 }
 
 func (diff ServiceUsageStateDiff) Apply() {
-	// TODO: implement
+	if len(diff.ComponentDestruct) > 0 {
+		for key := range diff.ComponentDestruct {
+			serviceName, _/*contextName*/, _/*allocationName*/, componentName := parseServiceUsageKey(key)
+			component := diff.Prev.Policy.Services[serviceName].ComponentsMap[componentName]
+
+			fmt.Println("Something should happen with component here", component.Code.Type)
+		}
+	}
+
+	if len(diff.ComponentInstantiate) > 0 {
+		for key := range diff.ComponentInstantiate {
+			serviceName, _/*contextName*/, _/*allocationName*/, componentName := parseServiceUsageKey(key)
+			component := diff.Next.Policy.Services[serviceName].ComponentsMap[componentName]
+
+			// Calculate real labels here:)
+			fmt.Println("Something should happen with component here", component.Code.Type)
+		}
+	}
 
 	// save new state
 	diff.Next.SaveServiceUsageState()
-
-	if diff.isEmpty() {
-		fmt.Println("[*] No changes to apply")
-	}
 }

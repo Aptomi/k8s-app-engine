@@ -40,12 +40,11 @@ var policyCmdApply = &cobra.Command{
 		}
 
 		// Process differences
-		diff := nextUsageState.ProcessDifference(&prevUsageState)
+		diff := nextUsageState.CalculateDifference(&prevUsageState)
 
-		if noop {
-			// do not apply changes
-			diff.Print()
-		} else {
+		diff.Print()
+
+		if !noop {
 			// apply changes
 			diff.Apply()
 		}
