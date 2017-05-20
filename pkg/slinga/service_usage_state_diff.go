@@ -173,15 +173,14 @@ func (diff ServiceUsageStateDiff) Apply() {
 		if _, ok := diff.ComponentInstantiate[key]; ok {
 			serviceName, _/*contextName*/, _/*allocationName*/, componentName := parseServiceUsageKey(key)
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
+			// labels := diff.Next.ResolvedLinks[key].Labels
 
 			if component == nil {
 				glog.Infof("Instantiating service: %s (%s)", serviceName, key)
 				// TODO: add processing code
-				// TODO: Calculate real labels here:)
 			}  else {
 				glog.Infof("Instantiating component: %s (%s)", component.Name, key)
 				// TODO: add processing code
-				// TODO: Calculate real labels here:)
 			}
 		}
 	}
