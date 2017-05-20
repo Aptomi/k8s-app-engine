@@ -1,0 +1,35 @@
+name: prod
+
+service: kafka
+
+criteria:
+  - dev == "no" && prod == "yes"
+
+labels:
+  set:
+    some-test-context-specific-label: some-value
+  remove:
+    a:
+    b:
+
+allocations:
+
+  - name: test-{{.User.Labels.team}}
+    criteria:
+      - priority >= 2
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
+  - name: test-{{.User.Labels.team}}
+    criteria:
+      - priority >= 2
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:

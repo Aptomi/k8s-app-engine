@@ -1,0 +1,5 @@
+- userid: 1
+  service: kafka
+
+- userid: 2
+  service: kafka
