@@ -126,7 +126,7 @@ func (service *Service) getComponentsSortedTopologically() ([]*ServiceComponent,
 		colors := make(map[string]int)
 
 		// Dfs
-		var cycle= false
+		var cycle = false
 		for _, c := range service.Components {
 			if _, ok := colors[c.Name]; !ok {
 				if service.dfsComponentSort(c, colors) {

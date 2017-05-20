@@ -26,7 +26,7 @@ type ServiceUsageState struct {
 }
 
 type ResolvedLinkUsageStruct struct {
-	UserIds []string
+	UserIds          []string
 	CalculatedLabels LabelSet
 }
 

@@ -53,7 +53,7 @@ type Service struct {
 	componentsOrdered []*ServiceComponent
 
 	// Lazily evaluated field (not serialized). Use via getter
-	componentsMap     map[string]*ServiceComponent
+	componentsMap map[string]*ServiceComponent
 }
 
 type Policy struct {

@@ -108,4 +108,3 @@ func (service *Service) getComponentsMap() map[string]*ServiceComponent {
 	}
 	return service.componentsMap
 }
-
