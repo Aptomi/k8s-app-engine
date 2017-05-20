@@ -58,7 +58,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 	}
 
 	// Second, visualize evaluated links
-	for key, userIds := range usage.ResolvedLinks {
+	for key, linkStruct := range usage.ResolvedLinks {
 		keyArray := strings.Split(key, "#")
 		service := keyArray[0]
 		contextAndAllocation := keyArray[1] + "#" + keyArray[2]
@@ -77,7 +77,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 		addNodeOnce(graph, "cluster_"+contextAndAllocation, componentKey, map[string]string{"label": componentLabel}, was)
 
 		// Add an edge from service to allocation box
-		for _, userId := range userIds {
+		for _, userId := range linkStruct.UserIds {
 			color := getUserColor(userId, colorForUser, &usedColors)
 			addEdge(graph, service, componentKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}

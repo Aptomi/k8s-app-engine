@@ -17,7 +17,7 @@ type LabelOperations map[string]map[string]string
 type Allocation struct {
 	Name     string
 	Criteria []string
-	Labels   LabelOperations
+	Labels   *LabelOperations
 
 	// Evaluated field (when parameters in name are substituted with real values)
 	NameResolved string
@@ -27,8 +27,8 @@ type Context struct {
 	Name        string
 	Service     string
 	Criteria    []string
-	Labels      LabelOperations
-	Allocations []Allocation
+	Labels      *LabelOperations
+	Allocations []*Allocation
 }
 
 type Code struct {
@@ -41,29 +41,31 @@ type ServiceComponent struct {
 	Service      string
 	Code         *Code
 	Dependencies []string
-	Labels       LabelOperations
+	Labels       *LabelOperations
 }
 
 type Service struct {
 	Name       string
-	Labels     LabelOperations
-	Components []ServiceComponent
+	Labels     *LabelOperations
+	Components []*ServiceComponent
 
-	// Evaluated field (when components are sorted in instantiation order)
-	ComponentsMap     map[string]ServiceComponent
-	ComponentsOrdered []ServiceComponent
+	// Lazily evaluated field (all components topologically sorted). Use via getter
+	componentsOrdered []*ServiceComponent
+
+	// Lazily evaluated field (not serialized). Use via getter
+	componentsMap     map[string]*ServiceComponent
 }
 
 type Policy struct {
-	Services map[string]Service
-	Contexts map[string][]Context
+	Services map[string]*Service
+	Contexts map[string][]*Context
 }
 
 // Loads policy from a directory
 func LoadPolicyFromDir(dir string) Policy {
 	s := Policy{
-		Services: make(map[string]Service),
-		Contexts: make(map[string][]Context),
+		Services: make(map[string]*Service),
+		Contexts: make(map[string][]*Context),
 	}
 
 	// read all services
@@ -88,7 +90,7 @@ func LoadPolicyFromDir(dir string) Policy {
 }
 
 // Loads service from YAML file
-func loadServiceFromFile(filename string) Service {
+func loadServiceFromFile(filename string) *Service {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
 		glog.Fatalf("Unable to read file: %v", e)
@@ -98,11 +100,11 @@ func loadServiceFromFile(filename string) Service {
 	if e != nil {
 		glog.Fatalf("Unable to unmarshal service: %v", e)
 	}
-	return t
+	return &t
 }
 
 // Loads context from YAML file
-func loadContextFromFile(filename string) Context {
+func loadContextFromFile(filename string) *Context {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
 		glog.Fatalf("Unable to read file: %v", e)
@@ -112,7 +114,7 @@ func loadContextFromFile(filename string) Context {
 	if e != nil {
 		glog.Fatalf("Unable to unmarshal context: %v", e)
 	}
-	return t
+	return &t
 }
 
 // Serialize object into YAML

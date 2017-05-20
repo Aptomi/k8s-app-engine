@@ -21,10 +21,11 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 	state := LoadPolicyFromDir("testdata/fake")
 	service := state.Services["kafka"]
 
-	err := service.sortComponentsTopologically()
+	c, err := service.getComponentsSortedTopologically()
 	assert.Equal(t, nil, err, "Service components should be topologically sorted without errors")
 
-	assert.Equal(t, "component3", service.ComponentsOrdered[0].Name, "Component tologogical sort should produce correct order")
-	assert.Equal(t, "component2", service.ComponentsOrdered[1].Name, "Component tologogical sort should produce correct order")
-	assert.Equal(t, "component1", service.ComponentsOrdered[2].Name, "Component tologogical sort should produce correct order")
+	assert.Equal(t, len(c), 3, "Component topological sort should produce correct number of values")
+	assert.Equal(t, "component3", c[0].Name, "Component topological sort should produce correct order")
+	assert.Equal(t, "component2", c[1].Name, "Component topological sort should produce correct order")
+	assert.Equal(t, "component1", c[2].Name, "Component topological sort should produce correct order")
 }

@@ -22,7 +22,7 @@ func (user *User) getLabelSet() LabelSet {
 }
 
 // Apply set of transformations to labels
-func (src *LabelSet) applyTransform(ops LabelOperations) LabelSet {
+func (src *LabelSet) applyTransform(ops *LabelOperations) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
 
 	// copy original labels
@@ -31,12 +31,12 @@ func (src *LabelSet) applyTransform(ops LabelOperations) LabelSet {
 	}
 
 	// set labels
-	for k, v := range ops["set"] {
+	for k, v := range (*ops)["set"] {
 		result.Labels[k] = v
 	}
 
 	// remove labels
-	for k, _ := range ops["remove"] {
+	for k, _ := range (*ops)["remove"] {
 		delete(result.Labels, k)
 	}
 
@@ -97,3 +97,15 @@ func evaluateTemplate(templateStr string, user User) (string, error) {
 
 	return doc.String(), nil
 }
+
+func (service *Service) getComponentsMap() map[string]*ServiceComponent {
+	if service.componentsMap == nil {
+		// Put all components into map
+		service.componentsMap = make(map[string]*ServiceComponent)
+		for _, c := range service.Components {
+			service.componentsMap[c.Name] = c
+		}
+	}
+	return service.componentsMap
+}
+

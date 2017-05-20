@@ -62,13 +62,13 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	labels = labels.applyTransform(allocation.Labels)
 
 	// Now, sort all components in topological order
-	err = service.sortComponentsTopologically()
+	componentsOrdered, err := service.getComponentsSortedTopologically()
 	if err != nil {
 		return err
 	}
 
 	// Resolve every component
-	for _, component := range service.ComponentsOrdered {
+	for _, component := range componentsOrdered {
 		// Process component and transform labels
 		componentLabels := labels.applyTransform(component.Labels)
 
@@ -86,21 +86,21 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		usage.recordUsage(user, service, context, allocation, &component)
+		usage.recordUsage(user, service, context, allocation, component, componentLabels)
 	}
 
 	// Record usage of a given service
-	usage.recordUsage(user, service, context, allocation, nil)
+	usage.recordUsage(user, service, context, allocation, nil, labels)
 
 	return nil
 }
 
 // Topologically sort components and return true if there is a cycle detected
-func (service *Service) dfsComponentSort(u ServiceComponent, colors map[string]int) bool {
+func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]int) bool {
 	colors[u.Name] = 1
 
 	for _, vName := range u.Dependencies {
-		v, exists := service.ComponentsMap[vName]
+		v, exists := service.getComponentsMap()[vName]
 		if !exists {
 			glog.Fatalf("Invalid dependency in service %s: %s", service.Name, vName)
 		}
@@ -114,48 +114,44 @@ func (service *Service) dfsComponentSort(u ServiceComponent, colors map[string]i
 		}
 	}
 
-	service.ComponentsOrdered = append(service.ComponentsOrdered, u)
+	service.componentsOrdered = append(service.componentsOrdered, u)
 	colors[u.Name] = 2
 	return false
 }
 
-// Orders all components in a topological way
-func (service *Service) sortComponentsTopologically() error {
-	// Put all components into map
-	service.ComponentsMap = make(map[string]ServiceComponent)
-	for _, c := range service.Components {
-		service.ComponentsMap[c.Name] = c
-	}
+// Sorts all components in a topological way
+func (service *Service) getComponentsSortedTopologically() ([]*ServiceComponent, error) {
+	if service.componentsOrdered == nil {
+		// Initiate colors
+		colors := make(map[string]int)
 
-	// Initiate colors
-	colors := make(map[string]int)
-
-	// Dfs
-	var cycle = false
-	for _, c := range service.Components {
-		if _, ok := colors[c.Name]; !ok {
-			if service.dfsComponentSort(c, colors) {
-				cycle = true
-				break
+		// Dfs
+		var cycle= false
+		for _, c := range service.Components {
+			if _, ok := colors[c.Name]; !ok {
+				if service.dfsComponentSort(c, colors) {
+					cycle = true
+					break
+				}
 			}
+		}
+
+		if cycle {
+			return nil, errors.New("Component cycle detected in service " + service.Name)
 		}
 	}
 
-	if cycle {
-		return errors.New("Component cycle detected in service " + service.Name)
-	}
-
-	return nil
+	return service.componentsOrdered, nil
 }
 
 // Helper to get a service
 func (policy *Policy) getService(serviceName string) (*Service, error) {
 	// Locate the service
-	service, ok := policy.Services[serviceName]
-	if !ok {
+	service := policy.Services[serviceName]
+	if service == nil {
 		return nil, errors.New("Service " + serviceName + " not found")
 	}
-	return &service, nil
+	return service, nil
 }
 
 // Helper to get a matched context
@@ -170,7 +166,7 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 	var contextMatched *Context
 	for _, c := range contexts {
 		if c.matches(labels) {
-			contextMatched = &c
+			contextMatched = c
 			break
 		}
 	}
@@ -189,7 +185,7 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	var allocationMatched *Allocation
 	for _, a := range context.Allocations {
 		if a.matches(labels) {
-			allocationMatched = &a
+			allocationMatched = a
 			break
 		}
 	}

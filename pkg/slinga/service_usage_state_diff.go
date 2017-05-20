@@ -2,6 +2,7 @@ package slinga
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 )
 
 // Attach or detach user to a service
@@ -45,8 +46,18 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) Serv
 
 	// go over all the keys and see which one appear and which one disappear
 	for k, _ := range allKeys {
-		userIdsPrev := prev.ResolvedLinks[k]
-		userIdsNext := next.ResolvedLinks[k]
+		uPrev := prev.ResolvedLinks[k]
+		uNext := next.ResolvedLinks[k]
+
+		var userIdsPrev []string
+		if uPrev != nil {
+			userIdsPrev = uPrev.UserIds
+		}
+
+		var userIdsNext []string
+		if uNext != nil {
+			userIdsNext = uNext.UserIds
+		}
 
 		// see if a component needs to be instantiated
 		if userIdsPrev == nil && userIdsNext != nil {
@@ -59,19 +70,19 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) Serv
 		}
 
 		// see what needs to happen to users
-		uPrev := toMap(userIdsPrev)
-		uNext := toMap(userIdsNext)
+		uPrevIdsMap := toMap(userIdsPrev)
+		uNextIdsMap := toMap(userIdsNext)
 
 		// see if a user needs to be detached from a component
-		for u, _ := range uPrev {
-			if !uNext[u] {
+		for u, _ := range uPrevIdsMap {
+			if !uNextIdsMap[u] {
 				result.ComponentDetachUser = append(result.ComponentDetachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
 		}
 
 		// see if a user needs to be attached to a component
-		for u, _ := range uNext {
-			if !uPrev[u] {
+		for u, _ := range uNextIdsMap {
+			if !uPrevIdsMap[u] {
 				result.ComponentAttachUser = append(result.ComponentAttachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
 		}
@@ -139,22 +150,39 @@ func (diff ServiceUsageStateDiff) Print() {
 }
 
 func (diff ServiceUsageStateDiff) Apply() {
-	if len(diff.ComponentDestruct) > 0 {
-		for key := range diff.ComponentDestruct {
-			serviceName, _/*contextName*/, _/*allocationName*/, componentName := parseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].ComponentsMap[componentName]
 
-			fmt.Println("Something should happen with component here", component.Code.Type)
+	// Process destructions in the right order
+	for _, key := range diff.Prev.ProcessingOrder {
+		// Does it need to be destructed?
+		if _, ok := diff.ComponentDestruct[key]; ok {
+			serviceName, _/*contextName*/, _/*allocationName*/, componentName := parseServiceUsageKey(key)
+			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
+			if component == nil {
+				glog.Infof("Destructing service: %s", serviceName)
+				// TODO: add processing code
+			}  else {
+				glog.Infof("Destructing component: %s (%s)", component.Name, component.Code)
+				// TODO: add processing code
+			}
 		}
 	}
 
-	if len(diff.ComponentInstantiate) > 0 {
-		for key := range diff.ComponentInstantiate {
+	// Process instantiations in the right order
+	for _, key := range diff.Next.ProcessingOrder {
+		// Does it need to be instantiated?
+		if _, ok := diff.ComponentInstantiate[key]; ok {
 			serviceName, _/*contextName*/, _/*allocationName*/, componentName := parseServiceUsageKey(key)
-			component := diff.Next.Policy.Services[serviceName].ComponentsMap[componentName]
+			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 
-			// Calculate real labels here:)
-			fmt.Println("Something should happen with component here", component.Code.Type)
+			if component == nil {
+				glog.Infof("Instantiating service: %s (%s)", serviceName, key)
+				// TODO: add processing code
+				// TODO: Calculate real labels here:)
+			}  else {
+				glog.Infof("Instantiating component: %s (%s)", component.Name, key)
+				// TODO: add processing code
+				// TODO: Calculate real labels here:)
+			}
 		}
 	}
 

@@ -19,17 +19,22 @@ type ServiceUsageState struct {
 	Dependencies *GlobalDependencies
 
 	// resolved triples <service, context, allocation, component> -> list of users
-	ResolvedLinks map[string][]string
+	ResolvedLinks map[string]*ResolvedLinkUsageStruct
 
-	// the order in which components/services have to be instantiated
+	// the order in which components/services have to be processed
 	ProcessingOrder []string
+}
+
+type ResolvedLinkUsageStruct struct {
+	UserIds []string
+	Labels LabelSet
 }
 
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
 	return ServiceUsageState{
 		Policy:        policy,
 		Dependencies:  dependencies,
-		ResolvedLinks: make(map[string][]string)}
+		ResolvedLinks: make(map[string]*ResolvedLinkUsageStruct)}
 }
 
 // Create key for the map
@@ -59,10 +64,22 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent) {
+func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet) {
 	key := usage.createServiceUsageKey(service, context, allocation, component)
-	usage.ResolvedLinks[key] = append(usage.ResolvedLinks[key], user.Id)
+
+	if _, ok := usage.ResolvedLinks[key]; !ok {
+		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{Labels: LabelSet{}}
+	}
+	usage.ResolvedLinks[key].append(user.Id, labels)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
+}
+
+// Adds user and set of labels to the entry
+func (usageStruct *ResolvedLinkUsageStruct) append(userId string, labelSet LabelSet) {
+	usageStruct.UserIds = append(usageStruct.UserIds, userId)
+
+	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
+	usageStruct.Labels = labelSet
 }
 
 // Records requested dependency
