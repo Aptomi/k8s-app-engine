@@ -115,6 +115,7 @@ Processing flow:
 6. [SL] support for multiple k8s clusters
 7. [SL] support deployment of specific versions, as well as
    deploy "latest" (or matching by regex) from docker registry
+8. [RA] more compact visualization
 
 ## Demo scenario:
 
