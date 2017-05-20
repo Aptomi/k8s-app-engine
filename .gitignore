@@ -1,5 +1,7 @@
 aptomi
 vendor
+db.yaml
+test.go
 
 .idea
 
