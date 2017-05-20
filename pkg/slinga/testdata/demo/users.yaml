@@ -1,7 +1,7 @@
 - id: 1
   name: Alice
   labels:
-    priority: 3
+    priority: 5
     org: corporate_it
     team: platform_services
     dev: yes
@@ -15,3 +15,12 @@
     team: platform_services
     dev: no
     prod: yes
+
+- id: 3
+  name: Carol
+  labels:
+    priority: 3
+    org: another_org
+    team: qa
+    dev: yes
+    prod: no

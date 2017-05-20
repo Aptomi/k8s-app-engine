@@ -1,0 +1,17 @@
+name: prod
+
+service: hdfs
+
+criteria:
+  - dev == "no" && prod == "yes"
+
+allocations:
+
+    # shared inside organisation
+    # accessible only to people with priority >= 5
+  - name: prod-{{ .User.Labels.org }}
+    criteria:
+      - priority >= 5
+    labels:
+      set:
+        antiAffinity: hard

@@ -1,0 +1,29 @@
+name: test
+
+service: hdfs
+
+criteria:
+  - dev == "yes" && prod == "no"
+
+labels:
+  set:
+    some-test-context-specific-label: some-value
+  remove:
+    a:
+    b:
+
+allocations:
+
+  - name: test-high-prio
+    criteria:
+      - priority >= 10
+    labels:
+      set:
+        antiAffinity: soft
+
+  - name: test-low-prio
+    criteria:
+      - priority < 10
+    labels:
+      set:
+        antiAffinity: soft

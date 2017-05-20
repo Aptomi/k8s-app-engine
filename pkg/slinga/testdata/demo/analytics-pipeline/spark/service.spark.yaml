@@ -1,0 +1,35 @@
+# Definition of Spark service
+name: spark
+
+labels:
+  set:
+    a: b
+
+components:
+
+  - name: zookeeper
+    service: zookeeper
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
+  - name: spark
+    code:
+      type: aptomi/code/kubernetes-helm
+      content:
+        chart:
+          name: boston-summit-charts/spark
+        params:
+          antiAffinity: soft
+          zookeeper: zk-{{ .Dependencies.zookeeper }}
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+    dependencies:
+      - zookeeper

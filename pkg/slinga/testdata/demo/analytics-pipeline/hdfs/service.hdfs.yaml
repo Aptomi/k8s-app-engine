@@ -1,0 +1,16 @@
+# Definition of HDFS service
+name: hdfs
+
+labels:
+  set:
+    a: b
+
+components:
+
+  - name: hdfs
+    code:
+      type: aptomi/code/kubernetes-helm
+      content:
+        chart:
+          name: boston-summit-charts/hdfs
+        params:

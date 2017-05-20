@@ -1,0 +1,14 @@
+name: shared
+
+service: spark
+
+criteria:
+  - dev == "yes" || prod == "yes"
+
+allocations:
+
+  - name: shared-{{ .User.Labels.team }}
+    criteria:
+    labels:
+      set:
+        antiAffinity: soft

@@ -1,0 +1,18 @@
+name: shared
+
+service: analytics-pipeline
+
+criteria:
+  - dev == "yes" || prod == "yes"
+
+allocations:
+
+  - name: shared-{{ .User.Labels.team }}
+    criteria:
+      - "true"
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:

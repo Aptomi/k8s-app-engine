@@ -1,7 +1,10 @@
 - userid: 1
-  service: kafka
+  service: analytics-pipeline
 
 - userid: 2
-  service: kafka
+  service: analytics-pipeline
   labels:
     important: yes
+
+- userid: 3
+  service: analytics-pipeline

@@ -1,5 +1,5 @@
-# Definition of Kafka service
-name: kafka
+# Definition of TweePub service
+name: tweepub
 
 labels:
   set:
@@ -7,8 +7,8 @@ labels:
 
 components:
 
-  - name: zookeeper
-    service: zookeeper
+  - name: kafka
+    service: kafka
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -16,14 +16,19 @@ components:
         a:
         b:
 
-  - name: kafka
+  - name: tweepub
     code:
       type: aptomi/code/kubernetes-helm
       content:
         chart:
-          name: boston-summit-charts/kafka
+          name: boston-summit-charts/tweepub
         params:
-          antiAffinity: soft
+          kafka.externalAddress: kafka-{{ .Dependencies.kafka }}
+          kafka.topic: tweepub_{{ .User.Name }}
+          twitter.appKey:
+          twitter.appSecret:
+          twitter.tokenKey:
+          twitter.tokenSecret:
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -31,4 +36,4 @@ components:
         a:
         b:
     dependencies:
-      - zookeeper
+      - kafka

@@ -14,7 +14,7 @@ components:
         chart:
           name: boston-summit-charts/zookeeper
         params:
-          antiAffinity: soft
+          antiAffinity: "{{ .Labels.antiAffinity }}"
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
