@@ -162,7 +162,12 @@ func (diff ServiceUsageStateDiff) Apply() {
 				// TODO: add processing code
 			} else {
 				glog.Infof("Destructing component: %s (%s)", component.Name, component.Code)
-				// TODO: add processing code
+
+				codeExecutor, err := component.Code.GetCodeExecutor()
+				if err != nil {
+					glog.Fatal("Error while getting codeExecutor")
+				}
+				codeExecutor.Destroy(key)
 			}
 		}
 	}
@@ -173,14 +178,19 @@ func (diff ServiceUsageStateDiff) Apply() {
 		if _, ok := diff.ComponentInstantiate[key]; ok {
 			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
-			// labels := diff.Next.ResolvedLinks[key].CalculatedLabels
+			 labels := diff.Next.ResolvedLinks[key].CalculatedLabels
 
 			if component == nil {
 				glog.Infof("Instantiating service: %s (%s)", serviceName, key)
 				// TODO: add processing code
 			} else {
 				glog.Infof("Instantiating component: %s (%s)", component.Name, key)
-				// TODO: add processing code
+
+				codeExecutor, err := component.Code.GetCodeExecutor()
+				if err != nil {
+					glog.Fatal("Error while getting codeExecutor")
+				}
+				codeExecutor.Install(key, labels)
 			}
 		}
 	}
