@@ -4,8 +4,8 @@ import (
 	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"path/filepath"
 	"sort"
+	"github.com/mattn/go-zglob"
 )
 
 /*
@@ -69,7 +69,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all services
-	files, _ := filepath.Glob(dir + "/policy/service.*.yaml")
+	files, _ := zglob.Glob(dir + "/**/service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		glog.Infof("Loading service from %s", f)
@@ -78,7 +78,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all contexts
-	files, _ = filepath.Glob(dir + "/policy/context.*.yaml")
+	files, _ = zglob.Glob(dir + "/**/context.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		glog.Infof("Loading context from %s", f)

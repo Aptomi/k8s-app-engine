@@ -108,11 +108,12 @@ Processing flow:
 ## What needs to be done:
 
 1. [RA] add labels to dependencies
-2. [RA] recursively process folders when loading policy
+2. [Done - RA] recursively process folders when loading policy
 3. [RA] dry run
 4. [SL] service discovery
-5. [SL] support for multiple k8s clusters
-6. [SL] support deployment of specific versions, as well as
+5. [RA or SL] add a mode to print Helm commands instead of executing them
+6. [SL] support for multiple k8s clusters
+7. [SL] support deployment of specific versions, as well as
    deploy "latest" (or matching by regex) from docker registry
 
 ## Demo scenario:
