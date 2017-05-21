@@ -1,13 +1,13 @@
-name: shared
+name: team
 
 service: analytics-pipeline
 
 criteria:
-  - dev == "yes" || prod == "yes"
+  - dev == "yes" || prod == "yes" || qa == "yes"
 
 allocations:
 
-  - name: shared-{{ .User.Labels.team }}
+  - name: team-{{ .User.Labels.team }}
     criteria:
       - "true"
     labels:

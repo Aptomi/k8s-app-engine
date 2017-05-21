@@ -3,27 +3,18 @@ name: test
 service: hdfs
 
 criteria:
-  - dev == "yes" && prod == "no"
+  - dev == "yes" || qa == "yes"
 
 labels:
   set:
-    some-test-context-specific-label: some-value
-  remove:
-    a:
-    b:
+    antiAffinity: soft
 
 allocations:
 
-  - name: test-high-prio
+  - name: test-org12
     criteria:
-      - priority >= 10
-    labels:
-      set:
-        antiAffinity: soft
+      - org == "org1" || org == "org2"
 
-  - name: test-low-prio
+  - name: test-not-org12
     criteria:
-      - priority < 10
-    labels:
-      set:
-        antiAffinity: soft
+      - org != "org1" && org != "org2"

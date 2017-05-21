@@ -8,3 +8,9 @@
 
 - userid: 3
   service: analytics-pipeline
+
+- userid: 4
+  service: analytics-pipeline
+
+- userid: 5
+  service: analytics-pipeline

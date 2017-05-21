@@ -1,14 +1,25 @@
-name: shared
+name: main
 
 service: spark
 
+# this context is only one defined for spark and available for everybody
 criteria:
-  - dev == "yes" || prod == "yes"
+  - dev == "yes" || prod == "yes" || qa == "yes"
+
+# always deploy spark with strictly enforced anti affinity
+labels:
+  set:
+    antiAffinity: hard
 
 allocations:
 
+  # always personal instance for high priority users with prod == yes
+  - name: personal-{{ .User.Name }}
+    criteria:
+      - prod == "yes" && priority >= 10
+
+  # all other users sharing single instance inside team
   - name: shared-{{ .User.Labels.team }}
     criteria:
-    labels:
-      set:
-        antiAffinity: soft
+      - "true"
+
