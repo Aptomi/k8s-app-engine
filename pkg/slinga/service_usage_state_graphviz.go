@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sort"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -21,6 +22,7 @@ func (usage ServiceUsageState) GetVisualFileNamePNG() string {
 
 // Stores usage state visual into a file
 func (usage ServiceUsageState) DrawVisualAndStore() {
+	users := LoadUsersFromDir(GetAptomiPolicyDir())
 
 	// Write graph into a file
 	graph := gographviz.NewEscape()
@@ -51,7 +53,17 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 				color := getUserColor(d.UserId, colorForUser, &usedColors)
 
 				// Add a node with user
-				addNodeOnce(graph, "cluster_Users", d.UserId, map[string]string{"style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
+				user := users.Users[d.UserId]
+				label := "Name: " + user.Name + " (" + user.Id + ")"
+				var keys []string
+				for k := range user.Labels {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					label += "\n" + k + " = " + user.Labels[k]
+				}
+				addNodeOnce(graph, "cluster_Users", d.UserId, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
 				// Add an edge from user to a service
 				addEdge(graph, d.UserId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
