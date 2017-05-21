@@ -25,9 +25,9 @@ type ServiceUsageStateDiff struct {
 }
 
 // Calculate difference between two usage states
-func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) ServiceUsageStateDiff {
+func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *ServiceUsageStateDiff {
 	// resulting difference
-	result := ServiceUsageStateDiff{
+	result := &ServiceUsageStateDiff{
 		Prev:                 prev,
 		Next:                 next,
 		ComponentInstantiate: make(map[string]bool),
@@ -37,15 +37,15 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) Serv
 	allKeys := make(map[string]bool)
 
 	// merge all the keys
-	for k, _ := range prev.ResolvedLinks {
+	for k := range prev.ResolvedLinks {
 		allKeys[k] = true
 	}
-	for k, _ := range next.ResolvedLinks {
+	for k := range next.ResolvedLinks {
 		allKeys[k] = true
 	}
 
 	// go over all the keys and see which one appear and which one disappear
-	for k, _ := range allKeys {
+	for k := range allKeys {
 		uPrev := prev.ResolvedLinks[k]
 		uNext := next.ResolvedLinks[k]
 
@@ -74,14 +74,14 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) Serv
 		uNextIdsMap := toMap(userIdsNext)
 
 		// see if a user needs to be detached from a component
-		for u, _ := range uPrevIdsMap {
+		for u := range uPrevIdsMap {
 			if !uNextIdsMap[u] {
 				result.ComponentDetachUser = append(result.ComponentDetachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
 		}
 
 		// see if a user needs to be attached to a component
-		for u, _ := range uNextIdsMap {
+		for u := range uNextIdsMap {
 			if !uPrevIdsMap[u] {
 				result.ComponentAttachUser = append(result.ComponentAttachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
@@ -118,7 +118,7 @@ func (diff ServiceUsageStateDiff) isEmpty() bool {
 func (diff ServiceUsageStateDiff) Print() {
 	if len(diff.ComponentInstantiate) > 0 {
 		fmt.Println("New components to instantiate:")
-		for k, _ := range diff.ComponentInstantiate {
+		for k := range diff.ComponentInstantiate {
 			fmt.Println("[+] " + k)
 		}
 	}
@@ -139,7 +139,7 @@ func (diff ServiceUsageStateDiff) Print() {
 
 	if len(diff.ComponentDestruct) > 0 {
 		fmt.Println("Components to destruct (no usage):")
-		for k, _ := range diff.ComponentDestruct {
+		for k := range diff.ComponentDestruct {
 			fmt.Println("[-] " + k)
 		}
 	}
@@ -150,6 +150,7 @@ func (diff ServiceUsageStateDiff) Print() {
 }
 
 func (diff ServiceUsageStateDiff) Apply() {
+	diff.Next.SaveServiceUsageState()
 
 	// Process destructions in the right order
 	for _, key := range diff.Prev.ProcessingOrder {

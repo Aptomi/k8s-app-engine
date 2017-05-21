@@ -9,19 +9,129 @@ import (
 	"strconv"
 	"strings"
 	"sort"
+	"fmt"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
 const colorScheme = "set19"
 const colorCount = 9
 
+// Visualization for the policy
+type PolicyVisualization struct {
+	diff *ServiceUsageStateDiff
+}
+
+// Policy visualization object
+func NewPolicyVisualization(diff *ServiceUsageStateDiff) PolicyVisualization {
+	return PolicyVisualization{diff: diff}
+}
+
+// Draws and stores both pictures
+func (vis PolicyVisualization) DrawAndStore() {
+	// Draw & save resulting state
+	nextGraph := vis.diff.Next.DrawVisualAndStore("complete")
+	vis.saveGraph("complete", nextGraph)
+
+	// Draw previous state
+	prevGraph := vis.diff.Prev.DrawVisualAndStore("prev")
+	vis.saveGraph("prev", prevGraph)
+
+	// Draw delta (i.e. difference between resulting state and previous state)
+	deltaGraph := vis.Delta(prevGraph, nextGraph)
+	vis.saveGraph("delta", deltaGraph)
+}
+
+// Opens a picture
+func (vis PolicyVisualization) OpenInPreview() {
+	vis.OpenInPreviewWithSuffix("delta")
+}
+
+// Opens a picture, given a suffix
+func (vis PolicyVisualization) OpenInPreviewWithSuffix(suffix string) {
+	fileName := vis.getVisualFileNamePNG(suffix)
+	command := exec.Command("open", []string{fileName}...)
+	if err := command.Run(); err != nil {
+		fmt.Print("Allocations (PNG): " + fileName)
+	}
+}
+
+// Calculates delta between two graphs (it actually modifies "next" graph)
+// TODO: deal with escape bulshit
+func (vis PolicyVisualization) Delta(prev *gographviz.Escape, next *gographviz.Escape) *gographviz.Escape {
+	// New nodes, edges, subgraphs must be highlighted
+	{
+		for _, s := range next.SubGraphs.SubGraphs {
+			if _, inPrev := prev.SubGraphs.SubGraphs[s.Name]; !inPrev {
+				// New subgraph -> no special treatment needed
+				// s.Attrs.Add("style", "filled")
+			}
+		}
+		for _, n := range next.Nodes.Nodes {
+			if _, inPrev := prev.Nodes.Lookup[n.Name]; !inPrev {
+				// New node -> filled green
+				n.Attrs.Add("style", "filled")
+				n.Attrs.Add("color", "green2")
+			}
+		}
+		for _, e := range next.Edges.Edges {
+			if _, inPrev := prev.Edges.SrcToDsts[e.Src][e.Dst]; !inPrev {
+				// New edge -> bold, same color
+				e.Attrs.Add("penwidth", "4")
+			}
+		}
+	}
+
+	// Removed nodes, edges, subgraphs must be highlighted
+	{
+		for _, s := range prev.SubGraphs.SubGraphs {
+			if _, inNext := next.SubGraphs.SubGraphs[s.Name]; !inNext {
+				// Removed subgraph -> add a sugraph filled red
+				next.AddSubGraph(next.Name, s.Name, map[string]string{"style": "filled", "fillcolor": "gray18", "fontcolor": "white", "label": s.Attrs["label"]})
+			}
+		}
+
+		for _, n := range prev.Nodes.Nodes {
+			if _, inNext := next.Nodes.Lookup[n.Name]; !inNext {
+				// Removed node -> add a node filled red
+				n.Attrs.Add("style", "filled")
+				n.Attrs.Add("color", "red")
+
+				// Find previous subgraph & put it into the same subgraph
+				subgraphName := vis.findSubraphName(prev, n.Name)
+				next.Relations.Add(subgraphName, n.Name)
+
+				next.Nodes.Add(n)
+			}
+		}
+		for _, e := range prev.Edges.Edges {
+			if _, inNext := next.Edges.SrcToDsts[e.Src][e.Dst]; !inNext {
+				// Removed edge -> add an edge, dashed
+				e.Attrs.Add("style", "dashed")
+				next.Edges.Add(e)
+			}
+		}
+	}
+
+	return next
+}
+
+// Finds subgraph name from relations
+func (vis PolicyVisualization) findSubraphName(prev *gographviz.Escape, nName string) string {
+	for gName := range prev.Relations.ParentToChildren {
+		if prev.Relations.ParentToChildren[gName][nName] {
+			return gName
+		}
+	}
+	return prev.Name
+}
+
 // Returns name of the file where visual is stored
-func (usage ServiceUsageState) GetVisualFileNamePNG() string {
-	return GetAptomiDBDir() + "/" + "graph.png"
+func (vis PolicyVisualization) getVisualFileNamePNG(suffix string) string {
+	return GetAptomiDBDir() + "/" + "graph_" + suffix + ".png"
 }
 
 // Stores usage state visual into a file
-func (usage ServiceUsageState) DrawVisualAndStore() {
+func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Escape {
 	users := LoadUsersFromDir(GetAptomiPolicyDir())
 
 	// Write graph into a file
@@ -121,16 +231,20 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 			}
 		}
 	} else {
-		addNodeOnce(graph, "", "Empty", nil, was)
+		addNodeOnce(graph, "", "No entries", nil, was)
 	}
 
-	fileNameDot := GetAptomiDBDir() + "/" + "graph_full.dot"
-	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_flat.dot"
+	return graph
+}
+
+// Saves graph into a file
+func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape) {
+	fileNameDot := GetAptomiDBDir() + "/" + "graph_" + suffix + "_full.dot"
+	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_" + suffix + "_flat.dot"
 	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 	if err != nil {
 		glog.Fatalf("Unable to write to a file: %s", fileNameDot)
 	}
-
 	// Call graphviz to flatten an image
 	{
 		cmd := "unflatten"
@@ -143,12 +257,11 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 			glog.Fatalf("Unable to execute graphviz (%s): %s %s", cmd, outb.String(), errb.String(), err)
 		}
 	}
-
 	// Call graphviz to generate an image
 	{
-		// -Kfdp will call a different engine
 		cmd := "dot"
-		args := []string{"-Tpng", "-o" + usage.GetVisualFileNamePNG(), fileNameDotFlat}
+		args := []string{"-Tpng", "-o" + vis.getVisualFileNamePNG(suffix), fileNameDotFlat}
+		// args := []string{"-Tpng", "-Kfdp", "-o" + vis.getVisualFileNamePNG(suffix), fileNameDotFlat}
 		command := exec.Command(cmd, args...)
 		var outb, errb bytes.Buffer
 		command.Stdout = &outb
@@ -159,6 +272,7 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 	}
 }
 
+// Returns a color for the given user
 func getUserColor(userId string, colorForUser map[string]int, usedColors *int) int {
 	color, ok := colorForUser[userId]
 	if !ok {

@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/spf13/cobra"
 	"os"
-	"os/exec"
 )
 
 var showCmd = &cobra.Command{
@@ -36,28 +34,14 @@ var showCmdPolicy = &cobra.Command{
 	Short: "Show aptomi policy",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-	},
-}
-
-var showCmdGraph = &cobra.Command{
-	Use:   "graph",
-	Short: "Show the current allocation graph (what has been allocated and who is using what)",
-	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
-		usage := slinga.LoadServiceUsageState()
-		usage.DrawVisualAndStore()
-
-		command := exec.Command("open", []string{usage.GetVisualFileNamePNG()}...)
-		if err := command.Run(); err != nil {
-			fmt.Print("Allocations (PNG): " + usage.GetVisualFileNamePNG())
-		}
+		// TODO: implement show policy
+		fmt.Println("Not implemented")
 	},
 }
 
 func init() {
 	showCmd.AddCommand(showCmdConfig)
 	showCmd.AddCommand(showCmdPolicy)
-	showCmd.AddCommand(showCmdGraph)
 
 	RootCmd.AddCommand(showCmd)
 }

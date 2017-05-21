@@ -7,6 +7,7 @@ import (
 )
 
 var noop bool
+var show bool
 
 var policyCmd = &cobra.Command{
 	Use:   "policy",
@@ -42,10 +43,18 @@ var policyCmdApply = &cobra.Command{
 		// Process differences
 		diff := nextUsageState.CalculateDifference(&prevUsageState)
 
+		// Print on screen
 		diff.Print()
 
+		// Generate pictures, if needed
+		if show {
+			visual := slinga.NewPolicyVisualization(diff)
+			visual.DrawAndStore()
+			visual.OpenInPreview()
+		}
+
+		// Apply changes, if not noop
 		if !noop {
-			// apply changes
 			diff.Apply()
 		}
 	},
@@ -56,4 +65,5 @@ func init() {
 	RootCmd.AddCommand(policyCmd)
 
 	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
+	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 }
