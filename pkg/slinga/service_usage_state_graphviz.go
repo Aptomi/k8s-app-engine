@@ -78,10 +78,10 @@ func (usage ServiceUsageState) DrawVisualAndStore() {
 		addNodeOnce(graph, "cluster_Services", service, nil, was)
 
 		// Add box/subgraph for a given service, containing all its allocations
-		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_" + service, map[string]string{"label": "Allocations: " + service}, was)
+		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_" + service, map[string]string{"label": "Allocations for service: " + service}, was)
 
 		// Add a node with allocation
-		addNodeOnce(graph, "cluster_Service_Allocations_" + service, serviceAllocationKey, map[string]string{"label": contextAndAllocation}, was)
+		addNodeOnce(graph, "cluster_Service_Allocations_" + service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
 
 		// Add an edge from service to allocation box
 		for _, userId := range linkStruct.UserIds {
