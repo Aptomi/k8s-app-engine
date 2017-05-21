@@ -2,10 +2,10 @@ package slinga
 
 import (
 	"github.com/golang/glog"
+	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
-	"github.com/mattn/go-zglob"
 )
 
 /*

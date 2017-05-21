@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"github.com/golang/glog"
+	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"github.com/mattn/go-zglob"
 	"sort"
 )
 
@@ -15,7 +15,7 @@ import (
 type Dependency struct {
 	UserId  string
 	Service string
-	Labels map[string]string
+	Labels  map[string]string
 }
 
 type GlobalDependencies struct {

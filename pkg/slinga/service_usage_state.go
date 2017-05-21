@@ -35,9 +35,9 @@ type ResolvedLinkUsageStruct struct {
 
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
 	return ServiceUsageState{
-		Policy:        policy,
-		Dependencies:  dependencies,
-		ResolvedLinks: make(map[string]*ResolvedLinkUsageStruct),
+		Policy:               policy,
+		Dependencies:         dependencies,
+		ResolvedLinks:        make(map[string]*ResolvedLinkUsageStruct),
 		ComponentInstanceMap: make(map[string]map[string]string)}
 }
 

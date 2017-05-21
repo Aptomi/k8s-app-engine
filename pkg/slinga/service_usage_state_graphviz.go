@@ -2,14 +2,14 @@ package slinga
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/awalterschulze/gographviz"
 	"github.com/golang/glog"
 	"io/ioutil"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
-	"sort"
-	"fmt"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -200,10 +200,10 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 		addNodeOnce(graph, "cluster_Services", service, nil, was)
 
 		// Add box/subgraph for a given service, containing all its allocations
-		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_" + service, map[string]string{"label": "Allocations for service: " + service}, was)
+		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_"+service, map[string]string{"label": "Allocations for service: " + service}, was)
 
 		// Add a node with allocation
-		addNodeOnce(graph, "cluster_Service_Allocations_" + service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
+		addNodeOnce(graph, "cluster_Service_Allocations_"+service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
 
 		// Add an edge from service to allocation box
 		for _, userId := range linkStruct.UserIds {
@@ -254,7 +254,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			glog.Fatalf("Unable to execute graphviz (%s): %s %s", cmd, outb.String(), errb.String(), err)
+			glog.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
 		}
 	}
 	// Call graphviz to generate an image
@@ -267,7 +267,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			glog.Fatalf("Unable to execute graphviz (%s): %s %s", cmd, outb.String(), errb.String(), err)
+			glog.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
 		}
 	}
 }
