@@ -12,17 +12,20 @@ import (
 	This file declares all the necessary structures for Dependencies (User -> Service)
 */
 
+// Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
 type Dependency struct {
-	UserId  string
+	UserID  string
 	Service string
 	Labels  map[string]string
 }
 
+// GlobalDependencies represents the list of global dependencies (see the definition above)
 type GlobalDependencies struct {
 	// dependencies <service> -> list of dependencies
 	Dependencies map[string][]*Dependency
 }
 
+// NewGlobalDependencies creates and initializes a new empty list of global dependencies
 func NewGlobalDependencies() GlobalDependencies {
 	return GlobalDependencies{Dependencies: make(map[string][]*Dependency)}
 }
@@ -44,7 +47,7 @@ func (src GlobalDependencies) appendDependencies(ops GlobalDependencies) GlobalD
 	return result
 }
 
-// Loads dependencies from directory
+// LoadDependenciesFromDir loads all dependencies from a given directory
 func LoadDependenciesFromDir(dir string) GlobalDependencies {
 	// read all services
 	files, _ := zglob.Glob(dir + "/**/dependencies.*.yaml")
@@ -58,7 +61,7 @@ func LoadDependenciesFromDir(dir string) GlobalDependencies {
 	return r
 }
 
-// Loads dependencies from file
+// LoadDependenciesFromFile loads all dependencies from a given file
 func LoadDependenciesFromFile(filename string) GlobalDependencies {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {

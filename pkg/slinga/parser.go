@@ -12,8 +12,10 @@ import (
 	This file declares all the necessary structures for Slinga YAML file to be successfully parsed
 */
 
+// LabelOperations defines the set of label manipulations (e.g. set/remove)
 type LabelOperations map[string]map[string]string
 
+// Allocation defines within a Context for a given service
 type Allocation struct {
 	Name     string
 	Criteria []string
@@ -23,6 +25,7 @@ type Allocation struct {
 	NameResolved string
 }
 
+// Context for a given service
 type Context struct {
 	Name        string
 	Service     string
@@ -31,11 +34,13 @@ type Context struct {
 	Allocations []*Allocation
 }
 
+// Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type    string
 	Content map[string]map[string]string
 }
 
+// ServiceComponent defines component within a service
 type ServiceComponent struct {
 	Name         string
 	Service      string
@@ -44,6 +49,7 @@ type ServiceComponent struct {
 	Labels       *LabelOperations
 }
 
+// Service defines individual service
 type Service struct {
 	Name       string
 	Labels     *LabelOperations
@@ -56,12 +62,13 @@ type Service struct {
 	componentsMap map[string]*ServiceComponent
 }
 
+// Policy is a global policy object with services and contexts
 type Policy struct {
 	Services map[string]*Service
 	Contexts map[string][]*Context
 }
 
-// Loads policy from a directory
+// LoadPolicyFromDir loads policy from a directory, recursively processing all files
 func LoadPolicyFromDir(dir string) Policy {
 	s := Policy{
 		Services: make(map[string]*Service),

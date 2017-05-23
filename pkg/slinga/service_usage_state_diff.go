@@ -5,13 +5,13 @@ import (
 	"github.com/golang/glog"
 )
 
-// Attach or detach user to a service
+// ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
 type ServiceUsageUserAction struct {
 	ComponentKey string
 	User         string
 }
 
-// Difference between two usage states
+// ServiceUsageStateDiff represents a difference between two calculated usage states
 type ServiceUsageStateDiff struct {
 	// Pointers to previous and next states
 	Prev *ServiceUsageState
@@ -24,7 +24,7 @@ type ServiceUsageStateDiff struct {
 	ComponentDetachUser  []ServiceUsageUserAction
 }
 
-// Calculate difference between two usage states
+// CalculateDifference calculates difference between two given usage states
 func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *ServiceUsageStateDiff {
 	// resulting difference
 	result := &ServiceUsageStateDiff{
@@ -115,6 +115,7 @@ func (diff ServiceUsageStateDiff) isEmpty() bool {
 	return true
 }
 
+// Print method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) Print() {
 	if len(diff.ComponentInstantiate) > 0 {
 		fmt.Println("New components to instantiate:")
@@ -149,7 +150,9 @@ func (diff ServiceUsageStateDiff) Print() {
 	}
 }
 
+// Apply method applies all changes via executors and saves usage state in Aptomi DB
 func (diff ServiceUsageStateDiff) Apply() {
+	// TODO: remove
 	diff.Next.SaveServiceUsageState()
 
 	// Process destructions in the right order

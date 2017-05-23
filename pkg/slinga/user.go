@@ -12,22 +12,24 @@ import (
 	Later this will be replaced with LDAP integration
 */
 
+// User represents a user (ID, Name, set of labels)
 type User struct {
-	Id     string
+	ID     string
 	Name   string
 	Labels map[string]string
 }
 
+// GlobalUsers contains the global list of users
 type GlobalUsers struct {
 	Users map[string]User
 }
 
-// Loads users from YAML file
+// LoadUserByIDFromDir loads a given user from a given directory
 func LoadUserByIDFromDir(dir string, id string) User {
 	return LoadUsersFromDir(dir).Users[id]
 }
 
-// Loads users from YAML file
+// LoadUsersFromDir loads all users from a given directory
 func LoadUsersFromDir(dir string) GlobalUsers {
 	dat, e := ioutil.ReadFile(dir + "/users.yaml")
 	if e != nil {
@@ -40,7 +42,7 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 	}
 	r := GlobalUsers{Users: make(map[string]User)}
 	for _, u := range t {
-		r.Users[u.Id] = u
+		r.Users[u.ID] = u
 	}
 	return r
 }

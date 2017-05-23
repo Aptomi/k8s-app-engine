@@ -9,11 +9,11 @@ import (
 	Core engine for Slinga processing and evaluation
 */
 
-// Evaluates all recorded "<user> needs <service>" dependencies
+// ResolveUsage evaluates all recorded Dependencies ("<user> needs <service> with <labels>") and calculates allocations
 func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 	for serviceName, dependencies := range usage.Dependencies.Dependencies {
 		for _, d := range dependencies {
-			user := users.Users[d.UserId]
+			user := users.Users[d.UserID]
 
 			// take user labels
 			labels := user.getLabelSet()

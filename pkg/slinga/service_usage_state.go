@@ -10,7 +10,7 @@ import (
 
 const componentRootName = "root"
 
-// Service structure - who is currently using what
+// ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
 type ServiceUsageState struct {
 	// reference to a policy
 	Policy *Policy
@@ -18,7 +18,7 @@ type ServiceUsageState struct {
 	// reference to dependencies
 	Dependencies *GlobalDependencies
 
-	// resolved triples <service, context, allocation, component> -> list of users
+	// resolved triples <service, context, allocation, component> -> list of users & labels
 	ResolvedLinks map[string]*ResolvedLinkUsageStruct
 
 	// the order in which components/services have to be processed
@@ -28,11 +28,13 @@ type ServiceUsageState struct {
 	ComponentInstanceMap map[string]map[string]string
 }
 
+// ResolvedLinkUsageStruct is a usage data for a given component instance, containing list of user IDs and calculated labels
 type ResolvedLinkUsageStruct struct {
 	UserIds          []string
 	CalculatedLabels LabelSet
 }
 
+// NewServiceUsageState creates new empty ServiceUsageState
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
 	return ServiceUsageState{
 		Policy:               policy,
@@ -74,21 +76,21 @@ func (usage *ServiceUsageState) recordUsage(user User, service *Service, context
 	if _, ok := usage.ResolvedLinks[key]; !ok {
 		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
 	}
-	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.Id, labels)
+	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
 
 	return key
 }
 
 // Adds user and set of labels to the entry
-func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userId string, labelSet LabelSet) {
-	usageStruct.UserIds = append(usageStruct.UserIds, userId)
+func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID string, labelSet LabelSet) {
+	usageStruct.UserIds = append(usageStruct.UserIds, userID)
 
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
 	usageStruct.CalculatedLabels = labelSet
 }
 
-// Stores usage state in a file
+// LoadServiceUsageState loads usage state from a file under Aptomi DB
 func LoadServiceUsageState() ServiceUsageState {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 
@@ -112,7 +114,7 @@ func LoadServiceUsageState() ServiceUsageState {
 	return t
 }
 
-// Stores usage state in a file
+// SaveServiceUsageState stores usage state in a file under Aptomi DB
 func (usage ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)

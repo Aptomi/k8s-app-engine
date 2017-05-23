@@ -7,17 +7,14 @@ import (
 	"strings"
 )
 
+// HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
 	Code *Code
 }
 
-func HelmName(str string) string {
-	r := strings.NewReplacer("#", "-", "_", "-")
-	return r.Replace(str)
-}
-
+// Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (executor HelmCodeExecutor) Install(key string, labels LabelSet) error {
-	uid := HelmName(key)
+	uid := helmName(key)
 	content, err := executor.Code.processCodeContent(labels)
 	if err != nil {
 		return err
@@ -50,14 +47,22 @@ func (executor HelmCodeExecutor) Install(key string, labels LabelSet) error {
 	return runHelmCmd(helmArgs...)
 }
 
+// Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
 func (executor HelmCodeExecutor) Update(key string, labels LabelSet) error {
+	// TODO: implement update method
 	return nil
 }
 
+// Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
 func (executor HelmCodeExecutor) Destroy(key string) error {
-	uid := HelmName(key)
+	uid := helmName(key)
 
 	return runHelmCmd("delete", "--purge", uid)
+}
+
+func helmName(str string) string {
+	r := strings.NewReplacer("#", "-", "_", "-")
+	return r.Replace(str)
 }
 
 func runHelmCmd(helmArgs ...string) error {

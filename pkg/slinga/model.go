@@ -11,7 +11,7 @@ import (
 	This file declares all utility structures and methods required for Slinga processing
 */
 
-// Set of labels that will be manipulated
+// LabelSet defines the set of labels that will be manipulated
 type LabelSet struct {
 	Labels map[string]string
 }
@@ -37,7 +37,7 @@ func (src *LabelSet) applyTransform(ops *LabelOperations) LabelSet {
 		}
 
 		// remove labels
-		for k, _ := range (*ops)["remove"] {
+		for k := range (*ops)["remove"] {
 			delete(result.Labels, k)
 		}
 	}

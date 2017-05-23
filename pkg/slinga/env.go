@@ -17,12 +17,12 @@ func getAptomiEnvVarAsDir(key string) string {
 	return value
 }
 
-// Return aptomi DB directory
+// GetAptomiDBDir returns Aptomi DB directory
 func GetAptomiDBDir() string {
 	return getAptomiEnvVarAsDir("APTOMI_DB")
 }
 
-// Return aptomi policy directory
+// GetAptomiPolicyDir returns Aptomi Policy directory
 func GetAptomiPolicyDir() string {
 	return getAptomiEnvVarAsDir("APTOMI_POLICY")
 }

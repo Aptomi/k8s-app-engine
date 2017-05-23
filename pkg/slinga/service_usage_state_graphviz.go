@@ -13,20 +13,21 @@ import (
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
+const noEntriesNodeName = "No entries"
 const colorScheme = "set19"
 const colorCount = 9
 
-// Visualization for the policy
+// PolicyVisualization accepts diff and defines additional methods for visualizing the policy
 type PolicyVisualization struct {
 	diff *ServiceUsageStateDiff
 }
 
-// Policy visualization object
+// NewPolicyVisualization creates new policy visualization object, given a usage state difference
 func NewPolicyVisualization(diff *ServiceUsageStateDiff) PolicyVisualization {
 	return PolicyVisualization{diff: diff}
 }
 
-// Draws and stores both pictures
+// DrawAndStore draws and stores several pictures (current, prev, and delta)
 func (vis PolicyVisualization) DrawAndStore() {
 	// Draw & save resulting state
 	nextGraph := vis.diff.Next.DrawVisualAndStore("complete")
@@ -41,12 +42,12 @@ func (vis PolicyVisualization) DrawAndStore() {
 	vis.saveGraph("delta", deltaGraph)
 }
 
-// Opens a picture
+// OpenInPreview opens a picture in preview
 func (vis PolicyVisualization) OpenInPreview() {
 	vis.OpenInPreviewWithSuffix("delta")
 }
 
-// Opens a picture, given a suffix
+// OpenInPreviewWithSuffix opens a picture in preview, given a suffix
 func (vis PolicyVisualization) OpenInPreviewWithSuffix(suffix string) {
 	fileName := vis.getVisualFileNamePNG(suffix)
 	command := exec.Command("open", []string{fileName}...)
@@ -55,9 +56,10 @@ func (vis PolicyVisualization) OpenInPreviewWithSuffix(suffix string) {
 	}
 }
 
-// Calculates delta between two graphs (it actually modifies "next" graph)
-// TODO: deal with escape bulshit
+// Delta calculates difference between two graphs and returns it as a graph (it also modifies <next> to represent that difference)
 func (vis PolicyVisualization) Delta(prev *gographviz.Escape, next *gographviz.Escape) *gographviz.Escape {
+	// TODO: deal with escape bulshit
+	// TODO: we are modifying next while iterating. can this cause any issues?
 	// New nodes, edges, subgraphs must be highlighted
 	{
 		for _, s := range next.SubGraphs.SubGraphs {
@@ -92,15 +94,19 @@ func (vis PolicyVisualization) Delta(prev *gographviz.Escape, next *gographviz.E
 
 		for _, n := range prev.Nodes.Nodes {
 			if _, inNext := next.Nodes.Lookup[n.Name]; !inNext {
-				// Removed node -> add a node filled red
-				n.Attrs.Add("style", "filled")
-				n.Attrs.Add("color", "red")
 
-				// Find previous subgraph & put it into the same subgraph
-				subgraphName := vis.findSubraphName(prev, n.Name)
-				next.Relations.Add(subgraphName, n.Name)
+				// if the previous graph was empty and contained just one "empty" node, don't show it on delta
+				if !strings.Contains(n.Name, noEntriesNodeName) {
+					// Removed node -> add a node filled red
+					n.Attrs.Add("style", "filled")
+					n.Attrs.Add("color", "red")
 
-				next.Nodes.Add(n)
+					// Find previous subgraph & put it into the same subgraph
+					subgraphName := vis.findSubraphName(prev, n.Name)
+					next.Relations.Add(subgraphName, n.Name)
+
+					next.Nodes.Add(n)
+				}
 			}
 		}
 		for _, e := range prev.Edges.Edges {
@@ -130,7 +136,7 @@ func (vis PolicyVisualization) getVisualFileNamePNG(suffix string) string {
 	return GetAptomiDBDir() + "/" + "graph_" + suffix + ".png"
 }
 
-// Stores usage state visual into a file
+// DrawVisualAndStore writes usage state visual into a file
 func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Escape {
 	users := LoadUsersFromDir(GetAptomiPolicyDir())
 
@@ -160,11 +166,11 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 
 			// For every user who has a dependency on this service
 			for _, d := range dependencies {
-				color := getUserColor(d.UserId, colorForUser, &usedColors)
+				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := users.Users[d.UserId]
-				label := "Name: " + user.Name + " (" + user.Id + ")"
+				user := users.Users[d.UserID]
+				label := "Name: " + user.Name + " (" + user.ID + ")"
 				var keys []string
 				for k := range user.Labels {
 					keys = append(keys, k)
@@ -173,10 +179,10 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 				for _, k := range keys {
 					label += "\n" + k + " = " + user.Labels[k]
 				}
-				addNodeOnce(graph, "cluster_Users", d.UserId, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
+				addNodeOnce(graph, "cluster_Users", d.UserID, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
 				// Add an edge from user to a service
-				addEdge(graph, d.UserId, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+				addEdge(graph, d.UserID, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 			}
 		}
 	}
@@ -206,8 +212,8 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 		addNodeOnce(graph, "cluster_Service_Allocations_"+service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
 
 		// Add an edge from service to allocation box
-		for _, userId := range linkStruct.UserIds {
-			color := getUserColor(userId, colorForUser, &usedColors)
+		for _, userID := range linkStruct.UserIds {
+			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, service, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
@@ -231,7 +237,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 			}
 		}
 	} else {
-		addNodeOnce(graph, "", "No entries", nil, was)
+		addNodeOnce(graph, "", noEntriesNodeName, nil, was)
 	}
 
 	return graph
@@ -273,15 +279,15 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 }
 
 // Returns a color for the given user
-func getUserColor(userId string, colorForUser map[string]int, usedColors *int) int {
-	color, ok := colorForUser[userId]
+func getUserColor(userID string, colorForUser map[string]int, usedColors *int) int {
+	color, ok := colorForUser[userID]
 	if !ok {
 		*usedColors++
 		if *usedColors > colorCount {
 			*usedColors = 1
 		}
 		color = *usedColors
-		colorForUser[userId] = color
+		colorForUser[userID] = color
 	}
 	return color
 }
