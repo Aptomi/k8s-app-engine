@@ -3,6 +3,7 @@ package slinga
 import (
 	"fmt"
 	"github.com/golang/glog"
+	"strings"
 )
 
 // ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
@@ -285,7 +286,8 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
+			serviceName, contextName, allocationName, componentName := parseServiceUsageKey(key)
+			serviceKey := strings.Join([]string{serviceName, contextName, allocationName, "root"}, "#")
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 			labels := diff.Next.ResolvedLinks[key].CalculatedLabels
 
@@ -300,7 +302,11 @@ func (diff ServiceUsageStateDiff) Apply() {
 					if err != nil {
 						glog.Fatal("Error while getting codeExecutor")
 					}
-					codeExecutor.Install(key, labels)
+					dependencies := diff.Next.ComponentInstanceMap[serviceKey]
+					err = codeExecutor.Install(key, labels, dependencies)
+					if err != nil {
+						glog.Fatal("Failed install", err)
+					}
 				}
 			}
 		}
