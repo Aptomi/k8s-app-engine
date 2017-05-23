@@ -26,6 +26,9 @@ type ServiceUsageState struct {
 
 	// map from service instance key to map from component name to component instance key
 	ComponentInstanceMap map[string]map[string]string
+
+	// tracing - gets populated with detailed debug information if tracing is requested
+	tracing *ServiceUsageTracing
 }
 
 // ResolvedLinkUsageStruct is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -40,7 +43,8 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) Serv
 		Policy:               policy,
 		Dependencies:         dependencies,
 		ResolvedLinks:        make(map[string]*ResolvedLinkUsageStruct),
-		ComponentInstanceMap: make(map[string]map[string]string)}
+		ComponentInstanceMap: make(map[string]map[string]string),
+		tracing:              NewServiceUsageTracing()}
 }
 
 // Create key for the map

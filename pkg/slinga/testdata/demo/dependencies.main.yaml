@@ -14,3 +14,4 @@
 
 - userid: 5
   service: analytics-pipeline
+  trace: true

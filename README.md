@@ -109,13 +109,15 @@ Processing flow:
 
 1. [Done - RA] add labels to dependencies
 2. [Done - RA] recursively process folders when loading policy
-3. [RA] dry run
+3. [Done - RA] dry run (via 'trace' attribute)
 4. [SL] service discovery
 5. [RA or SL] add a mode to print Helm commands instead of executing them
 6. [SL] support for multiple k8s clusters
 7. [SL] support deployment of specific versions, as well as
    deploy "latest" (or matching by regex) from docker registry
 8. [Done - RA] more compact visualization
+
+9. We can consider adding "tests for DevOps" (smart tracing)
 
 ## Demo scenario:
 
