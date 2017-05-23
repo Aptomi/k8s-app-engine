@@ -24,7 +24,8 @@ components:
           name: boston-summit-charts/kafka
         params:
           antiAffinity: soft
-          zookeeper: zk-{{ .Dependencies.zookeeper }}
+          zookeeper.deployChart: false
+          zookeeper.externalAddress: zk-{{ .Dependencies.zookeeper }}-0.zk-{{ .Dependencies.zookeeper }}:2181,zk-{{ .Dependencies.zookeeper }}-1.zk-{{ .Dependencies.zookeeper }}:2181,zk-{{ .Dependencies.zookeeper }}-2.zk-{{ .Dependencies.zookeeper }}:2181
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
