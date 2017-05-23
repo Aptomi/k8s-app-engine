@@ -17,6 +17,9 @@ type Dependency struct {
 	UserID  string
 	Service string
 	Labels  map[string]string
+
+	// This field is populated when dependency gets resolved
+	ResolvesTo string
 }
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)

@@ -22,17 +22,21 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 			labels = labels.addLabels(d.getLabelSet())
 
 			// resolve usage via applying policy
-			err := usage.resolveWithLabels(user, serviceName, labels)
+			resKey, err := usage.resolveWithLabels(user, serviceName, labels)
 			if err != nil {
 				return err
 			}
+			d.ResolvesTo = resKey
 		}
 	}
 	return nil
 }
 
 // Evaluate "<user> needs <service>" statement
-func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet) error {
+func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet) (string, error) {
+
+	// Resolving allocations for service
+	glog.Infof("Resolving allocations for service %s (user = %s, labels = %s)", serviceName, user.Name, labels)
 
 	// Policy
 	policy := usage.Policy
@@ -40,17 +44,17 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Locate the service
 	service, err := policy.getService(serviceName)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Match the context
 	context, err := policy.getMatchedContext(*service, user, labels)
 	if err != nil {
-		return err
+		return "", err
 	}
 	// If no matching context is found, let's just exit
 	if context == nil {
-		return nil
+		return "", nil
 	}
 
 	// Process context and transform labels
@@ -59,11 +63,11 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Match the allocation
 	allocation, err := policy.getMatchedAllocation(*service, user, *context, labels)
 	if err != nil {
-		return err
+		return "", err
 	}
 	// If no matching allocation is found, let's just exit
 	if allocation == nil {
-		return nil
+		return "", nil
 	}
 
 	// Process allocation and transform labels
@@ -72,7 +76,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Now, sort all components in topological order
 	componentsOrdered, err := service.getComponentsSortedTopologically()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	componentDepMap := make(map[string]string)
@@ -84,12 +88,12 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 
 		// Is it a code?
 		if component.Code != nil {
-			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
+			// glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
 		} else if component.Service != "" {
 			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
-			err := usage.resolveWithLabels(user, component.Service, componentLabels)
+			_, err := usage.resolveWithLabels(user, component.Service, componentLabels)
 			if err != nil {
-				return err
+				return "", err
 			}
 		} else {
 			glog.Fatalf("Invalid component: %s (in %s)", component.Name, service.Name)
@@ -105,7 +109,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 
 	usage.ComponentInstanceMap[serviceKey] = componentDepMap
 
-	return nil
+	return context.Name + "#" + allocation.NameResolved, nil
 }
 
 // Topologically sort components and return true if there is a cycle detected

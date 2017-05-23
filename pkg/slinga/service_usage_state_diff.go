@@ -22,6 +22,8 @@ type ServiceUsageStateDiff struct {
 	ComponentDestruct    map[string]bool
 	ComponentAttachUser  []ServiceUsageUserAction
 	ComponentDetachUser  []ServiceUsageUserAction
+
+	// High-level generated text for the diff
 }
 
 // CalculateDifference calculates difference between two given usage states
@@ -33,21 +35,115 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 		ComponentInstantiate: make(map[string]bool),
 		ComponentDestruct:    make(map[string]bool)}
 
+	result.calculateDifferenceOnComponentLevel()
+
+	return result
+}
+
+// On a service level -- see which keys appear and disappear
+func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel() {
+
+	// High-level service resolutions in prev
+	pMap := make(map[string]map[string]string)
+	if result.Prev.Dependencies != nil {
+		for _, deps := range result.Prev.Dependencies.Dependencies {
+			for _, d := range deps {
+				if pMap[d.UserID] == nil {
+					pMap[d.UserID] = make(map[string]string)
+				}
+				pMap[d.UserID][d.Service] = d.ResolvesTo
+			}
+		}
+	}
+
+	// High-level service resolutions in next
+	cMap := make(map[string]map[string]string)
+	for _, deps := range result.Next.Dependencies.Dependencies {
+		for _, d := range deps {
+			if cMap[d.UserID] == nil {
+				cMap[d.UserID] = make(map[string]string)
+			}
+			cMap[d.UserID][d.Service] = d.ResolvesTo
+		}
+	}
+
+	// map of all user keys
+	uKeys := make(map[string]bool)
+	for k := range pMap {
+		uKeys[k] = true
+	}
+	for k := range cMap {
+		uKeys[k] = true
+	}
+
+	// Printable description
+	textMap := make(map[string][]string)
+
+	// Go over all users
+	for userID := range uKeys {
+		sPrev := pMap[userID]
+		sNext := cMap[userID]
+
+		// merge all the service keys
+		sKeys := make(map[string]bool)
+		for s := range sPrev {
+			sKeys[s] = true
+		}
+		for s := range sNext {
+			sKeys[s] = true
+		}
+
+		// Process all additions
+		for s := range sKeys {
+			_, inPrev := sPrev[s]
+			_, inNext := sNext[s]
+			if !inPrev && inNext {
+				textMap[userID] = append(textMap[userID], fmt.Sprintf("[+] %s (%s)", s, cMap[userID][s]))
+			}
+		}
+
+		// Process all deletions
+		for s := range sKeys {
+			_, inPrev := sPrev[s]
+			_, inNext := sNext[s]
+			if inPrev && !inNext {
+				textMap[userID] = append(textMap[userID], fmt.Sprintf("[-] %s", s))
+			}
+		}
+	}
+
+	// Print
+	printed := false
+	for userID, sKeys := range textMap {
+		user := LoadUserByIDFromDir(GetAptomiPolicyDir(), userID)
+		fmt.Printf("%s (ID=%s)\n", user.Name, user.ID)
+		for _, s := range sKeys {
+			fmt.Printf("  %s\n", s)
+		}
+		printed = true
+	}
+
+	if (!printed) {
+		fmt.Println("[*] No changes")
+	}
+}
+
+// On a component level -- see which allocation keys appear and disappear
+func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	// map of all instances
 	allKeys := make(map[string]bool)
 
 	// merge all the keys
-	for k := range prev.ResolvedLinks {
+	for k := range result.Prev.ResolvedLinks {
 		allKeys[k] = true
 	}
-	for k := range next.ResolvedLinks {
+	for k := range result.Next.ResolvedLinks {
 		allKeys[k] = true
 	}
-
-	// go over all the keys and see which one appear and which one disappear
+	// Go over all the keys and see which one appear and which one disappear
 	for k := range allKeys {
-		uPrev := prev.ResolvedLinks[k]
-		uNext := next.ResolvedLinks[k]
+		uPrev := result.Prev.ResolvedLinks[k]
+		uNext := result.Next.ResolvedLinks[k]
 
 		var userIdsPrev []string
 		if uPrev != nil {
@@ -87,8 +183,6 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 			}
 		}
 	}
-
-	return result
 }
 
 func toMap(p []string) map[string]bool {
@@ -99,6 +193,7 @@ func toMap(p []string) map[string]bool {
 	return result
 }
 
+/*
 func (diff ServiceUsageStateDiff) isEmpty() bool {
 	if len(diff.ComponentInstantiate) > 0 {
 		return false
@@ -114,13 +209,18 @@ func (diff ServiceUsageStateDiff) isEmpty() bool {
 	}
 	return true
 }
+*/
 
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) Print() {
+	/*
 	if len(diff.ComponentInstantiate) > 0 {
-		fmt.Println("New components to instantiate:")
+		fmt.Println("New services to instantiate:")
 		for k := range diff.ComponentInstantiate {
-			fmt.Println("[+] " + k)
+			_, _, _, componentName := parseServiceUsageKey(k)
+			if componentName == componentRootName {
+				fmt.Println("[+] " + k)
+			}
 		}
 	}
 
@@ -148,6 +248,9 @@ func (diff ServiceUsageStateDiff) Print() {
 	if diff.isEmpty() {
 		fmt.Println("[*] No changes to apply")
 	}
+	*/
+
+	diff.printDifferenceOnServicesLevel();
 }
 
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
@@ -159,7 +262,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Prev.ProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				glog.Infof("Destructing service: %s", serviceName)
@@ -182,7 +285,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 			labels := diff.Next.ResolvedLinks[key].CalculatedLabels
 
