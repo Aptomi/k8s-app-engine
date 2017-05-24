@@ -1,0 +1,50 @@
+# Definition of Twitter Analytics service
+name: twitter-stats
+
+components:
+
+  - name: analytics-pipeline
+    service: analytics-pipeline
+
+  - name: tweepub
+    code:
+      type: aptomi/code/kubernetes-helm
+      content:
+        chart:
+          name: boston-summit-charts/tweepub
+        params:
+          kafka.externalAddress: kafka-{{ .Dependencies.kafka }}
+          kafka.topic: tweepub_{{ .User.Name }}
+          twitter.appKey:
+          twitter.appSecret:
+          twitter.tokenKey:
+          twitter.tokenSecret:
+    dependencies:
+      - analytics-pipeline
+
+  - name: tweetics
+    code:
+      type: aptomi/code/kubernetes-helm
+      content:
+        chart:
+          name: boston-summit-charts/tweetics
+        params:
+          spark.externalAddress: spark-{{ .Dependencies.spark }}
+          zookeeper.externalAddress: zk-{{ .Dependencies.zookeeper }}
+          kafka.topic: tweepub_{{ .User.Name }}
+          hdfs.externalAddress: hdfs://hdfs-namenode:8020/tweepub_{{ .User.Name }}
+          hdfs.path: tweepub_{{ .User.Name }}
+    dependencies:
+      - analytics-pipeline
+
+  - name: tweeviz
+    code:
+      type: aptomi/code/kubernetes-helm
+      content:
+        chart:
+          name: boston-summit-charts/tweeviz
+        params:
+          hdfs.externalAddress: hdfs://hdfs-namenode:8020/tweepub_{{ .User.Name }}
+          hdfs.path: tweepub_{{ .User.Name }}
+    dependencies:
+      - analytics-pipeline

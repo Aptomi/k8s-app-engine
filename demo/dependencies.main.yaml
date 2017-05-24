@@ -1,17 +1,17 @@
 - userid: 1
-  service: analytics-pipeline
+  service: twitter-stats
 
 - userid: 2
-  service: analytics-pipeline
+  service: twitter-stats
   labels:
     important: yes
 
 - userid: 3
-  service: analytics-pipeline
+  service: twitter-stats
 
 - userid: 4
-  service: analytics-pipeline
+  service: twitter-stats
 
 - userid: 5
-  service: analytics-pipeline
+  service: twitter-stats
   trace: true

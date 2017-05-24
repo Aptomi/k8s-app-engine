@@ -1,0 +1,12 @@
+name: personal
+
+service: twitter-stats
+
+criteria:
+  - dev == "yes" || prod == "yes" || qa == "yes"
+
+allocations:
+
+  - name: team-{{ .User.Name }}
+    criteria:
+      - "true"
