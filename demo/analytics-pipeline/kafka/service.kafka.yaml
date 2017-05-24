@@ -25,7 +25,7 @@ components:
         params:
           antiAffinity: soft
           zookeeper.deployChart: false
-          zookeeper.externalAddress: zk-{{ .Dependencies.zookeeper }}-0.zk-{{ .Dependencies.zookeeper }}:2181,zk-{{ .Dependencies.zookeeper }}-1.zk-{{ .Dependencies.zookeeper }}:2181,zk-{{ .Dependencies.zookeeper }}-2.zk-{{ .Dependencies.zookeeper }}:2181
+          zookeeper.externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181,zk-{{ .Components.zookeeper.zookeeper }}-1.zk-{{ .Components.zookeeper.zookeeper }}:2181,zk-{{ .Components.zookeeper.zookeeper }}-2.zk-{{ .Components.zookeeper.zookeeper }}:2181
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

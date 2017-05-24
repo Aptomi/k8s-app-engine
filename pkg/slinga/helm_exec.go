@@ -18,13 +18,8 @@ func HelmName(str string) string {
 }
 
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
-func (executor HelmCodeExecutor) Install(key string, labels LabelSet, dependencies map[string]string) error {
+func (executor HelmCodeExecutor) Install(key string, content map[string]map[string]string) error {
 	uid := HelmName(key)
-
-	content, err := executor.Code.processCodeContent(labels, dependencies)
-	if err != nil {
-		return err
-	}
 
 	chartName := content["chart"]["name"]
 

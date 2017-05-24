@@ -3,7 +3,6 @@ package slinga
 import (
 	"fmt"
 	"github.com/golang/glog"
-	"strings"
 )
 
 // ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
@@ -194,24 +193,6 @@ func toMap(p []string) map[string]bool {
 	return result
 }
 
-/*
-func (diff ServiceUsageStateDiff) isEmpty() bool {
-	if len(diff.ComponentInstantiate) > 0 {
-		return false
-	}
-	if len(diff.ComponentAttachUser) > 0 {
-		return false
-	}
-	if len(diff.ComponentDetachUser) > 0 {
-		return false
-	}
-	if len(diff.ComponentDestruct) > 0 {
-		return false
-	}
-	return true
-}
-*/
-
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) Print() {
 	/*
@@ -245,10 +226,6 @@ func (diff ServiceUsageStateDiff) Print() {
 				fmt.Println("[-] " + k)
 			}
 		}
-
-		if diff.isEmpty() {
-			fmt.Println("[*] No changes to apply")
-		}
 	*/
 
 	diff.printDifferenceOnServicesLevel()
@@ -263,7 +240,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Prev.ProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				glog.Infof("Destructing service: %s", serviceName)
@@ -286,10 +263,8 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
-			serviceName, contextName, allocationName, componentName := parseServiceUsageKey(key)
-			serviceKey := strings.Join([]string{serviceName, contextName, allocationName, "root"}, "#")
+			serviceName, _, _, componentName := parseServiceUsageKey(key)
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
-			labels := diff.Next.ResolvedLinks[key].CalculatedLabels
 
 			if component == nil {
 				glog.Infof("Instantiating service: %s (%s)", serviceName, key)
@@ -302,8 +277,8 @@ func (diff ServiceUsageStateDiff) Apply() {
 					if err != nil {
 						glog.Fatal("Error while getting codeExecutor")
 					}
-					dependencies := diff.Next.ComponentInstanceMap[serviceKey]
-					err = codeExecutor.Install(key, labels, dependencies)
+
+					err = codeExecutor.Install(key, diff.Next.ResolvedLinks[key].CalculatedCodeContent)
 					if err != nil {
 						glog.Fatal("Failed install", err)
 					}

@@ -6,7 +6,7 @@ type FakeCodeExecutor struct {
 }
 
 // Install for FakeCodeExecutor does nothing
-func (executor FakeCodeExecutor) Install(key string, labels LabelSet, dependencies map[string]string) error {
+func (executor FakeCodeExecutor) Install(key string, codeContent map[string]map[string]string) error {
 	return nil
 }
 

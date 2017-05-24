@@ -1,16 +1,20 @@
 - userid: 1
   service: twitter-stats
+  trace: true
 
 - userid: 2
   service: twitter-stats
   labels:
     important: yes
+  trace: true
 
 - userid: 3
   service: twitter-stats
+  trace: true
 
 - userid: 4
   service: twitter-stats
+  trace: true
 
 - userid: 5
   service: twitter-stats

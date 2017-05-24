@@ -24,7 +24,7 @@ components:
           name: boston-summit-charts/spark
         params:
           antiAffinity: soft
-          zookeeper: zk-{{ .Dependencies.zookeeper }}
+          zookeeper: zk-{{ .Components.zookeeper.zookeeper }}
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

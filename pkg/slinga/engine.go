@@ -3,6 +3,9 @@ package slinga
 import (
 	"errors"
 	"github.com/golang/glog"
+	"bytes"
+	"strings"
+	"text/template"
 )
 
 /*
@@ -22,7 +25,7 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 			labels = labels.addLabels(d.getLabelSet())
 
 			// resolve usage via applying policy
-			resKey, err := usage.resolveWithLabels(user, serviceName, labels, d.Trace, 0)
+			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.ComponentInstanceMap, d.Trace, 0)
 			if err != nil {
 				return err
 			}
@@ -33,7 +36,7 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 }
 
 // Evaluate "<user> needs <service>" statement
-func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet, trace bool, depth int) (string, error) {
+func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet, cim map[string]interface{}, trace bool, depth int) (string, error) {
 
 	// Resolving allocations for service
 	glog.Infof("Resolving allocations for service %s (user = %s, labels = %s)", serviceName, user.Name, labels)
@@ -97,21 +100,30 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		return "", err
 	}
 
-	componentDepMap := make(map[string]string)
-
 	// Resolve every component
 	for _, component := range componentsOrdered {
 		// Process component and transform labels
 		componentLabels := labels.applyTransform(component.Labels)
 
 		// Is it a code?
+		var codeContent map[string]map[string]string
 		if component.Code != nil {
-			// glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
+			// Evaluate code params
+			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
+			codeContent, err = component.processCodeContent(componentLabels, user, cim, depth, usage.tracing.do(trace))
+			if err != nil {
+				return "", err
+			}
+
 		} else if component.Service != "" {
 			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
 			usage.tracing.do(trace).newline()
 
-			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, trace, depth+1)
+			// Create new map with resolution keys for component
+			cimComponent := make(map[string]interface{})
+			cim[component.Name] = cimComponent
+
+			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, trace, depth+1)
 			if err != nil {
 				return "", err
 			}
@@ -120,14 +132,16 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels)
-		componentDepMap[component.Name] = componentKey
+		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels, codeContent)
+
+		// Record component key in cim, if it's code
+		if component.Code != nil {
+			cim[component.Name] = componentKey
+		}
 	}
 
 	// Record usage of a given service
-	serviceKey := usage.recordUsage(user, service, context, allocation, nil, labels)
-
-	usage.ComponentInstanceMap[serviceKey] = componentDepMap
+	usage.recordUsage(user, service, context, allocation, nil, labels, nil)
 
 	return context.Name + "#" + allocation.NameResolved, nil
 }
@@ -250,4 +264,55 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	}
 
 	return allocationMatched, nil
+}
+
+func (component *ServiceComponent) processCodeContent(labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (map[string]map[string]string, error) {
+	tracing.log(depth+1, "Component: %s (code)", component.Name)
+
+	result := make(map[string]map[string]string)
+	for section, params := range component.Code.Content {
+		result[section] = make(map[string]string)
+		for key, value := range params {
+			evaluatedValue, err := evaluateCodeParamTemplate(value, labels, user, cim)
+			tracing.log(depth+2, "Parameter '%s': %s", value, evaluatedValue)
+			if err != nil {
+				return nil, err
+			}
+
+			result[section][key] = evaluatedValue
+		}
+	}
+	return result, nil
+}
+
+func evaluateCodeParamTemplate(templateStr string, labels LabelSet, user User, cim map[string]interface{}) (string, error) {
+	type Parameters struct {
+		Labels     map[string]string
+		User       User
+		Components map[string]interface{}
+	}
+	param := Parameters{
+		Labels:     labels.Labels,
+		Components: cim,
+		User:       user}
+
+	tmpl, err := template.New("").Parse(templateStr)
+	if err != nil {
+		return "", errors.New("Invalid template " + templateStr)
+	}
+
+	var doc bytes.Buffer
+	err = tmpl.Execute(&doc, param)
+
+	if err != nil {
+		return "", errors.New("Cannot evaluate template " + templateStr)
+	}
+
+	result := doc.String()
+	if strings.Contains(result, "<no value>") {
+		return "", errors.New("Cannot evaluate template " + templateStr)
+	}
+
+	// TODO: remove this ugly shit later (should not reference Helm in generic engine)
+	return HelmName(doc.String()), nil
 }

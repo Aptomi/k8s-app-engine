@@ -1,5 +1,5 @@
 # Definition of Analytics Pipeline service
-name: analytics-pipeline
+name: analytics_pipeline
 
 labels:
   set:

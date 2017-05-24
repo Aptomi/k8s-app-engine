@@ -136,3 +136,10 @@ Processing flow:
 
 5. U2 gets marked as "untrusted"
    - loses access to his "prod"
+
+## Bad stuff:
+
+1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
+
+2. Two users -> same service instance -> relies on different component instances. E.g. two users, single twitter-stats, two kafkas. Invalid case?
+

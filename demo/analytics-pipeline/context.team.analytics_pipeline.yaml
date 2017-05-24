@@ -1,6 +1,6 @@
 name: team
 
-service: analytics-pipeline
+service: analytics_pipeline
 
 criteria:
   - dev == "yes" || prod == "yes" || qa == "yes"

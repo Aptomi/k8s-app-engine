@@ -3,8 +3,8 @@ name: twitter-stats
 
 components:
 
-  - name: analytics-pipeline
-    service: analytics-pipeline
+  - name: analytics_pipeline
+    service: analytics_pipeline
 
   - name: tweepub
     code:
@@ -13,14 +13,14 @@ components:
         chart:
           name: boston-summit-charts/tweepub
         params:
-          kafka.externalAddress: kafka-{{ .Dependencies.kafka }}
+          kafka.externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}
           kafka.topic: tweepub_{{ .User.Name }}
           twitter.appKey:
           twitter.appSecret:
           twitter.tokenKey:
           twitter.tokenSecret:
     dependencies:
-      - analytics-pipeline
+      - analytics_pipeline
 
   - name: tweetics
     code:
@@ -29,13 +29,13 @@ components:
         chart:
           name: boston-summit-charts/tweetics
         params:
-          spark.externalAddress: spark-{{ .Dependencies.spark }}
-          zookeeper.externalAddress: zk-{{ .Dependencies.zookeeper }}
+          spark.externalAddress: spark-{{ .Components.analytics_pipeline.spark.spark }}
+          zookeeper.externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}
           kafka.topic: tweepub_{{ .User.Name }}
           hdfs.externalAddress: hdfs://hdfs-namenode:8020/tweepub_{{ .User.Name }}
           hdfs.path: tweepub_{{ .User.Name }}
     dependencies:
-      - analytics-pipeline
+      - analytics_pipeline
 
   - name: tweeviz
     code:
@@ -47,4 +47,4 @@ components:
           hdfs.externalAddress: hdfs://hdfs-namenode:8020/tweepub_{{ .User.Name }}
           hdfs.path: tweepub_{{ .User.Name }}
     dependencies:
-      - analytics-pipeline
+      - analytics_pipeline

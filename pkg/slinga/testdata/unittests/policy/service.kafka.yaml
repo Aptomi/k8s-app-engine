@@ -15,17 +15,13 @@ components:
       remove:
         a:
         b:
-    dependencies:
-      - component2
-      - component3
 
   - name: component2
     code:
       type: aptomi/code/unittests
       content:
-        metadata:
-          service: kafka
-          component: component2
+        params:
+          address: "{{ .Components.component1.component2 }}"
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -33,7 +29,7 @@ components:
         a:
         b:
     dependencies:
-      - component3
+      - component1
 
   - name: component3
     code:
@@ -48,3 +44,5 @@ components:
       remove:
         a:
         b:
+    dependencies:
+      - component2

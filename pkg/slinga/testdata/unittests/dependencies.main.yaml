@@ -1,5 +1,6 @@
 - userid: 1
   service: kafka
+  trace: true
 
 - userid: 2
   service: kafka
