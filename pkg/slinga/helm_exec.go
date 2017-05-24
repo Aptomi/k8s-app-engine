@@ -61,7 +61,7 @@ func (executor HelmCodeExecutor) Update(key string, labels LabelSet) error {
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
 func (executor HelmCodeExecutor) Destroy(key string) error {
-	uid := helmName(key)
+	uid := HelmName(key)
 
 	return runHelmCmd("delete", "--purge", uid)
 }
