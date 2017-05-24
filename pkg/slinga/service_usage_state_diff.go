@@ -124,7 +124,7 @@ func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel() {
 		printed = true
 	}
 
-	if (!printed) {
+	if !printed {
 		fmt.Println("[*] No changes")
 	}
 }
@@ -215,43 +215,43 @@ func (diff ServiceUsageStateDiff) isEmpty() bool {
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) Print() {
 	/*
-	if len(diff.ComponentInstantiate) > 0 {
-		fmt.Println("New services to instantiate:")
-		for k := range diff.ComponentInstantiate {
-			_, _, _, componentName := parseServiceUsageKey(k)
-			if componentName == componentRootName {
-				fmt.Println("[+] " + k)
+		if len(diff.ComponentInstantiate) > 0 {
+			fmt.Println("New services to instantiate:")
+			for k := range diff.ComponentInstantiate {
+				_, _, _, componentName := parseServiceUsageKey(k)
+				if componentName == componentRootName {
+					fmt.Println("[+] " + k)
+				}
 			}
 		}
-	}
 
-	if len(diff.ComponentAttachUser) > 0 {
-		fmt.Println("Add users to components:")
-		for _, cu := range diff.ComponentAttachUser {
-			fmt.Println("[+] " + cu.User + " -> " + cu.ComponentKey)
+		if len(diff.ComponentAttachUser) > 0 {
+			fmt.Println("Add users to components:")
+			for _, cu := range diff.ComponentAttachUser {
+				fmt.Println("[+] " + cu.User + " -> " + cu.ComponentKey)
+			}
 		}
-	}
 
-	if len(diff.ComponentDetachUser) > 0 {
-		fmt.Println("Delete users from components:")
-		for _, cu := range diff.ComponentDetachUser {
-			fmt.Println("[-] " + cu.User + " -> " + cu.ComponentKey)
+		if len(diff.ComponentDetachUser) > 0 {
+			fmt.Println("Delete users from components:")
+			for _, cu := range diff.ComponentDetachUser {
+				fmt.Println("[-] " + cu.User + " -> " + cu.ComponentKey)
+			}
 		}
-	}
 
-	if len(diff.ComponentDestruct) > 0 {
-		fmt.Println("Components to destruct (no usage):")
-		for k := range diff.ComponentDestruct {
-			fmt.Println("[-] " + k)
+		if len(diff.ComponentDestruct) > 0 {
+			fmt.Println("Components to destruct (no usage):")
+			for k := range diff.ComponentDestruct {
+				fmt.Println("[-] " + k)
+			}
 		}
-	}
 
-	if diff.isEmpty() {
-		fmt.Println("[*] No changes to apply")
-	}
+		if diff.isEmpty() {
+			fmt.Println("[*] No changes to apply")
+		}
 	*/
 
-	diff.printDifferenceOnServicesLevel();
+	diff.printDifferenceOnServicesLevel()
 }
 
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
@@ -263,7 +263,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Prev.ProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				glog.Infof("Destructing service: %s", serviceName)

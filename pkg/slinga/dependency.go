@@ -17,7 +17,7 @@ type Dependency struct {
 	UserID  string
 	Service string
 	Labels  map[string]string
-	Trace	bool
+	Trace   bool
 
 	// This field is populated when dependency gets resolved
 	ResolvesTo string

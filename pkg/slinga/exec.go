@@ -44,7 +44,7 @@ func (code *Code) processCodeContent(labels LabelSet, dependencies map[string]st
 
 func evaluateCodeParamTemplate(templateStr string, labels LabelSet, dependencies map[string]string) (string, error) {
 	type Parameters struct {
-		Labels map[string]string
+		Labels       map[string]string
 		Dependencies map[string]string
 	}
 	param := Parameters{Labels: labels.Labels, Dependencies: dependencies}

@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"log"
 	"bytes"
+	"log"
 )
 
 // ServiceUsageState contains detailed tracing information for specific allocations
@@ -29,7 +29,7 @@ func (tracing *ServiceUsageTracing) do(t bool) *ServiceUsageTracing {
 func (tracing *ServiceUsageTracing) log(depth int, format string, args ...interface{}) {
 	if tracing.trace {
 		indent := ""
-		for n := 0; n <= 4 * depth; n++ {
+		for n := 0; n <= 4*depth; n++ {
 			indent = indent + " "
 		}
 		format = indent + format
@@ -39,6 +39,5 @@ func (tracing *ServiceUsageTracing) log(depth int, format string, args ...interf
 }
 
 func (tracing *ServiceUsageTracing) newline() {
-	tracing.log(0, "\n");
+	tracing.log(0, "\n")
 }
-
