@@ -107,17 +107,24 @@ Processing flow:
 
 ## What needs to be done:
 
-1. [Done - RA] add labels to dependencies
-2. [Done - RA] recursively process folders when loading policy
-3. [Done - RA] dry run (via 'trace' attribute)
-4. [SL] service discovery
-5. [RA or SL] add a mode to print Helm commands instead of executing them
-6. [SL] support for multiple k8s clusters
-7. [SL] support deployment of specific versions, as well as
+* [Done - RA] add labels to dependencies
+* [Done - RA] recursively process folders when loading policy
+* [Done - RA] dry run (via 'trace' attribute)
+* [Done - RA/SL] service discovery
+* [SL] use temp files to path params to Helm charts instead of CLI
+* [SL] save Helm output to temp file and print its name for future debug
+* [SL] wrap spark job for twitter stats with Helm chart
+* [SL] update demo policy to have demo-like topology
+* [SL] make demo policy works with real charts & tools
+* [SL] build & push fresh aptomi images & helm charts
+* [SL] add check for !compromised user
+* [SL] add a mode to print Helm commands instead of executing them
+* [SL] support for multiple k8s clusters
+* [SL] support deployment of specific versions, as well as
    deploy "latest" (or matching by regex) from docker registry
-8. [Done - RA] more compact visualization
+* [Done - RA] more compact visualization
 
-9. We can consider adding "tests for DevOps" (smart tracing)
+* We can consider adding "tests for DevOps" (smart tracing)
 
 ## Demo scenario:
 
