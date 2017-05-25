@@ -119,6 +119,7 @@ Processing flow:
 * [SL] build & push fresh aptomi images & helm charts
 * [SL] add check for !compromised user
 * [SL] add a mode to print Helm commands instead of executing them
+* [SL or RA] Make sure that if something failed during apply, new state will not be saved, so, we can just re-run apply
 * [SL] support for multiple k8s clusters
 * [SL] support deployment of specific versions, as well as
    deploy "latest" (or matching by regex) from docker registry
