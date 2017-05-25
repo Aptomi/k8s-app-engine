@@ -5,6 +5,7 @@ import (
 	"github.com/golang/glog"
 	"os/exec"
 	"strings"
+	"io/ioutil"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
@@ -31,6 +32,19 @@ func (executor HelmCodeExecutor) Install(key string, content map[string]map[stri
 		}
 	}
 
+	tmpFile, _ /*err*/ := ioutil.TempFile("", "aptomi-helm-params")
+	//TODO: slukjanov: defer os.Remove(tmpFile.Name())
+	glog.Info("Temp helm params: ", tmpFile.Name())
+	if params, ok := content["params"]; ok {
+		content := []byte(serializeObject(params))
+		if _, err := tmpFile.Write(content); err != nil {
+			glog.Info(err)
+		}
+		if err := tmpFile.Close(); err != nil {
+			glog.Info(err)
+		}
+	}
+
 	helmArgs := []string{"install", "--name", uid}
 	if len(setValues) > 0 {
 		helmArgs = append(helmArgs, "--set", setValues)
@@ -45,7 +59,9 @@ func (executor HelmCodeExecutor) Install(key string, content map[string]map[stri
 	}
 	helmArgs = append(helmArgs, chartName)
 
+	glog.Infof("Running Helm with args: %s", helmArgs)
 	return runHelmCmd(helmArgs...)
+	//return nil
 }
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
