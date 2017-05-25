@@ -8,8 +8,10 @@ import:
   version: ^2.0.0
 - package: github.com/spf13/cobra
 - package: github.com/mattn/go-zglob
-- package: github.com/kubernetes/helm
+- package: k8s.io/helm
   version: ~2.4.2
+  subpackages:
+  - pkg/helm
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4
