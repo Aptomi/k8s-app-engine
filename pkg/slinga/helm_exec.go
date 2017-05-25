@@ -82,7 +82,12 @@ func (executor HelmCodeExecutor) Update(key string, labels LabelSet) error {
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
 func (executor HelmCodeExecutor) Destroy(key string) error {
-	// uid := HelmName(key)
-	// TODO: implement destroy method
+	uid := strings.ToLower(HelmName(key))
+
+	helmClient := newHelmClient()
+	if _, err := helmClient.DeleteRelease(uid); err != nil {
+		return err
+	}
+
 	return nil
 }
