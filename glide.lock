@@ -1,5 +1,5 @@
-hash: a9eb58df484d699c6ae313939cf8f7852b3dffcf33685982a71ff9005dffcc75
-updated: 2017-05-20T14:04:46.905708515-07:00
+hash: 99a4b8f025fe809e153e8a8e0230ec4db47be2724b351538e60893feb3a08bf8
+updated: 2017-05-25T11:28:32.096047666-07:00
 imports:
 - name: github.com/awalterschulze/gographviz
   version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
@@ -15,8 +15,12 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Knetic/govaluate
   version: d216395917cc49052c7c7094cf57f09657ca08a8
+- name: github.com/kubernetes/helm
+  version: 82d8e9498d96535cc6787a6a9194a76161d29b4c
 - name: github.com/mattn/go-zglob
   version: 95345c4e1c0ebc9d16a3284177f09360f4d20fab
+  subpackages:
+  - fastwalk
 - name: github.com/spf13/cobra
   version: ca57f0f5dba473a8a58765d16d7e811fb8027add
 - name: github.com/spf13/pflag
@@ -25,7 +29,7 @@ imports:
   version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
