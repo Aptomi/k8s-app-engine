@@ -278,7 +278,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 						glog.Fatal("Error while getting codeExecutor")
 					}
 
-					err = codeExecutor.Install(key, diff.Next.ResolvedLinks[key].CalculatedCodeContent)
+					err = codeExecutor.Install(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
 					if err != nil {
 						glog.Fatal("Failed install", err)
 					}

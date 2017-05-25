@@ -19,7 +19,7 @@ func TestEngine(t *testing.T) {
 
 	// Check that parameter evaluates correctly
 	v := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
-	assert.Equal(t, "zookeeper-test-test-platform-services-component2", v.CalculatedCodeContent["params"]["address"], "Code parameter should be calculated correctly")
+	assert.Equal(t, "zookeeper-test-test-platform-services-component2", v.CalculatedCodeParams["params"]["address"], "Code parameter should be calculated correctly")
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {

@@ -33,9 +33,9 @@ type ServiceUsageState struct {
 
 // ResolvedLinkUsageStruct is a usage data for a given component instance, containing list of user IDs and calculated labels
 type ResolvedLinkUsageStruct struct {
-	UserIds               []string
-	CalculatedLabels      LabelSet
-	CalculatedCodeContent map[string]map[string]string
+	UserIds              []string
+	CalculatedLabels     LabelSet
+	CalculatedCodeParams interface{}
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
@@ -80,28 +80,28 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet, codeContent map[string]map[string]string) string {
+func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet, codeParams interface{}) string {
 	key := usage.createServiceUsageKey(service, context, allocation, component)
 
 	if _, ok := usage.ResolvedLinks[key]; !ok {
-		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}, CalculatedCodeContent: make(map[string]map[string]string)}
+		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
 	}
 
-	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels, codeContent)
+	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels, codeParams)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
 
 	return key
 }
 
 // Adds user and set of labels to the entry
-func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID string, labels LabelSet, codeContent map[string]map[string]string) {
+func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID string, labels LabelSet, codeParams interface{}) {
 	usageStruct.UserIds = append(usageStruct.UserIds, userID)
 
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
 	usageStruct.CalculatedLabels = labels
 
 	// TODO: what to do with different code contents? they should be the same
-	usageStruct.CalculatedCodeContent = codeContent
+	usageStruct.CalculatedCodeParams = codeParams
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB

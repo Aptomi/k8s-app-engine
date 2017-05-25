@@ -106,11 +106,11 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		componentLabels := labels.applyTransform(component.Labels)
 
 		// Is it a code?
-		var codeContent map[string]map[string]string
+		var codeParams interface{}
 		if component.Code != nil {
 			// Evaluate code params
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
-			codeContent, err = component.processCodeContent(componentLabels, user, cim, depth, usage.tracing.do(trace))
+			codeParams, err = component.processCodeContent(componentLabels, user, cim, depth, usage.tracing.do(trace))
 			if err != nil {
 				return "", err
 			}
@@ -132,7 +132,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels, codeContent)
+		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels, codeParams)
 
 		// Record component key in cim, if it's code
 		if component.Code != nil {
@@ -266,23 +266,48 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	return allocationMatched, nil
 }
 
-func (component *ServiceComponent) processCodeContent(labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (map[string]map[string]string, error) {
+type ProcessingError struct {
+	Reason string
+}
+
+func (err ProcessingError) Error() string {
+	return err.Reason
+}
+
+func (component *ServiceComponent) processCodeContent(labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
 	tracing.log(depth+1, "Component: %s (code)", component.Name)
 
-	result := make(map[string]map[string]string)
-	for section, params := range component.Code.Content {
-		result[section] = make(map[string]string)
-		for key, value := range params {
-			evaluatedValue, err := evaluateCodeParamTemplate(value, labels, user, cim)
-			tracing.log(depth+2, "Parameter '%s': %s", value, evaluatedValue)
+	var evalParamsInterface func(params interface{}) (interface{}, error)
+	evalParamsInterface = func(params interface{}) (interface{}, error) {
+		if paramsMap, ok := params.(map[interface{}]interface{}); ok {
+			resultMap := make(map[string]interface{})
+
+			for key, value := range paramsMap {
+				evaluatedValue, err := evalParamsInterface(value)
+				if err != nil {
+					return nil, err
+				}
+				resultMap[key.(string)] = evaluatedValue
+			}
+
+			return resultMap, nil
+		} else if paramsStr, ok := params.(string); ok {
+			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, labels, user, cim)
+			tracing.log(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
 			if err != nil {
 				return nil, err
 			}
-
-			result[section][key] = evaluatedValue
+			return evaluatedValue, nil
+		} else if paramsInt, ok := params.(int); ok {
+			return paramsInt, nil
+		} else if paramsBool, ok := params.(bool); ok {
+			return paramsBool, nil
 		}
+
+		return nil, ProcessingError{"There should be map[string]interface{} or string"}
 	}
-	return result, nil
+
+	return evalParamsInterface(component.Code.Params)
 }
 
 func evaluateCodeParamTemplate(templateStr string, labels LabelSet, user User, cim map[string]interface{}) (string, error) {

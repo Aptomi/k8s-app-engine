@@ -37,7 +37,8 @@ type Context struct {
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type    string
-	Content map[string]map[string]string
+	Metadata map[string]string
+	Params interface{}
 }
 
 // ServiceComponent defines component within a service
