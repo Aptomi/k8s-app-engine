@@ -1,5 +1,5 @@
-hash: af58a1ae77a45e27b57e0baaf7422537348f1ae6dc857be09fe72b1d09e1865c
-updated: 2017-05-25T11:42:27.694025844-07:00
+hash: a710026ba801fb449f03456b6adfd9441dcf414c896c17f43bd27e537c09fb8d
+updated: 2017-05-25T23:36:17.236045912-07:00
 imports:
 - name: github.com/awalterschulze/gographviz
   version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
@@ -9,8 +9,8 @@ imports:
   - internal/lexer
   - internal/parser
   - internal/token
-- name: github.com/BurntSushi/toml
-  version: b26d9c308763d68093482582cea63d69be07a0f0
+- name: github.com/blang/semver
+  version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/facebookgo/symwalk
   version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/ghodss/yaml
@@ -26,9 +26,9 @@ imports:
   - util/runes
   - util/strings
 - name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+  version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/golang/protobuf
-  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
+  version: df1d3ca07d2d07bba352d5b73c4313b4e2a6203e
   subpackages:
   - proto
   - ptypes/any
@@ -43,6 +43,12 @@ imports:
   version: 95345c4e1c0ebc9d16a3284177f09360f4d20fab
   subpackages:
   - fastwalk
+- name: github.com/naoina/go-stringutil
+  version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
+- name: github.com/naoina/toml
+  version: e6f5723bf2a66af014955e0888881314cf294129
+  subpackages:
+  - ast
 - name: github.com/spf13/cobra
   version: ca57f0f5dba473a8a58765d16d7e811fb8027add
 - name: github.com/spf13/pflag
@@ -57,27 +63,20 @@ imports:
   - lex/httplex
   - trace
 - name: google.golang.org/grpc
-  version: 8050b9cbc271307e5a716a9d782803d09b0d6f2d
+  version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
   subpackages:
   - codes
   - credentials
   - grpclog
   - internal
-  - keepalive
   - metadata
   - naming
   - peer
-  - stats
-  - tap
   - transport
 - name: gopkg.in/yaml.v2
   version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
-- name: k8s.io/apimachinery
-  version: 0f8a3af747f81547246d79ca00c20af330868fa6
-  subpackages:
-  - pkg/version
 - name: k8s.io/helm
-  version: 82d8e9498d96535cc6787a6a9194a76161d29b4c
+  version: 32562a3040bb5ca690339b9840b6f60f8ce25da4
   subpackages:
   - pkg/chartutil
   - pkg/helm
@@ -87,9 +86,42 @@ imports:
   - pkg/proto/hapi/services
   - pkg/proto/hapi/version
   - pkg/version
+- name: k8s.io/kubernetes
+  version: f07eea23494be1e7c11a8e2cf51bd96d1ec9fdf1
+  subpackages:
+  - pkg/api
+  - pkg/api/errors
+  - pkg/api/meta
+  - pkg/api/unversioned
+  - pkg/api/v1
+  - pkg/apis/apps/v1beta1
+  - pkg/apis/batch
+  - pkg/apis/batch/v1
+  - pkg/apis/extensions
+  - pkg/apis/extensions/v1beta1
+  - pkg/client/clientset_generated/internalclientset
+  - pkg/client/clientset_generated/internalclientset/typed/core/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion
+  - pkg/client/restclient
+  - pkg/client/typed/discovery
+  - pkg/client/unversioned
+  - pkg/client/unversioned/clientcmd
+  - pkg/client/unversioned/portforward
+  - pkg/client/unversioned/remotecommand
+  - pkg/fields
+  - pkg/kubectl
+  - pkg/kubectl/cmd/util
+  - pkg/kubectl/resource
+  - pkg/labels
+  - pkg/runtime
+  - pkg/util/intstr
+  - pkg/util/strategicpatch
+  - pkg/util/wait
+  - pkg/version
+  - pkg/watch
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib

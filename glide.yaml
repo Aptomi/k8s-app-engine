@@ -9,7 +9,7 @@ import:
 - package: github.com/spf13/cobra
 - package: github.com/mattn/go-zglob
 - package: k8s.io/helm
-  version: ~2.4.2
+  version: 2.3.1
   subpackages:
   - pkg/helm
 testImport:
