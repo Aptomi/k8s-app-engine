@@ -279,7 +279,9 @@ func (component *ServiceComponent) processCodeContent(labels LabelSet, user User
 
 	var evalParamsInterface func(params interface{}) (interface{}, error)
 	evalParamsInterface = func(params interface{}) (interface{}, error) {
-		if paramsMap, ok := params.(map[interface{}]interface{}); ok {
+		if params == nil {
+			return "", nil
+		} else if paramsMap, ok := params.(map[interface{}]interface{}); ok {
 			resultMap := make(map[string]interface{})
 
 			for key, value := range paramsMap {
