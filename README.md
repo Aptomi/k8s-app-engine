@@ -124,6 +124,7 @@ Processing flow:
 * [SL] support deployment of specific versions, as well as
 * [SL] add Last updated x seconds ago to tweeviz and custom info field (User name + stage / prod)
 * [SL] aptomi show endpoints (print services endpoints)
+* [SL] code change demo - two versions of tweepub with different visaulizations available as 2 docker tags
    deploy "latest" (or matching by regex) from docker registry
 * [Done - RA] more compact visualization
 * [Done - RA] "no changes" shit is incorrect, doesn't take component updates into account
