@@ -42,5 +42,7 @@
    - Staging TS gets deleted
    - Production TS gets updated
 
-8. Alice (ID=1) gets marked as "untrusted"
+8. Increase priority for Carol (ID=3) and deploy dedicated DAP for her
+
+9. Alice (ID=1) gets marked as "untrusted"
    - Loses access to her "prod"
