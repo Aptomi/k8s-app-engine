@@ -24,6 +24,9 @@ components:
         service:
           type: NodePort
 
+        zeppelin:
+          enabled: false
+
         zookeeper:
           deployChart: false
           externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181
