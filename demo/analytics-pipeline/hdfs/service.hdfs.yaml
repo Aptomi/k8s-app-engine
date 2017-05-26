@@ -10,7 +10,24 @@ components:
   - name: hdfs
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/hdfs
-        params:
+      metadata:
+        chartName: hdfs-1.0.0
+      params:
+        datanode:
+          replicas: 1
+          image:
+            repository: uhopper/hadoop-datanode
+            tag: 2.7.2
+            pullPolicy: Always
+
+          antiAffinity: "soft"
+
+        namenode:
+          image:
+            repository: uhopper/hadoop-namenode
+            tag: 2.7.2
+            pullPolicy: Always
+
+          ui:
+            service:
+              type: NodePort

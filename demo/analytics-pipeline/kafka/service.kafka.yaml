@@ -19,13 +19,21 @@ components:
   - name: kafka
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/kafka
-        params:
-          antiAffinity: soft
-          zookeeper.deployChart: false
-          zookeeper.externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181,zk-{{ .Components.zookeeper.zookeeper }}-1.zk-{{ .Components.zookeeper.zookeeper }}:2181,zk-{{ .Components.zookeeper.zookeeper }}-2.zk-{{ .Components.zookeeper.zookeeper }}:2181
+      metadata:
+        chartName: kafka-1.0.0
+      params:
+        replicas: 1
+        antiAffinity: "soft"
+
+        image:
+          repository: mirantisworkloads/kafka
+          tag: 0.10.2.0
+          pullPolicy: Always
+
+        zookeeper:
+          deployChart: false
+          externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181
+
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

@@ -19,12 +19,13 @@ components:
   - name: spark
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/spark
-        params:
-          antiAffinity: soft
-          zookeeper: zk-{{ .Components.zookeeper.zookeeper }}
+      metadata:
+        chartName: spark-1.0.0
+      params:
+        antiAffinity: soft
+        zookeeper:
+          deployChart: false
+          externalAddress: zk-{{ .Components.zookeeper.zookeeper }}
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

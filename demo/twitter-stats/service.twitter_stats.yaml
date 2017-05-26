@@ -9,42 +9,89 @@ components:
   - name: tweepub
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/tweepub
-        params:
-          kafka.externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}
-          kafka.topic: tweepub_{{ .User.Name }}
-          twitter.appKey:
-          twitter.appSecret:
-          twitter.tokenKey:
-          twitter.tokenSecret:
+      metadata:
+        chartName: tweepub-1.0.0
+      params:
+        image:
+          repository: frostman/tweepub
+          tag: latest
+          pullPolicy: Always
+
+        twitter:
+          appKey: EDITME
+          appSecret: EDITME
+          tokenKey: EDITME
+          tokenSecret: EDITME
+
+          locations: -71.4415,41.9860,-70.4747,42.9041
+
+        kafka:
+          deployChart: false
+          externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}-0.kafka-{{ .Components.analytics_pipeline.kafka.kafka }}:9092
+          topic: tweepub_{{ .User.Name }}
     dependencies:
       - analytics_pipeline
 
   - name: tweetics
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/tweetics
-        params:
-          spark.externalAddress: spark-{{ .Components.analytics_pipeline.spark.spark }}
-          zookeeper.externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}
-          kafka.topic: tweepub_{{ .User.Name }}
-          hdfs.externalAddress: hdfs://hdfs-namenode:8020/tweepub_{{ .User.Name }}
-          hdfs.path: tweepub_{{ .User.Name }}
+      metadata:
+        chartName: tweetics-0.1.0
+      params:
+        image:
+          repository: kshatrix/tweetics
+          tag: latest
+          pullPolicy: Always
+
+        minHashtagCounts: 0
+
+        zookeeper:
+          deployChart: false
+          externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+
+        kafka:
+          deployChart: false
+          externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}-0.kafka-{{ .Components.analytics_pipeline.kafka.kafka }}:9092
+          topic: twitter-stream
+          zookeeper:
+            deployChart: false
+            externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+
+        spark:
+          deployChart: false
+          externalAddress: spark-master-{{ .Components.analytics_pipeline.spark.spark }}-0.spark-master-{{ .Components.analytics_pipeline.spark.spark }}:7077
+          zookeeper:
+            deployChart: false
+            externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+        hdfs:
+          deployChart: false
+          externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-1
+          # TODO make path unique
+          path: /twitter
     dependencies:
       - analytics_pipeline
 
   - name: tweeviz
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/tweeviz
-        params:
-          hdfs.externalAddress: hdfs://hdfs-namenode:8020/tweepub_{{ .User.Name }}
-          hdfs.path: tweepub_{{ .User.Name }}
+      metadata:
+        chartName: tweeviz-0.1.0
+      params:
+        image:
+          repository: frostman/tweeviz
+          tag: latest
+          pullPolicy: Always
+
+        minPopularity: 1
+        topListSize: 0
+
+        service:
+          type: NodePort
+
+        hdfs:
+          deployChart: false
+          externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-1
+          # TODO make path unique
+          path: /
     dependencies:
       - analytics_pipeline

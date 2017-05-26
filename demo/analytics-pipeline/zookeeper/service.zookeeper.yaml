@@ -10,11 +10,15 @@ components:
   - name: zookeeper
     code:
       type: aptomi/code/kubernetes-helm
-      content:
-        chart:
-          name: boston-summit-charts/zookeeper
-        params:
-          antiAffinity: "{{ .Labels.antiAffinity }}"
+      metadata:
+        chartName: zookeeper-1.0.0
+      params:
+        replicas: 1
+        antiAffinity: "{{ .Labels.antiAffinity }}"
+        image:
+          repository: mirantisworkloads/zookeeper
+          tag: 3.5.3-rc1
+          pullPolicy: Always
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
