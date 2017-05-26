@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-var verbose bool
+var debug bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -16,7 +16,7 @@ var RootCmd = &cobra.Command{
 	Long:  `Aptomi - policy & governance for microservices`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		flag.Parse()
-		if verbose {
+		if debug {
 			flag.Lookup("logtostderr").Value.Set("true")
 		}
 	},
@@ -36,5 +36,5 @@ func Execute() {
 
 func init() {
 	// Global flags for the application
-	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output (enables logging)")
+	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Pring debug information")
 }

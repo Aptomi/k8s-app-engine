@@ -19,7 +19,7 @@ func TestEngine(t *testing.T) {
 
 	// Check that parameter evaluates correctly
 	v := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
-	paramsMap, ok := v.CalculatedCodeParams.(map[string]interface{})
+	paramsMap, ok := v.CalculatedCodeParams.(map[interface{}]interface{})
 	assert.Equal(t, true, ok, "Calculated Code Params should be map")
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", paramsMap["address"], "Code parameter should be calculated correctly")
 }

@@ -8,6 +8,7 @@ import (
 
 var noop bool
 var show bool
+var verbose bool
 
 var policyCmd = &cobra.Command{
 	Use:   "policy",
@@ -44,7 +45,7 @@ var policyCmdApply = &cobra.Command{
 		diff := nextUsageState.CalculateDifference(&prevUsageState)
 
 		// Print on screen
-		diff.Print()
+		diff.Print(verbose)
 
 		// Generate pictures, if needed
 		if show {
@@ -66,4 +67,5 @@ func init() {
 
 	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
+	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
 }

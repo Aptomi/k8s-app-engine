@@ -42,7 +42,9 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 }
 
 // On a service level -- see which keys appear and disappear
-func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel() {
+func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) {
+
+	fmt.Println("[Services]")
 
 	// High-level service resolutions in prev
 	pMap := make(map[string]map[string]string)
@@ -117,15 +119,15 @@ func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel() {
 	printed := false
 	for userID, sKeys := range textMap {
 		user := LoadUserByIDFromDir(GetAptomiPolicyDir(), userID)
-		fmt.Printf("%s (ID=%s)\n", user.Name, user.ID)
+		fmt.Printf("  %s (ID=%s)\n", user.Name, user.ID)
 		for _, s := range sKeys {
-			fmt.Printf("  %s\n", s)
+			fmt.Printf("    %s\n", s)
 		}
 		printed = true
 	}
 
 	if !printed {
-		fmt.Println("[*] No changes")
+		fmt.Println("  [*] No changes")
 	}
 }
 
@@ -194,6 +196,51 @@ func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	}
 }
 
+// On a component level -- see which keys appear and disappear
+func (diff *ServiceUsageStateDiff) printDifferenceOnComponentLevel(verbose bool) {
+	fmt.Println("[Components]")
+
+	// Print
+	printed := len(diff.ComponentInstantiate)+len(diff.ComponentDestruct)+len(diff.ComponentUpdate) > 0
+
+	if printed {
+		fmt.Printf("  New instances:     %d\n", len(diff.ComponentInstantiate))
+		fmt.Printf("  Deleted instances: %d\n", len(diff.ComponentDestruct))
+		fmt.Printf("  Updated instances: %d\n", len(diff.ComponentUpdate))
+
+		fmt.Println("[Component Instances]")
+		if verbose {
+			if len(diff.ComponentInstantiate) > 0 {
+				fmt.Println("  New:")
+				for k := range diff.ComponentInstantiate {
+					fmt.Printf("    [+] %s\n", k)
+				}
+			}
+
+			if len(diff.ComponentDestruct) > 0 {
+				fmt.Println("  Deleted:")
+				for k := range diff.ComponentDestruct {
+					fmt.Printf("    [-] %s\n", k)
+				}
+			}
+
+			if len(diff.ComponentUpdate) > 0 {
+				fmt.Println("  Updated:")
+				for k := range diff.ComponentUpdate {
+					fmt.Printf("    [*] %s\n", k)
+				}
+			}
+		} else {
+			fmt.Println("  Use --verbose to see the list")
+		}
+	}
+
+	if !printed {
+		fmt.Println("  [*] No changes")
+	}
+
+}
+
 func toMap(p []string) map[string]bool {
 	result := make(map[string]bool)
 	for _, s := range p {
@@ -203,41 +250,9 @@ func toMap(p []string) map[string]bool {
 }
 
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
-func (diff ServiceUsageStateDiff) Print() {
-	/*
-		if len(diff.ComponentInstantiate) > 0 {
-			fmt.Println("New services to instantiate:")
-			for k := range diff.ComponentInstantiate {
-				_, _, _, componentName := parseServiceUsageKey(k)
-				if componentName == componentRootName {
-					fmt.Println("[+] " + k)
-				}
-			}
-		}
-
-		if len(diff.ComponentAttachUser) > 0 {
-			fmt.Println("Add users to components:")
-			for _, cu := range diff.ComponentAttachUser {
-				fmt.Println("[+] " + cu.User + " -> " + cu.ComponentKey)
-			}
-		}
-
-		if len(diff.ComponentDetachUser) > 0 {
-			fmt.Println("Delete users from components:")
-			for _, cu := range diff.ComponentDetachUser {
-				fmt.Println("[-] " + cu.User + " -> " + cu.ComponentKey)
-			}
-		}
-
-		if len(diff.ComponentDestruct) > 0 {
-			fmt.Println("Components to destruct (no usage):")
-			for k := range diff.ComponentDestruct {
-				fmt.Println("[-] " + k)
-			}
-		}
-	*/
-
-	diff.printDifferenceOnServicesLevel()
+func (diff ServiceUsageStateDiff) Print(verbose bool) {
+	diff.printDifferenceOnServicesLevel(verbose)
+	diff.printDifferenceOnComponentLevel(verbose)
 }
 
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
@@ -249,7 +264,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Prev.ProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				glog.Infof("Destructing service: %s", serviceName)
@@ -272,7 +287,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be updated?
 		if _, ok := diff.ComponentUpdate[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				glog.Infof("Updating service: %s", serviceName)
