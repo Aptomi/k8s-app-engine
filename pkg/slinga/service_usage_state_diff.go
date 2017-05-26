@@ -21,7 +21,7 @@ type ServiceUsageStateDiff struct {
 	// Actions that need to be taken
 	ComponentInstantiate map[string]bool
 	ComponentDestruct    map[string]bool
-	ComponentUpdate	     map[string]bool
+	ComponentUpdate      map[string]bool
 	ComponentAttachUser  []ServiceUsageUserAction
 	ComponentDetachUser  []ServiceUsageUserAction
 }
@@ -34,7 +34,7 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 		Next:                 next,
 		ComponentInstantiate: make(map[string]bool),
 		ComponentDestruct:    make(map[string]bool),
-		ComponentUpdate:	  make(map[string]bool)}
+		ComponentUpdate:      make(map[string]bool)}
 
 	result.calculateDifferenceOnComponentLevel()
 
@@ -170,7 +170,7 @@ func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		if userIdsPrev != nil && userIdsNext != nil {
 			sameParams := reflect.DeepEqual(uPrev.CalculatedCodeParams, uNext.CalculatedCodeParams)
 			if !sameParams {
-				result.ComponentUpdate[k] = true;
+				result.ComponentUpdate[k] = true
 			}
 		}
 
