@@ -110,7 +110,8 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		if component.Code != nil {
 			// Evaluate code params
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
-			codeParams, err = component.processCodeParams(componentLabels, user, cim, depth, usage.tracing.do(trace))
+			componentKey := usage.createServiceUsageKey(service, context, allocation, component)
+			codeParams, err = component.processCodeParams(componentKey, componentLabels, user, cim, depth, usage.tracing.do(trace))
 			if err != nil {
 				return "", err
 			}
@@ -274,7 +275,7 @@ func (err ProcessingError) Error() string {
 	return err.Reason
 }
 
-func (component *ServiceComponent) processCodeParams(labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
+func (component *ServiceComponent) processCodeParams(componentKey string, labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
 	tracing.log(depth+1, "Component: %s (code)", component.Name)
 
 	var evalParamsInterface func(params interface{}) (interface{}, error)
@@ -294,7 +295,7 @@ func (component *ServiceComponent) processCodeParams(labels LabelSet, user User,
 
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
-			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, labels, user, cim)
+			evaluatedValue, err := evaluateCodeParamTemplate(componentKey, paramsStr, labels, user, cim)
 			tracing.log(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
 			if err != nil {
 				return nil, err
@@ -312,13 +313,15 @@ func (component *ServiceComponent) processCodeParams(labels LabelSet, user User,
 	return evalParamsInterface(component.Code.Params)
 }
 
-func evaluateCodeParamTemplate(templateStr string, labels LabelSet, user User, cim map[string]interface{}) (string, error) {
+func evaluateCodeParamTemplate(componentKey string, templateStr string, labels LabelSet, user User, cim map[string]interface{}) (string, error) {
 	type Parameters struct {
+		ComponentInstance   string
 		Labels     map[string]string
 		User       User
 		Components map[string]interface{}
 	}
 	param := Parameters{
+		ComponentInstance: componentKey,
 		Labels:     labels.Labels,
 		Components: cim,
 		User:       user}
