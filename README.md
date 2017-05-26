@@ -111,22 +111,18 @@ Processing flow:
 * [Done - RA] recursively process folders when loading policy
 * [Done - RA] dry run (via 'trace' attribute)
 * [Done - RA/SL] service discovery
-* [SL] use temp files to path params to Helm charts instead of CLI
-* [SL] save Helm output to temp file and print its name for future debug
-* [SL] wrap spark job for twitter stats with Helm chart
+* [Done - SL] use temp files to path params to Helm charts instead of CLI
+* [Done - SL] save Helm output to temp file and print its name for future debug
+* [Done - SL] wrap spark job for twitter stats with Helm chart
 * [SL] update demo policy to have demo-like topology
-* [SL] make demo policy works with real charts & tools
+* [Demo - SL] make demo policy works with real charts & tools
 * [SL] build & push fresh aptomi images & helm charts
 * [SL] add check for !compromised user
-* [SL] add a mode to print Helm commands instead of executing them
 * [SL or RA] Make sure that if something failed during apply, new state will not be saved, so, we can just re-run apply
-* [SL] support for multiple k8s clusters
-* [SL] support deployment of specific versions, as well as
 * [SL] add Last updated x seconds ago to tweeviz and custom info field (User name + stage / prod)
 * [SL] aptomi show endpoints (print services endpoints)
 * [SL] code change demo - two versions of tweepub with different visaulizations available as 2 docker tags
 * [SL] impl multiple k8s support - add some file with list of k8s clusters (and tiller addresses) and specify cluster name in metadata for helm chart
-   deploy "latest" (or matching by regex) from docker registry
 * [Done - RA] more compact visualization
 * [Done - RA] "no changes" shit is incorrect, doesn't take component updates into account
 * [RA] criteria -> accept and reject
