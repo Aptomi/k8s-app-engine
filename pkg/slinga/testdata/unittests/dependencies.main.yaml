@@ -1,8 +1,10 @@
 - userid: 1
   service: kafka
-  trace: true
 
 - userid: 2
   service: kafka
   labels:
     important: yes
+
+- userid: 3
+  service: kafka

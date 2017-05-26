@@ -15,10 +15,16 @@ import (
 // LabelOperations defines the set of label manipulations (e.g. set/remove)
 type LabelOperations map[string]map[string]string
 
+// Criteria defines a structure with criteria accept/reject syntax
+type Criteria struct {
+	Accept []string
+	Reject []string
+}
+
 // Allocation defines within a Context for a given service
 type Allocation struct {
 	Name     string
-	Criteria []string
+	Criteria *Criteria
 	Labels   *LabelOperations
 
 	// Evaluated field (when parameters in name are substituted with real values)
@@ -29,7 +35,7 @@ type Allocation struct {
 type Context struct {
 	Name        string
 	Service     string
-	Criteria    []string
+	Criteria    *Criteria
 	Labels      *LabelOperations
 	Allocations []*Allocation
 }

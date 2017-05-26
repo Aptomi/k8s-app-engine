@@ -15,16 +15,22 @@ func TestEngine(t *testing.T) {
 
 	// Check that policy resolution finished correctly
 	assert.Equal(t, nil, err, "Policy usage should be resolved without errors")
-	assert.Equal(t, 14, len(usageState.ResolvedLinks), "Policy resolution should result in correct amount of usage entries")
 
-	// Check that parameter evaluates correctly
-	v := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
+	kTest := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
+	kProd := usageState.ResolvedLinks["kafka#prod#test-platform_services#component2"]
+	assert.Equal(t, 1, len(kTest.UserIds), "Only one user should have access to test")
+	assert.Equal(t, "1", kTest.UserIds[0], "Only Alice should have access to test")
 
-	paramsMap, ok := v.CalculatedCodeParams.(map[interface{}]interface{})
+	assert.Equal(t, 1, len(kProd.UserIds), "Only one user should have access to prod")
+	assert.Equal(t, "2", kProd.UserIds[0], "Only Bob should have access to prod (Carol is compromised)")
+
+	// Check that code parameters evaluate correctly
+	paramsMap, ok := kTest.CalculatedCodeParams.(map[interface{}]interface{})
 	assert.Equal(t, true, ok, "Calculated Code Params should be map")
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", paramsMap["address"], "Code parameter should be calculated correctly")
 
-	discoveryMap, ok := v.CalculatedDiscovery.(map[interface{}]interface{})
+	// Check that discovery parameters evaluate correctly
+	discoveryMap, ok := kTest.CalculatedDiscovery.(map[interface{}]interface{})
 	assert.Equal(t, true, ok, "Calculated Discovery should be map")
 	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", discoveryMap["url"], "Discovery parameter should be calculated correctly")
 }

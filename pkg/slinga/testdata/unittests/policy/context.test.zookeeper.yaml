@@ -3,7 +3,10 @@ name: test
 service: zookeeper
 
 criteria:
-  - dev == "yes" && prod == "no"
+  accept:
+    - dev == "yes" && prod == "no"
+  reject:
+    - compromised == "yes"
 
 labels:
   set:
@@ -16,7 +19,8 @@ allocations:
 
   - name: test-{{.User.Labels.team}}
     criteria:
-      - priority >= 2
+      accept:
+        - priority >= 2
     labels:
       set:
         some-test-context-specific-label: some-value
@@ -26,7 +30,8 @@ allocations:
 
   - name: test-{{.User.Labels.team}}
     criteria:
-      - priority >= 2
+      accept:
+        - priority < 2
     labels:
       set:
         some-test-context-specific-label: some-value
