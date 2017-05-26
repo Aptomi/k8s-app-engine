@@ -7,7 +7,7 @@ import (
 // CodeExecutor is an interface that allows to create different executors for component allocation (e.g. helm, kube.libsonnet, etc)
 type CodeExecutor interface {
 	Install(key string, codeMetadata map[string]string, codeParams interface{}) error
-	Update(key string, labels LabelSet) error
+	Update(key string, codeMetadata map[string]string, codeParams interface{}) error
 	Destroy(key string) error
 }
 

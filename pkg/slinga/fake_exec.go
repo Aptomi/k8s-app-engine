@@ -11,7 +11,7 @@ func (executor FakeCodeExecutor) Install(key string, codeMetadata map[string]str
 }
 
 // Update for FakeCodeExecutor does nothing
-func (executor FakeCodeExecutor) Update(key string, labels LabelSet) error {
+func (executor FakeCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
 	return nil
 }
 

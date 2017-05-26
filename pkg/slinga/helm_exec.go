@@ -74,7 +74,7 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 }
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
-func (executor HelmCodeExecutor) Update(key string, labels LabelSet) error {
+func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
 	// TODO: implement update method
 	return nil
 }

@@ -3,6 +3,7 @@ package slinga
 import (
 	"fmt"
 	"github.com/golang/glog"
+	"reflect"
 )
 
 // ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
@@ -20,10 +21,9 @@ type ServiceUsageStateDiff struct {
 	// Actions that need to be taken
 	ComponentInstantiate map[string]bool
 	ComponentDestruct    map[string]bool
+	ComponentUpdate	     map[string]bool
 	ComponentAttachUser  []ServiceUsageUserAction
 	ComponentDetachUser  []ServiceUsageUserAction
-
-	// High-level generated text for the diff
 }
 
 // CalculateDifference calculates difference between two given usage states
@@ -33,7 +33,8 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 		Prev:                 prev,
 		Next:                 next,
 		ComponentInstantiate: make(map[string]bool),
-		ComponentDestruct:    make(map[string]bool)}
+		ComponentDestruct:    make(map[string]bool),
+		ComponentUpdate:	  make(map[string]bool)}
 
 	result.calculateDifferenceOnComponentLevel()
 
@@ -165,6 +166,14 @@ func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 			result.ComponentDestruct[k] = true
 		}
 
+		// see if a component needs to be updated
+		if userIdsPrev != nil && userIdsNext != nil {
+			sameParams := reflect.DeepEqual(uPrev.CalculatedCodeParams, uNext.CalculatedCodeParams)
+			if !sameParams {
+				result.ComponentUpdate[k] = true;
+			}
+		}
+
 		// see what needs to happen to users
 		uPrevIdsMap := toMap(userIdsPrev)
 		uNextIdsMap := toMap(userIdsNext)
@@ -254,6 +263,29 @@ func (diff ServiceUsageStateDiff) Apply() {
 						glog.Fatal("Error while getting codeExecutor")
 					}
 					codeExecutor.Destroy(key)
+				}
+			}
+		}
+	}
+
+	// Process updates in the right order
+	for _, key := range diff.Next.ProcessingOrder {
+		// Does it need to be updated?
+		if _, ok := diff.ComponentUpdate[key]; ok {
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
+			if component == nil {
+				glog.Infof("Updating service: %s", serviceName)
+				// TODO: add processing code
+			} else {
+				glog.Infof("Updating component: %s (%s)", component.Name, component.Code)
+
+				if component.Code != nil {
+					codeExecutor, err := component.Code.GetCodeExecutor()
+					if err != nil {
+						glog.Fatal("Error while getting codeExecutor")
+					}
+					codeExecutor.Update(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
 				}
 			}
 		}
