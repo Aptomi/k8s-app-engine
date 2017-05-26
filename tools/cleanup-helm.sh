@@ -2,5 +2,5 @@
 
 set -ex
 
-helm delete --purge $(helm list --all -q)
-kubectl delete ns aptomi
+helm delete --purge $(helm list --all -q) || true
+kubectl delete ns demo

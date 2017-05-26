@@ -68,7 +68,7 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 	glog.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
 
 	// TODO is it good to reuse name?
-	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "aptomi", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
+	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
 	if err != nil {
 		return err
 	}
