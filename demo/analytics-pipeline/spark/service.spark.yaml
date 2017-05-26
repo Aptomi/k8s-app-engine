@@ -27,5 +27,6 @@ components:
         zookeeper:
           deployChart: false
           externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181
+          path: /{{ .ComponentInstance }}
     dependencies:
       - zookeeper
