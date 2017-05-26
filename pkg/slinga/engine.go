@@ -321,7 +321,7 @@ func evaluateCodeParamTemplate(componentKey string, templateStr string, labels L
 		Components map[string]interface{}
 	}
 	param := Parameters{
-		ComponentInstance: componentKey,
+		ComponentInstance: HelmName(componentKey),
 		Labels:     labels.Labels,
 		Components: cim,
 		User:       user}
