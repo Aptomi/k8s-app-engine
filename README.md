@@ -125,6 +125,7 @@ Processing flow:
 * [SL] add Last updated x seconds ago to tweeviz and custom info field (User name + stage / prod)
 * [SL] aptomi show endpoints (print services endpoints)
 * [SL] code change demo - two versions of tweepub with different visaulizations available as 2 docker tags
+* [SL] impl multiple k8s support - add some file with list of k8s clusters (and tiller addresses) and specify cluster name in metadata for helm chart
    deploy "latest" (or matching by regex) from docker registry
 * [Done - RA] more compact visualization
 * [Done - RA] "no changes" shit is incorrect, doesn't take component updates into account
