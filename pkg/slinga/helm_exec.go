@@ -63,8 +63,7 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 		return err
 	}
 
-	//TODO: print how we're running helm
-	glog.Info("Running Helm install for: ", uid, " ", chartPath, "\n", string(vals))
+	glog.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", uid, chartName, chartPath, string(vals))
 
 	// TODO is it good to reuse name?
 	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "aptomi", helm.ReleaseName(uid), helm.ValueOverrides(vals), helm.InstallReuseName(true))
