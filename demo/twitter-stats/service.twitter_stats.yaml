@@ -26,8 +26,8 @@ components:
 
         kafka:
           deployChart: false
-          externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}-0.kafka-{{ .Components.analytics_pipeline.kafka.kafka }}:9092
-          topic: tweepub_{{ .User.Name }}
+          externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
+          topic: "tweepub-{{ .User.Name }}"
     dependencies:
       - analytics_pipeline
 
@@ -45,27 +45,27 @@ components:
 
         zookeeper:
           deployChart: false
-          externalAddress: {{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}
+          externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
 
         kafka:
           deployChart: false
-          externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}-0.kafka-{{ .Components.analytics_pipeline.kafka.kafka }}:9092
-          topic: tweepub_{{ .User.Name }}
+          externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
+          topic: "tweepub-{{ .User.Name }}"
           zookeeper:
             deployChart: false
-            externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+            externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
 
         spark:
           deployChart: false
-          externalAddress: spark-master-{{ .Components.analytics_pipeline.spark.spark }}-0.spark-master-{{ .Components.analytics_pipeline.spark.spark }}:7077
+          externalAddress: "{{ .Discovery.analytics_pipeline.spark.spark.url }}"
           zookeeper:
             deployChart: false
-            externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+            externalAddress: "{{ .Discovery.analytics_pipeline.spark.zookeeper.zookeeper.url }}"
 
         hdfs:
           deployChart: false
-          externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}
-          path: /twitter-{{ .User.Name }}/results
+          externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
+          path: "/twitter-{{ .User.Name }}/results"
     dependencies:
       - analytics_pipeline
 
@@ -87,7 +87,7 @@ components:
 
         hdfs:
           deployChart: false
-          externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}
-          path: /twitter-{{ .User.Name }}
+          externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
+          path: "/twitter-{{ .User.Name }}"
     dependencies:
       - analytics_pipeline

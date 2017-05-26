@@ -7,6 +7,6 @@ criteria:
 
 allocations:
 
-  - name: team-{{ .User.Labels.team }}
+  - name: "team-{{ .User.Labels.team }}"
     criteria:
       - "true"

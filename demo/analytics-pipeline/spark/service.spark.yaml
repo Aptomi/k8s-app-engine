@@ -7,6 +7,8 @@ components:
     service: zookeeper
 
   - name: spark
+    discovery:
+      url: "spark-master-{{ .Discovery.instance }}-0.spark-master-{{ .Discovery.instance }}:7077"
     code:
       type: aptomi/code/kubernetes-helm
       metadata:
@@ -29,7 +31,7 @@ components:
 
         zookeeper:
           deployChart: false
-          externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181
-          path: /{{ .ComponentInstance }}
+          externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
+          path: "/{{ .Discovery.instance }}"
     dependencies:
       - zookeeper

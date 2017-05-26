@@ -8,7 +8,7 @@ criteria:
 allocations:
 
     # shared inside organisation
-  - name: prod-{{ .User.Labels.org }}
+  - name: "prod-{{ .User.Labels.org }}"
     criteria:
       - "true"
     labels:

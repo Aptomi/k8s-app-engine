@@ -11,13 +11,13 @@ labels:
 
 allocations:
 
-  - name: test-high-prio-{{ .User.Labels.org }}
+  - name: "test-high-prio-{{ .User.Labels.org }}"
     criteria:
       - priority >= 10
     labels:
       set:
         antiAffinity: hard
 
-  - name: test-low-prio-{{ .User.Labels.org }}
+  - name: "test-low-prio-{{ .User.Labels.org }}"
     criteria:
       - priority < 10

@@ -4,6 +4,8 @@ name: hdfs
 components:
 
   - name: hdfs
+    discovery:
+      url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}"
     code:
       type: aptomi/code/kubernetes-helm
       metadata:

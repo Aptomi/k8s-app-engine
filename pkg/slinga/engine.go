@@ -14,10 +14,9 @@ import (
 
 // TemplateData defines struct that holds all params and gets passed to template engine for evaluating template string
 type TemplateData struct {
-	ComponentInstance   string
-	Labels     map[string]string
-	User       User
-	Components map[string]interface{}
+	Labels    map[string]string
+	User      User
+	Discovery map[string]interface{}
 }
 
 // ResolveUsage evaluates all recorded Dependencies ("<user> needs <service> with <labels>") and calculates allocations
@@ -116,27 +115,36 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		// Is it a code?
 		var codeParams interface{}
 		var discoveryParams interface{}
+
+		componentKey := usage.createServiceUsageKey(service, context, allocation, component)
+		discoveryParams, err = component.processTemplateParams(component.Discovery, componentKey, componentLabels, user, cim, "discovery", depth, usage.tracing.do(trace))
+		if err != nil {
+			return "", err
+		}
+
+		// Create new map with resolution keys for component
+		cimComponent := make(map[string]interface{})
+		cim[component.Name] = cimComponent
+
 		if component.Code != nil {
 			// Evaluate code params
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
-			componentKey := usage.createServiceUsageKey(service, context, allocation, component)
-			codeParams, err = component.processCodeParams(component.Code.Params, componentKey, componentLabels, user, cim, depth, usage.tracing.do(trace))
+
+			// TODO: WAT?? no HelmName please
+			cimComponent["instance"] = HelmName(componentKey)
+			if discoveryParamsMap, ok := discoveryParams.(map[interface{}]interface{}); ok {
+				for k, v := range discoveryParamsMap {
+					cimComponent[k.(string)] = v
+				}
+			}
+
+			codeParams, err = component.processTemplateParams(component.Code.Params, componentKey, componentLabels, user, cim, "code", depth, usage.tracing.do(trace))
 			if err != nil {
 				return "", err
 			}
-
-			discoveryParams, err = component.processCodeParams(component.Discovery, componentKey, componentLabels, user, cim, depth, usage.tracing.do(trace))
-			if err != nil {
-				return "", err
-			}
-
 		} else if component.Service != "" {
 			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
 			usage.tracing.do(trace).newline()
-
-			// Create new map with resolution keys for component
-			cimComponent := make(map[string]interface{})
-			cim[component.Name] = cimComponent
 
 			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, trace, depth+1)
 			if err != nil {
@@ -147,16 +155,12 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels, codeParams, discoveryParams)
-
-		// Record component key in cim, if it's code
-		if component.Code != nil {
-			cim[component.Name] = componentKey
-		}
+		usage.recordUsage(componentKey, user, componentLabels, codeParams, discoveryParams)
 	}
 
 	// Record usage of a given service
-	usage.recordUsage(user, service, context, allocation, nil, labels, nil, nil)
+	serviceKey := usage.createServiceUsageKey(service, context, allocation, nil)
+	usage.recordUsage(serviceKey, user, labels, nil, nil)
 
 	return context.Name + "#" + allocation.NameResolved, nil
 }
@@ -289,14 +293,23 @@ func (err ProcessingError) Error() string {
 	return err.Reason
 }
 
-func (component *ServiceComponent) processCodeParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
-	tracing.log(depth+1, "Component: %s (code)", component.Name)
+func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, templateType string, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
+	if template == nil {
+		return nil, nil
+	}
+	tracing.log(depth+1, "Component: %s (%s)", component.Name, templateType)
+
+	cimCopy := make(map[string]interface{})
+	// TODO SPARTAAA!
+	cimCopy["instance"] = HelmName(componentKey)
+	for k, v := range cim {
+		cimCopy[k] = v
+	}
 
 	templateData := TemplateData{
-		ComponentInstance: HelmName(componentKey),
-		Labels:     labels.Labels,
-		Components: cim,
-		User:       user}
+		Labels:    labels.Labels,
+		Discovery: cimCopy,
+		User:      user}
 
 	var evalParamsInterface func(params interface{}) (interface{}, error)
 	evalParamsInterface = func(params interface{}) (interface{}, error) {

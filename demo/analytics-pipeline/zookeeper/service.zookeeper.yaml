@@ -4,6 +4,8 @@ name: zookeeper
 components:
 
   - name: zookeeper
+    discovery:
+      url: "zk-{{ .Discovery.instance }}-0.zk-{{ .Discovery.instance }}:2181"
     code:
       type: aptomi/code/kubernetes-helm
       metadata:

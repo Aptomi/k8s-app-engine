@@ -14,12 +14,12 @@ labels:
 allocations:
 
   # always personal instance for high priority users with prod == yes
-  - name: personal-{{ .User.Name }}
+  - name: "personal-{{ .User.Name }}"
     criteria:
       - prod == "yes" && priority >= 10
 
   # all other users sharing single instance inside team
-  - name: shared-{{ .User.Labels.team }}
+  - name: "shared-{{ .User.Labels.team }}"
     criteria:
       - "true"
 

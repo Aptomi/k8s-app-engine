@@ -11,6 +11,6 @@ labels:
 
 allocations:
 
-  - name: prod-{{ .User.Labels.team }}
+  - name: "prod-{{ .User.Labels.team }}"
     criteria:
       - "true"

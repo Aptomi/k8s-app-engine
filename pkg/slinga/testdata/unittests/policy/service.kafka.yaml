@@ -18,11 +18,11 @@ components:
 
   - name: component2
     discovery:
-      url: kafka-{{ .ComponentInstance }}-url
+      url: "kafka-{{ .Discovery.instance }}-url"
     code:
       type: aptomi/code/unittests
       params:
-        address: "{{ .Components.component1.component2 }}"
+        address: "{{ .Discovery.component1.component2.instance }}"
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

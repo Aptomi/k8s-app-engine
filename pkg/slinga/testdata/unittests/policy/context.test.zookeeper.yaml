@@ -17,7 +17,7 @@ labels:
 
 allocations:
 
-  - name: test-{{.User.Labels.team}}
+  - name: "test-{{.User.Labels.team}}"
     criteria:
       accept:
         - priority >= 2
@@ -28,7 +28,7 @@ allocations:
         a:
         b:
 
-  - name: test-{{.User.Labels.team}}
+  - name: "test-{{.User.Labels.team}}"
     criteria:
       accept:
         - priority < 2

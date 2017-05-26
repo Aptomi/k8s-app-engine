@@ -81,9 +81,7 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet, codeParams interface{}, discoveryParams interface{}) string {
-	key := usage.createServiceUsageKey(service, context, allocation, component)
-
+func (usage *ServiceUsageState) recordUsage(key string, user User, labels LabelSet, codeParams interface{}, discoveryParams interface{}) string {
 	if _, ok := usage.ResolvedLinks[key]; !ok {
 		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
 	}
