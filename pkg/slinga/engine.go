@@ -110,7 +110,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		if component.Code != nil {
 			// Evaluate code params
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
-			codeParams, err = component.processCodeContent(componentLabels, user, cim, depth, usage.tracing.do(trace))
+			codeParams, err = component.processCodeParams(componentLabels, user, cim, depth, usage.tracing.do(trace))
 			if err != nil {
 				return "", err
 			}
@@ -274,7 +274,7 @@ func (err ProcessingError) Error() string {
 	return err.Reason
 }
 
-func (component *ServiceComponent) processCodeContent(labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
+func (component *ServiceComponent) processCodeParams(labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
 	tracing.log(depth+1, "Component: %s (code)", component.Name)
 
 	var evalParamsInterface func(params interface{}) (interface{}, error)
