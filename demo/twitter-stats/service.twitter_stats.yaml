@@ -78,8 +78,8 @@ components:
           repository: frostman/tweeviz
           tag: 1.0.0
 
-        minPopularity: 1
-        topListSize: 0
+        minPopularity: 0
+        topListSize: 25
 
         service:
           type: NodePort
