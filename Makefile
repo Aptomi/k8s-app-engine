@@ -9,6 +9,7 @@ vendor:
 test:
 	go test -v ./cmd/...
 	go test -v ./pkg/...
+	@echo "\nAll tests passed"
 
 .PHONY: build
 build:
