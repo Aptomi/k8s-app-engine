@@ -122,9 +122,11 @@ Processing flow:
 * [SL or RA] Make sure that if something failed during apply, new state will not be saved, so, we can just re-run apply
 * [SL] support for multiple k8s clusters
 * [SL] support deployment of specific versions, as well as
+* [SL] add Last updated x seconds ago to tweeviz and custom info field (User name + stage / prod)
+* [SL] aptomi show endpoints (print services endpoints)
    deploy "latest" (or matching by regex) from docker registry
 * [Done - RA] more compact visualization
-* [RA] "no changes" shit is incorrect, doesn't take component updates into account
+* [Done - RA] "no changes" shit is incorrect, doesn't take component updates into account
 * [RA] criteria -> accept and reject
 
 * We can consider adding "tests for DevOps" (smart tracing)
