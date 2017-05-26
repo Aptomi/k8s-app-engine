@@ -41,6 +41,8 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 	return false, nil
 }
 
+//func preparePar
+
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
 	releaseName := strings.ToLower(HelmName(key))
@@ -75,7 +77,35 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
 func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	// TODO: implement update method
+	// TODO merge with Install
+	releaseName := strings.ToLower(HelmName(key))
+
+	chartName := codeMetadata["chartName"]
+
+	helmClient := newHelmClient()
+
+	// TODO check err separately
+	if exists, err := findHelmRelease(helmClient, releaseName); exists && err == nil {
+		// TODO log that it's already installed
+		// TODO update release just in case
+		return nil
+	}
+
+	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
+
+	vals, err := yaml.Marshal(codeParams)
+	if err != nil {
+		return err
+	}
+
+	glog.Infof("Upgrading Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
+
+	// TODO is it good to reuse name?
+	_ /*resp*/, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
+	if err != nil {
+		return err
+	}
+	
 	return nil
 }
 
