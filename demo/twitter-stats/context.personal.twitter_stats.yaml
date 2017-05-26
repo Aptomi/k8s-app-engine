@@ -7,6 +7,6 @@ criteria:
 
 allocations:
 
-  - name: team-{{ .User.Name }}
+  - name: personal-{{ .User.Name }}
     criteria:
       - "true"
