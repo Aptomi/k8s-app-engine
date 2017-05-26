@@ -5,6 +5,7 @@
    - "Twitter Stats" service (twitter real-time messages -> DAP -> stats on web)
    - Explain our model (what gets matched and how)
    - Explain what we are going to show
+   TODO: think about how to show high-value on slides
 
 2. Show policy
    - Run with empty dependencies. Show service graph
