@@ -1,20 +1,10 @@
 # Definition of Kafka service
 name: kafka
 
-labels:
-  set:
-    a: b
-
 components:
 
   - name: zookeeper
     service: zookeeper
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
 
   - name: kafka
     code:
@@ -28,17 +18,10 @@ components:
         image:
           repository: mirantisworkloads/kafka
           tag: 0.10.2.0
-          pullPolicy: Always
 
         zookeeper:
           deployChart: false
           externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181
 
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
     dependencies:
       - zookeeper

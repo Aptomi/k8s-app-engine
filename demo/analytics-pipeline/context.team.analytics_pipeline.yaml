@@ -10,9 +10,3 @@ allocations:
   - name: team-{{ .User.Labels.team }}
     criteria:
       - "true"
-    labels:
-      set:
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:

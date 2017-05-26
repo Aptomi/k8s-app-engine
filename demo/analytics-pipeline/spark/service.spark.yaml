@@ -1,20 +1,10 @@
 # Definition of Spark service
 name: spark
 
-labels:
-  set:
-    a: b
-
 components:
 
   - name: zookeeper
     service: zookeeper
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
 
   - name: spark
     code:
@@ -26,17 +16,10 @@ components:
           image:
             repository: mirantisworkloads/spark
             tag: 2.1.0
-            pullPolicy: Always
           master:
             replicas: 1
           worker:
             replicas: 1
-
-        zeppelin:
-          image:
-            repository: mirantisworkloads/zeppelin
-            tag: 0.7.1
-            pullPolicy: Always
 
         service:
           type: NodePort
@@ -44,11 +27,5 @@ components:
         zookeeper:
           deployChart: false
           externalAddress: zk-{{ .Components.zookeeper.zookeeper }}-0.zk-{{ .Components.zookeeper.zookeeper }}:2181
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
     dependencies:
       - zookeeper

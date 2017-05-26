@@ -15,7 +15,6 @@ components:
         image:
           repository: frostman/tweepub
           tag: latest
-          pullPolicy: Always
 
         twitter:
           appKey: EDITME
@@ -41,7 +40,6 @@ components:
         image:
           repository: kshatrix/tweetics
           tag: latest
-          pullPolicy: Always
 
         minHashtagCounts: 0
 
@@ -80,7 +78,6 @@ components:
         image:
           repository: frostman/tweeviz
           tag: latest
-          pullPolicy: Always
 
         minPopularity: 1
         topListSize: 0

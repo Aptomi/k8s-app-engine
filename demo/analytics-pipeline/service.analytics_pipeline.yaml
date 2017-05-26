@@ -1,35 +1,13 @@
 # Definition of Analytics Pipeline service
 name: analytics_pipeline
 
-labels:
-  set:
-    a: b
-
 components:
 
   - name: kafka
     service: kafka
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
 
   - name: spark
     service: spark
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
 
   - name: hdfs
     service: hdfs
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:

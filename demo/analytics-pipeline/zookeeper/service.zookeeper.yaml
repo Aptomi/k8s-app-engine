@@ -1,10 +1,6 @@
 # Definition of Zookeeper service
 name: zookeeper
 
-labels:
-  set:
-    a: b
-
 components:
 
   - name: zookeeper
@@ -18,10 +14,3 @@ components:
         image:
           repository: mirantisworkloads/zookeeper
           tag: 3.5.3-rc1
-          pullPolicy: Always
-    labels:
-      set: # add/modify
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
