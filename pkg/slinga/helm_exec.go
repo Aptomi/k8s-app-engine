@@ -85,7 +85,7 @@ func (executor HelmCodeExecutor) Destroy(key string) error {
 	uid := strings.ToLower(HelmName(key))
 
 	helmClient := newHelmClient()
-	if _, err := helmClient.DeleteRelease(uid); err != nil {
+	if _, err := helmClient.DeleteRelease(uid, helm.DeletePurge(true)); err != nil {
 		return err
 	}
 
