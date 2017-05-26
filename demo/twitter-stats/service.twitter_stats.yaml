@@ -17,12 +17,12 @@ components:
           tag: latest
 
         twitter:
-          appKey: EDITME
-          appSecret: EDITME
-          tokenKey: EDITME
-          tokenSecret: EDITME
+          appKey: "{{ .Labels.appKey }}"
+          appSecret: "{{ .Labels.appSecret }}"
+          tokenKey: "{{ .Labels.tokenKey }}"
+          tokenSecret: "{{ .Labels.tokenSecret }}"
 
-          locations: -71.4415,41.9860,-70.4747,42.9041
+          locations: "{{ .Labels.locations }}"
 
         kafka:
           deployChart: false
@@ -50,7 +50,7 @@ components:
         kafka:
           deployChart: false
           externalAddress: kafka-{{ .Components.analytics_pipeline.kafka.kafka }}-0.kafka-{{ .Components.analytics_pipeline.kafka.kafka }}:9092
-          topic: twitter-stream
+          topic: tweepub_{{ .User.Name }}
           zookeeper:
             deployChart: false
             externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
@@ -64,8 +64,7 @@ components:
         hdfs:
           deployChart: false
           externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}
-          # TODO make path unique
-          path: /twitter
+          path: /twitter-{{ .User.Name }}/results
     dependencies:
       - analytics_pipeline
 
@@ -77,7 +76,7 @@ components:
       params:
         image:
           repository: frostman/tweeviz
-          tag: latest
+          tag: a-test-02
 
         minPopularity: 1
         topListSize: 0
@@ -87,8 +86,7 @@ components:
 
         hdfs:
           deployChart: false
-          externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-1
-          # TODO make path unique
-          path: /
+          externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}
+          path: /twitter-{{ .User.Name }}
     dependencies:
       - analytics_pipeline
