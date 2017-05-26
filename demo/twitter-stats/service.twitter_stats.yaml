@@ -14,7 +14,7 @@ components:
       params:
         image:
           repository: frostman/tweepub
-          tag: latest
+          tag: 1.0.0
 
         twitter:
           appKey: "{{ .Labels.appKey }}"
@@ -38,8 +38,8 @@ components:
         chartName: tweetics-0.1.0
       params:
         image:
-          repository: kshatrix/tweetics
-          tag: latest
+          repository: frostman/tweetics
+          tag: 1.0.0
 
         minHashtagCounts: 0
 
@@ -76,7 +76,7 @@ components:
       params:
         image:
           repository: frostman/tweeviz
-          tag: a-test-02
+          tag: 1.0.0
 
         minPopularity: 1
         topListSize: 0

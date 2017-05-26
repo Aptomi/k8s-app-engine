@@ -14,7 +14,7 @@ components:
       params:
         spark:
           image:
-            repository: mirantisworkloads/spark
+            repository: frostman/spark
             tag: 2.1.0
           master:
             replicas: 1

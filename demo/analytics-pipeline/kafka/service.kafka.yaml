@@ -16,7 +16,7 @@ components:
         antiAffinity: "soft"
 
         image:
-          repository: mirantisworkloads/kafka
+          repository: frostman/kafka
           tag: 0.10.2.0
 
         zookeeper:
