@@ -43,14 +43,14 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	uid := strings.ToLower(HelmName(key))
+	releaseName := strings.ToLower(HelmName(key))
 
 	chartName := codeMetadata["chartName"]
 
 	helmClient := newHelmClient()
 
 	// TODO check err separately
-	if exists, err := findHelmRelease(helmClient, uid); exists && err == nil {
+	if exists, err := findHelmRelease(helmClient, releaseName); exists && err == nil {
 		// TODO log that it's already installed
 		// TODO update release just in case
 		return nil
@@ -63,10 +63,10 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 		return err
 	}
 
-	glog.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", uid, chartName, chartPath, string(vals))
+	glog.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
 
 	// TODO is it good to reuse name?
-	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "aptomi", helm.ReleaseName(uid), helm.ValueOverrides(vals), helm.InstallReuseName(true))
+	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "aptomi", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
 	if err != nil {
 		return err
 	}
@@ -81,13 +81,13 @@ func (executor HelmCodeExecutor) Update(key string, labels LabelSet) error {
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
 func (executor HelmCodeExecutor) Destroy(key string) error {
-	uid := strings.ToLower(HelmName(key))
+	releaseName := strings.ToLower(HelmName(key))
 
 	helmClient := newHelmClient()
 
-	glog.Infof("Deleting Helm release '%s'", uid)
+	glog.Infof("Deleting Helm release '%s'", releaseName)
 
-	if _, err := helmClient.DeleteRelease(uid, helm.DeletePurge(true)); err != nil {
+	if _, err := helmClient.DeleteRelease(releaseName, helm.DeletePurge(true)); err != nil {
 		return err
 	}
 
