@@ -30,7 +30,7 @@ components:
           master:
             replicas: 1
           worker:
-            replicas: 2
+            replicas: 1
 
         zeppelin:
           image:
