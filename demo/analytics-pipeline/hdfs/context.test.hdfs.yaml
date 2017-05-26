@@ -3,7 +3,8 @@ name: test
 service: hdfs
 
 criteria:
-  - dev == "yes" || qa == "yes"
+  accept:
+    - dev == "yes" || qa == "yes"
 
 labels:
   set:
@@ -13,8 +14,10 @@ allocations:
 
   - name: test-org12
     criteria:
-      - org == "org1" || org == "org2"
+      accept:
+        - org == "org1" || org == "org2"
 
   - name: test-not-org12
     criteria:
-      - org != "org1" && org != "org2"
+      accept:
+        - org != "org1" && org != "org2"

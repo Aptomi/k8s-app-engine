@@ -3,7 +3,8 @@ name: prod
 service: kafka
 
 criteria:
-  - prod == "yes"
+  accept:
+    - prod == "yes"
 
 labels:
   set:
@@ -12,5 +13,3 @@ labels:
 allocations:
 
   - name: "prod-{{ .User.Labels.team }}"
-    criteria:
-      - "true"

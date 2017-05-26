@@ -3,10 +3,9 @@ name: personal
 service: twitter-stats
 
 criteria:
-  - dev == "yes" || prod == "yes" || qa == "yes"
+  accept:
+    - dev == "yes" || prod == "yes" || qa == "yes"
 
 allocations:
 
   - name: "personal-{{ .User.Name }}"
-    criteria:
-      - "true"

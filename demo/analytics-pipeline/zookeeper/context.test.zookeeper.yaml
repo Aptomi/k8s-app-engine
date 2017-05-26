@@ -3,7 +3,8 @@ name: test
 service: zookeeper
 
 criteria:
-  - dev == "yes" || qa == "yes"
+  accept:
+    - dev == "yes" || qa == "yes"
 
 labels:
   set:
@@ -12,5 +13,3 @@ labels:
 allocations:
 
   - name: "test-{{ .User.Labels.org }}"
-    criteria:
-      - "true"

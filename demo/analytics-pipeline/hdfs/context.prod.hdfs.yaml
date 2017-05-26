@@ -3,14 +3,13 @@ name: prod
 service: hdfs
 
 criteria:
-  - prod == "yes"
+  accept:
+    - prod == "yes"
 
 allocations:
 
     # shared inside organisation
   - name: "prod-{{ .User.Labels.org }}"
-    criteria:
-      - "true"
     labels:
       set:
         antiAffinity: hard

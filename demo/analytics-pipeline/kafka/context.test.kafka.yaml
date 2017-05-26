@@ -3,7 +3,8 @@ name: test
 service: kafka
 
 criteria:
-  - dev == "yes" || qa == "yes"
+  accept:
+    - dev == "yes" || qa == "yes"
 
 labels:
   set:
@@ -13,11 +14,13 @@ allocations:
 
   - name: "test-high-prio-{{ .User.Labels.org }}"
     criteria:
-      - priority >= 10
+      accept:
+        - priority >= 10
     labels:
       set:
         antiAffinity: hard
 
   - name: "test-low-prio-{{ .User.Labels.org }}"
     criteria:
-      - priority < 10
+      accept:
+        - priority < 10

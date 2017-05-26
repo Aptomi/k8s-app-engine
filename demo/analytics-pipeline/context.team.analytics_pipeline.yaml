@@ -3,10 +3,9 @@ name: team
 service: analytics_pipeline
 
 criteria:
-  - dev == "yes" || prod == "yes" || qa == "yes"
+  accept:
+    - dev == "yes" || prod == "yes" || qa == "yes"
 
 allocations:
 
   - name: "team-{{ .User.Labels.team }}"
-    criteria:
-      - "true"
