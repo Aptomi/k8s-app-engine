@@ -282,14 +282,14 @@ func (component *ServiceComponent) processCodeParams(labels LabelSet, user User,
 		if params == nil {
 			return "", nil
 		} else if paramsMap, ok := params.(map[interface{}]interface{}); ok {
-			resultMap := make(map[string]interface{})
+			resultMap := make(map[interface{}]interface{})
 
 			for key, value := range paramsMap {
 				evaluatedValue, err := evalParamsInterface(value)
 				if err != nil {
 					return nil, err
 				}
-				resultMap[key.(string)] = evaluatedValue
+				resultMap[key] = evaluatedValue
 			}
 
 			return resultMap, nil

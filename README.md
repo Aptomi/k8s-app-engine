@@ -124,6 +124,7 @@ Processing flow:
 * [SL] support deployment of specific versions, as well as
    deploy "latest" (or matching by regex) from docker registry
 * [Done - RA] more compact visualization
+* [RA] "no changes" shit is incorrect, doesn't take component updates into account
 
 * We can consider adding "tests for DevOps" (smart tracing)
 
