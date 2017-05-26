@@ -10,10 +10,9 @@ components:
   - name: component1
     code:
       type: aptomi/code/unittests
-      content:
-        metadata:
-          service: zookeeper
-          component: component1
+      metadata:
+        service: zookeeper
+        component: component1
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -26,10 +25,9 @@ components:
   - name: component2
     code:
       type: aptomi/code/unittests
-      content:
-        metadata:
-          service: zookeeper
-          component: component2
+      metadata:
+        service: zookeeper
+        component: component2
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

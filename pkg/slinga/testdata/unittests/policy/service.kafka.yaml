@@ -19,9 +19,8 @@ components:
   - name: component2
     code:
       type: aptomi/code/unittests
-      content:
-        params:
-          address: "{{ .Components.component1.component2 }}"
+      params:
+        address: "{{ .Components.component1.component2 }}"
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
@@ -34,10 +33,9 @@ components:
   - name: component3
     code:
       type: aptomi/code/unittests
-      content:
-        metadata:
-          service: kafka
-          component: component3
+      metadata:
+        service: kafka
+        component: component3
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value
