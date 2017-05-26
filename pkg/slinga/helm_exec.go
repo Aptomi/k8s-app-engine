@@ -84,13 +84,6 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 
 	helmClient := newHelmClient()
 
-	// TODO check err separately
-	if exists, err := findHelmRelease(helmClient, releaseName); exists && err == nil {
-		// TODO log that it's already installed
-		// TODO update release just in case
-		return nil
-	}
-
 	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
 
 	vals, err := yaml.Marshal(codeParams)
@@ -105,7 +98,7 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
