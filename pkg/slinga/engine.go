@@ -1,9 +1,9 @@
 package slinga
 
 import (
+	"bytes"
 	"errors"
 	"github.com/golang/glog"
-	"bytes"
 	"strings"
 	"text/template"
 )

@@ -22,4 +22,3 @@ func (code *Code) GetCodeExecutor() (CodeExecutor, error) {
 		return nil, errors.New("CodeExecutor not found: " + code.Type)
 	}
 }
-

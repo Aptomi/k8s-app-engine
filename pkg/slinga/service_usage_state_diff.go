@@ -240,7 +240,7 @@ func (diff ServiceUsageStateDiff) Apply() {
 	for _, key := range diff.Prev.ProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				glog.Infof("Destructing service: %s", serviceName)

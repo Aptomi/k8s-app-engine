@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"github.com/golang/glog"
+	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"strings"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
