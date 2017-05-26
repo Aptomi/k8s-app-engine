@@ -19,9 +19,14 @@ func TestEngine(t *testing.T) {
 
 	// Check that parameter evaluates correctly
 	v := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
+
 	paramsMap, ok := v.CalculatedCodeParams.(map[interface{}]interface{})
 	assert.Equal(t, true, ok, "Calculated Code Params should be map")
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", paramsMap["address"], "Code parameter should be calculated correctly")
+
+	discoveryMap, ok := v.CalculatedDiscovery.(map[interface{}]interface{})
+	assert.Equal(t, true, ok, "Calculated Discovery should be map")
+	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", discoveryMap["url"], "Discovery parameter should be calculated correctly")
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {

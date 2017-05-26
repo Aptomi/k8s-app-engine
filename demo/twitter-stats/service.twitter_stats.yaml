@@ -45,7 +45,7 @@ components:
 
         zookeeper:
           deployChart: false
-          externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+          externalAddress: {{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}
 
         kafka:
           deployChart: false
@@ -61,6 +61,7 @@ components:
           zookeeper:
             deployChart: false
             externalAddress: zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}-0.zk-{{ .Components.analytics_pipeline.kafka.zookeeper.zookeeper }}:2181
+
         hdfs:
           deployChart: false
           externalAddress: hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}-0.hdfs-namenode-{{ .Components.analytics_pipeline.hdfs.hdfs }}

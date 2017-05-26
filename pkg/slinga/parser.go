@@ -46,6 +46,7 @@ type ServiceComponent struct {
 	Name         string
 	Service      string
 	Code         *Code
+	Discovery	 interface{}
 	Dependencies []string
 	Labels       *LabelOperations
 }

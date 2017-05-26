@@ -17,6 +17,8 @@ components:
         b:
 
   - name: component2
+    discovery:
+      url: kafka-{{ .ComponentInstance }}-url
     code:
       type: aptomi/code/unittests
       params:

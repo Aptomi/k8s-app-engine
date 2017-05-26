@@ -12,6 +12,14 @@ import (
 	Core engine for Slinga processing and evaluation
 */
 
+// TemplateData defines struct that holds all params and gets passed to template engine for evaluating template string
+type TemplateData struct {
+	ComponentInstance   string
+	Labels     map[string]string
+	User       User
+	Components map[string]interface{}
+}
+
 // ResolveUsage evaluates all recorded Dependencies ("<user> needs <service> with <labels>") and calculates allocations
 func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 	for serviceName, dependencies := range usage.Dependencies.Dependencies {
@@ -107,11 +115,17 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 
 		// Is it a code?
 		var codeParams interface{}
+		var discoveryParams interface{}
 		if component.Code != nil {
 			// Evaluate code params
 			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
 			componentKey := usage.createServiceUsageKey(service, context, allocation, component)
-			codeParams, err = component.processCodeParams(componentKey, componentLabels, user, cim, depth, usage.tracing.do(trace))
+			codeParams, err = component.processCodeParams(component.Code.Params, componentKey, componentLabels, user, cim, depth, usage.tracing.do(trace))
+			if err != nil {
+				return "", err
+			}
+
+			discoveryParams, err = component.processCodeParams(component.Discovery, componentKey, componentLabels, user, cim, depth, usage.tracing.do(trace))
 			if err != nil {
 				return "", err
 			}
@@ -133,7 +147,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels, codeParams)
+		componentKey := usage.recordUsage(user, service, context, allocation, component, componentLabels, codeParams, discoveryParams)
 
 		// Record component key in cim, if it's code
 		if component.Code != nil {
@@ -142,7 +156,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	}
 
 	// Record usage of a given service
-	usage.recordUsage(user, service, context, allocation, nil, labels, nil)
+	usage.recordUsage(user, service, context, allocation, nil, labels, nil, nil)
 
 	return context.Name + "#" + allocation.NameResolved, nil
 }
@@ -275,8 +289,14 @@ func (err ProcessingError) Error() string {
 	return err.Reason
 }
 
-func (component *ServiceComponent) processCodeParams(componentKey string, labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
+func (component *ServiceComponent) processCodeParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
 	tracing.log(depth+1, "Component: %s (code)", component.Name)
+
+	templateData := TemplateData{
+		ComponentInstance: HelmName(componentKey),
+		Labels:     labels.Labels,
+		Components: cim,
+		User:       user}
 
 	var evalParamsInterface func(params interface{}) (interface{}, error)
 	evalParamsInterface = func(params interface{}) (interface{}, error) {
@@ -295,7 +315,7 @@ func (component *ServiceComponent) processCodeParams(componentKey string, labels
 
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
-			evaluatedValue, err := evaluateCodeParamTemplate(componentKey, paramsStr, labels, user, cim)
+			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, templateData)
 			tracing.log(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
 			if err != nil {
 				return nil, err
@@ -310,29 +330,17 @@ func (component *ServiceComponent) processCodeParams(componentKey string, labels
 		return nil, ProcessingError{"There should be map[string]interface{} or string"}
 	}
 
-	return evalParamsInterface(component.Code.Params)
+	return evalParamsInterface(template)
 }
 
-func evaluateCodeParamTemplate(componentKey string, templateStr string, labels LabelSet, user User, cim map[string]interface{}) (string, error) {
-	type Parameters struct {
-		ComponentInstance   string
-		Labels     map[string]string
-		User       User
-		Components map[string]interface{}
-	}
-	param := Parameters{
-		ComponentInstance: HelmName(componentKey),
-		Labels:     labels.Labels,
-		Components: cim,
-		User:       user}
-
+func evaluateCodeParamTemplate(templateStr string, templateData TemplateData) (string, error) {
 	tmpl, err := template.New("").Parse(templateStr)
 	if err != nil {
 		return "", errors.New("Invalid template " + templateStr)
 	}
 
 	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, param)
+	err = tmpl.Execute(&doc, templateData)
 
 	if err != nil {
 		return "", errors.New("Cannot evaluate template " + templateStr)

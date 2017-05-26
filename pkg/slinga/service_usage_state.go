@@ -35,6 +35,7 @@ type ServiceUsageState struct {
 type ResolvedLinkUsageStruct struct {
 	UserIds              []string
 	CalculatedLabels     LabelSet
+	CalculatedDiscovery  interface{}
 	CalculatedCodeParams interface{}
 }
 
@@ -80,28 +81,31 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet, codeParams interface{}) string {
+func (usage *ServiceUsageState) recordUsage(user User, service *Service, context *Context, allocation *Allocation, component *ServiceComponent, labels LabelSet, codeParams interface{}, discoveryParams interface{}) string {
 	key := usage.createServiceUsageKey(service, context, allocation, component)
 
 	if _, ok := usage.ResolvedLinks[key]; !ok {
 		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
 	}
 
-	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels, codeParams)
+	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels, codeParams, discoveryParams)
 	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
 
 	return key
 }
 
 // Adds user and set of labels to the entry
-func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID string, labels LabelSet, codeParams interface{}) {
+func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID string, labels LabelSet, codeParams interface{}, discoveryParams interface{}) {
 	usageStruct.UserIds = append(usageStruct.UserIds, userID)
 
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
 	usageStruct.CalculatedLabels = labels
 
-	// TODO: what to do with different code contents? they should be the same
+	// TODO: what to do with different code contents?
 	usageStruct.CalculatedCodeParams = codeParams
+
+	// TODO: what to do with different discovery contents?
+	usageStruct.CalculatedDiscovery = discoveryParams
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
