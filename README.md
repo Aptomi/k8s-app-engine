@@ -125,6 +125,7 @@ Processing flow:
    deploy "latest" (or matching by regex) from docker registry
 * [Done - RA] more compact visualization
 * [RA] "no changes" shit is incorrect, doesn't take component updates into account
+* [RA] criteria -> accept and reject
 
 * We can consider adding "tests for DevOps" (smart tracing)
 
