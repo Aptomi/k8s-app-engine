@@ -2,7 +2,6 @@ package slinga
 
 import (
 	"fmt"
-	"github.com/golang/glog"
 	"reflect"
 )
 
@@ -286,10 +285,10 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 
 			if component == nil {
-				glog.Infof("Instantiating service: %s (%s)", serviceName, key)
+				debug.Infof("Instantiating service: %s (%s)", serviceName, key)
 				// TODO: add processing code
 			} else {
-				glog.Infof("Instantiating component: %s (%s)", component.Name, key)
+				debug.Infof("Instantiating component: %s (%s)", component.Name, key)
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
@@ -316,10 +315,10 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
-				glog.Infof("Updating service: %s", serviceName)
+				debug.Infof("Updating service: %s", serviceName)
 				// TODO: add processing code
 			} else {
-				glog.Infof("Updating component: %s (%s)", component.Name, component.Code)
+				debug.Infof("Updating component: %s (%s)", component.Name, component.Code)
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
@@ -346,10 +345,10 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
-				glog.Infof("Destructing service: %s", serviceName)
+				debug.Infof("Destructing service: %s", serviceName)
 				// TODO: add processing code
 			} else {
-				glog.Infof("Destructing component: %s (%s)", component.Name, component.Code)
+				debug.Infof("Destructing component: %s (%s)", component.Name, component.Code)
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()

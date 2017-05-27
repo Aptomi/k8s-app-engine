@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"github.com/Sirupsen/logrus"
+	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 var debug bool
@@ -15,9 +16,8 @@ var RootCmd = &cobra.Command{
 	Short: "Aptomi - policy & governance for microservices",
 	Long:  `Aptomi - policy & governance for microservices`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		flag.Parse()
 		if debug {
-			flag.Lookup("logtostderr").Value.Set("true")
+			slinga.SetDebugLevel(logrus.DebugLevel)
 		}
 	},
 	// Uncomment the following line if your bare application

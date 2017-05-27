@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -33,12 +32,12 @@ func LoadUserByIDFromDir(dir string, id string) User {
 func LoadUsersFromDir(dir string) GlobalUsers {
 	dat, e := ioutil.ReadFile(dir + "/users.yaml")
 	if e != nil {
-		glog.Fatalf("Unable to read file: %v", e)
+		debug.Fatalf("Unable to read file: %v", e)
 	}
 	t := []User{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		glog.Fatalf("Unable to unmarshal user: %v", e)
+		debug.Fatalf("Unable to unmarshal user: %v", e)
 	}
 	r := GlobalUsers{Users: make(map[string]User)}
 	for _, u := range t {

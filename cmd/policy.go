@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	log "github.com/Sirupsen/logrus"
 )
 
 var noop bool
@@ -38,7 +38,7 @@ var policyCmdApply = &cobra.Command{
 		err := nextUsageState.ResolveUsage(&users)
 
 		if err != nil {
-			glog.Fatalf("Cannot resolve usage: %v", err)
+			log.Panicf("Cannot resolve usage: %v", err)
 		}
 
 		// Process differences

@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"github.com/golang/glog"
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"strings"
@@ -18,7 +17,8 @@ func HelmName(str string) string {
 }
 
 const (
-	//tillerHost = "tiller-deploy.kube-system.svc.cluster.local:44134"
+	// tillerHost = "tiller-deploy.kube-system.svc.cluster.local:44134"
+	// tillerHost = "192.168.64.6:30350"
 	tillerHost = "kapp-demo-1:40666"
 )
 
@@ -40,8 +40,6 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 
 	return false, nil
 }
-
-//func preparePar
 
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
@@ -65,7 +63,7 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 		return err
 	}
 
-	glog.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
+	debug.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
 
 	// TODO is it good to reuse name?
 	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
@@ -91,7 +89,7 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 		return err
 	}
 
-	glog.Infof("Upgrading Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
+	debug.Infof("Upgrading Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
 
 	// TODO is it good to reuse name?
 	_ /*resp*/, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
@@ -108,7 +106,7 @@ func (executor HelmCodeExecutor) Destroy(key string) error {
 
 	helmClient := newHelmClient()
 
-	glog.Infof("Deleting Helm release '%s'", releaseName)
+	debug.Infof("Deleting Helm release '%s'", releaseName)
 
 	if _, err := helmClient.DeleteRelease(releaseName, helm.DeletePurge(true)); err != nil {
 		return err

@@ -1,7 +1,6 @@
 package: github.com/Frostman/aptomi
 import:
 - package: gopkg.in/yaml.v2
-- package: github.com/golang/glog
 - package: github.com/Knetic/govaluate
   version: ^3.0.0
 - package: github.com/awalterschulze/gographviz
@@ -12,6 +11,8 @@ import:
   version: 2.3.1
   subpackages:
   - pkg/helm
+- package: github.com/Sirupsen/logrus
+  version: ^0.11.5
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4

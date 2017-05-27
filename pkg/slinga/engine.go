@@ -3,7 +3,6 @@ package slinga
 import (
 	"bytes"
 	"errors"
-	"github.com/golang/glog"
 	"strings"
 	"text/template"
 )
@@ -31,8 +30,15 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 			// combine them with dependency labels
 			labels = labels.addLabels(d.getLabelSet())
 
+			// see if it needs to be traced (addl debug output on console)
+			tracing.setEnable(d.Trace)
+
 			// resolve usage via applying policy
-			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.ComponentInstanceMap, d.Trace, 0)
+			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.ComponentInstanceMap, 0)
+
+			// disable tracing
+			tracing.setEnable(false)
+
 			if err != nil {
 				return err
 			}
@@ -43,15 +49,15 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 }
 
 // Evaluate "<user> needs <service>" statement
-func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet, cim map[string]interface{}, trace bool, depth int) (string, error) {
+func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet, cim map[string]interface{}, depth int) (string, error) {
 
 	// Resolving allocations for service
-	glog.Infof("Resolving allocations for service %s (user = %s, labels = %s)", serviceName, user.Name, labels)
+	debug.Infof("Resolving allocations for service %s (user = %s, labels = %s)", serviceName, user.Name, labels)
 
-	usage.tracing.do(trace).log(depth, "[Dependency]")
-	usage.tracing.do(trace).log(depth, "User: %s (ID = %s)", user.Name, user.ID)
-	usage.tracing.do(trace).log(depth+1, "Labels: %s", labels)
-	usage.tracing.do(trace).log(depth, "Service: %s", serviceName)
+	tracing.log(depth, "[Dependency]")
+	tracing.log(depth, "User: %s (ID = %s)", user.Name, user.ID)
+	tracing.log(depth+1, "Labels: %s", labels)
+	tracing.log(depth, "Service: %s", serviceName)
 
 	// Policy
 	policy := usage.Policy
@@ -59,47 +65,47 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Locate the service
 	service, err := policy.getService(serviceName)
 	if err != nil {
-		usage.tracing.do(trace).log(depth, "Error while trying to look up service %s (%v)", serviceName, err)
+		tracing.log(depth, "Error while trying to look up service %s (%v)", serviceName, err)
 		return "", err
 	}
 
 	// Process service and transform labels
 	labels = labels.applyTransform(service.Labels)
-	usage.tracing.do(trace).log(depth+1, "New labels = %s", labels)
+	tracing.log(depth+1, "New labels = %s", labels)
 
 	// Match the context
-	context, err := policy.getMatchedContext(*service, user, labels, depth, usage.tracing.do(trace))
+	context, err := policy.getMatchedContext(*service, user, labels, depth)
 	if err != nil {
-		usage.tracing.do(trace).log(depth, "Error while matching context for service %s (%v)", serviceName, err)
+		tracing.log(depth, "Error while matching context for service %s (%v)", serviceName, err)
 		return "", err
 	}
 	// If no matching context is found, let's just exit
 	if context == nil {
-		usage.tracing.do(trace).log(depth, "No context matched for service %s", serviceName)
+		tracing.log(depth, "No context matched for service %s", serviceName)
 		return "", nil
 	}
 
 	// Process context and transform labels
 	labels = labels.applyTransform(context.Labels)
-	usage.tracing.do(trace).log(depth, "Context: %s", context.Name)
-	usage.tracing.do(trace).log(depth+1, "New labels = %s", labels)
+	tracing.log(depth, "Context: %s", context.Name)
+	tracing.log(depth+1, "New labels = %s", labels)
 
 	// Match the allocation
-	allocation, err := policy.getMatchedAllocation(*service, user, *context, labels, depth, usage.tracing.do(trace))
+	allocation, err := policy.getMatchedAllocation(*service, user, *context, labels, depth)
 	if err != nil {
-		usage.tracing.do(trace).log(depth, "Error while matching allocation for service %s, context %s (%v)", serviceName, context.Name, err)
+		tracing.log(depth, "Error while matching allocation for service %s, context %s (%v)", serviceName, context.Name, err)
 		return "", err
 	}
 	// If no matching allocation is found, let's just exit
 	if allocation == nil {
-		usage.tracing.do(trace).log(depth, "No allocation matched for service %s, context %s", serviceName, context.Name)
+		tracing.log(depth, "No allocation matched for service %s, context %s", serviceName, context.Name)
 		return "", nil
 	}
 
 	// Process allocation and transform labels
 	labels = labels.applyTransform(allocation.Labels)
-	usage.tracing.do(trace).log(depth, "Allocation: %s", allocation.NameResolved)
-	usage.tracing.do(trace).log(depth+1, "New labels = %s", labels)
+	tracing.log(depth, "Allocation: %s", allocation.NameResolved)
+	tracing.log(depth+1, "New labels = %s", labels)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := service.getComponentsSortedTopologically()
@@ -117,7 +123,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		var discoveryParams interface{}
 
 		componentKey := usage.createServiceUsageKey(service, context, allocation, component)
-		discoveryParams, err = component.processTemplateParams(component.Discovery, componentKey, componentLabels, user, cim, "discovery", depth, usage.tracing.do(trace))
+		discoveryParams, err = component.processTemplateParams(component.Discovery, componentKey, componentLabels, user, cim, "discovery", depth)
 		if err != nil {
 			return "", err
 		}
@@ -128,7 +134,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 
 		if component.Code != nil {
 			// Evaluate code params
-			glog.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
+			debug.Infof("Processing dependency on code execution: %s (in %s)", component.Name, service.Name)
 
 			// TODO: WAT?? no HelmName please
 			cimComponent["instance"] = HelmName(componentKey)
@@ -138,20 +144,20 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 				}
 			}
 
-			codeParams, err = component.processTemplateParams(component.Code.Params, componentKey, componentLabels, user, cim, "code", depth, usage.tracing.do(trace))
+			codeParams, err = component.processTemplateParams(component.Code.Params, componentKey, componentLabels, user, cim, "code", depth)
 			if err != nil {
 				return "", err
 			}
 		} else if component.Service != "" {
-			glog.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
-			usage.tracing.do(trace).newline()
+			debug.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
+			tracing.newline()
 
-			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, trace, depth+1)
+			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, depth+1)
 			if err != nil {
 				return "", err
 			}
 		} else {
-			glog.Fatalf("Invalid component: %s (in %s)", component.Name, service.Name)
+			debug.Fatalf("Invalid component: %s (in %s)", component.Name, service.Name)
 		}
 
 		// Record usage of a given component
@@ -172,7 +178,7 @@ func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]
 	for _, vName := range u.Dependencies {
 		v, exists := service.getComponentsMap()[vName]
 		if !exists {
-			glog.Fatalf("Invalid dependency in service %s: %s", service.Name, vName)
+			debug.Fatalf("Invalid dependency in service %s: %s", service.Name, vName)
 		}
 		if vColor, ok := colors[v.Name]; !ok {
 			// not visited yet -> visit and exit if a cycle was found
@@ -225,7 +231,7 @@ func (policy *Policy) getService(serviceName string) (*Service, error) {
 }
 
 // Helper to get a matched context
-func (policy *Policy) getMatchedContext(service Service, user User, labels LabelSet, depth int, tracing *ServiceUsageTracing) (*Context, error) {
+func (policy *Policy) getMatchedContext(service Service, user User, labels LabelSet, depth int) (*Context, error) {
 	// Locate the list of contexts for service
 	contexts, ok := policy.Contexts[service.Name]
 	if !ok || len(contexts) <= 0 {
@@ -245,15 +251,15 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 	}
 
 	if contextMatched != nil {
-		glog.Infof("Matched context: '%s' (service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
+		debug.Infof("Matched context: '%s' (service = %s, user = %s)", contextMatched.Name, service.Name, user.Name)
 	} else {
-		glog.Infof("No context matched (service = %s, user = %s)", service.Name, user.Name)
+		debug.Infof("No context matched (service = %s, user = %s)", service.Name, user.Name)
 	}
 	return contextMatched, nil
 }
 
 // Helper to get a matched allocation
-func (policy *Policy) getMatchedAllocation(service Service, user User, context Context, labels LabelSet, depth int, tracing *ServiceUsageTracing) (*Allocation, error) {
+func (policy *Policy) getMatchedAllocation(service Service, user User, context Context, labels LabelSet, depth int) (*Allocation, error) {
 	if len(context.Allocations) <= 0 {
 		tracing.log(depth+1, "No allocations found")
 		return nil, errors.New("No allocations found for " + service.Name)
@@ -274,12 +280,12 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	if allocationMatched != nil {
 		err := allocationMatched.resolveName(user)
 		if err != nil {
-			glog.Infof("Cannot resolve name for an allocation: '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, context.Name, service.Name, user.Name)
+			debug.Infof("Cannot resolve name for an allocation: '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, context.Name, service.Name, user.Name)
 			return nil, nil
 		}
-		glog.Infof("Matched allocation: '%s' -> '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, allocationMatched.NameResolved, context.Name, service.Name, user.Name)
+		debug.Infof("Matched allocation: '%s' -> '%s' (context = %s, service = %s, user = %s)", allocationMatched.Name, allocationMatched.NameResolved, context.Name, service.Name, user.Name)
 	} else {
-		glog.Infof("No allocation matched (context = %s, service = %s, user = %s)", context.Name, service.Name, user.Name)
+		debug.Infof("No allocation matched (context = %s, service = %s, user = %s)", context.Name, service.Name, user.Name)
 	}
 
 	return allocationMatched, nil
@@ -293,7 +299,7 @@ func (err ProcessingError) Error() string {
 	return err.Reason
 }
 
-func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, templateType string, depth int, tracing *ServiceUsageTracing) (interface{}, error) {
+func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, templateType string, depth int) (interface{}, error) {
 	if template == nil {
 		return nil, nil
 	}

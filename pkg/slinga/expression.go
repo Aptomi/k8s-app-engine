@@ -2,7 +2,6 @@ package slinga
 
 import (
 	"github.com/Knetic/govaluate"
-	"github.com/golang/glog"
 	"strconv"
 	"strings"
 )
@@ -12,7 +11,7 @@ func evaluate(expression string, params LabelSet) bool {
 	// Create an expression
 	expressionObject, e := govaluate.NewEvaluableExpression(expression)
 	if e != nil {
-		glog.Fatalf("Invalid expression: %v", e)
+		debug.Fatalf("Invalid expression: %v", e)
 	}
 
 	// Populate parameter map
@@ -36,13 +35,13 @@ func evaluate(expression string, params LabelSet) bool {
 		if strings.Contains(e.Error(), "No parameter") && strings.Contains(e.Error(), "found") {
 			return false
 		}
-		glog.Fatalf("Cannot evaluate expression: %v", e)
+		debug.Fatalf("Cannot evaluate expression: %v", e)
 	}
 
 	// Convert result to bool
 	resultBool, ok := result.(bool)
 	if !ok {
-		glog.Fatalf("Expression doesn't evaluate to boolean: %v", result)
+		debug.Fatalf("Expression doesn't evaluate to boolean: %v", result)
 	}
 
 	return resultBool

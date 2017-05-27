@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/awalterschulze/gographviz"
-	"github.com/golang/glog"
 	"io/ioutil"
 	"os/exec"
 	"sort"
@@ -249,7 +248,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_" + suffix + "_flat.dot"
 	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 	if err != nil {
-		glog.Fatalf("Unable to write to a file: %s", fileNameDot)
+		debug.Fatalf("Unable to write to a file: %s", fileNameDot)
 	}
 	// Call graphviz to flatten an image
 	{
@@ -260,7 +259,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			glog.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
+			debug.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
 		}
 	}
 	// Call graphviz to generate an image
@@ -273,7 +272,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			glog.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
+			debug.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"github.com/golang/glog"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -58,7 +57,7 @@ func LoadDependenciesFromDir(dir string) GlobalDependencies {
 	sort.Strings(files)
 	r := NewGlobalDependencies()
 	for _, f := range files {
-		glog.Infof("Loading dependencies from %s", f)
+		debug.Infof("Loading dependencies from %s", f)
 		dependencies := LoadDependenciesFromFile(f)
 		r = r.appendDependencies(dependencies)
 	}
@@ -69,12 +68,12 @@ func LoadDependenciesFromDir(dir string) GlobalDependencies {
 func LoadDependenciesFromFile(filename string) GlobalDependencies {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
-		glog.Fatalf("Unable to read file: %v", e)
+		debug.Fatalf("Unable to read file: %v", e)
 	}
 	t := []*Dependency{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		glog.Fatalf("Unable to unmarshal dependencies: %v", e)
+		debug.Fatalf("Unable to unmarshal dependencies: %v", e)
 	}
 	r := NewGlobalDependencies()
 	for _, d := range t {

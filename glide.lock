@@ -1,5 +1,5 @@
-hash: a710026ba801fb449f03456b6adfd9441dcf414c896c17f43bd27e537c09fb8d
-updated: 2017-05-25T23:36:17.236045912-07:00
+hash: b595309c7ed886c099b8eeec272370707b83b94b875a32826726f3cc9d46ea7f
+updated: 2017-05-27T00:41:20.813836152-07:00
 imports:
 - name: github.com/awalterschulze/gographviz
   version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
@@ -49,6 +49,8 @@ imports:
   version: e6f5723bf2a66af014955e0888881314cf294129
   subpackages:
   - ast
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/spf13/cobra
   version: ca57f0f5dba473a8a58765d16d7e811fb8027add
 - name: github.com/spf13/pflag
@@ -62,6 +64,10 @@ imports:
   - internal/timeseries
   - lex/httplex
   - trace
+- name: golang.org/x/sys
+  version: a55a76086885b80f79961eacb876ebd8caf3868d
+  subpackages:
+  - unix
 - name: google.golang.org/grpc
   version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
   subpackages:

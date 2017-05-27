@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -26,9 +25,6 @@ type ServiceUsageState struct {
 
 	// map from service instance key to map from component name to component instance key
 	ComponentInstanceMap map[string]interface{}
-
-	// tracing - gets populated with detailed debug information if tracing is requested
-	tracing *ServiceUsageTracing
 }
 
 // ResolvedLinkUsageStruct is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -45,8 +41,7 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) Serv
 		Policy:               policy,
 		Dependencies:         dependencies,
 		ResolvedLinks:        make(map[string]*ResolvedLinkUsageStruct),
-		ComponentInstanceMap: make(map[string]interface{}),
-		tracing:              NewServiceUsageTracing()}
+		ComponentInstanceMap: make(map[string]interface{})}
 }
 
 // Create key for the map
@@ -116,16 +111,16 @@ func LoadServiceUsageState() ServiceUsageState {
 	if os.IsNotExist(e) {
 		return ServiceUsageState{}
 	} else if e != nil {
-		glog.Fatalf("Unable to read file: %v", e)
+		debug.Fatalf("Unable to read file: %v", e)
 	}
 
 	if e != nil {
-		glog.Fatalf("Unable to read file: %v", e)
+		debug.Fatalf("Unable to read file: %v", e)
 	}
 	t := ServiceUsageState{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		glog.Fatalf("Unable to unmarshal service usage state: %v", e)
+		debug.Fatalf("Unable to unmarshal service usage state: %v", e)
 	}
 	return t
 }
@@ -140,6 +135,6 @@ func (usage ServiceUsageState) SaveServiceUsageState(noop bool) {
 	}
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
 	if err != nil {
-		glog.Fatalf("Unable to write to a file: %s", fileName)
+		debug.Fatalf("Unable to write to a file: %s", fileName)
 	}
 }

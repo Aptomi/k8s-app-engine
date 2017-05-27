@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"github.com/golang/glog"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -87,7 +86,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	files, _ := zglob.Glob(dir + "/**/service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
-		glog.Infof("Loading service from %s", f)
+		debug.Infof("Loading service from %s", f)
 		service := loadServiceFromFile(f)
 		s.Services[service.Name] = service
 	}
@@ -96,7 +95,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	files, _ = zglob.Glob(dir + "/**/context.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
-		glog.Infof("Loading context from %s", f)
+		debug.Infof("Loading context from %s", f)
 		context := loadContextFromFile(f)
 		s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
 	}
@@ -108,12 +107,12 @@ func LoadPolicyFromDir(dir string) Policy {
 func loadServiceFromFile(filename string) *Service {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
-		glog.Fatalf("Unable to read file: %v", e)
+		debug.Fatalf("Unable to read file: %v", e)
 	}
 	t := Service{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		glog.Fatalf("Unable to unmarshal service: %v", e)
+		debug.Fatalf("Unable to unmarshal service: %v", e)
 	}
 	return &t
 }
@@ -122,12 +121,12 @@ func loadServiceFromFile(filename string) *Service {
 func loadContextFromFile(filename string) *Context {
 	dat, e := ioutil.ReadFile(filename)
 	if e != nil {
-		glog.Fatalf("Unable to read file: %v", e)
+		debug.Fatalf("Unable to read file: %v", e)
 	}
 	t := Context{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		glog.Fatalf("Unable to unmarshal context: %v", e)
+		debug.Fatalf("Unable to unmarshal context: %v", e)
 	}
 	return &t
 }
@@ -136,7 +135,7 @@ func loadContextFromFile(filename string) *Context {
 func serializeObject(t interface{}) string {
 	d, e := yaml.Marshal(&t)
 	if e != nil {
-		glog.Fatalf("error: %v", e)
+		debug.Fatalf("error: %v", e)
 	}
 	return string(d)
 }
@@ -144,12 +143,12 @@ func serializeObject(t interface{}) string {
 // Prints slinga object onto screen
 //noinspection GoUnusedFunction
 func printObject(t interface{}) {
-	glog.Infof("--- dump:\n%s\n", serializeObject(t))
+	debug.Infof("--- dump:\n%s\n", serializeObject(t))
 
 	m := make(map[interface{}]interface{})
 	e := yaml.Unmarshal([]byte(serializeObject(t)), &m)
 	if e != nil {
-		glog.Fatalf("error: %v", e)
+		debug.Fatalf("error: %v", e)
 	}
-	glog.Infof("%v\n\n", m)
+	debug.Infof("%v\n\n", m)
 }

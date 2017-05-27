@@ -82,3 +82,6 @@ go run main.go show graph
 1. DB
   1. How to handle schema change. If we change a format of parameter (e.g. 'criteria'), how do we handle it correctly?. Prev can be one version. Next can be another version
   1. Do we need to store all versions? Every time we apply policy version would increase
+
+1. Structure of Go project
+  1. Right now everything is in one package. Not very good
