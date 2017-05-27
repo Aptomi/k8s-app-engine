@@ -3,6 +3,7 @@ package slinga
 import (
 	"github.com/Sirupsen/logrus"
 	"fmt"
+	"os"
 )
 
 var tracing *ScreenLogger
@@ -42,5 +43,6 @@ func init() {
 	tracing = &ScreenLogger{}
 
 	debug = logrus.New()
+	debug.Out, _ = os.OpenFile(GetAptomiDBDir() + "/" + "debug.log", os.O_CREATE|os.O_WRONLY, 0644)
 	SetDebugLevel(logrus.ErrorLevel)
 }

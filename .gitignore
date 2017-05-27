@@ -4,6 +4,7 @@ db*.yaml
 graph*.png
 graph*.dot
 test.go
+debug*.log
 
 .idea
 
