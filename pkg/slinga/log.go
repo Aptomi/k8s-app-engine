@@ -2,7 +2,7 @@ package slinga
 
 import (
 	"github.com/Sirupsen/logrus"
-	"log"
+	"fmt"
 )
 
 var tracing *ScreenLogger
@@ -17,19 +17,21 @@ func (logger *ScreenLogger) setEnable(enabled bool) {
 	logger.enabled = enabled
 }
 
-func (logger *ScreenLogger) log(depth int, format string, args ...interface{}) {
+func (logger *ScreenLogger) Printf(depth int, format string, args ...interface{}) {
 	if logger.enabled {
 		indent := ""
 		for n := 0; n <= 4*depth; n++ {
 			indent = indent + " "
 		}
-		format = indent + format
-		log.Printf(format, args...)
+		format = indent + format + "\n"
+		fmt.Printf(format, args...)
 	}
 }
 
-func (logger *ScreenLogger) newline() {
-	logger.log(0, "\n")
+func (logger *ScreenLogger) Println() {
+	if logger.enabled {
+		fmt.Println()
+	}
 }
 
 func SetDebugLevel(level logrus.Level) {

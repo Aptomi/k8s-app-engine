@@ -54,10 +54,10 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Resolving allocations for service
 	debug.Infof("Resolving allocations for service %s (user = %s, labels = %s)", serviceName, user.Name, labels)
 
-	tracing.log(depth, "[Dependency]")
-	tracing.log(depth, "User: %s (ID = %s)", user.Name, user.ID)
-	tracing.log(depth+1, "Labels: %s", labels)
-	tracing.log(depth, "Service: %s", serviceName)
+	tracing.Printf(depth, "[Dependency]")
+	tracing.Printf(depth, "User: %s (ID = %s)", user.Name, user.ID)
+	tracing.Printf(depth+1, "Labels: %s", labels)
+	tracing.Printf(depth, "Service: %s", serviceName)
 
 	// Policy
 	policy := usage.Policy
@@ -65,47 +65,47 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Locate the service
 	service, err := policy.getService(serviceName)
 	if err != nil {
-		tracing.log(depth, "Error while trying to look up service %s (%v)", serviceName, err)
+		tracing.Printf(depth, "Error while trying to look up service %s (%v)", serviceName, err)
 		return "", err
 	}
 
 	// Process service and transform labels
 	labels = labels.applyTransform(service.Labels)
-	tracing.log(depth+1, "New labels = %s", labels)
+	tracing.Printf(depth+1, "New labels = %s", labels)
 
 	// Match the context
 	context, err := policy.getMatchedContext(*service, user, labels, depth)
 	if err != nil {
-		tracing.log(depth, "Error while matching context for service %s (%v)", serviceName, err)
+		tracing.Printf(depth, "Error while matching context for service %s (%v)", serviceName, err)
 		return "", err
 	}
 	// If no matching context is found, let's just exit
 	if context == nil {
-		tracing.log(depth, "No context matched for service %s", serviceName)
+		tracing.Printf(depth, "No context matched for service %s", serviceName)
 		return "", nil
 	}
 
 	// Process context and transform labels
 	labels = labels.applyTransform(context.Labels)
-	tracing.log(depth, "Context: %s", context.Name)
-	tracing.log(depth+1, "New labels = %s", labels)
+	tracing.Printf(depth, "Context: %s", context.Name)
+	tracing.Printf(depth+1, "New labels = %s", labels)
 
 	// Match the allocation
 	allocation, err := policy.getMatchedAllocation(*service, user, *context, labels, depth)
 	if err != nil {
-		tracing.log(depth, "Error while matching allocation for service %s, context %s (%v)", serviceName, context.Name, err)
+		tracing.Printf(depth, "Error while matching allocation for service %s, context %s (%v)", serviceName, context.Name, err)
 		return "", err
 	}
 	// If no matching allocation is found, let's just exit
 	if allocation == nil {
-		tracing.log(depth, "No allocation matched for service %s, context %s", serviceName, context.Name)
+		tracing.Printf(depth, "No allocation matched for service %s, context %s", serviceName, context.Name)
 		return "", nil
 	}
 
 	// Process allocation and transform labels
 	labels = labels.applyTransform(allocation.Labels)
-	tracing.log(depth, "Allocation: %s", allocation.NameResolved)
-	tracing.log(depth+1, "New labels = %s", labels)
+	tracing.Printf(depth, "Allocation: %s", allocation.NameResolved)
+	tracing.Printf(depth+1, "New labels = %s", labels)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := service.getComponentsSortedTopologically()
@@ -150,7 +150,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 			}
 		} else if component.Service != "" {
 			debug.Infof("Processing dependency on another service: %s -> %s (in %s)", component.Name, component.Service, service.Name)
-			tracing.newline()
+			tracing.Println()
 
 			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, depth+1)
 			if err != nil {
@@ -235,7 +235,7 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 	// Locate the list of contexts for service
 	contexts, ok := policy.Contexts[service.Name]
 	if !ok || len(contexts) <= 0 {
-		tracing.log(depth+1, "No contexts found")
+		tracing.Printf(depth+1, "No contexts found")
 		return nil, errors.New("No contexts found for " + service.Name)
 	}
 
@@ -243,7 +243,7 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 	var contextMatched *Context
 	for _, c := range contexts {
 		m := c.matches(labels)
-		tracing.log(depth+1, "[%t] Testing context '%s': (criteria = %+v)", m, c.Name, c.Criteria)
+		tracing.Printf(depth+1, "[%t] Testing context '%s': (criteria = %+v)", m, c.Name, c.Criteria)
 		if m {
 			contextMatched = c
 			break
@@ -261,7 +261,7 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 // Helper to get a matched allocation
 func (policy *Policy) getMatchedAllocation(service Service, user User, context Context, labels LabelSet, depth int) (*Allocation, error) {
 	if len(context.Allocations) <= 0 {
-		tracing.log(depth+1, "No allocations found")
+		tracing.Printf(depth+1, "No allocations found")
 		return nil, errors.New("No allocations found for " + service.Name)
 	}
 
@@ -269,7 +269,7 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	var allocationMatched *Allocation
 	for _, a := range context.Allocations {
 		m := a.matches(labels)
-		tracing.log(depth+1, "[%t] Testing allocation '%s': (criteria = %+v)", m, a.Name, a.Criteria)
+		tracing.Printf(depth+1, "[%t] Testing allocation '%s': (criteria = %+v)", m, a.Name, a.Criteria)
 		if m {
 			allocationMatched = a
 			break
@@ -303,7 +303,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 	if template == nil {
 		return nil, nil
 	}
-	tracing.log(depth+1, "Component: %s (%s)", component.Name, templateType)
+	tracing.Printf(depth+1, "Component: %s (%s)", component.Name, templateType)
 
 	cimCopy := make(map[string]interface{})
 	// TODO SPARTAAA!
@@ -335,7 +335,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
 			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, templateData)
-			tracing.log(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
+			tracing.Printf(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
 			if err != nil {
 				return nil, err
 			}
