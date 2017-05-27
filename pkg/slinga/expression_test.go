@@ -6,7 +6,26 @@ import (
 )
 
 func TestExpressions(t *testing.T) {
-	labels := LabelSet{Labels: map[string]string{"foo": "10", "unusedLabel": "3", "a": "valueOfA"}}
+	labels := LabelSet{Labels: map[string]string{"foo": "10", "unusedLabel": "3", "a": "valueOfA", "bar": "true", "anotherbar": "t"}}
+
+	// simple case with bool variable
+	assert.Equal(t, true, evaluate("anotherbar == true", labels), "Evaluate expression with boolean")
+
+	// simple case with bool variable
+	assert.Equal(t, true, evaluate("anotherbar", labels), "Evaluate expression with boolean")
+
+	// simple case with bool variable
+	// TODO: we need to fix this test
+	// assert.Equal(t, true, evaluate("anotherbar == 't'", labels), "Evaluate expression with boolean")
+
+	// simple case with bool variable
+	assert.Equal(t, false, evaluate("anotherbar == 'p'", labels), "Evaluate expression with boolean")
+
+	// simple case with bool variable
+	assert.Equal(t, true, evaluate("bar == true", labels), "Evaluate expression with boolean")
+
+	// simple case with bool variable
+	assert.Equal(t, true, evaluate("bar", labels), "Evaluate expression with boolean")
 
 	// simple case with integer variable
 	assert.Equal(t, true, evaluate("foo > 5", labels), "Evaluate expression with integer")

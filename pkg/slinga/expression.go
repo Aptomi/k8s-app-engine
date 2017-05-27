@@ -21,6 +21,8 @@ func evaluate(expression string, params LabelSet) bool {
 		// all labels are strings. we need to cast them to the appropriate type before evaluation
 		if vInt, err := strconv.Atoi(v); err == nil {
 			parameters[k] = vInt
+		} else if vBool, err := strconv.ParseBool(v); err == nil {
+			parameters[k] = vBool
 		} else {
 			parameters[k] = v
 		}

@@ -6,6 +6,7 @@ components:
   - name: analytics_pipeline
     service: analytics_pipeline
 
+  # Publisher (Twitter Streaming API -> kafka)
   - name: tweepub
     code:
       type: aptomi/code/kubernetes-helm
@@ -16,14 +17,15 @@ components:
           repository: frostman/tweepub
           tag: 1.0.0
 
+        # Pass labels to publisher application
         twitter:
           appKey: "{{ .Labels.appKey }}"
           appSecret: "{{ .Labels.appSecret }}"
           tokenKey: "{{ .Labels.tokenKey }}"
           tokenSecret: "{{ .Labels.tokenSecret }}"
-
           locations: "{{ .Labels.locations }}"
 
+        # Tell publisher where to put messages (kafka connection url & topic)
         kafka:
           deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
@@ -31,6 +33,7 @@ components:
     dependencies:
       - analytics_pipeline
 
+  # Spark job (takes tweets -> does hashtags stats -> puts stats into hdfs)
   - name: tweetics
     code:
       type: aptomi/code/kubernetes-helm
@@ -69,6 +72,7 @@ components:
     dependencies:
       - analytics_pipeline
 
+  # Visualizer (takes stats from hdfs and shows on web page)
   - name: tweeviz
     code:
       type: aptomi/code/kubernetes-helm

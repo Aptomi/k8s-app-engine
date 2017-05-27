@@ -2,10 +2,14 @@ name: personal
 
 service: twitter-stats
 
+# Who is allowed to access
 criteria:
   accept:
-    - dev == "yes" || prod == "yes" || qa == "yes"
+    - team == 'platform_services'
+  reject:
+    - priority < 50
+    - compromised
 
 allocations:
-
+  # Each allowed user will have its own instance
   - name: "personal-{{ .User.Name }}"

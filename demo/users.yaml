@@ -1,49 +1,21 @@
 - id: 1
   name: Alice
   labels:
-    priority: 20
-    org: org1
+    priority: 100
+    org: it
     team: platform_services
-    dev: yes
-    prod: yes
-    qa: no
 
 - id: 2
   name: Bob
   labels:
-    priority: 5
-    org: org1
+    priority: 100
+    org: it
     team: platform_services
-    dev: yes
-    prod: no
-    qa: no
 
 - id: 3
   name: Carol
   labels:
-    priority: 3
-    org: org1
+    priority: 10
+    org: it
     team: platform_services
-    dev: yes
-    prod: no
-#    qa: no
-
-- id: 4
-  name: Dan
-  labels:
-    priority: 3
-    org: org1
-    team: qa
-    dev: yes
-    prod: no
-#    qa: yes
-
-- id: 5
-  name: Erin
-  labels:
-    priority: 20
-    org: org1
-    team: platform_services
-    dev: yes
-    prod: yes
-#    qa: no
+    compromised: true

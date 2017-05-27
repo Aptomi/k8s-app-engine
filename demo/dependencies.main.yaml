@@ -1,32 +1,38 @@
 - userid: 1
   service: twitter-stats
   labels:
+    # San Francisco, Boston, New York
     locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
+    # Twitter API Credentials
     appKey: Y4FeBw1uRiLqvVVFziYLryGVx
     appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
     tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
     tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
+  # Print debug information
   trace: true
 
-- userid: 5
-  service: twitter-stats
-  labels:
-    important: yes
-    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
-    appKey: Y4FeBw1uRiLqvVVFziYLryGVx
-    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
-    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
-    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
-  trace: true
+#- userid: 2
+#  service: twitter-stats
+#  labels:
+#    # TODO: change location
+#    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
+#    # Twitter API Credentials
+#    appKey: Y4FeBw1uRiLqvVVFziYLryGVx
+#    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
+#    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
+#    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
+#  # Print debug information
+#  trace: true
 #
 #- userid: 3
 #  service: twitter-stats
-#  trace: true
-#
-#- userid: 4
-#  service: twitter-stats
-#  trace: true
-#
-#- userid: 5
-#  service: twitter-stats
+#  labels:
+#    # TODO: change location
+#    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
+#    # Twitter API Credentials
+#    appKey: Y4FeBw1uRiLqvVVFziYLryGVx
+#    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
+#    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
+#    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
+#  # Print debug information
 #  trace: true

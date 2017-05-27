@@ -2,14 +2,15 @@ name: prod
 
 service: hdfs
 
-criteria:
-  accept:
-    - prod == "yes"
-
 allocations:
+  # Dedicated for high-priority users
+  - name: "personal-{{ .User.Name }}"
+    criteria:
+      accept:
+        - priority >= 200
 
-    # shared inside organisation
-  - name: "prod-{{ .User.Labels.org }}"
-    labels:
-      set:
-        antiAffinity: hard
+  # Shared for the rest of the team
+  - name: "team-{{ .User.Labels.team }}"
+    criteria:
+      accept:
+        - priority < 200

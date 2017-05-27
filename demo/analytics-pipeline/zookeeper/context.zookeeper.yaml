@@ -1,6 +1,6 @@
-name: main
+name: prod
 
-service: spark
+service: zookeeper
 
 labels:
   set:
