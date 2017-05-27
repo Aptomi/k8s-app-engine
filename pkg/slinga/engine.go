@@ -237,7 +237,7 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 	var contextMatched *Context
 	for _, c := range contexts {
 		m := c.matches(labels)
-		tracing.log(depth+1, "[%t] Testing context '%s': %s", m, c.Name, c.Criteria)
+		tracing.log(depth+1, "[%t] Testing context '%s': (criteria = %+v)", m, c.Name, c.Criteria)
 		if m {
 			contextMatched = c
 			break
@@ -263,7 +263,7 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	var allocationMatched *Allocation
 	for _, a := range context.Allocations {
 		m := a.matches(labels)
-		tracing.log(depth+1, "[%t] Testing allocation '%s': %s", m, a.Name, a.Criteria)
+		tracing.log(depth+1, "[%t] Testing allocation '%s': (criteria = %+v)", m, a.Name, a.Criteria)
 		if m {
 			allocationMatched = a
 			break
