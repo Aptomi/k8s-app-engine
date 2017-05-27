@@ -131,8 +131,13 @@ func LoadServiceUsageState() ServiceUsageState {
 }
 
 // SaveServiceUsageState stores usage state in a file under Aptomi DB
-func (usage ServiceUsageState) SaveServiceUsageState() {
-	fileName := GetAptomiDBDir() + "/" + "db.yaml"
+func (usage ServiceUsageState) SaveServiceUsageState(noop bool) {
+	fileName := GetAptomiDBDir() + "/"
+	if noop {
+		fileName += "db_noop.yaml"
+	} else {
+		fileName += "db.yaml"
+	}
 	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
 	if err != nil {
 		glog.Fatalf("Unable to write to a file: %s", fileName)

@@ -54,10 +54,8 @@ var policyCmdApply = &cobra.Command{
 			visual.OpenInPreview()
 		}
 
-		// Apply changes, if not noop
-		if !noop {
-			diff.Apply()
-		}
+		// Apply changes
+		diff.Apply(noop)
 	},
 }
 

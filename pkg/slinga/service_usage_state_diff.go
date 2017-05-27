@@ -256,56 +256,28 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 }
 
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
-func (diff ServiceUsageStateDiff) Apply() {
-	// TODO: remove
-	diff.Next.SaveServiceUsageState()
-
-	// Process destructions in the right order
-	for _, key := range diff.Prev.ProcessingOrder {
-		// Does it need to be destructed?
-		if _, ok := diff.ComponentDestruct[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
-			if component == nil {
-				glog.Infof("Destructing service: %s", serviceName)
-				// TODO: add processing code
-			} else {
-				glog.Infof("Destructing component: %s (%s)", component.Name, component.Code)
-
-				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor()
-					if err != nil {
-						glog.Fatal("Error while getting codeExecutor")
-					}
-					codeExecutor.Destroy(key)
-				}
-			}
+func (diff ServiceUsageStateDiff) Apply(noop bool) error {
+	if !noop {
+		err := diff.processDestructions()
+		if err != nil {
+			return err
+		}
+		err = diff.processUpdates()
+		if err != nil {
+			return err
+		}
+		err = diff.processInstantiations()
+		if err != nil {
+			return err
 		}
 	}
 
-	// Process updates in the right order
-	for _, key := range diff.Next.ProcessingOrder {
-		// Does it need to be updated?
-		if _, ok := diff.ComponentUpdate[key]; ok {
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
-			if component == nil {
-				glog.Infof("Updating service: %s", serviceName)
-				// TODO: add processing code
-			} else {
-				glog.Infof("Updating component: %s (%s)", component.Name, component.Code)
+	// save new state
+	diff.Next.SaveServiceUsageState(noop)
+	return nil
+}
 
-				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor()
-					if err != nil {
-						glog.Fatal("Error while getting codeExecutor")
-					}
-					codeExecutor.Update(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
-				}
-			}
-		}
-	}
-
+func (diff ServiceUsageStateDiff) processInstantiations() error {
 	// Process instantiations in the right order
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be instantiated?
@@ -322,18 +294,75 @@ func (diff ServiceUsageStateDiff) Apply() {
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
 					if err != nil {
-						glog.Fatal("Error while getting codeExecutor")
+						return err;
 					}
 
 					err = codeExecutor.Install(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
 					if err != nil {
-						glog.Fatal("Failed install", err)
+						return err;
 					}
 				}
 			}
 		}
 	}
+	return nil
+}
 
-	// save new state
-	diff.Next.SaveServiceUsageState()
+func (diff ServiceUsageStateDiff) processUpdates() error {
+	// Process updates in the right order
+	for _, key := range diff.Next.ProcessingOrder {
+		// Does it need to be updated?
+		if _, ok := diff.ComponentUpdate[key]; ok {
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
+			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
+			if component == nil {
+				glog.Infof("Updating service: %s", serviceName)
+				// TODO: add processing code
+			} else {
+				glog.Infof("Updating component: %s (%s)", component.Name, component.Code)
+
+				if component.Code != nil {
+					codeExecutor, err := component.Code.GetCodeExecutor()
+					if err != nil {
+						return err;
+					}
+					err = codeExecutor.Update(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
+					if err != nil {
+						return err;
+					}
+
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (diff ServiceUsageStateDiff) processDestructions() error {
+	// Process destructions in the right order
+	for _, key := range diff.Prev.ProcessingOrder {
+		// Does it need to be destructed?
+		if _, ok := diff.ComponentDestruct[key]; ok {
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
+			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
+			if component == nil {
+				glog.Infof("Destructing service: %s", serviceName)
+				// TODO: add processing code
+			} else {
+				glog.Infof("Destructing component: %s (%s)", component.Name, component.Code)
+
+				if component.Code != nil {
+					codeExecutor, err := component.Code.GetCodeExecutor()
+					if err != nil {
+						return err;
+					}
+					err = codeExecutor.Destroy(key)
+					if err != nil {
+						return err;
+					}
+				}
+			}
+		}
+	}
+	return nil
 }

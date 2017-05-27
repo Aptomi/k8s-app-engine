@@ -1,6 +1,6 @@
 aptomi
 vendor
-db.yaml
+db*.yaml
 graph*.png
 graph*.dot
 test.go
