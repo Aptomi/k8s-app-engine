@@ -58,8 +58,8 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Resolving allocations for service
 	debug.WithFields(log.Fields{
 		"service": serviceName,
-		"user": user.Name,
-		"labels": labels,
+		"user":    user.Name,
+		"labels":  labels,
 	}).Info("Resolving allocations for service")
 
 	tracing.Printf(depth, "[Dependency]")
@@ -73,7 +73,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Locate the service
 	service, err := policy.getService(serviceName)
 	if err != nil {
-		tracing.Printf(depth, "Error while trying to look up service %s (%v)", serviceName, err)
+		tracing.Printf(depth+1, "Error while trying to look up service %s (%v)", serviceName, err)
 		return "", err
 	}
 
@@ -84,12 +84,12 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 	// Match the context
 	context, err := policy.getMatchedContext(*service, user, labels, depth)
 	if err != nil {
-		tracing.Printf(depth, "Error while matching context for service %s (%v)", serviceName, err)
+		tracing.Printf(depth+1, "Error while matching context for service %s (%v)", serviceName, err)
 		return "", err
 	}
 	// If no matching context is found, let's just exit
 	if context == nil {
-		tracing.Printf(depth, "No context matched for service %s", serviceName)
+		tracing.Printf(depth+1, "No context matched for service %s", serviceName)
 		return "", nil
 	}
 
@@ -143,7 +143,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		if component.Code != nil {
 			// Evaluate code params
 			debug.WithFields(log.Fields{
-				"service": service.Name,
+				"service":   service.Name,
 				"component": component.Name,
 			}).Info("Processing dependency on code execution")
 
@@ -161,8 +161,8 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 			}
 		} else if component.Service != "" {
 			debug.WithFields(log.Fields{
-				"service": service.Name,
-				"component": component.Name,
+				"service":          service.Name,
+				"component":        component.Name,
 				"dependsOnService": component.Service,
 			}).Info("Processing dependency on another service")
 
@@ -174,7 +174,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 			}
 		} else {
 			debug.WithFields(log.Fields{
-				"service": service.Name,
+				"service":   service.Name,
 				"component": component.Name,
 			}).Fatal("Invalid component (not code and not service")
 		}
@@ -198,7 +198,7 @@ func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]
 		v, exists := service.getComponentsMap()[vName]
 		if !exists {
 			debug.WithFields(log.Fields{
-				"service": service.Name,
+				"service":   service.Name,
 				"component": vName,
 			}).Fatal("Service dependency points to non-existing component")
 		}
@@ -276,12 +276,12 @@ func (policy *Policy) getMatchedContext(service Service, user User, labels Label
 		debug.WithFields(log.Fields{
 			"service": service.Name,
 			"context": contextMatched.Name,
-			"user": user.Name,
+			"user":    user.Name,
 		}).Info("Matched context")
 	} else {
 		debug.WithFields(log.Fields{
 			"service": service.Name,
-			"user": user.Name,
+			"user":    user.Name,
 		}).Info("No context matched")
 	}
 	return contextMatched, nil
@@ -310,24 +310,24 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 		err := allocationMatched.resolveName(user)
 		if err != nil {
 			debug.WithFields(log.Fields{
-				"service": service.Name,
-				"context": context.Name,
+				"service":    service.Name,
+				"context":    context.Name,
 				"allocation": allocationMatched.Name,
-				"user": user.Name,
+				"user":       user.Name,
 			}).Fatal("Cannot resolve name for an allocation")
 		}
 		debug.WithFields(log.Fields{
-			"service": service.Name,
-			"context": context.Name,
-			"allocation": allocationMatched.Name,
+			"service":            service.Name,
+			"context":            context.Name,
+			"allocation":         allocationMatched.Name,
 			"allocationResolved": allocationMatched.NameResolved,
-			"user": user.Name,
+			"user":               user.Name,
 		}).Info("Matched allocation")
 	} else {
 		debug.WithFields(log.Fields{
 			"service": service.Name,
 			"context": context.Name,
-			"user": user.Name,
+			"user":    user.Name,
 		}).Info("No allocation matched")
 	}
 
