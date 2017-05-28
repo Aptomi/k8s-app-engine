@@ -58,10 +58,13 @@ func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool
 	if result.Prev.Dependencies != nil {
 		for _, deps := range result.Prev.Dependencies.Dependencies {
 			for _, d := range deps {
-				if pMap[d.UserID] == nil {
-					pMap[d.UserID] = make(map[string]string)
+				// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
+				if len(d.ResolvesTo) > 0 {
+					if pMap[d.UserID] == nil {
+						pMap[d.UserID] = make(map[string]string)
+					}
+					pMap[d.UserID][d.Service] = d.ResolvesTo
 				}
-				pMap[d.UserID][d.Service] = d.ResolvesTo
 			}
 		}
 	}
@@ -70,10 +73,13 @@ func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool
 	cMap := make(map[string]map[string]string)
 	for _, deps := range result.Next.Dependencies.Dependencies {
 		for _, d := range deps {
-			if cMap[d.UserID] == nil {
-				cMap[d.UserID] = make(map[string]string)
+			// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
+			if len(d.ResolvesTo) > 0 {
+				if cMap[d.UserID] == nil {
+					cMap[d.UserID] = make(map[string]string)
+				}
+				cMap[d.UserID][d.Service] = d.ResolvesTo
 			}
-			cMap[d.UserID][d.Service] = d.ResolvesTo
 		}
 	}
 

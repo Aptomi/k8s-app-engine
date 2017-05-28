@@ -40,9 +40,12 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 			// disable tracing
 			tracing.setEnable(false)
 
+			// see if there is an error
 			if err != nil {
 				return err
 			}
+
+			// record high-level service resolution
 			d.ResolvesTo = resKey
 		}
 	}
