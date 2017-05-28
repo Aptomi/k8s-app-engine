@@ -7,10 +7,11 @@ import (
 
 func TestLoadUsers(t *testing.T) {
 	users := LoadUsersFromDir("testdata/unittests")
-	assert.Equal(t, 3, len(users.Users), "Two users should be loaded")
+	assert.Equal(t, 4, len(users.Users), "Two users should be loaded")
 	assert.Equal(t, "Alice", users.Users["1"].Name, "Alice user should be loaded")
 	assert.Equal(t, "Bob", users.Users["2"].Name, "Bob user should be loaded")
 	assert.Equal(t, "Carol", users.Users["3"].Name, "Carol user should be loaded")
+	assert.Equal(t, "Dave", users.Users["4"].Name, "Dave user should be loaded")
 
 	userAlice := LoadUserByIDFromDir("testdata/unittests", "1")
 	assert.Equal(t, "Alice", userAlice.Name, "Should load Alice user by ID")

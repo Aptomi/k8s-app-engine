@@ -8,3 +8,6 @@
 
 - userid: 3
   service: kafka
+
+- userid: 4
+  service: kafka

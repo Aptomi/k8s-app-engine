@@ -29,12 +29,12 @@ func TestTemplateEvaluation(t *testing.T) {
 	alice := LoadUserByIDFromDir("testdata/unittests", "1")
 
 	result, err := evaluateTemplate("test-{{.User.Labels.team}}", alice)
-	assert.Equal(t, nil, err, "Template should evaluate without errors")
+	assert.Nil(t, err, "Template should evaluate without errors")
 	assert.Equal(t, "test-platform_services", result, "Template should be evaluated correctly, user team parameter must be substituted with its value")
 
 	result, err = evaluateTemplate("test-{{.User.MissingField}}-{{.MissingObject}}", alice)
-	assert.NotEqual(t, nil, err, "Template should not evaluate, because there is a missing field")
+	assert.NotNil(t, err, "Template should not evaluate, because there is a missing field")
 
 	result, err = evaluateTemplate("test-{{.User.Labels.missinglabel}}", alice)
-	assert.NotEqual(t, nil, err, "Template should not evaluate, because there is a missing label")
+	assert.NotNil(t, err, "Template should not evaluate, because there is a missing label")
 }

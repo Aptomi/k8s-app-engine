@@ -73,6 +73,7 @@ go run main.go show graph
   1. How to implement service aliases (mysql vs. mariadb, etc). Do we match contexts first or services? With the current definition of services and contexts, there is NO way to provide different implementation of the same "service interface (e.g. SQL service -> MySQL or MariaDB)
   1. Service, context - shall we use IDs (unique) instead of names (non-unique)?
   1. When something failed in the middle of applying policy. How to handle it?
+  1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed
 
 1. CI/CD
   1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production

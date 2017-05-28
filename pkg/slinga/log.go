@@ -48,7 +48,7 @@ func init() {
 	// Don't log much by default. It will be overridden with "--debug" from CLI
 	debug.Level = log.PanicLevel
 
-	// Add a hook to print critical errors to stdout as well
+	// Add a hook to print important errors to stdout as well
 	debug.Hooks.Add(&LogHook{})
 }
 
@@ -58,6 +58,7 @@ type LogHook struct {
 
 func (l *LogHook) Levels() []log.Level {
 	return []log.Level{
+		log.WarnLevel,
 		log.ErrorLevel,
 		log.FatalLevel,
 		log.PanicLevel,

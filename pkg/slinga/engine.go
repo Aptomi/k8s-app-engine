@@ -143,8 +143,10 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		if component.Code != nil {
 			// Evaluate code params
 			debug.WithFields(log.Fields{
-				"service":   service.Name,
-				"component": component.Name,
+				"service":    service.Name,
+				"component":  component.Name,
+				"context":    context.Name,
+				"allocation": allocation.NameResolved,
 			}).Info("Processing dependency on code execution")
 
 			// TODO: WAT?? no HelmName please
@@ -163,14 +165,30 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 			debug.WithFields(log.Fields{
 				"service":          service.Name,
 				"component":        component.Name,
+				"context":          context.Name,
+				"allocation":       allocation.NameResolved,
 				"dependsOnService": component.Service,
 			}).Info("Processing dependency on another service")
 
 			tracing.Println()
 
-			_, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, depth+1)
+			// resolve dependency recursively
+			resolvedKey, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, depth+1)
 			if err != nil {
 				return "", err
+			}
+
+			// if a dependency has not been matched
+			if len(resolvedKey) <= 0 {
+				// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
+				debug.WithFields(log.Fields{
+					"service":          service.Name,
+					"component":        component.Name,
+					"context":          context.Name,
+					"allocation":       allocation.NameResolved,
+					"dependsOnService": component.Service,
+				}).Warning("Cannot fulfill dependency on another service")
+				return "", nil
 			}
 		} else {
 			debug.WithFields(log.Fields{

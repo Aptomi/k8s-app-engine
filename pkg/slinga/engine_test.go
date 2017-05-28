@@ -14,7 +14,7 @@ func TestEngine(t *testing.T) {
 	err := usageState.ResolveUsage(&users)
 
 	// Check that policy resolution finished correctly
-	assert.Equal(t, nil, err, "Policy usage should be resolved without errors")
+	assert.Nil(t, err, "Policy usage should be resolved without errors")
 
 	kTest := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
 	kProd := usageState.ResolvedLinks["kafka#prod#test-platform_services#component2"]
@@ -40,7 +40,7 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 	service := state.Services["kafka"]
 
 	c, err := service.getComponentsSortedTopologically()
-	assert.Equal(t, nil, err, "Service components should be topologically sorted without errors")
+	assert.Nil(t, err, "Service components should be topologically sorted without errors")
 
 	assert.Equal(t, len(c), 3, "Component topological sort should produce correct number of values")
 	assert.Equal(t, "component1", c[0].Name, "Component topological sort should produce correct order")
