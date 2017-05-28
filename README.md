@@ -60,11 +60,6 @@ go run main.go show graph
   problems, but it can find errors not caught by the compilers
 * ```make lint``` runs linter for Go source code
 
-## What needs to be done:
-
-* [SL] add check for !compromised user
-* [SL] update demo policy
-
 ## Fundamental design questions (for production code, not PoC):
 1. Model & Engine
   1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
@@ -74,6 +69,7 @@ go run main.go show graph
   1. Service, context - shall we use IDs (unique) instead of names (non-unique)?
   1. When something failed in the middle of applying policy. How to handle it?
   1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed
+  1. Detect circular dependencies (global cycle between services, not only cycle within one service between its components)
 
 1. CI/CD
   1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production
