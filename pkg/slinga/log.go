@@ -7,7 +7,7 @@ import (
 )
 
 var tracing *ScreenLogger
-var debug *logrus.Logger
+var debug *log.Logger
 
 // ScreenLogger contains is a logger that prints onto the screen and supports on/off
 type ScreenLogger struct {
@@ -35,14 +35,38 @@ func (logger *ScreenLogger) Println() {
 	}
 }
 
-func SetDebugLevel(level logrus.Level) {
+func SetDebugLevel(level log.Level) {
 	debug.Level = level
 }
 
 func init() {
 	tracing = &ScreenLogger{}
 
-	debug = logrus.New()
+	debug = log.New()
 	debug.Out, _ = os.OpenFile(GetAptomiDBDir() + "/" + "debug.log", os.O_CREATE|os.O_WRONLY, 0644)
-	SetDebugLevel(logrus.ErrorLevel)
+
+	// Don't log anything by default. It will be overridden with "--debug" from CLI
+	debug.Level = log.PanicLevel
+
+	// Add a hook to print critical errors to stdout as well
+	debug.Hooks.Add(&LogHook{})
+}
+
+type LogHook struct {
+
+}
+
+func (l *LogHook) Levels() []log.Level {
+	return []log.Level{
+		log.ErrorLevel,
+		log.FatalLevel,
+		log.PanicLevel,
+	}
+}
+
+func (l *LogHook) Fire(e *log.Entry) error {
+	fmt.Println("Error!")
+	fmt.Printf("  %s\n", e.Message)
+	fmt.Printf("  %v\n", e.Data)
+	return nil
 }

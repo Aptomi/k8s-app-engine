@@ -3,6 +3,7 @@ package slinga
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"github.com/Sirupsen/logrus"
 )
 
 /*
@@ -30,14 +31,26 @@ func LoadUserByIDFromDir(dir string, id string) User {
 
 // LoadUsersFromDir loads all users from a given directory
 func LoadUsersFromDir(dir string) GlobalUsers {
-	dat, e := ioutil.ReadFile(dir + "/users.yaml")
+	fileName := dir + "/users.yaml"
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Debug("Loading users")
+
+	dat, e := ioutil.ReadFile(fileName)
+
 	if e != nil {
-		debug.Fatalf("Unable to read file: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to read file")
 	}
 	t := []User{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		debug.Fatalf("Unable to unmarshal user: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to unmarshal users")
 	}
 	r := GlobalUsers{Users: make(map[string]User)}
 	for _, u := range t {

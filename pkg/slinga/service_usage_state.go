@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"github.com/Sirupsen/logrus"
 )
 
 const componentRootName = "root"
@@ -105,22 +106,31 @@ func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID strin
 func LoadServiceUsageState() ServiceUsageState {
 	fileName := GetAptomiDBDir() + "/" + "db.yaml"
 
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Info("Loading service usage state")
+
 	dat, e := ioutil.ReadFile(fileName)
 
 	// If the file doesn't exist, it means that DB is empty and we are starting from scratch
 	if os.IsNotExist(e) {
 		return ServiceUsageState{}
-	} else if e != nil {
-		debug.Fatalf("Unable to read file: %v", e)
 	}
 
 	if e != nil {
-		debug.Fatalf("Unable to read file: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to read file", e)
 	}
+
 	t := ServiceUsageState{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		debug.Fatalf("Unable to unmarshal service usage state: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to unmarshal service usage state")
 	}
 	return t
 }
@@ -133,8 +143,16 @@ func (usage ServiceUsageState) SaveServiceUsageState(noop bool) {
 	} else {
 		fileName += "db.yaml"
 	}
-	err := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
-	if err != nil {
-		debug.Fatalf("Unable to write to a file: %s", fileName)
+
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Info("Saving service usage state")
+
+	e := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
+	if e != nil {
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to save service usage state")
 	}
 }

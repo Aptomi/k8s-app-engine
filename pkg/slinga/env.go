@@ -2,16 +2,22 @@ package slinga
 
 import (
 	"os"
+	"github.com/Sirupsen/logrus"
 )
 
 // Return aptomi DB directory
 func getAptomiEnvVarAsDir(key string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		debug.Fatalf("%s environment variable is not present. Must point to a directory", key)
+		debug.WithFields(log.Fields{
+			"var": key,
+		}).Fatal("Environment variable is not present. Must point to a directory")
 	}
 	if stat, err := os.Stat(value); err != nil || !stat.IsDir() {
-		debug.Fatalf("Directory %s doesn't exist: %s", key, value)
+		debug.WithFields(log.Fields{
+			"var": key,
+			"directory": value,
+		}).Fatal("Directory doesn't exist")
 	}
 	return value
 }

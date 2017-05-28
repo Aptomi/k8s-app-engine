@@ -4,6 +4,7 @@ import (
 	"github.com/Knetic/govaluate"
 	"strconv"
 	"strings"
+	"github.com/Sirupsen/logrus"
 )
 
 // Evaluate an expression, given a set of labels
@@ -11,7 +12,10 @@ func evaluate(expression string, params LabelSet) bool {
 	// Create an expression
 	expressionObject, e := govaluate.NewEvaluableExpression(expression)
 	if e != nil {
-		debug.Fatalf("Invalid expression: %v", e)
+		debug.WithFields(log.Fields{
+			"expression": expression,
+			"error": e,
+		}).Fatal("Invalid expression")
 	}
 
 	// Populate parameter map
@@ -35,13 +39,21 @@ func evaluate(expression string, params LabelSet) bool {
 		if strings.Contains(e.Error(), "No parameter") && strings.Contains(e.Error(), "found") {
 			return false
 		}
-		debug.Fatalf("Cannot evaluate expression: %v", e)
+		debug.WithFields(log.Fields{
+			"expression": expression,
+			"parameters": parameters,
+			"error": e,
+		}).Fatal("Cannot evaluate expression")
 	}
 
 	// Convert result to bool
 	resultBool, ok := result.(bool)
 	if !ok {
-		debug.Fatalf("Expression doesn't evaluate to boolean: %v", result)
+		debug.WithFields(log.Fields{
+			"expression": expression,
+			"parameters": parameters,
+			"result": result,
+		}).Fatal("Expression doesn't evaluate to boolean")
 	}
 
 	return resultBool

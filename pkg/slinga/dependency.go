@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
+	log "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -57,7 +58,6 @@ func LoadDependenciesFromDir(dir string) GlobalDependencies {
 	sort.Strings(files)
 	r := NewGlobalDependencies()
 	for _, f := range files {
-		debug.Infof("Loading dependencies from %s", f)
 		dependencies := LoadDependenciesFromFile(f)
 		r = r.appendDependencies(dependencies)
 	}
@@ -65,15 +65,25 @@ func LoadDependenciesFromDir(dir string) GlobalDependencies {
 }
 
 // LoadDependenciesFromFile loads all dependencies from a given file
-func LoadDependenciesFromFile(filename string) GlobalDependencies {
-	dat, e := ioutil.ReadFile(filename)
+func LoadDependenciesFromFile(fileName string) GlobalDependencies {
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Debug("Loading dependencies")
+
+	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
-		debug.Fatalf("Unable to read file: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to read file")
 	}
 	t := []*Dependency{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		debug.Fatalf("Unable to unmarshal dependencies: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to unmarshal dependencies")
 	}
 	r := NewGlobalDependencies()
 	for _, d := range t {

@@ -5,6 +5,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
+	"github.com/Sirupsen/logrus"
+	"fmt"
 )
 
 /*
@@ -86,7 +88,6 @@ func LoadPolicyFromDir(dir string) Policy {
 	files, _ := zglob.Glob(dir + "/**/service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
-		debug.Infof("Loading service from %s", f)
 		service := loadServiceFromFile(f)
 		s.Services[service.Name] = service
 	}
@@ -95,7 +96,6 @@ func LoadPolicyFromDir(dir string) Policy {
 	files, _ = zglob.Glob(dir + "/**/context.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
-		debug.Infof("Loading context from %s", f)
 		context := loadContextFromFile(f)
 		s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
 	}
@@ -104,29 +104,49 @@ func LoadPolicyFromDir(dir string) Policy {
 }
 
 // Loads service from YAML file
-func loadServiceFromFile(filename string) *Service {
-	dat, e := ioutil.ReadFile(filename)
+func loadServiceFromFile(fileName string) *Service {
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Info("Loading service")
+
+	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
-		debug.Fatalf("Unable to read file: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to read file")
 	}
 	t := Service{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		debug.Fatalf("Unable to unmarshal service: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to unmarshal service")
 	}
 	return &t
 }
 
 // Loads context from YAML file
-func loadContextFromFile(filename string) *Context {
-	dat, e := ioutil.ReadFile(filename)
+func loadContextFromFile(fileName string) *Context {
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Info("Loading context")
+
+	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
-		debug.Fatalf("Unable to read file: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to read file")
 	}
 	t := Context{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
-		debug.Fatalf("Unable to unmarshal context: %v", e)
+		debug.WithFields(log.Fields{
+			"file": fileName,
+			"error": e,
+		}).Fatal("Unable to unmarshal context")
 	}
 	return &t
 }
@@ -135,7 +155,10 @@ func loadContextFromFile(filename string) *Context {
 func serializeObject(t interface{}) string {
 	d, e := yaml.Marshal(&t)
 	if e != nil {
-		debug.Fatalf("error: %v", e)
+		debug.WithFields(log.Fields{
+			"object": t,
+			"error": e,
+		}).Fatal("Can't serialize object", e)
 	}
 	return string(d)
 }
@@ -143,12 +166,12 @@ func serializeObject(t interface{}) string {
 // Prints slinga object onto screen
 //noinspection GoUnusedFunction
 func printObject(t interface{}) {
-	debug.Infof("--- dump:\n%s\n", serializeObject(t))
+	fmt.Printf("--- dump:\n%s\n", serializeObject(t))
 
 	m := make(map[interface{}]interface{})
 	e := yaml.Unmarshal([]byte(serializeObject(t)), &m)
 	if e != nil {
-		debug.Fatalf("error: %v", e)
+		fmt.Printf("error: %v", e)
 	}
-	debug.Infof("%v\n\n", m)
+	fmt.Printf("%v\n\n", m)
 }

@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"github.com/Sirupsen/logrus"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -246,10 +247,15 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape) {
 	fileNameDot := GetAptomiDBDir() + "/" + "graph_" + suffix + "_full.dot"
 	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_" + suffix + "_flat.dot"
-	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
-	if err != nil {
-		debug.Fatalf("Unable to write to a file: %s", fileNameDot)
+	e := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
+
+	if e != nil {
+		debug.WithFields(log.Fields{
+			"file": fileNameDot,
+			"error": e,
+		}).Fatal("Unable to write to a file")
 	}
+
 	// Call graphviz to flatten an image
 	{
 		cmd := "unflatten"
@@ -259,7 +265,12 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			debug.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
+			debug.WithFields(log.Fields{
+				"cmd": cmd,
+				"stdout": outb.String(),
+				"stderr": errb.String(),
+				"error": err,
+			}).Fatal("Unable to execute graphviz")
 		}
 	}
 	// Call graphviz to generate an image
@@ -272,7 +283,12 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
-			debug.Fatalf("Unable to execute graphviz (%s): %s %s %v", cmd, outb.String(), errb.String(), err)
+			debug.WithFields(log.Fields{
+				"cmd": cmd,
+				"stdout": outb.String(),
+				"stderr": errb.String(),
+				"error": err,
+			}).Fatal("Unable to execute graphviz")
 		}
 	}
 }

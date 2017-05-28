@@ -17,7 +17,7 @@ var RootCmd = &cobra.Command{
 	Long:  `Aptomi - policy & governance for microservices`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if debug {
-			slinga.SetDebugLevel(logrus.DebugLevel)
+			slinga.SetDebugLevel(log.DebugLevel)
 		}
 	},
 	// Uncomment the following line if your bare application

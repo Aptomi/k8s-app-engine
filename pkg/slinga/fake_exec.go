@@ -5,6 +5,11 @@ type FakeCodeExecutor struct {
 	Code *Code
 }
 
+// Constructor for FakeCodeExecutor
+func NewFakeCodeExecutor(code *Code) FakeCodeExecutor {
+	return FakeCodeExecutor{Code: code}
+}
+
 // Install for FakeCodeExecutor does nothing
 func (executor FakeCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
 	return nil

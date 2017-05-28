@@ -3,6 +3,7 @@ package slinga
 import (
 	"fmt"
 	"reflect"
+	"github.com/Sirupsen/logrus"
 )
 
 // ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
@@ -255,25 +256,30 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 }
 
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
-func (diff ServiceUsageStateDiff) Apply(noop bool) error {
+func (diff ServiceUsageStateDiff) Apply(noop bool) {
 	if !noop {
 		err := diff.processDestructions()
 		if err != nil {
-			return err
+			debug.WithFields(log.Fields{
+				"error": err,
+			}).Fatal("Error while destructing components")
 		}
 		err = diff.processUpdates()
 		if err != nil {
-			return err
+			debug.WithFields(log.Fields{
+				"error": err,
+			}).Fatal("Error while updating components")
 		}
 		err = diff.processInstantiations()
 		if err != nil {
-			return err
+			debug.WithFields(log.Fields{
+				"error": err,
+			}).Fatal("Error while instantiating components")
 		}
 	}
 
 	// save new state
 	diff.Next.SaveServiceUsageState(noop)
-	return nil
 }
 
 func (diff ServiceUsageStateDiff) processInstantiations() error {
@@ -285,10 +291,18 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 
 			if component == nil {
-				debug.Infof("Instantiating service: %s (%s)", serviceName, key)
+				debug.WithFields(log.Fields{
+					"serviceKey": key,
+					"service": serviceName,
+				}).Info("Instantiating service")
+
 				// TODO: add processing code
 			} else {
-				debug.Infof("Instantiating component: %s (%s)", component.Name, key)
+				debug.WithFields(log.Fields{
+					"componentKey": key,
+					"component": component.Name,
+					"code": component.Code,
+				}).Info("Instantiating component")
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
@@ -315,10 +329,18 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
-				debug.Infof("Updating service: %s", serviceName)
+				debug.WithFields(log.Fields{
+					"serviceKey": key,
+					"service": serviceName,
+				}).Info("Updating service")
+
 				// TODO: add processing code
 			} else {
-				debug.Infof("Updating component: %s (%s)", component.Name, component.Code)
+				debug.WithFields(log.Fields{
+					"componentKey": key,
+					"component": component.Name,
+					"code": component.Code,
+				}).Info("Updating component")
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
@@ -345,10 +367,18 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
-				debug.Infof("Destructing service: %s", serviceName)
+				debug.WithFields(log.Fields{
+					"serviceKey": key,
+					"service": serviceName,
+				}).Info("Destructing service")
+
 				// TODO: add processing code
 			} else {
-				debug.Infof("Destructing component: %s (%s)", component.Name, component.Code)
+				debug.WithFields(log.Fields{
+					"componentKey": key,
+					"component": component.Name,
+					"code": component.Code,
+				}).Info("Destructing component")
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()

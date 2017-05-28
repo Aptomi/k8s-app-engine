@@ -15,9 +15,9 @@ type CodeExecutor interface {
 func (code *Code) GetCodeExecutor() (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
-		return HelmCodeExecutor{code}, nil
+		return NewHelmCodeExecutor(code), nil
 	case "aptomi/code/unittests", "unittests":
-		return FakeCodeExecutor{code}, nil
+		return NewFakeCodeExecutor(code), nil
 	default:
 		return nil, errors.New("CodeExecutor not found: " + code.Type)
 	}

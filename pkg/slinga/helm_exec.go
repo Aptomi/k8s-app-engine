@@ -4,11 +4,21 @@ import (
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"strings"
+	"github.com/Sirupsen/logrus"
+	"google.golang.org/grpc/grpclog"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
 	Code *Code
+}
+
+// Constructor for HelmCodeExecutor
+func NewHelmCodeExecutor(code *Code) CodeExecutor {
+	// First of all, redirect Helm/grpc to debug. We don't want them to be printed to Stdout or Stderr
+	grpclog.SetLogger(debug)
+
+	return HelmCodeExecutor{Code: code}
 }
 
 func HelmName(str string) string {
@@ -63,10 +73,14 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 		return err
 	}
 
-	debug.Infof("Installing new Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
+	debug.WithFields(log.Fields{
+		"release": releaseName,
+		"chart": chartName,
+		"path": chartPath,
+		"params": string(vals),
+	}).Info("Installing Helm release")
 
-	// TODO is it good to reuse name?
-	_ /*resp*/, err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
+	_ , err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
 	if err != nil {
 		return err
 	}
@@ -89,10 +103,14 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 		return err
 	}
 
-	debug.Infof("Upgrading Helm release '%s' of '%s' (path: %s) with params:\n%s", releaseName, chartName, chartPath, string(vals))
+	debug.WithFields(log.Fields{
+		"release": releaseName,
+		"chart": chartName,
+		"path": chartPath,
+		"params": string(vals),
+	}).Info("Updating Helm release")
 
-	// TODO is it good to reuse name?
-	_ /*resp*/, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
+	_ , err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
 	if err != nil {
 		return err
 	}
@@ -106,7 +124,9 @@ func (executor HelmCodeExecutor) Destroy(key string) error {
 
 	helmClient := newHelmClient()
 
-	debug.Infof("Deleting Helm release '%s'", releaseName)
+	debug.WithFields(log.Fields{
+		"release": releaseName,
+	}).Info("Deleting Helm release")
 
 	if _, err := helmClient.DeleteRelease(releaseName, helm.DeletePurge(true)); err != nil {
 		return err
