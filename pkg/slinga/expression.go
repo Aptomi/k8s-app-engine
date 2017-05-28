@@ -4,7 +4,7 @@ import (
 	"github.com/Knetic/govaluate"
 	"strconv"
 	"strings"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Evaluate an expression, given a set of labels

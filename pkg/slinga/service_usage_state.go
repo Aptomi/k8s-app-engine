@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 const componentRootName = "root"
@@ -22,7 +22,8 @@ type ServiceUsageState struct {
 	ResolvedLinks map[string]*ResolvedLinkUsageStruct
 
 	// the order in which components/services have to be processed
-	ProcessingOrder []string
+	processingOrderHas map[string]bool
+	ProcessingOrder    []string
 
 	// map from service instance key to map from component name to component instance key
 	ComponentInstanceMap map[string]interface{}
@@ -42,7 +43,8 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) Serv
 		Policy:               policy,
 		Dependencies:         dependencies,
 		ResolvedLinks:        make(map[string]*ResolvedLinkUsageStruct),
-		ComponentInstanceMap: make(map[string]interface{})}
+		ComponentInstanceMap: make(map[string]interface{}),
+		processingOrderHas:   make(map[string]bool)}
 }
 
 // Create key for the map
@@ -83,7 +85,10 @@ func (usage *ServiceUsageState) recordUsage(key string, user User, labels LabelS
 	}
 
 	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels, codeParams, discoveryParams)
-	usage.ProcessingOrder = append(usage.ProcessingOrder, key)
+	if !usage.processingOrderHas[key] {
+		usage.processingOrderHas[key] = true
+		usage.ProcessingOrder = append(usage.ProcessingOrder, key)
+	}
 
 	return key
 }
@@ -119,7 +124,7 @@ func LoadServiceUsageState() ServiceUsageState {
 
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to read file", e)
 	}
@@ -128,7 +133,7 @@ func LoadServiceUsageState() ServiceUsageState {
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to unmarshal service usage state")
 	}
@@ -151,7 +156,7 @@ func (usage ServiceUsageState) SaveServiceUsageState(noop bool) {
 	e := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to save service usage state")
 	}

@@ -1,5 +1,5 @@
-hash: b595309c7ed886c099b8eeec272370707b83b94b875a32826726f3cc9d46ea7f
-updated: 2017-05-27T00:41:20.813836152-07:00
+hash: ac664f0c83cd6678563893b1d2e0db128a530217dbe00eeb4117b4538f99d712
+updated: 2017-05-27T19:51:20.318543832-07:00
 imports:
 - name: github.com/awalterschulze/gographviz
   version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
@@ -33,12 +33,20 @@ imports:
   - proto
   - ptypes/any
   - ptypes/timestamp
+- name: github.com/gosuri/uilive
+  version: ac356e6e42cd31fcef8e6aec13ae9ed6fe87713e
+- name: github.com/gosuri/uiprogress
+  version: d0567a9d84a1c40dd7568115ea66f4887bf57b33
+  subpackages:
+  - util/strutil
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Knetic/govaluate
   version: d216395917cc49052c7c7094cf57f09657ca08a8
 - name: github.com/Masterminds/semver
   version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
+- name: github.com/mattn/go-isatty
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
 - name: github.com/mattn/go-zglob
   version: 95345c4e1c0ebc9d16a3284177f09360f4d20fab
   subpackages:

@@ -3,7 +3,10 @@ package slinga
 import (
 	"fmt"
 	"reflect"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
+	"github.com/gosuri/uiprogress"
+	"time"
+	"github.com/gosuri/uiprogress/util/strutil"
 )
 
 // ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
@@ -24,6 +27,10 @@ type ServiceUsageStateDiff struct {
 	ComponentUpdate      map[string]bool
 	ComponentAttachUser  []ServiceUsageUserAction
 	ComponentDetachUser  []ServiceUsageUserAction
+
+	// Progress bar for CLI
+	progress    *uiprogress.Progress
+	progressBar *uiprogress.Bar
 }
 
 // CalculateDifference calculates difference between two given usage states
@@ -197,11 +204,16 @@ func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 }
 
 // On a component level -- see which keys appear and disappear
+func (diff *ServiceUsageStateDiff) getDifferenceLen() int {
+	return len(diff.ComponentInstantiate) + len(diff.ComponentDestruct) + len(diff.ComponentUpdate)
+}
+
+// On a component level -- see which keys appear and disappear
 func (diff *ServiceUsageStateDiff) printDifferenceOnComponentLevel(verbose bool) {
 	fmt.Println("[Components]")
 
 	// Print
-	printed := len(diff.ComponentInstantiate)+len(diff.ComponentDestruct)+len(diff.ComponentUpdate) > 0
+	printed := diff.getDifferenceLen() > 0
 
 	if printed {
 		fmt.Printf("  New instances:     %d\n", len(diff.ComponentInstantiate))
@@ -258,6 +270,23 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
 func (diff ServiceUsageStateDiff) Apply(noop bool) {
 	if !noop {
+		// add progress bar into CLI
+		dLen := diff.getDifferenceLen()
+		if dLen > 0 {
+			fmt.Println("[Applying changes]")
+			diff.progress = uiprogress.New()
+			diff.progress.RefreshInterval = time.Second
+			diff.progress.Start()
+			diff.progressBar = diff.progress.AddBar(dLen)
+			diff.progressBar.PrependFunc(func(b *uiprogress.Bar) string {
+				return fmt.Sprintf("  [%d/%d]", b.Current(), b.Total)
+			})
+			diff.progressBar.AppendCompleted()
+			diff.progressBar.AppendFunc(func(b *uiprogress.Bar) string {
+				return fmt.Sprintf("  Time: %s", strutil.PrettyTime(time.Since(b.TimeStarted)))
+			})
+		}
+
 		err := diff.processDestructions()
 		if err != nil {
 			debug.WithFields(log.Fields{
@@ -276,6 +305,11 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 				"error": err,
 			}).Fatal("Error while instantiating components")
 		}
+
+		// Don't forget to stop the progress bar and print its final state
+		if diff.progress != nil {
+			diff.progress.Stop()
+		}
 	}
 
 	// save new state
@@ -287,32 +321,37 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
+			// Increment progress bar
+			if diff.progressBar != nil {
+				diff.progressBar.Incr()
+			}
+
 			serviceName, _, _, componentName := parseServiceUsageKey(key)
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 
 			if component == nil {
 				debug.WithFields(log.Fields{
 					"serviceKey": key,
-					"service": serviceName,
+					"service":    serviceName,
 				}).Info("Instantiating service")
 
 				// TODO: add processing code
 			} else {
 				debug.WithFields(log.Fields{
 					"componentKey": key,
-					"component": component.Name,
-					"code": component.Code,
+					"component":    component.Name,
+					"code":         component.Code,
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
 					if err != nil {
-						return err;
+						return err
 					}
 
 					err = codeExecutor.Install(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
 					if err != nil {
-						return err;
+						return err
 					}
 				}
 			}
@@ -326,30 +365,35 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 	for _, key := range diff.Next.ProcessingOrder {
 		// Does it need to be updated?
 		if _, ok := diff.ComponentUpdate[key]; ok {
+			// Increment progress bar
+			if diff.progressBar != nil {
+				diff.progressBar.Incr()
+			}
+
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
 					"serviceKey": key,
-					"service": serviceName,
+					"service":    serviceName,
 				}).Info("Updating service")
 
 				// TODO: add processing code
 			} else {
 				debug.WithFields(log.Fields{
 					"componentKey": key,
-					"component": component.Name,
-					"code": component.Code,
+					"component":    component.Name,
+					"code":         component.Code,
 				}).Info("Updating component")
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
 					if err != nil {
-						return err;
+						return err
 					}
 					err = codeExecutor.Update(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
 					if err != nil {
-						return err;
+						return err
 					}
 
 				}
@@ -364,30 +408,35 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 	for _, key := range diff.Prev.ProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
+			// Increment progress bar
+			if diff.progressBar != nil {
+				diff.progressBar.Incr()
+			}
+
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := parseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
 					"serviceKey": key,
-					"service": serviceName,
+					"service":    serviceName,
 				}).Info("Destructing service")
 
 				// TODO: add processing code
 			} else {
 				debug.WithFields(log.Fields{
 					"componentKey": key,
-					"component": component.Name,
-					"code": component.Code,
+					"component":    component.Name,
+					"code":         component.Code,
 				}).Info("Destructing component")
 
 				if component.Code != nil {
 					codeExecutor, err := component.Code.GetCodeExecutor()
 					if err != nil {
-						return err;
+						return err
 					}
 					err = codeExecutor.Destroy(key)
 					if err != nil {
-						return err;
+						return err
 					}
 				}
 			}

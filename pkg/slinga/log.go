@@ -1,7 +1,7 @@
 package slinga
 
 import (
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"fmt"
 	"os"
 )
@@ -45,7 +45,7 @@ func init() {
 	debug = log.New()
 	debug.Out, _ = os.OpenFile(GetAptomiDBDir() + "/" + "debug.log", os.O_CREATE|os.O_WRONLY, 0644)
 
-	// Don't log anything by default. It will be overridden with "--debug" from CLI
+	// Don't log much by default. It will be overridden with "--debug" from CLI
 	debug.Level = log.PanicLevel
 
 	// Add a hook to print critical errors to stdout as well

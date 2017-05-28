@@ -2,7 +2,7 @@ package slinga
 
 import (
 	"os"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Return aptomi DB directory

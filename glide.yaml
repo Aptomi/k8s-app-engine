@@ -13,6 +13,8 @@ import:
   - pkg/helm
 - package: github.com/Sirupsen/logrus
   version: ^0.11.5
+- package: github.com/gosuri/uiprogress
+- package: github.com/gosuri/uilive
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4

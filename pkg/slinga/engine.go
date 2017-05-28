@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 	"text/template"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 /*

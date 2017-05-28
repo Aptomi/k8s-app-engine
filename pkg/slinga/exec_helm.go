@@ -4,7 +4,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"strings"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"google.golang.org/grpc/grpclog"
 )
 
@@ -15,9 +15,11 @@ type HelmCodeExecutor struct {
 
 // Constructor for HelmCodeExecutor
 func NewHelmCodeExecutor(code *Code) CodeExecutor {
-	// First of all, redirect Helm/grpc to debug. We don't want them to be printed to Stdout or Stderr
+	// First of all, redirect Helm/grpc logging to our own debug stream
+	// We don't want these messages to be printed to Stdout/Stderr
 	grpclog.SetLogger(debug)
 
+	// Next, create the executor itself
 	return HelmCodeExecutor{Code: code}
 }
 
@@ -27,6 +29,7 @@ func HelmName(str string) string {
 }
 
 const (
+	// TODO: remove this hardcode
 	// tillerHost = "tiller-deploy.kube-system.svc.cluster.local:44134"
 	// tillerHost = "192.168.64.6:30350"
 	tillerHost = "kapp-demo-1:40666"

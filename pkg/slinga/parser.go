@@ -5,7 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"fmt"
 )
 

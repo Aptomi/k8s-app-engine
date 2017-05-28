@@ -3,7 +3,7 @@ package slinga
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 /*

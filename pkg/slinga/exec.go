@@ -2,6 +2,7 @@ package slinga
 
 import (
 	"errors"
+	"time"
 )
 
 // CodeExecutor is an interface that allows to create different executors for component allocation (e.g. helm, kube.libsonnet, etc)
@@ -18,6 +19,8 @@ func (code *Code) GetCodeExecutor() (CodeExecutor, error) {
 		return NewHelmCodeExecutor(code), nil
 	case "aptomi/code/unittests", "unittests":
 		return NewFakeCodeExecutor(code), nil
+	case "aptomi/code/withdelay", "delay":
+		return NewFakeCodeExecutorWithDelay(code, time.Second), nil
 	default:
 		return nil, errors.New("CodeExecutor not found: " + code.Type)
 	}
