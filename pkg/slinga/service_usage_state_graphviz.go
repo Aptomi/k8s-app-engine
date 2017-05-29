@@ -3,13 +3,13 @@ package slinga
 import (
 	"bytes"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"
 	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
-	log "github.com/Sirupsen/logrus"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -251,7 +251,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileNameDot,
+			"file":  fileNameDot,
 			"error": e,
 		}).Fatal("Unable to write to a file")
 	}
@@ -266,10 +266,10 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
 			debug.WithFields(log.Fields{
-				"cmd": cmd,
+				"cmd":    cmd,
 				"stdout": outb.String(),
 				"stderr": errb.String(),
-				"error": err,
+				"error":  err,
 			}).Fatal("Unable to execute graphviz")
 		}
 	}
@@ -284,10 +284,10 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		command.Stderr = &errb
 		if err := command.Run(); err != nil {
 			debug.WithFields(log.Fields{
-				"cmd": cmd,
+				"cmd":    cmd,
 				"stdout": outb.String(),
 				"stderr": errb.String(),
-				"error": err,
+				"error":  err,
 			}).Fatal("Unable to execute graphviz")
 		}
 	}

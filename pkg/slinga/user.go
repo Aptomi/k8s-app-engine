@@ -1,9 +1,9 @@
 package slinga
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	log "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -40,7 +40,7 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to read file")
 	}
@@ -48,7 +48,7 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to unmarshal users")
 	}

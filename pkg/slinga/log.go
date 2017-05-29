@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"os"
 )
 
@@ -11,7 +11,7 @@ var debug *log.Logger
 
 // ScreenLogger contains is a logger that prints onto the screen and supports on/off
 type ScreenLogger struct {
-	enabled  bool
+	enabled bool
 }
 
 func (logger *ScreenLogger) setEnable(enabled bool) {
@@ -43,7 +43,7 @@ func init() {
 	tracing = &ScreenLogger{}
 
 	debug = log.New()
-	debug.Out, _ = os.OpenFile(GetAptomiDBDir() + "/" + "debug.log", os.O_CREATE|os.O_WRONLY, 0644)
+	debug.Out, _ = os.OpenFile(GetAptomiDBDir()+"/"+"debug.log", os.O_CREATE|os.O_WRONLY, 0644)
 
 	// Don't log much by default. It will be overridden with "--debug" from CLI
 	debug.Level = log.PanicLevel
@@ -53,7 +53,6 @@ func init() {
 }
 
 type LogHook struct {
-
 }
 
 func (l *LogHook) Levels() []log.Level {

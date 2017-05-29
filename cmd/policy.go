@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
-	"github.com/spf13/cobra"
 	log "github.com/Sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var noop bool

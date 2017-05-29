@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"github.com/Knetic/govaluate"
+	log "github.com/Sirupsen/logrus"
 	"strconv"
 	"strings"
-	log "github.com/Sirupsen/logrus"
 )
 
 // Evaluate an expression, given a set of labels
@@ -14,7 +14,7 @@ func evaluate(expression string, params LabelSet) bool {
 	if e != nil {
 		debug.WithFields(log.Fields{
 			"expression": expression,
-			"error": e,
+			"error":      e,
 		}).Fatal("Invalid expression")
 	}
 
@@ -42,7 +42,7 @@ func evaluate(expression string, params LabelSet) bool {
 		debug.WithFields(log.Fields{
 			"expression": expression,
 			"parameters": parameters,
-			"error": e,
+			"error":      e,
 		}).Fatal("Cannot evaluate expression")
 	}
 
@@ -52,7 +52,7 @@ func evaluate(expression string, params LabelSet) bool {
 		debug.WithFields(log.Fields{
 			"expression": expression,
 			"parameters": parameters,
-			"result": result,
+			"result":     result,
 		}).Fatal("Expression doesn't evaluate to boolean")
 	}
 

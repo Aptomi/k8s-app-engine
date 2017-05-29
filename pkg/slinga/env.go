@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"os"
 	log "github.com/Sirupsen/logrus"
+	"os"
 )
 
 // Return aptomi DB directory
@@ -15,7 +15,7 @@ func getAptomiEnvVarAsDir(key string) string {
 	}
 	if stat, err := os.Stat(value); err != nil || !stat.IsDir() {
 		debug.WithFields(log.Fields{
-			"var": key,
+			"var":       key,
 			"directory": value,
 		}).Fatal("Directory doesn't exist")
 	}

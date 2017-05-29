@@ -1,11 +1,11 @@
 package slinga
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"strings"
-	log "github.com/Sirupsen/logrus"
 )
 
 const componentRootName = "root"

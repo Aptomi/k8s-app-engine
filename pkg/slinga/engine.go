@@ -3,9 +3,9 @@ package slinga
 import (
 	"bytes"
 	"errors"
+	log "github.com/Sirupsen/logrus"
 	"strings"
 	"text/template"
-	log "github.com/Sirupsen/logrus"
 )
 
 /*

@@ -1,11 +1,11 @@
 package slinga
 
 import (
+	log "github.com/Sirupsen/logrus"
+	"google.golang.org/grpc/grpclog"
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"strings"
-	log "github.com/Sirupsen/logrus"
-	"google.golang.org/grpc/grpclog"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
@@ -78,12 +78,12 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 
 	debug.WithFields(log.Fields{
 		"release": releaseName,
-		"chart": chartName,
-		"path": chartPath,
-		"params": string(vals),
+		"chart":   chartName,
+		"path":    chartPath,
+		"params":  string(vals),
 	}).Info("Installing Helm release")
 
-	_ , err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
+	_, err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
 	if err != nil {
 		return err
 	}
@@ -108,12 +108,12 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 
 	debug.WithFields(log.Fields{
 		"release": releaseName,
-		"chart": chartName,
-		"path": chartPath,
-		"params": string(vals),
+		"chart":   chartName,
+		"path":    chartPath,
+		"params":  string(vals),
 	}).Info("Updating Helm release")
 
-	_ , err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
+	_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
 	if err != nil {
 		return err
 	}

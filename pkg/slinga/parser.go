@@ -1,12 +1,12 @@
 package slinga
 
 import (
+	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
-	log "github.com/Sirupsen/logrus"
-	"fmt"
 )
 
 /*
@@ -112,7 +112,7 @@ func loadServiceFromFile(fileName string) *Service {
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to read file")
 	}
@@ -120,7 +120,7 @@ func loadServiceFromFile(fileName string) *Service {
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to unmarshal service")
 	}
@@ -136,7 +136,7 @@ func loadContextFromFile(fileName string) *Context {
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to read file")
 	}
@@ -144,7 +144,7 @@ func loadContextFromFile(fileName string) *Context {
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to unmarshal context")
 	}
@@ -157,7 +157,7 @@ func serializeObject(t interface{}) string {
 	if e != nil {
 		debug.WithFields(log.Fields{
 			"object": t,
-			"error": e,
+			"error":  e,
 		}).Fatal("Can't serialize object", e)
 	}
 	return string(d)

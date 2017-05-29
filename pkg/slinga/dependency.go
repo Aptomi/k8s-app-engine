@@ -1,11 +1,11 @@
 package slinga
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
-	log "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -73,7 +73,7 @@ func LoadDependenciesFromFile(fileName string) GlobalDependencies {
 	dat, e := ioutil.ReadFile(fileName)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to read file")
 	}
@@ -81,7 +81,7 @@ func LoadDependenciesFromFile(fileName string) GlobalDependencies {
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
 		debug.WithFields(log.Fields{
-			"file": fileName,
+			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to unmarshal dependencies")
 	}

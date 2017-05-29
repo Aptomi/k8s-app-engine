@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Frostman/aptomi/pkg/slinga"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
-	log "github.com/Sirupsen/logrus"
-	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 var debug bool
