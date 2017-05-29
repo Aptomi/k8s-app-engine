@@ -149,8 +149,7 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 				"allocation": allocation.NameResolved,
 			}).Info("Processing dependency on code execution")
 
-			// TODO: WAT?? no HelmName please
-			cimComponent["instance"] = HelmName(componentKey)
+			cimComponent["instance"] = EscapeName(componentKey)
 			if discoveryParamsMap, ok := discoveryParams.(map[interface{}]interface{}); ok {
 				for k, v := range discoveryParamsMap {
 					cimComponent[k.(string)] = v
@@ -359,8 +358,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 	tracing.Printf(depth+1, "Component: %s (%s)", component.Name, templateType)
 
 	cimCopy := make(map[string]interface{})
-	// TODO SPARTAAA!
-	cimCopy["instance"] = HelmName(componentKey)
+	cimCopy["instance"] = EscapeName(componentKey)
 	for k, v := range cim {
 		cimCopy[k] = v
 	}
@@ -423,6 +421,5 @@ func evaluateCodeParamTemplate(templateStr string, templateData TemplateData) (s
 		return "", errors.New("Cannot evaluate template " + templateStr)
 	}
 
-	// TODO: remove this ugly shit later (should not reference Helm in generic engine)
-	return HelmName(doc.String()), nil
+	return EscapeName(doc.String()), nil
 }

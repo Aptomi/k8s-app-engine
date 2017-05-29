@@ -23,11 +23,6 @@ func NewHelmCodeExecutor(code *Code) CodeExecutor {
 	return HelmCodeExecutor{Code: code}
 }
 
-func HelmName(str string) string {
-	r := strings.NewReplacer("#", "-", "_", "-")
-	return r.Replace(str)
-}
-
 const (
 	// TODO: remove this hardcode
 	// tillerHost = "tiller-deploy.kube-system.svc.cluster.local:44134"
@@ -56,7 +51,7 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	releaseName := strings.ToLower(HelmName(key))
+	releaseName := EscapeName(key)
 
 	chartName := codeMetadata["chartName"]
 
@@ -92,8 +87,7 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
 func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	// TODO merge with Install
-	releaseName := strings.ToLower(HelmName(key))
+	releaseName := EscapeName(key)
 
 	chartName := codeMetadata["chartName"]
 
@@ -123,7 +117,7 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
 func (executor HelmCodeExecutor) Destroy(key string) error {
-	releaseName := strings.ToLower(HelmName(key))
+	releaseName := EscapeName(key)
 
 	helmClient := newHelmClient()
 
