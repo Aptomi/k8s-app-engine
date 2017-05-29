@@ -16,21 +16,21 @@ func TestEngine(t *testing.T) {
 	// Check that policy resolution finished correctly
 	assert.Nil(t, err, "Policy usage should be resolved without errors")
 
-	kTest := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
-	kProd := usageState.ResolvedLinks["kafka#prod#test-platform_services#component2"]
-	assert.Equal(t, 1, len(kTest.UserIds), "Only one user should have access to test")
-	assert.Equal(t, "1", kTest.UserIds[0], "Only Alice should have access to test")
+	kafkaTest := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
+	kafkaProd := usageState.ResolvedLinks["kafka#prod#test-platform_services#component2"]
+	assert.Equal(t, 1, len(kafkaTest.UserIds), "Only one user should have access to test")
+	assert.Equal(t, "1", kafkaTest.UserIds[0], "Only Alice should have access to test")
 
-	assert.Equal(t, 1, len(kProd.UserIds), "Only one user should have access to prod")
-	assert.Equal(t, "2", kProd.UserIds[0], "Only Bob should have access to prod (Carol is compromised)")
+	assert.Equal(t, 1, len(kafkaProd.UserIds), "Only one user should have access to prod")
+	assert.Equal(t, "2", kafkaProd.UserIds[0], "Only Bob should have access to prod (Carol is compromised)")
 
 	// Check that code parameters evaluate correctly
-	paramsMap, ok := kTest.CalculatedCodeParams.(map[interface{}]interface{})
+	paramsMap, ok := kafkaTest.CalculatedCodeParams.(map[interface{}]interface{})
 	assert.Equal(t, true, ok, "Calculated Code Params should be map")
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", paramsMap["address"], "Code parameter should be calculated correctly")
 
 	// Check that discovery parameters evaluate correctly
-	discoveryMap, ok := kTest.CalculatedDiscovery.(map[interface{}]interface{})
+	discoveryMap, ok := kafkaTest.CalculatedDiscovery.(map[interface{}]interface{})
 	assert.Equal(t, true, ok, "Calculated Discovery should be map")
 	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", discoveryMap["url"], "Discovery parameter should be calculated correctly")
 }

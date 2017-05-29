@@ -8,12 +8,12 @@ type FakeCodeExecutor struct {
 	Delay time.Duration
 }
 
-// Constructor for FakeCodeExecutor
+// NewFakeCodeExecutor constructs FakeCodeExecutor from given *Code
 func NewFakeCodeExecutor(code *Code) FakeCodeExecutor {
 	return FakeCodeExecutor{Code: code}
 }
 
-// Constructor for FakeCodeExecutor
+// NewFakeCodeExecutorWithDelay constructs FakeCodeExecutor from given *Code with specified delay
 func NewFakeCodeExecutorWithDelay(code *Code, delay time.Duration) FakeCodeExecutor {
 	return FakeCodeExecutor{Code: code, Delay: delay}
 }

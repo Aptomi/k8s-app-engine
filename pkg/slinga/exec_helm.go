@@ -13,7 +13,7 @@ type HelmCodeExecutor struct {
 	Code *Code
 }
 
-// Constructor for HelmCodeExecutor
+// NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
 func NewHelmCodeExecutor(code *Code) CodeExecutor {
 	// First of all, redirect Helm/grpc logging to our own debug stream
 	// We don't want these messages to be printed to Stdout/Stderr
