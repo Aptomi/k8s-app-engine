@@ -352,14 +352,6 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	return allocationMatched, nil
 }
 
-type ProcessingError struct {
-	Reason string
-}
-
-func (err ProcessingError) Error() string {
-	return err.Reason
-}
-
 func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, templateType string, depth int) (interface{}, error) {
 	if template == nil {
 		return nil, nil
@@ -407,7 +399,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 			return paramsBool, nil
 		}
 
-		return nil, ProcessingError{"There should be map[string]interface{} or string"}
+		return nil, errors.New("There should be map[string]interface{} or string")
 	}
 
 	return evalParamsInterface(template)
