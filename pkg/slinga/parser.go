@@ -72,15 +72,15 @@ type Service struct {
 }
 
 type Cluster struct {
-	Name string
-	Type string
+	Name     string
+	Type     string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
 		Namespace       string
 
 		// store local proxy address when connection established
-		tillerHost      string
+		tillerHost string
 	}
 }
 
@@ -96,7 +96,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	s := Policy{
 		Services: make(map[string]*Service),
 		Contexts: make(map[string][]*Context),
-		Clusters: make(map[string] *Cluster),
+		Clusters: make(map[string]*Cluster),
 	}
 
 	// read all clusters

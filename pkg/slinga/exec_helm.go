@@ -1,32 +1,32 @@
 package slinga
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"google.golang.org/grpc/grpclog"
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
-	"strings"
-	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/helm/portforwarder"
-	"fmt"
-	"k8s.io/kubernetes/pkg/client/restclient"
+	"k8s.io/helm/pkg/kube"
+	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
+	"k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/labels"
-	"k8s.io/kubernetes/pkg/api"
+	"strings"
 
 	"errors"
-	"net/url"
 	"net"
+	"net/url"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
-	Code *Code
-	Cluster *Cluster
-	Key string
+	Code     *Code
+	Cluster  *Cluster
+	Key      string
 	Metadata map[string]string
-	Params interface{}
+	Params   interface{}
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
@@ -113,7 +113,7 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 	return false, nil
 }
 
-func releaseName( key string) string {
+func releaseName(key string) string {
 	return strings.ToLower(EscapeName(key))
 }
 
@@ -131,14 +131,14 @@ func (exec HelmCodeExecutor) Install() error {
 	exists, err := findHelmRelease(helmClient, releaseName)
 	if err != nil {
 		debug.WithFields(log.Fields{
-			"releaseName":  releaseName,
-			"error": err,
+			"releaseName": releaseName,
+			"error":       err,
 		}).Fatal("Err while looking for release")
 	}
 
 	if exists {
 		debug.WithFields(log.Fields{
-			"releaseName":  releaseName,
+			"releaseName": releaseName,
 		}).Fatal("Release already exists")
 	}
 
@@ -239,7 +239,7 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 					sUrl := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
 
 					// todo(slukjanov): could we somehow detect real schema? I think no :(
-					if  port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
+					if port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
 						sUrl = "http://" + sUrl
 					}
 

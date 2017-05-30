@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	//log "github.com/Sirupsen/logrus"
-	"github.com/spf13/cobra"
 	"fmt"
+	"github.com/spf13/cobra"
 )
 
 var endpointCmd = &cobra.Command{
