@@ -1,5 +1,9 @@
 package slinga
 
+import (
+	log "github.com/Sirupsen/logrus"
+)
+
 func (state *ServiceUsageState) Endpoints() map[string]map[string]string {
 	result := make(map[string]map[string]string)
 
@@ -13,11 +17,17 @@ func (state *ServiceUsageState) Endpoints() map[string]map[string]string {
 		if component != nil  && component.Code != nil {
 			codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, state.ResolvedLinks[key].CalculatedCodeParams, state.Policy.Clusters)
 			if err != nil {
-				panic(err)
+				debug.WithFields(log.Fields{
+					"key":  key,
+					"error": err,
+				}).Fatal("Unable to get CodeExecutor")
 			}
 			endpoints, err := codeExecutor.Endpoints()
 			if err != nil {
-				panic(err)
+				debug.WithFields(log.Fields{
+					"key":  key,
+					"error": err,
+				}).Fatal("Error while getting endpoints")
 			}
 
 			if len(endpoints) > 0 {
