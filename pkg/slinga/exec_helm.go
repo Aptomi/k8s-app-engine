@@ -128,11 +128,18 @@ func (exec HelmCodeExecutor) Install() error {
 
 	helmClient := exec.newHelmClient()
 
-	// TODO check err separately
-	if exists, err := findHelmRelease(helmClient, releaseName); exists && err == nil {
-		// TODO log that it's already installed
-		// TODO update release just in case
-		return nil
+	exists, err := findHelmRelease(helmClient, releaseName)
+	if err != nil {
+		debug.WithFields(log.Fields{
+			"releaseName":  releaseName,
+			"error": err,
+		}).Fatal("Err while looking for release")
+	}
+
+	if exists {
+		debug.WithFields(log.Fields{
+			"releaseName":  releaseName,
+		}).Fatal("Release already exists")
 	}
 
 	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
