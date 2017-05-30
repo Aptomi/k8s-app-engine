@@ -1,0 +1,6 @@
+name: demo
+
+type: kubernetes
+
+metadata:
+  kubeContext: kapp-demo

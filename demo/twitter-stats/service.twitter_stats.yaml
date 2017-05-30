@@ -10,6 +10,7 @@ components:
   - name: tweepub
     code:
       type: aptomi/code/kubernetes-helm
+      cluster: demo
       metadata:
         chartName: tweepub-1.0.0
       params:
@@ -37,6 +38,7 @@ components:
   - name: tweetics
     code:
       type: aptomi/code/kubernetes-helm
+      cluster: demo
       metadata:
         chartName: tweetics-0.1.0
       params:
@@ -76,6 +78,7 @@ components:
   - name: tweeviz
     code:
       type: aptomi/code/kubernetes-helm
+      cluster: demo
       metadata:
         chartName: tweeviz-0.1.0
       params:

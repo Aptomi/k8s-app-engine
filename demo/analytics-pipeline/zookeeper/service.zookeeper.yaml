@@ -8,6 +8,7 @@ components:
       url: "zk-{{ .Discovery.instance }}-0.zk-{{ .Discovery.instance }}:2181"
     code:
       type: aptomi/code/kubernetes-helm
+      cluster: demo
       metadata:
         chartName: zookeeper-1.0.0
       params:

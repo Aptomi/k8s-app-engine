@@ -8,6 +8,7 @@ components:
       url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}"
     code:
       type: aptomi/code/kubernetes-helm
+      cluster: demo
       metadata:
         chartName: hdfs-1.0.0
       params:
