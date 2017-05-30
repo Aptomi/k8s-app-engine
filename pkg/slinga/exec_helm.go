@@ -11,27 +11,21 @@ import (
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
 	Code *Code
+	tillerHost string
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
-func NewHelmCodeExecutor(code *Code) CodeExecutor {
+func NewHelmCodeExecutor(code *Code, tillerHost string) CodeExecutor {
 	// First of all, redirect Helm/grpc logging to our own debug stream
 	// We don't want these messages to be printed to Stdout/Stderr
 	grpclog.SetLogger(debug)
 
 	// Next, create the executor itself
-	return HelmCodeExecutor{Code: code}
+	return HelmCodeExecutor{Code: code, tillerHost: tillerHost}
 }
 
-const (
-	// TODO: remove this hardcode
-	// tillerHost = "tiller-deploy.kube-system.svc.cluster.local:44134"
-	// tillerHost = "192.168.64.6:30350"
-	tillerHost = "kapp-demo-1:40666"
-)
-
-func newHelmClient() *helm.Client {
-	return helm.NewClient(helm.Host(tillerHost))
+func (executor *HelmCodeExecutor) newHelmClient() *helm.Client {
+	return helm.NewClient(helm.Host(executor.tillerHost))
 }
 
 func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
@@ -49,13 +43,17 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 	return false, nil
 }
 
+func releaseName( key string) string {
+	return strings.ToLower(EscapeName(key))
+}
+
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	releaseName := EscapeName(key)
+	releaseName := releaseName(key)
 
 	chartName := codeMetadata["chartName"]
 
-	helmClient := newHelmClient()
+	helmClient := executor.newHelmClient()
 
 	// TODO check err separately
 	if exists, err := findHelmRelease(helmClient, releaseName); exists && err == nil {
@@ -87,11 +85,11 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
 func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	releaseName := EscapeName(key)
+	releaseName := releaseName(key)
 
 	chartName := codeMetadata["chartName"]
 
-	helmClient := newHelmClient()
+	helmClient := executor.newHelmClient()
 
 	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
 
@@ -117,9 +115,9 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
 func (executor HelmCodeExecutor) Destroy(key string) error {
-	releaseName := EscapeName(key)
+	releaseName := releaseName(key)
 
-	helmClient := newHelmClient()
+	helmClient := executor.newHelmClient()
 
 	debug.WithFields(log.Fields{
 		"release": releaseName,
