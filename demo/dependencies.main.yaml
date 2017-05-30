@@ -1,8 +1,6 @@
 - userid: 1
   service: twitter-stats
   labels:
-    cluster: demo
-
     # San Francisco, Boston, New York
     locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
     # Twitter API Credentials
@@ -11,13 +9,11 @@
     tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
     tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
   # Print debug information
-  trace: true
+  trace: false
 
 #- userid: 2
 #  service: twitter-stats
 #  labels:
-#    cluster: demo
-#
 #    # Japan
 #    locations: 129.772544,31.070051,142.916753,41.746139
 #    # Twitter API Credentials
@@ -26,13 +22,11 @@
 #    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
 #    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
 #  # Print debug information
-#  trace: true
-#
+#  trace: false
+
 #- userid: 3
 #  service: twitter-stats
 #  labels:
-#    cluster: demo
-#
 #    # Brazil
 #    locations: -57.752720,-21.471868,-31.912877,-0.547536
 #    # Twitter API Credentials
@@ -41,4 +35,4 @@
 #    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
 #    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
 #  # Print debug information
-#  trace: true
+#  trace: false

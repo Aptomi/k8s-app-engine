@@ -1,4 +1,4 @@
-name: minikube
+name: local-minikube
 
 type: kubernetes
 

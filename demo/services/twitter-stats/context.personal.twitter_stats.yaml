@@ -1,0 +1,32 @@
+name: personal
+
+service: twitter-stats
+
+# Who is allowed to access
+criteria:
+  accept:
+    - team == 'platform_services'
+  reject:
+    - priority < 50
+    - compromised
+
+allocations:
+
+  # Users with priority >= 200 will get a dedicated instance in a specific k8s cluster
+  - name: "high-{{ .User.Name }}"
+    criteria:
+      accept:
+        - priority >= 200
+    labels:
+      set:
+        cluster: local-minikube
+
+  # Users with priority < 200 will get a dedicated instance in another k8s cluster
+  - name: "low-{{ .User.Name }}"
+    criteria:
+      accept:
+        - priority < 200
+    labels:
+      set:
+        cluster: remote-shared
+
