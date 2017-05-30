@@ -14,8 +14,8 @@
 #- userid: 2
 #  service: twitter-stats
 #  labels:
-#    # TODO: change location
-#    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
+#    # Japan
+#    locations: 129.772544,31.070051,142.916753,41.746139
 #    # Twitter API Credentials
 #    appKey: Y4FeBw1uRiLqvVVFziYLryGVx
 #    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
@@ -27,8 +27,8 @@
 #- userid: 3
 #  service: twitter-stats
 #  labels:
-#    # TODO: change location
-#    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
+#    # Brazil
+#    locations: -57.752720,-21.471868,-31.912877,-0.547536
 #    # Twitter API Credentials
 #    appKey: Y4FeBw1uRiLqvVVFziYLryGVx
 #    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
