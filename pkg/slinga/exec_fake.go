@@ -36,6 +36,7 @@ func (executor FakeCodeExecutor) Destroy() error {
 	return nil
 }
 
+// Endpoints for FakeCodeExecutor does nothing
 func (executor FakeCodeExecutor) Endpoints() (map[string]string, error) {
 	return nil, nil
 }

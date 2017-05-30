@@ -63,7 +63,7 @@ func (usage ServiceUsageState) createServiceUsageKeyFromStr(serviceName string, 
 	return serviceName + "#" + contextName + "#" + allocationName + "#" + componentName
 }
 
-// Parse key
+// ParseServiceUsageKey parses key and returns service, component, allocation, component names
 func ParseServiceUsageKey(key string) (string, string, string, string) {
 	keyArray := strings.Split(key, "#")
 	service := keyArray[0]

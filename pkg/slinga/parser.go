@@ -71,6 +71,7 @@ type Service struct {
 	componentsMap map[string]*ServiceComponent
 }
 
+// CLuster defines individual K8s cluster and way to access it
 type Cluster struct {
 	Name     string
 	Type     string

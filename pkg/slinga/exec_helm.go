@@ -210,6 +210,7 @@ func (exec HelmCodeExecutor) Destroy() error {
 	return nil
 }
 
+// Endpoints returns map from port type to url for all services of the current chart
 func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 	_, client, err := exec.newKubeClient()
 	if err != nil {
@@ -236,14 +237,14 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 		for _, service := range services.Items {
 			if service.Spec.Type == "NodePort" {
 				for _, port := range service.Spec.Ports {
-					sUrl := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
+					sURL := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
 
 					// todo(slukjanov): could we somehow detect real schema? I think no :(
 					if port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
-						sUrl = "http://" + sUrl
+						sURL = "http://" + sURL
 					}
 
-					endpoints[port.Name] = sUrl
+					endpoints[port.Name] = sURL
 				}
 			}
 		}

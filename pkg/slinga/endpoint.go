@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// Endpoints returns map from key to map from port type to url for all services
 func (state *ServiceUsageState) Endpoints() map[string]map[string]string {
 	result := make(map[string]map[string]string)
 
