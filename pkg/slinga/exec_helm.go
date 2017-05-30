@@ -133,13 +133,21 @@ func (exec HelmCodeExecutor) Install() error {
 		debug.WithFields(log.Fields{
 			"releaseName": releaseName,
 			"error":       err,
-		}).Fatal("Err while looking for release")
+		}).Fatal("Error while looking for release")
 	}
 
 	if exists {
+		// If a release already exists, let's just go ahead and update it
+		debug.WithFields(log.Fields{
+			"releaseName": releaseName,
+		}).Info("Found that release already exists. Calling an update on it")
+		return exec.Update()
+
+		/*
 		debug.WithFields(log.Fields{
 			"releaseName": releaseName,
 		}).Fatal("Release already exists")
+		*/
 	}
 
 	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"

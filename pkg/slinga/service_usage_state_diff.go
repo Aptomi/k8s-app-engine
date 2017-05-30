@@ -273,6 +273,15 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 	diff.printDifferenceOnComponentLevel(verbose)
 }
 
+func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
+	// If we are requesting full policy processing, then we will need to re-create all objects
+	if full {
+		for key := range diff.Next.ResolvedLinks {
+			diff.ComponentInstantiate[key] = true
+		}
+	}
+}
+
 // Apply method applies all changes via executors and saves usage state in Aptomi DB
 func (diff ServiceUsageStateDiff) Apply(noop bool) {
 	if !noop {
@@ -376,7 +385,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -419,7 +428,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
