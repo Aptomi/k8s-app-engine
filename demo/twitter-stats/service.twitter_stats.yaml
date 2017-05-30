@@ -67,7 +67,7 @@ components:
         image:
           repository: frostman/tweeviz
           # v2 available with another visualization
-          tag: v1
+          tag: v1-demo
 
 #        topListSize: 25
 
