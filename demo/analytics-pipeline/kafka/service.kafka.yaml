@@ -18,12 +18,7 @@ components:
         replicas: 1
         antiAffinity: "soft"
 
-        image:
-          repository: frostman/kafka
-          tag: 0.10.2.0
-
         zookeeper:
-          deployChart: false
           externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
 
     dependencies:

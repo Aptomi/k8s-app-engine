@@ -14,6 +14,3 @@ components:
       params:
         replicas: 1
         antiAffinity: "{{ .Labels.antiAffinity }}"
-        image:
-          repository: frostman/zookeeper
-          tag: 3.5.3-rc1

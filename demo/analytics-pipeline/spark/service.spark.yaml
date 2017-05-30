@@ -16,22 +16,12 @@ components:
         chartName: spark-1.0.0
       params:
         spark:
-          image:
-            repository: frostman/spark
-            tag: 2.1.0
           master:
             replicas: 1
           worker:
             replicas: 1
 
-        service:
-          type: NodePort
-
-        zeppelin:
-          enabled: false
-
         zookeeper:
-          deployChart: false
           externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
           path: "/{{ .Discovery.instance }}"
     dependencies:

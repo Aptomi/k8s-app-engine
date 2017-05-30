@@ -14,10 +14,6 @@ components:
       metadata:
         chartName: tweepub-1.0.0
       params:
-        image:
-          repository: frostman/tweepub
-          tag: 1.0.0
-
         # Pass labels to publisher application
         twitter:
           appKey: "{{ .Labels.appKey }}"
@@ -28,7 +24,6 @@ components:
 
         # Tell publisher where to put messages (kafka connection url & topic)
         kafka:
-          deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
           topic: "tweepub-{{ .User.Name }}"
     dependencies:
@@ -42,33 +37,17 @@ components:
       metadata:
         chartName: tweetics-0.1.0
       params:
-        image:
-          repository: frostman/tweetics
-          tag: 1.0.0
-
-        minHashtagCounts: 0
-
         zookeeper:
-          deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
 
         kafka:
-          deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
           topic: "tweepub-{{ .User.Name }}"
-          zookeeper:
-            deployChart: false
-            externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
 
         spark:
-          deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.spark.spark.url }}"
-          zookeeper:
-            deployChart: false
-            externalAddress: "{{ .Discovery.analytics_pipeline.spark.zookeeper.zookeeper.url }}"
 
         hdfs:
-          deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
           path: "/twitter-{{ .User.Name }}/results"
     dependencies:
@@ -82,18 +61,14 @@ components:
       metadata:
         chartName: tweeviz-0.1.0
       params:
-        image:
-          repository: frostman/tweeviz
-          tag: 1.0.0
+#        image:
+#          repository: frostman/tweeviz
+#          # demo-v2 available with another visualization
+#          tag: demo-v1
 
-        minPopularity: 0
-        topListSize: 25
-
-        service:
-          type: NodePort
+#        topListSize: 25
 
         hdfs:
-          deployChart: false
           externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
           path: "/twitter-{{ .User.Name }}"
     dependencies:

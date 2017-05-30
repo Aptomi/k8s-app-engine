@@ -14,17 +14,4 @@ components:
       params:
         datanode:
           replicas: 1
-          image:
-            repository: uhopper/hadoop-datanode
-            tag: 2.7.2
-
           antiAffinity: "soft"
-
-        namenode:
-          image:
-            repository: uhopper/hadoop-namenode
-            tag: 2.7.2
-
-          ui:
-            service:
-              type: NodePort
