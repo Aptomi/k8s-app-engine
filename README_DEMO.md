@@ -5,7 +5,6 @@
    - "Twitter Stats" service (twitter real-time messages -> DAP -> stats on web)
    - Explain our model (what gets matched and how)
    - Explain what we are going to show
-   TODO: think about how to show high-value on slides
 
 2. Show policy
    - Run with empty dependencies. Show service graph
@@ -31,19 +30,22 @@
      - show visualization on web (get endpoints via aptomi)
      - policy apply
 
-5. Low-priority user Carol (ID=3)
-   - Gets nothing due to low priority
-
-6. Alice (ID=1) deploys new staging version of TS in parallel
+5. Alice (ID=1) deploys new staging version of TS in parallel
    - Show TS
      - tweepub: different region
      - tweeviz: different HTML to visualize data
 
-7. Alice (ID=1) propagates staging version to production
+6. Alice (ID=1) propagates staging version to production
    - Staging TS gets deleted
    - Production TS gets updated
 
-8. Increase priority for Carol (ID=3) and deploy dedicated DAP for her
-
-9. Alice (ID=1) gets marked as "untrusted"
+7. Alice (ID=1) gets marked as "untrusted"
    - Loses access to her "prod"
+
+8. Low-priority user Carol (ID=3)
+   - Gets nothing due to low priority
+
+9. Increase priority for Carol (ID=3) and deploy dedicated DAP for her
+   - In another k8s cluster
+
+
