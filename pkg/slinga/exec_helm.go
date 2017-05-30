@@ -6,26 +6,96 @@ import (
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"strings"
+	"k8s.io/helm/pkg/kube"
+	"k8s.io/helm/pkg/helm/portforwarder"
+	"fmt"
+	"k8s.io/kubernetes/pkg/client/restclient"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
+	"k8s.io/kubernetes/pkg/labels"
+	"k8s.io/kubernetes/pkg/api"
+
+	"errors"
+	"net/url"
+	"net"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
 	Code *Code
-	tillerHost string
+	Cluster *Cluster
+	Key string
+	Metadata map[string]string
+	Params interface{}
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
-func NewHelmCodeExecutor(code *Code, tillerHost string) CodeExecutor {
+func NewHelmCodeExecutor(code *Code, key string, codeMetadata map[string]string, codeParams interface{}, clusters map[string]*Cluster) (CodeExecutor, error) {
 	// First of all, redirect Helm/grpc logging to our own debug stream
 	// We don't want these messages to be printed to Stdout/Stderr
 	grpclog.SetLogger(debug)
 
-	// Next, create the executor itself
-	return HelmCodeExecutor{Code: code, tillerHost: tillerHost}
+	if paramsMap, ok := codeParams.(map[interface{}]interface{}); ok {
+		// todo: should we check key existence first?
+		if clusterName, ok := paramsMap["cluster"].(string); !ok {
+			return nil, errors.New("Cluster param should be defined")
+		} else if cluster, ok := clusters[clusterName]; ok {
+			exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Metadata: codeMetadata, Params: codeParams}
+			err := exec.setupTillerConnection()
+			if err != nil {
+				return nil, err
+			}
+			return exec, nil
+		} else {
+			return nil, errors.New("Specified cluster is undefined")
+		}
+	}
+	return nil, errors.New("Can't parse codeParams")
 }
 
-func (executor *HelmCodeExecutor) newHelmClient() *helm.Client {
-	return helm.NewClient(helm.Host(executor.tillerHost))
+func (exec *HelmCodeExecutor) newKubeClient() (*restclient.Config, *internalclientset.Clientset, error) {
+	kubeContext := exec.Cluster.Metadata.KubeContext
+	config, err := kube.GetConfig(kubeContext).ClientConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("Could not get kubernetes config for context '%s': %s", kubeContext, err)
+	}
+	client, err := internalclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Could not get kubernetes client: %s", err)
+	}
+	return config, client, nil
+}
+
+func (exec *HelmCodeExecutor) setupTillerConnection() error {
+	if exec.Cluster.Metadata.tillerHost != "" {
+		return nil
+	}
+
+	config, client, err := exec.newKubeClient()
+	if err != nil {
+		return err
+	}
+
+	tillerNamespace := exec.Cluster.Metadata.TillerNamespace
+	if tillerNamespace == "" {
+		tillerNamespace = "kube-system"
+	}
+	tunnel, err := portforwarder.New(tillerNamespace, client, config)
+	if err != nil {
+		return err
+	}
+
+	exec.Cluster.Metadata.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
+
+	debug.WithFields(log.Fields{
+		"port": tunnel.Local,
+	}).Info("Created k8s tunnel using local port")
+
+	return nil
+}
+
+func (exec *HelmCodeExecutor) newHelmClient() *helm.Client {
+	return helm.NewClient(helm.Host(exec.Cluster.Metadata.tillerHost))
 }
 
 func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
@@ -48,12 +118,15 @@ func releaseName( key string) string {
 }
 
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
-func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	releaseName := releaseName(key)
+func (exec HelmCodeExecutor) Install() error {
+	releaseName := releaseName(exec.Key)
 
-	chartName := codeMetadata["chartName"]
+	chartName, ok := exec.Metadata["chartName"]
+	if !ok {
+		return errors.New("Chart name is undefined")
+	}
 
-	helmClient := executor.newHelmClient()
+	helmClient := exec.newHelmClient()
 
 	// TODO check err separately
 	if exists, err := findHelmRelease(helmClient, releaseName); exists && err == nil {
@@ -64,7 +137,7 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 
 	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
 
-	vals, err := yaml.Marshal(codeParams)
+	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
 		return err
 	}
@@ -84,16 +157,16 @@ func (executor HelmCodeExecutor) Install(key string, codeMetadata map[string]str
 }
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
-func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
-	releaseName := releaseName(key)
+func (exec HelmCodeExecutor) Update() error {
+	releaseName := releaseName(exec.Key)
 
-	chartName := codeMetadata["chartName"]
+	chartName := exec.Metadata["chartName"]
 
-	helmClient := executor.newHelmClient()
+	helmClient := exec.newHelmClient()
 
 	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
 
-	vals, err := yaml.Marshal(codeParams)
+	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
 		return err
 	}
@@ -114,10 +187,10 @@ func (executor HelmCodeExecutor) Update(key string, codeMetadata map[string]stri
 }
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
-func (executor HelmCodeExecutor) Destroy(key string) error {
-	releaseName := releaseName(key)
+func (exec HelmCodeExecutor) Destroy() error {
+	releaseName := releaseName(exec.Key)
 
-	helmClient := executor.newHelmClient()
+	helmClient := exec.newHelmClient()
 
 	debug.WithFields(log.Fields{
 		"release": releaseName,
@@ -128,4 +201,66 @@ func (executor HelmCodeExecutor) Destroy(key string) error {
 	}
 
 	return nil
+}
+
+func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
+	_, client, err := exec.newKubeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if svcGetter, ok := client.Core().(internalversion.ServicesGetter); ok {
+		releaseName := releaseName(exec.Key)
+		chartName := exec.Metadata["chartName"]
+
+		selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
+		options := api.ListOptions{LabelSelector: selector}
+		services, err := svcGetter.Services(exec.Cluster.Metadata.Namespace).List(options)
+		if err != nil {
+			return nil, err
+		}
+		endpoints := make(map[string]string)
+
+		kubeHost, err := exec.getKubeHost()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, service := range services.Items {
+			if service.Spec.Type == "NodePort" {
+				for _, port := range service.Spec.Ports {
+					sUrl := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
+
+					// todo(slukjanov): could we somehow detect real schema? I think no :(
+					if  port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
+						sUrl = "http://" + sUrl
+					}
+
+					endpoints[port.Name] = sUrl
+				}
+			}
+		}
+		return endpoints, nil
+	}
+
+	return nil, nil
+}
+
+func (exec HelmCodeExecutor) getKubeHost() (string, error) {
+	config, _, err := exec.newKubeClient()
+	if err != nil {
+		return "", err
+	}
+
+	u, err := url.Parse(config.Host)
+	if err != nil {
+		return "", err
+	}
+
+	host, _, err := net.SplitHostPort(u.Host)
+	if err != nil {
+		return "", err
+	}
+
+	return host, nil
 }

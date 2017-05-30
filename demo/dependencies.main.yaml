@@ -1,6 +1,8 @@
 - userid: 1
   service: twitter-stats
   labels:
+    cluster: demo
+
     # San Francisco, Boston, New York
     locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
     # Twitter API Credentials
@@ -14,6 +16,8 @@
 #- userid: 2
 #  service: twitter-stats
 #  labels:
+#    cluster: demo
+#
 #    # Japan
 #    locations: 129.772544,31.070051,142.916753,41.746139
 #    # Twitter API Credentials
@@ -27,6 +31,8 @@
 #- userid: 3
 #  service: twitter-stats
 #  labels:
+#    cluster: demo
+#
 #    # Brazil
 #    locations: -57.752720,-21.471868,-31.912877,-0.547536
 #    # Twitter API Credentials

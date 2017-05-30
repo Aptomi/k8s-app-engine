@@ -332,7 +332,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _, _, componentName := parseServiceUsageKey(key)
+			serviceName, _, _, componentName := ParseServiceUsageKey(key)
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 
 			if component == nil {
@@ -350,12 +350,12 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor()
+					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
 
-					err = codeExecutor.Install(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
+					err = codeExecutor.Install()
 					if err != nil {
 						return err
 					}
@@ -376,7 +376,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -393,11 +393,11 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				}).Info("Updating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor()
+					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
-					err = codeExecutor.Update(key, component.Code.Metadata, diff.Next.ResolvedLinks[key].CalculatedCodeParams)
+					err = codeExecutor.Update()
 					if err != nil {
 						return err
 					}
@@ -419,7 +419,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := parseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -436,11 +436,11 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				}).Info("Destructing component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor()
+					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Prev.ResolvedLinks[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
 					if err != nil {
 						return err
 					}
-					err = codeExecutor.Destroy(key)
+					err = codeExecutor.Destroy()
 					if err != nil {
 						return err
 					}

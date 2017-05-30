@@ -11,10 +11,11 @@ components:
       url: "kafka-{{ .Discovery.instance }}-0.kafka-{{ .Discovery.instance }}:9092"
     code:
       type: aptomi/code/kubernetes-helm
-      cluster: demo
       metadata:
         chartName: kafka-1.0.0
       params:
+        cluster: "{{ .Labels.cluster }}"
+
         replicas: 1
         antiAffinity: "soft"
 

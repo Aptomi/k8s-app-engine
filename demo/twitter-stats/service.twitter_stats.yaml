@@ -10,10 +10,11 @@ components:
   - name: tweepub
     code:
       type: aptomi/code/kubernetes-helm
-      cluster: demo
       metadata:
         chartName: tweepub-1.0.0
       params:
+        cluster: "{{ .Labels.cluster }}"
+
         # Pass labels to publisher application
         twitter:
           appKey: "{{ .Labels.appKey }}"
@@ -33,10 +34,11 @@ components:
   - name: tweetics
     code:
       type: aptomi/code/kubernetes-helm
-      cluster: demo
       metadata:
         chartName: tweetics-0.1.0
       params:
+        cluster: "{{ .Labels.cluster }}"
+
         zookeeper:
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
 
@@ -57,14 +59,15 @@ components:
   - name: tweeviz
     code:
       type: aptomi/code/kubernetes-helm
-      cluster: demo
       metadata:
         chartName: tweeviz-0.1.0
       params:
-#        image:
-#          repository: frostman/tweeviz
-#          # demo-v2 available with another visualization
-#          tag: demo-v1
+        cluster: "{{ .Labels.cluster }}"
+
+        image:
+          repository: frostman/tweeviz
+          # v2 available with another visualization
+          tag: v1
 
 #        topListSize: 25
 

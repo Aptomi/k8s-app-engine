@@ -11,10 +11,11 @@ components:
       url: "spark-master-{{ .Discovery.instance }}-0.spark-master-{{ .Discovery.instance }}:7077"
     code:
       type: aptomi/code/kubernetes-helm
-      cluster: demo
       metadata:
         chartName: spark-1.0.0
       params:
+        cluster: "{{ .Labels.cluster }}"
+
         spark:
           master:
             replicas: 1

@@ -3,4 +3,5 @@ name: minikube
 type: kubernetes
 
 metadata:
-  kubeContext: minikube
+  kubecontext: minikube
+  namespace: demo

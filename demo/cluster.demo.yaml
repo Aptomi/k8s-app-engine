@@ -3,4 +3,5 @@ name: demo
 type: kubernetes
 
 metadata:
-  kubeContext: kapp-demo
+  kubecontext: kapp-demo
+  namespace: demo

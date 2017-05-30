@@ -44,11 +44,8 @@ type Context struct {
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type     string
-	Cluster  string
 	Metadata map[string]string
 	Params   interface{}
-
-	cluster *Cluster
 }
 
 // ServiceComponent defines component within a service
@@ -77,7 +74,14 @@ type Service struct {
 type Cluster struct {
 	Name string
 	Type string
-	Metadata map[string]string
+	Metadata struct {
+		KubeContext     string
+		TillerNamespace string
+		Namespace       string
+
+		// store local proxy address when connection established
+		tillerHost      string
+	}
 }
 
 // Policy is a global policy object with services and contexts
@@ -108,19 +112,6 @@ func LoadPolicyFromDir(dir string) Policy {
 	sort.Strings(files)
 	for _, f := range files {
 		service := loadServiceFromFile(f)
-		for _, component := range service.Components {
-			if code := component.Code; code != nil {
-				if cluster, ok := s.Clusters[code.Cluster]; ok {
-					code.cluster = cluster
-				} else {
-					debug.WithFields(log.Fields{
-						"service": service,
-						"component": component,
-					}).Fatal("Can't find cluster for component")
-				}
-
-			}
-		}
 		s.Services[service.Name] = service
 	}
 

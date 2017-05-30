@@ -9,29 +9,33 @@ type FakeCodeExecutor struct {
 }
 
 // NewFakeCodeExecutor constructs FakeCodeExecutor from given *Code
-func NewFakeCodeExecutor(code *Code) FakeCodeExecutor {
+func NewFakeCodeExecutor(code *Code, key string, codeMetadata map[string]string, codeParams interface{}, clusters map[string]*Cluster) FakeCodeExecutor {
 	return FakeCodeExecutor{Code: code}
 }
 
 // NewFakeCodeExecutorWithDelay constructs FakeCodeExecutor from given *Code with specified delay
-func NewFakeCodeExecutorWithDelay(code *Code, delay time.Duration) FakeCodeExecutor {
+func NewFakeCodeExecutorWithDelay(code *Code, key string, codeMetadata map[string]string, codeParams interface{}, clusters map[string]*Cluster, delay time.Duration) FakeCodeExecutor {
 	return FakeCodeExecutor{Code: code, Delay: delay}
 }
 
 // Install for FakeCodeExecutor does nothing
-func (executor FakeCodeExecutor) Install(key string, codeMetadata map[string]string, codeParams interface{}) error {
+func (executor FakeCodeExecutor) Install() error {
 	time.Sleep(executor.Delay)
 	return nil
 }
 
 // Update for FakeCodeExecutor does nothing
-func (executor FakeCodeExecutor) Update(key string, codeMetadata map[string]string, codeParams interface{}) error {
+func (executor FakeCodeExecutor) Update() error {
 	time.Sleep(executor.Delay)
 	return nil
 }
 
 // Destroy for FakeCodeExecutor does nothing
-func (executor FakeCodeExecutor) Destroy(key string) error {
+func (executor FakeCodeExecutor) Destroy() error {
 	time.Sleep(executor.Delay)
 	return nil
+}
+
+func (executor FakeCodeExecutor) Endpoints() (map[string]string, error) {
+	return nil, nil
 }
