@@ -13,7 +13,7 @@ test:
 
 .PHONY: build
 build:
-	go build -o aptomi
+	go build -i -o aptomi
 
 .PHONY: fmt
 fmt:
@@ -33,3 +33,4 @@ validate: fmt vet
 .PHONY: clean
 clean:
 	-rm -f aptomi
+	go clean -r -i
