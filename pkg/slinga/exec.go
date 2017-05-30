@@ -16,7 +16,10 @@ type CodeExecutor interface {
 func (code *Code) GetCodeExecutor() (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
-		return NewHelmCodeExecutor(code), nil
+		if kubeClient, ok := code.cluster.Client().(*KubeClient); ok {
+			return NewHelmCodeExecutor(code, kubeClient.tillerHost), nil
+		}
+		return nil, errors.New("Helm executor works only with K8s cluster")
 	case "aptomi/code/unittests", "unittests":
 		return NewFakeCodeExecutor(code), nil
 	case "aptomi/code/withdelay", "delay":

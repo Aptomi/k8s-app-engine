@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
+	"errors"
 )
 
 /*
@@ -44,8 +45,11 @@ type Context struct {
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type     string
+	Cluster  string
 	Metadata map[string]string
 	Params   interface{}
+
+	cluster *Cluster
 }
 
 // ServiceComponent defines component within a service
@@ -71,10 +75,17 @@ type Service struct {
 	componentsMap map[string]*ServiceComponent
 }
 
+type Cluster struct {
+	Name string
+	Type string
+	Metadata map[string]string
+}
+
 // Policy is a global policy object with services and contexts
 type Policy struct {
 	Services map[string]*Service
 	Contexts map[string][]*Context
+	Clusters map[string]*Cluster
 }
 
 // LoadPolicyFromDir loads policy from a directory, recursively processing all files
@@ -82,13 +93,33 @@ func LoadPolicyFromDir(dir string) Policy {
 	s := Policy{
 		Services: make(map[string]*Service),
 		Contexts: make(map[string][]*Context),
+		Clusters: make(map[string] *Cluster),
+	}
+
+	// read all clusters
+	files, _ := zglob.Glob(dir + "/**/cluster.*.yaml")
+	sort.Strings(files)
+	for _, f := range files {
+		cluster := loadClusterFromFile(f)
+		s.Clusters[cluster.Name] = cluster
 	}
 
 	// read all services
-	files, _ := zglob.Glob(dir + "/**/service.*.yaml")
+	files, _ = zglob.Glob(dir + "/**/service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		service := loadServiceFromFile(f)
+		for _, component := range service.Components {
+			if code := component.Code; code != nil {
+				if cluster, ok := s.Clusters[code.Cluster]; ok {
+					code.cluster = cluster
+				} else {
+					// todo panic!
+					panic(errors.New("Can't find cluster for component"))
+				}
+
+			}
+		}
 		s.Services[service.Name] = service
 	}
 
@@ -147,6 +178,30 @@ func loadContextFromFile(fileName string) *Context {
 			"file":  fileName,
 			"error": e,
 		}).Fatal("Unable to unmarshal context")
+	}
+	return &t
+}
+
+// Loads cluster from YAML file
+func loadClusterFromFile(fileName string) *Cluster {
+	debug.WithFields(log.Fields{
+		"file": fileName,
+	}).Info("Loading cluster")
+
+	dat, e := ioutil.ReadFile(fileName)
+	if e != nil {
+		debug.WithFields(log.Fields{
+			"file":  fileName,
+			"error": e,
+		}).Fatal("Unable to read file")
+	}
+	t := Cluster{}
+	e = yaml.Unmarshal([]byte(dat), &t)
+	if e != nil {
+		debug.WithFields(log.Fields{
+			"file":  fileName,
+			"error": e,
+		}).Fatal("Unable to unmarshal cluster")
 	}
 	return &t
 }
