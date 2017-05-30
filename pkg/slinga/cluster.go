@@ -3,6 +3,7 @@ package slinga
 import (
 	"sync"
 	"errors"
+	log "github.com/Sirupsen/logrus"
 )
 
 var (
@@ -33,8 +34,9 @@ func (cluster *Cluster) Client() ClusterClient {
 
 	client, err := newClusterClient(cluster)
 	if err != nil {
-		// todo panic!
-		panic(err)
+		debug.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Can't create cluster client")
 	}
 	clusterClients[cluster.Name] = client
 

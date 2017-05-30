@@ -7,7 +7,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
-	"errors"
 )
 
 /*
@@ -114,8 +113,10 @@ func LoadPolicyFromDir(dir string) Policy {
 				if cluster, ok := s.Clusters[code.Cluster]; ok {
 					code.cluster = cluster
 				} else {
-					// todo panic!
-					panic(errors.New("Can't find cluster for component"))
+					debug.WithFields(log.Fields{
+						"service": service,
+						"component": component,
+					}).Fatal("Can't find cluster for component")
 				}
 
 			}

@@ -6,7 +6,7 @@ import (
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/client/restclient"
-	"errors"
+	log "github.com/Sirupsen/logrus"
 )
 
 type KubeClient struct {
@@ -20,8 +20,9 @@ func NewKubeClient(cluster *Cluster) *KubeClient {
 
 	err := client.setupTillerConnection()
 	if err != nil {
-		// todo panic!
-		panic(err)
+		debug.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Can't setup tiller connection")
 	}
 
 	return client
@@ -33,16 +34,17 @@ func NewKubeClient(cluster *Cluster) *KubeClient {
 func (kubeClient *KubeClient) getKubeClient() (*restclient.Config, *internalclientset.Clientset, error) {
 	kubeContext, ok := kubeClient.cluster.Metadata["kubeContext"]
 	if !ok {
-		// todo panic!
-		panic(errors.New("Kube context should be specified for k8s cluster"))
+		debug.WithFields(log.Fields{
+			"cluster": kubeClient.cluster,
+		}).Fatal("Kube context should be specified for k8s cluster")
 	}
 	config, err := kube.GetConfig(kubeContext).ClientConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes config for context '%s': %s", kubeContext, err)
+		return nil, nil, fmt.Errorf("Could not get kubernetes config for context '%s': %s", kubeContext, err)
 	}
 	client, err := internalclientset.NewForConfig(config)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
+		return nil, nil, fmt.Errorf("Could not get kubernetes client: %s", err)
 	}
 	return config, client, nil
 }
@@ -69,8 +71,9 @@ func (kubeClient *KubeClient) setupTillerConnection() error {
 
 	kubeClient.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 
-	// todo: wrap with debug logging
-	fmt.Printf("Created k8s tunnel using local port: '%d'\n", tunnel.Local)
+	debug.WithFields(log.Fields{
+		"port": tunnel.Local,
+	}).Info("Created k8s tunnel using local port")
 
 	return nil
 }
