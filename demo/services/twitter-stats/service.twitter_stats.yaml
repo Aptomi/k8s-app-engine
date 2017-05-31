@@ -66,10 +66,12 @@ components:
 
         image:
           repository: frostman/tweeviz
-          # v2 available with another visualization
-          tag: v1-demo
+          # demo-v32 available with another visualization
+          tag: demo-v31
 
 #        topListSize: 25
+
+        header: Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})
 
         hdfs:
           externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
