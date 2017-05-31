@@ -13,7 +13,7 @@ criteria:
 allocations:
 
   # Users with priority >= 200 will get a dedicated instance in a specific k8s cluster
-  - name: "high-{{ .User.Name }}-{{ .Labels.tsvisimage }}"
+  - name: "high-{{ .User.Name }}-{{ .Labels.tstype }}"
     criteria:
       accept:
         - priority >= 200
@@ -22,11 +22,10 @@ allocations:
         cluster: local-minikube
 
   # Users with priority < 200 will get a dedicated instance in another k8s cluster
-  - name: "low-{{ .User.Name }}-{{ .Labels.tsvisimage }}"
+  - name: "low-{{ .User.Name }}-{{ .Labels.tstype }}"
     criteria:
       accept:
         - priority < 200
     labels:
       set:
         cluster: remote-shared
-
