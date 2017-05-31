@@ -324,13 +324,14 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 
 	// Check errors and resolve allocation name (it can be dynamic, depending on user labels)
 	if allocationMatched != nil {
-		err := allocationMatched.resolveName(user)
+		err := allocationMatched.resolveName(user, labels)
 		if err != nil {
 			debug.WithFields(log.Fields{
 				"service":    service.Name,
 				"context":    context.Name,
 				"allocation": allocationMatched.Name,
 				"user":       user.Name,
+				"error":      err,
 			}).Fatal("Cannot resolve name for an allocation")
 		}
 		debug.WithFields(log.Fields{

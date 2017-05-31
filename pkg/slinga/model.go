@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"bytes"
-	"errors"
 	"strings"
 	"text/template"
+	"fmt"
 )
 
 /*
@@ -73,8 +73,8 @@ func (allocation *Allocation) matches(labels LabelSet) bool {
 }
 
 // Resolve name for an allocation
-func (allocation *Allocation) resolveName(user User) error {
-	result, err := evaluateTemplate(allocation.Name, user)
+func (allocation *Allocation) resolveName(user User, labels LabelSet) error {
+	result, err := evaluateTemplate(allocation.Name, user, labels)
 	allocation.NameResolved = result
 	return err
 }
@@ -104,28 +104,28 @@ func (criteria *Criteria) allows(labels LabelSet) bool {
 }
 
 // Evaluates a template
-func evaluateTemplate(templateStr string, user User) (string, error) {
-
+func evaluateTemplate(templateStr string, user User, labels LabelSet) (string, error) {
 	type Parameters struct {
 		User User
+		Labels map[string]string
 	}
-	param := Parameters{User: user}
+	param := Parameters{User: user, Labels: labels.Labels}
 
 	tmpl, err := template.New("").Parse(templateStr)
 	if err != nil {
-		return "", errors.New("Invalid template " + templateStr)
+		return "", fmt.Errorf("Invalid template %s: %s", templateStr, err.Error())
 	}
 
 	var doc bytes.Buffer
 	err = tmpl.Execute(&doc, param)
 
 	if err != nil {
-		return "", errors.New("Cannot evaluate template " + templateStr)
+		return "", fmt.Errorf("Cannot evaluate template %s: %s", templateStr, err.Error())
 	}
 
 	result := doc.String()
 	if strings.Contains(result, "<no value>") {
-		return "", errors.New("Cannot evaluate template " + templateStr)
+		return "", fmt.Errorf("Cannot evaluate template %s: <no value>", templateStr)
 	}
 
 	return doc.String(), nil

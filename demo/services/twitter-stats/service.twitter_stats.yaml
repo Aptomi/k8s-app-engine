@@ -67,7 +67,7 @@ components:
         image:
           repository: frostman/tweeviz
           # demo-v32 available with another visualization
-          tag: demo-v31
+          tag: "{{ .Labels.tsvisimage }}"
 
 #        topListSize: 25
 
