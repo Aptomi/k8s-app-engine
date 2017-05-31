@@ -10,6 +10,7 @@ var noop bool
 var show bool
 var full bool
 var verbose bool
+var trace bool
 
 var policyCmd = &cobra.Command{
 	Use:   "policy",
@@ -34,6 +35,7 @@ var policyCmdApply = &cobra.Command{
 		policy := slinga.LoadPolicyFromDir(policyDir)
 		users := slinga.LoadUsersFromDir(policyDir)
 		dependencies := slinga.LoadDependenciesFromDir(policyDir)
+		dependencies.SetTrace(trace)
 
 		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies)
 		err := nextUsageState.ResolveUsage(&users)
@@ -69,4 +71,5 @@ func init() {
 	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "In addition to applying changes, re-create missing instances (if they were manually deleted from the underlying cloud) and update running instances")
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
+	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", false, "Trace all dependencies and print how rules got evaluated")
 }

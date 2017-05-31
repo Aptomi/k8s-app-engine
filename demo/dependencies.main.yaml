@@ -8,8 +8,6 @@
     appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
     tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
     tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
-  # Print debug information
-  trace: false
 
 #- userid: 2
 #  service: twitter-stats
@@ -21,8 +19,6 @@
 #    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
 #    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
 #    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
-#  # Print debug information
-#  trace: false
 
 #- userid: 3
 #  service: twitter-stats
@@ -34,5 +30,3 @@
 #    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
 #    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
 #    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
-#  # Print debug information
-#  trace: false

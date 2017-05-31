@@ -39,6 +39,17 @@ func (dependency *Dependency) getLabelSet() LabelSet {
 	return LabelSet{Labels: dependency.Labels}
 }
 
+// Enable tracing for all dependencies
+func (dependencies *GlobalDependencies) SetTrace(trace bool) {
+	if trace {
+		for _, serviceDeps := range dependencies.Dependencies {
+			for _, v := range serviceDeps {
+				v.Trace = true
+			}
+		}
+	}
+}
+
 // Merge
 func (src GlobalDependencies) appendDependencies(ops GlobalDependencies) GlobalDependencies {
 	result := NewGlobalDependencies()
