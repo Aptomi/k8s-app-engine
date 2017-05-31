@@ -36,5 +36,5 @@ func Execute() {
 
 func init() {
 	// Global flags for the application
-	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Pring debug information")
+	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", true, "Print debug information")
 }
