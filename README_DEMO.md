@@ -22,9 +22,9 @@
    - Run aptomi
      - `./aptomi policy apply --noop`
      - `./aptomi policy apply --noop --show`
-     - `./aptomi policy apply --debug`
+     - `./aptomi policy apply`
    - Run aptomi again
-     - `./aptomi policy apply --debug` - to ensure there are no more changes to apply
+     - `./aptomi policy apply` - to ensure there are no more changes to apply
    - While it's loading, we can show tracing
      - `./aptomi policy apply --noop --trace`
    - Show kubectl output
@@ -41,7 +41,7 @@
    - Run aptomi
      - `./aptomi policy apply --noop`
      - `./aptomi policy apply --noop --show`
-     - `./aptomi policy apply --debug`
+     - `./aptomi policy apply`
    - Show endpoints
      - `./aptomi endpoint show`
    - Open Tweeviz UI
@@ -52,7 +52,7 @@
    - Run aptomi
      - `./aptomi policy apply --noop`
      - `./aptomi policy apply --noop --show`
-     - `./aptomi policy apply --debug`
+     - `./aptomi policy apply`
    - Open Tweeviz UI
      - Shows SF, NY, Boston tweets. But different UI
 
