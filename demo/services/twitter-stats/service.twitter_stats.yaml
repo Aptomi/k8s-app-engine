@@ -26,7 +26,7 @@ components:
         # Tell publisher where to put messages (kafka connection url & topic)
         kafka:
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
-          topic: "tweepub-{{ .User.Name }}"
+          topic: "tweepub-{{ .User.Name }}-{{ .Labels.tsvisimage }}"
     dependencies:
       - analytics_pipeline
 
@@ -44,14 +44,14 @@ components:
 
         kafka:
           externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
-          topic: "tweepub-{{ .User.Name }}"
+          topic: "tweepub-{{ .User.Name }}-{{ .Labels.tsvisimage }}"
 
         spark:
           externalAddress: "{{ .Discovery.analytics_pipeline.spark.spark.url }}"
 
         hdfs:
           externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
-          path: "/twitter-{{ .User.Name }}/results"
+          path: "/twitter-{{ .User.Name }}-{{ .Labels.tsvisimage }}/results"
     dependencies:
       - analytics_pipeline
 
@@ -74,6 +74,6 @@ components:
 
         hdfs:
           externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
-          path: "/twitter-{{ .User.Name }}"
+          path: "/twitter-{{ .User.Name }}-{{ .Labels.tsvisimage }}"
     dependencies:
       - analytics_pipeline
