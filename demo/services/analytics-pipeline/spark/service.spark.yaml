@@ -21,6 +21,8 @@ components:
             replicas: 1
           worker:
             replicas: 1
+            daemonMemory: "2g"
+            executorMemory: "2g"
 
         zookeeper:
           externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
