@@ -1,34 +1,48 @@
 ## Demo scenario:
 
-1. Explain use case (show slides)
-   - "Data Analytics Pipeline" service (kafka, spark, hdfs, zookeeper) for data processing
-   - "Twitter Stats" service (twitter real-time messages -> DAP -> stats on web)
-   - Explain our model (what gets matched and how)
-   - Explain what we are going to show
+1. Show slides
+   - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
 
 2. Show policy
-   - Run with empty dependencies. Show service graph
-   - Show service definition files for DAP
-   - Show service definition files for TS
-   - Show contexts/allocations
-     - Explain what contexts will be matched for which users
-   TODO: show k8s cluster definition files and multi-kubernetes cluster support
+   - Show k8s clusters
+      - `kubectl config get-contexts`
+      - `kubectl config view`
+   - Show services
+      - Analytics Pipeline
+      - Twitter Stats
+   - Show users
+   - Show contexts (where the secret sauce is)
 
-3. Deploy DAP + TS for user Alice (ID=1)
-   - Single DAP, single TS
-     - policy apply --noop
-     - policy apply --noop --verbose
-     - picture of services graph
-     - show visualization on web (get endpoints via aptomi)
-     - policy apply
+3. Deploy AP + TS for user Alice (ID=1)
+   - Explain what will get matched
+     - low-Alice (priority < 200), team-platform-services (priority < 200)
+   - Run aptomi
+     - `./aptomi policy apply --noop`
+     - `./aptomi policy apply --noop --show`
+     - `./aptomi policy apply --debug`
+   - Run aptomi again
+     - `./aptomi policy apply --debug` - to ensure there are no more changes to apply
+   - Show endpoints
+     - `./aptomi endpoint show`
+   - Open Tweeviz UI
+   - While it's loading, we can show tracing
+     - `./aptomi policy apply --noop --tracing`
 
-4. Deploy DAP + TS for user Bob (ID=2)
-   - Share the same DAP, dedicated TS
-     - policy apply --noop
-     - policy apply --noop --verbose
-     - picture of services graph
-     - show visualization on web (get endpoints via aptomi)
-     - policy apply
+4. Deploy AP + TS for user Bob (ID=2)
+   - Explain what will get matched
+     - low-Bob (priority < 200), team-platform-services (priority < 200)
+     - meaning, dedicated TS and shared AP
+   - Run aptomi
+     - `./aptomi policy apply --noop`
+     - `./aptomi policy apply --noop --show`
+     - `./aptomi policy apply --debug`
+   - Run aptomi again
+     - `./aptomi policy apply --debug` - to ensure there are no more changes to apply
+   - Show endpoints
+     - `./aptomi endpoint show`
+   - Open Tweeviz UI
+   - While it's loading, we can show tracing
+     - `./aptomi policy apply --noop --tracing`
 
 5. Alice (ID=1) deploys new staging version of TS in parallel
    - Show TS
@@ -49,3 +63,5 @@
    - In another k8s cluster
 
 
+tracing
+change tag
