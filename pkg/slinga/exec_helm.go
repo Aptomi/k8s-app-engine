@@ -273,10 +273,5 @@ func (exec HelmCodeExecutor) getKubeHost() (string, error) {
 		return "", err
 	}
 
-	host, _, err := net.SplitHostPort(u.Host)
-	if err != nil {
-		return "", err
-	}
-
-	return host, nil
+	return u.Hostname(), nil
 }
