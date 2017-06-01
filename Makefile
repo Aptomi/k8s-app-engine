@@ -15,6 +15,10 @@ test:
 build:
 	go build -i -o aptomi
 
+.PHONY: install
+install:
+	go install
+
 .PHONY: fmt
 fmt:
 	go fmt $$(go list ./... | grep -v /vendor/)
