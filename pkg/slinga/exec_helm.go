@@ -256,8 +256,6 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 		}
 	}
 	return endpoints, nil
-
-	return nil, nil
 }
 
 func (exec HelmCodeExecutor) getKubeExternalAddress(client internalversioncore.CoreInterface) (string, error) {
