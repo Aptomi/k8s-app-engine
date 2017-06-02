@@ -28,7 +28,7 @@
    - While it's loading, we can show tracing
      - `./aptomi policy apply --noop --trace`
    - Show kubectl output
-     - `kubectl --context kapp-demo -n demo get pods`
+     - `kubectl --context cluster_us_west -n demo get pods`
    - Show endpoints
      - `./aptomi endpoint show`
    - Open Tweeviz UI
@@ -77,5 +77,5 @@
 9. Deploy dedicated DAP for Carol (ID=3) in its own k8s cluster
    - Priority = 200
    - Show kubectl output
-     - `kubectl --context kapp-demo -n demo get pods`
-     - `kubectl --context minikube -n demo get pods`
+     - `kubectl --context cluster_us_west -n demo get pods`
+     - `kubectl --context cluster_us_east -n demo get pods`
