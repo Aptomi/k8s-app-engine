@@ -10,14 +10,12 @@ import (
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
+	internalversioncore "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	"k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/labels"
 	"strings"
 
 	"errors"
-	"net"
-	"net/url"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
@@ -220,58 +218,83 @@ func (exec HelmCodeExecutor) Destroy() error {
 
 // Endpoints returns map from port type to url for all services of the current chart
 func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
-	_, client, err := exec.newKubeClient()
+	_, clientset, err := exec.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
 
-	if svcGetter, ok := client.Core().(internalversion.ServicesGetter); ok {
-		releaseName := releaseName(exec.Key)
-		chartName := exec.Metadata["chartName"]
+	client := clientset.Core()
 
-		selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
-		options := api.ListOptions{LabelSelector: selector}
-		services, err := svcGetter.Services(exec.Cluster.Metadata.Namespace).List(options)
-		if err != nil {
-			return nil, err
-		}
-		endpoints := make(map[string]string)
+	releaseName := releaseName(exec.Key)
+	chartName := exec.Metadata["chartName"]
 
-		kubeHost, err := exec.getKubeHost()
-		if err != nil {
-			return nil, err
-		}
+	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
+	options := api.ListOptions{LabelSelector: selector}
+	services, err := client.Services(exec.Cluster.Metadata.Namespace).List(options)
+	if err != nil {
+		return nil, err
+	}
+	endpoints := make(map[string]string)
 
-		for _, service := range services.Items {
-			if service.Spec.Type == "NodePort" {
-				for _, port := range service.Spec.Ports {
-					sURL := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
+	kubeHost, err := exec.getKubeExternalAddress(client)
+	if err != nil {
+		return nil, err
+	}
 
-					// todo(slukjanov): could we somehow detect real schema? I think no :(
-					if port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
-						sURL = "http://" + sURL
-					}
+	for _, service := range services.Items {
+		if service.Spec.Type == "NodePort" {
+			for _, port := range service.Spec.Ports {
+				sURL := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
 
-					endpoints[port.Name] = sURL
+				// todo(slukjanov): could we somehow detect real schema? I think no :(
+				if port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
+					sURL = "http://" + sURL
 				}
+
+				endpoints[port.Name] = sURL
 			}
 		}
-		return endpoints, nil
 	}
+	return endpoints, nil
 
 	return nil, nil
 }
 
-func (exec HelmCodeExecutor) getKubeHost() (string, error) {
-	config, _, err := exec.newKubeClient()
+func (exec HelmCodeExecutor) getKubeExternalAddress(client internalversioncore.CoreInterface) (string, error) {
+	if exec.Cluster.Metadata.kubeExternalAddress != "" {
+		return exec.Cluster.Metadata.kubeExternalAddress, nil
+	}
+
+	nodes, err := client.Nodes().List(api.ListOptions{})
 	if err != nil {
 		return "", err
 	}
-
-	u, err := url.Parse(config.Host)
-	if err != nil {
-		return "", err
+	if len(nodes.Items) == 0 {
+		return "", errors.New("K8s nodes list if empty, fail")
 	}
 
-	return u.Hostname(), nil
+	returnFirst := func(addrType api.NodeAddressType) string {
+		for _, node := range nodes.Items {
+			for _, addr := range node.Status.Addresses {
+				if addr.Type == addrType {
+					return addr.Address
+				}
+			}
+		}
+		return ""
+	}
+
+	addr := returnFirst(api.NodeExternalIP)
+	if addr == "" {
+		addr = returnFirst(api.NodeLegacyHostIP)
+	}
+	if addr == "" {
+		addr = returnFirst(api.NodeInternalIP)
+	}
+	if addr == "" {
+		return "", errors.New("Couldn't find external IP for cluster")
+	}
+
+	exec.Cluster.Metadata.kubeExternalAddress = addr
+	return addr, nil
 }
