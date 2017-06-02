@@ -36,12 +36,13 @@ var endpointCmdShow = &cobra.Command{
 		for _, key := range keys {
 			keyEndpoints := endpoints[key]
 			serviceName, contextName, allocationName, componentName := slinga.ParseServiceUsageKey(key)
-			fmt.Println("")
 			fmt.Println("Service:", serviceName, " |  Context:", contextName, " |  Allocation:", allocationName, " |  Component:", componentName)
 
 			for tp, url := range keyEndpoints {
 				fmt.Println("	", tp, url)
 			}
+
+			fmt.Println("")
 		}
 	},
 }
