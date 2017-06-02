@@ -5,6 +5,7 @@ import (
 	//log "github.com/Sirupsen/logrus"
 	"fmt"
 	"github.com/spf13/cobra"
+	"sort"
 )
 
 var endpointCmd = &cobra.Command{
@@ -26,8 +27,16 @@ var endpointCmdShow = &cobra.Command{
 
 		endpoints := state.Endpoints()
 
-		for key, keyEndpoints := range endpoints {
+		var keys []string
+		for key := range endpoints {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+
+		for _, key := range keys {
+			keyEndpoints := endpoints[key]
 			serviceName, contextName, allocationName, componentName := slinga.ParseServiceUsageKey(key)
+			fmt.Println("")
 			fmt.Println("Service:", serviceName, " |  Context:", contextName, " |  Allocation:", allocationName, " |  Component:", componentName)
 
 			for tp, url := range keyEndpoints {
