@@ -82,6 +82,9 @@ type Cluster struct {
 
 		// store local proxy address when connection established
 		tillerHost string
+
+		// store kube external address
+		kubeExternalAddress string
 	}
 }
 
