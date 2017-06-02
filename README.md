@@ -70,6 +70,10 @@ go run main.go show graph
   1. When something failed in the middle of applying policy. How to handle it?
   1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed
   1. Detect circular dependencies (global cycle between services, not only cycle within one service between its components)
+  1. CLI and UI should invoke API
+  1. Policy should be segmented into pieces
+     1. Dev can have full access to its own "aptomi namespace" (create services, define instantiation rules, change dependencies) to test and deploy to his own cluster
+     1. Other pieces will have access to Ops only
 
 1. CI/CD
   1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production

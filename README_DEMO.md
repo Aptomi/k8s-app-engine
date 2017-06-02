@@ -4,6 +4,9 @@
    - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
 
 2. Show policy
+   - We have a language.
+      - Ops guy defined a policy - service & context
+      - Context = who it's for and how resources are allocated/shared
    - Show k8s clusters
       - `kubectl config get-contexts`
       - `kubectl config view`
@@ -40,14 +43,14 @@
      - meaning, dedicated TS and shared AP
    - Run aptomi
      - `./aptomi policy apply --noop`
-     - `./aptomi policy apply --noop --show`
+     - `./aptomi policy apply --noop --show` (explain share and reuse of services)
      - `./aptomi policy apply`
    - Show endpoints
      - `./aptomi endpoint show`
    - Open Tweeviz UI
      - Shows Japan tweets
 
-5. Alice (ID=1) deploys new staging version of TS in parallel
+5. Alice (ID=1) deploys new staging version of TS in parallel (Canary testing/updates)
    - With "demo-v42" and "stage" ts tags
    - Run aptomi
      - `./aptomi policy apply --noop`
