@@ -142,9 +142,9 @@ func (exec HelmCodeExecutor) Install() error {
 		return exec.Update()
 
 		/*
-		debug.WithFields(log.Fields{
-			"releaseName": releaseName,
-		}).Fatal("Release already exists")
+			debug.WithFields(log.Fields{
+				"releaseName": releaseName,
+			}).Fatal("Release already exists")
 		*/
 	}
 

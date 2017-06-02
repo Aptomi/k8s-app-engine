@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"text/template"
-	"fmt"
 )
 
 /*
@@ -106,7 +106,7 @@ func (criteria *Criteria) allows(labels LabelSet) bool {
 // Evaluates a template
 func evaluateTemplate(templateStr string, user User, labels LabelSet) (string, error) {
 	type Parameters struct {
-		User User
+		User   User
 		Labels map[string]string
 	}
 	param := Parameters{User: user, Labels: labels.Labels}
