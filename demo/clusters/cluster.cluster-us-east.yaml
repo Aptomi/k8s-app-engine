@@ -1,0 +1,7 @@
+name: cluster-us-east
+
+type: kubernetes
+
+metadata:
+  kubecontext: cluster_us_east
+  namespace: demo

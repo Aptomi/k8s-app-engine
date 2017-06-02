@@ -19,7 +19,7 @@ allocations:
         - priority >= 200
     labels:
       set:
-        cluster: local-minikube
+        cluster: cluster-us-east
 
   # Users with priority < 200 will get a dedicated instance in another k8s cluster
   - name: "low-{{ .User.Name }}-{{ .Labels.tstype }}"
@@ -28,4 +28,4 @@ allocations:
         - priority < 200
     labels:
       set:
-        cluster: remote-shared
+        cluster: cluster-us-west
