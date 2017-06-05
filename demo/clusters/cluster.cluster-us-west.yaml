@@ -3,5 +3,5 @@ name: cluster-us-west
 type: kubernetes
 
 metadata:
-  kubecontext: cluster_us_west
+  kubecontext: cluster-us-west
   namespace: demo
