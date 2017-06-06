@@ -60,6 +60,22 @@ go run main.go show graph
   problems, but it can find errors not caught by the compilers
 * ```make lint``` runs linter for Go source code
 
+## How to set up demo environment on Google Cloud
+
+1. ```brew install kubernetes-cli kubernetes-helm```
+1. ```curl https://sdk.cloud.google.com | bash```
+1. ```gcloud auth login```
+1. Create new project in https://console.cloud.google.com/
+1. ```gcloud config set project <YOUR_PROJECT_ID>```
+1. https://console.cloud.google.com/ -> API Manager -> Enable API
+  1. Google Container Engine API
+  1. Google Compute Engine API
+1. ```./tools/gke-demo.sh up```
+1. ```./tools/gke-demo.sh status```
+1. Run demo (see README_DEMO.md for instructions)
+1. ```./tools/gke-demo.sh down``` - don't forget to destroy your clusters, so you don't continue to get billed for them
+
+
 ## Fundamental design questions (for production code, not PoC):
 1. Model & Engine
   1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
