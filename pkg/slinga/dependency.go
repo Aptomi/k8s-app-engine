@@ -39,10 +39,10 @@ func (dependency *Dependency) getLabelSet() LabelSet {
 	return LabelSet{Labels: dependency.Labels}
 }
 
-// Enable tracing for all dependencies
-func (dependencies *GlobalDependencies) SetTrace(trace bool) {
+// SetTrace enable tracing (detailed engine output) for all dependencies
+func (src *GlobalDependencies) SetTrace(trace bool) {
 	if trace {
-		for _, serviceDeps := range dependencies.Dependencies {
+		for _, serviceDeps := range src.Dependencies {
 			for _, v := range serviceDeps {
 				v.Trace = true
 			}

@@ -6,10 +6,13 @@ import (
 	"os"
 )
 
+// Tracing logger is for detailed messages printed via --verbose
 var tracing *ScreenLogger
+
+// Debug logger writes debug information into a file
 var debug *log.Logger
 
-// ScreenLogger contains is a logger that prints onto the screen and supports on/off
+// ScreenLogger is a logger that prints onto the screen and supports on/off
 type ScreenLogger struct {
 	enabled bool
 }
@@ -18,6 +21,7 @@ func (logger *ScreenLogger) setEnable(enabled bool) {
 	logger.enabled = enabled
 }
 
+// Printf prints information onto screen
 func (logger *ScreenLogger) Printf(depth int, format string, args ...interface{}) {
 	if logger.enabled {
 		indent := ""
@@ -29,12 +33,14 @@ func (logger *ScreenLogger) Printf(depth int, format string, args ...interface{}
 	}
 }
 
+// Println prints new line onto screen
 func (logger *ScreenLogger) Println() {
 	if logger.enabled {
 		fmt.Println()
 	}
 }
 
+// SetDebugLevel sets level for the debug logger
 func SetDebugLevel(level log.Level) {
 	debug.Level = level
 }
@@ -49,13 +55,13 @@ func init() {
 	debug.Level = log.PanicLevel
 
 	// Add a hook to print important errors to stdout as well
-	debug.Hooks.Add(&LogHook{})
+	debug.Hooks.Add(&logHook{})
 }
 
-type LogHook struct {
+type logHook struct {
 }
 
-func (l *LogHook) Levels() []log.Level {
+func (l *logHook) Levels() []log.Level {
 	return []log.Level{
 		log.WarnLevel,
 		log.ErrorLevel,
@@ -64,7 +70,7 @@ func (l *LogHook) Levels() []log.Level {
 	}
 }
 
-func (l *LogHook) Fire(e *log.Entry) error {
+func (l *logHook) Fire(e *log.Entry) error {
 	fmt.Println("Error!")
 	fmt.Printf("  %s\n", e.Message)
 	fmt.Printf("  %v\n", e.Data)

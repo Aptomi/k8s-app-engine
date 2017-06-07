@@ -49,14 +49,14 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 }
 
 // On a service level -- see which keys appear and disappear
-func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) {
+func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) {
 
 	fmt.Println("[Services]")
 
 	// High-level service resolutions in prev
 	pMap := make(map[string]map[string]string)
-	if result.Prev.Dependencies != nil {
-		for _, deps := range result.Prev.Dependencies.Dependencies {
+	if diff.Prev.Dependencies != nil {
+		for _, deps := range diff.Prev.Dependencies.Dependencies {
 			for _, d := range deps {
 				// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
 				if len(d.ResolvesTo) > 0 {
@@ -71,7 +71,7 @@ func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool
 
 	// High-level service resolutions in next
 	cMap := make(map[string]map[string]string)
-	for _, deps := range result.Next.Dependencies.Dependencies {
+	for _, deps := range diff.Next.Dependencies.Dependencies {
 		for _, d := range deps {
 			// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
 			if len(d.ResolvesTo) > 0 {
@@ -145,21 +145,21 @@ func (result *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool
 }
 
 // On a component level -- see which allocation keys appear and disappear
-func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
+func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	// map of all instances
 	allKeys := make(map[string]bool)
 
 	// merge all the keys
-	for k := range result.Prev.ResolvedLinks {
+	for k := range diff.Prev.ResolvedLinks {
 		allKeys[k] = true
 	}
-	for k := range result.Next.ResolvedLinks {
+	for k := range diff.Next.ResolvedLinks {
 		allKeys[k] = true
 	}
 	// Go over all the keys and see which one appear and which one disappear
 	for k := range allKeys {
-		uPrev := result.Prev.ResolvedLinks[k]
-		uNext := result.Next.ResolvedLinks[k]
+		uPrev := diff.Prev.ResolvedLinks[k]
+		uNext := diff.Next.ResolvedLinks[k]
 
 		var userIdsPrev []string
 		if uPrev != nil {
@@ -173,19 +173,19 @@ func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 
 		// see if a component needs to be instantiated
 		if userIdsPrev == nil && userIdsNext != nil {
-			result.ComponentInstantiate[k] = true
+			diff.ComponentInstantiate[k] = true
 		}
 
 		// see if a component needs to be destructed
 		if userIdsPrev != nil && userIdsNext == nil {
-			result.ComponentDestruct[k] = true
+			diff.ComponentDestruct[k] = true
 		}
 
 		// see if a component needs to be updated
 		if userIdsPrev != nil && userIdsNext != nil {
 			sameParams := reflect.DeepEqual(uPrev.CalculatedCodeParams, uNext.CalculatedCodeParams)
 			if !sameParams {
-				result.ComponentUpdate[k] = true
+				diff.ComponentUpdate[k] = true
 			}
 		}
 
@@ -196,14 +196,14 @@ func (result *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		// see if a user needs to be detached from a component
 		for u := range uPrevIdsMap {
 			if !uNextIdsMap[u] {
-				result.ComponentDetachUser = append(result.ComponentDetachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
+				diff.ComponentDetachUser = append(diff.ComponentDetachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
 		}
 
 		// see if a user needs to be attached to a component
 		for u := range uNextIdsMap {
 			if !uPrevIdsMap[u] {
-				result.ComponentAttachUser = append(result.ComponentAttachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
+				diff.ComponentAttachUser = append(diff.ComponentAttachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
 			}
 		}
 	}
@@ -273,6 +273,7 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 	diff.printDifferenceOnComponentLevel(verbose)
 }
 
+// AlterDifference basically marks all objects in diff for recreation/update if full update is requested. This is useful to re-create missing objects if they got deleted externally after deployment
 func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 	// If we are requesting full policy processing, then we will need to re-create all objects
 	if full {
@@ -385,7 +386,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -428,7 +429,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
