@@ -90,6 +90,7 @@ go run main.go show graph
   1. Policy should be segmented into pieces
      1. Dev can have full access to its own "aptomi namespace" (create services, define instantiation rules, change dependencies) to test and deploy to his own cluster
      1. Other pieces will have access to Ops only
+  1. Add "aptomi test" and special language for operators to write and run tests
 
 1. CI/CD
   1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production
