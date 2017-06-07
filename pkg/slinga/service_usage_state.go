@@ -25,26 +25,26 @@ type ServiceUsageState struct {
 	processingOrderHas map[string]bool
 	ProcessingOrder    []string
 
-	// map from service instance key to map from component name to component instance key
-	ComponentInstanceMap map[string]interface{}
+	// travel a path by component names as keys and get to a specific component instance key
+	DiscoveryTree NestedParameterMap
 }
 
 // ResolvedLinkUsageStruct is a usage data for a given component instance, containing list of user IDs and calculated labels
 type ResolvedLinkUsageStruct struct {
 	UserIds              []string
 	CalculatedLabels     LabelSet
-	CalculatedDiscovery  interface{}
-	CalculatedCodeParams interface{}
+	CalculatedDiscovery  NestedParameterMap
+	CalculatedCodeParams NestedParameterMap
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
 	return ServiceUsageState{
-		Policy:               policy,
-		Dependencies:         dependencies,
-		ResolvedLinks:        make(map[string]*ResolvedLinkUsageStruct),
-		ComponentInstanceMap: make(map[string]interface{}),
-		processingOrderHas:   make(map[string]bool)}
+		Policy:             policy,
+		Dependencies:       dependencies,
+		ResolvedLinks:      make(map[string]*ResolvedLinkUsageStruct),
+		DiscoveryTree:      NestedParameterMap{},
+		processingOrderHas: make(map[string]bool)}
 }
 
 // Create key for the map
@@ -79,12 +79,12 @@ func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
 }
 
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(key string, user User, labels LabelSet, codeParams interface{}, discoveryParams interface{}) string {
-	if _, ok := usage.ResolvedLinks[key]; !ok {
-		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
-	}
+func (usage *ServiceUsageState) recordUsage(key string, user User) string {
+	// Add user to the entry
+	usageStruct := usage.getComponentInstanceEntry(key)
+	usageStruct.UserIds = append(usageStruct.UserIds, user.ID)
 
-	usage.ResolvedLinks[key].appendToLinkUsageStruct(user.ID, labels, codeParams, discoveryParams)
+	// Add to processing order
 	if !usage.processingOrderHas[key] {
 		usage.processingOrderHas[key] = true
 		usage.ProcessingOrder = append(usage.ProcessingOrder, key)
@@ -93,18 +93,30 @@ func (usage *ServiceUsageState) recordUsage(key string, user User, labels LabelS
 	return key
 }
 
-// Adds user and set of labels to the entry
-func (usageStruct *ResolvedLinkUsageStruct) appendToLinkUsageStruct(userID string, labels LabelSet, codeParams interface{}, discoveryParams interface{}) {
-	usageStruct.UserIds = append(usageStruct.UserIds, userID)
+// Stores calculated discovery params for component instance
+func (usage *ServiceUsageState) storeCodeParams(key string, codeParams NestedParameterMap) {
+	// TODO: what to do if we came here multiple times with different code params?
+	usage.getComponentInstanceEntry(key).CalculatedCodeParams = codeParams
+}
 
+// Stores calculated discovery params for component instance
+func (usage *ServiceUsageState) storeDiscoveryParams(key string, discoveryParams NestedParameterMap) {
+	// TODO: what to do if we came here multiple times with different discovery params?
+	usage.getComponentInstanceEntry(key).CalculatedDiscovery = discoveryParams
+}
+
+// Stores calculated labels for component instance
+func (usage *ServiceUsageState) storeLabels(key string, labels LabelSet) {
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
-	usageStruct.CalculatedLabels = labels
+	usage.getComponentInstanceEntry(key).CalculatedLabels = labels
+}
 
-	// TODO: what to do with different code contents?
-	usageStruct.CalculatedCodeParams = codeParams
-
-	// TODO: what to do with different discovery contents?
-	usageStruct.CalculatedDiscovery = discoveryParams
+// Gets a component instance entry or creates an new entry if it doesn't exist
+func (usage *ServiceUsageState) getComponentInstanceEntry(key string) *ResolvedLinkUsageStruct {
+	if _, ok := usage.ResolvedLinks[key]; !ok {
+		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
+	}
+	return usage.ResolvedLinks[key]
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB

@@ -12,15 +12,14 @@ import (
 	Core engine for Slinga processing and evaluation
 */
 
-// TemplateData defines struct that holds all params and gets passed to template engine for evaluating template string
-type TemplateData struct {
-	Labels    map[string]string
-	User      User
-	Discovery map[string]interface{}
+type Node struct {
+
 }
 
 // ResolveUsage evaluates all recorded Dependencies ("<user> needs <service> with <labels>") and calculates allocations
 func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
+
+	// Run every declared dependency via policy and resolve it
 	for serviceName, dependencies := range usage.Dependencies.Dependencies {
 		for _, d := range dependencies {
 			user := users.Users[d.UserID]
@@ -35,7 +34,10 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 			tracing.setEnable(d.Trace)
 
 			// resolve usage via applying policy
-			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.ComponentInstanceMap, 0)
+			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.DiscoveryTree, 0)
+
+			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly.
+			// i.e. usages should be recorded in different context (not in usage.DiscoveryTree and not even in usage) and not applied
 
 			// disable tracing
 			tracing.setEnable(false)
@@ -53,7 +55,7 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 }
 
 // Evaluate "<user> needs <service>" statement
-func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet, cim map[string]interface{}, depth int) (string, error) {
+func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string, labels LabelSet, discoveryTreeNode NestedParameterMap, depth int) (string, error) {
 
 	// Resolving allocations for service
 	debug.WithFields(log.Fields{
@@ -121,24 +123,25 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		return "", err
 	}
 
-	// Resolve every component
+	// Iterate over all service components and resolve them recursively
+	// Note that discovery variables can refer to other variables announced by dependents in the discovery tree
 	for _, component := range componentsOrdered {
-		// Process component and transform labels
-		componentLabels := labels.applyTransform(component.Labels)
-
-		// Is it a code?
-		var codeParams interface{}
-		var discoveryParams interface{}
-
+		// Create key
 		componentKey := usage.createServiceUsageKey(service, context, allocation, component)
-		discoveryParams, err = component.processTemplateParams(component.Discovery, componentKey, componentLabels, user, cim, "discovery", depth)
+
+		// Calculate and store labels
+		componentLabels := labels.applyTransform(component.Labels)
+		usage.storeLabels(componentKey, componentLabels)
+
+		// Calculate and store discovery params
+		componentDiscoveryParams, err := component.processTemplateParams(component.Discovery, componentKey, componentLabels, user, discoveryTreeNode, "discovery", depth)
 		if err != nil {
 			return "", err
 		}
+		usage.storeDiscoveryParams(componentKey, componentDiscoveryParams)
 
 		// Create new map with resolution keys for component
-		cimComponent := make(map[string]interface{})
-		cim[component.Name] = cimComponent
+		discoveryTreeNode[component.Name] = NestedParameterMap{}
 
 		if component.Code != nil {
 			// Evaluate code params
@@ -149,17 +152,17 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 				"allocation": allocation.NameResolved,
 			}).Info("Processing dependency on code execution")
 
-			cimComponent["instance"] = EscapeName(componentKey)
-			if discoveryParamsMap, ok := discoveryParams.(map[interface{}]interface{}); ok {
-				for k, v := range discoveryParamsMap {
-					cimComponent[k.(string)] = v
-				}
+			// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
+			discoveryTreeNode.getNestedMap(component.Name)["instance"] = EscapeName(componentKey)
+			for k, v := range componentDiscoveryParams {
+				discoveryTreeNode.getNestedMap(component.Name)[k] = v
 			}
 
-			codeParams, err = component.processTemplateParams(component.Code.Params, componentKey, componentLabels, user, cim, "code", depth)
+			componentCodeParams, err := component.processTemplateParams(component.Code.Params, componentKey, componentLabels, user, discoveryTreeNode, "code", depth)
 			if err != nil {
 				return "", err
 			}
+			usage.storeCodeParams(componentKey, componentCodeParams)
 		} else if component.Service != "" {
 			debug.WithFields(log.Fields{
 				"service":          service.Name,
@@ -172,21 +175,20 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 			tracing.Println()
 
 			// resolve dependency recursively
-			resolvedKey, err := usage.resolveWithLabels(user, component.Service, componentLabels, cimComponent, depth+1)
+			resolvedKey, err := usage.resolveWithLabels(user, component.Service, componentLabels, discoveryTreeNode.getNestedMap(component.Name), depth+1)
 			if err != nil {
 				return "", err
 			}
 
 			// if a dependency has not been matched
 			if len(resolvedKey) <= 0 {
-				// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
 				debug.WithFields(log.Fields{
 					"service":          service.Name,
 					"component":        component.Name,
 					"context":          context.Name,
 					"allocation":       allocation.NameResolved,
 					"dependsOnService": component.Service,
-				}).Warning("Cannot fulfill dependency on another service")
+				}).Info("Cannot fulfill dependency on another service")
 				return "", nil
 			}
 		} else {
@@ -197,12 +199,12 @@ func (usage *ServiceUsageState) resolveWithLabels(user User, serviceName string,
 		}
 
 		// Record usage of a given component
-		usage.recordUsage(componentKey, user, componentLabels, codeParams, discoveryParams)
+		usage.recordUsage(componentKey, user)
 	}
 
 	// Record usage of a given service
 	serviceKey := usage.createServiceUsageKey(service, context, allocation, nil)
-	usage.recordUsage(serviceKey, user, labels, nil, nil)
+	usage.recordUsage(serviceKey, user)
 
 	return context.Name + "#" + allocation.NameResolved, nil
 }
@@ -352,75 +354,9 @@ func (policy *Policy) getMatchedAllocation(service Service, user User, context C
 	return allocationMatched, nil
 }
 
-func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user User, cim map[string]interface{}, templateType string, depth int) (interface{}, error) {
-	if template == nil {
-		return nil, nil
-	}
-	tracing.Printf(depth+1, "Component: %s (%s)", component.Name, templateType)
-
-	cimCopy := make(map[string]interface{})
-	cimCopy["instance"] = EscapeName(componentKey)
-	for k, v := range cim {
-		cimCopy[k] = v
-	}
-
-	templateData := TemplateData{
-		Labels:    labels.Labels,
-		Discovery: cimCopy,
-		User:      user}
-
-	var evalParamsInterface func(params interface{}) (interface{}, error)
-	evalParamsInterface = func(params interface{}) (interface{}, error) {
-		if params == nil {
-			return "", nil
-		} else if paramsMap, ok := params.(map[interface{}]interface{}); ok {
-			resultMap := make(map[interface{}]interface{})
-
-			for key, value := range paramsMap {
-				evaluatedValue, err := evalParamsInterface(value)
-				if err != nil {
-					return nil, err
-				}
-				resultMap[key] = evaluatedValue
-			}
-
-			return resultMap, nil
-		} else if paramsStr, ok := params.(string); ok {
-			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, templateData)
-			tracing.Printf(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
-			if err != nil {
-				return nil, err
-			}
-			return evaluatedValue, nil
-		} else if paramsInt, ok := params.(int); ok {
-			return paramsInt, nil
-		} else if paramsBool, ok := params.(bool); ok {
-			return paramsBool, nil
-		}
-
-		return nil, errors.New("There should be map[string]interface{} or string")
-	}
-
-	return evalParamsInterface(template)
+type templateData struct {
+	Labels    map[string]string
+	User      User
+	Discovery NestedParameterMap
 }
 
-func evaluateCodeParamTemplate(templateStr string, templateData TemplateData) (string, error) {
-	tmpl, err := template.New("").Parse(templateStr)
-	if err != nil {
-		return "", errors.New("Invalid template " + templateStr)
-	}
-
-	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, templateData)
-
-	if err != nil {
-		return "", errors.New("Cannot evaluate template " + templateStr)
-	}
-
-	result := doc.String()
-	if strings.Contains(result, "<no value>") {
-		return "", errors.New("Cannot evaluate template " + templateStr)
-	}
-
-	return EscapeName(doc.String()), nil
-}

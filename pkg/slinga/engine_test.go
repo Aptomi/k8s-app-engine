@@ -25,14 +25,10 @@ func TestEngine(t *testing.T) {
 	assert.Equal(t, "2", kafkaProd.UserIds[0], "Only Bob should have access to prod (Carol is compromised)")
 
 	// Check that code parameters evaluate correctly
-	paramsMap, ok := kafkaTest.CalculatedCodeParams.(map[interface{}]interface{})
-	assert.Equal(t, true, ok, "Calculated Code Params should be map")
-	assert.Equal(t, "zookeeper-test-test-platform-services-component2", paramsMap["address"], "Code parameter should be calculated correctly")
+	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
 
 	// Check that discovery parameters evaluate correctly
-	discoveryMap, ok := kafkaTest.CalculatedDiscovery.(map[interface{}]interface{})
-	assert.Equal(t, true, ok, "Calculated Discovery should be map")
-	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", discoveryMap["url"], "Discovery parameter should be calculated correctly")
+	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {

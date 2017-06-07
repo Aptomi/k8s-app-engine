@@ -11,6 +11,9 @@ import (
 	This file declares all utility structures and methods required for Slinga processing
 */
 
+// ParameterMultiMap allows to do [string][string]...[string] -> value
+type NestedParameterMap map[string]interface{}
+
 // LabelSet defines the set of labels that will be manipulated
 type LabelSet struct {
 	Labels map[string]string
@@ -103,34 +106,7 @@ func (criteria *Criteria) allows(labels LabelSet) bool {
 	return false
 }
 
-// Evaluates a template
-func evaluateTemplate(templateStr string, user User, labels LabelSet) (string, error) {
-	type Parameters struct {
-		User   User
-		Labels map[string]string
-	}
-	param := Parameters{User: user, Labels: labels.Labels}
-
-	tmpl, err := template.New("").Parse(templateStr)
-	if err != nil {
-		return "", fmt.Errorf("Invalid template %s: %s", templateStr, err.Error())
-	}
-
-	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, param)
-
-	if err != nil {
-		return "", fmt.Errorf("Cannot evaluate template %s: %s", templateStr, err.Error())
-	}
-
-	result := doc.String()
-	if strings.Contains(result, "<no value>") {
-		return "", fmt.Errorf("Cannot evaluate template %s: <no value>", templateStr)
-	}
-
-	return doc.String(), nil
-}
-
+// Lazily initializes and returns a map of name -> component
 func (service *Service) getComponentsMap() map[string]*ServiceComponent {
 	if service.componentsMap == nil {
 		// Put all components into map
@@ -140,4 +116,18 @@ func (service *Service) getComponentsMap() map[string]*ServiceComponent {
 		}
 	}
 	return service.componentsMap
+}
+
+// Makes of copy of parameter structure
+func (src NestedParameterMap) makeCopy() NestedParameterMap {
+	result := NestedParameterMap{}
+	for k, v := range src {
+		result[k] = v
+	}
+	return result
+}
+
+// Gets nested parameter map
+func (src NestedParameterMap) getNestedMap(key string) NestedParameterMap {
+	return src[key].(NestedParameterMap)
 }
