@@ -198,7 +198,7 @@ function gke_cluster_delete() {
     else
         log "Deleting cluster $(cluster_log_name)"
 
-        if gke delete $name --zone $zone ; then
+        if gke delete $name --zone $zone --quiet ; then
             log "Cluster $(cluster_log_name) deleted successfully"
         else
             log "Cluster $(cluster_log_name) deletion failed, try to re-run cleanup"
@@ -296,7 +296,7 @@ function gke_firewall_delete() {
     else
         log "Deleting firewall rules '$name'"
 
-        if gcf delete $1 ; then
+        if gcf delete $1 --quiet ; then
             log "Firewall rules '$name' deleted successfully"
         else
             log "Firewall rules '$name' deletion failed"
