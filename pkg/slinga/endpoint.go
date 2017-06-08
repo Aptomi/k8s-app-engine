@@ -8,7 +8,7 @@ import (
 func (state *ServiceUsageState) Endpoints() map[string]map[string]string {
 	result := make(map[string]map[string]string)
 
-	for _, key := range state.ProcessingOrder {
+	for _, key := range state.ResolvedUsage.ComponentProcessingOrder {
 		if _, ok := result[key]; ok {
 			continue
 		}
@@ -16,7 +16,7 @@ func (state *ServiceUsageState) Endpoints() map[string]map[string]string {
 		serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 		component := state.Policy.Services[serviceName].getComponentsMap()[componentName]
 		if component != nil && component.Code != nil {
-			codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, state.ResolvedLinks[key].CalculatedCodeParams, state.Policy.Clusters)
+			codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, state.ResolvedUsage.ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
 			if err != nil {
 				debug.WithFields(log.Fields{
 					"key":   key,

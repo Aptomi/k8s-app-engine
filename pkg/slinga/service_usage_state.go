@@ -18,33 +18,52 @@ type ServiceUsageState struct {
 	// reference to dependencies
 	Dependencies *GlobalDependencies
 
-	// resolved triples <service, context, allocation, component> -> list of users & labels
-	ResolvedLinks map[string]*ResolvedLinkUsageStruct
+	// reference to users
+	users *GlobalUsers
 
-	// the order in which components/services have to be processed
-	processingOrderHas map[string]bool
-	ProcessingOrder    []string
+	// resolved usage - gets calculated by the main engine
+	ResolvedUsage ResolvedServiceUsageData
+}
 
-	// travel a path by component names as keys and get to a specific component instance key
+// ResolvedServiceUsageData contains all the data that gets resolved for one or more dependencies
+type ResolvedServiceUsageData struct {
+	// resolved component instances: componentKey -> componentInstance
+	ComponentInstanceMap map[string]*ComponentInstance
+
+	// resolved component processing order in which components/services have to be processed
+	componentProcessingOrderHas map[string]bool
+	ComponentProcessingOrder    []string
+
+	// resolved component discovery tree (component1.component2...component3 -> component instance key)
 	DiscoveryTree NestedParameterMap
 }
 
-// ResolvedLinkUsageStruct is a usage data for a given component instance, containing list of user IDs and calculated labels
-type ResolvedLinkUsageStruct struct {
-	UserIds              []string
+// ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
+type ComponentInstance struct {
+	// People who are using this component
+	UserIds []string
+
+	// Calculated parameters for the component
 	CalculatedLabels     LabelSet
 	CalculatedDiscovery  NestedParameterMap
 	CalculatedCodeParams NestedParameterMap
 }
 
+// NewResolvedServiceUsageData creates new empty ResolvedServiceUsageData
+func NewResolvedServiceUsageData() ResolvedServiceUsageData {
+	return ResolvedServiceUsageData{
+		ComponentInstanceMap:        make(map[string]*ComponentInstance),
+		DiscoveryTree:               NestedParameterMap{},
+		componentProcessingOrderHas: make(map[string]bool)}
+}
+
 // NewServiceUsageState creates new empty ServiceUsageState
-func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies) ServiceUsageState {
+func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, users *GlobalUsers) ServiceUsageState {
 	return ServiceUsageState{
-		Policy:             policy,
-		Dependencies:       dependencies,
-		ResolvedLinks:      make(map[string]*ResolvedLinkUsageStruct),
-		DiscoveryTree:      NestedParameterMap{},
-		processingOrderHas: make(map[string]bool)}
+		Policy:        policy,
+		Dependencies:  dependencies,
+		users:         users,
+		ResolvedUsage: NewResolvedServiceUsageData()}
 }
 
 // Create key for the map
@@ -85,9 +104,9 @@ func (usage *ServiceUsageState) recordUsage(key string, user User) string {
 	usageStruct.UserIds = append(usageStruct.UserIds, user.ID)
 
 	// Add to processing order
-	if !usage.processingOrderHas[key] {
-		usage.processingOrderHas[key] = true
-		usage.ProcessingOrder = append(usage.ProcessingOrder, key)
+	if !usage.ResolvedUsage.componentProcessingOrderHas[key] {
+		usage.ResolvedUsage.componentProcessingOrderHas[key] = true
+		usage.ResolvedUsage.ComponentProcessingOrder = append(usage.ResolvedUsage.ComponentProcessingOrder, key)
 	}
 
 	return key
@@ -112,11 +131,11 @@ func (usage *ServiceUsageState) storeLabels(key string, labels LabelSet) {
 }
 
 // Gets a component instance entry or creates an new entry if it doesn't exist
-func (usage *ServiceUsageState) getComponentInstanceEntry(key string) *ResolvedLinkUsageStruct {
-	if _, ok := usage.ResolvedLinks[key]; !ok {
-		usage.ResolvedLinks[key] = &ResolvedLinkUsageStruct{CalculatedLabels: LabelSet{}}
+func (usage *ServiceUsageState) getComponentInstanceEntry(key string) *ComponentInstance {
+	if _, ok := usage.ResolvedUsage.ComponentInstanceMap[key]; !ok {
+		usage.ResolvedUsage.ComponentInstanceMap[key] = &ComponentInstance{CalculatedLabels: LabelSet{}}
 	}
-	return usage.ResolvedLinks[key]
+	return usage.ResolvedUsage.ComponentInstanceMap[key]
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB

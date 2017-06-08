@@ -37,8 +37,8 @@ var policyCmdApply = &cobra.Command{
 		dependencies := slinga.LoadDependenciesFromDir(policyDir)
 		dependencies.SetTrace(trace)
 
-		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies)
-		err := nextUsageState.ResolveUsage(&users)
+		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &users)
+		err := nextUsageState.ResolveUsage()
 
 		if err != nil {
 			log.Panicf("Cannot resolve usage: %v", err)

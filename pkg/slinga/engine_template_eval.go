@@ -1,11 +1,11 @@
 package slinga
 
 import (
-	"fmt"
 	"bytes"
-	"text/template"
-	"strings"
 	"errors"
+	"fmt"
+	"strings"
+	"text/template"
 )
 
 // Evaluates a template

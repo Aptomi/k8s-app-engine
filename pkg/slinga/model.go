@@ -1,12 +1,5 @@
 package slinga
 
-import (
-	"bytes"
-	"fmt"
-	"strings"
-	"text/template"
-)
-
 /*
 	This file declares all utility structures and methods required for Slinga processing
 */

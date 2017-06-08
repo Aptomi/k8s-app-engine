@@ -1,28 +1,26 @@
 package slinga
 
 import (
-	"bytes"
 	"errors"
 	log "github.com/Sirupsen/logrus"
-	"strings"
-	"text/template"
 )
 
 /*
 	Core engine for Slinga processing and evaluation
 */
 
-type Node struct {
-
+type node struct {
+	// TODO: complete the struct
+	User *User
 }
 
 // ResolveUsage evaluates all recorded Dependencies ("<user> needs <service> with <labels>") and calculates allocations
-func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
+func (usage *ServiceUsageState) ResolveUsage() error {
 
 	// Run every declared dependency via policy and resolve it
 	for serviceName, dependencies := range usage.Dependencies.Dependencies {
 		for _, d := range dependencies {
-			user := users.Users[d.UserID]
+			user := usage.users.Users[d.UserID]
 
 			// take user labels
 			labels := user.getLabelSet()
@@ -34,7 +32,7 @@ func (usage *ServiceUsageState) ResolveUsage(users *GlobalUsers) error {
 			tracing.setEnable(d.Trace)
 
 			// resolve usage via applying policy
-			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.DiscoveryTree, 0)
+			resKey, err := usage.resolveWithLabels(user, serviceName, labels, usage.ResolvedUsage.DiscoveryTree, 0)
 
 			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly.
 			// i.e. usages should be recorded in different context (not in usage.DiscoveryTree and not even in usage) and not applied
@@ -359,4 +357,3 @@ type templateData struct {
 	User      User
 	Discovery NestedParameterMap
 }
-

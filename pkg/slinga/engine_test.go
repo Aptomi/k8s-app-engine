@@ -10,14 +10,14 @@ func TestEngine(t *testing.T) {
 	users := LoadUsersFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
-	usageState := NewServiceUsageState(&policy, &dependencies)
-	err := usageState.ResolveUsage(&users)
+	usageState := NewServiceUsageState(&policy, &dependencies, &users)
+	err := usageState.ResolveUsage()
 
 	// Check that policy resolution finished correctly
 	assert.Nil(t, err, "Policy usage should be resolved without errors")
 
-	kafkaTest := usageState.ResolvedLinks["kafka#test#test-platform_services#component2"]
-	kafkaProd := usageState.ResolvedLinks["kafka#prod#test-platform_services#component2"]
+	kafkaTest := usageState.ResolvedUsage.ComponentInstanceMap["kafka#test#test-platform_services#component2"]
+	kafkaProd := usageState.ResolvedUsage.ComponentInstanceMap["kafka#prod#test-platform_services#component2"]
 	assert.Equal(t, 1, len(kafkaTest.UserIds), "Only one user should have access to test")
 	assert.Equal(t, "1", kafkaTest.UserIds[0], "Only Alice should have access to test")
 
