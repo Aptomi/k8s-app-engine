@@ -50,4 +50,3 @@ func (src LabelSet) addLabels(ops LabelSet) LabelSet {
 
 	return result
 }
-
