@@ -105,13 +105,60 @@ func (node *resolutionNode) debugResolvingDependency() {
 	tracing.Printf(node.depth, "Service: %s", node.serviceName)
 }
 
-func (node *resolutionNode) errorDuringServiceLookup(err error) error {
-	tracing.Printf(node.depth+1, "Error while trying to look up service %s (%v)", node.serviceName, err)
-	return err
+func (node *resolutionNode) debugResolvingContext() {
+	tracing.Printf(node.depth, "Context: %s", node.context.Name)
 }
 
-func (node *resolutionNode) debugNewLabels() {
-	tracing.Printf(node.depth+1, "New labels = %s", node.labels)
+func (node *resolutionNode) debugResolvingAllocation() {
+	tracing.Printf(node.depth, "Allocation: %s", node.allocation.NameResolved)
+}
+
+func (node *resolutionNode) debugResolvingDependencyOnComponent() {
+	if node.component.Code != nil {
+		debug.WithFields(log.Fields{
+			"service":    node.service.Name,
+			"component":  node.component.Name,
+			"context":    node.context.Name,
+			"allocation": node.allocation.NameResolved,
+		}).Info("Processing dependency on code execution")
+	} else if node.component.Service != "" {
+		debug.WithFields(log.Fields{
+			"service":          node.service.Name,
+			"component":        node.component.Name,
+			"context":          node.context.Name,
+			"allocation":       node.allocation.NameResolved,
+			"dependsOnService": node.component.Service,
+		}).Info("Processing dependency on another service")
+
+		tracing.Println()
+	} else {
+		debug.WithFields(log.Fields{
+			"service":   node.service.Name,
+			"component": node.component.Name,
+		}).Fatal("Invalid component (not code and not service")
+	}
+}
+
+func (node *resolutionNode) cannotResolveDependency() error {
+	debug.WithFields(log.Fields{
+		"service":          node.service.Name,
+		"component":        node.component.Name,
+		"context":          node.context.Name,
+		"allocation":       node.allocation.NameResolved,
+		"dependsOnService": node.component.Service,
+	}).Info("Cannot fulfill dependency on another service")
+
+	return nil
+}
+
+func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) {
+	// Locate the service
+	service := policy.Services[node.serviceName]
+	if service == nil {
+		tracing.Printf(node.depth+1, "Error while trying to look up service %s (not found)", node.serviceName)
+		return nil, errors.New("Service " + node.serviceName + " not found")
+	}
+	return service, nil
 }
 
 // Helper to get a matched context
@@ -119,9 +166,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	// Locate the list of contexts for service
 	contexts, ok := policy.Contexts[node.service.Name]
 	if !ok || len(contexts) <= 0 {
-		debug.WithFields(log.Fields{
-			"service": node.service.Name,
-		}).Info("No contexts available for service")
+		tracing.Printf(node.depth+1, "Error while matching context for service %s (no contexts found)", node.service.Name)
 		return nil, errors.New("No contexts found for " + node.service.Name)
 	}
 
@@ -152,22 +197,10 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	return contextMatched, nil
 }
 
-func (node *resolutionNode) errorDuringMatchingContext(err error) error {
-	tracing.Printf(node.depth+1, "Error while matching context for service %s (%v)", node.service.Name, err)
-	return err
-}
-
-func (node *resolutionNode) debugResolvingContext() {
-	tracing.Printf(node.depth, "Context: %s", node.context.Name)
-}
-
 // Helper to get a matched allocation
 func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, error) {
 	if len(node.context.Allocations) <= 0 {
-		debug.WithFields(log.Fields{
-			"service": node.service.Name,
-			"context": node.context.Name,
-		}).Info("No allocations available")
+		tracing.Printf(node.depth, "Error while matching allocation for service %s, context %s (no allocations found)", node.service.Name, node.context.Name)
 		return nil, errors.New("No allocations found for " + node.service.Name)
 	}
 
@@ -213,69 +246,19 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	return allocationMatched, nil
 }
 
-func (node *resolutionNode) errorDuringMatchingAllocation(err error) error {
-	tracing.Printf(node.depth, "Error while matching allocation for service %s, context %s (%v)", node.service.Name, node.context.Name, err)
-	return err
-}
-
-func (node *resolutionNode) debugResolvingAllocation() {
-	tracing.Printf(node.depth, "Allocation: %s", node.allocation.NameResolved)
-}
-
-func (node *resolutionNode) errorDuringSortingComponentsTopologically(err error) error {
-	tracing.Printf(node.depth, "Error while sorting components topologically for service %s (%v)", node.service.Name, err)
-	return err
-}
-
-func (node *resolutionNode) debugResolvingDependencyOnCode() {
-	debug.WithFields(log.Fields{
-		"service":    node.service.Name,
-		"component":  node.component.Name,
-		"context":    node.context.Name,
-		"allocation": node.allocation.NameResolved,
-	}).Info("Processing dependency on code execution")
-}
-
-func (node *resolutionNode) debugResolvingDependencyOnService() {
-	debug.WithFields(log.Fields{
-		"service":          node.service.Name,
-		"component":        node.component.Name,
-		"context":          node.context.Name,
-		"allocation":       node.allocation.NameResolved,
-		"dependsOnService": node.component.Service,
-	}).Info("Processing dependency on another service")
-
-	tracing.Println()
-}
-
-func (node *resolutionNode) cannotResolveDependency() error {
-	debug.WithFields(log.Fields{
-		"service":          node.service.Name,
-		"component":        node.component.Name,
-		"context":          node.context.Name,
-		"allocation":       node.allocation.NameResolved,
-		"dependsOnService": node.component.Service,
-	}).Info("Cannot fulfill dependency on another service")
-
-	return nil
-}
-
-func (node *resolutionNode) errorInvalidComponent() {
-	debug.WithFields(log.Fields{
-		"service":   node.service.Name,
-		"component": node.component.Name,
-	}).Fatal("Invalid component (not code and not service")
+func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
+	result := labels.applyTransform(operations)
+	tracing.Printf(node.depth+1, "New labels = %s", result)
+	return result
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams(resolvedUsage ResolvedServiceUsageData) error {
-	// TODO: fix
 	componentCodeParams, err := node.component.processTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
 	resolvedUsage.storeCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams(resolvedUsage ResolvedServiceUsageData) error {
-	// TODO: fix
 	componentDiscoveryParams, err := node.component.processTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
 	resolvedUsage.storeDiscoveryParams(node.componentKey, componentDiscoveryParams)
 

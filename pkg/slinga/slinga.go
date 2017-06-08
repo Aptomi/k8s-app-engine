@@ -10,7 +10,7 @@ import (
 )
 
 /*
-	This file declares all the necessary structures for Slinga YAML file to be successfully parsed
+	This file declares all the necessary structures for Slinga
 */
 
 // LabelOperations defines the set of label manipulations (e.g. set/remove)

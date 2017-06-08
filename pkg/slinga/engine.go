@@ -1,8 +1,7 @@
 package slinga
 
 import (
-	"errors"
-	log "github.com/Sirupsen/logrus"
+	"fmt"
 )
 
 /*
@@ -21,7 +20,7 @@ func (usage *ServiceUsageState) ResolveAllDependencies() error {
 			tracing.setEnable(d.Trace)
 
 			// resolve usage via applying policy
-			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context (not in usage.DiscoveryTree and not even in usage) and not applied
+			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
 			err := usage.resolveDependency(node, usage.ResolvedUsage)
 
 			// disable tracing
@@ -48,19 +47,18 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	node.debugResolvingDependency()
 
 	// Locate the service
-	node.service, err = usage.Policy.getService(node.serviceName)
+	node.service, err = node.getMatchedService(usage.Policy)
 	if err != nil {
-		return node.errorDuringServiceLookup(err)
+		return err
 	}
 
 	// Process service and transform labels
-	node.labels = node.labels.applyTransform(node.service.Labels)
-	node.debugNewLabels()
+	node.labels = node.transformLabels(node.labels, node.service.Labels)
 
 	// Match the context
 	node.context, err = node.getMatchedContext(usage.Policy)
 	if err != nil {
-		return node.errorDuringMatchingContext(err)
+		return err
 	}
 	// If no matching context is found, let's just exit
 	if node.context == nil {
@@ -71,13 +69,12 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	node.debugResolvingContext()
 
 	// Process context and transform labels
-	node.labels = node.labels.applyTransform(node.context.Labels)
-	node.debugNewLabels()
+	node.labels = node.transformLabels(node.labels, node.context.Labels)
 
 	// Match the allocation
 	node.allocation, err = node.getMatchedAllocation(usage.Policy)
 	if err != nil {
-		return node.errorDuringMatchingAllocation(err)
+		return err
 	}
 	// If no matching allocation is found, let's just exit
 	if node.allocation == nil {
@@ -88,13 +85,12 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	node.debugResolvingAllocation()
 
 	// Process allocation and transform labels
-	node.labels = node.labels.applyTransform(node.allocation.Labels)
-	node.debugNewLabels()
+	node.labels = node.transformLabels(node.labels, node.allocation.Labels)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.service.getComponentsSortedTopologically()
 	if err != nil {
-		return node.errorDuringSortingComponentsTopologically(err)
+		return err
 	}
 
 	// Iterate over all service components and resolve them recursively
@@ -104,7 +100,7 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		node.componentKey = createServiceUsageKey(node.service, node.context, node.allocation, node.component)
 
 		// Calculate and store labels
-		node.componentLabels = node.labels.applyTransform(node.component.Labels)
+		node.componentLabels = node.transformLabels(node.labels, node.component.Labels)
 		resolvedUsage.storeLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component
@@ -116,19 +112,16 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 			return err
 		}
 
-		if node.component.Code != nil {
-			// Print information that we are starting to resolve dependency on code
-			node.debugResolvingDependencyOnCode()
+		// Print information that we are starting to resolve dependency (on code, or on service)
+		node.debugResolvingDependencyOnComponent()
 
+		if node.component.Code != nil {
 			// Evaluate code params
 			err := node.calculateAndStoreCodeParams(resolvedUsage)
 			if err != nil {
 				return err
 			}
 		} else if node.component.Service != "" {
-			// Print information that we are starting to resolve dependency on another service
-			node.debugResolvingDependencyOnService()
-
 			// Create a child node for dependency resolution
 			nodeNext := node.createChildNode()
 
@@ -142,8 +135,6 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 			if !nodeNext.resolved {
 				return node.cannotResolveDependency()
 			}
-		} else {
-			node.errorInvalidComponent()
 		}
 
 		// Record usage of a given component
@@ -161,30 +152,27 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 }
 
 // Topologically sort components and return true if there is a cycle detected
-func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]int) bool {
+func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]int) error {
 	colors[u.Name] = 1
 
 	for _, vName := range u.Dependencies {
 		v, exists := service.getComponentsMap()[vName]
 		if !exists {
-			debug.WithFields(log.Fields{
-				"service":   service.Name,
-				"component": vName,
-			}).Fatal("Service dependency points to non-existing component")
+			return fmt.Errorf("Service %s has a dependency to non-existing component %s", service.Name, vName)
 		}
 		if vColor, ok := colors[v.Name]; !ok {
-			// not visited yet -> visit and exit if a cycle was found
-			if service.dfsComponentSort(v, colors) {
-				return true
+			// not visited yet -> visit and exit if a cycle was found or another error occured
+			if err := service.dfsComponentSort(v, colors); err != nil {
+				return err
 			}
 		} else if vColor == 1 {
-			return true
+			return fmt.Errorf("Component cycle detected while processing service %s", service.Name)
 		}
 	}
 
 	service.componentsOrdered = append(service.componentsOrdered, u)
 	colors[u.Name] = 2
-	return false
+	return nil
 }
 
 // Sorts all components in a topological way
@@ -194,30 +182,14 @@ func (service *Service) getComponentsSortedTopologically() ([]*ServiceComponent,
 		colors := make(map[string]int)
 
 		// Dfs
-		var cycle = false
 		for _, c := range service.Components {
 			if _, ok := colors[c.Name]; !ok {
-				if service.dfsComponentSort(c, colors) {
-					cycle = true
-					break
+				if err := service.dfsComponentSort(c, colors); err != nil {
+					return nil, err
 				}
 			}
-		}
-
-		if cycle {
-			return nil, errors.New("Component cycle detected in service " + service.Name)
 		}
 	}
 
 	return service.componentsOrdered, nil
-}
-
-// Helper to get a service
-func (policy *Policy) getService(serviceName string) (*Service, error) {
-	// Locate the service
-	service := policy.Services[serviceName]
-	if service == nil {
-		return nil, errors.New("Service " + serviceName + " not found")
-	}
-	return service, nil
 }

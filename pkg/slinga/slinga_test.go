@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestParsing(t *testing.T) {
+func TestLoadPolicy(t *testing.T) {
 	state := LoadPolicyFromDir("testdata/unittests")
 
 	assert.Equal(t, 2, len(state.Services), "Two services should be loaded")
