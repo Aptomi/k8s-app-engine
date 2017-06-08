@@ -3,6 +3,7 @@ package slinga
 import (
 	"errors"
 	log "github.com/Sirupsen/logrus"
+	"reflect"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -248,7 +249,9 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
 	result := labels.applyTransform(operations)
-	tracing.Printf(node.depth+1, "New labels = %s", result)
+	if !reflect.DeepEqual(labels, result) {
+		tracing.Printf(node.depth+1, "Labels changed: %s", result)
+	}
 	return result
 }
 
