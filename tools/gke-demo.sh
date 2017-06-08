@@ -371,4 +371,4 @@ function helm_init() {
 #################### End
 
 main $@
-log "gke-demo.sh successfully finished"
+log "gke-demo.sh $@ successfully finished"
