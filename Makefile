@@ -40,7 +40,7 @@ lint:
 	$$(go env GOPATH)/bin/golint $$(go list ./... | grep -v /vendor/)
 
 .PHONY: validate
-validate: fmt vet
+validate: fmt vet lint
 
 .PHONY: clean
 clean:
