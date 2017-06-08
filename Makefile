@@ -11,6 +11,14 @@ test:
 	go test -v ./pkg/...
 	@echo "\nAll tests passed"
 
+.PHONY: clean-run-noop
+clean-run-noop:
+	-rm -f db/db.yaml
+	./aptomi policy apply --noop
+
+.PHONY: smoke
+smoke: test build clean-run-noop
+
 .PHONY: build
 build:
 	go build -i -o aptomi
