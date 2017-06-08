@@ -5,7 +5,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 const componentRootName = "root"
@@ -66,76 +65,45 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 		ResolvedUsage: NewResolvedServiceUsageData()}
 }
 
-// Create key for the map
-func (usage ServiceUsageState) createServiceUsageKey(service *Service, context *Context, allocation *Allocation, component *ServiceComponent) string {
-	var componentName string
-	if component != nil {
-		componentName = component.Name
-	} else {
-		componentName = componentRootName
-	}
-	return usage.createServiceUsageKeyFromStr(service.Name, context.Name, allocation.NameResolved, componentName)
-}
-
-// Create key for the map
-func (usage ServiceUsageState) createServiceUsageKeyFromStr(serviceName string, contextName string, allocationName string, componentName string) string {
-	return serviceName + "#" + contextName + "#" + allocationName + "#" + componentName
-}
-
-// ParseServiceUsageKey parses key and returns service, component, allocation, component names
-func ParseServiceUsageKey(key string) (string, string, string, string) {
-	keyArray := strings.Split(key, "#")
-	service := keyArray[0]
-	context := keyArray[1]
-	allocation := keyArray[2]
-	component := keyArray[3]
-	return service, context, allocation, component
-}
-
-// Create key for the map
-func (usage ServiceUsageState) createDependencyKey(serviceName string) string {
-	return serviceName
-}
-
 // Records usage event
-func (usage *ServiceUsageState) recordUsage(key string, user User) string {
+func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, user *User) string {
 	// Add user to the entry
-	usageStruct := usage.getComponentInstanceEntry(key)
+	usageStruct := resolvedUsage.getComponentInstanceEntry(key)
 	usageStruct.UserIds = append(usageStruct.UserIds, user.ID)
 
 	// Add to processing order
-	if !usage.ResolvedUsage.componentProcessingOrderHas[key] {
-		usage.ResolvedUsage.componentProcessingOrderHas[key] = true
-		usage.ResolvedUsage.ComponentProcessingOrder = append(usage.ResolvedUsage.ComponentProcessingOrder, key)
+	if !resolvedUsage.componentProcessingOrderHas[key] {
+		resolvedUsage.componentProcessingOrderHas[key] = true
+		resolvedUsage.ComponentProcessingOrder = append(resolvedUsage.ComponentProcessingOrder, key)
 	}
 
 	return key
 }
 
 // Stores calculated discovery params for component instance
-func (usage *ServiceUsageState) storeCodeParams(key string, codeParams NestedParameterMap) {
+func (resolvedUsage *ResolvedServiceUsageData) storeCodeParams(key string, codeParams NestedParameterMap) {
 	// TODO: what to do if we came here multiple times with different code params?
-	usage.getComponentInstanceEntry(key).CalculatedCodeParams = codeParams
+	resolvedUsage.getComponentInstanceEntry(key).CalculatedCodeParams = codeParams
 }
 
 // Stores calculated discovery params for component instance
-func (usage *ServiceUsageState) storeDiscoveryParams(key string, discoveryParams NestedParameterMap) {
+func (resolvedUsage *ResolvedServiceUsageData) storeDiscoveryParams(key string, discoveryParams NestedParameterMap) {
 	// TODO: what to do if we came here multiple times with different discovery params?
-	usage.getComponentInstanceEntry(key).CalculatedDiscovery = discoveryParams
+	resolvedUsage.getComponentInstanceEntry(key).CalculatedDiscovery = discoveryParams
 }
 
 // Stores calculated labels for component instance
-func (usage *ServiceUsageState) storeLabels(key string, labels LabelSet) {
+func (resolvedUsage *ResolvedServiceUsageData) storeLabels(key string, labels LabelSet) {
 	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
-	usage.getComponentInstanceEntry(key).CalculatedLabels = labels
+	resolvedUsage.getComponentInstanceEntry(key).CalculatedLabels = labels
 }
 
 // Gets a component instance entry or creates an new entry if it doesn't exist
-func (usage *ServiceUsageState) getComponentInstanceEntry(key string) *ComponentInstance {
-	if _, ok := usage.ResolvedUsage.ComponentInstanceMap[key]; !ok {
-		usage.ResolvedUsage.ComponentInstanceMap[key] = &ComponentInstance{CalculatedLabels: LabelSet{}}
+func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key string) *ComponentInstance {
+	if _, ok := resolvedUsage.ComponentInstanceMap[key]; !ok {
+		resolvedUsage.ComponentInstanceMap[key] = &ComponentInstance{CalculatedLabels: LabelSet{}}
 	}
-	return usage.ResolvedUsage.ComponentInstanceMap[key]
+	return resolvedUsage.ComponentInstanceMap[key]
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB

@@ -11,7 +11,7 @@ func TestEngine(t *testing.T) {
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
 	usageState := NewServiceUsageState(&policy, &dependencies, &users)
-	err := usageState.ResolveUsage()
+	err := usageState.ResolveAllDependencies()
 
 	// Check that policy resolution finished correctly
 	assert.Nil(t, err, "Policy usage should be resolved without errors")

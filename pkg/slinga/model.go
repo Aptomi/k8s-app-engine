@@ -4,7 +4,7 @@ package slinga
 	This file declares all utility structures and methods required for Slinga processing
 */
 
-// ParameterMultiMap allows to do [string][string]...[string] -> value
+// NestedParameterMap allows to work with nested maps [string][string]...[string] -> value
 type NestedParameterMap map[string]interface{}
 
 // LabelSet defines the set of labels that will be manipulated
@@ -69,7 +69,7 @@ func (allocation *Allocation) matches(labels LabelSet) bool {
 }
 
 // Resolve name for an allocation
-func (allocation *Allocation) resolveName(user User, labels LabelSet) error {
+func (allocation *Allocation) resolveName(user *User, labels LabelSet) error {
 	result, err := evaluateTemplate(allocation.Name, user, labels)
 	allocation.NameResolved = result
 	return err

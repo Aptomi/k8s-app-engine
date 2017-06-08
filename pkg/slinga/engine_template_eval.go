@@ -8,10 +8,16 @@ import (
 	"text/template"
 )
 
+type templateData struct {
+	Labels    map[string]string
+	User      *User
+	Discovery NestedParameterMap
+}
+
 // Evaluates a template
-func evaluateTemplate(templateStr string, user User, labels LabelSet) (string, error) {
+func evaluateTemplate(templateStr string, user *User, labels LabelSet) (string, error) {
 	type Parameters struct {
-		User   User
+		User   *User
 		Labels map[string]string
 	}
 	param := Parameters{User: user, Labels: labels.Labels}
@@ -36,7 +42,7 @@ func evaluateTemplate(templateStr string, user User, labels LabelSet) (string, e
 	return doc.String(), nil
 }
 
-func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
+func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
 	if template == nil {
 		return nil, nil
 	}

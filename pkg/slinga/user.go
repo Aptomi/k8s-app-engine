@@ -21,11 +21,11 @@ type User struct {
 
 // GlobalUsers contains the global list of users
 type GlobalUsers struct {
-	Users map[string]User
+	Users map[string]*User
 }
 
 // LoadUserByIDFromDir loads a given user from a given directory
-func LoadUserByIDFromDir(dir string, id string) User {
+func LoadUserByIDFromDir(dir string, id string) *User {
 	return LoadUsersFromDir(dir).Users[id]
 }
 
@@ -44,7 +44,7 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 			"error": e,
 		}).Fatal("Unable to read file")
 	}
-	t := []User{}
+	t := []*User{}
 	e = yaml.Unmarshal([]byte(dat), &t)
 	if e != nil {
 		debug.WithFields(log.Fields{
@@ -52,7 +52,7 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 			"error": e,
 		}).Fatal("Unable to unmarshal users")
 	}
-	r := GlobalUsers{Users: make(map[string]User)}
+	r := GlobalUsers{Users: make(map[string]*User)}
 	for _, u := range t {
 		r.Users[u.ID] = u
 	}
