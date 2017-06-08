@@ -188,7 +188,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 	}
 
 	// Second, visualize evaluated links
-	for key, linkStruct := range usage.ResolvedUsage.ComponentInstanceMap {
+	for key, linkStruct := range usage.getResolvedUsage().ComponentInstanceMap {
 		keyArray := strings.Split(key, "#")
 		service := keyArray[0]
 		contextAndAllocation := keyArray[1] + "#" + keyArray[2]

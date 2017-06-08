@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"os"
+	"flag"
 )
 
 // Tracing logger is for detailed messages printed via --verbose
@@ -49,13 +50,20 @@ func init() {
 	tracing = &ScreenLogger{}
 
 	debug = log.New()
-	debug.Out, _ = os.OpenFile(GetAptomiDBDir()+"/"+"debug.log", os.O_CREATE|os.O_WRONLY, 0644)
 
-	// Don't log much by default. It will be overridden with "--debug" from CLI
-	debug.Level = log.PanicLevel
+	if flag.Lookup("test.v") == nil {
+		// running normally
+		debug.Out, _ = os.OpenFile(GetAptomiDBDir()+"/"+"debug.log", os.O_CREATE|os.O_WRONLY, 0644)
 
-	// Add a hook to print important errors to stdout as well
-	debug.Hooks.Add(&logHook{})
+		// Don't log much by default. It will be overridden with "--debug" from CLI
+		debug.Level = log.PanicLevel
+
+		// Add a hook to print important errors to stdout as well
+		debug.Hooks.Add(&logHook{})
+	} else {
+		// running under unit tests
+		debug.Level = log.WarnLevel
+	}
 }
 
 type logHook struct {

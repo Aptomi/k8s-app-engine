@@ -39,7 +39,7 @@ func (usage *ServiceUsageState) ResolveAllDependencies() error {
 }
 
 // Evaluate evaluates and resolves a single dependency ("<user> needs <service> with <labels>") and calculates component allocations
-func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolvedUsage ResolvedServiceUsageData) error {
+func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolvedUsage *ResolvedServiceUsageData) error {
 	// Error variable that we will be reusing
 	var err error
 

@@ -5,7 +5,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
 	"github.com/gosuri/uiprogress/util/strutil"
-	"reflect"
 	"time"
 )
 
@@ -150,16 +149,16 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	allKeys := make(map[string]bool)
 
 	// merge all the keys
-	for k := range diff.Prev.ResolvedUsage.ComponentInstanceMap {
+	for k := range diff.Prev.getResolvedUsage().ComponentInstanceMap {
 		allKeys[k] = true
 	}
-	for k := range diff.Next.ResolvedUsage.ComponentInstanceMap {
+	for k := range diff.Next.getResolvedUsage().ComponentInstanceMap {
 		allKeys[k] = true
 	}
 	// Go over all the keys and see which one appear and which one disappear
 	for k := range allKeys {
-		uPrev := diff.Prev.ResolvedUsage.ComponentInstanceMap[k]
-		uNext := diff.Next.ResolvedUsage.ComponentInstanceMap[k]
+		uPrev := diff.Prev.getResolvedUsage().ComponentInstanceMap[k]
+		uNext := diff.Next.getResolvedUsage().ComponentInstanceMap[k]
 
 		var userIdsPrev []string
 		if uPrev != nil {
@@ -183,7 +182,7 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 
 		// see if a component needs to be updated
 		if userIdsPrev != nil && userIdsNext != nil {
-			sameParams := reflect.DeepEqual(uPrev.CalculatedCodeParams, uNext.CalculatedCodeParams)
+			sameParams := uPrev.CalculatedCodeParams.deepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				diff.ComponentUpdate[k] = true
 			}
@@ -277,7 +276,7 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 	// If we are requesting full policy processing, then we will need to re-create all objects
 	if full {
-		for key := range diff.Next.ResolvedUsage.ComponentInstanceMap {
+		for key := range diff.Next.getResolvedUsage().ComponentInstanceMap {
 			diff.ComponentInstantiate[key] = true
 		}
 	}
@@ -334,7 +333,7 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 
 func (diff ServiceUsageStateDiff) processInstantiations() error {
 	// Process instantiations in the right order
-	for _, key := range diff.Next.ResolvedUsage.ComponentProcessingOrder {
+	for _, key := range diff.Next.getResolvedUsage().ComponentProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
 			// Increment progress bar
@@ -360,7 +359,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.ResolvedUsage.ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -378,7 +377,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 
 func (diff ServiceUsageStateDiff) processUpdates() error {
 	// Process updates in the right order
-	for _, key := range diff.Next.ResolvedUsage.ComponentProcessingOrder {
+	for _, key := range diff.Next.getResolvedUsage().ComponentProcessingOrder {
 		// Does it need to be updated?
 		if _, ok := diff.ComponentUpdate[key]; ok {
 			// Increment progress bar
@@ -403,7 +402,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				}).Info("Updating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.ResolvedUsage.ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -421,7 +420,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 
 func (diff ServiceUsageStateDiff) processDestructions() error {
 	// Process destructions in the right order
-	for _, key := range diff.Prev.ResolvedUsage.ComponentProcessingOrder {
+	for _, key := range diff.Prev.getResolvedUsage().ComponentProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
 			// Increment progress bar
@@ -446,7 +445,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				}).Info("Destructing component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Prev.ResolvedUsage.ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Prev.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
 					if err != nil {
 						return err
 					}

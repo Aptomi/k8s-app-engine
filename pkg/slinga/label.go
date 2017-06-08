@@ -1,5 +1,7 @@
 package slinga
 
+import "reflect"
+
 // LabelSet defines the set of labels that will be manipulated
 type LabelSet struct {
 	Labels map[string]string
@@ -49,4 +51,12 @@ func (src LabelSet) addLabels(ops LabelSet) LabelSet {
 	}
 
 	return result
+}
+
+// Function to compare two labels sets. If one is nil and another one is empty, it will return true as well
+func (src LabelSet) equal(dst LabelSet) bool {
+	if len(src.Labels) == 0 && len(dst.Labels) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(src.Labels, dst.Labels)
 }

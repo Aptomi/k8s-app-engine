@@ -36,3 +36,13 @@
     dev: yes
     prod: no
     nozookeeper: true
+
+# Special user to test policy diff
+- id: 5
+  name: Elena
+  labels:
+    priority: 200
+    org: corporate_it
+    team: platform_services
+    dev: no
+    prod: yes

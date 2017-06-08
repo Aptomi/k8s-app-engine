@@ -62,6 +62,16 @@ func (src GlobalDependencies) appendDependencies(ops GlobalDependencies) GlobalD
 	return result
 }
 
+// Merge
+func (src GlobalDependencies) appendDependency(ops *Dependency) GlobalDependencies {
+	result := NewGlobalDependencies()
+	for k, v := range src.Dependencies {
+		result.Dependencies[k] = append(result.Dependencies[k], v...)
+	}
+	result.Dependencies[ops.Service] = append(result.Dependencies[ops.Service], ops)
+	return result
+}
+
 // LoadDependenciesFromDir loads all dependencies from a given directory
 func LoadDependenciesFromDir(dir string) GlobalDependencies {
 	// read all services

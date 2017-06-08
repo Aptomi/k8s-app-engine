@@ -3,7 +3,6 @@ package slinga
 import (
 	"errors"
 	log "github.com/Sirupsen/logrus"
-	"reflect"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -56,6 +55,12 @@ type resolutionNode struct {
 // Creates a new resolution node as a starting point for resolving a particular dependency
 func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode {
 	user := usage.users.Users[d.UserID]
+	if user == nil {
+		// Resolving allocations for service
+		debug.WithFields(log.Fields{
+			"dependency": d,
+		}).Fatal("Dependency refers to non-existing user")
+	}
 	return &resolutionNode{
 		resolved:   false,
 		depth:      0,
@@ -249,19 +254,19 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
 	result := labels.applyTransform(operations)
-	if !reflect.DeepEqual(labels, result) {
+	if !labels.equal(result) {
 		tracing.Printf(node.depth+1, "Labels changed: %s", result)
 	}
 	return result
 }
 
-func (node *resolutionNode) calculateAndStoreCodeParams(resolvedUsage ResolvedServiceUsageData) error {
+func (node *resolutionNode) calculateAndStoreCodeParams(resolvedUsage *ResolvedServiceUsageData) error {
 	componentCodeParams, err := node.component.processTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
 	resolvedUsage.storeCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
-func (node *resolutionNode) calculateAndStoreDiscoveryParams(resolvedUsage ResolvedServiceUsageData) error {
+func (node *resolutionNode) calculateAndStoreDiscoveryParams(resolvedUsage *ResolvedServiceUsageData) error {
 	componentDiscoveryParams, err := node.component.processTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
 	resolvedUsage.storeDiscoveryParams(node.componentKey, componentDiscoveryParams)
 

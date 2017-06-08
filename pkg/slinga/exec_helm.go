@@ -24,31 +24,28 @@ type HelmCodeExecutor struct {
 	Cluster  *Cluster
 	Key      string
 	Metadata map[string]string
-	Params   interface{}
+	Params   NestedParameterMap
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
-func NewHelmCodeExecutor(code *Code, key string, codeMetadata map[string]string, codeParams interface{}, clusters map[string]*Cluster) (CodeExecutor, error) {
+func NewHelmCodeExecutor(code *Code, key string, codeMetadata map[string]string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
 	// First of all, redirect Helm/grpc logging to our own debug stream
 	// We don't want these messages to be printed to Stdout/Stderr
 	grpclog.SetLogger(debug)
 
-	if paramsMap, ok := codeParams.(map[interface{}]interface{}); ok {
-		// todo: should we check key existence first?
-		if clusterName, ok := paramsMap["cluster"].(string); !ok {
-			return nil, errors.New("Cluster param should be defined")
-		} else if cluster, ok := clusters[clusterName]; ok {
-			exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Metadata: codeMetadata, Params: codeParams}
-			err := exec.setupTillerConnection()
-			if err != nil {
-				return nil, err
-			}
-			return exec, nil
-		} else {
-			return nil, errors.New("Specified cluster is undefined")
+	// todo: should we check key existence first?
+	if clusterName, ok := codeParams["cluster"].(string); !ok {
+		return nil, errors.New("Cluster param should be defined")
+	} else if cluster, ok := clusters[clusterName]; ok {
+		exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Metadata: codeMetadata, Params: codeParams}
+		err := exec.setupTillerConnection()
+		if err != nil {
+			return nil, err
 		}
+		return exec, nil
+	} else {
+		return nil, errors.New("Specified cluster is undefined")
 	}
-	return nil, errors.New("Can't parse codeParams")
 }
 
 func (exec *HelmCodeExecutor) newKubeClient() (*restclient.Config, *internalclientset.Clientset, error) {

@@ -85,7 +85,7 @@ go run main.go show graph
 ## Fundamental design questions (for production code, not PoC):
 1. Model & Engine
   1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
-  1. Two users -> same service instance -> relies on different component instances. E.g. two users, single twitter-stats, two kafkas. Invalid case?
+  1. Two users -> same service instance -> relies on different component instances. E.g. two users, single twitter-stats, two kafkas. Invalid case? If we refer to ".instance" of kafka from twitter-stats, it won't work... (same problem as above)
   1. Inheritance of contexts to avoid data duplication
   1. How to implement service aliases (mysql vs. mariadb, etc). Do we match contexts first or services? With the current definition of services and contexts, there is NO way to provide different implementation of the same "service interface (e.g. SQL service -> MySQL or MariaDB)
   1. Service, context - shall we use IDs (unique) instead of names (non-unique)?

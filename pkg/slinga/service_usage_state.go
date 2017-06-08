@@ -20,8 +20,8 @@ type ServiceUsageState struct {
 	// reference to users
 	users *GlobalUsers
 
-	// resolved usage - gets calculated by the main engine
-	ResolvedUsage ResolvedServiceUsageData
+	// resolved usage - gets calculated by the main engine. should be accessed by a getter
+	ResolvedUsage *ResolvedServiceUsageData
 }
 
 // ResolvedServiceUsageData contains all the data that gets resolved for one or more dependencies
@@ -49,8 +49,8 @@ type ComponentInstance struct {
 }
 
 // NewResolvedServiceUsageData creates new empty ResolvedServiceUsageData
-func NewResolvedServiceUsageData() ResolvedServiceUsageData {
-	return ResolvedServiceUsageData{
+func NewResolvedServiceUsageData() *ResolvedServiceUsageData {
+	return &ResolvedServiceUsageData{
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
 		DiscoveryTree:               NestedParameterMap{},
 		componentProcessingOrderHas: make(map[string]bool)}
@@ -63,6 +63,14 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 		Dependencies:  dependencies,
 		users:         users,
 		ResolvedUsage: NewResolvedServiceUsageData()}
+}
+
+// Records usage event
+func (usage *ServiceUsageState) getResolvedUsage() *ResolvedServiceUsageData {
+	if usage.ResolvedUsage == nil {
+		usage.ResolvedUsage = NewResolvedServiceUsageData()
+	}
+	return usage.ResolvedUsage
 }
 
 // Records usage event
@@ -82,26 +90,51 @@ func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, user *Use
 
 // Stores calculated discovery params for component instance
 func (resolvedUsage *ResolvedServiceUsageData) storeCodeParams(key string, codeParams NestedParameterMap) {
-	// TODO: what to do if we came here multiple times with different code params?
-	resolvedUsage.getComponentInstanceEntry(key).CalculatedCodeParams = codeParams
+	cInstance := resolvedUsage.getComponentInstanceEntry(key)
+	if len(cInstance.CalculatedCodeParams) == 0 {
+		// Record code parameters
+		cInstance.CalculatedCodeParams = codeParams
+	} else if !cInstance.CalculatedCodeParams.deepEqual(codeParams) {
+		// Same component instance, different code parameters
+		debug.WithFields(log.Fields{
+			"componentKey": key,
+			"prevCodeParams": cInstance.CalculatedCodeParams,
+			"nextCodeParams": codeParams,
+		}).Fatal("Invalid policy. Arrived to the same component with different code parameters")
+	}
 }
 
 // Stores calculated discovery params for component instance
 func (resolvedUsage *ResolvedServiceUsageData) storeDiscoveryParams(key string, discoveryParams NestedParameterMap) {
-	// TODO: what to do if we came here multiple times with different discovery params?
-	resolvedUsage.getComponentInstanceEntry(key).CalculatedDiscovery = discoveryParams
+	cInstance := resolvedUsage.getComponentInstanceEntry(key)
+	if len(cInstance.CalculatedDiscovery) == 0 {
+		// Record discovery parameters
+		cInstance.CalculatedDiscovery = discoveryParams
+	} else if !cInstance.CalculatedDiscovery.deepEqual(discoveryParams) {
+		// Same component instance, different discovery parameters
+		debug.WithFields(log.Fields{
+			"componentKey": key,
+			"prevDiscoveryParams": cInstance.CalculatedDiscovery,
+			"nextDiscoveryParams": discoveryParams,
+		}).Fatal("Invalid policy. Arrived to the same component with different discovery parameters")
+	}
 }
 
 // Stores calculated labels for component instance
 func (resolvedUsage *ResolvedServiceUsageData) storeLabels(key string, labels LabelSet) {
-	// TODO: we can arrive to a service via multiple usages with different labels. what to do?
-	resolvedUsage.getComponentInstanceEntry(key).CalculatedLabels = labels
+	cInstance := resolvedUsage.getComponentInstanceEntry(key)
+
+	// Unfortunately it's pretty typical for us to come with different labels to a component instance, let's combine them all
+	cInstance.CalculatedLabels = cInstance.CalculatedLabels.addLabels(labels)
 }
 
 // Gets a component instance entry or creates an new entry if it doesn't exist
 func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key string) *ComponentInstance {
 	if _, ok := resolvedUsage.ComponentInstanceMap[key]; !ok {
-		resolvedUsage.ComponentInstanceMap[key] = &ComponentInstance{CalculatedLabels: LabelSet{}}
+		resolvedUsage.ComponentInstanceMap[key] = &ComponentInstance{
+			CalculatedLabels:     LabelSet{},
+			CalculatedDiscovery:  NestedParameterMap{},
+			CalculatedCodeParams: NestedParameterMap{}}
 	}
 	return resolvedUsage.ComponentInstanceMap[key]
 }

@@ -14,7 +14,7 @@ type CodeExecutor interface {
 }
 
 // GetCodeExecutor returns an executor based on code.Type
-func (code *Code) GetCodeExecutor(key string, codeMetadata map[string]string, codeParams interface{}, clusters map[string]*Cluster) (CodeExecutor, error) {
+func (code *Code) GetCodeExecutor(key string, codeMetadata map[string]string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
 		return NewHelmCodeExecutor(code, key, codeMetadata, codeParams, clusters)
