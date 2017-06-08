@@ -13,14 +13,19 @@ macOS using ```brew install graphviz```.
 
 # How to test
 
+To run smoke tests (it will run unit tests and apply policy in noop mode):
 
-To run tests on a project:
+```shell
+make smoke
+```
+
+To run just all unit tests:
 
 ```shell
 make test
 ```
 
-Or to run tests on concrete package:
+To run tests on specific package:
 
 ```shell
 go test -v ./pkg/slinga
@@ -53,12 +58,13 @@ go run main.go show graph
 
 ## Tools
 
-* ```make fmt``` runs fmt that will ensure code style and print changed files
-* ```make vet``` runs vet that examines Go source code and reports suspicious
-  constructs, such as Printf calls whose arguments do not align with the format
-  string. Vet uses heuristics that do not guarantee all reports are genuine
-  problems, but it can find errors not caught by the compilers
-* ```make lint``` runs linter for Go source code
+* ```make validate``` runs code re-format and error/warning checks on code (everything listed below). In you want to run individual things:
+  * ```make fmt``` runs fmt that will ensure code style and print changed files
+  * ```make vet``` runs vet that examines Go source code and reports suspicious
+    constructs, such as Printf calls whose arguments do not align with the format
+    string. Vet uses heuristics that do not guarantee all reports are genuine
+    problems, but it can find errors not caught by the compilers
+  * ```make lint``` runs linter for Go source code
 
 ## How to set up demo environment on Google Cloud
 
