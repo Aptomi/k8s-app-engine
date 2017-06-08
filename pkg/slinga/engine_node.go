@@ -6,7 +6,7 @@ import (
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
-// It may be modified as the calculation goes on
+// It gets incrementally populated with data, as policy evaluation goes on for a given dependency
 type resolutionNode struct {
 	// whether we successfully resolved this node or not
 	resolved bool
