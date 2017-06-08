@@ -45,7 +45,7 @@ function main() {
     cluster_small_size=1
 
     # see https://cloud.google.com/compute/pricing#standard_machine_types
-    cluster_big_flavor=n1-standard-4
+    cluster_big_flavor=n1-standard-8
     cluster_small_flavor=n1-standard-2
 
     cluster_disk_size=100
