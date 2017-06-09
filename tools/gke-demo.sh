@@ -354,17 +354,24 @@ function helm_init() {
         log "Waiting 10 seconds for Tiller to start"
         sleep 10
 
-        if ! helm_alive $name ; then
-            log "Helm isn't alive 10 seconds after running helm init, let's wait 60 seconds"
-            sleep 60
-
-            if ! helm_alive $name ; then
-                log "Helm isn't alive 70 seconds after running helm init, fail"
-                exit 1
+        retries=0
+        # retry for 5 minutes
+        until [ $retries -ge 60 ]
+        do
+            if helm_alive $name ; then
+                break
             fi
-        fi
+            sleep 5
+            retries=$[$retries+1]
+        done
 
-        log "Helm in cluster $name successfully initialized"
+        # recheck
+        if ! helm_alive $name ; then
+            log "Helm isn't alive 5 minutes after running helm init, fail"
+            exit 1
+        else
+            log "Helm in cluster $name successfully initialized"
+        fi
     fi
 }
 
