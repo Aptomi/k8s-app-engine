@@ -12,15 +12,15 @@ type LabelsFilter []string
 
 type ServiceFilter struct {
 	Cluster *Criteria
-	Labels *Criteria
+	Labels  *Criteria
 }
 
 type Action map[string]string
 
 type Rule struct {
-	Name string
+	Name           string
 	FilterServices *ServiceFilter
-	Action []*Action
+	Action         []*Action
 
 	// This field is populated when dependency gets resolved
 	//ResolvesTo string
