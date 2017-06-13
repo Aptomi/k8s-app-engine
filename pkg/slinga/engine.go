@@ -32,7 +32,7 @@ func (usage *ServiceUsageState) ResolveAllDependencies(dir string) error {
 			}
 
 			// record high-level service resolution
-			d.ResolvesTo = node.debugResolvedKey
+			d.ResolvesTo = node.serviceKey
 		}
 	}
 	return nil
@@ -141,13 +141,11 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		resolvedUsage.recordUsage(node.componentKey, node.user)
 	}
 
-	// Record usage of a given service
+	// Mark object as resolved and record usage of a given service
+	node.resolved = true
 	node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
 	resolvedUsage.recordUsage(node.serviceKey, node.user)
 
-	// Mark object as successfully resolved
-	node.resolved = true
-	node.debugResolvedKey = node.context.Name + "#" + node.allocation.NameResolved
 	return nil
 }
 

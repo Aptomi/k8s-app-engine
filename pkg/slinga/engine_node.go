@@ -47,9 +47,6 @@ type resolutionNode struct {
 
 	// reference to the current service key
 	serviceKey string
-
-	// the key that will be showm in CLI in a quick summary of changes
-	debugResolvedKey string
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency

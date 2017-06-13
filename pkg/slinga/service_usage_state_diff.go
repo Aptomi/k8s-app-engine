@@ -52,78 +52,97 @@ func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) 
 
 	fmt.Println("[Services]")
 
-	// High-level service resolutions in prev
-	pMap := make(map[string]map[string]string)
+	// High-level service resolutions in prev (user -> serviceName -> serviceKey -> count)
+	pMap := make(map[string]map[string]map[string]int)
 	if diff.Prev.Dependencies != nil {
 		for _, deps := range diff.Prev.Dependencies.Dependencies {
 			for _, d := range deps {
 				// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
 				if len(d.ResolvesTo) > 0 {
 					if pMap[d.UserID] == nil {
-						pMap[d.UserID] = make(map[string]string)
+						pMap[d.UserID] = make(map[string]map[string]int)
 					}
-					pMap[d.UserID][d.Service] = d.ResolvesTo
+					if pMap[d.UserID][d.Service] == nil {
+						pMap[d.UserID][d.Service] = make(map[string]int)
+					}
+					pMap[d.UserID][d.Service][d.ResolvesTo]++
 				}
 			}
 		}
 	}
 
-	// High-level service resolutions in next
-	cMap := make(map[string]map[string]string)
+	// High-level service resolutions in next (user -> serviceName -> serviceKey -> count)
+	cMap := make(map[string]map[string]map[string]int)
 	for _, deps := range diff.Next.Dependencies.Dependencies {
 		for _, d := range deps {
 			// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
 			if len(d.ResolvesTo) > 0 {
 				if cMap[d.UserID] == nil {
-					cMap[d.UserID] = make(map[string]string)
+					cMap[d.UserID] = make(map[string]map[string]int)
 				}
-				cMap[d.UserID][d.Service] = d.ResolvesTo
+				if cMap[d.UserID][d.Service] == nil {
+					cMap[d.UserID][d.Service] = make(map[string]int)
+				}
+				cMap[d.UserID][d.Service][d.ResolvesTo]++
 			}
 		}
 	}
 
 	// map of all user keys
-	uKeys := make(map[string]bool)
-	for k := range pMap {
-		uKeys[k] = true
+	userKeyMap := make(map[string]bool)
+	for userID := range pMap {
+		userKeyMap[userID] = true
 	}
-	for k := range cMap {
-		uKeys[k] = true
+	for userID := range cMap {
+		userKeyMap[userID] = true
 	}
 
 	// Printable description
 	textMap := make(map[string][]string)
 
 	// Go over all users
-	for userID := range uKeys {
+	for userID := range userKeyMap {
 		sPrev := pMap[userID]
 		sNext := cMap[userID]
 
-		// merge all the service keys
-		sKeys := make(map[string]bool)
-		for s := range sPrev {
-			sKeys[s] = true
+		// merge all the service names
+		serviceNameMap := make(map[string]bool)
+		for serviceName := range sPrev {
+			serviceNameMap[serviceName] = true
 		}
-		for s := range sNext {
-			sKeys[s] = true
-		}
-
-		// Process all additions
-		for s := range sKeys {
-			_, inPrev := sPrev[s]
-			_, inNext := sNext[s]
-			if !inPrev && inNext {
-				textMap[userID] = append(textMap[userID], fmt.Sprintf("[+] %s (%s)", s, cMap[userID][s]))
-			}
+		for serviceName := range sNext {
+			serviceNameMap[serviceName] = true
 		}
 
-		// Process all deletions
-		for s := range sKeys {
-			_, inPrev := sPrev[s]
-			_, inNext := sNext[s]
-			if inPrev && !inNext {
-				textMap[userID] = append(textMap[userID], fmt.Sprintf("[-] %s", s))
+		// For every service
+		for serviceName := range serviceNameMap {
+			// Figure out how many service keys got added vs got removed
+			prevMap := sPrev[serviceName]
+			nextMap := sNext[serviceName]
+
+			// Merge all the service keys
+			serviceKeyMap := make(map[string]bool)
+			for serviceKey := range prevMap {
+				serviceKeyMap[serviceKey] = true
 			}
+			for serviceKey := range nextMap {
+				serviceKeyMap[serviceKey] = true
+			}
+
+			// For every service key
+			for serviceKey := range serviceKeyMap {
+				prevCnt := prevMap[serviceKey]
+				nextCnt := nextMap[serviceKey]
+
+				for i := 0; i < nextCnt-prevCnt; i++ {
+					textMap[userID] = append(textMap[userID], fmt.Sprintf("[+] %s (%s)", serviceName, serviceKey))
+				}
+
+				for i := 0; i < prevCnt-nextCnt; i++ {
+					textMap[userID] = append(textMap[userID], fmt.Sprintf("[-] %s (%s)", serviceName, serviceKey))
+				}
+			}
+
 		}
 	}
 
