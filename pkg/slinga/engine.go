@@ -9,19 +9,19 @@ import (
 */
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (usage *ServiceUsageState) ResolveAllDependencies(dir string) error {
+func (usage *ServiceUsageState) ResolveAllDependencies() error {
 
 	// Run every declared dependency via policy and resolve it
 	for _, dependencies := range usage.Dependencies.Dependencies {
 		for _, d := range dependencies {
-			node := usage.newResolutionNode(d, dir)
+			node := usage.newResolutionNode(d)
 
 			// see if it needs to be traced (addl debug output on console)
 			tracing.setEnable(d.Trace)
 
 			// resolve usage via applying policy
 			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
-			err := usage.resolveDependency(node, usage.ResolvedUsage, dir)
+			err := usage.resolveDependency(node, usage.ResolvedUsage)
 
 			// disable tracing
 			tracing.setEnable(false)
@@ -39,7 +39,7 @@ func (usage *ServiceUsageState) ResolveAllDependencies(dir string) error {
 }
 
 // Evaluate evaluates and resolves a single dependency ("<user> needs <service> with <labels>") and calculates component allocations
-func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolvedUsage *ResolvedServiceUsageData, dir string) error {
+func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolvedUsage *ResolvedServiceUsageData) error {
 	// Error variable that we will be reusing
 	var err error
 
@@ -126,7 +126,7 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 			nodeNext := node.createChildNode()
 
 			// Resolve dependency recursively
-			err := usage.resolveDependency(nodeNext, resolvedUsage, dir)
+			err := usage.resolveDependency(nodeNext, resolvedUsage)
 			if err != nil {
 				return err
 			}

@@ -54,6 +54,12 @@ func LoadUsersFromDir(dir string) GlobalUsers {
 	}
 	r := GlobalUsers{Users: make(map[string]*User)}
 	for _, u := range t {
+		// inject secrets into user's labels
+		secrets := LoadUserSecretsByIDFromDir(dir, u.ID)
+		for k, v := range secrets {
+			u.Labels[k] = v
+		}
+
 		r.Users[u.ID] = u
 	}
 	return r

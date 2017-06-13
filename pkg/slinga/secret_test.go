@@ -8,31 +8,31 @@ import (
 func TestLoadSecrets(t *testing.T) {
 	secrets := LoadUserSecretsByIDFromDir("testdata/unittests", "1")
 
-	assert.Equal(t, 4, len(secrets.Labels))
-	assert.Equal(t, "aliceappkey", secrets.Labels["twitterAppKey"])
-	assert.Equal(t, "aliceappsecret", secrets.Labels["twitterAppSecret"])
-	assert.Equal(t, "alicetokenkey", secrets.Labels["twitterTokenKey"])
-	assert.Equal(t, "alicetokensecret", secrets.Labels["twitterTokenSecret"])
+	assert.Equal(t, 4, len(secrets))
+	assert.Equal(t, "aliceappkey", secrets["twitterAppKey"])
+	assert.Equal(t, "aliceappsecret", secrets["twitterAppSecret"])
+	assert.Equal(t, "alicetokenkey", secrets["twitterTokenKey"])
+	assert.Equal(t, "alicetokensecret", secrets["twitterTokenSecret"])
 
 	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "2")
 
-	assert.Equal(t, 4, len(secrets.Labels))
-	assert.Equal(t, "bobappkey", secrets.Labels["twitterAppKey"])
-	assert.Equal(t, "bobappsecret", secrets.Labels["twitterAppSecret"])
-	assert.Equal(t, "bobtokenkey", secrets.Labels["twitterTokenKey"])
-	assert.Equal(t, "bobtokensecret", secrets.Labels["twitterTokenSecret"])
+	assert.Equal(t, 4, len(secrets))
+	assert.Equal(t, "bobappkey", secrets["twitterAppKey"])
+	assert.Equal(t, "bobappsecret", secrets["twitterAppSecret"])
+	assert.Equal(t, "bobtokenkey", secrets["twitterTokenKey"])
+	assert.Equal(t, "bobtokensecret", secrets["twitterTokenSecret"])
 
 	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "3")
-	assert.Equal(t, 1, len(secrets.Labels))
-	assert.Equal(t, "topsecret", secrets.Labels["someSecret"])
+	assert.Equal(t, 1, len(secrets))
+	assert.Equal(t, "topsecret", secrets["someSecret"])
 
 	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "4")
-	assert.Equal(t, 0, len(secrets.Labels))
+	assert.Equal(t, 0, len(secrets))
 }
 
 func TestUserLabelsWithSecrets(t *testing.T) {
 	userAlice := LoadUserByIDFromDir("testdata/unittests", "1")
-	labels := userAlice.getLabelSet("testdata/unittests")
+	labels := userAlice.getLabelSet()
 
 	assert.Equal(t, 9, len(labels.Labels))
 	assert.Equal(t, "aliceappkey", labels.Labels["twitterAppKey"])
@@ -41,7 +41,7 @@ func TestUserLabelsWithSecrets(t *testing.T) {
 
 func TestUserLabelsWithEmptySecrets(t *testing.T) {
 	userDave := LoadUserByIDFromDir("testdata/unittests", "5")
-	labels := userDave.getLabelSet("testdata/unittests")
+	labels := userDave.getLabelSet()
 
 	assert.Equal(t, 5, len(labels.Labels))
 }

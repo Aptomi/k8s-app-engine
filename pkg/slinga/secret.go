@@ -19,7 +19,7 @@ type UserSecrets struct {
 }
 
 // LoadUserSecretsByIDFromDir loads secrets for a given user from a given directory
-func LoadUserSecretsByIDFromDir(dir string, id string) *LabelSet {
+func LoadUserSecretsByIDFromDir(dir string, id string) map[string]string {
 	fileName := dir + "/secrets.yaml"
 	debug.WithFields(log.Fields{
 		"file": fileName,
@@ -43,9 +43,9 @@ func LoadUserSecretsByIDFromDir(dir string, id string) *LabelSet {
 	}
 	for _, s := range t {
 		if s.UserID == id {
-			return &LabelSet{Labels: s.Secrets}
+			return s.Secrets
 		}
 	}
 
-	return &LabelSet{Labels: make(map[string]string)}
+	return make(map[string]string)
 }

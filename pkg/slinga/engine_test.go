@@ -12,7 +12,7 @@ func TestPolicyResolve(t *testing.T) {
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
 	usageState := NewServiceUsageState(&policy, &dependencies, &users)
-	err := usageState.ResolveAllDependencies("testdata/unittests")
+	err := usageState.ResolveAllDependencies()
 	resolvedUsage := usageState.getResolvedUsage()
 
 	// Check that policy resolution finished correctly
@@ -41,7 +41,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 
 	// Get usage state prev
 	usageStatePrev := NewServiceUsageState(&policy, &dependencies, &users)
-	usageStatePrev.ResolveAllDependencies("testdata/unittests")
+	usageStatePrev.ResolveAllDependencies()
 
 	// Emulate saving and loading again
 	usageStatePrevSavedLoaded := ServiceUsageState{}
@@ -49,7 +49,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 
 	// Get usage state next
 	usageStateNext := NewServiceUsageState(&policy, &dependencies, &users)
-	usageStateNext.ResolveAllDependencies("testdata/unittests")
+	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrevSavedLoaded)
@@ -68,7 +68,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 
 	// Get usage state prev
 	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, &users)
-	usageStatePrev.ResolveAllDependencies("testdata/unittests")
+	usageStatePrev.ResolveAllDependencies()
 
 	// Emulate saving and loading again
 	usageStatePrevSavedLoaded := ServiceUsageState{}
@@ -82,7 +82,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 		},
 	)
 	usageStateNext := NewServiceUsageState(&policy, &dependenciesNext, &users)
-	usageStateNext.ResolveAllDependencies("testdata/unittests")
+	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrevSavedLoaded)
