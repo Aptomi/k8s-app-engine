@@ -216,7 +216,18 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy, rules *GlobalRu
 			continue
 		}
 
-		if rules.allowsAllocation(a, node) {
+		// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
+		var cluster *Cluster
+		if clusterLabel, ok := node.labels.Labels["cluster"]; ok {
+			if cluster, ok = policy.Clusters[clusterLabel]; !ok {
+				debug.WithFields(log.Fields{
+					"allocation": a,
+					"labels":     node.labels.Labels,
+				}).Fatal("Can't find cluster for allocation (based on label 'cluster')")
+			}
+		}
+
+		if rules.allowsAllocation(a, node, cluster) {
 			allocationMatched = a
 			break
 		}

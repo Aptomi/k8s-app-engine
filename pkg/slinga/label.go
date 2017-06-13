@@ -60,3 +60,7 @@ func (src LabelSet) equal(dst LabelSet) bool {
 	}
 	return reflect.DeepEqual(src.Labels, dst.Labels)
 }
+
+func (cluster *Cluster) getLabelSet() LabelSet {
+	return LabelSet{Labels: cluster.Labels}
+}

@@ -32,10 +32,10 @@ type GlobalRules struct {
 	Rules map[string][]*Rule
 }
 
-func (globalRules *GlobalRules) allowsAllocation(allocation *Allocation, node *resolutionNode) bool {
+func (globalRules *GlobalRules) allowsAllocation(allocation *Allocation, node *resolutionNode, cluster *Cluster) bool {
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
-			m := rule.FilterServices.match(node)
+			m := rule.FilterServices.match(node, cluster)
 			tracing.Printf(node.depth+1, "[%t] Testing allocation '%s': (global rule '%s')", !m, allocation.Name, rule.Name)
 			if m {
 				for _, action := range rule.Actions {
@@ -50,7 +50,7 @@ func (globalRules *GlobalRules) allowsAllocation(allocation *Allocation, node *r
 	return true
 }
 
-func (filter *ServiceFilter) match(node *resolutionNode) bool {
+func (filter *ServiceFilter) match(node *resolutionNode, cluster *Cluster) bool {
 	// check if service filters for another service labels
 	if filter.Labels != nil && !filter.Labels.allows(node.labels) {
 		return false
@@ -61,7 +61,9 @@ func (filter *ServiceFilter) match(node *resolutionNode) bool {
 		return false
 	}
 
-	// todo match clusters!!!
+	if filter.Cluster != nil && cluster != nil && !filter.Cluster.allows(cluster.getLabelSet()) {
+		return false
+	}
 
 	return true
 }
