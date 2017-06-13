@@ -2,8 +2,8 @@ package slinga
 
 import (
 	"github.com/stretchr/testify/assert"
-	"testing"
 	"gopkg.in/yaml.v2"
+	"testing"
 )
 
 func TestPolicyResolve(t *testing.T) {

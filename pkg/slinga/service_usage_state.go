@@ -97,7 +97,7 @@ func (resolvedUsage *ResolvedServiceUsageData) storeCodeParams(key string, codeP
 	} else if !cInstance.CalculatedCodeParams.deepEqual(codeParams) {
 		// Same component instance, different code parameters
 		debug.WithFields(log.Fields{
-			"componentKey": key,
+			"componentKey":   key,
 			"prevCodeParams": cInstance.CalculatedCodeParams,
 			"nextCodeParams": codeParams,
 		}).Fatal("Invalid policy. Arrived to the same component with different code parameters")
@@ -113,7 +113,7 @@ func (resolvedUsage *ResolvedServiceUsageData) storeDiscoveryParams(key string, 
 	} else if !cInstance.CalculatedDiscovery.deepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		debug.WithFields(log.Fields{
-			"componentKey": key,
+			"componentKey":        key,
 			"prevDiscoveryParams": cInstance.CalculatedDiscovery,
 			"nextDiscoveryParams": discoveryParams,
 		}).Fatal("Invalid policy. Arrived to the same component with different discovery parameters")

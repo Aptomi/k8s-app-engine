@@ -1,10 +1,10 @@
 package slinga
 
 import (
+	"flag"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"os"
-	"flag"
 )
 
 // Tracing logger is for detailed messages printed via --verbose

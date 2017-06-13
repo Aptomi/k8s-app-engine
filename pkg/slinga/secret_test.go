@@ -27,7 +27,7 @@ func TestLoadSecrets(t *testing.T) {
 	assert.Equal(t, "topsecret", secrets.Labels["someSecret"])
 
 	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "4")
-	assert.Equal(t,0, len(secrets.Labels))
+	assert.Equal(t, 0, len(secrets.Labels))
 }
 
 func TestUserLabelsWithSecrets(t *testing.T) {

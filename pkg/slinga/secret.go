@@ -14,11 +14,11 @@ import (
 
 // UserSecrets represents a user secret (ID, set of secrets)
 type UserSecrets struct {
-	UserID string
+	UserID  string
 	Secrets map[string]string
 }
 
-// LoadSecretsByIDFromDir loads secrets for a given user from a given directory
+// LoadUserSecretsByIDFromDir loads secrets for a given user from a given directory
 func LoadUserSecretsByIDFromDir(dir string, id string) *LabelSet {
 	fileName := dir + "/secrets.yaml"
 	debug.WithFields(log.Fields{
