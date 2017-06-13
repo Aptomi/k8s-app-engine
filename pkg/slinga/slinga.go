@@ -75,6 +75,7 @@ type Service struct {
 type Cluster struct {
 	Name     string
 	Type     string
+	Labels   map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
