@@ -6,11 +6,6 @@
     tsvisimage: demo-v41
     # San Francisco, Boston, New York
     locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
-    # Twitter API Credentials (Sergey)
-    appKey: Y4FeBw1uRiLqvVVFziYLryGVx
-    appSecret: HZLJFYnelNPkhvDqtfaYZgLhkA9Cn9lmIfS0pbR6zNUQ50UmE6
-    tokenKey: 49984644-nhs4mTr3XOwCi7oCmVgAFsEU0JNIS8NWI9zIdy7hI
-    tokenSecret: gnrdJXSNqmfxv0GndRhrCs45yQEK9XzFpuTAymV7zFf7X
 
 #- userid: 2
 #  service: twitter-stats
@@ -22,11 +17,6 @@
 ##    locations: 129.772544,31.070051,142.916753,41.746139
 #    # Mexico
 #    locations: -119.883662,13.301958,-91.780634,27.018021
-#    # Twitter API Credentials (Roman)
-#    appKey: qKj1sGtA3Oh982ERvExOHat9n
-#    appSecret: rvjf62MOqfaB0SClSzNFLm1AUypQbo9DNMxa0dmFdDDmqkbcpc
-#    tokenKey: 96550266-xh58P57avFNpozIgrJoja2Sqi6dCmS9L1xmnfME5e
-#    tokenSecret: o9CIb935ewMrqDCSYPXsdZ8B0LNuUnhNSP1TdfujeFYFG
 
 #- userid: 3
 #  service: twitter-stats
@@ -36,8 +26,3 @@
 #    tsvisimage: demo-v41
 #    # Brazil
 #    locations: -57.752720,-21.471868,-31.912877,-0.547536
-#    # Twitter API Credentials (Roman)
-#    appKey: qKj1sGtA3Oh982ERvExOHat9n
-#    appSecret: rvjf62MOqfaB0SClSzNFLm1AUypQbo9DNMxa0dmFdDDmqkbcpc
-#    tokenKey: 96550266-xh58P57avFNpozIgrJoja2Sqi6dCmS9L1xmnfME5e
-#    tokenSecret: o9CIb935ewMrqDCSYPXsdZ8B0LNuUnhNSP1TdfujeFYFG
