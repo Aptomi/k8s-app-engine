@@ -41,6 +41,7 @@ lint:
 
 .PHONY: validate
 validate: fmt vet lint
+	@echo "\nAll validations passed"
 
 .PHONY: clean
 clean:
