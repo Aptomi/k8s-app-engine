@@ -1,0 +1,10 @@
+- name: block_compromised_cluster
+  filterservices:
+    cluster:
+      accept:
+        - compromised
+    labels:
+      accept:
+        - sensetive
+  action:
+    - ingress: block
