@@ -8,8 +8,9 @@ type LabelSet struct {
 }
 
 // Apply set of transformations to labels
-func (user *User) getLabelSet() LabelSet {
-	return LabelSet{Labels: user.Labels}
+func (user *User) getLabelSet(dir string) LabelSet {
+	secrets := LoadUserSecretsByIDFromDir(dir, user.ID)
+	return LabelSet{Labels: user.Labels}.addLabels(LabelSet{Labels: secrets.Labels})
 }
 
 // Apply set of transformations to labels

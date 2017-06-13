@@ -71,7 +71,7 @@ func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode
 		serviceName: d.Service,
 
 		// combining user labels and dependency labels
-		labels: user.getLabelSet().addLabels(d.getLabelSet()),
+		labels: user.getLabelSet(GetAptomiPolicyDir()).addLabels(d.getLabelSet()),
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
