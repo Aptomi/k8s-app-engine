@@ -1,4 +1,4 @@
-- name: block_compromised_cluster
+- name: compromised_cluster_block_sensetive_services
   filterservices:
     cluster:
       accept:
@@ -6,5 +6,6 @@
     labels:
       accept:
         - sensetive
-  action:
-    - ingress: block
+  actions:
+    - type: ingress
+      content: block

@@ -15,23 +15,27 @@ type ServiceFilter struct {
 	Labels  *Criteria
 }
 
-type Action map[string]string
+type Action struct {
+	Type    string
+	Content string
+}
 
 type Rule struct {
 	Name           string
 	FilterServices *ServiceFilter
-	Action         []*Action
+	Actions        []*Action
 
 	// This field is populated when dependency gets resolved
 	//ResolvesTo string
 }
 
 type GlobalRules struct {
-	ServiceRules []*Rule
+	// action type -> []*Rule
+	Rules map[string][]*Rule
 }
 
 func NewGlobalRules() GlobalRules {
-	return GlobalRules{ServiceRules: make([]*Rule, 0)}
+	return GlobalRules{Rules: make(map[string][]*Rule, 0)}
 }
 
 func LoadRulesFromDir(dir string) GlobalRules {
@@ -40,12 +44,29 @@ func LoadRulesFromDir(dir string) GlobalRules {
 	r := NewGlobalRules()
 	for _, f := range files {
 		rules := LoadRulesFromFile(f)
-		r.ServiceRules = append(r.ServiceRules, rules.ServiceRules...)
+		r.insertRules(rules...)
 	}
 	return r
 }
 
-func LoadRulesFromFile(fileName string) GlobalRules {
+func (rules *GlobalRules) insertRules(appendRules ...*Rule) {
+	for _, rule := range appendRules {
+		if rule.FilterServices == nil {
+			debug.WithFields(log.Fields{
+				"rule": rule,
+			}).Fatal("Only service filters currently supported in rules")
+		}
+		for _, action := range rule.Actions {
+			if rulesList, ok := rules.Rules[action.Type]; ok {
+				rules.Rules[action.Type] = append(rulesList, rule)
+			} else {
+				rules.Rules[action.Type] = []*Rule{rule}
+			}
+		}
+	}
+}
+
+func LoadRulesFromFile(fileName string) []*Rule {
 	debug.WithFields(log.Fields{
 		"file": fileName,
 	}).Debug("Loading rules")
@@ -65,16 +86,5 @@ func LoadRulesFromFile(fileName string) GlobalRules {
 			"error": e,
 		}).Fatal("Unable to unmarshal rules")
 	}
-	r := NewGlobalRules()
-	for _, rule := range t {
-		if rule.FilterServices != nil {
-			r.ServiceRules = append(r.ServiceRules, rule)
-		} else {
-			debug.WithFields(log.Fields{
-				"file":  fileName,
-				"error": e,
-			}).Fatal("Only service filters currently supported in rules")
-		}
-	}
-	return r
+	return t
 }
