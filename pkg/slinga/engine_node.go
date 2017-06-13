@@ -201,7 +201,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 }
 
 // Helper to get a matched allocation
-func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, error) {
+func (node *resolutionNode) getMatchedAllocation(policy *Policy, rules *GlobalRules) (*Allocation, error) {
 	if len(node.context.Allocations) <= 0 {
 		tracing.Printf(node.depth, "Error while matching allocation for service %s, context %s (no allocations found)", node.service.Name, node.context.Name)
 		return nil, errors.New("No allocations found for " + node.service.Name)
@@ -212,7 +212,11 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	for _, a := range node.context.Allocations {
 		m := a.matches(node.labels)
 		tracing.Printf(node.depth+1, "[%t] Testing allocation '%s': (criteria = %+v)", m, a.Name, a.Criteria)
-		if m {
+		if !m {
+			continue
+		}
+
+		if rules.allowsAllocation(a, node) {
 			allocationMatched = a
 			break
 		}

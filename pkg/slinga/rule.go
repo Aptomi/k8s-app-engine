@@ -13,6 +13,7 @@ type LabelsFilter []string
 type ServiceFilter struct {
 	Cluster *Criteria
 	Labels  *Criteria
+	User    *Criteria
 }
 
 type Action struct {
@@ -24,14 +25,45 @@ type Rule struct {
 	Name           string
 	FilterServices *ServiceFilter
 	Actions        []*Action
-
-	// This field is populated when dependency gets resolved
-	//ResolvesTo string
 }
 
 type GlobalRules struct {
 	// action type -> []*Rule
 	Rules map[string][]*Rule
+}
+
+func (globalRules *GlobalRules) allowsAllocation(allocation *Allocation, node *resolutionNode) bool {
+	if rules, ok := globalRules.Rules["dependency"]; ok {
+		for _, rule := range rules {
+			m := rule.FilterServices.match(node)
+			tracing.Printf(node.depth+1, "[%t] Testing allocation '%s': (global rule '%s')", !m, allocation.Name, rule.Name)
+			if m {
+				for _, action := range rule.Actions {
+					if action.Type == "dependency" && action.Content == "forbid" {
+						return false
+					}
+				}
+			}
+		}
+	}
+
+	return true
+}
+
+func (filter *ServiceFilter) match(node *resolutionNode) bool {
+	// check if service filters for another service labels
+	if filter.Labels != nil && !filter.Labels.allows(node.labels) {
+		return false
+	}
+
+	// check if service filters for another user labels
+	if filter.User != nil && !filter.User.allows(node.user.getLabelSet()) {
+		return false
+	}
+
+	// todo match clusters!!!
+
+	return true
 }
 
 func NewGlobalRules() GlobalRules {
