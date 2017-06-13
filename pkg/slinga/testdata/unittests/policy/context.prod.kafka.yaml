@@ -5,8 +5,6 @@ service: kafka
 criteria:
   accept:
     - dev == "no" && prod == "yes"
-  reject:
-    - compromised == "yes"
 
 labels:
   set:

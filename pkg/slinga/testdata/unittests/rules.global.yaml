@@ -24,7 +24,19 @@
   filterservices:
     user:
       accept:
-        - priority <= 10
+        - priority < 100
+    labels:
+      accept:
+        - sensetive
+  actions:
+    - type: dependency
+      content: forbid
+
+- name: dev_cluster_forbid_sensetive_service
+  filterservices:
+    cluster:
+      accept:
+        - dev
     labels:
       accept:
         - sensetive

@@ -24,7 +24,7 @@
     team: platform_services
     dev: no
     prod: yes
-    compromised: yes
+    compromised: true
 
 # Special user to test partial matching (it has access to kafka, but not to zookeeper that kafka depends on)
 - id: 4

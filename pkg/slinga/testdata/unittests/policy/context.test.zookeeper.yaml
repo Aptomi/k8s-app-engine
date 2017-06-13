@@ -6,7 +6,6 @@ criteria:
   accept:
     - dev == "yes" && prod == "no"
   reject:
-    - compromised == "yes"
     - nozookeeper
 
 labels:
