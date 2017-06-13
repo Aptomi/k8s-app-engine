@@ -51,7 +51,7 @@
      - `./aptomi endpoint show`
    - Open Tweeviz UI
      - Show stage Alice (different UI)
-     - Show prod Bob (Japan tweets)
+     - Show prod Bob (Mexico tweets)
 
 5. Alice (ID=1) propagates staging version to production (making a change)
    - Staging TS gets deleted
