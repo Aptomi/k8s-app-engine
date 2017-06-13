@@ -53,7 +53,7 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode {
+func (usage *ServiceUsageState) newResolutionNode(d *Dependency, dir string) *resolutionNode {
 	user := usage.users.Users[d.UserID]
 	if user == nil {
 		// Resolving allocations for service
@@ -71,7 +71,7 @@ func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode
 		serviceName: d.Service,
 
 		// combining user labels and dependency labels
-		labels: user.getLabelSet(GetAptomiPolicyDir()).addLabels(d.getLabelSet()),
+		labels: user.getLabelSet(dir).addLabels(d.getLabelSet()),
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},

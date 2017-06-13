@@ -14,7 +14,7 @@ import (
 
 // UserSecrets represents a user secret (ID, set of secrets)
 type UserSecrets struct {
-	ID string
+	UserID string
 	Secrets map[string]string
 }
 
@@ -42,7 +42,7 @@ func LoadUserSecretsByIDFromDir(dir string, id string) *LabelSet {
 		}).Fatal("Unable to unmarshal secrets")
 	}
 	for _, s := range t {
-		if s.ID == id {
+		if s.UserID == id {
 			return &LabelSet{Labels: s.Secrets}
 		}
 	}
