@@ -278,7 +278,7 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 
 	// todo(slukjanov): support more then one ingress / rule / path
 	for _, ingress := range ingresses.Items {
-		if class, ok := ingress.Annotations["kubernetes.io/ingress.class"]; !ok || class != "istio"  {
+		if class, ok := ingress.Annotations["kubernetes.io/ingress.class"]; !ok || class != "istio" {
 			continue
 		}
 		for _, rule := range ingress.Spec.Rules {
