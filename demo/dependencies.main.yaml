@@ -26,3 +26,6 @@
 #    tsvisimage: demo-v41
 #    # Brazil
 #    locations: -57.752720,-21.471868,-31.912877,-0.547536
+
+- userid: 42
+  service: istio

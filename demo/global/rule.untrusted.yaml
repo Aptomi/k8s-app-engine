@@ -1,0 +1,17 @@
+name: block-untrusted
+
+source:
+  type: service
+  criteria:
+    accept:
+      - untrusted
+
+target:
+  type: service
+  criteris:
+    accept:
+      - sensetive
+
+action:
+  - type: istio
+    content: deny-source-target

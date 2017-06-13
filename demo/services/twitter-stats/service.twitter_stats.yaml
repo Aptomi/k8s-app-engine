@@ -60,12 +60,13 @@ components:
     code:
       type: aptomi/code/kubernetes-helm
       metadata:
-        chartName: tweeviz-0.1.0
+        chartName: tweeviz-istio-0.1.0
       params:
         cluster: "{{ .Labels.cluster }}"
 
         image:
-          repository: frostman/tweeviz
+          repository: frostman/
+          name: tweeviz
           tag: "{{ .Labels.tsvisimage }}"
 
 #        topListSize: 25

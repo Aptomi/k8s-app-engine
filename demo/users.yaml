@@ -18,3 +18,8 @@
     priority: 10
     org: it
     team: platform_services
+
+- id: 42
+  name: Admin
+  labels:
+    team: admin
