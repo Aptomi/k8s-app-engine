@@ -17,6 +17,8 @@ type ServiceUsageState struct {
 	// reference to dependencies
 	Dependencies *GlobalDependencies
 
+	Rules *GlobalRules
+
 	// reference to users
 	users *GlobalUsers
 
@@ -57,10 +59,11 @@ func NewResolvedServiceUsageData() *ResolvedServiceUsageData {
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
-func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, users *GlobalUsers) ServiceUsageState {
+func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, rules *GlobalRules, users *GlobalUsers) ServiceUsageState {
 	return ServiceUsageState{
 		Policy:        policy,
 		Dependencies:  dependencies,
+		Rules:         rules,
 		users:         users,
 		ResolvedUsage: NewResolvedServiceUsageData()}
 }
