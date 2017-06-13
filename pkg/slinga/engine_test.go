@@ -10,7 +10,7 @@ func TestPolicyResolve(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
 	users := LoadUsersFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
-	rules := LoadRulesFromDir("testdata/unittest")
+	rules := LoadRulesFromDir("testdata/unittests")
 
 	usageState := NewServiceUsageState(&policy, &dependencies, &rules, &users)
 	err := usageState.ResolveAllDependencies()
@@ -39,7 +39,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
 	users := LoadUsersFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
-	rules := LoadRulesFromDir("testdata/unittest")
+	rules := LoadRulesFromDir("testdata/unittests")
 
 	// Get usage state prev
 	usageStatePrev := NewServiceUsageState(&policy, &dependencies, &rules, &users)
@@ -67,7 +67,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
 	users := LoadUsersFromDir("testdata/unittests")
 	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
-	rules := LoadRulesFromDir("testdata/unittest")
+	rules := LoadRulesFromDir("testdata/unittests")
 
 	// Get usage state prev
 	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, &rules, &users)
