@@ -220,20 +220,23 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 		return nil, err
 	}
 
-	client := clientset.Core()
+	coreClient := clientset.Core()
 
 	releaseName := releaseName(exec.Key)
 	chartName := exec.Metadata["chartName"]
 
 	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
 	options := api.ListOptions{LabelSelector: selector}
-	services, err := client.Services(exec.Cluster.Metadata.Namespace).List(options)
+
+	endpoints := make(map[string]string)
+
+	// Check all corresponding services
+	services, err := coreClient.Services(exec.Cluster.Metadata.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
-	endpoints := make(map[string]string)
 
-	kubeHost, err := exec.getKubeExternalAddress(client)
+	kubeHost, err := exec.getKubeExternalAddress(coreClient)
 	if err != nil {
 		return nil, err
 	}
@@ -252,6 +255,45 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 			}
 		}
 	}
+
+	// Check all corresponding istio ingresses
+	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find Istio Ingress service (how ingress itself exposed)
+	service, err := coreClient.Services(exec.Cluster.Metadata.Namespace).Get("istio-ingress")
+	if err != nil {
+		return nil, err
+	}
+	istioIngress := "<unresolved>"
+	if service.Spec.Type == "NodePort" {
+		for _, port := range service.Spec.Ports {
+			if port.Name == "http" {
+				istioIngress = fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
+			}
+		}
+	}
+
+	// todo(slukjanov): support more then one ingress / rule / path
+	for _, ingress := range ingresses.Items {
+		if class, ok := ingress.Annotations["kubernetes.io/ingress.class"]; !ok || class != "istio"  {
+			continue
+		}
+		for _, rule := range ingress.Spec.Rules {
+			for _, path := range rule.HTTP.Paths {
+				pathStr := strings.Trim(path.Path, ".*")
+
+				if rule.Host == "" {
+					endpoints["ingress"] = "http://" + istioIngress + pathStr
+				} else {
+					endpoints["ingress"] = "http://" + rule.Host + pathStr
+				}
+			}
+		}
+	}
+
 	return endpoints, nil
 }
 
