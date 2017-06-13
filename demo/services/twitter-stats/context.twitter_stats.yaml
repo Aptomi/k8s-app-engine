@@ -2,13 +2,16 @@ name: personal
 
 service: twitter-stats
 
+labels:
+  set:
+    sensetive: true
+
 # Who is allowed to access
 criteria:
   accept:
     - team == 'platform_services'
   reject:
     - priority < 50
-    - compromised
 
 allocations:
 

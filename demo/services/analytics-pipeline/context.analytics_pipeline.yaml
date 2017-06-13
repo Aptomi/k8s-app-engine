@@ -8,7 +8,6 @@ criteria:
     - team == 'platform_services'
   reject:
     - priority < 50
-    - compromised
 
 allocations:
   # Dedicated for high-priority users

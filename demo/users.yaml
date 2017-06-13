@@ -15,7 +15,7 @@
 - id: 3
   name: Carol
   labels:
-    priority: 10
+    priority: 90
     org: it
     team: platform_services
 
