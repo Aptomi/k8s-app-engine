@@ -43,3 +43,15 @@
   actions:
     - type: dependency
       content: forbid
+
+- name: nonprod_users_forbid_prod_cluster
+  filterservices:
+    user:
+      accept:
+        - super-prod-users
+    cluster:
+      accept:
+        - prod
+  actions:
+    - type: dependency
+      content: allow
