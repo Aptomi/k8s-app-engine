@@ -1,0 +1,36 @@
+# Definition of Zookeeper service
+name: zookeeper
+
+labels:
+  set:
+    a: b
+
+components:
+
+  - name: component1
+    code:
+      type: aptomi/code/unittests
+      metadata:
+        service: zookeeper
+        component: component1
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+    dependencies:
+      - component2
+
+  - name: component2
+    code:
+      type: aptomi/code/unittests
+      metadata:
+        service: zookeeper
+        component: component2
+    labels:
+      set: # add/modify
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:

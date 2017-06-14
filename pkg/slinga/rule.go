@@ -72,8 +72,8 @@ func NewGlobalRules() GlobalRules {
 	return GlobalRules{Rules: make(map[string][]*Rule, 0)}
 }
 
-func LoadRulesFromDir(dir string) GlobalRules {
-	files, _ := zglob.Glob(dir + "/**/rules.*.yaml")
+func LoadRulesFromDir(baseDir string) GlobalRules {
+	files, _ := zglob.Glob(GetAptomiObjectDir(baseDir, Rules) + "/**/rules.*.yaml")
 	sort.Strings(files)
 	r := NewGlobalRules()
 	for _, f := range files {

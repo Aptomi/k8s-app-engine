@@ -25,8 +25,8 @@ fi
 
 function main() {
     if [ "$#" -ne "1" ]; then
-        echo "ERROR: (gke-demo.sh) Too few arguments"
-        echo "Usage: gke-demo.sh <up | status | down>"
+        echo "ERROR: (demo-gke.sh) Too few arguments"
+        echo "Usage: demo-gke.sh <up | status | down>"
         exit 1
     fi
 
@@ -378,4 +378,4 @@ function helm_init() {
 #################### End
 
 main $@
-log "gke-demo.sh $@ successfully finished"
+log "demo-gke.sh $@ successfully finished"

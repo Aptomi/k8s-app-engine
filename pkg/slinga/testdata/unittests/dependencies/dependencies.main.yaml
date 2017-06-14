@@ -1,0 +1,13 @@
+- userid: 1
+  service: kafka
+
+- userid: 2
+  service: kafka
+  labels:
+    important: yes
+
+- userid: 3
+  service: kafka
+
+- userid: 4
+  service: kafka

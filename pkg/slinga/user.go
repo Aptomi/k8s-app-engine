@@ -24,6 +24,10 @@ type GlobalUsers struct {
 	Users map[string]*User
 }
 
+func (users *GlobalUsers) count() int {
+	return countElements(users.Users)
+}
+
 // LoadUserByIDFromDir loads a given user from a given directory
 func LoadUserByIDFromDir(dir string, id string) *User {
 	return LoadUsersFromDir(dir).Users[id]
@@ -31,36 +35,32 @@ func LoadUserByIDFromDir(dir string, id string) *User {
 
 // LoadUsersFromDir loads all users from a given directory
 func LoadUsersFromDir(dir string) GlobalUsers {
-	fileName := dir + "/users.yaml"
+	fileName := GetAptomiObjectDir(dir, Users) + "/users.yaml"
 	debug.WithFields(log.Fields{
 		"file": fileName,
 	}).Debug("Loading users")
 
-	dat, e := ioutil.ReadFile(fileName)
-
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := []*User{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal users")
-	}
 	r := GlobalUsers{Users: make(map[string]*User)}
-	for _, u := range t {
-		// inject secrets into user's labels
-		secrets := LoadUserSecretsByIDFromDir(dir, u.ID)
-		for k, v := range secrets {
-			u.Labels[k] = v
-		}
 
-		r.Users[u.ID] = u
+	dat, e := ioutil.ReadFile(fileName)
+	if e == nil {
+		t := []*User{}
+		e = yaml.Unmarshal([]byte(dat), &t)
+		if e != nil {
+			debug.WithFields(log.Fields{
+				"file":  fileName,
+				"error": e,
+			}).Fatal("Unable to unmarshal users")
+		}
+		for _, u := range t {
+			// inject secrets into user's labels
+			secrets := LoadUserSecretsByIDFromDir(dir, u.ID)
+			for k, v := range secrets {
+				u.Labels[k] = v
+			}
+
+			r.Users[u.ID] = u
+		}
 	}
 	return r
 }

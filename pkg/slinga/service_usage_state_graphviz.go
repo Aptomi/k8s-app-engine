@@ -133,12 +133,12 @@ func (vis PolicyVisualization) findSubraphName(prev *gographviz.Escape, nName st
 
 // Returns name of the file where visual is stored
 func (vis PolicyVisualization) getVisualFileNamePNG(suffix string) string {
-	return GetAptomiDBDir() + "/" + "graph_" + suffix + ".png"
+	return GetAptomiObjectDir(GetAptomiBaseDir(), Graphics) + "/" + "graph_" + suffix + ".png"
 }
 
 // DrawVisualAndStore writes usage state visual into a file
 func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Escape {
-	users := LoadUsersFromDir(GetAptomiPolicyDir())
+	users := LoadUsersFromDir(GetAptomiObjectDir(GetAptomiBaseDir(), Users))
 
 	// Write graph into a file
 	graph := gographviz.NewEscape()
@@ -245,8 +245,8 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 
 // Saves graph into a file
 func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape) {
-	fileNameDot := GetAptomiDBDir() + "/" + "graph_" + suffix + "_full.dot"
-	fileNameDotFlat := GetAptomiDBDir() + "/" + "graph_" + suffix + "_flat.dot"
+	fileNameDot := GetAptomiObjectDir(GetAptomiBaseDir(), Graphics) + "/" + "graph_" + suffix + "_full.dot"
+	fileNameDotFlat := GetAptomiObjectDir(GetAptomiBaseDir(), Graphics) + "/" + "graph_" + suffix + "_flat.dot"
 	e := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 
 	if e != nil {

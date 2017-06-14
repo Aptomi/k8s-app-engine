@@ -29,6 +29,10 @@ type GlobalDependencies struct {
 	Dependencies map[string][]*Dependency
 }
 
+func (src *GlobalDependencies) count() int {
+	return countElements(src.Dependencies)
+}
+
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
 func NewGlobalDependencies() GlobalDependencies {
 	return GlobalDependencies{Dependencies: make(map[string][]*Dependency)}
@@ -73,9 +77,9 @@ func (src GlobalDependencies) appendDependency(ops *Dependency) GlobalDependenci
 }
 
 // LoadDependenciesFromDir loads all dependencies from a given directory
-func LoadDependenciesFromDir(dir string) GlobalDependencies {
+func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 	// read all services
-	files, _ := zglob.Glob(dir + "/**/dependencies.*.yaml")
+	files, _ := zglob.Glob(GetAptomiObjectDir(baseDir, Dependencies) + "/**/dependencies.*.yaml")
 	sort.Strings(files)
 	r := NewGlobalDependencies()
 	for _, f := range files {

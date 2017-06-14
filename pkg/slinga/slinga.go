@@ -7,6 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"sort"
+	"os"
+	"strings"
 )
 
 /*
@@ -73,9 +75,9 @@ type Service struct {
 
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	Name     string
-	Type     string
-	Labels   map[string]string
+	Name   string
+	Type   string
+	Labels map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
@@ -96,8 +98,78 @@ type Policy struct {
 	Clusters map[string]*Cluster
 }
 
+func (policy *Policy) countServices() int {
+	return countElements(policy.Services)
+}
+
+func (policy *Policy) countContexts() int {
+	return countElements(policy.Contexts)
+}
+
+func (policy *Policy) countClusters() int {
+	return countElements(policy.Clusters)
+}
+
+// LoadPolicyFromDir adds an object to the policy
+func AddObjectsToPolicy(aptFilter AptomiOject, args ...string) {
+	for _, v := range args {
+		stat, err := os.Stat(v)
+		if err == nil {
+			if stat.IsDir() {
+				// if it's a directory, process all yaml files in it
+				files, _ := zglob.Glob(v + "/**/*.*")
+				for _, f := range files {
+					AddObjectsToPolicy(aptFilter, f)
+				}
+			} else {
+				// if it's a file, copy it over
+				name := stat.Name()
+				idx := strings.Index(name, ".")
+				if idx >= 0 {
+					objectType := name[0:idx]
+					apt, ok := AptomiObjectsCanBeAdded[objectType]
+
+					// Charts don't have to start with object prefix
+					if aptFilter == Charts && strings.HasSuffix(name, ".tgz") {
+						ok = true
+						apt = aptFilter
+					}
+
+					if ok {
+						if apt == aptFilter {
+							err := copyFile(v, GetAptomiObjectDir(GetAptomiBaseDir(), apt)+"/"+name)
+							if err != nil {
+								fmt.Printf("Unable to add %s to aptomi policy: %s\n", objectType, name)
+								debug.WithFields(log.Fields{
+									"fileName":   v,
+									"name":       name,
+									"objectType": objectType,
+									"error":      err,
+								}).Fatal("Unable to add object to aptomi policy")
+							} else {
+								fmt.Printf("Adding %s to aptomi policy: %s\n", objectType, name)
+							}
+						}
+					} else {
+						debug.WithFields(log.Fields{
+							"fileName":   v,
+							"name":       name,
+							"objectType": objectType,
+						}).Warning("Invalid object type. Must be within defined Aptomi object types")
+					}
+				} else {
+					debug.WithFields(log.Fields{
+						"fileName": v,
+						"name":     name,
+					}).Warning("File name must be prefixed with object type")
+				}
+			}
+		}
+	}
+}
+
 // LoadPolicyFromDir loads policy from a directory, recursively processing all files
-func LoadPolicyFromDir(dir string) Policy {
+func LoadPolicyFromDir(baseDir string) Policy {
 	s := Policy{
 		Services: make(map[string]*Service),
 		Contexts: make(map[string][]*Context),
@@ -105,7 +177,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all clusters
-	files, _ := zglob.Glob(dir + "/**/cluster.*.yaml")
+	files, _ := zglob.Glob(GetAptomiObjectDir(baseDir, Clusters) + "/**/cluster.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		cluster := loadClusterFromFile(f)
@@ -113,7 +185,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all services
-	files, _ = zglob.Glob(dir + "/**/service.*.yaml")
+	files, _ = zglob.Glob(GetAptomiObjectDir(baseDir, Services) + "/**/service.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		service := loadServiceFromFile(f)
@@ -121,7 +193,7 @@ func LoadPolicyFromDir(dir string) Policy {
 	}
 
 	// read all contexts
-	files, _ = zglob.Glob(dir + "/**/context.*.yaml")
+	files, _ = zglob.Glob(GetAptomiObjectDir(baseDir, Contexts) + "/**/context.*.yaml")
 	sort.Strings(files)
 	for _, f := range files {
 		context := loadContextFromFile(f)
@@ -201,6 +273,30 @@ func loadClusterFromFile(fileName string) *Cluster {
 		}).Fatal("Unable to unmarshal cluster")
 	}
 	return &t
+}
+
+// ResetAptomiState fully resets aptomi state by deleting all file from its database. Including policy, logs, etc
+func ResetAptomiState() {
+	debug.WithFields(log.Fields{
+		"baseDir":  GetAptomiBaseDir(),
+	}).Info("Resetting aptomi state")
+
+	files, _ := zglob.Glob(GetAptomiBaseDir() + "/**/*.*")
+	for _, f := range files {
+		err := os.Remove(f)
+		if err != nil {
+			debug.WithFields(log.Fields{
+				"file":  f,
+				"error": err,
+			}).Fatal("Unable to remove file")
+		}
+	}
+
+	if len(files) > 0 {
+		fmt.Printf("Aptomi state is now empty. Deleted %d objects\n", len(files))
+	} else {
+		fmt.Println("Aptomi state is empty")
+	}
 }
 
 // Serialize object into YAML

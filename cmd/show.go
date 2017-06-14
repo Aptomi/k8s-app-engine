@@ -20,7 +20,7 @@ var showCmdConfig = &cobra.Command{
 	Short: "Show aptomi configuration variables",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		vars := []string{"APTOMI_POLICY", "APTOMI_DB"}
+		vars := []string{"APTOMI_DB"}
 
 		for _, key := range vars {
 			value, _ := os.LookupEnv(key)

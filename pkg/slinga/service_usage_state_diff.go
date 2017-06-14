@@ -47,6 +47,19 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 	return result
 }
 
+func (state ServiceUsageState) PrintSummary() {
+	fmt.Println("[Policy]")
+	state.printSummaryLine("Services", state.Policy.countServices())
+	state.printSummaryLine("Contexts", state.Policy.countContexts())
+	state.printSummaryLine("Clusters", state.Policy.countClusters())
+	state.printSummaryLine("Users", state.users.count())
+	state.printSummaryLine("Dependencies", state.Dependencies.count())
+}
+
+func (state ServiceUsageState) printSummaryLine(name string, cnt int) {
+	fmt.Printf("  %s: %d\n", name, cnt)
+}
+
 // On a service level -- see which keys appear and disappear
 func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) {
 
@@ -149,7 +162,7 @@ func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) 
 	// Print
 	printed := false
 	for userID, sKeys := range textMap {
-		user := LoadUserByIDFromDir(GetAptomiPolicyDir(), userID)
+		user := LoadUserByIDFromDir(GetAptomiBaseDir(), userID)
 		fmt.Printf("  %s (ID=%s)\n", user.Name, user.ID)
 		for _, s := range sKeys {
 			fmt.Printf("    %s\n", s)
@@ -404,7 +417,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -447,7 +460,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{

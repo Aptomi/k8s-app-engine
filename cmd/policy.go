@@ -4,13 +4,18 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"fmt"
 )
 
+// For apply command
 var noop bool
 var show bool
 var full bool
 var verbose bool
 var trace bool
+
+// For reset command
+var force bool
 
 var policyCmd = &cobra.Command{
 	Use:   "policy",
@@ -30,15 +35,15 @@ var policyCmdApply = &cobra.Command{
 		prevUsageState := slinga.LoadServiceUsageState()
 
 		// Generate the next usage state
-		policyDir := slinga.GetAptomiPolicyDir()
-
-		policy := slinga.LoadPolicyFromDir(policyDir)
-		users := slinga.LoadUsersFromDir(policyDir)
-		dependencies := slinga.LoadDependenciesFromDir(policyDir)
+		baseDir := slinga.GetAptomiBaseDir()
+		policy := slinga.LoadPolicyFromDir(baseDir)
+		users := slinga.LoadUsersFromDir(baseDir)
+		dependencies := slinga.LoadDependenciesFromDir(baseDir)
 		dependencies.SetTrace(trace)
-		rules := slinga.LoadRulesFromDir(policyDir)
+		rules := slinga.LoadRulesFromDir(baseDir)
 
 		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &rules, &users)
+		nextUsageState.PrintSummary()
 		err := nextUsageState.ResolveAllDependencies()
 
 		if err != nil {
@@ -64,13 +69,54 @@ var policyCmdApply = &cobra.Command{
 	},
 }
 
+var policyCmdAdd = &cobra.Command{
+	Use:   "add",
+	Short: "Add objects to the policy",
+	Long:  "",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+var policyCmdReset = &cobra.Command{
+	Use:   "reset",
+	Short: "Reset policy and delete all objects in it",
+	Long:  "",
+	Run: func(cmd *cobra.Command, args []string) {
+		if force {
+			slinga.ResetAptomiState()
+		} else {
+			fmt.Println("Sorry. I won't be doing anything without --force.")
+		}
+	},
+}
+
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
+	policyCmd.AddCommand(policyCmdAdd)
+	policyCmd.AddCommand(policyCmdReset)
+
+	for k := range slinga.AptomiObjectsCanBeAdded {
+		command := &cobra.Command{
+			Use:   k,
+			Short: fmt.Sprintf("Add one or more %s to the policy", k),
+			Long:  "",
+			Run: func(cmd *cobra.Command, args []string) {
+				slinga.AddObjectsToPolicy(slinga.AptomiObjectsCanBeAdded[cmd.Use], args...)
+			},
+		}
+		policyCmdAdd.AddCommand(command)
+	}
+
 	RootCmd.AddCommand(policyCmd)
 
+	// Flags for the apply command
 	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
 	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "In addition to applying changes, re-create missing instances (if they were manually deleted from the underlying cloud) and update running instances")
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
 	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", false, "Trace all dependencies and print how rules got evaluated")
+
+	// Flags for the reset command
+	policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
 }

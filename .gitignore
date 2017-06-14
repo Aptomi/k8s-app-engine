@@ -6,6 +6,8 @@ graph*.dot
 test.go
 debug*.log
 
+db
+
 .idea
 
 # ignore downloaded helm charts

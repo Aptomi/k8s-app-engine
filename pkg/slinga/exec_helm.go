@@ -145,7 +145,7 @@ func (exec HelmCodeExecutor) Install() error {
 		*/
 	}
 
-	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
+	chartPath := GetAptomiObjectDir(GetAptomiBaseDir(), Charts) + "/" + chartName + ".tgz"
 
 	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
@@ -174,7 +174,7 @@ func (exec HelmCodeExecutor) Update() error {
 
 	helmClient := exec.newHelmClient()
 
-	chartPath := GetAptomiPolicyDir() + "/charts/" + chartName + ".tgz"
+	chartPath := GetAptomiObjectDir(GetAptomiBaseDir(), Charts) + "/" + chartName + ".tgz"
 
 	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {

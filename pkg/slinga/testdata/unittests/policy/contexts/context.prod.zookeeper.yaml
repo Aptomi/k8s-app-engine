@@ -1,0 +1,51 @@
+name: prod
+
+service: zookeeper
+
+criteria:
+  accept:
+    - dev == "no" && prod == "yes"
+  reject:
+    - nozookeeper
+
+labels:
+  set:
+    some-test-context-specific-label: some-value
+  remove:
+    a:
+    b:
+
+allocations:
+
+  - name: "prod-{{.User.Name}}"
+    criteria:
+      accept:
+        - priority >= 200
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
+  - name: "prod-{{.User.Labels.team}}"
+    criteria:
+      accept:
+        - priority >= 2
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
+  - name: "prod-{{.User.Labels.team}}"
+    criteria:
+      accept:
+        - priority < 2
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
