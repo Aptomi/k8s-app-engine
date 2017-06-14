@@ -3,12 +3,15 @@ package slinga
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-)
-
-import (
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
+	"strings"
 )
+
+type IstioRouteRule struct {
+	Service string
+	Cluster *Cluster
+}
 
 // ProcessIstioIngress processes global rules and applies Istio routing rules for ingresses
 func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
@@ -16,36 +19,94 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 		return
 	}
 
-	fmt.Println("[Routes]")
+	fmt.Println("[Route Rules (Istio)]")
 
 	progress := NewProgress()
-	progressBar := AddProgressBar(progress, len(usage.getResolvedUsage().ComponentProcessingOrder))
+	progressBar := AddProgressBar(progress, len(usage.getResolvedUsage().ComponentProcessingOrder) + len(usage.Policy.Clusters))
 
-	desiredBlockedServices := make([]string, 0)
+	existingRules := make([]*IstioRouteRule, 0)
+
+	for _, cluster := range usage.Policy.Clusters {
+		existingRules = append(existingRules, cluster.getIstioRouteRules()...)
+
+		progressBar.Incr()
+	}
+
+	desiredRules := make([]*IstioRouteRule, 0)
 
 	// Process in the right order
 	for _, key := range usage.getResolvedUsage().ComponentProcessingOrder {
-		services, err := processComponent(key, usage)
+		rules, err := processComponent(key, usage)
 		if err != nil {
 			debug.WithFields(log.Fields{
 				"key":   key,
 				"error": err,
 			}).Fatal("Unable to process Istio Ingress for component")
 		}
-		desiredBlockedServices = append(desiredBlockedServices, services...)
+		desiredRules = append(desiredRules, rules...)
 		progressBar.Incr()
+	}
+
+	deleteRules := make([]*IstioRouteRule, 0)
+	createRules := make([]*IstioRouteRule, 0)
+
+	for _, existingRule := range existingRules {
+		found := false
+		for _, desiredRule := range desiredRules {
+			if existingRule.Service == desiredRule.Service && existingRule.Cluster.Name == desiredRule.Cluster.Name {
+				found = true
+			}
+		}
+		if !found {
+			deleteRules = append(deleteRules, existingRule)
+		}
+	}
+
+	for _, desiredRule := range desiredRules {
+		found := false
+		for _, existingRule := range existingRules {
+			if desiredRule.Service == existingRule.Service && desiredRule.Cluster.Name == existingRule.Cluster.Name {
+				found = true
+			}
+		}
+		if !found {
+			createRules = append(createRules, desiredRule)
+		}
+	}
+
+	tbdLen := len(createRules) + len(deleteRules)
+
+	if tbdLen > 0 {
+		progressBar = AddProgressBar(progress, tbdLen)
+
+		for _, rule := range createRules {
+			rule.create()
+			progressBar.Incr()
+		}
+
+		for _, rule := range deleteRules {
+			rule.delete()
+			progressBar.Incr()
+		}
 	}
 
 	progress.Stop()
 
-	if len(desiredBlockedServices) > 0 {
-		fmt.Println("[Blocked Services]", desiredBlockedServices)
+	if tbdLen > 0 {
+		for _, rule := range deleteRules {
+			fmt.Println("  [-] " + rule.Service)
+		}
+		for _, rule := range createRules {
+			fmt.Println("  [+] " + rule.Service)
+		}
+	} else {
+		fmt.Println("  [*] No changes")
 	}
 
 	// todo(slukjanov): add actual istio route rules creation/deletion here
 }
 
-func processComponent(key string, usage *ServiceUsageState) ([]string, error) {
+func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, error) {
 	serviceName, _, _, componentName := ParseServiceUsageKey(key)
 	component := usage.Policy.Services[serviceName].getComponentsMap()[componentName]
 
@@ -82,30 +143,13 @@ func processComponent(key string, usage *ServiceUsageState) ([]string, error) {
 				return nil, err
 			}
 
+			rules := make([]*IstioRouteRule, 0)
+
 			for _, service := range services {
-				content := "type: route-rule\n"
-				content += "name: block-" + service + "\n"
-				content += "spec:\n"
-				content += "  destination: " + service + "." + cluster.Metadata.Namespace + ".svc.cluster.local\n"
-				content += "  httpReqTimeout:\n"
-				content += "    simpleTimeout:\n"
-				content += "      timeout: 1ms\n"
-
-				ruleFile := writeTempFile("istio-rule", content)
-				fmt.Println("Istio rule file:", ruleFile.Name())
-				//TODO: slukjanov: defer os.Remove(tmpFile.Name())
-
-				content = "set -ex\n"
-				content += "kubectl config use-context " + cluster.Name + "\n"
-				// todo(slukjanov): find istio pilot service automatically
-				content += "istioctl --configAPIService istio-prod-production-istio-istio-pilot:8081 --namespace " + cluster.Metadata.Namespace + " "
-				content += "create -f " + ruleFile.Name() + "\n"
-
-				cmdFile := writeTempFile("istioctl", content)
-				fmt.Println("Istio cmd file:", cmdFile.Name())
+				rules = append(rules, &IstioRouteRule{service, cluster})
 			}
 
-			return services, nil
+			return rules, nil
 		}
 	}
 
@@ -114,7 +158,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]string, error) {
 
 // httpServices returns list of services for the current chart
 func (exec HelmCodeExecutor) httpServices() ([]string, error) {
-	_, clientset, err := exec.newKubeClient()
+	_, clientset, err := exec.Cluster.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
@@ -149,4 +193,110 @@ func (exec HelmCodeExecutor) httpServices() ([]string, error) {
 	}
 
 	return nil, nil
+}
+
+func (cluster *Cluster) getIstioRouteRules() []*IstioRouteRule {
+	cmd := "get route-rules"
+	rulesStr, err := cluster.runIstioCmd(cmd)
+	if err != nil {
+		debug.WithFields(log.Fields{
+			"cluster": cluster.Name,
+			"cmd": cmd,
+			"error": err,
+		}).Fatal("Failed to get route-rules by running bash cmd")
+	}
+
+	rules := make([]*IstioRouteRule, 0)
+
+	for _, ruleName := range strings.Split(rulesStr, "\n") {
+		if ruleName == "" {
+			continue
+		}
+		rules = append(rules, &IstioRouteRule{ruleName, cluster})
+	}
+
+	return rules
+}
+
+func (rule *IstioRouteRule) create() {
+	content := "type: route-rule\n"
+	content += "name: " + rule.Service + "\n"
+	content += "spec:\n"
+	content += "  destination: " + rule.Service + "." + rule.Cluster.Metadata.Namespace + ".svc.cluster.local\n"
+	content += "  httpReqTimeout:\n"
+	content += "    simpleTimeout:\n"
+	content += "      timeout: 1ms\n"
+
+	ruleFile := writeTempFile("istio-rule", content)
+
+	out, err := rule.Cluster.runIstioCmd("create -f " + ruleFile.Name())
+	if err != nil {
+		debug.WithFields(log.Fields{
+			"cluster": rule.Cluster.Name,
+			"content": content,
+			"out": out,
+			"error": err,
+		}).Fatal("Failed to create istio rule by running bash script")
+	}
+}
+
+func (rule *IstioRouteRule) delete() {
+	out, err := rule.Cluster.runIstioCmd("delete route-rule " + rule.Service)
+	if err != nil {
+		debug.WithFields(log.Fields{
+			"cluster": rule.Cluster.Name,
+			"out": out,
+			"error": err,
+		}).Fatal("Failed to delete istio rule by running bash script")
+	}
+}
+
+func (cluster *Cluster) runIstioCmd(cmd string) (string, error) {
+	istioSvc := cluster.Metadata.istioSvc
+	if istioSvc == "" {
+		_, clientset, err := cluster.newKubeClient()
+		if err != nil {
+			return "", err
+		}
+
+		coreClient := clientset.Core()
+
+		selector := k8slabels.Set{"app": "istio"}.AsSelector()
+		options := api.ListOptions{LabelSelector: selector}
+
+		services, err := coreClient.Services(cluster.Metadata.Namespace).List(options)
+		if err != nil {
+			return "", err
+		}
+
+		for _, service := range services.Items {
+			if strings.Contains(service.Name, "pilot") {
+				istioSvc = service.Name
+
+				for _, port := range service.Spec.Ports {
+					if port.Name == "http-apiserver" {
+						istioSvc = fmt.Sprintf("%s:%d", istioSvc, port.Port)
+						break
+					}
+				}
+
+				cluster.Metadata.istioSvc = istioSvc
+				break
+			}
+		}
+	}
+
+	content := "set -e\n"
+	content += "kubectl config use-context " + cluster.Name + " 1>/dev/null\n"
+	content += "istioctl --configAPIService " + cluster.Metadata.istioSvc + " --namespace " + cluster.Metadata.Namespace + " "
+	content += cmd + "\n"
+
+	cmdFile := writeTempFile("istioctl-cmd", content)
+
+	out, err := runCmd("bash", cmdFile.Name())
+	if err != nil {
+		return "", err
+	}
+
+	return out, nil
 }
