@@ -66,6 +66,7 @@ make clean build test install
     - `aptomi policy add dependencies demo/dependencies/dependencies.carol-stage-ts.yaml`
     - `aptomi policy apply --show` - there are no changes because Carol is compromised
   - Show ```demo/rules/rules.compromised-users.yaml``` rule and explain that global rule doesn't allow Carol to deploy
+    because she's compromised
   - Run aptomi again
     - `vim demo/users/users.dev.yaml` and remove line `compromised: true` from Carol's labels
     - `aptomi policy add users demo/users/users.dev.yaml` - updated users
@@ -75,7 +76,15 @@ make clean build test install
     - `watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods`
   - Open Tweeviz UI
     - Show stage Carol (Brazil tweets)
-
-
-
-- TODO: DEMONSTRATE THAT DEV & PROD ARE SEPARATE (e.g. Dev can't deploy to Prod)
+    
+6. Cluster-us-west gets compromised and all exposed service will be blocked by Istio
+  - Run aptomi
+    - `vim demo/clusters/cluster.cluster-us-west.yaml` - uncomment `compromised: true` label
+    - `aptomi policy add cluster demo/clusters/cluster.cluster-us-west.yaml` - update cluster
+  - Show ```demo/rules/rules.compromised-clusters.yaml``` rule and explain that global rule will block ingress access
+    to all services on compromised cluster
+    - `aptomi policy apply` - apply changes
+    
+7. Demonstrate that dev & prod are separate (e.g. Dev can't deploy to Prod)
+  - Show `demo/services/twitter_stats/context.prod.twitter_stats.yaml` - it'll accept only operators
+  - Show `demo/rules/rules.dev-users.yaml` - global rule restricts dev org users use of prod clusters 
