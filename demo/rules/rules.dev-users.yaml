@@ -1,0 +1,11 @@
+- name: dev_users_forbid_prod_clusters
+  filterservices:
+    user:
+      accept:
+        - org == 'dev'
+    cluster:
+      accept:
+        - prod
+  actions:
+    - type: dependency
+      content: forbid
