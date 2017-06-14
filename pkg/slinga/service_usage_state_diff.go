@@ -52,6 +52,7 @@ func (state ServiceUsageState) PrintSummary() {
 	state.printSummaryLine("Services", state.Policy.countServices())
 	state.printSummaryLine("Contexts", state.Policy.countContexts())
 	state.printSummaryLine("Clusters", state.Policy.countClusters())
+	state.printSummaryLine("Rules", state.Policy.Rules.count())
 	state.printSummaryLine("Users", state.users.count())
 	state.printSummaryLine("Dependencies", state.Dependencies.count())
 }

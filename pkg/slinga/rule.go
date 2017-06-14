@@ -100,6 +100,10 @@ func (rules *GlobalRules) insertRules(appendRules ...*Rule) {
 	}
 }
 
+func (rules *GlobalRules) count() int {
+	return countElements(rules.Rules)
+}
+
 func LoadRulesFromFile(fileName string) []*Rule {
 	debug.WithFields(log.Fields{
 		"file": fileName,
