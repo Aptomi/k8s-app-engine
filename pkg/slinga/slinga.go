@@ -88,6 +88,9 @@ type Cluster struct {
 
 		// store kube external address
 		kubeExternalAddress string
+
+		// store istio svc name
+		istioSvc string
 	}
 }
 
