@@ -27,5 +27,5 @@ aptomi policy add context demo/services/twitter-stats
 # Add dependencies
 aptomi policy add dependencies demo/dependencies/dependencies.alice-prod.yaml
 
-# Show
-aptomi policy apply --noop
+# Run
+aptomi policy apply
