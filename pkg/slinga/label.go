@@ -7,9 +7,14 @@ type LabelSet struct {
 	Labels map[string]string
 }
 
-// Apply set of transformations to labels
+// Returns a set of user labels
 func (user *User) getLabelSet() LabelSet {
 	return LabelSet{Labels: user.Labels}
+}
+
+// Returns a set of user secrets
+func (user *User) getSecretSet() LabelSet {
+	return LabelSet{Labels: user.Secrets}
 }
 
 // Apply set of transformations to labels
