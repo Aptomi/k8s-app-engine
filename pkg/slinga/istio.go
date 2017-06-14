@@ -38,7 +38,9 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 
 	progress.Stop()
 
-	fmt.Println("Desired blocked services:", desiredBlockedServices)
+	if len(desiredBlockedServices) > 0 {
+		fmt.Println("[Blocked Services]", desiredBlockedServices)
+	}
 
 	// todo(slukjanov): add actual istio route rules creation/deletion here
 }
