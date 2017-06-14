@@ -5,12 +5,12 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-
 import (
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 )
 
+// ProcessIstioIngress processes global rules and applies Istio routing rules for ingresses
 func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	fmt.Println("[Routes]")
 
@@ -24,7 +24,7 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 		services, err := processComponent(key, usage)
 		if err != nil {
 			debug.WithFields(log.Fields{
-				"key":  key,
+				"key":   key,
 				"error": err,
 			}).Fatal("Unable to process Istio Ingress for component")
 		}
@@ -59,12 +59,12 @@ func processComponent(key string, usage *ServiceUsageState) ([]string, error) {
 	// get all users who're using service
 	userIds := usage.ResolvedUsage.ComponentInstanceMap[key].UserIds
 	users := make([]*User, 0)
-	for _, userId := range userIds {
+	for _, userID := range userIds {
 		// todo check if user doesn't exists
-		users = append(users, usage.users.Users[userId])
+		users = append(users, usage.users.Users[userID])
 	}
 
-	if !usage.Rules.allowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
+	if !usage.Policy.Rules.allowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
 		codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, usage.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
 		if err != nil {
 			return nil, err

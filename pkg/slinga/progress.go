@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"github.com/gosuri/uiprogress"
 	"fmt"
+	"github.com/gosuri/uiprogress"
 	"github.com/gosuri/uiprogress/util/strutil"
 	"time"
 )
