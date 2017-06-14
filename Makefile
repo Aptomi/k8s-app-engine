@@ -15,7 +15,8 @@ test:
 clean-run-noop:
 	$$(go env GOPATH)/bin/aptomi policy reset --force
 	$$(go env GOPATH)/bin/aptomi policy apply --noop
-	./tools/demo-aptomi-init.sh
+	./tools/demo-init.sh
+	$$(go env GOPATH)/bin/aptomi policy apply --noop
 
 .PHONY: smoke
 smoke: test build install clean-run-noop
