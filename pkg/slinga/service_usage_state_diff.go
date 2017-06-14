@@ -4,8 +4,6 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
-	"github.com/gosuri/uiprogress/util/strutil"
-	"time"
 )
 
 // ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
@@ -323,17 +321,8 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 		dLen := diff.getDifferenceLen()
 		if dLen > 0 {
 			fmt.Println("[Applying changes]")
-			diff.progress = uiprogress.New()
-			diff.progress.RefreshInterval = time.Second
-			diff.progress.Start()
-			diff.progressBar = diff.progress.AddBar(dLen)
-			diff.progressBar.PrependFunc(func(b *uiprogress.Bar) string {
-				return fmt.Sprintf("  [%d/%d]", b.Current(), b.Total)
-			})
-			diff.progressBar.AppendCompleted()
-			diff.progressBar.AppendFunc(func(b *uiprogress.Bar) string {
-				return fmt.Sprintf("  Time: %s", strutil.PrettyTime(time.Since(b.TimeStarted)))
-			})
+			diff.progress = NewProgress()
+			diff.progressBar = AddProgressBar(diff.progress, dLen)
 		}
 
 		err := diff.processDestructions()
