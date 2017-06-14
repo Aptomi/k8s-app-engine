@@ -1,10 +1,10 @@
 package slinga
 
 import (
-"fmt"
-"strings"
-"text/template"
-"unicode"
+	"fmt"
+	"strings"
+	"text/template"
+	"unicode"
 )
 
 func isHTML(s string) bool {

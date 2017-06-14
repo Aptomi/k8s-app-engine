@@ -1,10 +1,10 @@
 package slinga
 
 import (
-	"io"
-	"os"
-	"io/ioutil"
 	log "github.com/Sirupsen/logrus"
+	"io"
+	"io/ioutil"
+	"os"
 )
 
 // copyFileContents copies the contents of the file named src to the file named
@@ -13,9 +13,9 @@ import (
 // of the source file.
 func copyFile(src, dst string) (err error) {
 	/*
-	if stat, err := os.Stat(dst); err == nil && !stat.IsDir() {
-		return fmt.Errorf("File %s already exists", dst)
-	}
+		if stat, err := os.Stat(dst); err == nil && !stat.IsDir() {
+			return fmt.Errorf("File %s already exists", dst)
+		}
 	*/
 
 	in, err := os.Open(src)
@@ -46,20 +46,20 @@ func deleteFile(src string) (err error) {
 }
 
 func writeTempFile(prefix string, content string) *os.File {
-	tmpFile, err := ioutil.TempFile("", "aptomi-" + prefix)
+	tmpFile, err := ioutil.TempFile("", "aptomi-"+prefix)
 	if err != nil {
 		debug.WithFields(log.Fields{
-			"prefix":  prefix,
-			"error": err,
+			"prefix": prefix,
+			"error":  err,
 		}).Fatal("Failed to create temp file")
 	}
 
 	_, err = tmpFile.Write([]byte(content))
 	if err != nil {
 		debug.WithFields(log.Fields{
-			"file":  tmpFile.Name(),
+			"file":    tmpFile.Name(),
 			"content": content,
-			"error": err,
+			"error":   err,
 		}).Fatal("Failed to write to temp file")
 	}
 

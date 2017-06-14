@@ -2,9 +2,9 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"github.com/mattn/go-zglob"
 )
 
 /*
@@ -15,9 +15,9 @@ import (
 
 // User represents a user (ID, Name, set of labels)
 type User struct {
-	ID     string
-	Name   string
-	Labels map[string]string
+	ID      string
+	Name    string
+	Labels  map[string]string
 	Secrets map[string]string
 }
 

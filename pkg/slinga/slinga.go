@@ -141,7 +141,7 @@ func RemoveObjectsFromPolicy(aptFilter AptomiOject, args ...string) {
 
 					if ok {
 						if apt == aptFilter {
-							err := deleteFile(GetAptomiObjectDir(GetAptomiBaseDir(), apt)+"/"+name)
+							err := deleteFile(GetAptomiObjectDir(GetAptomiBaseDir(), apt) + "/" + name)
 							if err != nil {
 								fmt.Printf("Unable to delete %s from aptomi policy: %s\n", objectType, name)
 								debug.WithFields(log.Fields{

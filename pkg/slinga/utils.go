@@ -10,7 +10,7 @@ func EscapeName(str string) string {
 	return r.Replace(str)
 }
 
-func stringContainsAny(str string, substrs... string) bool {
+func stringContainsAny(str string, substrs ...string) bool {
 	for _, substr := range substrs {
 		if strings.Contains(str, substr) {
 			return true

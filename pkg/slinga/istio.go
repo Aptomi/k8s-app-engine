@@ -22,7 +22,7 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	fmt.Println("[Route Rules (Istio)]")
 
 	progress := NewProgress()
-	progressBar := AddProgressBar(progress, len(usage.getResolvedUsage().ComponentProcessingOrder) + len(usage.Policy.Clusters))
+	progressBar := AddProgressBar(progress, len(usage.getResolvedUsage().ComponentProcessingOrder)+len(usage.Policy.Clusters))
 
 	existingRules := make([]*IstioRouteRule, 0)
 
@@ -199,8 +199,8 @@ func (cluster *Cluster) getIstioRouteRules() []*IstioRouteRule {
 	if err != nil {
 		debug.WithFields(log.Fields{
 			"cluster": cluster.Name,
-			"cmd": cmd,
-			"error": err,
+			"cmd":     cmd,
+			"error":   err,
 		}).Fatal("Failed to get route-rules by running bash cmd")
 	}
 
@@ -232,8 +232,8 @@ func (rule *IstioRouteRule) create() {
 		debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
 			"content": content,
-			"out": out,
-			"error": err,
+			"out":     out,
+			"error":   err,
 		}).Fatal("Failed to create istio rule by running bash script")
 	}
 }
@@ -243,8 +243,8 @@ func (rule *IstioRouteRule) delete() {
 	if err != nil {
 		debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
-			"out": out,
-			"error": err,
+			"out":     out,
+			"error":   err,
 		}).Fatal("Failed to delete istio rule by running bash script")
 	}
 }

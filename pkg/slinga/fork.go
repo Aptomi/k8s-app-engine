@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"os/exec"
 	"fmt"
+	"os/exec"
 )
 
 func runCmd(cmdName string, cmdArgs ...string) (string, error) {
