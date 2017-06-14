@@ -3,6 +3,6 @@
   labels:
     # Deploy specific version of tweeviz (image tag)
     tstype: prod
-    tsvisimage: demo-v41
+    tsvisimage: demo-v51
     # Mexico
     locations: -119.883662,13.301958,-91.780634,27.018021

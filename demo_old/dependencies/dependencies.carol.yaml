@@ -3,6 +3,6 @@
   labels:
     # Deploy specific version of tweeviz (image tag)
     tstype: prod
-    tsvisimage: demo-v41
+    tsvisimage: demo-v51
     # Brazil
     locations: -57.752720,-21.471868,-31.912877,-0.547536
