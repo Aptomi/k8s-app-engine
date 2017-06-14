@@ -3,6 +3,8 @@ package slinga
 import (
 	"io"
 	"os"
+	"io/ioutil"
+	log "github.com/Sirupsen/logrus"
 )
 
 // copyFileContents copies the contents of the file named src to the file named
@@ -41,4 +43,25 @@ func copyFile(src, dst string) (err error) {
 // deleteFile deletes a file
 func deleteFile(src string) (err error) {
 	return os.Remove(src)
+}
+
+func writeTempFile(prefix string, content string) *os.File {
+	tmpFile, err := ioutil.TempFile("", "aptomi-" + prefix)
+	if err != nil {
+		debug.WithFields(log.Fields{
+			"prefix":  prefix,
+			"error": err,
+		}).Fatal("Failed to create temp file")
+	}
+
+	_, err = tmpFile.Write([]byte(content))
+	if err != nil {
+		debug.WithFields(log.Fields{
+			"file":  tmpFile.Name(),
+			"content": content,
+			"error": err,
+		}).Fatal("Failed to write to temp file")
+	}
+
+	return tmpFile
 }
