@@ -3,7 +3,6 @@ package slinga
 import (
 	"fmt"
 	"github.com/gosuri/uiprogress"
-	"github.com/gosuri/uiprogress/util/strutil"
 	"time"
 )
 
@@ -22,7 +21,7 @@ func AddProgressBar(progress *uiprogress.Progress, total int) *uiprogress.Bar {
 	})
 	progressBar.AppendCompleted()
 	progressBar.AppendFunc(func(b *uiprogress.Bar) string {
-		return fmt.Sprintf("  Time: %s", strutil.PrettyTime(time.Since(b.TimeStarted)))
+		return fmt.Sprintf("  Time: %s", b.TimeElapsedString())
 	})
 
 	return progressBar
