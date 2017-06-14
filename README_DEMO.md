@@ -53,13 +53,13 @@ make clean build test install
 4. Alice deletes her staging instance and asks Frank to propagate her new VS to production
   - Run aptomi
     - `aptomi policy delete dependencies demo/dependencies/dependencies.alice-stage-ts.yaml`
-    - `vim demo/dependencies/dependencies.frank-prod-ts.yaml` and change demo-v51 -> demo-v52
+    - `vim demo/dependencies/dependencies.frank-prod-ts.yaml` and change demo-v61 -> demo-v62
     - `aptomi policy add dependencies demo/dependencies/dependencies.frank-prod-ts.yaml`
     - `aptomi policy apply --noop` - show that there are some deleted services and some to update
     - `aptomi policy apply`
    - Refresh in browser
      - Stage instance disappears
-     - Prod instance changes look and feel to demo-v52
+     - Prod instance changes look and feel to demo-v62
 
 5. Carol deploys her staging instance of TS
   - Run aptomi
