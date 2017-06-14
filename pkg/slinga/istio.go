@@ -102,8 +102,6 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	} else {
 		fmt.Println("  [*] No changes")
 	}
-
-	// todo(slukjanov): add actual istio route rules creation/deletion here
 }
 
 func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, error) {
