@@ -312,8 +312,9 @@ function k8s_alive() {
 
     log "Verifying cluster $name"
 
-    kubectl --context $name cluster-info
+    kubectl --context $name cluster-info | grep dashboard
     kubectl --context $name get ns 1>/dev/null
+    kubectl --context $name get pods 1>/dev/null
 
     # magic number of running pods in kube-system namespace
     if [[ $(kubectl --context $name -n kube-system get pods | grep " Running " | wc -l) -ge 3 ]]; then
@@ -333,7 +334,7 @@ function helm_alive() {
         return 1
     fi
 
-    if ! helm --kube-context $1 list --all 2>/dev/null ; then
+    if ! helm --kube-context $1 list --all 1>/dev/null 2>/dev/null ; then
         log "Helm in cluster $name seems not really alive"
         return 1
     fi
