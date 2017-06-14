@@ -262,26 +262,56 @@ func (cluster *Cluster) runIstioCmd(cmd string) (string, error) {
 		selector := k8slabels.Set{"app": "istio"}.AsSelector()
 		options := api.ListOptions{LabelSelector: selector}
 
-		services, err := coreClient.Services(cluster.Metadata.Namespace).List(options)
+		pods, err := coreClient.Pods(cluster.Metadata.Namespace).List(options)
 		if err != nil {
 			return "", err
 		}
 
-		for _, service := range services.Items {
-			if strings.Contains(service.Name, "pilot") {
-				istioSvc = service.Name
-
-				for _, port := range service.Spec.Ports {
-					if port.Name == "http-apiserver" {
-						istioSvc = fmt.Sprintf("%s:%d", istioSvc, port.Port)
+		running := false
+		for _, pod := range pods.Items {
+			if strings.Contains(pod.Name, "istio-pilot") {
+				if pod.Status.Phase == "Running" {
+					contReady := true
+					for _, cont := range pod.Status.ContainerStatuses {
+						if !cont.Ready {
+							contReady = false
+						}
+					}
+					if contReady {
+						running = true
 						break
 					}
 				}
-
-				cluster.Metadata.istioSvc = istioSvc
-				break
 			}
 		}
+
+		if running {
+			services, err := coreClient.Services(cluster.Metadata.Namespace).List(options)
+			if err != nil {
+				return "", err
+			}
+
+			for _, service := range services.Items {
+				if strings.Contains(service.Name, "istio-pilot") {
+					istioSvc = service.Name
+
+					for _, port := range service.Spec.Ports {
+						if port.Name == "http-apiserver" {
+							istioSvc = fmt.Sprintf("%s:%d", istioSvc, port.Port)
+							break
+						}
+					}
+
+					cluster.Metadata.istioSvc = istioSvc
+					break
+				}
+			}
+		}
+	}
+
+	if istioSvc == "" {
+		// todo(slukjanov): it's temp fix for the case when istio isn't running yet
+		return "", nil
 	}
 
 	content := "set -e\n"
