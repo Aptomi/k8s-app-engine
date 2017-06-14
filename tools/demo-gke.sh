@@ -66,12 +66,14 @@ function main() {
         gke_cluster_kubectl_setup $cluster_big_name $cluster_big_region $demo_namespace
         k8s_alive $cluster_big_name
         helm_init $cluster_big_name
+        helm_alive $cluster_big_name
 
         # create small cluster
         gke_cluster_create $cluster_small_name $cluster_small_region $k8s_version $disk_size $cluster_small_flavor $cluster_small_size
         gke_cluster_kubectl_setup $cluster_small_name $cluster_small_region $demo_namespace
         k8s_alive $cluster_small_name
         helm_init $cluster_small_name
+        helm_alive $cluster_small_name
     elif [ "down" == "$1" ]; then
         gke_firewall_delete $firewall_rules_name
 
@@ -88,6 +90,9 @@ function main() {
 
         k8s_alive $cluster_small_name
         helm_alive $cluster_small_name
+    elif [ "cleanup" == "$1" ]; then
+        helm_cleanup $cluster_big_name
+        helm_cleanup $cluster_small_name
     else
         log "Unsupported command '$1'"
         exit 1
@@ -340,6 +345,18 @@ function helm_alive() {
     fi
 
     log "Helm in cluster $name seems alive"
+    return 0
+}
+
+function helm_cleanup() {
+    name="$1"
+
+    if [[ $(helm --kube-context $1 list --all -q | wc -l) -ge 1 ]]; then
+        if ! helm --kube-context $1 delete --purge $(helm --kube-context $1 list --all -q); then
+            return 1
+        fi
+    fi
+
     return 0
 }
 
