@@ -2,9 +2,6 @@
 
 set -ex
 
-# Build and install aptomi binary
-make install
-
 # Reset aptomi policy
 aptomi policy reset --force
 

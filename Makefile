@@ -13,11 +13,12 @@ test:
 
 .PHONY: clean-run-noop
 clean-run-noop:
-	-rm -f db/db.yaml
-	./aptomi policy apply --noop
+	$$(go env GOPATH)/bin/aptomi policy reset --force
+	$$(go env GOPATH)/bin/aptomi policy apply --noop
+	./tools/demo-aptomi-init.sh
 
 .PHONY: smoke
-smoke: test build clean-run-noop
+smoke: test build install clean-run-noop
 
 .PHONY: build
 build:
