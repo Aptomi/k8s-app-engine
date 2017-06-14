@@ -120,7 +120,13 @@ func (rules *GlobalRules) insertRules(appendRules ...*Rule) {
 }
 
 func (rules *GlobalRules) count() int {
-	return countElements(rules.Rules)
+	result := 0
+
+	for _, v := range rules.Rules {
+		result += countElements(v)
+	}
+
+	return result
 }
 
 func LoadRulesFromFile(fileName string) []*Rule {
