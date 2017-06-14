@@ -44,8 +44,7 @@ make build
 
 Must define environment variables:
 
-* ```APTOMI_DB``` = <path to the directory where usage/allocation state will be serialized"
-* ```APTOMI_POLICY``` = <path to the directory where policy will be taken from"
+* ```APTOMI_DB``` = <path to aptomi working directory, where aptomi will store all its files (policy, logs, etc)>
 
 To run ```aptomi``` without compilation:
 
@@ -53,7 +52,8 @@ To run ```aptomi``` without compilation:
 go run main.go show config
 go run main.go policy apply
 go run main.go policy apply --noop
-go run main.go show graph
+go run main.go policy apply --noop --show
+go run main.go policy apply --trace
 ```
 
 ## Tools
