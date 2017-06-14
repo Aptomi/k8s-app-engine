@@ -26,6 +26,3 @@ aptomi policy add context demo/services/twitter_stats
 
 # Add dependencies
 aptomi policy add dependencies demo/dependencies/dependencies.frank-prod-ts.yaml
-
-# Run
-aptomi policy apply
