@@ -33,11 +33,11 @@ type ServiceUsageStateDiff struct {
 }
 
 // CalculateDifference calculates difference between two given usage states
-func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *ServiceUsageStateDiff {
+func (usage *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *ServiceUsageStateDiff {
 	// resulting difference
 	result := &ServiceUsageStateDiff{
 		Prev:                 prev,
-		Next:                 next,
+		Next:                 usage,
 		ComponentInstantiate: make(map[string]bool),
 		ComponentDestruct:    make(map[string]bool),
 		ComponentUpdate:      make(map[string]bool)}
@@ -47,17 +47,18 @@ func (next *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Ser
 	return result
 }
 
-func (state ServiceUsageState) PrintSummary() {
+// PrintSummary prints policy object counts to the screen
+func (usage ServiceUsageState) PrintSummary() {
 	fmt.Println("[Policy]")
-	state.printSummaryLine("Services", state.Policy.countServices())
-	state.printSummaryLine("Contexts", state.Policy.countContexts())
-	state.printSummaryLine("Clusters", state.Policy.countClusters())
-	state.printSummaryLine("Rules", state.Policy.Rules.count())
-	state.printSummaryLine("Users", state.users.count())
-	state.printSummaryLine("Dependencies", state.Dependencies.count())
+	usage.printSummaryLine("Services", usage.Policy.countServices())
+	usage.printSummaryLine("Contexts", usage.Policy.countContexts())
+	usage.printSummaryLine("Clusters", usage.Policy.countClusters())
+	usage.printSummaryLine("Rules", usage.Policy.Rules.count())
+	usage.printSummaryLine("Users", usage.users.count())
+	usage.printSummaryLine("Dependencies", usage.Dependencies.count())
 }
 
-func (state ServiceUsageState) printSummaryLine(name string, cnt int) {
+func (usage ServiceUsageState) printSummaryLine(name string, cnt int) {
 	fmt.Printf("  %s: %d\n", name, cnt)
 }
 
@@ -418,7 +419,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -461,7 +462,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{

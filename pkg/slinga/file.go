@@ -1,9 +1,9 @@
 package slinga
 
 import (
-	"os"
-	"io"
 	"fmt"
+	"io"
+	"os"
 )
 
 // copyFileContents copies the contents of the file named src to the file named

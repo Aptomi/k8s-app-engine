@@ -6,8 +6,8 @@ import (
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"sort"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -75,9 +75,9 @@ type Service struct {
 
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	Name   string
-	Type   string
-	Labels map[string]string
+	Name     string
+	Type     string
+	Labels   map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
@@ -111,7 +111,7 @@ func (policy *Policy) countClusters() int {
 	return countElements(policy.Clusters)
 }
 
-// LoadPolicyFromDir adds an object to the policy
+// AddObjectsToPolicy adds an object to the policy (basically, copies one or more files to Aptomi DB directory)
 func AddObjectsToPolicy(aptFilter AptomiOject, args ...string) {
 	for _, v := range args {
 		stat, err := os.Stat(v)
