@@ -15,4 +15,4 @@ allocations:
   - name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
     labels:
       set:
-        cluster: cluster-us-east
+        cluster: cluster-us-west

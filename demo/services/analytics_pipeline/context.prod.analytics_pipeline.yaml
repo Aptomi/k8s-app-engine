@@ -15,4 +15,4 @@ allocations:
   - name: "production"
     labels:
       set:
-        cluster: cluster-us-west
+        cluster: cluster-us-east

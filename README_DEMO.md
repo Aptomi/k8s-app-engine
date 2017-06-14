@@ -1,70 +1,58 @@
 ## Demo scenario:
 
-1. Run demo init script
-   - `./tools/demo-aptomi-init.sh`
-   - It will load all objects into Aptomi and deploy initial state
-
 1. Show slides
-   - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
+  - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
 
+2. Init demo. Frank & John run prod
+  - `./tools/demo-init.sh` to load all objects into Aptomi
+  - `aptomi policy apply --show` to deploy initial state
+  - Initial state is
+    - Prod is in cluster-us-east
+      - Frank (Ops) shares prod instance of twitter_stats with the org
+      - John (Ops) shares prod instance of analytics_pipeline with org
+  - Show that it got deployed on k8s
+    - `watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods`
+  - Run aptomi again
+    - `aptomi policy apply --noop` - to ensure there are no more changes to apply
+  - Show endpoints
+    - `aptomi endpoint show`
+  - Open Tweeviz UI
+    - Shows SF, NY, Boston tweets
 
-2. Show policy
-   - We have a language.
-      - Ops guy defined a policy - service & context
-      - Context = who it's for and how resources are allocated/shared
-   - Show k8s clusters
-      - `kubectl config get-contexts`
-      - `kubectl config view`
-   - Show services
-      - Analytics Pipeline
-      - Twitter Stats
-   - Show users
-   - Show dependencies
-   - Show contexts (where the secret sauce is)
-      - Twitter Stats
-      - Analytics Pipeline
+3. Alice & Bob deploy stage
+  - Alice (ID=100) deploys new staging version of TS viz (Canary testing/updates)
+  - Bob (ID=101) deploys new staging version of TS (Mexico tweets)
+  - Run aptomi
+    - `aptomi policy add dependencies demo/dependencies/dependencies.alice-stage-ts.yaml`
+    - `aptomi policy add dependencies demo/dependencies/dependencies.bob-stage-ts.yaml`
+    - `aptomi policy apply --noop --show` (explain share and reuse of services)
+    - `aptomi policy apply`
+  - Explain
+    - Stage is in cluster-us-west
+    - Alice & Bob have their own twitter apps
+    - Alice & Bob share analytics pipeline
+  - Show that it got deployed on k8s
+    - `watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods`
+  - Run aptomi again
+    - `aptomi policy apply --noop` - to ensure there are no more changes to apply
+  - Show endpoints
+    - `aptomi endpoint show`
+  - Open Tweeviz UI
+    - Show stage Alice (different UI)
+    - Show prod Bob (Mexico tweets)
 
-3. Deploy AP + TS for user Alice (ID=1)
-   - Explain what will get matched (Alice doesn't specify, policy controls that)
-     - low-Alice (priority < 200), team-platform-services (priority < 200)
-   - Run aptomi
-     - `./aptomi policy apply --noop`
-     - `./aptomi policy apply --noop --show`
-     - `./aptomi policy apply`
-   - Run aptomi again
-     - `./aptomi policy apply` - to ensure there are no more changes to apply
-   - While it's loading, we can show tracing
-     - `./aptomi policy apply --noop --trace`
-   - Show kubectl output
-     - `kubectl --context cluster-us-west -n demo get pods`
-     - `watch -n1 -d -- kubectl --context cluster-us-rwest -n demo get pods`
-   - Show endpoints
-     - `./aptomi endpoint show`
-   - Open Tweeviz UI
-     - Shows SF, NY, Boston tweets
-
-4. Deploy AP + TS for user Bob (ID=2). Alice (ID=1) deploys new staging version of TS (Canary testing/updates)
-  - Alice - with "demo-v42" and "stage" as tags
-  - Explain what will get matched
-     - low-Bob (priority < 200), team-platform-services (priority < 200)
-     - meaning, dedicated TS and shared AP
-   - Run aptomi
-     - `./aptomi policy apply --noop`
-     - `./aptomi policy apply --noop --show` (explain share and reuse of services)
-     - `./aptomi policy apply`
-   - Show endpoints
-     - `./aptomi endpoint show`
-   - Open Tweeviz UI
-     - Show stage Alice (different UI)
-     - Show prod Bob (Mexico tweets)
-
-5. Alice (ID=1) propagates staging version to production (making a change)
-   - Staging TS gets deleted
-   - Production TS gets updated
-   - Make sure to use `./aptomi policy apply --noop --show --verbose` to see deletions and updates
+4. Alice deletes her staging instance and asks Frank to propagate her new VS to production
+  - Run aptomi
+    - `aptomi policy delete dependencies demo/dependencies/dependencies.alice-stage-ts.yaml`
+    - `vim dependencies.frank-prod-ts.yaml` and change demo-v51 -> demo-v52
+    - `aptomi policy add dependencies demo/dependencies/dependencies.frank-prod-ts.yaml`
    - Refresh in browser
      - Stage instance disappears
      - Prod instance changes look and feel to demo-v42
+
+
+
+
 
 6. Change # of top tweets
    - Default -> 3 and redeploy

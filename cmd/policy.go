@@ -96,6 +96,7 @@ var policyCmdReset = &cobra.Command{
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
 	policyCmd.AddCommand(policyCmdAdd)
+	// policyCmd.AddCommand(policyCmdDelete)
 	policyCmd.AddCommand(policyCmdReset)
 
 	for k := range slinga.AptomiObjectsCanBeAdded {
