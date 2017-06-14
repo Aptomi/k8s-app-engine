@@ -60,7 +60,7 @@ components:
     code:
       type: aptomi/code/kubernetes-helm
       metadata:
-        chartName: tweeviz-istio-0.1.0
+        chartName: tweeviz-0.1.0
       params:
         cluster: "{{ .Labels.cluster }}"
 
