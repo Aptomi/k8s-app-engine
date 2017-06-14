@@ -48,8 +48,8 @@ func NewHelmCodeExecutor(code *Code, key string, codeMetadata map[string]string,
 	}
 }
 
-func (exec *HelmCodeExecutor) newKubeClient() (*restclient.Config, *internalclientset.Clientset, error) {
-	kubeContext := exec.Cluster.Metadata.KubeContext
+func (cluster *Cluster) newKubeClient() (*restclient.Config, *internalclientset.Clientset, error) {
+	kubeContext := cluster.Metadata.KubeContext
 	config, err := kube.GetConfig(kubeContext).ClientConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("Could not get kubernetes config for context '%s': %s", kubeContext, err)
@@ -66,7 +66,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 		return nil
 	}
 
-	config, client, err := exec.newKubeClient()
+	config, client, err := exec.Cluster.newKubeClient()
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func (exec HelmCodeExecutor) Destroy() error {
 
 // Endpoints returns map from port type to url for all services of the current chart
 func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
-	_, clientset, err := exec.newKubeClient()
+	_, clientset, err := exec.Cluster.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
