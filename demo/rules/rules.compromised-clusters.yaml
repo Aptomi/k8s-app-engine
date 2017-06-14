@@ -1,0 +1,9 @@
+- name: compromised_cluster_block_all_services
+  filterservices:
+    cluster:
+      accept:
+        - compromised
+    labels:
+  actions:
+    - type: ingress
+      content: block
