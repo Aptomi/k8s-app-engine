@@ -12,6 +12,10 @@ import (
 
 // ProcessIstioIngress processes global rules and applies Istio routing rules for ingresses
 func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
+	if len(usage.getResolvedUsage().ComponentProcessingOrder) == 0 {
+		return
+	}
+
 	fmt.Println("[Routes]")
 
 	progress := NewProgress()
