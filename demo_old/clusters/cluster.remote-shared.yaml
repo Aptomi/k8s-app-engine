@@ -1,7 +1,0 @@
-name: remote-shared
-
-type: kubernetes
-
-metadata:
-  kubecontext: kapp-demo
-  namespace: demo

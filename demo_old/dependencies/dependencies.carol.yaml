@@ -1,8 +1,0 @@
-- userid: 3
-  service: twitter-stats
-  labels:
-    # Deploy specific version of tweeviz (image tag)
-    tstype: prod
-    tsvisimage: demo-v51
-    # Brazil
-    locations: -57.752720,-21.471868,-31.912877,-0.547536
