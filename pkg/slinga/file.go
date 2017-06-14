@@ -37,3 +37,8 @@ func copyFile(src, dst string) (err error) {
 	err = out.Sync()
 	return
 }
+
+// deleteFile deletes a file
+func deleteFile(src string) (err error) {
+	return os.Remove(src)
+}

@@ -55,8 +55,8 @@ const (
 	Graphics AptomiOject = "resolution/graphics"
 )
 
-// AptomiObjectsCanBeAdded contains a map of all objects which can be added to aptomi policy
-var AptomiObjectsCanBeAdded = map[string]AptomiOject{
+// AptomiObjectsCanBeModified contains a map of all objects which can be added to aptomi policy
+var AptomiObjectsCanBeModified = map[string]AptomiOject{
 	"cluster":      Clusters,
 	"service":      Services,
 	"context":      Contexts,
