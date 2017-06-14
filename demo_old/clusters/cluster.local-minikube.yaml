@@ -1,0 +1,7 @@
+name: local-minikube
+
+type: kubernetes
+
+metadata:
+  kubecontext: minikube
+  namespace: demo

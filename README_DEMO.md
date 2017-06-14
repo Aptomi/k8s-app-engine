@@ -1,7 +1,12 @@
 ## Demo scenario:
 
+1. Run demo init script
+   - `./tools/demo-aptomi-init.sh`
+   - It will load all objects into Aptomi and deploy initial state
+
 1. Show slides
    - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
+
 
 2. Show policy
    - We have a language.
@@ -76,3 +81,7 @@
    - Show kubectl output
      - `kubectl --context cluster-us-east -n demo get pods`
      - `watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods`
+
+
+TODO:
+- istio allocation in different clusters

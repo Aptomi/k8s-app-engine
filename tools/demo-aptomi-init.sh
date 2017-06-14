@@ -7,26 +7,25 @@ aptomi policy reset --force
 
 # Add global objects
 aptomi policy add cluster demo/clusters
-aptomi policy add rules demo/rules.global.yaml
-aptomi policy add users demo/users.yaml
-aptomi policy add secrets demo/secrets.yaml
+aptomi policy add rules demo/rules
+aptomi policy add users demo/users
+aptomi policy add secrets demo/secrets
 aptomi policy add chart demo/charts
 
-# Add istio service (system-level)
+# Add istio service
 aptomi policy add service demo/services/istio
 aptomi policy add context demo/services/istio
 
 # Add analytics pipeline service
-aptomi policy add service demo/services/analytics-pipeline
-aptomi policy add context demo/services/analytics-pipeline
+aptomi policy add service demo/services/analytics_pipeline
+aptomi policy add context demo/services/analytics_pipeline
 
 # Add twitter stats service
-aptomi policy add service demo/services/twitter-stats
-aptomi policy add context demo/services/twitter-stats
+aptomi policy add service demo/services/twitter_stats
+aptomi policy add context demo/services/twitter_stats
 
 # Add dependencies
-aptomi policy add dependencies demo/dependencies/dependencies.alice-prod.yaml
-aptomi policy add dependencies demo/dependencies/dependencies.system-istio.yaml
+aptomi policy add dependencies demo/dependencies/dependencies.frank-prod-ts.yaml
 
 # Run
 aptomi policy apply

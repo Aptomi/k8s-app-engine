@@ -1,0 +1,18 @@
+name: stage
+
+# This context describes istio in staging
+service: istio
+
+# This context is for people from dev (they can run their instances in stage)
+criteria:
+  accept:
+    - org == 'dev'
+
+# In stage:
+# - service will be deployed in us-east
+# - all developers will rely on the same instance of analytics_pipeline
+allocations:
+  - name: "staging"
+    labels:
+      set:
+        cluster: cluster-us-east
