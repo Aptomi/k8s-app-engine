@@ -96,6 +96,7 @@ type Policy struct {
 	Services map[string]*Service
 	Contexts map[string][]*Context
 	Clusters map[string]*Cluster
+	Rules    GlobalRules
 }
 
 func (policy *Policy) countServices() int {
@@ -200,6 +201,9 @@ func LoadPolicyFromDir(baseDir string) Policy {
 		s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
 	}
 
+	// read all rules
+	s.Rules = LoadRulesFromDir(baseDir)
+
 	return s
 }
 
@@ -278,7 +282,7 @@ func loadClusterFromFile(fileName string) *Cluster {
 // ResetAptomiState fully resets aptomi state by deleting all file from its database. Including policy, logs, etc
 func ResetAptomiState() {
 	debug.WithFields(log.Fields{
-		"baseDir":  GetAptomiBaseDir(),
+		"baseDir": GetAptomiBaseDir(),
 	}).Info("Resetting aptomi state")
 
 	files, _ := zglob.Glob(GetAptomiBaseDir() + "/**/*.*")

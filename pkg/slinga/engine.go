@@ -72,7 +72,7 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	node.labels = node.transformLabels(node.labels, node.context.Labels)
 
 	// Match the allocation
-	node.allocation, err = node.getMatchedAllocation(usage.Policy, usage.Rules)
+	node.allocation, err = node.getMatchedAllocation(usage.Policy)
 	if err != nil {
 		return err
 	}

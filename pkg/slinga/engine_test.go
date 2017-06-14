@@ -10,9 +10,8 @@ func TestPolicyResolve(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
 	users := LoadUsersFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
-	rules := LoadRulesFromDir("testdata/unittests")
 
-	usageState := NewServiceUsageState(&policy, &dependencies, &rules, &users)
+	usageState := NewServiceUsageState(&policy, &dependencies, &users)
 	err := usageState.ResolveAllDependencies()
 	resolvedUsage := usageState.getResolvedUsage()
 
@@ -39,10 +38,9 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
 	users := LoadUsersFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
-	rules := LoadRulesFromDir("testdata/unittests")
 
 	// Get usage state prev
-	usageStatePrev := NewServiceUsageState(&policy, &dependencies, &rules, &users)
+	usageStatePrev := NewServiceUsageState(&policy, &dependencies, &users)
 	usageStatePrev.ResolveAllDependencies()
 
 	// Emulate saving and loading again
@@ -50,7 +48,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	yaml.Unmarshal([]byte(serializeObject(usageStatePrev)), &usageStatePrevSavedLoaded)
 
 	// Get usage state next
-	usageStateNext := NewServiceUsageState(&policy, &dependencies, &rules, &users)
+	usageStateNext := NewServiceUsageState(&policy, &dependencies, &users)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
@@ -67,10 +65,9 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
 	users := LoadUsersFromDir("testdata/unittests")
 	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
-	rules := LoadRulesFromDir("testdata/unittests")
 
 	// Get usage state prev
-	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, &rules, &users)
+	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, &users)
 	usageStatePrev.ResolveAllDependencies()
 
 	// Emulate saving and loading again
@@ -84,7 +81,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 			Service: "kafka",
 		},
 	)
-	usageStateNext := NewServiceUsageState(&policy, &dependenciesNext, &rules, &users)
+	usageStateNext := NewServiceUsageState(&policy, &dependenciesNext, &users)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference

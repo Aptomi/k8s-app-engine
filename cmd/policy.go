@@ -40,9 +40,8 @@ var policyCmdApply = &cobra.Command{
 		users := slinga.LoadUsersFromDir(baseDir)
 		dependencies := slinga.LoadDependenciesFromDir(baseDir)
 		dependencies.SetTrace(trace)
-		rules := slinga.LoadRulesFromDir(baseDir)
 
-		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &rules, &users)
+		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &users)
 		nextUsageState.PrintSummary()
 		err := nextUsageState.ResolveAllDependencies()
 
