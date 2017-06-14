@@ -30,18 +30,17 @@ func TestLoadSecrets(t *testing.T) {
 	assert.Equal(t, 0, len(secrets))
 }
 
-func TestUserLabelsWithSecrets(t *testing.T) {
+func TestUserWithSecrets(t *testing.T) {
 	userAlice := LoadUserByIDFromDir("testdata/unittests", "1")
-	labels := userAlice.getLabelSet()
+	secrets := userAlice.getSecretSet()
 
-	assert.Equal(t, 9, len(labels.Labels))
-	assert.Equal(t, "aliceappkey", labels.Labels["twitterAppKey"])
-	assert.Equal(t, "platform_services", labels.Labels["team"])
+	assert.Equal(t, 4, len(secrets.Labels))
+	assert.Equal(t, "aliceappkey", secrets.Labels["twitterAppKey"])
 }
 
-func TestUserLabelsWithEmptySecrets(t *testing.T) {
+func TestUserWithEmptySecrets(t *testing.T) {
 	userDave := LoadUserByIDFromDir("testdata/unittests", "5")
-	labels := userDave.getLabelSet()
+	secrets := userDave.getSecretSet()
 
-	assert.Equal(t, 5, len(labels.Labels))
+	assert.Equal(t, 0, len(secrets.Labels))
 }
