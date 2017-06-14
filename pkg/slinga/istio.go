@@ -12,7 +12,7 @@ import (
 
 // ProcessIstioIngress processes global rules and applies Istio routing rules for ingresses
 func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
-	if len(usage.getResolvedUsage().ComponentProcessingOrder) == 0 {
+	if len(usage.getResolvedUsage().ComponentProcessingOrder) == 0 || noop {
 		return
 	}
 
@@ -78,6 +78,29 @@ func processComponent(key string, usage *ServiceUsageState) ([]string, error) {
 			services, err := helmCodeExecutor.httpServices()
 			if err != nil {
 				return nil, err
+			}
+
+			for _, service := range services {
+				content := "type: route-rule\n"
+				content += "name: block-" + service + "\n"
+				content += "spec:\n"
+				content += "  destination: " + service + "." + cluster.Metadata.Namespace + ".svc.cluster.local\n"
+				content += "  httpReqTimeout:\n"
+				content += "    simpleTimeout:\n"
+				content += "      timeout: 1ms\n"
+
+				ruleFile := writeTempFile("istio-rule", content)
+				fmt.Println("Istio rule file:", ruleFile.Name())
+				//TODO: slukjanov: defer os.Remove(tmpFile.Name())
+
+				content = "set -ex\n"
+				content += "kubectl config use-context " + cluster.Name + "\n"
+				// todo(slukjanov): find istio pilot service automatically
+				content += "istioctl --configAPIService istio-prod-production-istio-istio-pilot:8081 --namespace " + cluster.Metadata.Namespace + " "
+				content += "create -f " + ruleFile.Name() + "\n"
+
+				cmdFile := writeTempFile("istioctl", content)
+				fmt.Println("Istio cmd file:", cmdFile.Name())
 			}
 
 			return services, nil
