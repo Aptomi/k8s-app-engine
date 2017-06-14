@@ -1,5 +1,14 @@
 ## Demo scenario:
 
+0. Cleanup env
+
+```shell
+tools/demo-gke.sh cleanup
+tools/demo-gke.sh status
+rm -rf db/*
+make clean build test install
+```
+
 1. Show slides
   - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
 
@@ -44,18 +53,25 @@
 4. Alice deletes her staging instance and asks Frank to propagate her new VS to production
   - Run aptomi
     - `aptomi policy delete dependencies demo/dependencies/dependencies.alice-stage-ts.yaml`
-    - `vim dependencies.frank-prod-ts.yaml` and change demo-v51 -> demo-v52
+    - `vim demo/dependencies/dependencies.frank-prod-ts.yaml` and change demo-v51 -> demo-v52
     - `aptomi policy add dependencies demo/dependencies/dependencies.frank-prod-ts.yaml`
+    - `aptomi policy apply --noop` - show that there are some deleted services and some to update
+    - `aptomi policy apply`
    - Refresh in browser
      - Stage instance disappears
-     - Prod instance changes look and feel to demo-v42
+     - Prod instance changes look and feel to demo-v52
 
 5. Carol deploys her staging instance of TS
   - Run aptomi
     - `aptomi policy add dependencies demo/dependencies/dependencies.carol-stage-ts.yaml`
-    - `aptomi policy apply --noop --show`
-    - `aptomi policy apply`
-
-  - TODO: global rule doesn't allow Carol to deploy
-
-  - TODO: change labels and deploy
+    - `aptomi policy apply --show` - there are no changes because Carol is compromised
+  - Show ```demo/rules/rules.compromised-users.yaml``` rule and explain that global rule doesn't allow Carol to deploy
+  - Run aptomi again
+    - `vim demo/users/users.dev.yaml` and remove line `compromised: true` from Carol's labels
+    - `aptomi policy add users demo/users/users.dev.yaml` - updated users
+    - `aptomi policy apply --show` - show that now services for Carol will be deployed
+    - `aptomi endpoint show`
+  - Show that it got deployed on k8s
+    - `watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods`
+  - Open Tweeviz UI
+    - Show stage Carol (Brazil tweets)
