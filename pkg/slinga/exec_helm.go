@@ -247,7 +247,9 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 				sURL := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
 
 				// todo(slukjanov): could we somehow detect real schema? I think no :(
-				if port.Name == "webui" || port.Name == "ui" || port.Name == "rest" {
+				if stringContainsAny(port.Name, "https") {
+					sURL = "https://" + sURL
+				} else if stringContainsAny(port.Name, "ui", "rest", "http", "grafana") {
 					sURL = "http://" + sURL
 				}
 
