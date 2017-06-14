@@ -11,6 +11,15 @@ Currently there is only one external dependency -
 [GraphViz](http://www.graphviz.org/Download..php) and it could be installed on
 macOS using ```brew install graphviz```.
 
+# If you see issue with gcloud token
+
+```shell
+kubectl --context cluster-us-east get pods
+kubectl --context cluster-us-west get pods
+helm --kube-context cluster-us-west list --all
+helm --kube-context cluster-us-east list --all
+```
+
 # How to test
 
 To run smoke tests (it will run unit tests and apply policy in noop mode):
