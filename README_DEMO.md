@@ -20,8 +20,8 @@
     - Shows SF, NY, Boston tweets
 
 3. Alice & Bob deploy stage
-  - Alice (ID=100) deploys new staging version of TS viz (Canary testing/updates)
-  - Bob (ID=101) deploys new staging version of TS (Mexico tweets)
+  - Alice deploys new staging version of TS viz (Canary testing/updates)
+  - Bob deploys new staging version of TS (Mexico tweets)
   - Run aptomi
     - `aptomi policy add dependencies demo/dependencies/dependencies.alice-stage-ts.yaml`
     - `aptomi policy add dependencies demo/dependencies/dependencies.bob-stage-ts.yaml`
@@ -50,26 +50,12 @@
      - Stage instance disappears
      - Prod instance changes look and feel to demo-v42
 
+5. Carol deploys her staging instance of TS
+  - Run aptomi
+    - `aptomi policy add dependencies demo/dependencies/dependencies.carol-stage-ts.yaml`
+    - `aptomi policy apply --noop --show`
+    - `aptomi policy apply`
 
+  - TODO: global rule doesn't allow Carol to deploy
 
-
-
-6. Change # of top tweets
-   - Default -> 3 and redeploy
-
-7. Alice (ID=1) gets marked as "compromised"
-   - Loses access to her "prod"
-   - Right now all objects get deleted, but this behavior will be customizable
-
-8. Low-priority user Carol (ID=3)
-   - Gets nothing due to priority < 50
-
-9. Deploy dedicated DAP for Carol (ID=3) in its own k8s cluster
-   - Priority = 200
-   - Show kubectl output
-     - `kubectl --context cluster-us-east -n demo get pods`
-     - `watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods`
-
-
-TODO:
-- istio allocation in different clusters
+  - TODO: change labels and deploy
