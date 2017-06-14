@@ -10,7 +10,7 @@ make clean build test install
 ```
 
 1. Show slides
-  - https://docs.google.com/presentation/d/1A4b2J1HP1-aaGtYAVBXi5spkpbwB7eZdkcXz9Dk2Lzc/edit?usp=sharing
+  - https://docs.google.com/presentation/d/17OeSqPzOC8ng1Roe3hkGVWvLJxa-o-VI3jp1GLXcCt0/edit?usp=sharing
 
 2. Init demo. Frank & John run prod
   - `./tools/demo-init.sh` to load all objects into Aptomi
@@ -75,3 +75,7 @@ make clean build test install
     - `watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods`
   - Open Tweeviz UI
     - Show stage Carol (Brazil tweets)
+
+
+
+- TODO: DEMONSTRATE THAT DEV & PROD ARE SEPARATE (e.g. Dev can't deploy to Prod)
