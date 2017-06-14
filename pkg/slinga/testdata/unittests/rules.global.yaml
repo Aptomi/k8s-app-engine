@@ -1,11 +1,11 @@
-- name: compromised_cluster_block_sensetive_services
+- name: compromised_cluster_block_sensitive_services
   filterservices:
     cluster:
       accept:
         - compromised
     labels:
       accept:
-        - sensetive
+        - sensitive
   actions:
     - type: ingress
       content: block
@@ -20,26 +20,26 @@
     - type: dependency
       content: forbid
 
-- name: low_prio_users_forbid_sensetive_services
+- name: low_prio_users_forbid_sensitive_services
   filterservices:
     user:
       accept:
         - priority < 100
     labels:
       accept:
-        - sensetive
+        - sensitive
   actions:
     - type: dependency
       content: forbid
 
-- name: dev_cluster_forbid_sensetive_service
+- name: dev_cluster_forbid_sensitive_service
   filterservices:
     cluster:
       accept:
         - dev
     labels:
       accept:
-        - sensetive
+        - sensitive
   actions:
     - type: dependency
       content: forbid

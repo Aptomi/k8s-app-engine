@@ -4,7 +4,7 @@ service: twitter-stats
 
 labels:
   set:
-    sensetive: true
+    sensitive: true
 
 # Who is allowed to access
 criteria:
