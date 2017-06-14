@@ -57,7 +57,7 @@ func (vis PolicyVisualization) OpenInPreviewWithSuffix(suffix string) {
 }
 
 // Delta calculates difference between two graphs and returns it as a graph (it also modifies <next> to represent that difference)
-func (vis PolicyVisualization) Delta(prev *gographviz.Escape, next *gographviz.Escape) *gographviz.Escape {
+func (vis PolicyVisualization) Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
 	// TODO: deal with escape bulshit
 	// TODO: we are modifying next while iterating. can this cause any issues?
 	// New nodes, edges, subgraphs must be highlighted
@@ -122,7 +122,7 @@ func (vis PolicyVisualization) Delta(prev *gographviz.Escape, next *gographviz.E
 }
 
 // Finds subgraph name from relations
-func (vis PolicyVisualization) findSubraphName(prev *gographviz.Escape, nName string) string {
+func (vis PolicyVisualization) findSubraphName(prev *gographviz.Graph, nName string) string {
 	for gName := range prev.Relations.ParentToChildren {
 		if prev.Relations.ParentToChildren[gName][nName] {
 			return gName
@@ -136,12 +136,21 @@ func (vis PolicyVisualization) getVisualFileNamePNG(suffix string) string {
 	return GetAptomiObjectDir(GetAptomiBaseDir(), Graphics) + "/" + "graph_" + suffix + ".png"
 }
 
+// Returns a short version of the string
+func shorten(s string) string {
+	const maxLen = 20
+	if len(s) >= maxLen {
+		return s[0:maxLen] + "..."
+	}
+	return s
+}
+
 // DrawVisualAndStore writes usage state visual into a file
-func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Escape {
-	users := LoadUsersFromDir(GetAptomiObjectDir(GetAptomiBaseDir(), Users))
+func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Graph {
+	users := LoadUsersFromDir(GetAptomiBaseDir())
 
 	// Write graph into a file
-	graph := gographviz.NewEscape()
+	graph := gographviz.NewGraph()
 	graph.SetName("Main")
 	graph.AddAttr("Main", "compound", "true")
 	graph.SetDir(true)
@@ -177,7 +186,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 				}
 				sort.Strings(keys)
 				for _, k := range keys {
-					label += "\n" + k + " = " + user.Labels[k]
+					label += "\n" + k + " = " + shorten(user.Labels[k])
 				}
 				addNodeOnce(graph, "cluster_Users", d.UserID, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
@@ -244,7 +253,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Esc
 }
 
 // Saves graph into a file
-func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape) {
+func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph) {
 	fileNameDot := GetAptomiObjectDir(GetAptomiBaseDir(), Graphics) + "/" + "graph_" + suffix + "_full.dot"
 	fileNameDotFlat := GetAptomiObjectDir(GetAptomiBaseDir(), Graphics) + "/" + "graph_" + suffix + "_flat.dot"
 	e := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
@@ -264,14 +273,21 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		var outb, errb bytes.Buffer
 		command.Stdout = &outb
 		command.Stderr = &errb
-		if err := command.Run(); err != nil {
+		if err := command.Run(); err != nil || len(errb.String()) > 0 {
 			debug.WithFields(log.Fields{
 				"cmd":    cmd,
+				"args":   args,
 				"stdout": outb.String(),
 				"stderr": errb.String(),
 				"error":  err,
 			}).Fatal("Unable to execute graphviz")
 		}
+		debug.WithFields(log.Fields{
+			"cmd":    cmd,
+			"args":   args,
+			"stdout": outb.String(),
+			"stderr": errb.String(),
+		}).Info("Successfully called graphviz command")
 	}
 	// Call graphviz to generate an image
 	{
@@ -282,7 +298,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 		var outb, errb bytes.Buffer
 		command.Stdout = &outb
 		command.Stderr = &errb
-		if err := command.Run(); err != nil {
+		if err := command.Run(); err != nil || len(errb.String()) > 0 {
 			debug.WithFields(log.Fields{
 				"cmd":    cmd,
 				"stdout": outb.String(),
@@ -290,6 +306,13 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Escape
 				"error":  err,
 			}).Fatal("Unable to execute graphviz")
 		}
+
+		debug.WithFields(log.Fields{
+			"cmd":    cmd,
+			"args":   args,
+			"stdout": outb.String(),
+			"stderr": errb.String(),
+		}).Info("Successfully called graphviz command")
 	}
 }
 
@@ -308,24 +331,24 @@ func getUserColor(userID string, colorForUser map[string]int, usedColors *int) i
 }
 
 // Adds an edge if it doesn't exist already
-func addEdge(g *gographviz.Escape, src string, dst string, attrs map[string]string) {
-	g.AddEdge(src, dst, true, attrs)
+func addEdge(g *gographviz.Graph, src string, dst string, attrs map[string]string) {
+	g.AddEdge(esc(src), esc(dst), true, escAttrs(attrs))
 }
 
 // Adds a subgraph if it doesn't exist already
-func addSubgraphOnce(g *gographviz.Escape, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
+func addSubgraphOnce(g *gographviz.Graph, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
 	wasKey := "SUBGRAPH" + "#" + parentGraph + "#" + name
 	if !was[wasKey] {
-		g.AddSubGraph(parentGraph, name, attrs)
+		g.AddSubGraph(esc(parentGraph), esc(name), escAttrs(attrs))
 		was[wasKey] = true
 	}
 }
 
 // Adds a node if it doesn't exist already
-func addNodeOnce(g *gographviz.Escape, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
+func addNodeOnce(g *gographviz.Graph, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
 	wasKey := "NODE" + "#" + parentGraph + "#" + name
 	if !was[wasKey] {
-		g.AddNode(parentGraph, name, attrs)
+		g.AddNode(esc(parentGraph), esc(name), escAttrs(attrs))
 		was[wasKey] = true
 	}
 }
