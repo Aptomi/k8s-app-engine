@@ -35,7 +35,8 @@ fmt:
 
 .PHONY: vet
 vet:
-	go vet -v $$(go list ./... | grep -v /vendor/)
+	go tool vet -all -shadow main.go
+	go tool vet -all -shadow ./cmd ./pkg
 
 .PHONY: lint
 lint:
