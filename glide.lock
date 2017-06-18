@@ -1,5 +1,5 @@
-hash: ac664f0c83cd6678563893b1d2e0db128a530217dbe00eeb4117b4538f99d712
-updated: 2017-05-29T16:35:41.511993202-07:00
+hash: b34ee9886c14bcbe18a900d964711626a6773b95a21999dbc43b11d008b38f2a
+updated: 2017-06-18T16:32:37.587090441-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -176,6 +176,8 @@ imports:
   version: 72f9bd7c4e0c2a40055ab3d0f09654f730cce982
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
+- name: github.com/julienschmidt/httprouter
+  version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/Knetic/govaluate
   version: d216395917cc49052c7c7094cf57f09657ca08a8
 - name: github.com/mailru/easyjson
