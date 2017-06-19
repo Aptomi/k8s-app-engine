@@ -87,7 +87,7 @@ func GetAptomiBaseDir() string {
 
 // GetAptomiPolicyDir returns default aptomi policy dir
 func GetAptomiPolicyDir() string {
-	return filepath.Join(GetAptomiBaseDir(), "aptomi-demo")
+	return filepath.Join(GetAptomiBaseDir(), "policy")
 }
 
 // GetAptomiObjectFilePatternYaml returns file pattern for aptomi objects (so they can be loaded from those files)
