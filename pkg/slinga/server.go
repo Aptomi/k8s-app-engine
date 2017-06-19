@@ -18,7 +18,7 @@ func Serve(host string, port int) {
 	router := httprouter.New()
 	router.GET("/", Index)
 	router.GET("/hello/:name", Hello)
-	router.ServeFiles("/static/*filepath", http.Dir("static/"))
+	router.ServeFiles("/static/*filepath", http.Dir("public/static"))
 
 	fmt.Println("Serving")
 	// todo handle error returned from ListenAndServe (path to Fatal??)
