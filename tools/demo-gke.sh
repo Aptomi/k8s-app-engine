@@ -63,12 +63,18 @@ function main() {
 
         # create big cluster
         gke_cluster_create $cluster_big_name $cluster_big_region $k8s_version $disk_size $cluster_big_flavor $cluster_big_size
+
+        # create small cluster
+        gke_cluster_create $cluster_small_name $cluster_small_region $k8s_version $disk_size $cluster_small_flavor $cluster_small_size
+
+        # wait until big cluster is alive and setup
+        gke_cluster_wait_alive $cluster_big_name $cluster_big_region
         gke_cluster_kubectl_setup $cluster_big_name $cluster_big_region $demo_namespace
         k8s_alive $cluster_big_name
         helm_init $cluster_big_name
 
-        # create small cluster
-        gke_cluster_create $cluster_small_name $cluster_small_region $k8s_version $disk_size $cluster_small_flavor $cluster_small_size
+        # wait until small cluster is alive and setup
+        gke_cluster_wait_alive $cluster_small_name $cluster_small_region
         gke_cluster_kubectl_setup $cluster_small_name $cluster_small_region $demo_namespace
         k8s_alive $cluster_small_name
         helm_init $cluster_small_name
@@ -82,13 +88,14 @@ function main() {
     elif [ "down" == "$1" ]; then
         gke_firewall_delete $firewall_rules_name
 
-        # delete big cluster
         gke_cluster_delete $cluster_big_name $cluster_big_region
-        gke_cluster_kubectl_cleanup $cluster_big_name $cluster_big_region
-
-        # delete small cluster
         gke_cluster_delete $cluster_small_name $cluster_small_region
+
+        gke_cluster_kubectl_cleanup $cluster_big_name $cluster_big_region
         gke_cluster_kubectl_cleanup $cluster_small_name $cluster_small_region
+
+        gke_cluster_wait_deleted $cluster_big_name $cluster_big_region
+        gke_cluster_wait_deleted $cluster_small_name $cluster_small_region
     elif [ "status" == "$1" ]; then
         k8s_alive $cluster_big_name
         helm_alive $cluster_big_name
@@ -188,15 +195,55 @@ function gke_cluster_create() {
             --zone $zone \
             --disk-size $disk_size \
             --machine-type $machine_type \
-            --num-nodes $num_nodes
+            --num-nodes $num_nodes \
+            --async
     fi
+}
+
+function gke_cluster_running() {
+    name="$1"
+    zone="$2"
 
     if gke describe $name --zone $zone | grep -q "^status: RUNNING\$" ; then
         log "Cluster $(cluster_log_name) is RUNNING"
+        return 0
     else
-        log "Cluster $(cluster_log_name) isn't RUNNING, run cleanup and try again"
-        exit 1
+        log "Cluster $(cluster_log_name) isn't RUNNING"
+        return 1
     fi
+}
+
+function gke_cluster_wait_alive() {
+    name="$1"
+    zone="$2"
+
+    retries=0
+    # retry for 15 minutes
+    until [ $retries -ge 90 ]
+    do
+        if gke_cluster_running $name $zone ; then
+            break
+        fi
+        sleep 10
+        retries=$[$retries+1]
+    done
+}
+
+function gke_cluster_wait_deleted() {
+    name="$1"
+    zone="$2"
+
+    retries=0
+    # retry for 15 minutes
+    until [ $retries -ge 90 ]
+    do
+        if ! gke_cluster_exists $name $zone ; then
+            break
+        fi
+        log "Cluster $(cluster_log_name) is still not deleted"
+        sleep 10
+        retries=$[$retries+1]
+    done
 }
 
 function gke_cluster_delete() {
@@ -208,8 +255,8 @@ function gke_cluster_delete() {
     else
         log "Deleting cluster $(cluster_log_name)"
 
-        if gke delete $name --zone $zone --quiet ; then
-            log "Cluster $(cluster_log_name) deleted successfully"
+        if gke delete $name --zone $zone --quiet --async; then
+            log "Cluster $(cluster_log_name) deleted successfully (async)"
         else
             log "Cluster $(cluster_log_name) deletion failed, try to re-run cleanup"
             exit 1
