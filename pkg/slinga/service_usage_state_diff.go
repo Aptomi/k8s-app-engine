@@ -348,6 +348,9 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 		if diff.progress != nil {
 			diff.progress.Stop()
 		}
+
+		// Apply changes in Istio Ingress rules
+		diff.Next.ProcessIstioIngress(noop)
 	}
 
 	// save new state

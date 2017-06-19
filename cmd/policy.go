@@ -64,9 +64,6 @@ var policyCmdApply = &cobra.Command{
 
 		// Apply changes
 		diff.Apply(noop)
-
-		// Apply changes in Istio Ingress rules
-		diff.Next.ProcessIstioIngress(noop)
 	},
 }
 
