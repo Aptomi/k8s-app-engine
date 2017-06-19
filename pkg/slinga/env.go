@@ -101,6 +101,17 @@ func GetAptomiObjectFilePatternTgz(baseDir string, aptomiObject AptomiOject, cha
 }
 
 // GetAptomiObjectWriteDir returns directory for aptomi objects (so they can be saved to this directory)
+// It will create directory if it doesn't exist
 func GetAptomiObjectWriteDir(baseDir string, aptomiObject AptomiOject) string {
-	return baseDir + "/" + string(aptomiObject)
+	dir := baseDir + "/" + string(aptomiObject)
+	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
+		_ = os.MkdirAll(dir, 0755)
+	}
+	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
+		debug.WithFields(log.Fields{
+			"directory": dir,
+			"error":     err,
+		}).Fatal("Directory can't be created or error encountered")
+	}
+	return dir
 }
