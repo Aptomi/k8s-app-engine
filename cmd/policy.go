@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"fmt"
+	"path/filepath"
 )
 
 // For apply command
@@ -35,7 +36,7 @@ var policyCmdApply = &cobra.Command{
 		prevUsageState := slinga.LoadServiceUsageState()
 
 		// Generate the next usage state
-		baseDir := slinga.GetAptomiBaseDir() + "/aptomi-demo"
+		baseDir := filepath.Join(slinga.GetAptomiBaseDir(), "aptomi-demo")
 		policy := slinga.LoadPolicyFromDir(baseDir)
 		users := slinga.LoadUsersFromDir(baseDir)
 		dependencies := slinga.LoadDependenciesFromDir(baseDir)

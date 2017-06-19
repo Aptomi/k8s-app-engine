@@ -53,7 +53,7 @@ func init() {
 
 	if flag.Lookup("test.v") == nil {
 		// running normally
-		debug.Out, _ = os.OpenFile(GetAptomiObjectWriteDir(GetAptomiBaseDir(), TypeLogs)+"/debug.log", os.O_CREATE|os.O_WRONLY, 0644)
+		debug.Out, _ = os.OpenFile(GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypeLogs, "debug.log"), os.O_CREATE|os.O_WRONLY, 0644)
 
 		// Don't log much by default. It will be overridden with "--debug" from CLI
 		debug.Level = log.PanicLevel

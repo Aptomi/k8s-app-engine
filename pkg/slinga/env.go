@@ -3,6 +3,7 @@ package slinga
 import (
 	log "github.com/Sirupsen/logrus"
 	"os"
+	"path/filepath"
 )
 
 // AptomiOject represents an aptomi entity, which gets stored in aptomi DB
@@ -92,18 +93,18 @@ func GetAptomiBaseDir() string {
 
 // GetAptomiObjectFilePatternYaml returns file pattern for aptomi objects (so they can be loaded from those files)
 func GetAptomiObjectFilePatternYaml(baseDir string, aptomiObject AptomiOject) string {
-	return baseDir + "/**/" + string(aptomiObject) + "*.yaml"
+	return filepath.Join(baseDir, "**", string(aptomiObject) + "*.yaml")
 }
 
 // GetAptomiObjectFilePatternTgz returns file pattern for tgz objects (so they can be loaded from those files)
 func GetAptomiObjectFilePatternTgz(baseDir string, aptomiObject AptomiOject, chartName string) string {
-	return baseDir + "/**/" + chartName + ".tgz"
+	return filepath.Join(baseDir, "**", chartName + ".tgz")
 }
 
 // GetAptomiObjectWriteDir returns directory for aptomi objects (so they can be saved to this directory)
 // It will create directory if it doesn't exist
-func GetAptomiObjectWriteDir(baseDir string, aptomiObject AptomiOject) string {
-	dir := baseDir + "/" + string(aptomiObject)
+func GetAptomiObjectWriteFile(baseDir string, aptomiObject AptomiOject, fileName string) string {
+	dir := filepath.Join(baseDir, string(aptomiObject))
 	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
 		_ = os.MkdirAll(dir, 0755)
 	}
@@ -113,5 +114,5 @@ func GetAptomiObjectWriteDir(baseDir string, aptomiObject AptomiOject) string {
 			"error":     err,
 		}).Fatal("Directory can't be created or error encountered")
 	}
-	return dir
+	return filepath.Join(dir, fileName)
 }
