@@ -165,7 +165,7 @@ func (exec HelmCodeExecutor) httpServices() ([]string, error) {
 	coreClient := clientset.Core()
 
 	releaseName := releaseName(exec.Key)
-	chartName := exec.Metadata["chartName"]
+	chartName := exec.chartName()
 
 	selector := k8slabels.Set{"release": releaseName, "chart": chartName}.AsSelector()
 	options := api.ListOptions{LabelSelector: selector}
