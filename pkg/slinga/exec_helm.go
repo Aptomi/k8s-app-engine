@@ -22,11 +22,10 @@ import (
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
-	Code     *Code
-	Cluster  *Cluster
-	Key      string
-	Metadata map[string]string
-	Params   NestedParameterMap
+	Code    *Code
+	Cluster *Cluster
+	Key     string
+	Params  NestedParameterMap
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
@@ -39,7 +38,7 @@ func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, 
 	if clusterName, ok := codeParams["cluster"].(string); !ok {
 		return nil, errors.New("Cluster param should be defined")
 	} else if cluster, ok := clusters[clusterName]; ok {
-		exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Metadata: code.Metadata, Params: codeParams}
+		exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Params: codeParams}
 		err := exec.setupTillerConnection()
 		if err != nil {
 			return nil, err
@@ -114,14 +113,22 @@ func releaseName(key string) string {
 	return strings.ToLower(EscapeName(key))
 }
 
+func (exec *HelmCodeExecutor) chartName() string {
+	if chartName, ok := exec.Params["chartName"].(string); ok {
+		return chartName
+	}
+
+	debug.WithFields(log.Fields{
+		"exec_key": exec.Key,
+		"params":   exec.Params,
+	}).Fatal("Params doesn't contain chartName")
+	return ""
+}
+
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (exec HelmCodeExecutor) Install() error {
 	releaseName := releaseName(exec.Key)
-
-	chartName, ok := exec.Metadata["chartName"]
-	if !ok {
-		return errors.New("Chart name is undefined")
-	}
+	chartName := exec.chartName()
 
 	helmClient := exec.newHelmClient()
 
@@ -165,8 +172,7 @@ func (exec HelmCodeExecutor) Install() error {
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
 func (exec HelmCodeExecutor) Update() error {
 	releaseName := releaseName(exec.Key)
-
-	chartName := exec.Metadata["chartName"]
+	chartName := exec.chartName()
 
 	helmClient := exec.newHelmClient()
 
@@ -231,7 +237,7 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 	coreClient := clientset.Core()
 
 	releaseName := releaseName(exec.Key)
-	chartName := exec.Metadata["chartName"]
+	chartName := exec.chartName()
 
 	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
 	options := api.ListOptions{LabelSelector: selector}
