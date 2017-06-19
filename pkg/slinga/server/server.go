@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/visibility"
 	"net/http"
 )
 
@@ -32,6 +33,12 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, endpoints)
 }
 
+func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
+	// Load the previous usage state
+	state := slinga.LoadServiceUsageState()
+	writeJSON(w, visibility.GetServiceViewObject(state))
+}
+
 // Serve starts http server on specified address that serves Aptomi API and WebUI
 func Serve(host string, port int) {
 	http.HandleFunc("/favicon.ico", faviconHandler)
@@ -44,6 +51,7 @@ func Serve(host string, port int) {
 
 	// serve all API endpoints at /api/ path and require auth
 	http.Handle("/api/endpoints", requireAuth(endpointsHandler))
+	http.Handle("/api/service-view", requireAuth(serviceViewHandler))
 
 	// serve login/logout api without auth
 	http.HandleFunc("/api/login", loginHandler)
