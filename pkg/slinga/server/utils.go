@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	pathlib "path"
 	"strings"
 )
 
@@ -24,9 +25,19 @@ import (
 //	return requireMethod(http.MethodPost, handler)
 //}
 
+func stringHasAnyPrefix(str string, prefix ...string) bool {
+	for _, prefix := range prefix {
+		if strings.HasPrefix(str, prefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func staticFilesHandler(path string, root http.FileSystem) http.Handler {
 	return http.StripPrefix(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "login.html" && !strings.HasPrefix(r.URL.Path, "img/") {
+		if r.URL.Path != "login.html" && !stringHasAnyPrefix(pathlib.Clean(r.URL.Path), "public/") {
 			if isUnauthorized(r) {
 				http.Redirect(w, r, "/ui/login.html", http.StatusTemporaryRedirect)
 				return
