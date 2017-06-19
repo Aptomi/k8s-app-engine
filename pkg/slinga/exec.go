@@ -21,7 +21,7 @@ func (code *Code) GetCodeExecutor(key string, codeMetadata map[string]string, co
 	case "aptomi/code/unittests", "unittests":
 		return NewFakeCodeExecutor(code, key, codeMetadata, codeParams, clusters), nil
 	case "aptomi/code/withdelay", "delay":
-		return NewFakeCodeExecutorWithDelay(code, key, codeMetadata, codeParams, clusters, 100 * time.Millisecond), nil
+		return NewFakeCodeExecutorWithDelay(code, key, codeMetadata, codeParams, clusters, 100*time.Millisecond), nil
 	default:
 		return nil, errors.New("CodeExecutor not found: " + code.Type)
 	}

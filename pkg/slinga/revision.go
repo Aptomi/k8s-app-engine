@@ -1,12 +1,12 @@
 package slinga
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
-	"fmt"
 )
 
 // If revision is absent, assume this value

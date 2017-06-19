@@ -142,7 +142,7 @@ func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key str
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
 func LoadServiceUsageState() ServiceUsageState {
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
-	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision, TypePolicyResolution,"db.yaml")
+	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision, TypePolicyResolution, "db.yaml")
 
 	debug.WithFields(log.Fields{
 		"file": fileName,

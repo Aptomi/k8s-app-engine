@@ -1,12 +1,12 @@
 package slinga
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"fmt"
 )
 
 // copyFileContents copies the contents of the file named src to the file named
@@ -81,7 +81,6 @@ func copyDirectory(srcDir string, dstDir string) (err error) {
 	}
 	return nil
 }
-
 
 // deleteFile deletes a file
 func deleteFile(src string) (err error) {

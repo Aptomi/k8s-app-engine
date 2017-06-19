@@ -56,7 +56,7 @@ func (usage ServiceUsageState) PrintSummary() {
 	usage.printSummaryLine("Dependencies", usage.Dependencies.count())
 }
 
-// SuccessfulExecution increments revision and saves results of the current run when policy processing executed successfuly
+// ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
 func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, noop bool) {
 	fmt.Println("[Revision]")
 	if !noop && diff.hasChanges() {
