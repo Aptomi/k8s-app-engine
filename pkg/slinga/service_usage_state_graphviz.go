@@ -133,7 +133,7 @@ func (vis PolicyVisualization) findSubraphName(prev *gographviz.Graph, nName str
 
 // Returns name of the file where visual is stored
 func (vis PolicyVisualization) getVisualFileNamePNG(suffix string) string {
-	return GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypeGraphics, "graph_" + suffix + ".png")
+	return GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_" + suffix + ".png")
 }
 
 // Returns a short version of the string
@@ -254,8 +254,8 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 
 // Saves graph into a file
 func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph) {
-	fileNameDot := GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypeGraphics, "graph_" + suffix + "_full.dot")
-	fileNameDotFlat := GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypeGraphics, "graph_" + suffix + "_flat.dot")
+	fileNameDot := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_" + suffix + "_full.dot")
+	fileNameDotFlat := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_" + suffix + "_flat.dot")
 	e := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 
 	if e != nil {

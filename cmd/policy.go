@@ -5,7 +5,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"fmt"
-	"path/filepath"
 )
 
 // For apply command
@@ -36,10 +35,10 @@ var policyCmdApply = &cobra.Command{
 		prevUsageState := slinga.LoadServiceUsageState()
 
 		// Generate the next usage state
-		baseDir := filepath.Join(slinga.GetAptomiBaseDir(), "aptomi-demo")
-		policy := slinga.LoadPolicyFromDir(baseDir)
-		users := slinga.LoadUsersFromDir(baseDir)
-		dependencies := slinga.LoadDependenciesFromDir(baseDir)
+		policyDir := slinga.GetAptomiPolicyDir()
+		policy := slinga.LoadPolicyFromDir(policyDir)
+		users := slinga.LoadUsersFromDir(policyDir)
+		dependencies := slinga.LoadDependenciesFromDir(policyDir)
 		dependencies.SetTrace(trace)
 
 		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &users)
@@ -66,6 +65,10 @@ var policyCmdApply = &cobra.Command{
 
 		// Apply changes
 		diff.Apply(noop)
+
+		// If everything is successful, then increment revision and save run
+		revision := slinga.GetLastRevision(slinga.GetAptomiBaseDir())
+		diff.ProcessSuccessfulExecution(revision, noop)
 	},
 }
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"google.golang.org/grpc/grpclog"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
@@ -194,18 +194,14 @@ func (exec HelmCodeExecutor) Update() error {
 
 func getValidChartPath(chartName string) string {
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternTgz(GetAptomiBaseDir(), TypeCharts, chartName))
-	if len(files) <= 0 {
+	fileName, err := ensureSingleFile(files)
+	if err != nil {
 		debug.WithFields(log.Fields{
 			"chartName": chartName,
-		}).Fatal("No charts found")
+			"error":     err,
+		}).Fatal("Chart lookup error")
 	}
-	if len(files) > 1 {
-		debug.WithFields(log.Fields{
-			"chartName": chartName,
-			"files":     files,
-		}).Fatal("More that one chart found")
-	}
-	return files[0]
+	return fileName
 }
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart

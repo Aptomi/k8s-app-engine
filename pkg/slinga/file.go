@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"fmt"
 )
 
 // copyFileContents copies the contents of the file named src to the file named
@@ -35,6 +36,53 @@ func copyFile(src, dst string) (err error) {
 	return
 }
 
+// Recursively copies a directory tree
+// Source directory must exist, destination directory must not exist
+func copyDirectory(srcDir string, dstDir string) (err error) {
+	// get properties of source directory
+	srcStat, err := os.Stat(srcDir)
+	if err != nil {
+		return err
+	}
+	if !srcStat.IsDir() {
+		return fmt.Errorf("Source is not a directory")
+	}
+
+	// ensure destination directory does not already exist
+	_, err = os.Open(dstDir)
+	if !os.IsNotExist(err) {
+		return fmt.Errorf("Destination directory already exists")
+	}
+
+	// create destination dir
+	err = os.MkdirAll(dstDir, srcStat.Mode())
+	if err != nil {
+		return err
+	}
+
+	// get all entries in a directory
+	entries, err := ioutil.ReadDir(srcDir)
+	for _, entry := range entries {
+		sfp := filepath.Join(srcDir, entry.Name())
+		dfp := filepath.Join(dstDir, entry.Name())
+		if entry.IsDir() {
+			err = copyDirectory(sfp, dfp)
+			if err != nil {
+				return err
+			}
+		} else {
+			// perform copy
+			err = copyFile(sfp, dfp)
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+	return nil
+}
+
+
 // deleteFile deletes a file
 func deleteFile(src string) (err error) {
 	return os.Remove(src)
@@ -43,6 +91,10 @@ func deleteFile(src string) (err error) {
 // deleteDirectoryContents removes all contents of a directory
 func deleteDirectoryContents(dir string) error {
 	d, err := os.Open(dir)
+	if os.IsNotExist(err) {
+		// do nothing
+		return nil
+	}
 	if err != nil {
 		return err
 	}
@@ -79,4 +131,15 @@ func writeTempFile(prefix string, content string) *os.File {
 	}
 
 	return tmpFile
+}
+
+// Ensures that only one file matches the list of files
+func ensureSingleFile(files []string) (string, error) {
+	if len(files) <= 0 {
+		return "", fmt.Errorf("No files found")
+	}
+	if len(files) > 1 {
+		return "", fmt.Errorf("More than one file found")
+	}
+	return files[0], nil
 }

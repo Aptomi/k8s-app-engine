@@ -54,6 +54,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrevSavedLoaded)
 
+	assert.False(t, diff.hasChanges(), "Diff should not have any changes")
 	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Empty diff should not have any component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Empty diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Empty diff should not have any component updates")
@@ -87,6 +88,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrevSavedLoaded)
 
+	assert.True(t, diff.hasChanges(), "Diff should have changes")
 	assert.Equal(t, 7, len(diff.ComponentInstantiate), "Diff should have component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Diff should not have any component updates")

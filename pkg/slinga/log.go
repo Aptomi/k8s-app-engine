@@ -52,8 +52,14 @@ func init() {
 	debug = log.New()
 
 	if flag.Lookup("test.v") == nil {
+		// Make sure we have a place to write the current state to
+		// This is a bit of a hack to clean up the current directory here
+		// But you can't really do this in policy.go, because this will cause a race condition with init()
+		PrepareCurrentRunDirectory(GetAptomiBaseDir())
+
 		// running normally
-		debug.Out, _ = os.OpenFile(GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypeLogs, "debug.log"), os.O_CREATE|os.O_WRONLY, 0644)
+		fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeLogs, "debug.log")
+		debug.Out, _ = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
 
 		// Don't log much by default. It will be overridden with "--debug" from CLI
 		debug.Level = log.PanicLevel

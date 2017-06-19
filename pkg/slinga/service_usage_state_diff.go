@@ -56,6 +56,27 @@ func (usage ServiceUsageState) PrintSummary() {
 	usage.printSummaryLine("Dependencies", usage.Dependencies.count())
 }
 
+// SuccessfulExecution increments revision and saves results of the current run when policy processing executed successfuly
+func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, noop bool) {
+	fmt.Println("[Revision]")
+	if !noop && diff.hasChanges() {
+		// Increment a revision
+		newRevision := revision.increment()
+
+		// Save results of the current run
+		newRevision.saveCurrentRun()
+
+		// Save updated revision number
+		newRevision.saveAsLastRevision()
+
+		// Print revision numbers
+		fmt.Printf("  Previous: %s\n", revision.String())
+		fmt.Printf("  Current: %s\n", newRevision.String())
+	} else {
+		fmt.Printf("  Current: %s (no changes saved)\n", revision.String())
+	}
+}
+
 func (usage ServiceUsageState) printSummaryLine(name string, cnt int) {
 	fmt.Printf("  %s: %d\n", name, cnt)
 }
@@ -240,6 +261,28 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	}
 }
 
+// This method became one of the key methods.
+// If it returns false, then new run and new revision will not be generated
+func (diff *ServiceUsageStateDiff) hasChanges() bool {
+	// TODO: this key method doesn't take into account presence of Istio rules
+	if len(diff.ComponentInstantiate) > 0 {
+		return true
+	}
+	if len(diff.ComponentUpdate) > 0 {
+		return true
+	}
+	if len(diff.ComponentDestruct) > 0 {
+		return true
+	}
+	if len(diff.ComponentAttachUser) > 0 {
+		return true
+	}
+	if len(diff.ComponentDetachUser) > 0 {
+		return true
+	}
+	return false
+}
+
 // On a component level -- see which keys appear and disappear
 func (diff *ServiceUsageStateDiff) getDifferenceLen() int {
 	return len(diff.ComponentInstantiate) + len(diff.ComponentDestruct) + len(diff.ComponentUpdate)
@@ -314,7 +357,7 @@ func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 	}
 }
 
-// Apply method applies all changes via executors and saves usage state in Aptomi DB
+// Apply method applies all changes via executors, saves usage state in Aptomi DB
 func (diff ServiceUsageStateDiff) Apply(noop bool) {
 	if !noop {
 		// add progress bar into CLI
@@ -353,8 +396,8 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 		diff.Next.ProcessIstioIngress(noop)
 	}
 
-	// save new state
-	diff.Next.SaveServiceUsageState(noop)
+	// save new state in the last run directory
+	diff.Next.SaveServiceUsageState()
 }
 
 func (diff ServiceUsageStateDiff) processInstantiations() error {

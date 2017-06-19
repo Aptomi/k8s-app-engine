@@ -141,7 +141,8 @@ func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key str
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
 func LoadServiceUsageState() ServiceUsageState {
-	fileName := GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypePolicyResolution,"db.yaml")
+	lastRevision := GetLastRevision(GetAptomiBaseDir())
+	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision, TypePolicyResolution,"db.yaml")
 
 	debug.WithFields(log.Fields{
 		"file": fileName,
@@ -151,6 +152,9 @@ func LoadServiceUsageState() ServiceUsageState {
 
 	// If the file doesn't exist, it means that DB is empty and we are starting from scratch
 	if os.IsNotExist(e) {
+		debug.WithFields(log.Fields{
+			"file": fileName,
+		}).Info("Previous service usage state not found. Returning empty state")
 		return ServiceUsageState{}
 	}
 
@@ -173,14 +177,8 @@ func LoadServiceUsageState() ServiceUsageState {
 }
 
 // SaveServiceUsageState stores usage state in a file under Aptomi DB
-func (usage ServiceUsageState) SaveServiceUsageState(noop bool) {
-	var shortName string
-	if noop {
-		shortName = "db_noop.yaml"
-	} else {
-		shortName = "db.yaml"
-	}
-	fileName := GetAptomiObjectWriteFile(GetAptomiBaseDir(), TypePolicyResolution, shortName)
+func (usage ServiceUsageState) SaveServiceUsageState() {
+	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
 
 	debug.WithFields(log.Fields{
 		"file": fileName,
