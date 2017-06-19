@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// IstioRouteRule is istio route rule
 type IstioRouteRule struct {
 	Service string
 	Cluster *Cluster

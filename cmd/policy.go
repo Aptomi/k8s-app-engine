@@ -107,35 +107,35 @@ func init() {
 	policyCmd.AddCommand(policyCmdApply)
 
 	/*
-	policyCmd.AddCommand(policyCmdAdd)
-	policyCmd.AddCommand(policyCmdDelete)
-	policyCmd.AddCommand(policyCmdReset)
+		policyCmd.AddCommand(policyCmdAdd)
+		policyCmd.AddCommand(policyCmdDelete)
+		policyCmd.AddCommand(policyCmdReset)
 	*/
 
 	/*
-	for k := range slinga.AptomiObjectsCanBeModified {
-		command := &cobra.Command{
-			Use:   k,
-			Short: fmt.Sprintf("Add one or more %s to the policy", k),
-			Long:  "",
-			Run: func(cmd *cobra.Command, args []string) {
-				slinga.AddObjectsToPolicy(slinga.AptomiObjectsCanBeModified[cmd.Use], args...)
-			},
+		for k := range slinga.AptomiObjectsCanBeModified {
+			command := &cobra.Command{
+				Use:   k,
+				Short: fmt.Sprintf("Add one or more %s to the policy", k),
+				Long:  "",
+				Run: func(cmd *cobra.Command, args []string) {
+					slinga.AddObjectsToPolicy(slinga.AptomiObjectsCanBeModified[cmd.Use], args...)
+				},
+			}
+			policyCmdAdd.AddCommand(command)
 		}
-		policyCmdAdd.AddCommand(command)
-	}
 
-	for k := range slinga.AptomiObjectsCanBeModified {
-		command := &cobra.Command{
-			Use:   k,
-			Short: fmt.Sprintf("Delete one or more %s from the policy", k),
-			Long:  "",
-			Run: func(cmd *cobra.Command, args []string) {
-				slinga.RemoveObjectsFromPolicy(slinga.AptomiObjectsCanBeModified[cmd.Use], args...)
-			},
+		for k := range slinga.AptomiObjectsCanBeModified {
+			command := &cobra.Command{
+				Use:   k,
+				Short: fmt.Sprintf("Delete one or more %s from the policy", k),
+				Long:  "",
+				Run: func(cmd *cobra.Command, args []string) {
+					slinga.RemoveObjectsFromPolicy(slinga.AptomiObjectsCanBeModified[cmd.Use], args...)
+				},
+			}
+			policyCmdDelete.AddCommand(command)
 		}
-		policyCmdDelete.AddCommand(command)
-	}
 	*/
 
 	RootCmd.AddCommand(policyCmd)

@@ -2,9 +2,9 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"github.com/mattn/go-zglob"
 	"sort"
 )
 

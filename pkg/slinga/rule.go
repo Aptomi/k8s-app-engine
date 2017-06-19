@@ -8,25 +8,30 @@ import (
 	"sort"
 )
 
+// LabelsFilter is a labels filter
 type LabelsFilter []string
 
+// ServiceFilter is a service filter
 type ServiceFilter struct {
 	Cluster *Criteria
 	Labels  *Criteria
 	User    *Criteria
 }
 
+// Action is an action
 type Action struct {
 	Type    string
 	Content string
 }
 
+// Rule is a global rule
 type Rule struct {
 	Name           string
 	FilterServices *ServiceFilter
 	Actions        []*Action
 }
 
+// GlobalRules is a list of global rules
 type GlobalRules struct {
 	// action type -> []*Rule
 	Rules map[string][]*Rule
@@ -87,22 +92,24 @@ func (filter *ServiceFilter) match(labels LabelSet, user *User, cluster *Cluster
 	return true
 }
 
+// NewGlobalRules creates and initializes a new empty list of global rules
 func NewGlobalRules() GlobalRules {
 	return GlobalRules{Rules: make(map[string][]*Rule, 0)}
 }
 
+// LoadRulesFromDir loads all rules from a given directory
 func LoadRulesFromDir(baseDir string) GlobalRules {
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeRules))
 	sort.Strings(files)
 	r := NewGlobalRules()
 	for _, f := range files {
-		rules := LoadRulesFromFile(f)
+		rules := loadRulesFromFile(f)
 		r.insertRules(rules...)
 	}
 	return r
 }
 
-func (rules *GlobalRules) insertRules(appendRules ...*Rule) {
+func (globalRules *GlobalRules) insertRules(appendRules ...*Rule) {
 	for _, rule := range appendRules {
 		if rule.FilterServices == nil {
 			debug.WithFields(log.Fields{
@@ -110,26 +117,20 @@ func (rules *GlobalRules) insertRules(appendRules ...*Rule) {
 			}).Fatal("Only service filters currently supported in rules")
 		}
 		for _, action := range rule.Actions {
-			if rulesList, ok := rules.Rules[action.Type]; ok {
-				rules.Rules[action.Type] = append(rulesList, rule)
+			if rulesList, ok := globalRules.Rules[action.Type]; ok {
+				globalRules.Rules[action.Type] = append(rulesList, rule)
 			} else {
-				rules.Rules[action.Type] = []*Rule{rule}
+				globalRules.Rules[action.Type] = []*Rule{rule}
 			}
 		}
 	}
 }
 
-func (rules *GlobalRules) count() int {
-	result := 0
-
-	for _, v := range rules.Rules {
-		result += countElements(v)
-	}
-
-	return result
+func (globalRules *GlobalRules) count() int {
+	return countElements(globalRules.Rules)
 }
 
-func LoadRulesFromFile(fileName string) []*Rule {
+func loadRulesFromFile(fileName string) []*Rule {
 	debug.WithFields(log.Fields{
 		"file": fileName,
 	}).Debug("Loading rules")

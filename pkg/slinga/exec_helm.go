@@ -201,7 +201,7 @@ func getValidChartPath(chartName string) string {
 	if len(files) > 1 {
 		debug.WithFields(log.Fields{
 			"chartName": chartName,
-			"files": files,
+			"files":     files,
 		}).Fatal("More that one chart found")
 	}
 	return files[0]
