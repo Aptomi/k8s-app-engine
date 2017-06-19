@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"errors"
+	"github.com/mattn/go-zglob"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
@@ -137,15 +138,9 @@ func (exec HelmCodeExecutor) Install() error {
 			"releaseName": releaseName,
 		}).Info("Found that release already exists. Calling an update on it")
 		return exec.Update()
-
-		/*
-			debug.WithFields(log.Fields{
-				"releaseName": releaseName,
-			}).Fatal("Release already exists")
-		*/
 	}
 
-	chartPath := GetAptomiObjectDir(GetAptomiBaseDir(), Charts) + "/" + chartName + ".tgz"
+	chartPath := getValidChartPath(chartName)
 
 	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
@@ -174,7 +169,7 @@ func (exec HelmCodeExecutor) Update() error {
 
 	helmClient := exec.newHelmClient()
 
-	chartPath := GetAptomiObjectDir(GetAptomiBaseDir(), Charts) + "/" + chartName + ".tgz"
+	chartPath := getValidChartPath(chartName)
 
 	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
@@ -194,6 +189,22 @@ func (exec HelmCodeExecutor) Update() error {
 	}
 
 	return nil
+}
+
+func getValidChartPath(chartName string) string {
+	files, _ := zglob.Glob(GetAptomiObjectFilePatternTgz(GetAptomiBaseDir(), TypeCharts, chartName))
+	if len(files) <= 0 {
+		debug.WithFields(log.Fields{
+			"chartName": chartName,
+		}).Fatal("No charts found")
+	}
+	if len(files) > 1 {
+		debug.WithFields(log.Fields{
+			"chartName": chartName,
+			"files": files,
+		}).Fatal("More that one chart found")
+	}
+	return files[0]
 }
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart

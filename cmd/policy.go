@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,7 +14,7 @@ var verbose bool
 var trace bool
 
 // For reset command
-var force bool
+// var force bool
 
 var policyCmd = &cobra.Command{
 	Use:   "policy",
@@ -35,7 +34,7 @@ var policyCmdApply = &cobra.Command{
 		prevUsageState := slinga.LoadServiceUsageState()
 
 		// Generate the next usage state
-		baseDir := slinga.GetAptomiBaseDir()
+		baseDir := slinga.GetAptomiBaseDir() + "/aptomi-demo"
 		policy := slinga.LoadPolicyFromDir(baseDir)
 		users := slinga.LoadUsersFromDir(baseDir)
 		dependencies := slinga.LoadDependenciesFromDir(baseDir)
@@ -71,6 +70,7 @@ var policyCmdApply = &cobra.Command{
 	},
 }
 
+/*
 var policyCmdAdd = &cobra.Command{
 	Use:   "add",
 	Short: "Add objects to the policy (or edit existing objects)",
@@ -101,13 +101,18 @@ var policyCmdReset = &cobra.Command{
 		}
 	},
 }
+*/
 
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
+
+	/*
 	policyCmd.AddCommand(policyCmdAdd)
 	policyCmd.AddCommand(policyCmdDelete)
 	policyCmd.AddCommand(policyCmdReset)
+	*/
 
+	/*
 	for k := range slinga.AptomiObjectsCanBeModified {
 		command := &cobra.Command{
 			Use:   k,
@@ -131,6 +136,7 @@ func init() {
 		}
 		policyCmdDelete.AddCommand(command)
 	}
+	*/
 
 	RootCmd.AddCommand(policyCmd)
 
@@ -142,5 +148,5 @@ func init() {
 	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", false, "Trace all dependencies and print how rules got evaluated")
 
 	// Flags for the reset command
-	policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
+	// policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
 }

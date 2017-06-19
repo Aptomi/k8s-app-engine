@@ -141,7 +141,7 @@ func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key str
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
 func LoadServiceUsageState() ServiceUsageState {
-	fileName := GetAptomiObjectDir(GetAptomiBaseDir(), PolicyResolution) + "/" + "db.yaml"
+	fileName := GetAptomiObjectWriteDir(GetAptomiBaseDir(), TypePolicyResolution) + "/db.yaml"
 
 	debug.WithFields(log.Fields{
 		"file": fileName,
@@ -174,7 +174,7 @@ func LoadServiceUsageState() ServiceUsageState {
 
 // SaveServiceUsageState stores usage state in a file under Aptomi DB
 func (usage ServiceUsageState) SaveServiceUsageState(noop bool) {
-	fileName := GetAptomiObjectDir(GetAptomiBaseDir(), PolicyResolution) + "/"
+	fileName := GetAptomiObjectWriteDir(GetAptomiBaseDir(), TypePolicyResolution) + "/"
 	if noop {
 		fileName += "db_noop.yaml"
 	} else {

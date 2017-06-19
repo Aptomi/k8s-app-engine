@@ -6,9 +6,7 @@ import (
 	"github.com/mattn/go-zglob"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
 	"sort"
-	"strings"
 )
 
 /*
@@ -114,121 +112,121 @@ func (policy *Policy) countClusters() int {
 	return countElements(policy.Clusters)
 }
 
-// RemoveObjectsFromPolicy removes objects from the policy (basically, removes one or more files from Aptomi DB directory)
-func RemoveObjectsFromPolicy(aptFilter AptomiOject, args ...string) {
-	for _, v := range args {
-		stat, err := os.Stat(v)
-		if err == nil {
-			if stat.IsDir() {
-				// if it's a directory, process all yaml files in it
-				files, _ := zglob.Glob(v + "/**/*.*")
-				for _, f := range files {
-					RemoveObjectsFromPolicy(aptFilter, f)
-				}
-			} else {
-				// if it's a file, delete it
-				name := stat.Name()
-				idx := strings.Index(name, ".")
-				if idx >= 0 {
-					objectType := name[0:idx]
-					apt, ok := AptomiObjectsCanBeModified[objectType]
-
-					// Charts don't have to start with object prefix
-					if aptFilter == Charts && strings.HasSuffix(name, ".tgz") {
-						ok = true
-						apt = aptFilter
-					}
-
-					if ok {
-						if apt == aptFilter {
-							err := deleteFile(GetAptomiObjectDir(GetAptomiBaseDir(), apt) + "/" + name)
-							if err != nil {
-								fmt.Printf("Unable to delete %s from aptomi policy: %s\n", objectType, name)
-								debug.WithFields(log.Fields{
-									"fileName":   v,
-									"name":       name,
-									"objectType": objectType,
-									"error":      err,
-								}).Fatal("Unable to delete object from aptomi policy")
-							} else {
-								fmt.Printf("Deleting %s to aptomi policy: %s\n", objectType, name)
-							}
-						}
-					} else {
-						debug.WithFields(log.Fields{
-							"fileName":   v,
-							"name":       name,
-							"objectType": objectType,
-						}).Warning("Invalid object type. Must be within defined Aptomi object types")
-					}
-				} else {
-					debug.WithFields(log.Fields{
-						"fileName": v,
-						"name":     name,
-					}).Warning("File name must be prefixed with object type")
-				}
-			}
-		}
-	}
-}
-
-// AddObjectsToPolicy adds an object to the policy (basically, copies one or more files to Aptomi DB directory)
-func AddObjectsToPolicy(aptFilter AptomiOject, args ...string) {
-	for _, v := range args {
-		stat, err := os.Stat(v)
-		if err == nil {
-			if stat.IsDir() {
-				// if it's a directory, process all yaml files in it
-				files, _ := zglob.Glob(v + "/**/*.*")
-				for _, f := range files {
-					AddObjectsToPolicy(aptFilter, f)
-				}
-			} else {
-				// if it's a file, copy it over
-				name := stat.Name()
-				idx := strings.Index(name, ".")
-				if idx >= 0 {
-					objectType := name[0:idx]
-					apt, ok := AptomiObjectsCanBeModified[objectType]
-
-					// Charts don't have to start with object prefix
-					if aptFilter == Charts && strings.HasSuffix(name, ".tgz") {
-						ok = true
-						apt = aptFilter
-					}
-
-					if ok {
-						if apt == aptFilter {
-							err := copyFile(v, GetAptomiObjectDir(GetAptomiBaseDir(), apt)+"/"+name)
-							if err != nil {
-								fmt.Printf("Unable to add %s to aptomi policy: %s\n", objectType, name)
-								debug.WithFields(log.Fields{
-									"fileName":   v,
-									"name":       name,
-									"objectType": objectType,
-									"error":      err,
-								}).Fatal("Unable to add object to aptomi policy")
-							} else {
-								fmt.Printf("Adding %s to aptomi policy: %s\n", objectType, name)
-							}
-						}
-					} else {
-						debug.WithFields(log.Fields{
-							"fileName":   v,
-							"name":       name,
-							"objectType": objectType,
-						}).Warning("Invalid object type. Must be within defined Aptomi object types")
-					}
-				} else {
-					debug.WithFields(log.Fields{
-						"fileName": v,
-						"name":     name,
-					}).Warning("File name must be prefixed with object type")
-				}
-			}
-		}
-	}
-}
+//// RemoveObjectsFromPolicy removes objects from the policy (basically, removes one or more files from Aptomi DB directory)
+//func RemoveObjectsFromPolicy(aptFilter AptomiOject, args ...string) {
+//	for _, v := range args {
+//		stat, err := os.Stat(v)
+//		if err == nil {
+//			if stat.IsDir() {
+//				// if it's a directory, process all yaml files in it
+//				files, _ := zglob.Glob(v + "/**/*.*")
+//				for _, f := range files {
+//					RemoveObjectsFromPolicy(aptFilter, f)
+//				}
+//			} else {
+//				// if it's a file, delete it
+//				name := stat.Name()
+//				idx := strings.Index(name, ".")
+//				if idx >= 0 {
+//					objectType := name[0:idx]
+//					apt, ok := AptomiObjectsCanBeModified[objectType]
+//
+//					// Charts don't have to start with object prefix
+//					if aptFilter == Charts && strings.HasSuffix(name, ".tgz") {
+//						ok = true
+//						apt = aptFilter
+//					}
+//
+//					if ok {
+//						if apt == aptFilter {
+//							err := deleteFile(GetAptomiObjectDir(GetAptomiBaseDir(), apt) + "/" + name)
+//							if err != nil {
+//								fmt.Printf("Unable to delete %s from aptomi policy: %s\n", objectType, name)
+//								debug.WithFields(log.Fields{
+//									"fileName":   v,
+//									"name":       name,
+//									"objectType": objectType,
+//									"error":      err,
+//								}).Fatal("Unable to delete object from aptomi policy")
+//							} else {
+//								fmt.Printf("Deleting %s to aptomi policy: %s\n", objectType, name)
+//							}
+//						}
+//					} else {
+//						debug.WithFields(log.Fields{
+//							"fileName":   v,
+//							"name":       name,
+//							"objectType": objectType,
+//						}).Warning("Invalid object type. Must be within defined Aptomi object types")
+//					}
+//				} else {
+//					debug.WithFields(log.Fields{
+//						"fileName": v,
+//						"name":     name,
+//					}).Warning("File name must be prefixed with object type")
+//				}
+//			}
+//		}
+//	}
+//}
+//
+//// AddObjectsToPolicy adds an object to the policy (basically, copies one or more files to Aptomi DB directory)
+//func AddObjectsToPolicy(aptFilter AptomiOject, args ...string) {
+//	for _, v := range args {
+//		stat, err := os.Stat(v)
+//		if err == nil {
+//			if stat.IsDir() {
+//				// if it's a directory, process all yaml files in it
+//				files, _ := zglob.Glob(v + "/**/*.*")
+//				for _, f := range files {
+//					AddObjectsToPolicy(aptFilter, f)
+//				}
+//			} else {
+//				// if it's a file, copy it over
+//				name := stat.Name()
+//				idx := strings.Index(name, ".")
+//				if idx >= 0 {
+//					objectType := name[0:idx]
+//					apt, ok := AptomiObjectsCanBeModified[objectType]
+//
+//					// Charts don't have to start with object prefix
+//					if aptFilter == Charts && strings.HasSuffix(name, ".tgz") {
+//						ok = true
+//						apt = aptFilter
+//					}
+//
+//					if ok {
+//						if apt == aptFilter {
+//							err := copyFile(v, GetAptomiObjectDir(GetAptomiBaseDir(), apt)+"/"+name)
+//							if err != nil {
+//								fmt.Printf("Unable to add %s to aptomi policy: %s\n", objectType, name)
+//								debug.WithFields(log.Fields{
+//									"fileName":   v,
+//									"name":       name,
+//									"objectType": objectType,
+//									"error":      err,
+//								}).Fatal("Unable to add object to aptomi policy")
+//							} else {
+//								fmt.Printf("Adding %s to aptomi policy: %s\n", objectType, name)
+//							}
+//						}
+//					} else {
+//						debug.WithFields(log.Fields{
+//							"fileName":   v,
+//							"name":       name,
+//							"objectType": objectType,
+//						}).Warning("Invalid object type. Must be within defined Aptomi object types")
+//					}
+//				} else {
+//					debug.WithFields(log.Fields{
+//						"fileName": v,
+//						"name":     name,
+//					}).Warning("File name must be prefixed with object type")
+//				}
+//			}
+//		}
+//	}
+//}
 
 // LoadPolicyFromDir loads policy from a directory, recursively processing all files
 func LoadPolicyFromDir(baseDir string) Policy {
@@ -239,7 +237,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	}
 
 	// read all clusters
-	files, _ := zglob.Glob(GetAptomiObjectDir(baseDir, Clusters) + "/**/cluster.*.yaml")
+	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeCluster))
 	sort.Strings(files)
 	for _, f := range files {
 		cluster := loadClusterFromFile(f)
@@ -247,7 +245,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	}
 
 	// read all services
-	files, _ = zglob.Glob(GetAptomiObjectDir(baseDir, Services) + "/**/service.*.yaml")
+	files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeService))
 	sort.Strings(files)
 	for _, f := range files {
 		service := loadServiceFromFile(f)
@@ -255,7 +253,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	}
 
 	// read all contexts
-	files, _ = zglob.Glob(GetAptomiObjectDir(baseDir, Contexts) + "/**/context.*.yaml")
+	files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeContext))
 	sort.Strings(files)
 	for _, f := range files {
 		context := loadContextFromFile(f)
@@ -341,28 +339,28 @@ func loadClusterFromFile(fileName string) *Cluster {
 }
 
 // ResetAptomiState fully resets aptomi state by deleting all file from its database. Including policy, logs, etc
-func ResetAptomiState() {
-	debug.WithFields(log.Fields{
-		"baseDir": GetAptomiBaseDir(),
-	}).Info("Resetting aptomi state")
-
-	files, _ := zglob.Glob(GetAptomiBaseDir() + "/**/*.*")
-	for _, f := range files {
-		err := os.Remove(f)
-		if err != nil {
-			debug.WithFields(log.Fields{
-				"file":  f,
-				"error": err,
-			}).Fatal("Unable to remove file")
-		}
-	}
-
-	if len(files) > 0 {
-		fmt.Printf("Aptomi state is now empty. Deleted %d objects\n", len(files))
-	} else {
-		fmt.Println("Aptomi state is empty")
-	}
-}
+//func ResetAptomiState() {
+//	debug.WithFields(log.Fields{
+//		"baseDir": GetAptomiBaseDir(),
+//	}).Info("Resetting aptomi state")
+//
+//	files, _ := zglob.Glob(GetAptomiBaseDir() + "/**/*.*")
+//	for _, f := range files {
+//		err := os.Remove(f)
+//		if err != nil {
+//			debug.WithFields(log.Fields{
+//				"file":  f,
+//				"error": err,
+//			}).Fatal("Unable to remove file")
+//		}
+//	}
+//
+//	if len(files) > 0 {
+//		fmt.Printf("Aptomi state is now empty. Deleted %d objects\n", len(files))
+//	} else {
+//		fmt.Println("Aptomi state is empty")
+//	}
+//}
 
 // Serialize object into YAML
 func serializeObject(t interface{}) string {

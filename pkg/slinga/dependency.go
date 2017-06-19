@@ -79,7 +79,7 @@ func (src GlobalDependencies) appendDependency(ops *Dependency) GlobalDependenci
 // LoadDependenciesFromDir loads all dependencies from a given directory
 func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 	// read all services
-	files, _ := zglob.Glob(GetAptomiObjectDir(baseDir, Dependencies) + "/**/dependencies.*.yaml")
+	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeDependencies))
 	sort.Strings(files)
 	r := NewGlobalDependencies()
 	for _, f := range files {

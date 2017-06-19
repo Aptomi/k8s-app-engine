@@ -37,10 +37,8 @@ func LoadUserByIDFromDir(baseDir string, id string) *User {
 
 // LoadUsersFromDir loads all users from a given directory
 func LoadUsersFromDir(baseDir string) GlobalUsers {
-	files, _ := zglob.Glob(GetAptomiObjectDir(baseDir, Users) + "/**/users.*.yaml")
-
+	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeUsers))
 	r := GlobalUsers{Users: make(map[string]*User)}
-
 	for _, f := range files {
 		debug.WithFields(log.Fields{
 			"file": f,

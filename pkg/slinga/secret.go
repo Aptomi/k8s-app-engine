@@ -4,6 +4,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"github.com/mattn/go-zglob"
+	"sort"
 )
 
 /*
@@ -18,9 +20,17 @@ type UserSecrets struct {
 	Secrets map[string]string
 }
 
-// LoadUserSecretsByIDFromDir loads secrets for a given user from a given directory
-func LoadUserSecretsByIDFromDir(dir string, id string) map[string]string {
-	fileName := GetAptomiObjectDir(dir, Secrets) + "/secrets.yaml"
+func loadUserSecretsFromDir(baseDir string) []*UserSecrets {
+	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeSecrets))
+	sort.Strings(files)
+	t := []*UserSecrets{}
+	for _, f := range files {
+		t = append(t, loadUserSecretsFromFile(f)...)
+	}
+	return t
+}
+
+func loadUserSecretsFromFile(fileName string) []*UserSecrets {
 	debug.WithFields(log.Fields{
 		"file": fileName,
 	}).Debug("Loading secrets")
@@ -41,6 +51,13 @@ func LoadUserSecretsByIDFromDir(dir string, id string) map[string]string {
 			"error": e,
 		}).Fatal("Unable to unmarshal secrets")
 	}
+
+	return t
+}
+
+// LoadUserSecretsByIDFromDir loads all secrets for a particular user
+func LoadUserSecretsByIDFromDir(baseDir string, id string) map[string]string {
+	t := loadUserSecretsFromDir(baseDir)
 	for _, s := range t {
 		if s.UserID == id {
 			return s.Secrets
