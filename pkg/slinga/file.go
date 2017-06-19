@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // copyFileContents copies the contents of the file named src to the file named
@@ -12,12 +13,6 @@ import (
 // destination file exists, all it's contents will be replaced by the contents
 // of the source file.
 func copyFile(src, dst string) (err error) {
-	/*
-		if stat, err := os.Stat(dst); err == nil && !stat.IsDir() {
-			return fmt.Errorf("File %s already exists", dst)
-		}
-	*/
-
 	in, err := os.Open(src)
 	if err != nil {
 		return
@@ -43,6 +38,26 @@ func copyFile(src, dst string) (err error) {
 // deleteFile deletes a file
 func deleteFile(src string) (err error) {
 	return os.Remove(src)
+}
+
+// deleteDirectoryContents removes all contents of a directory
+func deleteDirectoryContents(dir string) error {
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func writeTempFile(prefix string, content string) *os.File {

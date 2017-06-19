@@ -4,6 +4,7 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"fmt"
 )
 
 // For apply command
@@ -14,7 +15,7 @@ var verbose bool
 var trace bool
 
 // For reset command
-// var force bool
+var force bool
 
 var policyCmd = &cobra.Command{
 	Use:   "policy",
@@ -85,6 +86,7 @@ var policyCmdDelete = &cobra.Command{
 		cmd.Help()
 	},
 }
+*/
 
 var policyCmdReset = &cobra.Command{
 	Use:   "reset",
@@ -94,19 +96,19 @@ var policyCmdReset = &cobra.Command{
 		if force {
 			slinga.ResetAptomiState()
 		} else {
-			fmt.Println("Sorry. I won't be doing anything without --force.")
+			fmt.Println("This will erase everything under " + slinga.GetAptomiBaseDir())
+			fmt.Println("No action is taken. If you are sure, use --force to delete all the data")
 		}
 	},
 }
-*/
 
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
+	policyCmd.AddCommand(policyCmdReset)
 
 	/*
 		policyCmd.AddCommand(policyCmdAdd)
 		policyCmd.AddCommand(policyCmdDelete)
-		policyCmd.AddCommand(policyCmdReset)
 	*/
 
 	/*
@@ -145,5 +147,5 @@ func init() {
 	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", false, "Trace all dependencies and print how rules got evaluated")
 
 	// Flags for the reset command
-	// policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
+	policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
 }

@@ -338,29 +338,17 @@ func loadClusterFromFile(fileName string) *Cluster {
 	return &t
 }
 
-// ResetAptomiState fully resets aptomi state by deleting all file from its database. Including policy, logs, etc
-//func ResetAptomiState() {
-//	debug.WithFields(log.Fields{
-//		"baseDir": GetAptomiBaseDir(),
-//	}).Info("Resetting aptomi state")
-//
-//	files, _ := zglob.Glob(GetAptomiBaseDir() + "/**/*.*")
-//	for _, f := range files {
-//		err := os.Remove(f)
-//		if err != nil {
-//			debug.WithFields(log.Fields{
-//				"file":  f,
-//				"error": err,
-//			}).Fatal("Unable to remove file")
-//		}
-//	}
-//
-//	if len(files) > 0 {
-//		fmt.Printf("Aptomi state is now empty. Deleted %d objects\n", len(files))
-//	} else {
-//		fmt.Println("Aptomi state is empty")
-//	}
-//}
+// ResetAptomiState fully resets aptomi state by deleting all files and directories from its database
+// That includes all revisions of policy, resolution data, logs, etc
+func ResetAptomiState() {
+	debug.WithFields(log.Fields{
+		"baseDir": GetAptomiBaseDir(),
+	}).Info("Resetting aptomi state")
+
+	deleteDirectoryContents(GetAptomiBaseDir())
+
+	fmt.Println("Aptomi state is now empty. Deleted all objects")
+}
 
 // Serialize object into YAML
 func serializeObject(t interface{}) string {
