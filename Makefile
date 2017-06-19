@@ -13,9 +13,6 @@ test:
 
 .PHONY: clean-run-noop
 clean-run-noop:
-	$$(go env GOPATH)/bin/aptomi policy reset --force
-	$$(go env GOPATH)/bin/aptomi policy apply --noop
-	./tools/demo-init.sh
 	$$(go env GOPATH)/bin/aptomi policy apply --noop
 
 .PHONY: smoke
