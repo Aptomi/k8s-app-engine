@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // todo enforce login/logout to work only through POST
@@ -25,7 +26,7 @@ import (
 
 func staticFilesHandler(path string, root http.FileSystem) http.Handler {
 	return http.StripPrefix(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "login.html" {
+		if r.URL.Path != "login.html" || strings.HasPrefix(r.URL.Path, "/img") {
 			if isUnauthorized(r) {
 				http.Redirect(w, r, "/ui/login.html", http.StatusTemporaryRedirect)
 				return
