@@ -3,36 +3,33 @@ package slinga
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Fprint(w, "Welcome!\n")
-}
-
-func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
-}
-
-func Endpoints(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func serveEndpoints(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := LoadServiceUsageState()
 
 	endpoints := state.Endpoints()
 
+	// todo handle errors
 	res, _ := json.Marshal(endpoints)
 	fmt.Fprint(w, string(res))
 }
 
 func Serve(host string, port int) {
-	router := httprouter.New()
-	router.GET("/", Index)
-	router.GET("/hello/:name", Hello)
-	router.GET("/api/endpoints", Endpoints)
-	router.ServeFiles("/static/*filepath", http.Dir("public/static"))
+	// redirect from "/" to "/ui/"
+	http.Handle("/", http.RedirectHandler("/ui/", http.StatusPermanentRedirect))
+
+	// serve all files from "webui" folder as is at /ui/ path
+	http.Handle("/ui/", http.StripPrefix("/ui/", http.FileServer(http.Dir("./webui"))))
+
+	// serve all API endpoints at /api/ path
+	http.HandleFunc("/api/endpoints", serveEndpoints)
+
+	//http.HandleFunc()
 
 	fmt.Println("Serving")
 	// todo handle error returned from ListenAndServe (path to Fatal??)
-	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), router)
+	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil)
 }
