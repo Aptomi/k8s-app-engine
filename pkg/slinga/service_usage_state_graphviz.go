@@ -204,7 +204,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 		component := keyArray[3]
 
 		// only add edges to "root" components (i.e. services)
-		if component != componentRootName {
+		if component != ComponentRootName {
 			continue
 		}
 

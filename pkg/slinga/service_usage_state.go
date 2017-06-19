@@ -4,8 +4,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-const componentRootName = "root"
-
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
 type ServiceUsageState struct {
 	// reference to a policy

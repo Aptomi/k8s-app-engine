@@ -36,7 +36,8 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
-	writeJSON(w, visibility.GetServiceViewObject(state))
+	svo := visibility.NewServiceViewObject("analytics_pipeline", state)
+	writeJSON(w, svo.GetData())
 }
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI

@@ -101,56 +101,60 @@
                                 </div>
                             </div>
                             <div class="ibox-content">
-<!--
-                                <div class="row">
-                                    <div class="col-sm-9 m-b-xs">
-                                        <div data-toggle="buttons" class="btn-group">
-                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option1"
-                                                                                        name="options"> Day </label>
-                                            <label class="btn btn-sm btn-white active"> <input type="radio" id="option2"
-                                                                                               name="options"> Week
-                                            </label>
-                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option3"
-                                                                                        name="options"> Month </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="input-group"><input type="text" placeholder="Search"
-                                                                        class="input-sm form-control"> <span
-                                                class="input-group-btn">
-                                        <button type="button" class="btn btn-sm btn-primary"> Go!</button> </span></div>
-                                    </div>
-                                </div>
--->
+                                <!--
+                                                                <div class="row">
+                                                                    <div class="col-sm-9 m-b-xs">
+                                                                        <div data-toggle="buttons" class="btn-group">
+                                                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option1"
+                                                                                                                        name="options"> Day </label>
+                                                                            <label class="btn btn-sm btn-white active"> <input type="radio" id="option2"
+                                                                                                                               name="options"> Week
+                                                                            </label>
+                                                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option3"
+                                                                                                                        name="options"> Month </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-3">
+                                                                        <div class="input-group"><input type="text" placeholder="Search"
+                                                                                                        class="input-sm form-control"> <span
+                                                                                class="input-group-btn">
+                                                                        <button type="button" class="btn btn-sm btn-primary"> Go!</button> </span></div>
+                                                                    </div>
+                                                                </div>
+                                -->
 
                                 <div id="mynetwork"></div>
                                 <script type="text/javascript">
-                                    var dataJSON = loadJSON("/api/service-view", jsonLoaded, function(err) {console.log('error')});
+                                    var dataJSON = loadJSON("/api/service-view", jsonLoaded, function (err) {
+                                        console.log('error')
+                                    });
 
                                     // create a network
                                     var container = document.getElementById('mynetwork');
                                     var options = {
                                         nodes: {
-                                            shape: 'dot',
-                                            size: 20,
                                             font: {
-                                                size: 15,
-                                                color: '#ffffff'
+                                                size: 12,
+                                                color: 'white'
                                             },
                                             borderWidth: 2
                                         },
                                         edges: {
-                                            width: 2
+                                            width: 1,
+                                            font: {
+                                                strokeWidth: 0,
+                                                color: 'white'
+                                            }
                                         },
                                         groups: {
-                                            diamonds: {
+                                            service: {
                                                 color: {background: 'red', border: 'white'},
-                                                shape: 'diamond'
+                                                shape: 'ellipse'
                                             },
-                                            dotsWithLabel: {
-                                                label: "I'm a dot!",
-                                                shape: 'dot',
-                                                color: 'cyan'
+                                            serviceInstance: {
+                                                font: {color: 'black'},
+                                                color: {background: 'rgb(0,255,140)', border: 'black'},
+                                                shape: 'box'
                                             },
                                             mints: {color: 'rgb(0,255,140)'},
                                             icons: {
@@ -164,6 +168,12 @@
                                             },
                                             source: {
                                                 color: {border: 'white'}
+                                            }
+                                        },
+                                        physics: {
+                                            barnesHut: {
+                                                gravitationalConstant: -10000,
+                                                avoidOverlap: 1
                                             }
                                         }
                                     };

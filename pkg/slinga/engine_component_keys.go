@@ -2,13 +2,15 @@ package slinga
 
 import "strings"
 
+const ComponentRootName = "root"
+
 // Create key for the map
 func createServiceUsageKey(service *Service, context *Context, allocation *Allocation, component *ServiceComponent) string {
 	var componentName string
 	if component != nil {
 		componentName = component.Name
 	} else {
-		componentName = componentRootName
+		componentName = ComponentRootName
 	}
 	return createServiceUsageKeyFromStr(service.Name, context.Name, allocation.NameResolved, componentName)
 }
