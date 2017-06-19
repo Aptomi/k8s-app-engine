@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./webui/favicon.ico")
+}
+
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
@@ -17,6 +21,8 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI
 func Serve(host string, port int) {
+	http.HandleFunc("/favicon.ico", faviconHandler)
+
 	// redirect from "/" to "/ui/"
 	http.Handle("/", http.RedirectHandler("/ui/", http.StatusPermanentRedirect))
 
