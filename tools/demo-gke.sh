@@ -53,6 +53,8 @@ function main() {
     firewall_rules_name=demo-firewall-open-all
     firewall_rules="--allow tcp"
 
+    helm_tiller_image="frostman/kubernetes-helm-tiller:2.3.1"
+
     demo_namespace=demo
     # end of defaults
 
@@ -71,13 +73,13 @@ function main() {
         gke_cluster_wait_alive $cluster_big_name $cluster_big_region
         gke_cluster_kubectl_setup $cluster_big_name $cluster_big_region $demo_namespace
         k8s_alive $cluster_big_name
-        helm_init $cluster_big_name
+        helm_init $cluster_big_name $helm_tiller_image
 
         # wait until small cluster is alive and setup
         gke_cluster_wait_alive $cluster_small_name $cluster_small_region
         gke_cluster_kubectl_setup $cluster_small_name $cluster_small_region $demo_namespace
         k8s_alive $cluster_small_name
-        helm_init $cluster_small_name
+        helm_init $cluster_small_name $helm_tiller_image
 
         log "Applying some magic to increase chance that gcloud tokens will work"
         k8s_alive $cluster_big_name 1>/dev/null 2>/dev/null
@@ -414,9 +416,10 @@ function helm_cleanup() {
 
 function helm_init() {
     name="$1"
+    helm_tiller_image="$2"
 
     if ! helm_alive $name ; then
-        if ! helm --kube-context $name init 2>/dev/null ; then
+        if ! helm --kube-context $name init --tiller-image "$helm_tiller_image" 2>/dev/null ; then
             log "Helm init failed in cluster $name"
             exit 1
         fi
