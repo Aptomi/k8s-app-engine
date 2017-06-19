@@ -9,12 +9,12 @@ type FakeCodeExecutor struct {
 }
 
 // NewFakeCodeExecutor constructs FakeCodeExecutor from given *Code
-func NewFakeCodeExecutor(code *Code, key string, codeMetadata map[string]string, codeParams NestedParameterMap, clusters map[string]*Cluster) FakeCodeExecutor {
+func NewFakeCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster) FakeCodeExecutor {
 	return FakeCodeExecutor{Code: code}
 }
 
 // NewFakeCodeExecutorWithDelay constructs FakeCodeExecutor from given *Code with specified delay
-func NewFakeCodeExecutorWithDelay(code *Code, key string, codeMetadata map[string]string, codeParams NestedParameterMap, clusters map[string]*Cluster, delay time.Duration) FakeCodeExecutor {
+func NewFakeCodeExecutorWithDelay(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster, delay time.Duration) FakeCodeExecutor {
 	return FakeCodeExecutor{Code: code, Delay: delay}
 }
 

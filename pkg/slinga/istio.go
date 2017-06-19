@@ -131,7 +131,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	}
 
 	if !usage.Policy.Rules.allowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
-		codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, usage.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
+		codeExecutor, err := component.Code.GetCodeExecutor(key, usage.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
 		if err != nil {
 			return nil, err
 		}

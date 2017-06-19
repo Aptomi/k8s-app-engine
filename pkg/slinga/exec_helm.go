@@ -30,7 +30,7 @@ type HelmCodeExecutor struct {
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
-func NewHelmCodeExecutor(code *Code, key string, codeMetadata map[string]string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
+func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
 	// First of all, redirect Helm/grpc logging to our own debug stream
 	// We don't want these messages to be printed to Stdout/Stderr
 	grpclog.SetLogger(debug)
@@ -39,7 +39,7 @@ func NewHelmCodeExecutor(code *Code, key string, codeMetadata map[string]string,
 	if clusterName, ok := codeParams["cluster"].(string); !ok {
 		return nil, errors.New("Cluster param should be defined")
 	} else if cluster, ok := clusters[clusterName]; ok {
-		exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Metadata: codeMetadata, Params: codeParams}
+		exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Metadata: code.Metadata, Params: codeParams}
 		err := exec.setupTillerConnection()
 		if err != nil {
 			return nil, err

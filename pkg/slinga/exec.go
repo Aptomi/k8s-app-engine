@@ -14,14 +14,14 @@ type CodeExecutor interface {
 }
 
 // GetCodeExecutor returns an executor based on code.Type
-func (code *Code) GetCodeExecutor(key string, codeMetadata map[string]string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
+func (code *Code) GetCodeExecutor(key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
-		return NewHelmCodeExecutor(code, key, codeMetadata, codeParams, clusters)
+		return NewHelmCodeExecutor(code, key, codeParams, clusters)
 	case "aptomi/code/unittests", "unittests":
-		return NewFakeCodeExecutor(code, key, codeMetadata, codeParams, clusters), nil
+		return NewFakeCodeExecutor(code, key, codeParams, clusters), nil
 	case "aptomi/code/withdelay", "delay":
-		return NewFakeCodeExecutorWithDelay(code, key, codeMetadata, codeParams, clusters, 100*time.Millisecond), nil
+		return NewFakeCodeExecutorWithDelay(code, key, codeParams, clusters, 100*time.Millisecond), nil
 	default:
 		return nil, errors.New("CodeExecutor not found: " + code.Type)
 	}

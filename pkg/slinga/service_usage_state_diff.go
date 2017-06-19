@@ -428,7 +428,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -471,7 +471,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				}).Info("Updating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Next.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -514,7 +514,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				}).Info("Destructing component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, component.Code.Metadata, diff.Prev.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Prev.getResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
 					if err != nil {
 						return err
 					}
