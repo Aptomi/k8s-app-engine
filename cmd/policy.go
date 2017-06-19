@@ -72,26 +72,6 @@ var policyCmdApply = &cobra.Command{
 	},
 }
 
-/*
-var policyCmdAdd = &cobra.Command{
-	Use:   "add",
-	Short: "Add objects to the policy (or edit existing objects)",
-	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-
-var policyCmdDelete = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete objects from the policy",
-	Long:  "",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-*/
-
 var policyCmdReset = &cobra.Command{
 	Use:   "reset",
 	Short: "Reset policy and delete all objects in it",
@@ -109,38 +89,6 @@ var policyCmdReset = &cobra.Command{
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
 	policyCmd.AddCommand(policyCmdReset)
-
-	/*
-		policyCmd.AddCommand(policyCmdAdd)
-		policyCmd.AddCommand(policyCmdDelete)
-	*/
-
-	/*
-		for k := range slinga.AptomiObjectsCanBeModified {
-			command := &cobra.Command{
-				Use:   k,
-				Short: fmt.Sprintf("Add one or more %s to the policy", k),
-				Long:  "",
-				Run: func(cmd *cobra.Command, args []string) {
-					slinga.AddObjectsToPolicy(slinga.AptomiObjectsCanBeModified[cmd.Use], args...)
-				},
-			}
-			policyCmdAdd.AddCommand(command)
-		}
-
-		for k := range slinga.AptomiObjectsCanBeModified {
-			command := &cobra.Command{
-				Use:   k,
-				Short: fmt.Sprintf("Delete one or more %s from the policy", k),
-				Long:  "",
-				Run: func(cmd *cobra.Command, args []string) {
-					slinga.RemoveObjectsFromPolicy(slinga.AptomiObjectsCanBeModified[cmd.Use], args...)
-				},
-			}
-			policyCmdDelete.AddCommand(command)
-		}
-	*/
-
 	RootCmd.AddCommand(policyCmd)
 
 	// Flags for the apply command
@@ -148,7 +96,7 @@ func init() {
 	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "In addition to applying changes, re-create missing instances (if they were manually deleted from the underlying cloud) and update running instances")
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
-	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", false, "Trace all dependencies and print how rules got evaluated")
+	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", true, "Trace all dependencies and log how rules got evaluated")
 
 	// Flags for the reset command
 	policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")

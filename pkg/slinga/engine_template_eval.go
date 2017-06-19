@@ -46,7 +46,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 	if template == nil {
 		return nil, nil
 	}
-	tracing.Printf(depth+1, "Component: %s (%s)", component.Name, templateType)
+	trace.Printf(depth+1, "Component: %s (%s)", component.Name, templateType)
 
 	// Create a copy of discovery tree, so we can add our own instance into it
 	discoveryTreeCopy := discoveryTree.makeCopy()
@@ -77,7 +77,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
 			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, tData)
-			tracing.Printf(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
+			trace.Printf(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
 			if err != nil {
 				return nil, err
 			}

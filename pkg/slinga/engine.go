@@ -17,14 +17,14 @@ func (usage *ServiceUsageState) ResolveAllDependencies() error {
 			node := usage.newResolutionNode(d)
 
 			// see if it needs to be traced (addl debug output on console)
-			tracing.setEnable(d.Trace)
+			trace.setEnable(d.Trace)
 
 			// resolve usage via applying policy
 			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
 			err := usage.resolveDependency(node, usage.ResolvedUsage)
 
 			// disable tracing
-			tracing.setEnable(false)
+			trace.setEnable(false)
 
 			// see if there is an error
 			if err != nil {

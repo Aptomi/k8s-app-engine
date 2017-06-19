@@ -102,18 +102,18 @@ func (node *resolutionNode) debugResolvingDependency() {
 		"labels":  node.labels,
 	}).Info("Resolving allocations for service")
 
-	tracing.Printf(node.depth, "[Dependency]")
-	tracing.Printf(node.depth, "User: %s (ID = %s)", node.user.Name, node.user.ID)
-	tracing.Printf(node.depth+1, "Labels: %s", node.labels)
-	tracing.Printf(node.depth, "Service: %s", node.serviceName)
+	trace.Printf(node.depth, "[Dependency]")
+	trace.Printf(node.depth, "User: %s (ID = %s)", node.user.Name, node.user.ID)
+	trace.Printf(node.depth+1, "Labels: %s", node.labels)
+	trace.Printf(node.depth, "Service: %s", node.serviceName)
 }
 
 func (node *resolutionNode) debugResolvingContext() {
-	tracing.Printf(node.depth, "Context: %s", node.context.Name)
+	trace.Printf(node.depth, "Context: %s", node.context.Name)
 }
 
 func (node *resolutionNode) debugResolvingAllocation() {
-	tracing.Printf(node.depth, "Allocation: %s", node.allocation.NameResolved)
+	trace.Printf(node.depth, "Allocation: %s", node.allocation.NameResolved)
 }
 
 func (node *resolutionNode) debugResolvingDependencyOnComponent() {
@@ -133,7 +133,7 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 
-		tracing.Println()
+		trace.Println()
 	} else {
 		debug.WithFields(log.Fields{
 			"service":   node.service.Name,
@@ -158,7 +158,7 @@ func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) 
 	// Locate the service
 	service := policy.Services[node.serviceName]
 	if service == nil {
-		tracing.Printf(node.depth+1, "Error while trying to look up service %s (not found)", node.serviceName)
+		trace.Printf(node.depth+1, "Error while trying to look up service %s (not found)", node.serviceName)
 		return nil, errors.New("Service " + node.serviceName + " not found")
 	}
 	return service, nil
@@ -169,7 +169,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	// Locate the list of contexts for service
 	contexts, ok := policy.Contexts[node.service.Name]
 	if !ok || len(contexts) <= 0 {
-		tracing.Printf(node.depth+1, "Error while matching context for service %s (no contexts found)", node.service.Name)
+		trace.Printf(node.depth+1, "Error while matching context for service %s (no contexts found)", node.service.Name)
 		return nil, errors.New("No contexts found for " + node.service.Name)
 	}
 
@@ -177,7 +177,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	var contextMatched *Context
 	for _, c := range contexts {
 		m := c.matches(node.labels)
-		tracing.Printf(node.depth+1, "[%t] Testing context '%s': (criteria = %+v)", m, c.Name, c.Criteria)
+		trace.Printf(node.depth+1, "[%t] Testing context '%s': (criteria = %+v)", m, c.Name, c.Criteria)
 		if m {
 			contextMatched = c
 			break
@@ -191,7 +191,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 			"user":    node.user.Name,
 		}).Info("Matched context")
 	} else {
-		tracing.Printf(node.depth+1, "No context matched for service %s", node.service.Name)
+		trace.Printf(node.depth+1, "No context matched for service %s", node.service.Name)
 		debug.WithFields(log.Fields{
 			"service": node.service.Name,
 			"user":    node.user.Name,
@@ -203,7 +203,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 // Helper to get a matched allocation
 func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, error) {
 	if len(node.context.Allocations) <= 0 {
-		tracing.Printf(node.depth, "Error while matching allocation for service %s, context %s (no allocations found)", node.service.Name, node.context.Name)
+		trace.Printf(node.depth, "Error while matching allocation for service %s, context %s (no allocations found)", node.service.Name, node.context.Name)
 		return nil, errors.New("No allocations found for " + node.service.Name)
 	}
 
@@ -211,7 +211,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	var allocationMatched *Allocation
 	for _, a := range node.context.Allocations {
 		m := a.matches(node.labels)
-		tracing.Printf(node.depth+1, "[%t] Testing allocation '%s': (criteria = %+v)", m, a.Name, a.Criteria)
+		trace.Printf(node.depth+1, "[%t] Testing allocation '%s': (criteria = %+v)", m, a.Name, a.Criteria)
 		if !m {
 			continue
 		}
@@ -256,7 +256,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 			"user":               node.user.Name,
 		}).Info("Matched allocation")
 	} else {
-		tracing.Printf(node.depth+1, "No allocation matched for service %s, context %s", node.service.Name, node.context.Name)
+		trace.Printf(node.depth+1, "No allocation matched for service %s, context %s", node.service.Name, node.context.Name)
 		debug.WithFields(log.Fields{
 			"service": node.service.Name,
 			"context": node.context.Name,
@@ -270,7 +270,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
 	result := labels.applyTransform(operations)
 	if !labels.equal(result) {
-		tracing.Printf(node.depth+1, "Labels changed: %s", result)
+		trace.Printf(node.depth+1, "Labels changed: %s", result)
 	}
 	return result
 }

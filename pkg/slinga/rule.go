@@ -39,7 +39,7 @@ func (globalRules *GlobalRules) allowsAllocation(allocation *Allocation, labels 
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
 			m := rule.FilterServices.match(labels, node.user, cluster)
-			tracing.Printf(node.depth+1, "[%t] Testing allocation '%s': (global rule '%s')", !m, allocation.Name, rule.Name)
+			trace.Printf(node.depth+1, "[%t] Testing allocation '%s': (global rule '%s')", !m, allocation.Name, rule.Name)
 			if m {
 				for _, action := range rule.Actions {
 					if action.Type == "dependency" && action.Content == "forbid" {
