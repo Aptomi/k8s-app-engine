@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/server"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +10,7 @@ var serverCmd = &cobra.Command{
 	Short: "Server",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		slinga.Serve("", 8080)
+		server.Serve("", 8080)
 	},
 }
 
