@@ -1,0 +1,8 @@
+- userid: 100
+  service: twitter_stats
+  labels:
+    # TODO: remove stage def from here
+    tstype: stage
+    tsvisimage: demo-v61
+    # Mexico
+    locations: -119.883662,13.301958,-91.780634,27.018021

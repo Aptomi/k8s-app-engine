@@ -1,0 +1,10 @@
+name: cluster-us-west
+
+type: kubernetes
+
+#labels:
+#  compromised: true
+
+metadata:
+  kubecontext: cluster-us-west
+  namespace: demo

@@ -1,0 +1,15 @@
+name: prod
+
+# This context describes kafka in production
+service: kafka
+
+# This context is for people from it/analytics_ops_team (they control production instance)
+criteria:
+  accept:
+    - org == 'it' && is_operator
+
+# In production:
+# - service will be deployed in a cluster specified by label
+# - as a single production instance
+allocations:
+  - name: "production"

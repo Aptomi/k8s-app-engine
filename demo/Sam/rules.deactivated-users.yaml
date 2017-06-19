@@ -1,0 +1,9 @@
+- name: compromised_users_forbid_all_services
+  filterservices:
+    user:
+      accept:
+        - deactivated
+    labels:
+  actions:
+    - type: ingress
+      content: block

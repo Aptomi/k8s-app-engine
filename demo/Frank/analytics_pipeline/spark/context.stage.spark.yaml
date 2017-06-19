@@ -1,0 +1,15 @@
+name: stage
+
+# This context describes spark in staging
+service: spark
+
+# This context is for people from dev (they can run their instances in stage)
+criteria:
+  accept:
+    - org == 'dev'
+
+# In stage:
+# - service will be deployed in a cluster specified by label
+# - all developers will rely on the same instance
+allocations:
+  - name: "shared"
