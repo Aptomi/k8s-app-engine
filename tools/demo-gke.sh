@@ -32,7 +32,7 @@ function main() {
 
     # TODO(slukjanov): should we load params from config file?
     # defaults
-    k8s_version=1.5.7
+    k8s_version=1.6.4
     disk_size=100
 
     cluster_big_name=cluster-us-west
