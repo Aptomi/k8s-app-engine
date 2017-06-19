@@ -11,10 +11,23 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
+	// prefer explicitly passed username through query
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		username = getUsername(r)
+	}
+
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
 
-	endpoints := state.Endpoints()
+	filterUserId := ""
+	for userId, user := range slinga.LoadUsers().Users {
+		if user.Name == username {
+			filterUserId = userId
+		}
+	}
+
+	endpoints := state.Endpoints(filterUserId)
 
 	writeJSON(w, endpoints)
 }

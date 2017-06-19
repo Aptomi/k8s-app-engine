@@ -25,7 +25,7 @@ var endpointCmdShow = &cobra.Command{
 		// Load the previous usage state
 		state := slinga.LoadServiceUsageState()
 
-		endpoints := state.Endpoints()
+		endpoints := state.Endpoints("")
 
 		var keys []string
 		for key := range endpoints {

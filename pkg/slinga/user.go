@@ -49,3 +49,8 @@ func LoadUsersFromDir(baseDir string) GlobalUsers {
 
 	return r
 }
+
+// LoadUsers loads users from current users.yaml
+func LoadUsers() GlobalUsers {
+	return LoadUsersFromDir(GetAptomiBaseDir())
+}
