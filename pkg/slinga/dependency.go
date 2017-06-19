@@ -1,10 +1,7 @@
 package slinga
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"sort"
 )
 
@@ -36,6 +33,16 @@ func (src *GlobalDependencies) count() int {
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
 func NewGlobalDependencies() GlobalDependencies {
 	return GlobalDependencies{Dependencies: make(map[string][]*Dependency)}
+}
+
+// LoadDependenciesFromFile loads all dependencies from a given file
+func LoadDependenciesFromFile(fileName string) GlobalDependencies {
+	r := NewGlobalDependencies()
+	t := loadDependenciesFromFile(fileName)
+	for _, d := range t {
+		r.Dependencies[d.Service] = append(r.Dependencies[d.Service], d)
+	}
+	return r
 }
 
 // Apply set of transformations to labels
@@ -85,34 +92,6 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 	for _, f := range files {
 		dependencies := LoadDependenciesFromFile(f)
 		r = r.appendDependencies(dependencies)
-	}
-	return r
-}
-
-// LoadDependenciesFromFile loads all dependencies from a given file
-func LoadDependenciesFromFile(fileName string) GlobalDependencies {
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Debug("Loading dependencies")
-
-	dat, e := ioutil.ReadFile(fileName)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := []*Dependency{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal dependencies")
-	}
-	r := NewGlobalDependencies()
-	for _, d := range t {
-		r.Dependencies[d.Service] = append(r.Dependencies[d.Service], d)
 	}
 	return r
 }

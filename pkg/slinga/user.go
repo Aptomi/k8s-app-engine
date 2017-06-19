@@ -1,10 +1,7 @@
 package slinga
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 )
 
 /*
@@ -39,28 +36,14 @@ func LoadUserByIDFromDir(baseDir string, id string) *User {
 func LoadUsersFromDir(baseDir string) GlobalUsers {
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeUsers))
 	r := GlobalUsers{Users: make(map[string]*User)}
-	for _, f := range files {
-		debug.WithFields(log.Fields{
-			"file": f,
-		}).Debug("Loading users")
+	for _, fileName := range files {
+		t := loadUsersFromFile(fileName)
+		for _, u := range t {
+			// load secrets
+			u.Secrets = LoadUserSecretsByIDFromDir(baseDir, u.ID)
 
-		dat, e := ioutil.ReadFile(f)
-		if e == nil {
-			t := []*User{}
-			e = yaml.Unmarshal([]byte(dat), &t)
-			if e != nil {
-				debug.WithFields(log.Fields{
-					"file":  f,
-					"error": e,
-				}).Fatal("Unable to unmarshal users")
-			}
-			for _, u := range t {
-				// load secrets
-				u.Secrets = LoadUserSecretsByIDFromDir(baseDir, u.ID)
-
-				// add user
-				r.Users[u.ID] = u
-			}
+			// add user
+			r.Users[u.ID] = u
 		}
 	}
 

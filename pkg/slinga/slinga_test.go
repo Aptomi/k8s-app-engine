@@ -10,6 +10,8 @@ func TestLoadPolicy(t *testing.T) {
 
 	assert.Equal(t, 2, len(state.Services), "Two services should be loaded")
 
+	assert.Equal(t, 2, len(state.Clusters), "Two clusters should be loaded")
+
 	assert.Equal(t, 2, len(state.Contexts["kafka"]), "Two contexts should be loaded for kafka")
 	assert.Equal(t, "kafka", state.Services["kafka"].Name, "Service name should be correct")
 	assert.Equal(t, 3, len(state.Services["kafka"].Components), "Service should have components")

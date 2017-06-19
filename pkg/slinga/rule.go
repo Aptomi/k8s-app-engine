@@ -3,8 +3,6 @@ package slinga
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"sort"
 )
 
@@ -128,27 +126,4 @@ func (globalRules *GlobalRules) insertRules(appendRules ...*Rule) {
 
 func (globalRules *GlobalRules) count() int {
 	return countElements(globalRules.Rules)
-}
-
-func loadRulesFromFile(fileName string) []*Rule {
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Debug("Loading rules")
-
-	dat, e := ioutil.ReadFile(fileName)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := []*Rule{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal rules")
-	}
-	return t
 }

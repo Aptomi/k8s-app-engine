@@ -4,8 +4,6 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"path/filepath"
 )
 
@@ -44,44 +42,10 @@ func GetLastRevision(baseDir string) AptomiRevision {
 	return loadRevisionFromFile(files[0])
 }
 
-func loadRevisionFromFile(fileName string) AptomiRevision {
-	dat, e := ioutil.ReadFile(fileName)
-
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-
-	var t = AptomiRevision(lastRevisionAbsentValue)
-	e = yaml.Unmarshal([]byte(dat), &t)
-
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal revision")
-	}
-
-	return t
-}
-
 // SaveLastRevision stores last revision in a file under Aptomi DB
 func (revision AptomiRevision) saveAsLastRevision() {
 	fileName := GetAptomiObjectWriteFileGlobal(GetAptomiBaseDir(), TypeRevision)
-
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Info("Saving last revision")
-
-	e := ioutil.WriteFile(fileName, []byte(serializeObject(revision)), 0644)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to save revision")
-	}
+	saveObjectToFile(fileName, revision)
 }
 
 // Saves contents of the current run

@@ -2,9 +2,6 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 const componentRootName = "root"
@@ -143,52 +140,11 @@ func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key str
 func LoadServiceUsageState() ServiceUsageState {
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
 	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision, TypePolicyResolution, "db.yaml")
-
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Info("Loading service usage state")
-
-	dat, e := ioutil.ReadFile(fileName)
-
-	// If the file doesn't exist, it means that DB is empty and we are starting from scratch
-	if os.IsNotExist(e) {
-		debug.WithFields(log.Fields{
-			"file": fileName,
-		}).Info("Previous service usage state not found. Returning empty state")
-		return ServiceUsageState{}
-	}
-
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file", e)
-	}
-
-	t := ServiceUsageState{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal service usage state")
-	}
-	return t
+	return loadServiceUsageStateFromFile(fileName)
 }
 
 // SaveServiceUsageState stores usage state in a file under Aptomi DB
 func (usage ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
-
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Info("Saving service usage state")
-
-	e := ioutil.WriteFile(fileName, []byte(serializeObject(usage)), 0644)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to save service usage state")
-	}
+	saveObjectToFile(fileName, usage)
 }

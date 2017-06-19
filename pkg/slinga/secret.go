@@ -1,10 +1,7 @@
 package slinga
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"sort"
 )
 
@@ -27,31 +24,6 @@ func loadUserSecretsFromDir(baseDir string) []*UserSecrets {
 	for _, f := range files {
 		t = append(t, loadUserSecretsFromFile(f)...)
 	}
-	return t
-}
-
-func loadUserSecretsFromFile(fileName string) []*UserSecrets {
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Debug("Loading secrets")
-
-	dat, e := ioutil.ReadFile(fileName)
-
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := []*UserSecrets{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal secrets")
-	}
-
 	return t
 }
 

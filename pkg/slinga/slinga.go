@@ -4,8 +4,6 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"sort"
 )
 
@@ -67,7 +65,7 @@ type Service struct {
 	// Lazily evaluated field (all components topologically sorted). Use via getter
 	componentsOrdered []*ServiceComponent
 
-	// Lazily evaluated field (not serialized). Use via getter
+	// Lazily evaluated field. Use via getter
 	componentsMap map[string]*ServiceComponent
 }
 
@@ -150,78 +148,6 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	return s
 }
 
-// Loads service from YAML file
-func loadServiceFromFile(fileName string) *Service {
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Info("Loading service")
-
-	dat, e := ioutil.ReadFile(fileName)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := Service{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal service")
-	}
-	return &t
-}
-
-// Loads context from YAML file
-func loadContextFromFile(fileName string) *Context {
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Info("Loading context")
-
-	dat, e := ioutil.ReadFile(fileName)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := Context{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal context")
-	}
-	return &t
-}
-
-// Loads cluster from YAML file
-func loadClusterFromFile(fileName string) *Cluster {
-	debug.WithFields(log.Fields{
-		"file": fileName,
-	}).Info("Loading cluster")
-
-	dat, e := ioutil.ReadFile(fileName)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to read file")
-	}
-	t := Cluster{}
-	e = yaml.Unmarshal([]byte(dat), &t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"file":  fileName,
-			"error": e,
-		}).Fatal("Unable to unmarshal cluster")
-	}
-	return &t
-}
-
 // ResetAptomiState fully resets aptomi state by deleting all files and directories from its database
 // That includes all revisions of policy, resolution data, logs, etc
 func ResetAptomiState() {
@@ -239,29 +165,4 @@ func ResetAptomiState() {
 	}
 
 	fmt.Println("Aptomi state is now empty. Deleted all objects")
-}
-
-// Serialize object into YAML
-func serializeObject(t interface{}) string {
-	d, e := yaml.Marshal(&t)
-	if e != nil {
-		debug.WithFields(log.Fields{
-			"object": t,
-			"error":  e,
-		}).Fatal("Can't serialize object", e)
-	}
-	return string(d)
-}
-
-// Prints slinga object onto screen
-//noinspection GoUnusedFunction
-func printObject(t interface{}) {
-	fmt.Printf("--- dump:\n%s\n", serializeObject(t))
-
-	m := make(map[interface{}]interface{})
-	e := yaml.Unmarshal([]byte(serializeObject(t)), &m)
-	if e != nil {
-		fmt.Printf("error: %v", e)
-	}
-	fmt.Printf("%v\n\n", m)
 }
