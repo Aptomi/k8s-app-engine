@@ -13,6 +13,7 @@ var show bool
 var full bool
 var verbose bool
 var trace bool
+var emulateDeployment bool
 
 // For reset command
 var force bool
@@ -63,12 +64,13 @@ var policyCmdApply = &cobra.Command{
 			visual.OpenInPreview()
 		}
 
-		// Apply changes
-		diff.Apply(noop)
+		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
+		diff.Apply(noop || emulateDeployment)
 
 		// If everything is successful, then increment revision and save run
+		// if emulateDeployment == true --> we set noop to false to write state on disk)
 		revision := slinga.GetLastRevision(slinga.GetAptomiBaseDir())
-		diff.ProcessSuccessfulExecution(revision, noop)
+		diff.ProcessSuccessfulExecution(revision, noop && !emulateDeployment)
 	},
 }
 
@@ -97,6 +99,7 @@ func init() {
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
 	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", true, "Trace all dependencies and log how rules got evaluated")
+	policyCmdApply.Flags().BoolVarP(&emulateDeployment, "emulate", "e", false, "Process a policy, do not deploy anything (emulate deployment), save state to the database")
 
 	// Flags for the reset command
 	policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
