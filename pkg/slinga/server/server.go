@@ -15,6 +15,7 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, endpoints)
 }
 
+// Serve starts http server on specified address that serves Aptomi API and WebUI
 func Serve(host string, port int) {
 	// redirect from "/" to "/ui/"
 	http.Handle("/", http.RedirectHandler("/ui/", http.StatusPermanentRedirect))
