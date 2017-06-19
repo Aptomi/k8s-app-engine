@@ -9,6 +9,7 @@ import (
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/kubernetes/pkg/api"
+	k8serrors "k8s.io/kubernetes/pkg/api/errors"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	internalversioncore "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	"k8s.io/kubernetes/pkg/client/restclient"
@@ -269,17 +270,16 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 		}
 	}
 
-	// Check all corresponding istio ingresses
-	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
-	if err != nil {
-		return nil, err
-	}
-
 	// Find Istio Ingress service (how ingress itself exposed)
 	service, err := coreClient.Services(exec.Cluster.Metadata.Namespace).Get("istio-ingress")
 	if err != nil {
+		// return if there is no Istio deployed
+		if k8serrors.IsNotFound(err) {
+			return endpoints, nil
+		}
 		return nil, err
 	}
+
 	istioIngress := "<unresolved>"
 	if service.Spec.Type == "NodePort" {
 		for _, port := range service.Spec.Ports {
@@ -287,6 +287,12 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 				istioIngress = fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
 			}
 		}
+	}
+
+	// Check all corresponding istio ingresses
+	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
+	if err != nil {
+		return nil, err
 	}
 
 	// todo(slukjanov): support more then one ingress / rule / path
