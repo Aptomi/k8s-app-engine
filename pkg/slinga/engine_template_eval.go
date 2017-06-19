@@ -52,7 +52,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 	discoveryTreeCopy := discoveryTree.makeCopy()
 	discoveryTreeCopy["instance"] = EscapeName(componentKey)
 
-	templateData := templateData{
+	tData := templateData{
 		Labels:    labels.Labels,
 		Discovery: discoveryTreeCopy,
 		User:      user}
@@ -76,7 +76,7 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
-			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, templateData)
+			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, tData)
 			tracing.Printf(depth+2, "Parameter '%s': %s", paramsStr, evaluatedValue)
 			if err != nil {
 				return nil, err
@@ -103,14 +103,14 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 	return result, err
 }
 
-func evaluateCodeParamTemplate(templateStr string, templateData templateData) (string, error) {
+func evaluateCodeParamTemplate(templateStr string, tData templateData) (string, error) {
 	tmpl, err := template.New("").Parse(templateStr)
 	if err != nil {
 		return "", errors.New("Invalid template " + templateStr)
 	}
 
 	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, templateData)
+	err = tmpl.Execute(&doc, tData)
 
 	if err != nil {
 		return "", errors.New("Cannot evaluate template " + templateStr)
