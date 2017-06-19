@@ -14,11 +14,11 @@ func countElements(m interface{}) int {
 	switch v.Kind() {
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < v.Len(); i++ {
-			result += countElements(v.Index(i))
+			result += countElements(v.Index(i).Interface())
 		}
 	case reflect.Map:
 		for _, key := range v.MapKeys() {
-			result += countElements(v.MapIndex(key))
+			result += countElements(v.MapIndex(key).Interface())
 		}
 	default:
 		result++
