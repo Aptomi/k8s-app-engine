@@ -9,4 +9,7 @@ make install
 aptomi policy reset --force
 
 # Sync demo policy
-./tools/demo-sync.sh
+git clone https://github.com/Frostman/aptomi-demo $APTOMI_DB/aptomi-demo
+
+# Run aptomi policy apply in noop mode
+aptomi policy apply --noop
