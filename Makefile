@@ -15,7 +15,7 @@ test:
 clean-run-noop:
 	$(eval TMP := $(shell mktemp -d))
 	APTOMI_DB=$(TMP) && $$(go env GOPATH)/bin/aptomi policy reset --force
-	git clone https://github.com/Frostman/aptomi-demo $(TMP)/aptomi-demo
+	git clone git@github.com:Frostman/aptomi-demo.git $(TMP)/aptomi-demo
 	APTOMI_DB=$(TMP) && $$(go env GOPATH)/bin/aptomi policy apply --noop
 
 .PHONY: smoke
