@@ -44,7 +44,7 @@ func Serve(host string, port int) {
 	http.HandleFunc("/favicon.ico", faviconHandler)
 
 	// redirect from "/" to "/ui/"
-	http.Handle("/", http.RedirectHandler("/ui/", http.StatusPermanentRedirect))
+	http.Handle("/", http.RedirectHandler("/ui/", http.StatusTemporaryRedirect))
 
 	// serve all files from "webui" folder and require auth for everything except login.html
 	http.Handle("/ui/", staticFilesHandler("/ui/", http.Dir("./webui/")))
