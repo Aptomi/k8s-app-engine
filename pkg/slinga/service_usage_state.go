@@ -50,7 +50,8 @@ type ComponentInstance struct {
 	CalculatedDiscovery  NestedParameterMap
 	CalculatedCodeParams NestedParameterMap
 
-	// Graph edges (instance: key -> true) as we are traversing the graph
+	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
+	EdgesIn  map[string]bool
 	EdgesOut map[string]bool
 }
 
@@ -61,6 +62,7 @@ func newComponentInstance() *ComponentInstance {
 		CalculatedLabels:     LabelSet{},
 		CalculatedDiscovery:  NestedParameterMap{},
 		CalculatedCodeParams: NestedParameterMap{},
+		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
 	}
 }
@@ -143,11 +145,11 @@ func (resolvedUsage *ResolvedServiceUsageData) storeLabels(key string, labels La
 }
 
 // Stores an outgoing edge for component instance as we are traversing the graph
-func (resolvedUsage *ResolvedServiceUsageData) storeOutgoingEdge(key string, keyDst string) {
+func (resolvedUsage *ResolvedServiceUsageData) storeEdge(key string, keyDst string) {
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that
-	if len(key) > 0 {
-		cInstance := resolvedUsage.getComponentInstanceEntry(key)
-		cInstance.EdgesOut[keyDst] = true
+	if len(key) > 0 && len(keyDst) > 0 {
+		resolvedUsage.getComponentInstanceEntry(key).EdgesOut[keyDst] = true
+		resolvedUsage.getComponentInstanceEntry(keyDst).EdgesIn[key] = true
 	}
 }
 
