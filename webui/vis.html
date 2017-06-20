@@ -109,8 +109,25 @@
 
                                 <div id="mygraph"></div>
                                 <script type="text/javascript">
-                                    var serviceName = "analytics_pipeline";
-                                    loadJSON("/api/service-view?serviceName=" + serviceName, jsonLoaded, function (err) {
+                                    // can be service-view, consumer-view, or globalops-view
+                                    var view = "consumer-view";
+
+                                    var apiPath = "/api/" + view;
+                                    if (view === "service-view") {
+                                        // service-view = view from the standpoint of service owner
+                                        var serviceName = "analytics_pipeline";
+                                        apiPath += "?serviceName=" + serviceName;
+                                    } else if (view === "consumer-view") {
+                                        // consumer-view = view from the standpoint of service consumer
+                                        var userId = "100";
+                                        apiPath += "?userId=" + userId;
+                                    } else {
+                                        // globalops-view = view from the standpoint of global IT ops
+                                        var userId = "100";
+                                        apiPath += "?userId=" + userId;
+                                    }
+
+                                    loadJSON(apiPath, jsonLoaded, function (err) {
                                         console.log('error')
                                     });
 
@@ -166,13 +183,37 @@
                                                 color: {background: 'rgb(0,123,199)', border: 'darkslategrey'},
                                                 shape: 'box'
                                             },
-                                            dependency: {
+                                            dependencyShort: {
                                                 shape: 'icon',
                                                 icon: {
                                                     face: 'FontAwesome',
                                                     code: '\uf007',
                                                     size: 50,
                                                     color: 'orange'
+                                                }
+                                            },
+                                            dependencyLongResolved: {
+                                                shape: 'icon',
+                                                font: {
+                                                    multi: 'html',
+                                                },
+                                                icon: {
+                                                    face: 'FontAwesome',
+                                                    code: '\uf234',
+                                                    size: 50,
+                                                    color: 'orange'
+                                                }
+                                            },
+                                            dependencyLongNotResolved: {
+                                                shape: 'icon',
+                                                font: {
+                                                    multi: 'html',
+                                                },
+                                                icon: {
+                                                    face: 'FontAwesome',
+                                                    code: '\uf235',
+                                                    size: 50,
+                                                    color: 'red'
                                                 }
                                             },
                                             mints: {color: 'rgb(0,255,140)'},

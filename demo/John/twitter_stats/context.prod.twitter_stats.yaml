@@ -7,6 +7,8 @@ service: twitter_stats
 criteria:
   accept:
     - org == 'it' && is_operator
+  reject:
+    - meow
 
 # In production:
 # - service will be deployed in us-west

@@ -33,11 +33,18 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, endpoints)
 }
 
+func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
+	state := slinga.LoadServiceUsageState()
+	userId := r.URL.Query().Get("userId")
+	view := visibility.NewConsumerView(userId, state)
+	writeJSON(w, view.GetData())
+}
+
 func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	serviceName := r.URL.Query().Get("serviceName")
-	svo := visibility.NewServiceView(serviceName, state)
-	writeJSON(w, svo.GetData())
+	view := visibility.NewServiceView(serviceName, state)
+	writeJSON(w, view.GetData())
 }
 
 func objectViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +67,7 @@ func Serve(host string, port int) {
 	// serve all API endpoints at /api/ path and require auth
 	http.Handle("/api/endpoints", requireAuth(endpointsHandler))
 	http.Handle("/api/service-view", requireAuth(serviceViewHandler))
+	http.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
 	http.Handle("/api/object-view", requireAuth(objectViewHandler))
 
 	// serve login/logout api without auth

@@ -7,3 +7,15 @@
     tsvisimage: demo-v61
     # Mexico
     locations: -119.883662,13.301958,-91.780634,27.018021
+
+- id: alice_tests_twitter_stats_in_stage_another_time
+  userid: 100
+  service: twitter_stats
+  labels:
+    # TODO: remove stage def from here
+    tstype: stage
+    tsvisimage: demo-v61
+    meow: true
+    # Mexico
+    locations: -119.883662,13.301958,-91.780634,27.018021
+
