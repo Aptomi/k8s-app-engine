@@ -23,11 +23,11 @@ func (svo ServiceViewObject) GetData() interface{} {
 	g.addNode(svcNode)
 
 	// 2 - find all instances of a given service. add them as "instance nodes"
-	for k, _ := range svo.state.ResolvedUsage.ComponentInstanceMap {
+	for k, v := range svo.state.ResolvedUsage.ComponentInstanceMap {
 		service, context, allocation, component := slinga.ParseServiceUsageKey(k)
 		if service == svo.serviceName && component == slinga.ComponentRootName {
 			// add a node with an instance of our service
-			svcInstanceNode := newServiceInstanceNode(service, context, allocation)
+			svcInstanceNode := newServiceInstanceNode(svo.state.Policy.Services[service], context, allocation, v)
 			g.addNode(svcInstanceNode)
 
 			// connect service node and instance node

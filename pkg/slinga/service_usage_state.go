@@ -2,6 +2,7 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"time"
 )
 
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
@@ -29,8 +30,18 @@ type ResolvedServiceUsageData struct {
 	ComponentProcessingOrder    []string
 }
 
+// NewResolvedServiceUsageData creates new empty ResolvedServiceUsageData
+func newResolvedServiceUsageData() *ResolvedServiceUsageData {
+	return &ResolvedServiceUsageData{
+		ComponentInstanceMap:        make(map[string]*ComponentInstance),
+		componentProcessingOrderHas: make(map[string]bool)}
+}
+
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
 type ComponentInstance struct {
+	// When this instance was created
+	CreatedOn time.Time
+
 	// People who are using this component
 	UserIds []string
 
@@ -40,11 +51,19 @@ type ComponentInstance struct {
 	CalculatedCodeParams NestedParameterMap
 }
 
-// NewResolvedServiceUsageData creates new empty ResolvedServiceUsageData
-func NewResolvedServiceUsageData() *ResolvedServiceUsageData {
-	return &ResolvedServiceUsageData{
-		ComponentInstanceMap:        make(map[string]*ComponentInstance),
-		componentProcessingOrderHas: make(map[string]bool)}
+// Creates a new component instance
+func newComponentInstance() *ComponentInstance {
+	return &ComponentInstance{
+		CreatedOn:            time.Now(),
+		CalculatedLabels:     LabelSet{},
+		CalculatedDiscovery:  NestedParameterMap{},
+		CalculatedCodeParams: NestedParameterMap{},
+	}
+}
+
+// GetRunningTime returns the time for long component has been running
+func (instance *ComponentInstance) GetRunningTime() time.Duration {
+	return time.Since(instance.CreatedOn)
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
@@ -53,13 +72,13 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 		Policy:        policy,
 		Dependencies:  dependencies,
 		users:         users,
-		ResolvedUsage: NewResolvedServiceUsageData()}
+		ResolvedUsage: newResolvedServiceUsageData()}
 }
 
 // Records usage event
 func (usage *ServiceUsageState) getResolvedUsage() *ResolvedServiceUsageData {
 	if usage.ResolvedUsage == nil {
-		usage.ResolvedUsage = NewResolvedServiceUsageData()
+		usage.ResolvedUsage = newResolvedServiceUsageData()
 	}
 	return usage.ResolvedUsage
 }
@@ -122,10 +141,7 @@ func (resolvedUsage *ResolvedServiceUsageData) storeLabels(key string, labels La
 // Gets a component instance entry or creates an new entry if it doesn't exist
 func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key string) *ComponentInstance {
 	if _, ok := resolvedUsage.ComponentInstanceMap[key]; !ok {
-		resolvedUsage.ComponentInstanceMap[key] = &ComponentInstance{
-			CalculatedLabels:     LabelSet{},
-			CalculatedDiscovery:  NestedParameterMap{},
-			CalculatedCodeParams: NestedParameterMap{}}
+		resolvedUsage.ComponentInstanceMap[key] = newComponentInstance()
 	}
 	return resolvedUsage.ComponentInstanceMap[key]
 }

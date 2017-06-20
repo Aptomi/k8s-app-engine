@@ -1,27 +1,35 @@
 package visibility
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/time"
+)
 
 type serviceInstanceNode struct {
-	serviceName string
-	context     string
-	allocation  string
+	service    *slinga.Service
+	context    string
+	allocation string
+	instance   *slinga.ComponentInstance
 }
 
-func newServiceInstanceNode(serviceName string, context string, allocation string) graphNode {
-	return serviceInstanceNode{serviceName: serviceName, context: context, allocation: allocation}
+func newServiceInstanceNode(service *slinga.Service, context string, allocation string, instance *slinga.ComponentInstance) graphNode {
+	return serviceInstanceNode{service: service, context: context, allocation: allocation, instance: instance}
 }
 
 func (n serviceInstanceNode) getID() string {
-	return fmt.Sprintf("svc-inst-%s-%s-%s", n.serviceName, n.context, n.allocation)
+	return fmt.Sprintf("svc-inst-%s-%s-%s", n.service.Name, n.context, n.allocation)
 }
 
 func (n serviceInstanceNode) getLabel() string {
 	return fmt.Sprintf(
-		`components: %s
+		`components: %d
 				cluster: %s
-				time: %s`,
-		"TBD", "TBD", "TBD")
+				running: %s`,
+		len(n.service.Components), // TODO: fix
+		n.instance.CalculatedLabels.Labels["cluster"],
+		time.NewDiff(n.instance.GetRunningTime()).Humanize(),
+	)
 }
 
 func (n serviceInstanceNode) getGroup() string {
