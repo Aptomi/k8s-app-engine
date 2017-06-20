@@ -111,11 +111,11 @@ func (node *resolutionNode) debugResolvingDependency() {
 	trace.Printf(node.depth, "Service: %s", node.serviceName)
 }
 
-func (node *resolutionNode) debugResolvingContext() {
+func (node *resolutionNode) debugResolvedContext() {
 	trace.Printf(node.depth, "Context: %s", node.context.Name)
 }
 
-func (node *resolutionNode) debugResolvingAllocation() {
+func (node *resolutionNode) debugResolvedAllocation() {
 	trace.Printf(node.depth, "Allocation: %s", node.allocation.NameResolved)
 }
 

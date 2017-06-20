@@ -65,8 +65,8 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		return nil
 	}
 
-	// Print information that we are starting to resolve context
-	node.debugResolvingContext()
+	// Print that we have resolved context
+	node.debugResolvedContext()
 
 	// Process context and transform labels
 	node.labels = node.transformLabels(node.labels, node.context.Labels)
@@ -81,11 +81,17 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		return nil
 	}
 
-	// Print information that we are starting to resolve allocation
-	node.debugResolvingAllocation()
+	// Print that we have resolved allocation
+	node.debugResolvedAllocation()
 
-	// Process allocation and transform labels
+	// Process allocation, transform
 	node.labels = node.transformLabels(node.labels, node.allocation.Labels)
+
+	// Create service key
+	node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
+
+	// Store labels for service
+	resolvedUsage.storeLabels(node.serviceKey, node.labels)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.service.getComponentsSortedTopologically()
@@ -99,7 +105,7 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		// Create key
 		node.componentKey = createServiceUsageKey(node.service, node.context, node.allocation, node.component)
 
-		// Calculate and store labels
+		// Calculate and store labels for component
 		node.componentLabels = node.transformLabels(node.labels, node.component.Labels)
 		resolvedUsage.storeLabels(node.componentKey, node.componentLabels)
 
@@ -143,7 +149,6 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 
 	// Mark object as resolved and record usage of a given service
 	node.resolved = true
-	node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
 	resolvedUsage.recordUsage(node.serviceKey, node.user)
 
 	return nil
