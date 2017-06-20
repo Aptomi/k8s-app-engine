@@ -8,6 +8,7 @@ cp -r demo/* $tmp/
 pushd $tmp
     git init
     git add -A
+    git add -f _external/charts/*.tgz
     git commit -a -m "Initial demo state $(date)"
     git remote add origin git@github.com:Frostman/aptomi-demo.git
     git push -f origin master
