@@ -70,7 +70,7 @@ var policyCmdApply = &cobra.Command{
 		// If everything is successful, then increment revision and save run
 		// if emulateDeployment == true --> we set noop to false to write state on disk)
 		revision := slinga.GetLastRevision(slinga.GetAptomiBaseDir())
-		diff.ProcessSuccessfulExecution(revision, noop && !emulateDeployment)
+		diff.ProcessSuccessfulExecution(revision, full, noop && !emulateDeployment)
 	},
 }
 
@@ -95,7 +95,7 @@ func init() {
 
 	// Flags for the apply command
 	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
-	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "In addition to applying changes, re-create missing instances (if they were manually deleted from the underlying cloud) and update running instances")
+	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "Fully re-evaluate the policy. Create new revision. Re-create missing instances (if they were manually deleted from the underlying cloud), update running instances ")
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
 	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", true, "Trace all dependencies and log how rules got evaluated")

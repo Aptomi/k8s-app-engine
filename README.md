@@ -108,6 +108,9 @@ go run main.go policy apply --trace
   1. Add "aptomi test" and special language for operators to write and run tests
   1. Handle case when user gets deleted and disappears
 
+1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes.
+   Right now I'm doing a workaround by reusing --full flag.
+
 1. CI/CD
   1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production
 
