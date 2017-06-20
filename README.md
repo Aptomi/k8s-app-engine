@@ -111,6 +111,8 @@ go run main.go policy apply --trace
 1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes.
    Right now I'm doing a workaround by reusing --full flag.
 
+1. We need to store history of aptomi revisions and continuously regression test against old stored runs (e.g. visualization)
+
 1. CI/CD
   1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production
 
