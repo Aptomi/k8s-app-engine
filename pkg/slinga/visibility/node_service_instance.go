@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/time"
+	"html"
 )
 
 type serviceInstanceNode struct {
@@ -31,23 +32,23 @@ func (n serviceInstanceNode) getID() string {
 func (n serviceInstanceNode) getLabel() string {
 	if n.primary {
 		return fmt.Sprintf(
-			`%s
-				components: %d
-				cluster: %s
-				running: %s`,
-			n.service.Name,
+			`<b>%s</b>
+				components: <i>%d</i>
+				cluster: <i>%s</i>
+				running: <i>%s</i>`,
+			html.EscapeString(n.service.Name),
 			len(n.service.Components), // TODO: fix
-			n.instance.CalculatedLabels.Labels["cluster"],
-			time.NewDiff(n.instance.GetRunningTime()).Humanize(),
+			html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
+			html.EscapeString(time.NewDiff(n.instance.GetRunningTime()).Humanize()),
 		)
 	}
 	return fmt.Sprintf(
-		`%s
-			cluster: %s
-			running: %s`,
-		n.service.Name,
-		n.instance.CalculatedLabels.Labels["cluster"],
-		time.NewDiff(n.instance.GetRunningTime()).Humanize(),
+		`<b>%s</b>
+			cluster: <i>%s</i>
+			running: <i>%s</i>`,
+		html.EscapeString(n.service.Name),
+		html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
+		html.EscapeString(time.NewDiff(n.instance.GetRunningTime()).Humanize()),
 	)
 }
 
