@@ -79,6 +79,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	dependenciesNext := dependenciesPrev.makeCopy();
 	dependenciesNext.appendDependency(
 		&Dependency{
+			ID:      "dep_id_5",
 			UserID:  "5",
 			Service: "kafka",
 		},
