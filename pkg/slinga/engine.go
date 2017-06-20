@@ -93,6 +93,9 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	// Store labels for service
 	resolvedUsage.storeLabels(node.serviceKey, node.labels)
 
+	// Store outgoing edge (last component instance -> service instance)
+	resolvedUsage.storeOutgoingEdge(node.arrivalKey, node.serviceKey)
+
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.service.getComponentsSortedTopologically()
 	if err != nil {
@@ -104,6 +107,9 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	for _, node.component = range componentsOrdered {
 		// Create key
 		node.componentKey = createServiceUsageKey(node.service, node.context, node.allocation, node.component)
+
+		// Store outgoing edge (service instance -> component instance)
+		resolvedUsage.storeOutgoingEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
 		node.componentLabels = node.transformLabels(node.labels, node.component.Labels)

@@ -50,6 +50,9 @@ type resolutionNode struct {
 
 	// reference to the current service key
 	serviceKey string
+
+	// reference to the last key we arrived with, so we can reconstruct graph edges between keys
+	arrivalKey string
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
@@ -94,6 +97,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 
 		// move further by the discovery tree via component name link
 		discoveryTreeNode: node.discoveryTreeNode.getNestedMap(node.component.Name),
+
+		// remember the last arrival key
+		arrivalKey: node.componentKey,
 	}
 }
 
