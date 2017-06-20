@@ -35,14 +35,15 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 
 func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
-	svo := visibility.NewServiceView("analytics_pipeline", state)
+	serviceName := r.URL.Query().Get("serviceName")
+	svo := visibility.NewServiceView(serviceName, state)
 	writeJSON(w, svo.GetData())
 }
 
 func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
-	id := r.URL.Query().Get("id")
-	ov := visibility.NewObjectView(id, state)
+	objectID := r.URL.Query().Get("id")
+	ov := visibility.NewObjectView(objectID, state)
 	writeJSON(w, ov.GetData())
 }
 
