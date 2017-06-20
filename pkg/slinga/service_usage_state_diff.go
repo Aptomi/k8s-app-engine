@@ -6,10 +6,10 @@ import (
 	"github.com/gosuri/uiprogress"
 )
 
-// ServiceUsageUserAction is a <ComponentKey, User> object. It holds data for attach/detach operations for user<->service
-type ServiceUsageUserAction struct {
+// ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
+type ServiceUsageDependencyAction struct {
 	ComponentKey string
-	User         string
+	DependencyID string
 }
 
 // ServiceUsageStateDiff represents a difference between two calculated usage states
@@ -19,11 +19,11 @@ type ServiceUsageStateDiff struct {
 	Next *ServiceUsageState
 
 	// Actions that need to be taken
-	ComponentInstantiate map[string]bool
-	ComponentDestruct    map[string]bool
-	ComponentUpdate      map[string]bool
-	ComponentAttachUser  []ServiceUsageUserAction
-	ComponentDetachUser  []ServiceUsageUserAction
+	ComponentInstantiate      map[string]bool
+	ComponentDestruct         map[string]bool
+	ComponentUpdate           map[string]bool
+	ComponentAttachDependency []ServiceUsageDependencyAction
+	ComponentDetachDependency []ServiceUsageDependencyAction
 
 	// Progress bar for CLI
 	progress    *uiprogress.Progress
@@ -213,28 +213,28 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		uPrev := diff.Prev.getResolvedUsage().ComponentInstanceMap[k]
 		uNext := diff.Next.getResolvedUsage().ComponentInstanceMap[k]
 
-		var userIdsPrev []string
+		var depIdsPrev []string
 		if uPrev != nil {
-			userIdsPrev = uPrev.UserIds
+			depIdsPrev = uPrev.DependencyIds
 		}
 
-		var userIdsNext []string
+		var depIdsNext []string
 		if uNext != nil {
-			userIdsNext = uNext.UserIds
+			depIdsNext = uNext.DependencyIds
 		}
 
 		// see if a component needs to be instantiated
-		if userIdsPrev == nil && userIdsNext != nil {
+		if depIdsPrev == nil && depIdsNext != nil {
 			diff.ComponentInstantiate[k] = true
 		}
 
 		// see if a component needs to be destructed
-		if userIdsPrev != nil && userIdsNext == nil {
+		if depIdsPrev != nil && depIdsNext == nil {
 			diff.ComponentDestruct[k] = true
 		}
 
 		// see if a component needs to be updated
-		if userIdsPrev != nil && userIdsNext != nil {
+		if depIdsPrev != nil && depIdsNext != nil {
 			sameParams := uPrev.CalculatedCodeParams.deepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				diff.ComponentUpdate[k] = true
@@ -242,20 +242,20 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		}
 
 		// see what needs to happen to users
-		uPrevIdsMap := toMap(userIdsPrev)
-		uNextIdsMap := toMap(userIdsNext)
+		depPrevIdsMap := toMap(depIdsPrev)
+		depNextIdsMap := toMap(depIdsNext)
 
 		// see if a user needs to be detached from a component
-		for u := range uPrevIdsMap {
-			if !uNextIdsMap[u] {
-				diff.ComponentDetachUser = append(diff.ComponentDetachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
+		for dependencyId := range depPrevIdsMap {
+			if !depNextIdsMap[dependencyId] {
+				diff.ComponentDetachDependency = append(diff.ComponentDetachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyId})
 			}
 		}
 
 		// see if a user needs to be attached to a component
-		for u := range uNextIdsMap {
-			if !uPrevIdsMap[u] {
-				diff.ComponentAttachUser = append(diff.ComponentAttachUser, ServiceUsageUserAction{ComponentKey: k, User: u})
+		for dependencyId := range depNextIdsMap {
+			if !depPrevIdsMap[dependencyId] {
+				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyId})
 			}
 		}
 	}
@@ -274,10 +274,10 @@ func (diff *ServiceUsageStateDiff) hasChanges() bool {
 	if len(diff.ComponentDestruct) > 0 {
 		return true
 	}
-	if len(diff.ComponentAttachUser) > 0 {
+	if len(diff.ComponentAttachDependency) > 0 {
 		return true
 	}
-	if len(diff.ComponentDetachUser) > 0 {
+	if len(diff.ComponentDetachDependency) > 0 {
 		return true
 	}
 	return false
@@ -454,7 +454,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -497,7 +497,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{

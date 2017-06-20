@@ -221,7 +221,8 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 		addNodeOnce(graph, "cluster_Service_Allocations_"+service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
 
 		// Add an edge from service to allocation box
-		for _, userID := range linkStruct.UserIds {
+		for _, dependencyID := range linkStruct.DependencyIds {
+			userID := usage.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, service, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}

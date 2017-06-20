@@ -42,8 +42,8 @@ type ComponentInstance struct {
 	// When this instance was created
 	CreatedOn time.Time
 
-	// People who are using this component
-	UserIds []string
+	// List of dependencies which are keeping this component instantiated
+	DependencyIds []string
 
 	// Calculated parameters for the component
 	CalculatedLabels     LabelSet
@@ -90,10 +90,10 @@ func (usage *ServiceUsageState) getResolvedUsage() *ResolvedServiceUsageData {
 }
 
 // Records usage event
-func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, user *User) string {
+func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, dependency *Dependency) string {
 	// Add user to the entry
 	usageStruct := resolvedUsage.getComponentInstanceEntry(key)
-	usageStruct.UserIds = append(usageStruct.UserIds, user.ID)
+	usageStruct.DependencyIds = append(usageStruct.DependencyIds, dependency.ID)
 
 	// Add to processing order
 	if !resolvedUsage.componentProcessingOrderHas[key] {

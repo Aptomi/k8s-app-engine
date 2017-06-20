@@ -150,12 +150,12 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		}
 
 		// Record usage of a given component
-		resolvedUsage.recordUsage(node.componentKey, node.user)
+		resolvedUsage.recordUsage(node.componentKey, node.dependency)
 	}
 
 	// Mark object as resolved and record usage of a given service
 	node.resolved = true
-	resolvedUsage.recordUsage(node.serviceKey, node.user)
+	resolvedUsage.recordUsage(node.serviceKey, node.dependency)
 
 	return nil
 }

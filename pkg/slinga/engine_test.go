@@ -21,11 +21,11 @@ func TestPolicyResolve(t *testing.T) {
 
 	kafkaTest := resolvedUsage.ComponentInstanceMap["kafka#test#test-platform_services#component2"]
 	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod#prod-platform_services#component2"]
-	assert.Equal(t, 1, len(kafkaTest.UserIds), "Only one user should have access to test")
-	assert.Equal(t, "1", kafkaTest.UserIds[0], "Only Alice should have access to test")
+	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
+	assert.Equal(t, "1", dependencies.DependenciesByID[kafkaTest.DependencyIds[0]].UserID, "Only Alice should have access to test")
 
-	assert.Equal(t, 1, len(kafkaProd.UserIds), "Only one user should have access to prod")
-	assert.Equal(t, "2", kafkaProd.UserIds[0], "Only Bob should have access to prod (Carol is compromised)")
+	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
+	assert.Equal(t, "2", dependencies.DependenciesByID[kafkaProd.DependencyIds[0]].UserID, "Only Bob should have access to prod (Carol is compromised)")
 
 	// Check that code parameters evaluate correctly
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
@@ -58,8 +58,8 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Empty diff should not have any component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Empty diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Empty diff should not have any component updates")
-	assert.Equal(t, 0, len(diff.ComponentAttachUser), "Empty diff should not have any users attached to components")
-	assert.Equal(t, 0, len(diff.ComponentDetachUser), "Empty diff should not have any users removed from components")
+	assert.Equal(t, 0, len(diff.ComponentAttachDependency), "Empty diff should not have any dependencies attached to components")
+	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Empty diff should not have any dependencies removed from components")
 }
 
 func TestPolicyResolveNonEmptyDiff(t *testing.T) {
@@ -93,8 +93,8 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	assert.Equal(t, 7, len(diff.ComponentInstantiate), "Diff should have component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Diff should not have any component updates")
-	assert.Equal(t, 7, len(diff.ComponentAttachUser), "Diff should not have any users attached to components")
-	assert.Equal(t, 0, len(diff.ComponentDetachUser), "Diff should not have any users removed from components")
+	assert.Equal(t, 7, len(diff.ComponentAttachDependency), "Diff should have 7 dependencies attached to components")
+	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {

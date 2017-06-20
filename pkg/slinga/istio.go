@@ -123,10 +123,11 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	}
 
 	// get all users who're using service
-	userIds := usage.ResolvedUsage.ComponentInstanceMap[key].UserIds
+	dependencyIds := usage.ResolvedUsage.ComponentInstanceMap[key].DependencyIds
 	users := make([]*User, 0)
-	for _, userID := range userIds {
+	for _, dependencyID := range dependencyIds {
 		// todo check if user doesn't exists
+		userID := usage.Dependencies.DependenciesByID[dependencyID].UserID
 		users = append(users, usage.users.Users[userID])
 	}
 
