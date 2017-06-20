@@ -1,6 +1,9 @@
 package visibility
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 type graphNode interface {
 	getID() string
@@ -9,23 +12,43 @@ type graphNode interface {
 	getEdgeLabel(graphNode) string
 }
 
-type graphEntry map[string]interface{}
-
 type graph struct {
 	hasObject map[string]bool
-	nodes   []graphEntry
-	edges   []graphEntry
+	nodes   graphEntryList
+	edges   graphEntryList
+}
+
+type graphEntry map[string]interface{}
+
+type graphEntryList []graphEntry
+
+func (list graphEntryList) Len() int {
+	return len(list)
+}
+
+func (list graphEntryList) Less(i, j int) bool {
+	return list[i]["id"].(string) < list[j]["id"].(string);
+}
+
+func (list graphEntryList) Swap(i, j int) {
+	list[i], list[j] = list[j], list[i]
 }
 
 func NewGraph() *graph {
 	return &graph{
 		hasObject: make(map[string]bool),
-		nodes:   []graphEntry{},
-		edges:   []graphEntry{},
+		nodes:   graphEntryList{},
+		edges:   graphEntryList{},
 	}
 }
 
 func (g *graph) GetData() graphEntry {
+	// Sort nodes and edges, so we can get a stable response from API that doesn't change over reloads
+	// This will ensure that UI will show the same layout over refreshes
+	sort.Sort(g.nodes)
+	sort.Sort(g.edges)
+
+	// Wrap it into a graph structure for visjs
 	return graphEntry{
 		"nodes": g.nodes,
 		"edges": g.edges,
@@ -49,6 +72,7 @@ func (g *graph) addEdge(src graphNode, dst graphNode) {
 	key := fmt.Sprintf("edge-%s-%s", src.getID(), dst.getID())
 	if !g.hasObject[key] {
 		g.edges = append(g.edges, graphEntry{
+			"id":	 key,
 			"from":  src.getID(),
 			"to":    dst.getID(),
 			"label": src.getEdgeLabel(dst),
