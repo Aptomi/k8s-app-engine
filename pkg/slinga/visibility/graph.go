@@ -32,13 +32,14 @@ func (g *graph) GetData() graphEntry {
 	}
 }
 
-func (g *graph) addNode(n graphNode) {
+func (g *graph) addNode(n graphNode, level int) {
 	key := fmt.Sprintf("node-%s", n.getID())
 	if !g.hasObject[key] {
 		g.nodes = append(g.nodes, graphEntry{
 			"id":    n.getID(),
 			"label": n.getLabel(),
 			"group": n.getGroup(),
+			"level": level,
 		})
 		g.hasObject[key] = true
 	}

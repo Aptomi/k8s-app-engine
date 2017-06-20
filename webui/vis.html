@@ -26,8 +26,8 @@
             background-color: #222222;
             border: 1px solid #444444;
             font: 12pt arial;
-            width: 800px;
-            height: 800px;
+            width: 100%;
+            height: 435px;
         }
     </style>
 
@@ -125,7 +125,7 @@
 
                                 <div id="mynetwork"></div>
                                 <script type="text/javascript">
-                                    var dataJSON = loadJSON("/api/service-view", jsonLoaded, function (err) {
+                                    loadJSON("/api/service-view", jsonLoaded, function (err) {
                                         console.log('error')
                                     });
 
@@ -175,22 +175,30 @@
                                                 color: {border: 'white'}
                                             }
                                         },
-                                        physics: {
-                                            barnesHut: {
-                                                gravitationalConstant: -10000,
-                                                avoidOverlap: 1
+                                        layout: {
+                                            hierarchical: {
+                                                direction: "LR",
+                                                levelSeparation: 250
                                             }
-                                        }
+                                        },
+                                        physics: false
                                     };
 
                                     function jsonLoaded(jsonData) {
                                         var data = {
                                             nodes: jsonData.nodes,
                                             edges: jsonData.edges
-                                        }
+                                        };
 
                                         network = new vis.Network(container, data, options);
                                         network.fit();
+
+/*
+                                        network.on("stabilizationIterationsDone", function () {
+                                            network.setOptions({physics: false});
+                                            network.fit();
+                                        });
+*/
                                     }
 
                                 </script>

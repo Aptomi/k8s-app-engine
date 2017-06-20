@@ -29,11 +29,23 @@ func (n serviceInstanceNode) getID() string {
 }
 
 func (n serviceInstanceNode) getLabel() string {
-	return fmt.Sprintf(
-		`components: %d
+	if n.primary {
+		return fmt.Sprintf(
+			`%s
+				components: %d
 				cluster: %s
 				running: %s`,
-		len(n.service.Components), // TODO: fix
+			n.service.Name,
+			len(n.service.Components), // TODO: fix
+			n.instance.CalculatedLabels.Labels["cluster"],
+			time.NewDiff(n.instance.GetRunningTime()).Humanize(),
+		)
+	}
+	return fmt.Sprintf(
+		`%s
+			cluster: %s
+			running: %s`,
+		n.service.Name,
 		n.instance.CalculatedLabels.Labels["cluster"],
 		time.NewDiff(n.instance.GetRunningTime()).Humanize(),
 	)
