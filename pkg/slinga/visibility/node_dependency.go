@@ -18,7 +18,7 @@ func (n dependencyNode) getID() string {
 }
 
 func (n dependencyNode) getLabel() string {
-	return n.dependency.UserID
+	return slinga.LoadUserByIDFromDir(slinga.GetAptomiBaseDir(), n.dependency.UserID).Name
 }
 
 func (n dependencyNode) getGroup() string {
