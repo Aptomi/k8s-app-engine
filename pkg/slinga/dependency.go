@@ -1,9 +1,9 @@
 package slinga
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
-	log "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -12,11 +12,12 @@ import (
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
 type Dependency struct {
-	ID      string
-	UserID  string
-	Service string
-	Labels  map[string]string
-	Trace   bool
+	ID       string
+	UserID   string
+	Service  string
+	Labels   map[string]string
+	Trace    bool
+	Disabled bool
 
 	// This field is populated when dependency gets resolved
 	ResolvesTo string
@@ -86,6 +87,9 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 	for _, fileName := range files {
 		t := loadDependenciesFromFile(fileName)
 		for _, d := range t {
+			if d.Disabled {
+				continue
+			}
 			result.appendDependency(d)
 		}
 	}
