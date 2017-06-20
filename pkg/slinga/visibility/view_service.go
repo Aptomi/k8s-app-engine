@@ -48,7 +48,7 @@ func (svo ServiceViewObject) GetData() graphEntry {
 // Adds to the graph nodes/edges which trigger usage of a given service instance
 func (svo ServiceViewObject) addEveryoneWhoUses(serviceKey string, svcInstanceNodePrev graphNode, nextLevel int) {
 	// retrieve service instance
-	instance := svo.state.ResolvedUsage.ComponentInstanceMap[serviceKey]
+	instance := svo.state.GetResolvedUsage().ComponentInstanceMap[serviceKey]
 
 	// if there are no incoming edges, it means we came to the very beginning of the chain (i.e. dependency)
 	if len(instance.EdgesIn) <= 0 {
@@ -65,7 +65,7 @@ func (svo ServiceViewObject) addEveryoneWhoUses(serviceKey string, svcInstanceNo
 		// go over all incoming edges
 		for k := range instance.EdgesIn {
 			service, context, allocation, component := slinga.ParseServiceUsageKey(k)
-			v := svo.state.ResolvedUsage.ComponentInstanceMap[k]
+			v := svo.state.GetResolvedUsage().ComponentInstanceMap[k]
 			if component == slinga.ComponentRootName {
 				// if it's a service instance, add a node
 				svcInstanceNode := newServiceInstanceNode(svo.state.Policy.Services[service], context, allocation, v, false)

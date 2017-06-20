@@ -16,7 +16,7 @@ type ServiceUsageState struct {
 	// reference to users
 	users *GlobalUsers
 
-	// resolved usage - gets calculated by the main engine. should be accessed by a getter
+	// resolved usage - gets calculated by the main engine. should ideally be accessed by a getter
 	ResolvedUsage *ResolvedServiceUsageData
 }
 
@@ -34,7 +34,8 @@ type ResolvedServiceUsageData struct {
 func newResolvedServiceUsageData() *ResolvedServiceUsageData {
 	return &ResolvedServiceUsageData{
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
-		componentProcessingOrderHas: make(map[string]bool)}
+		componentProcessingOrderHas: make(map[string]bool),
+	}
 }
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -82,7 +83,7 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 }
 
 // Records usage event
-func (usage *ServiceUsageState) getResolvedUsage() *ResolvedServiceUsageData {
+func (usage *ServiceUsageState) GetResolvedUsage() *ResolvedServiceUsageData {
 	if usage.ResolvedUsage == nil {
 		usage.ResolvedUsage = newResolvedServiceUsageData()
 	}

@@ -13,7 +13,7 @@ func TestPolicyResolve(t *testing.T) {
 
 	usageState := NewServiceUsageState(&policy, &dependencies, &users)
 	err := usageState.ResolveAllDependencies()
-	resolvedUsage := usageState.getResolvedUsage()
+	resolvedUsage := usageState.GetResolvedUsage()
 
 	// Check that policy resolution finished correctly
 	assert.Nil(t, err, "Policy usage should be resolved without errors")
