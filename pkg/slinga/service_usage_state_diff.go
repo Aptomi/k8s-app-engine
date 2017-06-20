@@ -57,9 +57,9 @@ func (usage ServiceUsageState) PrintSummary() {
 }
 
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
-func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, noop bool) {
+func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, forceSave bool, noop bool) {
 	fmt.Println("[Revision]")
-	if !noop && diff.hasChanges() {
+	if forceSave || (!noop && diff.hasChanges()) {
 		// Increment a revision
 		newRevision := revision.increment()
 
