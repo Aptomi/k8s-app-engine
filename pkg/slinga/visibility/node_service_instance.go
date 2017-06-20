@@ -11,10 +11,17 @@ type serviceInstanceNode struct {
 	context    string
 	allocation string
 	instance   *slinga.ComponentInstance
+	primary    bool
 }
 
-func newServiceInstanceNode(service *slinga.Service, context string, allocation string, instance *slinga.ComponentInstance) graphNode {
-	return serviceInstanceNode{service: service, context: context, allocation: allocation, instance: instance}
+func newServiceInstanceNode(service *slinga.Service, context string, allocation string, instance *slinga.ComponentInstance, primary bool) graphNode {
+	return serviceInstanceNode{
+		service:    service,
+		context:    context,
+		allocation: allocation,
+		instance:   instance,
+		primary:    primary,
+	}
 }
 
 func (n serviceInstanceNode) getID() string {
@@ -33,6 +40,9 @@ func (n serviceInstanceNode) getLabel() string {
 }
 
 func (n serviceInstanceNode) getGroup() string {
+	if n.primary {
+		return "serviceInstancePrimary"
+	}
 	return "serviceInstance"
 }
 

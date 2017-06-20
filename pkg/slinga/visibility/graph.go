@@ -1,5 +1,7 @@
 package visibility
 
+import "fmt"
+
 type graphNode interface {
 	getID() string
 	getLabel() string
@@ -10,14 +12,16 @@ type graphNode interface {
 type graphEntry map[string]interface{}
 
 type graph struct {
-	nodes []graphEntry
-	edges []graphEntry
+	hasObject map[string]bool
+	nodes   []graphEntry
+	edges   []graphEntry
 }
 
-func NewGraph() graph {
-	return graph{
-		nodes: []graphEntry{},
-		edges: []graphEntry{},
+func NewGraph() *graph {
+	return &graph{
+		hasObject: make(map[string]bool),
+		nodes:   []graphEntry{},
+		edges:   []graphEntry{},
 	}
 }
 
@@ -29,18 +33,25 @@ func (g *graph) GetData() graphEntry {
 }
 
 func (g *graph) addNode(n graphNode) {
-	g.nodes = append(g.nodes, graphEntry{
-		"id":    n.getID(),
-		"label": n.getLabel(),
-		"group": n.getGroup(),
-	})
+	key := fmt.Sprintf("node-%s", n.getID())
+	if !g.hasObject[key] {
+		g.nodes = append(g.nodes, graphEntry{
+			"id":    n.getID(),
+			"label": n.getLabel(),
+			"group": n.getGroup(),
+		})
+		g.hasObject[key] = true
+	}
 }
 
 func (g *graph) addEdge(src graphNode, dst graphNode) {
-	label := src.getEdgeLabel(dst)
-	g.edges = append(g.edges, graphEntry{
-		"from":  src.getID(),
-		"to":    dst.getID(),
-		"label": label,
-	})
+	key := fmt.Sprintf("edge-%s-%s", src.getID(), dst.getID())
+	if !g.hasObject[key] {
+		g.edges = append(g.edges, graphEntry{
+			"from":  src.getID(),
+			"to":    dst.getID(),
+			"label": src.getEdgeLabel(dst),
+		})
+		g.hasObject[key] = true
+	}
 }
