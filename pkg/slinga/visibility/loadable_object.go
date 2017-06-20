@@ -13,9 +13,9 @@ type loadableObject interface {
 
 func getLoadableObject(id string) loadableObject {
 	var registeredObjects = []reflect.Type {
-		reflect.TypeOf(dependencyNode{}),
-		reflect.TypeOf(serviceNode{}),
-		reflect.TypeOf(serviceInstanceNode{}),
+		reflect.TypeOf(loadableObject(dependencyNode{})),
+		reflect.TypeOf(loadableObject(serviceNode{})),
+		reflect.TypeOf(loadableObject(serviceInstanceNode{})),
 	}
 
 	for _, t := range registeredObjects {
