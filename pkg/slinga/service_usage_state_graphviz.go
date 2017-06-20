@@ -7,7 +7,6 @@ import (
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"
 	"os/exec"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -180,11 +179,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 				// Add a node with user
 				user := users.Users[d.UserID]
 				label := "Name: " + user.Name + " (" + user.ID + ")"
-				var keys []string
-				for k := range user.Labels {
-					keys = append(keys, k)
-				}
-				sort.Strings(keys)
+				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {
 					label += "\n" + k + " = " + shorten(user.Labels[k])
 				}
