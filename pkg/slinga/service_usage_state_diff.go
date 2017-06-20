@@ -73,7 +73,7 @@ func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRev
 		fmt.Printf("  Previous: %s\n", revision.String())
 		fmt.Printf("  Current: %s\n", newRevision.String())
 	} else {
-		fmt.Printf("  Current: %s (no changes saved)\n", revision.String())
+		fmt.Printf("  Current: %s (no changes made)\n", revision.String())
 	}
 }
 
