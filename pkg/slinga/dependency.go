@@ -3,6 +3,7 @@ package slinga
 import (
 	"github.com/mattn/go-zglob"
 	"sort"
+	log "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -58,6 +59,11 @@ func (src *GlobalDependencies) SetTrace(trace bool) {
 
 // Append a single dependency to an existing object
 func (src GlobalDependencies) appendDependency(dependency *Dependency) {
+	if len(dependency.ID) <= 0 {
+		debug.WithFields(log.Fields{
+			"dependency": dependency,
+		}).Fatal("Empty dependency ID")
+	}
 	src.DependenciesByService[dependency.Service] = append(src.DependenciesByService[dependency.Service], dependency)
 	src.DependenciesByID[dependency.ID] = dependency
 }
