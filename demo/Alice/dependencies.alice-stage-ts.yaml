@@ -1,4 +1,5 @@
-- userid: 100
+- id: alice_tests_twitter_stats_in_stage
+  userid: 100
   service: twitter_stats
   labels:
     # TODO: remove stage def from here

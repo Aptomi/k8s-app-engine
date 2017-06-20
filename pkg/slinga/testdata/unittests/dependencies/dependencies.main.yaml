@@ -1,13 +1,17 @@
-- userid: 1
+- id: dep_id_1
+  userid: 1
   service: kafka
 
-- userid: 2
+- id: dep_id_2
+  userid: 2
   service: kafka
   labels:
     important: yes
 
-- userid: 3
+- id: dep_id_3
+  userid: 3
   service: kafka
 
-- userid: 4
+- id: dep_id_4
+  userid: 4
   service: kafka

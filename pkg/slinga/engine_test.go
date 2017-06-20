@@ -76,7 +76,8 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	yaml.Unmarshal([]byte(serializeObject(usageStatePrev)), &usageStatePrevSavedLoaded)
 
 	// Add another dependency and resolve usage state next
-	dependenciesNext := dependenciesPrev.appendDependency(
+	dependenciesNext := dependenciesPrev.makeCopy();
+	dependenciesNext.appendDependency(
 		&Dependency{
 			UserID:  "5",
 			Service: "kafka",

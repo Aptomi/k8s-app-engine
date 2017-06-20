@@ -12,7 +12,7 @@ import (
 func (usage *ServiceUsageState) ResolveAllDependencies() error {
 
 	// Run every declared dependency via policy and resolve it
-	for _, dependencies := range usage.Dependencies.Dependencies {
+	for _, dependencies := range usage.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
 			node := usage.newResolutionNode(d)
 

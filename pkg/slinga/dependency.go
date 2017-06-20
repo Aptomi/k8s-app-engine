@@ -6,11 +6,12 @@ import (
 )
 
 /*
-	This file declares all the necessary structures for Dependencies (User -> Service)
+	This file declares all the necessary structures for Dependencies (User "wants" Service)
 */
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
 type Dependency struct {
+	ID      string
 	UserID  string
 	Service string
 	Labels  map[string]string
@@ -23,26 +24,22 @@ type Dependency struct {
 // GlobalDependencies represents the list of global dependencies (see the definition above)
 type GlobalDependencies struct {
 	// dependencies <service> -> list of dependencies
-	Dependencies map[string][]*Dependency
+	DependenciesByService map[string][]*Dependency
+
+	// dependencies <id> -> dependency
+	DependenciesByID map[string]*Dependency
 }
 
 func (src *GlobalDependencies) count() int {
-	return countElements(src.Dependencies)
+	return countElements(src.DependenciesByID)
 }
 
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
 func NewGlobalDependencies() GlobalDependencies {
-	return GlobalDependencies{Dependencies: make(map[string][]*Dependency)}
-}
-
-// LoadDependenciesFromFile loads all dependencies from a given file
-func LoadDependenciesFromFile(fileName string) GlobalDependencies {
-	r := NewGlobalDependencies()
-	t := loadDependenciesFromFile(fileName)
-	for _, d := range t {
-		r.Dependencies[d.Service] = append(r.Dependencies[d.Service], d)
+	return GlobalDependencies{
+		DependenciesByService: make(map[string][]*Dependency),
+		DependenciesByID:      make(map[string]*Dependency),
 	}
-	return r
 }
 
 // Apply set of transformations to labels
@@ -53,33 +50,24 @@ func (dependency *Dependency) getLabelSet() LabelSet {
 // SetTrace enable tracing (detailed engine output) for all dependencies
 func (src *GlobalDependencies) SetTrace(trace bool) {
 	if trace {
-		for _, serviceDeps := range src.Dependencies {
-			for _, v := range serviceDeps {
-				v.Trace = true
-			}
+		for _, d := range src.DependenciesByID {
+			d.Trace = true
 		}
 	}
 }
 
-// Merge
-func (src GlobalDependencies) appendDependencies(ops GlobalDependencies) GlobalDependencies {
-	result := NewGlobalDependencies()
-	for k, v := range src.Dependencies {
-		result.Dependencies[k] = append(result.Dependencies[k], v...)
-	}
-	for k, v := range ops.Dependencies {
-		result.Dependencies[k] = append(result.Dependencies[k], v...)
-	}
-	return result
+// Append a single dependency to an existing object
+func (src GlobalDependencies) appendDependency(dependency *Dependency) {
+	src.DependenciesByService[dependency.Service] = append(src.DependenciesByService[dependency.Service], dependency)
+	src.DependenciesByID[dependency.ID] = dependency
 }
 
-// Merge
-func (src GlobalDependencies) appendDependency(ops *Dependency) GlobalDependencies {
+// Copy the whole structure with dependencies
+func (src GlobalDependencies) makeCopy() GlobalDependencies {
 	result := NewGlobalDependencies()
-	for k, v := range src.Dependencies {
-		result.Dependencies[k] = append(result.Dependencies[k], v...)
+	for _, v := range src.DependenciesByID {
+		result.appendDependency(v)
 	}
-	result.Dependencies[ops.Service] = append(result.Dependencies[ops.Service], ops)
 	return result
 }
 
@@ -88,10 +76,12 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 	// read all services
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeDependencies))
 	sort.Strings(files)
-	r := NewGlobalDependencies()
-	for _, f := range files {
-		dependencies := LoadDependenciesFromFile(f)
-		r = r.appendDependencies(dependencies)
+	result := NewGlobalDependencies()
+	for _, fileName := range files {
+		t := loadDependenciesFromFile(fileName)
+		for _, d := range t {
+			result.appendDependency(d)
+		}
 	}
-	return r
+	return result
 }

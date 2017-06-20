@@ -1,4 +1,5 @@
-- userid: 101
+- id: bob_tests_twitter_stats_vis_in_stage
+  userid: 101
   service: twitter_stats
   enabled: false
   labels:

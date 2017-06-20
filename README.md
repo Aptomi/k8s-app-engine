@@ -107,6 +107,7 @@ go run main.go policy apply --trace
      1. Other pieces will have access to Ops only
   1. Add "aptomi test" and special language for operators to write and run tests
   1. Handle case when user gets deleted and disappears
+  1. Every object should have an ID :)
 
 1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes.
    Right now I'm doing a workaround by reusing --full flag.

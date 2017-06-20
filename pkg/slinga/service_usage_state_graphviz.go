@@ -169,7 +169,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 
 	// First of all, let's show all dependencies (who requested what)
 	if usage.Dependencies != nil {
-		for service, dependencies := range usage.Dependencies.Dependencies {
+		for service, dependencies := range usage.Dependencies.DependenciesByService {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
