@@ -34,10 +34,16 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
-	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
-	svo := visibility.NewServiceViewObject("analytics_pipeline", state)
+	svo := visibility.NewServiceView("analytics_pipeline", state)
 	writeJSON(w, svo.GetData())
+}
+
+func objectViewHandler(w http.ResponseWriter, r *http.Request) {
+	state := slinga.LoadServiceUsageState()
+	id := r.URL.Query().Get("id")
+	ov := visibility.NewObjectView(id, state)
+	writeJSON(w, ov.GetData())
 }
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI
@@ -53,6 +59,7 @@ func Serve(host string, port int) {
 	// serve all API endpoints at /api/ path and require auth
 	http.Handle("/api/endpoints", requireAuth(endpointsHandler))
 	http.Handle("/api/service-view", requireAuth(serviceViewHandler))
+	http.Handle("/api/object-view", requireAuth(objectViewHandler))
 
 	// serve login/logout api without auth
 	http.HandleFunc("/api/login", loginHandler)

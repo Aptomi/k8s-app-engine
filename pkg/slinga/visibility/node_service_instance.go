@@ -5,9 +5,11 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/time"
 	"html"
+	"strings"
 )
 
 type serviceInstanceNode struct {
+	key        string
 	service    *slinga.Service
 	context    string
 	allocation string
@@ -15,8 +17,9 @@ type serviceInstanceNode struct {
 	primary    bool
 }
 
-func newServiceInstanceNode(service *slinga.Service, context string, allocation string, instance *slinga.ComponentInstance, primary bool) graphNode {
+func newServiceInstanceNode(key string, service *slinga.Service, context string, allocation string, instance *slinga.ComponentInstance, primary bool) graphNode {
 	return serviceInstanceNode{
+		key:        key,
 		service:    service,
 		context:    context,
 		allocation: allocation,
@@ -25,8 +28,23 @@ func newServiceInstanceNode(service *slinga.Service, context string, allocation 
 	}
 }
 
+func (n serviceInstanceNode) getIDPrefix() string {
+	return "svcinst-"
+}
+
+func (n serviceInstanceNode) getGroup() string {
+	if n.primary {
+		return "serviceInstancePrimary"
+	}
+	return "serviceInstance"
+}
+
 func (n serviceInstanceNode) getID() string {
-	return fmt.Sprintf("svc-inst-%s-%s-%s", n.service.Name, n.context, n.allocation)
+	return fmt.Sprintf("%s%s", n.getIDPrefix(), strings.Replace(n.key, "#", ".", -1))
+}
+
+func (n serviceInstanceNode) isItMyID(id string) string {
+	return strings.Replace(cutPrefixOrEmpty(id, n.getIDPrefix()), ".", "#", -1)
 }
 
 func (n serviceInstanceNode) getLabel() string {
@@ -52,13 +70,10 @@ func (n serviceInstanceNode) getLabel() string {
 	)
 }
 
-func (n serviceInstanceNode) getGroup() string {
-	if n.primary {
-		return "serviceInstancePrimary"
-	}
-	return "serviceInstance"
-}
-
 func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 	return ""
+}
+
+func (n serviceInstanceNode) getDetails(id string, state slinga.ServiceUsageState) interface{} {
+	return state.ResolvedUsage.ComponentInstanceMap[id]
 }

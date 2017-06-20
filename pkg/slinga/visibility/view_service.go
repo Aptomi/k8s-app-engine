@@ -4,16 +4,16 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
-// ServiceViewObject represents a view from a particular service (service owner point of view)
-type ServiceViewObject struct {
+// ServiceView represents a view from a particular service (service owner point of view)
+type ServiceView struct {
 	serviceName string
 	state       slinga.ServiceUsageState
 	g           *graph
 }
 
-// NewServiceViewObject creates a new ServiceViewObject
-func NewServiceViewObject(serviceName string, state slinga.ServiceUsageState) ServiceViewObject {
-	return ServiceViewObject{
+// NewServiceView creates a new ServiceView
+func NewServiceView(serviceName string, state slinga.ServiceUsageState) ServiceView {
+	return ServiceView{
 		serviceName: serviceName,
 		state:       state,
 		g:           NewGraph(),
@@ -21,7 +21,7 @@ func NewServiceViewObject(serviceName string, state slinga.ServiceUsageState) Se
 }
 
 // GetData returns graph for a given view
-func (svo ServiceViewObject) GetData() graphEntry {
+func (svo ServiceView) GetData() graphEntry {
 	// Step 1 - add a node with a given service
 	svcNode := newServiceNode(svo.serviceName)
 	svo.g.addNode(svcNode, 0)
@@ -31,7 +31,7 @@ func (svo ServiceViewObject) GetData() graphEntry {
 		service, context, allocation, component := slinga.ParseServiceUsageKey(k)
 		if service == svo.serviceName && component == slinga.ComponentRootName {
 			// add a node with an instance of our service
-			svcInstanceNode := newServiceInstanceNode(svo.state.Policy.Services[service], context, allocation, v, true)
+			svcInstanceNode := newServiceInstanceNode(k, svo.state.Policy.Services[service], context, allocation, v, true)
 			svo.g.addNode(svcInstanceNode, 1)
 
 			// connect service node and instance node
@@ -46,7 +46,7 @@ func (svo ServiceViewObject) GetData() graphEntry {
 }
 
 // Adds to the graph nodes/edges which trigger usage of a given service instance
-func (svo ServiceViewObject) addEveryoneWhoUses(serviceKey string, svcInstanceNodePrev graphNode, nextLevel int) {
+func (svo ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePrev graphNode, nextLevel int) {
 	// retrieve service instance
 	instance := svo.state.GetResolvedUsage().ComponentInstanceMap[serviceKey]
 
@@ -68,7 +68,7 @@ func (svo ServiceViewObject) addEveryoneWhoUses(serviceKey string, svcInstanceNo
 			v := svo.state.GetResolvedUsage().ComponentInstanceMap[k]
 			if component == slinga.ComponentRootName {
 				// if it's a service instance, add a node
-				svcInstanceNode := newServiceInstanceNode(svo.state.Policy.Services[service], context, allocation, v, false)
+				svcInstanceNode := newServiceInstanceNode(k, svo.state.Policy.Services[service], context, allocation, v, false)
 				svo.g.addNode(svcInstanceNode, nextLevel)
 
 				// connect service instance nodes

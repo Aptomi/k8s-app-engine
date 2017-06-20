@@ -5,13 +5,6 @@ import (
 	"sort"
 )
 
-type graphNode interface {
-	getID() string
-	getLabel() string
-	getGroup() string
-	getEdgeLabel(graphNode) string
-}
-
 type graph struct {
 	hasObject map[string]bool
 	nodes   graphEntryList

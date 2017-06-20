@@ -1,6 +1,9 @@
 package visibility
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/Frostman/aptomi/pkg/slinga"
+)
 
 type serviceNode struct {
 	serviceName string
@@ -10,16 +13,24 @@ func newServiceNode(serviceName string) graphNode {
 	return serviceNode{serviceName: serviceName}
 }
 
-func (n serviceNode) getID() string {
-	return fmt.Sprintf("svc-%s", n.serviceName)
-}
-
-func (n serviceNode) getLabel() string {
-	return n.serviceName
+func (n serviceNode) getIDPrefix() string {
+	return "svc-"
 }
 
 func (n serviceNode) getGroup() string {
 	return "service"
+}
+
+func (n serviceNode) getID() string {
+	return fmt.Sprintf("%s%s", n.getIDPrefix(), n.serviceName)
+}
+
+func (n serviceNode) isItMyID(id string) string {
+	return cutPrefixOrEmpty(id, n.getIDPrefix())
+}
+
+func (n serviceNode) getLabel() string {
+	return n.serviceName
 }
 
 func (n serviceNode) getEdgeLabel(dst graphNode) string {
@@ -28,4 +39,8 @@ func (n serviceNode) getEdgeLabel(dst graphNode) string {
 		return fmt.Sprintf("%s/%s", dstInst.context, dstInst.allocation)
 	}
 	return ""
+}
+
+func (n serviceNode) getDetails(id string, state slinga.ServiceUsageState) interface{} {
+	return state.Policy.Services[id]
 }
