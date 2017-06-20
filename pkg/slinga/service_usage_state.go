@@ -27,9 +27,6 @@ type ResolvedServiceUsageData struct {
 	// resolved component processing order in which components/services have to be processed
 	componentProcessingOrderHas map[string]bool
 	ComponentProcessingOrder    []string
-
-	// resolved component discovery tree (component1.component2...component3 -> component instance key)
-	DiscoveryTree NestedParameterMap
 }
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -47,7 +44,6 @@ type ComponentInstance struct {
 func NewResolvedServiceUsageData() *ResolvedServiceUsageData {
 	return &ResolvedServiceUsageData{
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
-		DiscoveryTree:               NestedParameterMap{},
 		componentProcessingOrderHas: make(map[string]bool)}
 }
 

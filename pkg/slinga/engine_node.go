@@ -34,6 +34,9 @@ type resolutionNode struct {
 	allocation *Allocation
 
 	// reference to the current node in discovery tree for components announcing their discovery properties
+	// component1...component2...component3 -> component instance key
+	DiscoveryTree NestedParameterMap
+
 	discoveryTreeNode NestedParameterMap
 
 	// reference to the current component in discovery tree
