@@ -2,7 +2,7 @@
 
 set -eou pipefail
 
-#APTOMI_DB
+echo "APTOMI_DB=$APTOMI_DB"
 
 COLOR_GRAY='\033[0;37m'
 COLOR_BLUE='\033[0;34m'
