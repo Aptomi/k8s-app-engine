@@ -36,8 +36,22 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func detailViewHandler(w http.ResponseWriter, r *http.Request) {
+	// prefer explicitly passed username through query
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		username = getUsername(r)
+	}
+
 	state := slinga.LoadServiceUsageState()
-	view := visibility.NewDetails("", slinga.LoadUsers(), state)
+
+	filterUserID := ""
+	for userID, user := range slinga.LoadUsers().Users {
+		if user.Name == username {
+			filterUserID = userID
+		}
+	}
+
+	view := visibility.NewDetails(filterUserID, slinga.LoadUsers(), state)
 	writeJSON(w, view)
 }
 
