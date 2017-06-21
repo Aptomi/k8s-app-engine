@@ -17,15 +17,28 @@ type rEndpoint struct {
 	Links      []rLink
 }
 
+type userEndpoints struct {
+	User      *slinga.User
+	Endpoints []rEndpoint
+}
+
 type endpointsView struct {
-	Endpoints map[string][]rEndpoint
+	Endpoints []userEndpoints
 }
 
 func Endpoints(username string, users map[string]*slinga.User, state slinga.ServiceUsageState) endpointsView {
-	uR := endpointsView{make(map[string][]rEndpoint)}
+	uR := endpointsView{make([]userEndpoints, 0)}
+
+	isGlobalOp := false
+	for _, user := range users {
+		if user.Name == username && user.Labels["global_ops"] == "true" {
+			isGlobalOp = true
+			break
+		}
+	}
 
 	for userId, user := range users {
-		if username != "" && user.Name != username {
+		if !isGlobalOp && username != "" && user.Name != username {
 			continue
 		}
 		r := make([]rEndpoint, 0)
@@ -43,7 +56,7 @@ func Endpoints(username string, users map[string]*slinga.User, state slinga.Serv
 			r = append(r, rEndpoint{service, context, allocation, component, rLinks})
 		}
 
-		uR.Endpoints[userId] = r
+		uR.Endpoints = append(uR.Endpoints, userEndpoints{user, r})
 	}
 
 	return uR
