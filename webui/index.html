@@ -33,6 +33,7 @@
 
 <body class="top-navigation">
 
+<!--Main body, usually don't need to change-->
 <div id="wrapper">
     <div id="page-wrapper" class="gray-bg">
         <div class="row border-bottom white-bg">
@@ -88,8 +89,7 @@
     </div>
 </div>
 
-
-
+<!--JS-->
 <!-- Mainly scripts -->
 <script src="public/js/jquery-3.1.1.min.js"></script>
 <script src="public/js/bootstrap.min.js"></script>
@@ -108,6 +108,7 @@
 <script type="text/javascript" src="public/vis/dist/vis.js"></script>
 <script type="text/javascript" src="public/vis/dist/vis-util.js"></script>
 
+<!--Template for /details filter-->
 <script type="text/x-template" id="template-details-filter">
     <div class="btn-group">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -125,6 +126,7 @@
     </div>
 </script>
 
+<!--JS for /details/filter-->
 <script>
     const CompDetailsFilter = Vue.component('details-filter', {
         template: '#template-details-filter',
@@ -132,6 +134,7 @@
     })
 </script>
 
+<!--Template for /details-->
 <script type="text/x-template" id="template-details">
     <div class="row">
         <div class="col-lg-9">
@@ -165,6 +168,7 @@
     </div>
 </script>
 
+<!--JS for drawing charts on /details-->
 <script>
     const drawChart = function (inputView, userId, dependencyId, serviceName) {
         console.log("Draw chart with params: ")
@@ -353,6 +357,7 @@
     };
 </script>
 
+<!--JS for /details-->
 <script>
     const CompDetails = Vue.component('details', {
         template: '#template-details',
@@ -451,6 +456,7 @@
     })
 </script>
 
+<!--Template for /home-->
 <script type="text/x-template" id="template-home">
     <div>
     <div class="row">
@@ -655,6 +661,7 @@
     </div>
 </script>
 
+<!--JS for /home-->
 <script>
     const CompHome = Vue.component('home', {
         template: '#template-home',
@@ -680,6 +687,7 @@
     });
 </script>
 
+<!--Main Vue JS-->
 <script>
     const routes = [
         { name: 'home', path: '/home', title: "Home", component: CompHome },
@@ -709,6 +717,7 @@
     });
 
 </script>
+
 </body>
 
 </html>
