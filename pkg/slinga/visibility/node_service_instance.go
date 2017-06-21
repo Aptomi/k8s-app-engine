@@ -48,6 +48,16 @@ func (n serviceInstanceNode) isItMyID(id string) string {
 }
 
 func (n serviceInstanceNode) getLabel() string {
+	// for not resolved instances
+	if !n.instance.Resolved {
+		return fmt.Sprintf(
+			`<b>%s</b>
+				ERROR`,
+			html.EscapeString(n.service.Name),
+		)
+	}
+
+	// for successfully resolved instances (primary & not primary)
 	if n.primary {
 		return fmt.Sprintf(
 			`<b>%s</b>
@@ -75,5 +85,9 @@ func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 }
 
 func (n serviceInstanceNode) getDetails(id string, state slinga.ServiceUsageState) interface{} {
-	return state.ResolvedUsage.ComponentInstanceMap[id]
+	result := state.ResolvedData.ComponentInstanceMap[id]
+	if result == nil {
+		result = state.UnresolvedData.ComponentInstanceMap[id]
+	}
+	return result
 }

@@ -8,14 +8,14 @@ import (
 func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[string]string {
 	result := make(map[string]map[string]string)
 
-	for _, key := range state.GetResolvedUsage().ComponentProcessingOrder {
+	for _, key := range state.GetResolvedData().ComponentProcessingOrder {
 		if _, ok := result[key]; ok {
 			continue
 		}
 
-		instance := state.GetResolvedUsage().ComponentInstanceMap[key]
+		instance := state.GetResolvedData().ComponentInstanceMap[key]
 		used := filterUserID == ""
-		for _, dependencyID := range instance.DependencyIds {
+		for dependencyID := range instance.DependencyIds {
 			userID := state.Dependencies.DependenciesByID[dependencyID].UserID
 			if userID == filterUserID {
 				used = true
@@ -29,7 +29,7 @@ func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[st
 		serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 		component := state.Policy.Services[serviceName].getComponentsMap()[componentName]
 		if component != nil && component.Code != nil {
-			codeExecutor, err := component.Code.GetCodeExecutor(key, state.GetResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
+			codeExecutor, err := component.Code.GetCodeExecutor(key, state.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
 			if err != nil {
 				debug.WithFields(log.Fields{
 					"key":   key,

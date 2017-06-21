@@ -25,7 +25,7 @@ func (n dependencyNode) getGroup() string {
 	if n.short {
 		return "dependencyShort"
 	}
-	if len(n.dependency.ResolvesTo) > 0 {
+	if n.dependency.Resolved {
 		return "dependencyLongResolved"
 	}
 	return "dependencyLongNotResolved"

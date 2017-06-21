@@ -15,19 +15,19 @@ type IstioRouteRule struct {
 }
 
 // ProcessIstioIngress processes global rules and applies Istio routing rules for ingresses
-func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
-	if len(usage.GetResolvedUsage().ComponentProcessingOrder) == 0 || noop {
+func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
+	if len(state.GetResolvedData().ComponentProcessingOrder) == 0 || noop {
 		return
 	}
 
 	fmt.Println("[Route Rules (Istio)]")
 
 	progress := NewProgress()
-	progressBar := AddProgressBar(progress, len(usage.GetResolvedUsage().ComponentProcessingOrder)+len(usage.Policy.Clusters))
+	progressBar := AddProgressBar(progress, len(state.GetResolvedData().ComponentProcessingOrder)+len(state.Policy.Clusters))
 
 	existingRules := make([]*IstioRouteRule, 0)
 
-	for _, cluster := range usage.Policy.Clusters {
+	for _, cluster := range state.Policy.Clusters {
 		existingRules = append(existingRules, cluster.getIstioRouteRules()...)
 
 		progressBar.Incr()
@@ -36,8 +36,8 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	desiredRules := make([]*IstioRouteRule, 0)
 
 	// Process in the right order
-	for _, key := range usage.GetResolvedUsage().ComponentProcessingOrder {
-		rules, err := processComponent(key, usage)
+	for _, key := range state.GetResolvedData().ComponentProcessingOrder {
+		rules, err := processComponent(key, state)
 		if err != nil {
 			debug.WithFields(log.Fields{
 				"key":   key,
@@ -109,7 +109,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	serviceName, _, _, componentName := ParseServiceUsageKey(key)
 	component := usage.Policy.Services[serviceName].getComponentsMap()[componentName]
 
-	labels := usage.GetResolvedUsage().ComponentInstanceMap[key].CalculatedLabels
+	labels := usage.GetResolvedData().ComponentInstanceMap[key].CalculatedLabels
 
 	// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
 	var cluster *Cluster
@@ -123,16 +123,16 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	}
 
 	// get all users who're using service
-	dependencyIds := usage.GetResolvedUsage().ComponentInstanceMap[key].DependencyIds
+	dependencyIds := usage.GetResolvedData().ComponentInstanceMap[key].DependencyIds
 	users := make([]*User, 0)
-	for _, dependencyID := range dependencyIds {
+	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exists
 		userID := usage.Dependencies.DependenciesByID[dependencyID].UserID
 		users = append(users, usage.users.Users[userID])
 	}
 
 	if !usage.Policy.Rules.allowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
-		codeExecutor, err := component.Code.GetCodeExecutor(key, usage.GetResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
+		codeExecutor, err := component.Code.GetCodeExecutor(key, usage.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
 		if err != nil {
 			return nil, err
 		}

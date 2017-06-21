@@ -1,9 +1,5 @@
 package slinga
 
-import (
-	log "github.com/Sirupsen/logrus"
-)
-
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
 type ServiceUsageState struct {
 	// reference to a policy
@@ -15,12 +11,16 @@ type ServiceUsageState struct {
 	// reference to users
 	users *GlobalUsers
 
-	// resolved usage - gets calculated by the main engine. should ideally be accessed by a getter
-	ResolvedUsage *ResolvedServiceUsageData
+	// resolved usage - stores full information about dependencies which have been successfully resolved. should ideally be accessed by a getter
+	ResolvedData *ServiceUsageData
+
+	// unresolved usage - stores full information about dependencies which were not resolved. including rule logs with reasons, etc
+	UnresolvedData *ServiceUsageData
 }
 
-// ResolvedServiceUsageData contains all the data that gets resolved for one or more dependencies
-type ResolvedServiceUsageData struct {
+// ServiceUsageData contains all the data that gets resolved for one or more dependencies
+// When adding new fields to this object, it's crucial to modify appendData() method as well (!)
+type ServiceUsageData struct {
 	// resolved component instances: componentKey -> componentInstance
 	ComponentInstanceMap map[string]*ComponentInstance
 
@@ -29,108 +29,95 @@ type ResolvedServiceUsageData struct {
 	ComponentProcessingOrder    []string
 }
 
-// NewResolvedServiceUsageData creates new empty ResolvedServiceUsageData
-func newResolvedServiceUsageData() *ResolvedServiceUsageData {
-	return &ResolvedServiceUsageData{
+// NewResolvedServiceUsageData creates new empty ServiceUsageData
+func newServiceUsageData() *ServiceUsageData {
+	return &ServiceUsageData{
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
 		componentProcessingOrderHas: make(map[string]bool),
+		ComponentProcessingOrder:    []string{},
 	}
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
 func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, users *GlobalUsers) ServiceUsageState {
 	return ServiceUsageState{
-		Policy:        policy,
-		Dependencies:  dependencies,
-		users:         users,
-		ResolvedUsage: newResolvedServiceUsageData()}
+		Policy:         policy,
+		Dependencies:   dependencies,
+		users:          users,
+		ResolvedData:   newServiceUsageData(),
+		UnresolvedData: newServiceUsageData(),
+	}
 }
 
-// GetResolvedUsage returns usage.ResolvedUsage
+// GetResolvedData returns usage.ResolvedData
 // TODO: we can get likely rid of this method (but need to check serialization, etc)
-func (usage *ServiceUsageState) GetResolvedUsage() *ResolvedServiceUsageData {
-	if usage.ResolvedUsage == nil {
-		usage.ResolvedUsage = newResolvedServiceUsageData()
+func (state *ServiceUsageState) GetResolvedData() *ServiceUsageData {
+	if state.ResolvedData == nil {
+		state.ResolvedData = newServiceUsageData()
 	}
-	return usage.ResolvedUsage
+	return state.ResolvedData
 }
 
-// Records usage event
-func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, dependency *Dependency) string {
-	// Add user to the entry
-	instance := resolvedUsage.getComponentInstanceEntry(key)
-	instance.DependencyIds = append(instance.DependencyIds, dependency.ID)
-
-	// Add to processing order
-	if !resolvedUsage.componentProcessingOrderHas[key] {
-		resolvedUsage.componentProcessingOrderHas[key] = true
-		resolvedUsage.ComponentProcessingOrder = append(resolvedUsage.ComponentProcessingOrder, key)
+// Gets a component instance entry or creates an new entry if it doesn't exist
+func (data *ServiceUsageData) getComponentInstanceEntry(key string) *ComponentInstance {
+	if _, ok := data.ComponentInstanceMap[key]; !ok {
+		data.ComponentInstanceMap[key] = newComponentInstance(key)
 	}
-
-	return key
+	return data.ComponentInstanceMap[key]
 }
 
-// Stores calculated discovery params for component instance
-func (resolvedUsage *ResolvedServiceUsageData) storeCodeParams(key string, codeParams NestedParameterMap) {
-	instance := resolvedUsage.getComponentInstanceEntry(key)
-	if len(instance.CalculatedCodeParams) == 0 {
-		// Record code parameters
-		instance.CalculatedCodeParams = codeParams
-	} else if !instance.CalculatedCodeParams.deepEqual(codeParams) {
-		// Same component instance, different code parameters
-		debug.WithFields(log.Fields{
-			"componentKey":   key,
-			"prevCodeParams": instance.CalculatedCodeParams,
-			"nextCodeParams": codeParams,
-		}).Panic("Invalid policy. Arrived to the same component with different code parameters")
+
+// Record dependency for component instance
+func (data *ServiceUsageData) recordResolvedAndDependency(key string, dependency *Dependency) {
+	data.getComponentInstanceEntry(key).setResolved(true)
+	data.getComponentInstanceEntry(key).addDependency(dependency.ID)
+}
+
+// Record processing order for component instance
+func (data *ServiceUsageData) recordProcessingOrder(key string) {
+	if !data.componentProcessingOrderHas[key] {
+		data.componentProcessingOrderHas[key] = true
+		data.ComponentProcessingOrder = append(data.ComponentProcessingOrder, key)
 	}
 }
 
 // Stores calculated discovery params for component instance
-func (resolvedUsage *ResolvedServiceUsageData) storeDiscoveryParams(key string, discoveryParams NestedParameterMap) {
-	cInstance := resolvedUsage.getComponentInstanceEntry(key)
-	if len(cInstance.CalculatedDiscovery) == 0 {
-		// Record discovery parameters
-		cInstance.CalculatedDiscovery = discoveryParams
-	} else if !cInstance.CalculatedDiscovery.deepEqual(discoveryParams) {
-		// Same component instance, different discovery parameters
-		debug.WithFields(log.Fields{
-			"componentKey":        key,
-			"prevDiscoveryParams": cInstance.CalculatedDiscovery,
-			"nextDiscoveryParams": discoveryParams,
-		}).Panic("Invalid policy. Arrived to the same component with different discovery parameters")
-	}
+func (data *ServiceUsageData) recordCodeParams(key string, codeParams NestedParameterMap) {
+	data.getComponentInstanceEntry(key).addCodeParams(codeParams)
+}
+
+// Stores calculated discovery params for component instance
+func (data *ServiceUsageData) recordDiscoveryParams(key string, discoveryParams NestedParameterMap) {
+	data.getComponentInstanceEntry(key).addDiscoveryParams(discoveryParams)
 }
 
 // Stores calculated labels for component instance
-func (resolvedUsage *ResolvedServiceUsageData) storeLabels(key string, labels LabelSet) {
-	cInstance := resolvedUsage.getComponentInstanceEntry(key)
+func (data *ServiceUsageData) recordLabels(key string, labels LabelSet) {
+	data.getComponentInstanceEntry(key).addLabels(labels)
 
-	// Unfortunately it's pretty typical for us to come with different labels to a component instance, let's combine them all
-	cInstance.CalculatedLabels = cInstance.CalculatedLabels.addLabels(labels)
 }
-
 // Stores an outgoing edge for component instance as we are traversing the graph
-func (resolvedUsage *ResolvedServiceUsageData) storeEdge(key string, keyDst string) {
+func (data *ServiceUsageData) storeEdge(key string, keyDst string) {
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that
 	if len(key) > 0 && len(keyDst) > 0 {
-		resolvedUsage.getComponentInstanceEntry(key).EdgesOut[keyDst] = true
-		resolvedUsage.getComponentInstanceEntry(keyDst).EdgesIn[key] = true
+		data.getComponentInstanceEntry(key).addEdgeOut(keyDst)
+		data.getComponentInstanceEntry(keyDst).addEdgeIn(key)
 	}
 }
 
 // Stores rule log entry, attaching it to component instance by dependency
-func (resolvedUsage *ResolvedServiceUsageData) storeRuleLogEntry(key string, dependency *Dependency, entry *RuleLogEntry) {
-	instance := resolvedUsage.getComponentInstanceEntry(key)
-	instance.RuleLog[dependency.ID] = append(instance.RuleLog[dependency.ID], entry)
+func (data *ServiceUsageData) storeRuleLogEntry(key string, dependency *Dependency, entry *RuleLogEntry) {
+	data.getComponentInstanceEntry(key).addRuleLogEntries(dependency.ID, entry)
 }
 
-// Gets a component instance entry or creates an new entry if it doesn't exist
-func (resolvedUsage *ResolvedServiceUsageData) getComponentInstanceEntry(key string) *ComponentInstance {
-	if _, ok := resolvedUsage.ComponentInstanceMap[key]; !ok {
-		resolvedUsage.ComponentInstanceMap[key] = newComponentInstance()
+// Appends data to the current ServiceUsageData
+func (data *ServiceUsageData) appendData(ops *ServiceUsageData) {
+	for key, instance := range ops.ComponentInstanceMap {
+		data.getComponentInstanceEntry(key).appendData(instance)
 	}
-	return resolvedUsage.ComponentInstanceMap[key]
+	for _, key := range ops.ComponentProcessingOrder {
+		data.recordProcessingOrder(key)
+	}
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
@@ -140,8 +127,8 @@ func LoadServiceUsageState() ServiceUsageState {
 	return loadServiceUsageStateFromFile(fileName)
 }
 
-// SaveServiceUsageState stores usage state in a file under Aptomi DB
-func (usage ServiceUsageState) SaveServiceUsageState() {
+// SaveServiceUsageState saves usage state in a file under Aptomi DB
+func (state ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
-	saveObjectToFile(fileName, usage)
+	saveObjectToFile(fileName, state)
 }

@@ -47,8 +47,8 @@ func NewRuleLogEntry(ruleLogType RuleLogType, ruleLogScope RuleLogScope, name st
 
 // RuleLogWriter is something that is capable of organizing and storing rule logs in the right entities
 type RuleLogWriter struct {
-	// global structure, inside which logs will be saved
-	resolvedUsage *ResolvedServiceUsageData
+	// reference to the global structure, inside which logs will be saved
+	data *ServiceUsageData
 
 	// instance key where rule logs should be attached to (initially will be empty, but will be set as evaluation goes on)
 	key string
@@ -61,16 +61,16 @@ type RuleLogWriter struct {
 }
 
 // NewRuleLogWriter creates new RuleLogWriter for writing rule logs
-func NewRuleLogWriter(resolvedUsage *ResolvedServiceUsageData, dependency *Dependency) *RuleLogWriter {
+func NewRuleLogWriter(data *ServiceUsageData, dependency *Dependency) *RuleLogWriter {
 	return &RuleLogWriter{
-		resolvedUsage: resolvedUsage,
-		dependency:    dependency,
+		data:       data,
+		dependency: dependency,
 	}
 }
 
-func (writer *RuleLogWriter) setInstanceKey(key string) {
+func (writer *RuleLogWriter) attachToInstance(key string) {
 	if len(key) <= 0 {
-		debug.Fatal("Empty instance key")
+		debug.Panic("Empty instance key")
 	}
 	writer.key = key
 	writer.flushQueue()
@@ -79,7 +79,7 @@ func (writer *RuleLogWriter) setInstanceKey(key string) {
 func (writer *RuleLogWriter) flushQueue() {
 	// store all items from queue
 	for _, entry := range writer.queue {
-		writer.resolvedUsage.storeRuleLogEntry(writer.key, writer.dependency, entry)
+		writer.data.storeRuleLogEntry(writer.key, writer.dependency, entry)
 	}
 }
 
@@ -90,7 +90,7 @@ func (writer *RuleLogWriter) addRuleLogEntry(entry *RuleLogEntry) {
 		writer.queue = append(writer.queue, entry)
 	} else {
 		// store item directly
-		writer.resolvedUsage.storeRuleLogEntry(writer.key, writer.dependency, entry)
+		writer.data.storeRuleLogEntry(writer.key, writer.dependency, entry)
 	}
 }
 

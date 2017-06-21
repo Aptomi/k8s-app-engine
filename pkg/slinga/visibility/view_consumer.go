@@ -49,10 +49,8 @@ func (view ConsumerView) GetData() interface{} {
 			dependencyNode := newDependencyNode(dependency, false)
 			view.g.addNode(dependencyNode, 0)
 
-			// Step 2 - process subgraph
-			if len(dependency.ResolvesTo) > 0 {
-				view.addResolvedDependencies(dependency.ResolvesTo, dependencyNode, 1)
-			}
+			// Step 2 - process subgraph (doesn't matter whether it's resolved successfully or not)
+			view.addResolvedDependencies(dependency.ServiceKey, dependencyNode, 1)
 		}
 	}
 
@@ -63,7 +61,14 @@ func (view ConsumerView) GetData() interface{} {
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
 	// retrieve instance
 	service, context, allocation, component := slinga.ParseServiceUsageKey(key)
-	v := view.state.GetResolvedUsage().ComponentInstanceMap[key]
+
+	// try to get this component instance from resolved data
+	v := view.state.GetResolvedData().ComponentInstanceMap[key]
+
+	// okay, this component likely failed to resolved, so let's look it up from unresolved pool
+	if v == nil {
+		v = view.state.UnresolvedData.ComponentInstanceMap[key]
+	}
 
 	// if it's a service, add node and connext with previous
 	if component == slinga.ComponentRootName {

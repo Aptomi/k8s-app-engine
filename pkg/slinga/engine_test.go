@@ -14,7 +14,7 @@ func TestPolicyResolve(t *testing.T) {
 
 	usageState := NewServiceUsageState(&policy, &dependencies, &users)
 	err := usageState.ResolveAllDependencies()
-	resolvedUsage := usageState.GetResolvedUsage()
+	resolvedUsage := usageState.GetResolvedData()
 
 	// Check that policy resolution finished correctly
 	assert.Nil(t, err, "Policy usage should be resolved without errors")
@@ -23,10 +23,10 @@ func TestPolicyResolve(t *testing.T) {
 	kafkaTest := resolvedUsage.ComponentInstanceMap["kafka#test#test-platform_services#component2"]
 	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod#prod-platform_services#component2"]
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
-	assert.Equal(t, "1", dependencies.DependenciesByID[kafkaTest.DependencyIds[0]].UserID, "Only Alice should have access to test")
+	assert.Equal(t, "1", dependencies.DependenciesByID["dep_id_1"].UserID, "Only Alice should have access to test")
 
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
-	assert.Equal(t, "2", dependencies.DependenciesByID[kafkaProd.DependencyIds[0]].UserID, "Only Bob should have access to prod (Carol is compromised)")
+	assert.Equal(t, "2", dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 
 	// Check that code parameters evaluate correctly
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
@@ -112,8 +112,8 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 
 	// Check creation/update times
 	key = "kafka#test#test-platform_services#component2"
-	timeNextCreated = uInitial.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uInitial.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uInitial.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uInitial.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	assert.WithinDuration(t, time.Now(), timeNextCreated, time.Second, "Creation time should be initialized correctly for kafka")
 	assert.Equal(t, timeNextUpdated, timeNextUpdated, "Update time should be equal to creation time")
 
@@ -134,10 +134,10 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	uNewDependency.CalculateDifference(&uInitial)
 
 	// Check creation/update times
-	timePrevCreated = uInitial.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timePrevUpdated = uInitial.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
-	timeNextCreated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timePrevCreated = uInitial.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timePrevUpdated = uInitial.ResolvedData.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.Equal(t, timePrevUpdated, timeNextUpdated, "Update time should be carried over to remain the same")
 
@@ -160,19 +160,19 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 
 	// Check creation/update times for component
 	key = "kafka#prod#prod-Elena#component2"
-	timePrevCreated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timePrevUpdated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
-	timeNextCreated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timePrevCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timePrevUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed")
 
 	// Check creation/update times for service
 	key = "kafka#prod#prod-Elena#root"
-	timePrevCreated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timePrevUpdated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
-	timeNextCreated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timePrevCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timePrevUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed for service")
 }

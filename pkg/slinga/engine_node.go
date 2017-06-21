@@ -11,6 +11,9 @@ type resolutionNode struct {
 	// whether we successfully resolved this node or not
 	resolved bool
 
+	// new instance of ServiceUsageData, where resolution data will be stored
+	data *ServiceUsageData
+
 	// depth we are currently on (as we are traversing policy graph), with initial dependency being on depth 0
 	depth int
 
@@ -59,25 +62,31 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode {
-	user := usage.users.Users[d.UserID]
+func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resolutionNode {
+	user := state.users.Users[dependency.UserID]
 	if user == nil {
 		// Resolving allocations for service
 		debug.WithFields(log.Fields{
-			"dependency": d,
+			"dependency": dependency,
 		}).Panic("Dependency refers to non-existing user")
 	}
+
+	data := newServiceUsageData()
 	return &resolutionNode{
-		resolved:   false,
+		resolved: false,
+
+		data:          data,
+		ruleLogWriter: NewRuleLogWriter(data, dependency),
+
 		depth:      0,
-		dependency: d,
+		dependency: dependency,
 		user:       user,
 
 		// we start with the service specified in the dependency
-		serviceName: d.Service,
+		serviceName: dependency.Service,
 
 		// combining user labels and dependency labels
-		labels: user.getLabelSet().addLabels(user.getSecretSet()).addLabels(d.getLabelSet()),
+		labels: user.getLabelSet().addLabels(user.getSecretSet()).addLabels(dependency.getLabelSet()),
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
@@ -87,7 +96,11 @@ func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
 	return &resolutionNode{
-		resolved:   false,
+		resolved: false,
+
+		data:          node.data,
+		ruleLogWriter: node.ruleLogWriter,
+
 		depth:      node.depth + 1,
 		dependency: node.dependency,
 		user:       node.user,
@@ -151,14 +164,23 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 	}
 }
 
-func (node *resolutionNode) cannotResolveDependency() error {
+func (node *resolutionNode) cannotResolve() error {
 	debug.WithFields(log.Fields{
-		"service":          node.service.Name,
-		"component":        node.component.Name,
-		"context":          node.context.Name,
-		"allocation":       node.allocation.NameResolved,
-		"dependsOnService": node.component.Service,
-	}).Info("Cannot fulfill dependency on another service")
+		"service":       node.service.Name,
+		"componentObj":  node.component,
+		"contextObj":    node.context,
+		"allocationObj": node.allocation,
+	}).Info("Cannot resolve instance")
+
+	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
+
+	if len(node.serviceKey) <= 0 {
+		// Create service key
+		node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
+
+		// Once instance is figured out, make sure to attach rule logs to that instance
+		node.ruleLogWriter.attachToInstance(node.serviceKey)
+	}
 
 	return nil
 }
@@ -301,15 +323,15 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 	return true
 }
 
-func (node *resolutionNode) calculateAndStoreCodeParams(resolvedUsage *ResolvedServiceUsageData) error {
+func (node *resolutionNode) calculateAndStoreCodeParams() error {
 	componentCodeParams, err := node.component.processTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
-	resolvedUsage.storeCodeParams(node.componentKey, componentCodeParams)
+	node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
-func (node *resolutionNode) calculateAndStoreDiscoveryParams(resolvedUsage *ResolvedServiceUsageData) error {
+func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	componentDiscoveryParams, err := node.component.processTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
-	resolvedUsage.storeDiscoveryParams(node.componentKey, componentDiscoveryParams)
+	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
 	node.discoveryTreeNode.getNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey)

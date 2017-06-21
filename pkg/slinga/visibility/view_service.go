@@ -27,7 +27,7 @@ func (view ServiceView) GetData() interface{} {
 	view.g.addNode(svcNode, 0)
 
 	// Step 2 - find all instances of a given service. add them as "instance nodes"
-	for k, v := range view.state.ResolvedUsage.ComponentInstanceMap {
+	for k, v := range view.state.ResolvedData.ComponentInstanceMap {
 		service, context, allocation, component := slinga.ParseServiceUsageKey(k)
 		if service == view.serviceName && component == slinga.ComponentRootName {
 			// add a node with an instance of our service
@@ -48,12 +48,12 @@ func (view ServiceView) GetData() interface{} {
 // Adds to the graph nodes/edges which trigger usage of a given service instance
 func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePrev graphNode, nextLevel int) {
 	// retrieve service instance
-	instance := view.state.GetResolvedUsage().ComponentInstanceMap[serviceKey]
+	instance := view.state.GetResolvedData().ComponentInstanceMap[serviceKey]
 
 	// if there are no incoming edges, it means we came to the very beginning of the chain (i.e. dependency)
 	if len(instance.EdgesIn) <= 0 {
 		// add nodes for all dependencies
-		for _, dependencyID := range instance.DependencyIds {
+		for dependencyID := range instance.DependencyIds {
 			// add a node for dependency
 			dependencyNode := newDependencyNode(view.state.Dependencies.DependenciesByID[dependencyID], true)
 			view.g.addNode(dependencyNode, nextLevel)
@@ -65,7 +65,7 @@ func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePre
 		// go over all incoming edges
 		for k := range instance.EdgesIn {
 			service, context, allocation, component := slinga.ParseServiceUsageKey(k)
-			v := view.state.GetResolvedUsage().ComponentInstanceMap[k]
+			v := view.state.GetResolvedData().ComponentInstanceMap[k]
 			if component == slinga.ComponentRootName {
 				// if it's a service instance, add a node
 				svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[service], context, allocation, v, false)

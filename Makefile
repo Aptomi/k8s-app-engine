@@ -11,6 +11,10 @@ test:
 	go test -v ./pkg/...
 	@echo "\nAll tests passed"
 
+.PHONY: test-loop
+test-loop:
+	while go test -v ./pkg/slinga; do :; done
+
 .PHONY: clean-run-noop
 clean-run-noop:
 	$(eval TMP := $(shell mktemp -d))

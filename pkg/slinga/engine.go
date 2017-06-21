@@ -9,42 +9,44 @@ import (
 */
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (usage *ServiceUsageState) ResolveAllDependencies() error {
+func (state *ServiceUsageState) ResolveAllDependencies() error {
 
 	// Run every declared dependency via policy and resolve it
-	for _, dependencies := range usage.Dependencies.DependenciesByService {
+	for _, dependencies := range state.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
-			node := usage.newResolutionNode(d)
+			node := state.newResolutionNode(d)
 
 			// resolve usage via applying policy
-			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
-			err := usage.resolveDependency(node, usage.ResolvedUsage)
+			err := state.resolveDependency(node)
 
 			// see if there is an error
 			if err != nil {
 				return err
 			}
 
-			// record high-level service resolution
-			d.ResolvesTo = node.serviceKey
+			// record and put usages in the right place
+			d.Resolved = node.resolved
+			d.ServiceKey = node.serviceKey
+			if node.resolved {
+				state.ResolvedData.appendData(node.data)
+			} else {
+				state.UnresolvedData.appendData(node.data)
+			}
 		}
 	}
 	return nil
 }
 
 // Evaluate evaluates and resolves a single dependency ("<user> needs <service> with <labels>") and calculates component allocations
-func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolvedUsage *ResolvedServiceUsageData) error {
+func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	// Error variable that we will be reusing
 	var err error
-
-	// How/where to write entry logs as we are doing evaluation
-	node.ruleLogWriter = NewRuleLogWriter(resolvedUsage, node.dependency)
 
 	// Indicate that we are starting to resolve dependency
 	node.debugResolvingDependencyStart()
 
 	// Locate the service
-	node.service, err = node.getMatchedService(usage.Policy)
+	node.service, err = node.getMatchedService(state.Policy)
 	if err != nil {
 		return err
 	}
@@ -53,26 +55,26 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	node.labels = node.transformLabels(node.labels, node.service.Labels)
 
 	// Match the context
-	node.context, err = node.getMatchedContext(usage.Policy)
+	node.context, err = node.getMatchedContext(state.Policy)
 	if err != nil {
 		return err
 	}
 	// If no matching context is found, let's just exit
 	if node.context == nil {
-		return nil
+		return node.cannotResolve()
 	}
 
 	// Process context and transform labels
 	node.labels = node.transformLabels(node.labels, node.context.Labels)
 
 	// Match the allocation
-	node.allocation, err = node.getMatchedAllocation(usage.Policy)
+	node.allocation, err = node.getMatchedAllocation(state.Policy)
 	if err != nil {
 		return err
 	}
 	// If no matching allocation is found, let's just exit
 	if node.allocation == nil {
-		return nil
+		return node.cannotResolve()
 	}
 
 	// Process allocation, transform
@@ -82,13 +84,13 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
 
 	// Once instance is figured out, make sure to attach rule logs to that instance
-	node.ruleLogWriter.setInstanceKey(node.serviceKey)
+	node.ruleLogWriter.attachToInstance(node.serviceKey)
 
 	// Store labels for service
-	resolvedUsage.storeLabels(node.serviceKey, node.labels)
+	node.data.recordLabels(node.serviceKey, node.labels)
 
 	// Store edge (last component instance -> service instance)
-	resolvedUsage.storeEdge(node.arrivalKey, node.serviceKey)
+	node.data.storeEdge(node.arrivalKey, node.serviceKey)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.service.getComponentsSortedTopologically()
@@ -103,17 +105,17 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		node.componentKey = createServiceUsageKey(node.service, node.context, node.allocation, node.component)
 
 		// Store edge (service instance -> component instance)
-		resolvedUsage.storeEdge(node.serviceKey, node.componentKey)
+		node.data.storeEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
 		node.componentLabels = node.transformLabels(node.labels, node.component.Labels)
-		resolvedUsage.storeLabels(node.componentKey, node.componentLabels)
+		node.data.recordLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component
 		node.discoveryTreeNode[node.component.Name] = NestedParameterMap{}
 
 		// Calculate and store discovery params
-		err := node.calculateAndStoreDiscoveryParams(resolvedUsage)
+		err := node.calculateAndStoreDiscoveryParams()
 		if err != nil {
 			return err
 		}
@@ -123,7 +125,7 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 
 		if node.component.Code != nil {
 			// Evaluate code params
-			err := node.calculateAndStoreCodeParams(resolvedUsage)
+			err := node.calculateAndStoreCodeParams()
 			if err != nil {
 				return err
 			}
@@ -132,24 +134,26 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 			nodeNext := node.createChildNode()
 
 			// Resolve dependency recursively
-			err := usage.resolveDependency(nodeNext, resolvedUsage)
+			err := state.resolveDependency(nodeNext)
 			if err != nil {
 				return err
 			}
 
 			// if a dependency has not been fulfilled, then exit
 			if !nodeNext.resolved {
-				return node.cannotResolveDependency()
+				return node.cannotResolve()
 			}
 		}
 
 		// Record usage of a given component
-		resolvedUsage.recordUsage(node.componentKey, node.dependency)
+		node.data.recordResolvedAndDependency(node.componentKey, node.dependency)
+		node.data.recordProcessingOrder(node.componentKey)
 	}
 
 	// Mark object as resolved and record usage of a given service
 	node.resolved = true
-	resolvedUsage.recordUsage(node.serviceKey, node.dependency)
+	node.data.recordResolvedAndDependency(node.serviceKey, node.dependency)
+	node.data.recordProcessingOrder(node.serviceKey)
 
 	// Indicate that we have resolved dependency
 	node.debugResolvingDependencyEnd()

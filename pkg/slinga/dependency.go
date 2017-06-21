@@ -18,10 +18,12 @@ type Dependency struct {
 	Labels   map[string]string
 	Disabled bool
 
-	// This field is populated when dependency gets resolved
-	ResolvesTo string
+	// This fields are populated when dependency gets resolved
+	Resolved bool
+	ServiceKey string
 }
 
+// TODO: during serialization there is data duplication (as both fields get serialized). should prob avoid this
 // GlobalDependencies represents the list of global dependencies (see the definition above)
 type GlobalDependencies struct {
 	// dependencies <service> -> list of dependencies

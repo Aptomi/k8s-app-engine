@@ -32,11 +32,11 @@ type ServiceUsageStateDiff struct {
 }
 
 // CalculateDifference calculates difference between two given usage states
-func (usage *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *ServiceUsageStateDiff {
+func (state *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *ServiceUsageStateDiff {
 	// resulting difference
 	result := &ServiceUsageStateDiff{
 		Prev:                 prev,
-		Next:                 usage,
+		Next:                 state,
 		ComponentInstantiate: make(map[string]bool),
 		ComponentDestruct:    make(map[string]bool),
 		ComponentUpdate:      make(map[string]bool)}
@@ -47,14 +47,14 @@ func (usage *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Se
 }
 
 // PrintSummary prints policy object counts to the screen
-func (usage ServiceUsageState) PrintSummary() {
+func (state ServiceUsageState) PrintSummary() {
 	fmt.Println("[Policy]")
-	usage.printSummaryLine("Services", usage.Policy.countServices())
-	usage.printSummaryLine("Contexts", usage.Policy.countContexts())
-	usage.printSummaryLine("Clusters", usage.Policy.countClusters())
-	usage.printSummaryLine("Rules", usage.Policy.Rules.count())
-	usage.printSummaryLine("Users", usage.users.count())
-	usage.printSummaryLine("Dependencies", usage.Dependencies.count())
+	state.printSummaryLine("Services", state.Policy.countServices())
+	state.printSummaryLine("Contexts", state.Policy.countContexts())
+	state.printSummaryLine("Clusters", state.Policy.countClusters())
+	state.printSummaryLine("Rules", state.Policy.Rules.count())
+	state.printSummaryLine("Users", state.users.count())
+	state.printSummaryLine("Dependencies", state.Dependencies.count())
 }
 
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
@@ -78,7 +78,7 @@ func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRev
 	}
 }
 
-func (usage ServiceUsageState) printSummaryLine(name string, cnt int) {
+func (state ServiceUsageState) printSummaryLine(name string, cnt int) {
 	fmt.Printf("  %s: %d\n", name, cnt)
 }
 
@@ -93,14 +93,14 @@ func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) 
 		for _, deps := range diff.Prev.Dependencies.DependenciesByService {
 			for _, d := range deps {
 				// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
-				if len(d.ResolvesTo) > 0 {
+				if d.Resolved {
 					if pMap[d.UserID] == nil {
 						pMap[d.UserID] = make(map[string]map[string]int)
 					}
 					if pMap[d.UserID][d.Service] == nil {
 						pMap[d.UserID][d.Service] = make(map[string]int)
 					}
-					pMap[d.UserID][d.Service][d.ResolvesTo]++
+					pMap[d.UserID][d.Service][d.ServiceKey]++
 				}
 			}
 		}
@@ -111,14 +111,14 @@ func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) 
 	for _, deps := range diff.Next.Dependencies.DependenciesByService {
 		for _, d := range deps {
 			// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
-			if len(d.ResolvesTo) > 0 {
+			if d.Resolved {
 				if cMap[d.UserID] == nil {
 					cMap[d.UserID] = make(map[string]map[string]int)
 				}
 				if cMap[d.UserID][d.Service] == nil {
 					cMap[d.UserID][d.Service] = make(map[string]int)
 				}
-				cMap[d.UserID][d.Service][d.ResolvesTo]++
+				cMap[d.UserID][d.Service][d.ServiceKey]++
 			}
 		}
 	}
@@ -203,41 +203,41 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	allKeys := make(map[string]bool)
 
 	// merge all the keys
-	for k := range diff.Prev.GetResolvedUsage().ComponentInstanceMap {
+	for k := range diff.Prev.GetResolvedData().ComponentInstanceMap {
 		allKeys[k] = true
 	}
-	for k := range diff.Next.GetResolvedUsage().ComponentInstanceMap {
+	for k := range diff.Next.GetResolvedData().ComponentInstanceMap {
 		allKeys[k] = true
 	}
 	// Go over all the keys and see which one appear and which one disappear
 	for k := range allKeys {
-		uPrev := diff.Prev.GetResolvedUsage().ComponentInstanceMap[k]
-		uNext := diff.Next.GetResolvedUsage().ComponentInstanceMap[k]
+		uPrev := diff.Prev.GetResolvedData().ComponentInstanceMap[k]
+		uNext := diff.Next.GetResolvedData().ComponentInstanceMap[k]
 
-		var depIdsPrev []string
+		var depIdsPrev map[string]bool
 		if uPrev != nil {
 			depIdsPrev = uPrev.DependencyIds
 		}
 
-		var depIdsNext []string
+		var depIdsNext map[string]bool
 		if uNext != nil {
 			depIdsNext = uNext.DependencyIds
 		}
 
 		// see if a component needs to be instantiated
-		if depIdsPrev == nil && depIdsNext != nil {
+		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
 			diff.ComponentInstantiate[k] = true
 			diff.updateTimes(k, time.Now(), time.Now())
 		}
 
 		// see if a component needs to be destructed
-		if depIdsPrev != nil && depIdsNext == nil {
+		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
 			diff.ComponentDestruct[k] = true
 			diff.updateTimes(k, uPrev.CreatedOn, time.Now())
 		}
 
 		// see if a component needs to be updated
-		if depIdsPrev != nil && depIdsNext != nil {
+		if len(depIdsPrev) > 0 && len(depIdsNext) > 0 {
 			sameParams := uPrev.CalculatedCodeParams.deepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				diff.ComponentUpdate[k] = true
@@ -247,20 +247,16 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 			}
 		}
 
-		// see what needs to happen to users
-		depPrevIdsMap := toMap(depIdsPrev)
-		depNextIdsMap := toMap(depIdsNext)
-
 		// see if a user needs to be detached from a component
-		for dependencyID := range depPrevIdsMap {
-			if !depNextIdsMap[dependencyID] {
+		for dependencyID := range depIdsPrev {
+			if !depIdsNext[dependencyID] {
 				diff.ComponentDetachDependency = append(diff.ComponentDetachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyID})
 			}
 		}
 
 		// see if a user needs to be attached to a component
-		for dependencyID := range depNextIdsMap {
-			if !depPrevIdsMap[dependencyID] {
+		for dependencyID := range depIdsNext {
+			if !depIdsPrev[dependencyID] {
 				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyID})
 			}
 		}
@@ -270,13 +266,8 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 // updated timestamps for component (and root service, if/as needed)
 func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, updatedOn time.Time) {
 	// update for a given node
-	instance := diff.Next.GetResolvedUsage().ComponentInstanceMap[k]
-	if createdOn.After(instance.CreatedOn) {
-		instance.CreatedOn = createdOn
-	}
-	if updatedOn.After(instance.UpdatedOn) {
-		instance.UpdatedOn = updatedOn
-	}
+	instance := diff.Next.GetResolvedData().ComponentInstanceMap[k]
+	instance.updateTimes(createdOn, updatedOn)
 
 	// if it's a component instance, then update for its parent service instance as well
 	serviceName, contextName, allocationName, componentName := ParseServiceUsageKey(k)
@@ -358,14 +349,6 @@ func (diff *ServiceUsageStateDiff) printDifferenceOnComponentLevel(verbose bool)
 
 }
 
-func toMap(p []string) map[string]bool {
-	result := make(map[string]bool)
-	for _, s := range p {
-		result[s] = true
-	}
-	return result
-}
-
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) Print(verbose bool) {
 	diff.printDifferenceOnServicesLevel(verbose)
@@ -376,7 +359,7 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 	// If we are requesting full policy processing, then we will need to re-create all objects
 	if full {
-		for k, v := range diff.Next.GetResolvedUsage().ComponentInstanceMap {
+		for k, v := range diff.Next.GetResolvedData().ComponentInstanceMap {
 			diff.ComponentInstantiate[k] = true
 			diff.updateTimes(k, v.CreatedOn, time.Now())
 		}
@@ -428,7 +411,7 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 
 func (diff ServiceUsageStateDiff) processInstantiations() error {
 	// Process instantiations in the right order
-	for _, key := range diff.Next.GetResolvedUsage().ComponentProcessingOrder {
+	for _, key := range diff.Next.GetResolvedData().ComponentProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
 			// Increment progress bar
@@ -454,7 +437,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.GetResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -472,7 +455,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 
 func (diff ServiceUsageStateDiff) processUpdates() error {
 	// Process updates in the right order
-	for _, key := range diff.Next.GetResolvedUsage().ComponentProcessingOrder {
+	for _, key := range diff.Next.GetResolvedData().ComponentProcessingOrder {
 		// Does it need to be updated?
 		if _, ok := diff.ComponentUpdate[key]; ok {
 			// Increment progress bar
@@ -497,7 +480,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				}).Info("Updating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.GetResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -515,7 +498,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 
 func (diff ServiceUsageStateDiff) processDestructions() error {
 	// Process destructions in the right order
-	for _, key := range diff.Prev.GetResolvedUsage().ComponentProcessingOrder {
+	for _, key := range diff.Prev.GetResolvedData().ComponentProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
 			// Increment progress bar
@@ -540,7 +523,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				}).Info("Destructing component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Prev.GetResolvedUsage().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
+					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Prev.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
 					if err != nil {
 						return err
 					}

@@ -145,7 +145,7 @@ func shorten(s string) string {
 }
 
 // DrawVisualAndStore writes usage state visual into a file
-func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Graph {
+func (state ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Graph {
 	users := LoadUsersFromDir(GetAptomiBaseDir())
 
 	// Write graph into a file
@@ -167,8 +167,8 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	if usage.Dependencies != nil {
-		for service, dependencies := range usage.Dependencies.DependenciesByService {
+	if state.Dependencies != nil {
+		for service, dependencies := range state.Dependencies.DependenciesByService {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
@@ -192,7 +192,7 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 	}
 
 	// Second, visualize evaluated links
-	for key, linkStruct := range usage.GetResolvedUsage().ComponentInstanceMap {
+	for key, linkStruct := range state.GetResolvedData().ComponentInstanceMap {
 		keyArray := strings.Split(key, "#")
 		service := keyArray[0]
 		contextAndAllocation := keyArray[1] + "#" + keyArray[2]
@@ -216,16 +216,16 @@ func (usage ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 		addNodeOnce(graph, "cluster_Service_Allocations_"+service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
 
 		// Add an edge from service to allocation box
-		for _, dependencyID := range linkStruct.DependencyIds {
-			userID := usage.Dependencies.DependenciesByID[dependencyID].UserID
+		for dependencyID := range linkStruct.DependencyIds {
+			userID := state.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, service, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 
 	// Third, show cross-service dependencies
-	if usage.Policy != nil {
-		for serviceName1, service1 := range usage.Policy.Services {
+	if state.Policy != nil {
+		for serviceName1, service1 := range state.Policy.Services {
 			// Resolve every component
 			for _, component := range service1.Components {
 				serviceName2 := component.Service
