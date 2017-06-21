@@ -269,23 +269,20 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 
 // updated timestamps for component (and root service, if/as needed)
 func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, updatedOn time.Time) {
-	// update for component
-	uNext := diff.Next.GetResolvedUsage().ComponentInstanceMap[k]
-	uNext.CreatedOn = createdOn
-	uNext.UpdatedOn = updatedOn
+	// update for a given node
+	instance := diff.Next.GetResolvedUsage().ComponentInstanceMap[k]
+	if createdOn.After(instance.CreatedOn) {
+		instance.CreatedOn = createdOn
+	}
+	if updatedOn.After(instance.UpdatedOn) {
+		instance.UpdatedOn = updatedOn
+	}
 
-	// update for service if/as needed
+	// if it's a component instance, then update for its parent service instance as well
 	serviceName, contextName , allocationName, componentName := ParseServiceUsageKey(k)
 	if componentName != ComponentRootName {
 		kService := createServiceUsageKeyFromStr(serviceName, contextName , allocationName, ComponentRootName)
-		uNextSvc := diff.Next.GetResolvedUsage().ComponentInstanceMap[kService]
-
-		if createdOn.After(uNextSvc.CreatedOn) {
-			uNextSvc.CreatedOn = createdOn
-		}
-		if updatedOn.After(uNextSvc.UpdatedOn) {
-			uNextSvc.UpdatedOn = updatedOn
-		}
+		diff.updateTimes(kService, createdOn, updatedOn)
 	}
 }
 
