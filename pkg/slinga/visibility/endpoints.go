@@ -2,6 +2,7 @@ package visibility
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
+	"sort"
 )
 
 type rLink struct {
@@ -37,10 +38,17 @@ func Endpoints(username string, users map[string]*slinga.User, state slinga.Serv
 		}
 	}
 
+	userIds := make([]string, 0)
 	for userId, user := range users {
 		if !isGlobalOp && username != "" && user.Name != username {
 			continue
 		}
+		userIds = append(userIds, userId)
+	}
+
+	sort.Strings(userIds)
+
+	for _, userId := range userIds {
 		r := make([]rEndpoint, 0)
 
 		endpoints := state.Endpoints(userId)
@@ -56,7 +64,7 @@ func Endpoints(username string, users map[string]*slinga.User, state slinga.Serv
 			r = append(r, rEndpoint{service, context, allocation, component, rLinks})
 		}
 
-		uR.Endpoints = append(uR.Endpoints, userEndpoints{user, r})
+		uR.Endpoints = append(uR.Endpoints, userEndpoints{users[userId], r})
 	}
 
 	return uR
