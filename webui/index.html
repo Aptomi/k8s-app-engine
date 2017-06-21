@@ -590,18 +590,35 @@
             fetch_data: function () {
                 var ctx = this;
 
+                $("#mygraph").html("");
+
                 loadJSON("/api/details", function (jsonData) {
                     var view = ctx.$route.params.view;
                     var filter = ctx.$route.params.filter;
-
-                    var userId = ""
-                    var dependencyId = ""
-                    var serviceName = ""
 
                     if (view === ":view") {
                         router.push({ name: 'details', params: { view: "consumer" }})
                         return
                     }
+
+                    ctx.curr_view = view;
+                    ctx.curr_filter = filter;
+
+                    ctx.views.forEach(function(item) {
+                        if (item.name === ctx.curr_view) {
+                            ctx.curr_view_title = item.title
+                        }
+                    })
+
+                    ctx.items.forEach(function(item) {
+                        if (item.name === ctx.curr_filter) {
+                            ctx.curr_filter_title = item.title
+                        }
+                    })
+
+                    var userId = ""
+                    var dependencyId = ""
+                    var serviceName = ""
 
                     if (view === "service") {
                         ctx.items = jsonData.Services
@@ -625,73 +642,17 @@
                     }
 
                     if (filter === ":filter") {
-                        router.push({ name: 'details', params: { view: view, filter: ctx.items[0].name }})
+                        if (ctx.items.length > 0) {
+                            router.push({name: 'details', params: {view: view, filter: ctx.items[0].name}})
+                        }
                         return
                     }
-
-                    ctx.curr_view = view;
-                    ctx.curr_filter = filter;
-
-                    ctx.views.forEach(function(item) {
-                        if (item.name === ctx.curr_view) {
-                            ctx.curr_view_title = item.title
-                        }
-                    })
-
-                    ctx.items.forEach(function(item) {
-                        if (item.name === ctx.curr_filter) {
-                            ctx.curr_filter_title = item.title
-                        }
-                    })
 
                     drawChart(ctx.curr_view, userId, dependencyId, serviceName)
                 }, function (err) {
                     console.log("/api/details not loaded with err:")
                     console.log(err)
                 });
-
-                ///
-                $("#mygraph").html("");
-
-
-//                var ok = false;
-//                this.views.forEach(function (item) {
-//                    if (item.name === ctx.$route.params.view) {
-//                        ctx.curr_view = item.name
-//                        ctx.curr_view_title = item.title
-//                        ok = true
-//                    }
-//                });
-//                if (!ok) {
-//                    ctx.curr_view = ""
-//                    ctx.curr_view_title = ""
-//                }
-//
-
-//
-//                ok = false
-//                this.users.forEach(function (item) {
-//                    if (item.name === ctx.$route.params.filter) {
-//                        ctx.curr_user = item.name
-//                        ctx.curr_user_title = item.title
-//                        ok = true
-//                    }
-//                });
-//                if (!ok) {
-//                    ctx.curr_user = ""
-//                }
-//
-//                ok = false
-//                this.dependencies.forEach(function (item) {
-//                    if (item.name === ctx.$route.params.filter) {
-//                        ctx.curr_dep = item.title
-//                        ok = true
-//                    }
-//                });
-//                if (!ok) {
-//                    ctx.curr_dep = ""
-//                }
-
             }
         }
     })
