@@ -29,54 +29,14 @@
                         <i class="fa fa-reorder"></i>
                     </button>
                     <a href="#" class="navbar-brand" style="padding: 5px 5px">
-                            <img src="public/img/aptomi_logo_2.png" style="height: 40px">
+                        <img src="public/img/aptomi_logo_2.png" style="height: 40px">
                     </a>
                 </div>
                 <div class="navbar-collapse collapse" id="navbar">
                     <ul class="nav navbar-nav">
-                        <li class="active">
-                            <a aria-expanded="false" role="button" href="/ui/"> Home</a>
-                        </li>
-                        <li>
-                            <a aria-expanded="false" role="button" href="/ui/vis.html"> Services View</a>
-                        </li>
-                        <!--<li class="dropdown">-->
-                            <!--<a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Menu item <span class="caret"></span></a>-->
-                            <!--<ul role="menu" class="dropdown-menu">-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                            <!--</ul>-->
-                        <!--</li>-->
-                        <!--<li class="dropdown">-->
-                            <!--<a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Menu item <span class="caret"></span></a>-->
-                            <!--<ul role="menu" class="dropdown-menu">-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                            <!--</ul>-->
-                        <!--</li>-->
-                        <!--<li class="dropdown">-->
-                            <!--<a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Menu item <span class="caret"></span></a>-->
-                            <!--<ul role="menu" class="dropdown-menu">-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                            <!--</ul>-->
-                        <!--</li>-->
-                        <!--<li class="dropdown">-->
-                            <!--<a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Menu item <span class="caret"></span></a>-->
-                            <!--<ul role="menu" class="dropdown-menu">-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                                <!--<li><a href="">Menu item</a></li>-->
-                            <!--</ul>-->
-                        <!--</li>-->
-
+                        <router-link v-for="item in routes" v-bind:to="item.path" tag="li" active-class="active">
+                            <a role="button"> {{ item.title }}</a>
+                        </router-link>
                     </ul>
                     <ul class="nav navbar-top-links navbar-right">
                         <li>
@@ -99,6 +59,9 @@
             </nav>
         </div>
         <div class="wrapper wrapper-content">
+
+            <router-view></router-view>
+
             <div class="container">
                 <div class="row">
                     <div class="col-md-2">
@@ -447,6 +410,34 @@
 <script src="public/js/inspinia.js"></script>
 <script src="public/js/plugins/pace/pace.min.js"></script>
 
+<script src="public/js/vue.min.js"></script>
+<script src="public/js/vue-router.min.js"></script>
+
+<script>
+    const Foo = Vue.component('foo', {
+        template: '<div>foo {{ counter }}</div>',
+        data: function () {
+            console.log("foo#data()");
+            return {
+                counter: 0
+            }
+        },
+        created: function () {
+            console.log("foo#created()");
+            this.fetch_data()
+        },
+        watch: {
+            '$route': 'fetch_data'
+        },
+        methods: {
+            fetch_data: function () {
+                console.log("foo#methods#fetch_data");
+                console.log(this.$route);
+            }
+        }
+    });
+</script>
+
 <script>
     function getCookie(c_name) {
         if (document.cookie.length > 0) {
@@ -465,6 +456,53 @@
 
     $(document).ready(function() {
         $("#username").text(getCookie("username"));
+    });
+
+
+
+
+//    methods: {
+//        fetchData () {
+//            this.error = this.post = null
+//            this.loading = true
+//            // replace `getPost` with your data fetching util / API wrapper
+//            getPost(this.$route.params.id, (err, post) => {
+//                this.loading = false
+//            if (err) {
+//                this.error = err.toString()
+//            } else {
+//                this.post = post
+//            }
+//        })
+//        }
+//    }
+
+    const Bar = Vue.component('bar', {
+        template: '<div>bar {{ counter }}</div>',
+        data: function () {
+            console.log("bar#data()");
+            return {
+                counter: 1
+            }
+        }
+    });
+
+    const routes = [
+        { name: 'foo', path: '/foo', title: "The Foo", component: Foo },
+        { name: 'bar', path: '/bar', title: "The Bar", component: Bar },
+        { path: '*', redirect: '/foo'}
+    ];
+
+    const router = new VueRouter({
+        routes: routes
+    });
+
+    const app = new Vue({
+        el: '#wrapper',
+        router: router,
+        data: {
+            routes: routes
+        }
     });
 
 </script>
