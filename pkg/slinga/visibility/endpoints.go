@@ -18,16 +18,17 @@ type rEndpoint struct {
 }
 
 type endpointsView struct {
-	Endpoints []rEndpoint
+	Endpoints map[string][]rEndpoint
 }
 
 func Endpoints(filterUserId string, users map[string]*slinga.User, state slinga.ServiceUsageState) endpointsView {
-	r := make([]rEndpoint, 0)
+	uR := endpointsView{make(map[string][]rEndpoint)}
 
 	for userId := range users {
 		if filterUserId != "" && userId != filterUserId {
 			continue
 		}
+		r := make([]rEndpoint, 0)
 
 		endpoints := state.Endpoints(userId)
 
@@ -42,7 +43,8 @@ func Endpoints(filterUserId string, users map[string]*slinga.User, state slinga.
 			r = append(r, rEndpoint{service, context, allocation, component, rLinks})
 		}
 
+		uR.Endpoints[userId] = r
 	}
 
-	return endpointsView{r}
+	return uR
 }
