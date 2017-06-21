@@ -2,7 +2,6 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"time"
 )
 
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
@@ -36,41 +35,6 @@ func newResolvedServiceUsageData() *ResolvedServiceUsageData {
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
 		componentProcessingOrderHas: make(map[string]bool),
 	}
-}
-
-// ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
-type ComponentInstance struct {
-	// When this instance was created & last updated on
-	CreatedOn time.Time
-	UpdatedOn time.Time
-
-	// List of dependencies which are keeping this component instantiated
-	DependencyIds []string
-
-	// Calculated parameters for the component
-	CalculatedLabels     LabelSet
-	CalculatedDiscovery  NestedParameterMap
-	CalculatedCodeParams NestedParameterMap
-
-	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
-	EdgesIn  map[string]bool
-	EdgesOut map[string]bool
-}
-
-// Creates a new component instance
-func newComponentInstance() *ComponentInstance {
-	return &ComponentInstance{
-		CalculatedLabels:     LabelSet{},
-		CalculatedDiscovery:  NestedParameterMap{},
-		CalculatedCodeParams: NestedParameterMap{},
-		EdgesIn:              make(map[string]bool),
-		EdgesOut:             make(map[string]bool),
-	}
-}
-
-// GetRunningTime returns the time for long component has been running
-func (instance *ComponentInstance) GetRunningTime() time.Duration {
-	return time.Since(instance.CreatedOn)
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
