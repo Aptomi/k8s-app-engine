@@ -31,7 +31,7 @@ function log() {
     fi
 }
 
-watched_path="cmd pkg Makefile tools"
+watched_path="cmd pkg Makefile tools vendor"
 
 log "Watching repo and reloading aptomi server after any changes in: $watched_path"
 
