@@ -86,23 +86,23 @@
                     <div class="col-lg-9">
                         <div class="ibox float-e-margins">
                             <div class="ibox-title">
-                                <h5>Service Owner View</h5>
+                                <h5 id="viewType"></h5>
                                 <div class="ibox-tools">
                                     <a href="#">
                                         <i class="fa"></i>[TODO: Select Service]
                                     </a>
-<!--
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        <i class="fa fa-wrench"></i>
-                                    </a>
+                                    <!--
+                                                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                                                            <i class="fa fa-wrench"></i>
+                                                                        </a>
 
-                                    <ul class="dropdown-menu dropdown-user">
-                                        <li><a href="#">Config option 1</a>
-                                        </li>
-                                        <li><a href="#">Config option 2</a>
-                                        </li>
-                                    </ul>
--->
+                                                                        <ul class="dropdown-menu dropdown-user">
+                                                                            <li><a href="#">Config option 1</a>
+                                                                            </li>
+                                                                            <li><a href="#">Config option 2</a>
+                                                                            </li>
+                                                                        </ul>
+                                    -->
                                 </div>
                             </div>
                             <div class="ibox-content">
@@ -110,21 +110,24 @@
                                 <div id="mygraph"></div>
                                 <script type="text/javascript">
                                     // can be service-view, consumer-view, or globalops-view
-                                    var view = "consumer-view";
+                                    var view = "service-view";
 
                                     var apiPath = "/api/" + view;
                                     if (view === "service-view") {
                                         // service-view = view from the standpoint of service owner
                                         var serviceName = "analytics_pipeline";
                                         apiPath += "?serviceName=" + serviceName;
+                                        document.getElementById('viewType').innerHTML = 'Service Owner View'
                                     } else if (view === "consumer-view") {
                                         // consumer-view = view from the standpoint of service consumer
                                         var userId = "100";
                                         apiPath += "?userId=" + userId;
+                                        document.getElementById('viewType').innerHTML = 'Service Consumer View'
                                     } else {
                                         // globalops-view = view from the standpoint of global IT ops
                                         var userId = "100";
                                         apiPath += "?userId=" + userId;
+                                        document.getElementById('viewType').innerHTML = 'Global IT/Ops View'
                                     }
 
                                     loadJSON(apiPath, jsonLoaded, function (err) {
@@ -207,7 +210,7 @@
                                             dependencyLongNotResolved: {
                                                 shape: 'icon',
                                                 font: {
-                                                    multi: 'html',
+                                                    multi: 'html'
                                                 },
                                                 icon: {
                                                     face: 'FontAwesome',
@@ -225,14 +228,19 @@
                                             randomSeed: 239,
                                             hierarchical: {
                                                 direction: "LR",
-                                                levelSeparation: 250
+                                                levelSeparation: 220
                                             }
                                         },
-                                        physics: false,
                                         interaction: {
                                             hover: true
-                                        }
+                                        },
+                                        physics: false
                                     };
+
+                                    // hack to better display consumer view
+                                    if (view === "consumer-view") {
+                                        options.layout.hierarchical.levelSeparation = 130;
+                                    }
 
                                     function chosenNode(values, id, selected, hovering) {
                                         values.color = "#ffdd88";
@@ -241,10 +249,10 @@
 
                                     function clickedNode(params) {
                                         params.event = "[original event]";
-                                        var node = this.getNodeAt(params.pointer.DOM)
-                                        var edge = this.getEdgeAt(params.pointer.DOM)
+                                        var node = this.getNodeAt(params.pointer.DOM);
+                                        var edge = this.getEdgeAt(params.pointer.DOM);
 
-                                        var id = ""
+                                        var id = "";
                                         if (node) {
                                             id = node
                                         } else if (edge) {
