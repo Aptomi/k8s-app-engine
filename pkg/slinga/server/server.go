@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/visibility"
+	"github.com/gorilla/handlers"
 	"net/http"
+	"os"
 )
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,26 +58,34 @@ func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI
 func Serve(host string, port int) {
-	http.HandleFunc("/favicon.ico", faviconHandler)
+	r := http.NewServeMux()
+
+	r.HandleFunc("/favicon.ico", faviconHandler)
 
 	// redirect from "/" to "/ui/"
-	http.Handle("/", http.RedirectHandler("/ui/", http.StatusTemporaryRedirect))
+	r.Handle("/", http.RedirectHandler("/ui/", http.StatusTemporaryRedirect))
 
 	// serve all files from "webui" folder and require auth for everything except login.html
-	http.Handle("/ui/", staticFilesHandler("/ui/", http.Dir("./webui/")))
+	r.Handle("/ui/", staticFilesHandler("/ui/", http.Dir("./webui/")))
 
 	// serve all API endpoints at /api/ path and require auth
-	http.Handle("/api/endpoints", requireAuth(endpointsHandler))
-	http.Handle("/api/service-view", requireAuth(serviceViewHandler))
-	http.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
-	http.Handle("/api/object-view", requireAuth(objectViewHandler))
+	r.Handle("/api/endpoints", requireAuth(endpointsHandler))
+	r.Handle("/api/service-view", requireAuth(serviceViewHandler))
+	r.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
+	r.Handle("/api/object-view", requireAuth(objectViewHandler))
 
 	// serve login/logout api without auth
-	http.HandleFunc("/api/login", loginHandler)
-	http.HandleFunc("/api/logout", logoutHandler)
+	r.HandleFunc("/api/login", loginHandler)
+	r.HandleFunc("/api/logout", logoutHandler)
 
 	listenAddr := fmt.Sprintf("%s:%d", host, port)
 	fmt.Println("Serving at", listenAddr)
+
+	var server http.Handler = r
+
+	server = handlers.CombinedLoggingHandler(os.Stdout, server)
+	server = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(server)
+
 	// todo better handle error returned from ListenAndServe (path to Fatal??)
-	panic(http.ListenAndServe(listenAddr, nil))
+	panic(http.ListenAndServe(listenAddr, server))
 }
