@@ -46,15 +46,36 @@ func (state *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Se
 	return result
 }
 
+type ServiceUsageStateSummary struct {
+	Services     int
+	Contexts     int
+	Clusters     int
+	Rules        int
+	Users        int
+	Dependencies int
+}
+
+func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
+	return ServiceUsageStateSummary{
+		state.Policy.countServices(),
+		state.Policy.countContexts(),
+		state.Policy.countClusters(),
+		state.Policy.Rules.count(),
+		state.users.count(),
+		state.Dependencies.count(),
+	}
+}
+
 // PrintSummary prints policy object counts to the screen
 func (state ServiceUsageState) PrintSummary() {
 	fmt.Println("[Policy]")
-	state.printSummaryLine("Services", state.Policy.countServices())
-	state.printSummaryLine("Contexts", state.Policy.countContexts())
-	state.printSummaryLine("Clusters", state.Policy.countClusters())
-	state.printSummaryLine("Rules", state.Policy.Rules.count())
-	state.printSummaryLine("Users", state.users.count())
-	state.printSummaryLine("Dependencies", state.Dependencies.count())
+	summary := state.GetSummary()
+	state.printSummaryLine("Services", summary.Services)
+	state.printSummaryLine("Contexts", summary.Contexts)
+	state.printSummaryLine("Clusters", summary.Clusters)
+	state.printSummaryLine("Rules", summary.Rules)
+	state.printSummaryLine("Users", summary.Users)
+	state.printSummaryLine("Dependencies", summary.Dependencies)
 }
 
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
