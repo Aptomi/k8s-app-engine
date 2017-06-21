@@ -459,169 +459,170 @@
 <!--Template for /home-->
 <script type="text/x-template" id="template-home">
     <div>
-    <div class="row">
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-primary pull-right">Available</span>
-                    <h5>Services</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">4</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-primary pull-right">Available</span>
-                    <h5>Contexts</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">8</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-primary pull-right">Global</span>
-                    <h5>Clusters</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">2</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-primary pull-right">Global</span>
-                    <h5>Rules</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">4</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-success pull-right">Owner</span>
-                    <h5>Services</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">4</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-success pull-right">Owner</span>
-                    <h5>Contexts</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">8</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-success pull-right">Me</span>
-                    <h5>Dependencies</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">8</h1>
-                    <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                    <!--<small>Total views</small>-->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row" v-for="user_endpoints in all_endpoints" v-if="user_endpoints.Endpoints.length > 0">
-        <div class="col-lg-12">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>Services Endpoints of user {{ user_endpoints.User.Name }} </h5>
-
-                    <!--<div class="ibox-tools">-->
-                    <!--<a class="collapse-link">-->
-                    <!--<i class="fa fa-chevron-up"></i>-->
-                    <!--</a>-->
-                    <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">-->
-                    <!--<i class="fa fa-wrench"></i>-->
-                    <!--</a>-->
-                    <!--<ul class="dropdown-menu dropdown-user">-->
-                    <!--<li><a href="#">Config option 1</a>-->
-                    <!--</li>-->
-                    <!--<li><a href="#">Config option 2</a>-->
-                    <!--</li>-->
-                    <!--</ul>-->
-                    <!--<a class="close-link">-->
-                    <!--<i class="fa fa-times"></i>-->
-                    <!--</a>-->
-                    <!--</div>-->
-                </div>
-                <div class="ibox-content">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>Service </th>
-                                <th>Context </th>
-                                <th>Allocation </th>
-                                <th>Component</th>
-                                <th>Links</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>Project <small>This is example of project</small></td>
-                                <td>Patrick Smith</td>
-                                <td>0800 051213</td>
-                                <td>Inceptos Hymenaeos Ltd</td>
-                                <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                            </tr>
-                            <tr v-for="endpoint in user_endpoints.Endpoints">
-                                <td>{{ endpoint.Service }}</td>
-                                <td>{{ endpoint.Context }}</td>
-                                <td>{{ endpoint.Allocation }}</td>
-                                <td>{{ endpoint.Component }}</td>
-                                <td>
-                                    <div v-for="link in endpoint.Links">
-                                        <a v-bind:href="link.Link">{{ link.Name }}</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">Available</span>
+                        <h5>Services</h5>
                     </div>
-
+                    <div class="ibox-content">
+                        <h1 class="no-margins">4</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">Available</span>
+                        <h5>Contexts</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">8</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">Global</span>
+                        <h5>Clusters</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">2</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">Global</span>
+                        <h5>Rules</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">4</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
                 </div>
             </div>
         </div>
 
-    </div>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-success pull-right">Owner</span>
+                        <h5>Services</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">4</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-success pull-right">Owner</span>
+                        <h5>Contexts</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">8</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-success pull-right">Me</span>
+                        <h5>Dependencies</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">8</h1>
+                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
+                        <!--<small>Total views</small>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" v-for="user_endpoints in all_endpoints" v-if="user_endpoints.Endpoints.length > 0">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5 v-if="all_endpoints.length > 1">Services Endpoints for user {{ user_endpoints.User.Name }} </h5>
+                        <h5 v-else>Services Endpoints </h5>
+
+                        <!--<div class="ibox-tools">-->
+                        <!--<a class="collapse-link">-->
+                        <!--<i class="fa fa-chevron-up"></i>-->
+                        <!--</a>-->
+                        <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">-->
+                        <!--<i class="fa fa-wrench"></i>-->
+                        <!--</a>-->
+                        <!--<ul class="dropdown-menu dropdown-user">-->
+                        <!--<li><a href="#">Config option 1</a>-->
+                        <!--</li>-->
+                        <!--<li><a href="#">Config option 2</a>-->
+                        <!--</li>-->
+                        <!--</ul>-->
+                        <!--<a class="close-link">-->
+                        <!--<i class="fa fa-times"></i>-->
+                        <!--</a>-->
+                        <!--</div>-->
+                    </div>
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Service </th>
+                                    <th>Context </th>
+                                    <th>Allocation </th>
+                                    <th>Component</th>
+                                    <th>Links</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Project <small>This is example of project</small></td>
+                                    <td>Patrick Smith</td>
+                                    <td>0800 051213</td>
+                                    <td>Inceptos Hymenaeos Ltd</td>
+                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+                                </tr>
+                                <tr v-for="endpoint in user_endpoints.Endpoints">
+                                    <td>{{ endpoint.Service }}</td>
+                                    <td>{{ endpoint.Context }}</td>
+                                    <td>{{ endpoint.Allocation }}</td>
+                                    <td>{{ endpoint.Component }}</td>
+                                    <td>
+                                        <div v-for="link in endpoint.Links">
+                                            <a v-bind:href="link.Link">{{ link.Name }}</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 </script>
 
