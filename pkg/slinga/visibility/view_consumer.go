@@ -15,7 +15,7 @@ type ConsumerView struct {
 func NewGlobalConsumerView(filterUserId string, users map[string]*slinga.User, state slinga.ServiceUsageState) graph {
 	g := newGraph()
 	for userId := range users {
-		if userId != "" && userId != filterUserId {
+		if filterUserId != "" && userId != filterUserId {
 			continue
 		}
 		view := ConsumerView{
