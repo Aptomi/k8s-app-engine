@@ -21,11 +21,11 @@ type endpointsView struct {
 	Endpoints map[string][]rEndpoint
 }
 
-func Endpoints(filterUserId string, users map[string]*slinga.User, state slinga.ServiceUsageState) endpointsView {
+func Endpoints(username string, users map[string]*slinga.User, state slinga.ServiceUsageState) endpointsView {
 	uR := endpointsView{make(map[string][]rEndpoint)}
 
-	for userId := range users {
-		if filterUserId != "" && userId != filterUserId {
+	for userId, user := range users {
+		if username != "" && user.Name != username {
 			continue
 		}
 		r := make([]rEndpoint, 0)
