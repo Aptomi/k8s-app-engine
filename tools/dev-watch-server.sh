@@ -31,7 +31,9 @@ function log() {
     fi
 }
 
-log "Watching repo and reloading aptomi server after any changes outside of webui folder"
+watched_path="cmd pkg Makefile tools"
+
+log "Watching repo and reloading aptomi server after any changes in: $watched_path"
 
 if ! hash fswatch 2>/dev/null; then
     log "App fswatch isn't installed but required"
@@ -45,7 +47,7 @@ pushd $workdir 1>/dev/null
 log "Workdir: $workdir"
 
 tools/dev-reload-server.sh
-fswatch -o -l 1 ./cmd ./pkg Makefile ./tools | xargs -n1 -I "{}" tools/dev-reload-server.sh
+fswatch -o -l 1 $watched_path | xargs -n1 -I "{}" tools/dev-reload-server.sh
 
 popd
 
