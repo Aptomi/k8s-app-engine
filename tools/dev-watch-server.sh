@@ -9,9 +9,12 @@ COLOR_BLUE='\033[0;34m'
 COLOR_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
+function kill_aptomi() {
+    pkill -f "aptomi server" || true
+}
+
 function finish() {
-# todo source _dev... and use kill_aptomi from it
-#    kill_aptomi
+    kill_aptomi
     echo -e -n $COLOR_RESET
 }
 trap finish EXIT
