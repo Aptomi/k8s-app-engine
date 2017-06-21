@@ -558,11 +558,11 @@
         </div>
     </div>
 
-    <div class="row" v-for="(endpoints, user) in all_endpoints" v-if="endpoints.length > 0">
+    <div class="row" v-for="user_endpoints in all_endpoints" v-if="user_endpoints.Endpoints.length > 0">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>Services Endpoints of user {{ user }} </h5>
+                    <h5>Services Endpoints of user {{ user_endpoints.User.Name }} </h5>
 
                     <!--<div class="ibox-tools">-->
                     <!--<a class="collapse-link">-->
@@ -602,7 +602,7 @@
                                 <td>Inceptos Hymenaeos Ltd</td>
                                 <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
                             </tr>
-                            <tr v-for="endpoint in endpoints">
+                            <tr v-for="endpoint in user_endpoints.Endpoints">
                                 <td>{{ endpoint.Service }}</td>
                                 <td>{{ endpoint.Context }}</td>
                                 <td>{{ endpoint.Allocation }}</td>
