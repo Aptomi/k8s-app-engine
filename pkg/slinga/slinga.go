@@ -58,6 +58,7 @@ type ServiceComponent struct {
 // Service defines individual service
 type Service struct {
 	Name       string
+	Owner      string
 	Labels     *LabelOperations
 	Components []*ServiceComponent
 
