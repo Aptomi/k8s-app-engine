@@ -42,7 +42,7 @@ func evaluateTemplate(templateStr string, user *User, labels LabelSet) (string, 
 	return doc.String(), nil
 }
 
-func (component *ServiceComponent) processTemplateParams(template interface{}, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
+func (component *ServiceComponent) processTemplateParams(template ParameterTree, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
 	if template == nil {
 		return nil, nil
 	}
@@ -56,10 +56,10 @@ func (component *ServiceComponent) processTemplateParams(template interface{}, c
 		Discovery: discoveryTreeCopy,
 		User:      user}
 
-	var evalParamsInterface func(params interface{}) (interface{}, error)
+	var evalParamsInterface func(params ParameterTree) (interface{}, error)
 
 	// TODO: this method needs to be fixed to use less interface{} :-)
-	evalParamsInterface = func(params interface{}) (interface{}, error) {
+	evalParamsInterface = func(params ParameterTree) (interface{}, error) {
 		if params == nil {
 			return "", nil
 		} else if paramsMap, ok := params.(map[interface{}]interface{}); ok {

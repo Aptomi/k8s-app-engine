@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
+	"encoding/json"
 )
 
 /*
@@ -39,10 +40,13 @@ type Context struct {
 	Allocations []*Allocation
 }
 
+// ParameterTree is a special type alias defined for freeform blocks with parameters
+type ParameterTree interface{}
+
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type   string
-	Params interface{}
+	Params ParameterTree
 }
 
 // ServiceComponent defines component within a service
@@ -50,7 +54,7 @@ type ServiceComponent struct {
 	Name         string
 	Service      string
 	Code         *Code
-	Discovery    interface{}
+	Discovery    ParameterTree
 	Dependencies []string
 	Labels       *LabelOperations
 }
@@ -71,9 +75,9 @@ type Service struct {
 
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	Name     string
-	Type     string
-	Labels   map[string]string
+	Name   string
+	Type   string
+	Labels map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
@@ -165,4 +169,19 @@ func ResetAptomiState() {
 	}
 
 	fmt.Println("Aptomi state is now empty. Deleted all objects")
+}
+
+// MarshalJSON marshals service component into a structure without freeform parameters, so UI doesn't fail
+// See http://choly.ca/post/go-json-marshalling/
+func (u *ServiceComponent) MarshalJSON() ([]byte, error) {
+	type Alias ServiceComponent
+	return json.Marshal(&struct {
+		Code      *Code
+		Discovery ParameterTree
+		*Alias
+	}{
+		Code:      nil,
+		Discovery: nil,
+		Alias:     (*Alias)(u),
+	})
 }
