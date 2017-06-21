@@ -16,7 +16,6 @@ type Dependency struct {
 	UserID   string
 	Service  string
 	Labels   map[string]string
-	Trace    bool
 	Disabled bool
 
 	// This field is populated when dependency gets resolved
@@ -47,15 +46,6 @@ func NewGlobalDependencies() GlobalDependencies {
 // Apply set of transformations to labels
 func (dependency *Dependency) getLabelSet() LabelSet {
 	return LabelSet{Labels: dependency.Labels}
-}
-
-// SetTrace enable tracing (detailed engine output) for all dependencies
-func (src *GlobalDependencies) SetTrace(trace bool) {
-	if trace {
-		for _, d := range src.DependenciesByID {
-			d.Trace = true
-		}
-	}
 }
 
 // Append a single dependency to an existing object

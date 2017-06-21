@@ -16,15 +16,9 @@ func (usage *ServiceUsageState) ResolveAllDependencies() error {
 		for _, d := range dependencies {
 			node := usage.newResolutionNode(d)
 
-			// see if it needs to be traced (addl debug output on console)
-			trace.setEnable(d.Trace)
-
 			// resolve usage via applying policy
 			// TODO: if a dependency cannot be fulfilled, we need to handle it correctly. i.e. usages should be recorded in different context and not applied
 			err := usage.resolveDependency(node, usage.ResolvedUsage)
-
-			// disable tracing
-			trace.setEnable(false)
 
 			// see if there is an error
 			if err != nil {
@@ -43,8 +37,11 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	// Error variable that we will be reusing
 	var err error
 
-	// Print information that we are starting to resolve dependency on service
-	node.debugResolvingDependency()
+	// How/where to write entry logs as we are doing evaluation
+	node.ruleLogWriter = NewRuleLogWriter(resolvedUsage, node.dependency)
+
+	// Indicate that we are starting to resolve dependency
+	node.debugResolvingDependencyStart()
 
 	// Locate the service
 	node.service, err = node.getMatchedService(usage.Policy)
@@ -65,9 +62,6 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		return nil
 	}
 
-	// Print that we have resolved context
-	node.debugResolvedContext()
-
 	// Process context and transform labels
 	node.labels = node.transformLabels(node.labels, node.context.Labels)
 
@@ -81,14 +75,14 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 		return nil
 	}
 
-	// Print that we have resolved allocation
-	node.debugResolvedAllocation()
-
 	// Process allocation, transform
 	node.labels = node.transformLabels(node.labels, node.allocation.Labels)
 
 	// Create service key
 	node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
+
+	// Once instance is figured out, make sure to attach rule logs to that instance
+	node.ruleLogWriter.setInstanceKey(node.serviceKey)
 
 	// Store labels for service
 	resolvedUsage.storeLabels(node.serviceKey, node.labels)
@@ -156,6 +150,9 @@ func (usage *ServiceUsageState) resolveDependency(node *resolutionNode, resolved
 	// Mark object as resolved and record usage of a given service
 	node.resolved = true
 	resolvedUsage.recordUsage(node.serviceKey, node.dependency)
+
+	// Indicate that we have resolved dependency
+	node.debugResolvingDependencyEnd()
 
 	return nil
 }

@@ -57,8 +57,8 @@ func (usage *ServiceUsageState) GetResolvedUsage() *ResolvedServiceUsageData {
 // Records usage event
 func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, dependency *Dependency) string {
 	// Add user to the entry
-	usageStruct := resolvedUsage.getComponentInstanceEntry(key)
-	usageStruct.DependencyIds = append(usageStruct.DependencyIds, dependency.ID)
+	instance := resolvedUsage.getComponentInstanceEntry(key)
+	instance.DependencyIds = append(instance.DependencyIds, dependency.ID)
 
 	// Add to processing order
 	if !resolvedUsage.componentProcessingOrderHas[key] {
@@ -71,15 +71,15 @@ func (resolvedUsage *ResolvedServiceUsageData) recordUsage(key string, dependenc
 
 // Stores calculated discovery params for component instance
 func (resolvedUsage *ResolvedServiceUsageData) storeCodeParams(key string, codeParams NestedParameterMap) {
-	cInstance := resolvedUsage.getComponentInstanceEntry(key)
-	if len(cInstance.CalculatedCodeParams) == 0 {
+	instance := resolvedUsage.getComponentInstanceEntry(key)
+	if len(instance.CalculatedCodeParams) == 0 {
 		// Record code parameters
-		cInstance.CalculatedCodeParams = codeParams
-	} else if !cInstance.CalculatedCodeParams.deepEqual(codeParams) {
+		instance.CalculatedCodeParams = codeParams
+	} else if !instance.CalculatedCodeParams.deepEqual(codeParams) {
 		// Same component instance, different code parameters
 		debug.WithFields(log.Fields{
 			"componentKey":   key,
-			"prevCodeParams": cInstance.CalculatedCodeParams,
+			"prevCodeParams": instance.CalculatedCodeParams,
 			"nextCodeParams": codeParams,
 		}).Panic("Invalid policy. Arrived to the same component with different code parameters")
 	}
@@ -116,6 +116,12 @@ func (resolvedUsage *ResolvedServiceUsageData) storeEdge(key string, keyDst stri
 		resolvedUsage.getComponentInstanceEntry(key).EdgesOut[keyDst] = true
 		resolvedUsage.getComponentInstanceEntry(keyDst).EdgesIn[key] = true
 	}
+}
+
+// Stores rule log entry, attaching it to component instance by dependency
+func (resolvedUsage *ResolvedServiceUsageData) storeRuleLogEntry(key string, dependency *Dependency, entry *RuleLogEntry) {
+	instance := resolvedUsage.getComponentInstanceEntry(key)
+	instance.RuleLog[dependency.ID] = append(instance.RuleLog[dependency.ID], entry)
 }
 
 // Gets a component instance entry or creates an new entry if it doesn't exist

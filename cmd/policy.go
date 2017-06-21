@@ -12,7 +12,6 @@ var noop bool
 var show bool
 var full bool
 var verbose bool
-var trace bool
 var emulateDeployment bool
 
 // For reset command
@@ -40,7 +39,6 @@ var policyCmdApply = &cobra.Command{
 		policy := slinga.LoadPolicyFromDir(policyDir)
 		users := slinga.LoadUsersFromDir(policyDir)
 		dependencies := slinga.LoadDependenciesFromDir(policyDir)
-		dependencies.SetTrace(trace)
 
 		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &users)
 		nextUsageState.PrintSummary()
@@ -98,7 +96,6 @@ func init() {
 	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "Fully re-evaluate the policy. Create new revision. Re-create missing instances (if they were manually deleted from the underlying cloud), update running instances ")
 	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
-	policyCmdApply.Flags().BoolVarP(&trace, "trace", "t", true, "Trace all dependencies and log how rules got evaluated")
 	policyCmdApply.Flags().BoolVarP(&emulateDeployment, "emulate", "e", false, "Process a policy, do not deploy anything (emulate deployment), save state to the database")
 
 	// Flags for the reset command

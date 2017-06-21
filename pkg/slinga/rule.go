@@ -35,29 +35,12 @@ type GlobalRules struct {
 	Rules map[string][]*Rule
 }
 
-func (globalRules *GlobalRules) allowsAllocation(allocation *Allocation, labels LabelSet, node *resolutionNode, cluster *Cluster) bool {
-	if rules, ok := globalRules.Rules["dependency"]; ok {
-		for _, rule := range rules {
-			m := rule.FilterServices.match(labels, node.user, cluster)
-			trace.Printf(node.depth+1, "[%t] Testing allocation '%s': (global rule '%s')", !m, allocation.Name, rule.Name)
-			if m {
-				for _, action := range rule.Actions {
-					if action.Type == "dependency" && action.Content == "forbid" {
-						return false
-					}
-				}
-			}
-		}
-	}
-
-	return true
-}
-
 func (globalRules *GlobalRules) allowsIngressAccess(labels LabelSet, users []*User, cluster *Cluster) bool {
 	if rules, ok := globalRules.Rules["ingress"]; ok {
 		for _, rule := range rules {
 			// for all users of the service
 			for _, user := range users {
+				// TODO: this is pretty shitty that it's not a part of engine_node. so you can't even log into "rule log" (new replacement of tracing)
 				if rule.FilterServices.match(labels, user, cluster) {
 					for _, action := range rule.Actions {
 						if action.Type == "ingress" && action.Content == "block" {

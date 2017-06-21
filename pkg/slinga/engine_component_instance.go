@@ -19,6 +19,9 @@ type ComponentInstance struct {
 	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
 	EdgesIn  map[string]bool
 	EdgesOut map[string]bool
+
+	// Rule evaluation log (dependency ID -> []*RuleLogEntry)
+	RuleLog map[string][]*RuleLogEntry
 }
 
 // Creates a new component instance
@@ -29,6 +32,7 @@ func newComponentInstance() *ComponentInstance {
 		CalculatedCodeParams: NestedParameterMap{},
 		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
+		RuleLog:              make(map[string][]*RuleLogEntry),
 	}
 }
 
