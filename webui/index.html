@@ -47,7 +47,7 @@
                 </div>
                 <div class="navbar-collapse collapse" id="navbar">
                     <ul class="nav navbar-nav">
-                        <router-link v-for="item in routes" v-bind:to="item.path" tag="li" active-class="active">
+                        <router-link v-for="item in routes" v-bind:to="item.path" tag="li">
                             <a role="button"> {{ item.title }}</a>
                         </router-link>
                     </ul>
@@ -74,63 +74,6 @@
         <div class="wrapper wrapper-content">
             <div class="container">
                 <router-view></router-view>
-
-
-                <div class="row">
-
-                    <div class="col-lg-9">
-                        <div class="ibox float-e-margins">
-                            <div class="ibox-title">
-                                <h5 id="viewType"></h5>
-                                <div class="ibox-tools">
-                                    <a href="#">
-                                        <i class="fa"></i>[TODO: Select Service]
-                                    </a>
-                                    <!--
-                                                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                                                            <i class="fa fa-wrench"></i>
-                                                                        </a>
-
-                                                                        <ul class="dropdown-menu dropdown-user">
-                                                                            <li><a href="#">Config option 1</a>
-                                                                            </li>
-                                                                            <li><a href="#">Config option 2</a>
-                                                                            </li>
-                                                                        </ul>
-                                    -->
-                                </div>
-                            </div>
-                            <div class="ibox-content">
-
-                                <div id="mygraph"></div>
-
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="ibox float-e-margins">
-                            <div class="ibox-title">
-                                <h5>Details</h5>
-                                <div class="ibox-tools">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        <i class="fa fa-wrench"></i>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-user">
-                                        <li><a href="#">Config option 1</a>
-                                        </li>
-                                        <li><a href="#">Config option 2</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="ibox-content">
-                                <div id="mypanel">No data loaded</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
 
                 <!--<div class="row">-->
                     <!--<div class="col-md-2">-->
@@ -239,6 +182,7 @@
                         <div class="ibox float-e-margins">
                             <div class="ibox-title">
                                 <h5>Services Endpoints </h5>
+
                                 <!--<div class="ibox-tools">-->
                                     <!--<a class="collapse-link">-->
                                         <!--<i class="fa fa-chevron-up"></i>-->
@@ -369,28 +313,81 @@
 <script type="text/javascript" src="public/vis/dist/vis.js"></script>
 <script type="text/javascript" src="public/vis/dist/vis-util.js"></script>
 
-<script type="text/javascript">
-    $(function () {
+<script type="text/x-template" id="template-details-filter">
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span>{{ current_title.length != 0 ? current_title : 'Select' }}</span>
+            &nbsp;
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <router-link v-for="item in items"
+                         v-bind:to="{ name: 'details', params: { view: target_view.length == 0 ? item.name : target_view, filter: target_view.length != 0 ? item.name : ':filter' } }"
+                         tag="li">
+                <a> {{ item.title }}</a>
+            </router-link>
+        </ul>
+    </div>
+</script>
+
+<script>
+    const CompDetailsFilter = Vue.component('details-filter', {
+        template: '#template-details-filter',
+        props: ['items', 'current_title', 'target_view']
+    })
+</script>
+
+<script type="text/x-template" id="template-details">
+    <div class="row">
+        <div class="col-lg-9">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <div class="row m-b-xs">
+                        <div class="col-sm-9">
+                            <span class="m-l-xs m-r-sm">View Type: </span>
+                            <details-filter v-bind:items="views" v-bind:current_title="curr_view_title" target_view=""/>
+
+                            <span v-if="curr_view == 'globalops'" class="m-l-xl m-r-sm">User: </span>
+                            <details-filter v-if="curr_view == 'globalops'"
+                                            v-bind:items="users" v-bind:current_title="curr_user" target_view="globalops"/>
+                        </div>
+                    </div>
+                    <div id="mygraph"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Details</h5>
+                </div>
+                <div class="ibox-content">
+                    <div id="mypanel">No data loaded</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script>
+    const drawChart = function (input_view) {
         // can be service-view, consumer-view, or globalops-view
-        var view = "consumer-view";
+        var view = input_view + "-view";
 
         var apiPath = "/api/" + view;
         if (view === "service-view") {
             // service-view = view from the standpoint of service owner
             var serviceName = "analytics_pipeline";
             apiPath += "?serviceName=" + serviceName;
-            document.getElementById('viewType').innerHTML = 'Service Owner View'
         } else if (view === "consumer-view") {
             // consumer-view = view from the standpoint of service consumer
             var userId = "100";
-            var dependencyId = "alice_tests_twitter_stats_in_stage"; // if you pass dependencyId, it will filter. if you don't, it will show all dependencies of a given user
+            var dependencyId = "" //"alice_tests_twitter_stats_in_stage"; // if you pass dependencyId, it will filter. if you don't, it will show all dependencies of a given user
             apiPath += "?userId=" + userId + "&dependencyId=" + dependencyId;
-            document.getElementById('viewType').innerHTML = 'Service Consumer View'
         } else {
             // globalops-view = view from the standpoint of global IT ops
             var userId = "100";
             apiPath += "?userId=" + userId;
-            document.getElementById('viewType').innerHTML = 'Global IT/Ops View'
         }
 
         loadJSON(apiPath, jsonLoaded, function (err) {
@@ -550,7 +547,65 @@
         function objectNotLoaded(err) {
             document.getElementById('mypanel').innerHTML = '<h2>Unable to load data</h2>' + err
         }
-    });
+    };
+
+    const CompDetails = Vue.component('details', {
+        template: '#template-details',
+        data: function () {
+            return {
+                curr_view: "",
+                curr_view_title: "",
+                views: [
+                    { name: 'consumer', title: 'Service Consumer View' },
+                    { name: 'service', title: 'Service Owner View' },
+                    { name: 'globalops', title: 'Global IT/Ops View' }
+                ],
+                curr_user: "",
+                users: [
+                    { name: '100', title: 'Alice' },
+                    { name: '101', title: 'Bob' },
+                ]
+            }
+        },
+        created: function () {
+            this.fetch_data()
+        },
+        watch: {
+            '$route': 'fetch_data'
+        },
+        methods: {
+            fetch_data: function () {
+                $("#mygraph").html("");
+
+                var ctx = this;
+                var ok = false
+                this.views.forEach(function (item) {
+                    if (item.name === ctx.$route.params.view) {
+                        ctx.curr_view = item.name
+                        ctx.curr_view_title = item.title
+                        ok = true
+                    }
+                });
+                if (!ok) {
+                    ctx.curr_view = ""
+                    ctx.curr_view_title = ""
+                }
+
+                ok = false
+                this.users.forEach(function (item) {
+                    if (item.name === ctx.$route.params.filter) {
+                        ctx.curr_user = item.title
+                        ok = true
+                    }
+                });
+                if (!ok) {
+                    ctx.curr_user = ""
+                }
+
+                drawChart(ctx.curr_view)
+            }
+        }
+    })
 </script>
 
 <script>
@@ -592,11 +647,14 @@
     const routes = [
         { name: 'foo', path: '/foo', title: "The Foo", component: Foo },
         { name: 'bar', path: '/bar', title: "The Bar", component: Bar },
-        { path: '*', redirect: '/foo'}
+        { name: 'details', path: '/details/:view/:filter', title: 'Details', component: CompDetails },
+        { path: '*', redirect: { name: 'foo' } }
     ];
 
     const router = new VueRouter({
-        routes: routes
+        routes: routes,
+        linkActiveClass: 'active',
+        linkExactActiveClass: 'active'
     });
 
     const app = new Vue({
