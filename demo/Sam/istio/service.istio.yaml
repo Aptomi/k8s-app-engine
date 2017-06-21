@@ -1,7 +1,7 @@
 # Definition of Istio service
 name: istio
 
-owner: 300
+owner: 301
 
 components:
 
