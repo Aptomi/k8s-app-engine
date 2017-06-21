@@ -31,5 +31,22 @@ func NewDetails(userId string, globalUsers slinga.GlobalUsers, state slinga.Serv
 		r.Users = append(r.Users, &item{userId, globalUsers.Users[userId].Name})
 	}
 
+	// Dependencies
+	depIds := make([]string, 0)
+	deps := state.Dependencies.DependenciesByID
+	for depId, dep := range deps {
+		if dep.UserID != userId {
+			continue
+		}
+
+		depIds = append(depIds, depId)
+	}
+
+	sort.Strings(depIds)
+
+	for _, depId := range depIds {
+		r.Dependencies = append(r.Dependencies, &item{depId, deps[depId].Service})
+	}
+
 	return r
 }
