@@ -72,7 +72,7 @@ func NewDetails(userId string, globalUsers slinga.GlobalUsers, state slinga.Serv
 	if len(r.Services) > 0 {
 		r.Views = append(r.Views, &item{"service", "Service Owner View"})
 	}
-	if globalUsers.Users[userId].Labels["globalit"] == "true" {
+	if globalUsers.Users[userId].Labels["global_ops"] == "true" {
 		r.Views = append(r.Views, &item{"globalops", "Global IT/Ops View"})
 	}
 
