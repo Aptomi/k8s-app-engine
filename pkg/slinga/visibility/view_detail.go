@@ -46,7 +46,9 @@ func NewDetails(userId string, globalUsers slinga.GlobalUsers, state slinga.Serv
 
 	sort.Strings(depIds)
 
-	r.Dependencies = append(r.Dependencies, &item{"all", "All"})
+	if len(depIds) > 1 {
+		r.Dependencies = append([]*item{{"all", "All"}}, r.Dependencies...)
+	}
 	for _, depId := range depIds {
 		r.Dependencies = append(r.Dependencies, &item{depId, deps[depId].ID})
 	}
