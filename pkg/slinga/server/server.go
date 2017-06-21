@@ -35,6 +35,12 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, endpoints)
 }
 
+func detailViewHandler(w http.ResponseWriter, r *http.Request) {
+	state := slinga.LoadServiceUsageState()
+	view := visibility.NewDetails("", slinga.LoadUsers(), state)
+	writeJSON(w, view)
+}
+
 func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	userID := r.URL.Query().Get("userId")
@@ -71,6 +77,7 @@ func Serve(host string, port int) {
 
 	// serve all API endpoints at /api/ path and require auth
 	r.Handle("/api/endpoints", requireAuth(endpointsHandler))
+	r.Handle("/api/details", requireAuth(detailViewHandler))
 	r.Handle("/api/service-view", requireAuth(serviceViewHandler))
 	r.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
 	r.Handle("/api/object-view", requireAuth(objectViewHandler))
