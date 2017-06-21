@@ -70,6 +70,14 @@ func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, view.GetData())
 }
 
+func globalOpsViewHandler(w http.ResponseWriter, r *http.Request) {
+	state := slinga.LoadServiceUsageState()
+
+	userID := r.URL.Query().Get("userId")
+	view := visibility.NewGlobalView(userID, slinga.LoadUsers().Users, state)
+	writeJSON(w, view.GetData())
+}
+
 func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	objectID := r.URL.Query().Get("id")
@@ -94,6 +102,7 @@ func Serve(host string, port int) {
 	r.Handle("/api/details", requireAuth(detailViewHandler))
 	r.Handle("/api/service-view", requireAuth(serviceViewHandler))
 	r.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
+	r.Handle("/api/globalops-view", requireAuth(globalOpsViewHandler))
 	r.Handle("/api/object-view", requireAuth(objectViewHandler))
 
 	// serve login/logout api without auth
