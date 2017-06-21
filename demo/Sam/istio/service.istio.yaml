@@ -1,6 +1,8 @@
 # Definition of Istio service
 name: istio
 
+owner: 300
+
 components:
 
   - name: istio

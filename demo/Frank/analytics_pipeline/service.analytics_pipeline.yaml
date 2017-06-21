@@ -1,6 +1,8 @@
 # Definition of Analytics Pipeline service
 name: analytics_pipeline
 
+owner: 202
+
 components:
 
   - name: kafka

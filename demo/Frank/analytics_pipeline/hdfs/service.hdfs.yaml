@@ -1,6 +1,8 @@
 # Definition of HDFS service
 name: hdfs
 
+owner: 202
+
 components:
 
   - name: hdfs

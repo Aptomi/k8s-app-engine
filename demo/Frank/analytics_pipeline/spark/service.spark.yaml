@@ -1,6 +1,8 @@
 # Definition of Spark service
 name: spark
 
+owner: 202
+
 components:
 
   - name: zookeeper

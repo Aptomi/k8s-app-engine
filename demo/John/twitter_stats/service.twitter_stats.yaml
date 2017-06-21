@@ -1,6 +1,8 @@
 # Definition of Twitter Stats service
 name: twitter_stats
 
+owner: 201
+
 components:
 
   - name: analytics_pipeline

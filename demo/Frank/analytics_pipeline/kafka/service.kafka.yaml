@@ -1,6 +1,8 @@
 # Definition of Kafka service
 name: kafka
 
+owner: 202
+
 components:
 
   - name: zookeeper

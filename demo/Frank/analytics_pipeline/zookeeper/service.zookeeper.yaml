@@ -1,6 +1,8 @@
 # Definition of Zookeeper service
 name: zookeeper
 
+owner: 202
+
 components:
 
   - name: zookeeper
