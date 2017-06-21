@@ -424,7 +424,7 @@
                         ctx.filter_name = "User"
 
                         // globalops-view = view from the standpoint of global IT ops
-                        userId = filter
+                        userId = filter === "all" ? "" : filter
                     }
 
                     ctx.views.forEach(function(item) {
