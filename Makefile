@@ -19,6 +19,11 @@ clean-run-noop:
 .PHONY: smoke
 smoke: test build install clean-run-noop
 
+.PHONY: emulate
+emulate:
+	tools/demo-init.sh
+	aptomi policy apply --emulate --full
+
 .PHONY: build
 build:
 	go build -i -o aptomi
