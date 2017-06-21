@@ -52,14 +52,16 @@ func NewDetails(userId string, globalUsers slinga.GlobalUsers, state slinga.Serv
 
 	// Services
 	svcIds := make([]string, 0)
-	for svcId := range state.Policy.Services {
+	for svcId, svc := range state.Policy.Services {
+		if svc.Owner != userId {
+			continue
+		}
 		svcIds = append(svcIds, svcId)
 	}
 
 	sort.Strings(svcIds)
 
 	for _, svcId := range svcIds {
-		// check service owner
 		r.Services = append(r.Services, &item{svcId, state.Policy.Services[svcId].Name})
 	}
 
