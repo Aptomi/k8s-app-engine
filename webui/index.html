@@ -397,18 +397,6 @@
                     ctx.curr_view = view;
                     ctx.curr_filter = filter;
 
-                    ctx.views.forEach(function(item) {
-                        if (item.name === ctx.curr_view) {
-                            ctx.curr_view_title = item.title
-                        }
-                    })
-
-                    ctx.items.forEach(function(item) {
-                        if (item.name === ctx.curr_filter) {
-                            ctx.curr_filter_title = item.title
-                        }
-                    })
-
                     var userId = ""
                     var dependencyId = ""
                     var serviceName = ""
@@ -433,6 +421,18 @@
                         // globalops-view = view from the standpoint of global IT ops
                         userId = filter
                     }
+
+                    ctx.views.forEach(function(item) {
+                        if (item.name === ctx.curr_view) {
+                            ctx.curr_view_title = item.title
+                        }
+                    })
+
+                    ctx.items.forEach(function(item) {
+                        if (item.name === ctx.curr_filter) {
+                            ctx.curr_filter_title = item.title
+                        }
+                    })
 
                     if (filter === ":filter") {
                         if (ctx.items.length > 0) {
