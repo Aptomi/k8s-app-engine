@@ -111,7 +111,7 @@
 <script type="text/x-template" id="template-details-filter">
     <div class="btn-group">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span>{{ current_title.length != 0 ? current_title : 'Select' }}</span>
+            <span>{{ current_title.length != 0 ? current_title : 'Not available' }}</span>
             &nbsp;
             <span class="caret"></span>
         </button>
@@ -390,7 +390,7 @@
                     ctx.views = jsonData.Views
 
                     if (view === ":view") {
-                        router.push({ name: 'details', params: { view: "consumer" }})
+                        router.push({ name: 'details', params: { view: ctx.views[0].name }})
                         return
                     }
 
