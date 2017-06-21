@@ -22,15 +22,15 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
-
+	users := slinga.LoadUsers().Users
 	filterUserID := ""
-	for userID, user := range slinga.LoadUsers().Users {
+	for userID, user := range users {
 		if user.Name == username {
 			filterUserID = userID
 		}
 	}
 
-	endpoints := state.Endpoints(filterUserID)
+	endpoints := visibility.Endpoints(filterUserID, users, state)
 
 	writeJSON(w, endpoints)
 }
