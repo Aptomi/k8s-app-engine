@@ -344,16 +344,13 @@
                 <div class="ibox-content">
                     <div class="row m-b-xs">
                         <div class="col-sm-12">
-                            <span class="m-l-xs m-r-sm">View Type: </span>
+                            <!--<span class="m-l-xs m-r-sm">View Type: </span>-->
                             <details-filter v-bind:items="views" v-bind:current_title="curr_view_title" target_view=""/>
 
-                            <span v-if="curr_view == 'globalops'" class="m-l-md m-r-sm">User: </span>
-                            <details-filter v-if="curr_view == 'globalops'"
-                                            v-bind:items="users" v-bind:current_title="curr_user" target_view="globalops"/>
+                            <span v-if="items.length > 0" class="m-l-sm m-r-sm">{{ filter_name }}: </span>
+                            <details-filter v-if="items.length > 0"
+                                            v-bind:items="items" v-bind:current_title="curr_filter_title" v-bind:target_view="curr_view"/>
 
-                            <span v-if="curr_view == 'consumer'" class="m-l-md m-r-sm">Dependency: </span>
-                            <details-filter v-if="curr_view == 'consumer'"
-                                            v-bind:items="dependencies" v-bind:current_title="curr_dep" target_view="consumer"/>
                         </div>
                     </div>
                     <div id="mygraph"></div>
@@ -567,18 +564,20 @@
         data: function () {
             return {
                 curr_view: "",
+                curr_filter: "",
+
                 curr_view_title: "",
+                curr_filter_title: "",
+
+                filter_name: "",
+
                 views: [
                     { name: 'consumer', title: 'Service Consumer View' },
                     { name: 'service', title: 'Service Owner View' },
                     { name: 'globalops', title: 'Global IT/Ops View' }
                 ],
 
-                curr_user: "",
-                users: [],
-
-                curr_dep: "",
-                dependencies: []
+                items: []
             }
         },
         created: function () {
@@ -589,75 +588,110 @@
         },
         methods: {
             fetch_data: function () {
-                var ctx = this, view = ctx.$route.params.view;
-                ctx.curr_view = view;
-
-                var userId = "100"
-                var dependencyId = ""
-                var serviceName = ""
-
-                if (view === "service") {
-                    // service-view = view from the standpoint of service owner
-                    // serviceName = dropdown
-                } else if (view === "consumer") {
-                    // consumer-view = view from the standpoint of service consumer
-                    // userId = current
-                    // dependencies = dropdown
-                } else if (view === "globalops"){
-                    // globalops-view = view from the standpoint of global IT ops
-                    // userId = dropdown
-                }
-
-                ///
-                $("#mygraph").html("");
-
-
-                var ok = false;
-                this.views.forEach(function (item) {
-                    if (item.name === ctx.$route.params.view) {
-                        ctx.curr_view = item.name
-                        ctx.curr_view_title = item.title
-                        ok = true
-                    }
-                });
-                if (!ok) {
-                    ctx.curr_view = ""
-                    ctx.curr_view_title = ""
-                }
+                var ctx = this;
 
                 loadJSON("/api/details", function (jsonData) {
-                    ctx.users = jsonData.Users
-                    ctx.dependencies = jsonData.Dependencies
-                    console.log(ctx)
+                    var view = ctx.$route.params.view;
+                    var filter = ctx.$route.params.filter;
+
+                    var userId = ""
+                    var dependencyId = ""
+                    var serviceName = ""
+
+                    if (view === ":view") {
+                        router.push({ name: 'details', params: { view: "consumer" }})
+                        return
+                    }
+
+                    if (view === "service") {
+                        ctx.items = jsonData.Services
+                        ctx.filter_name = "Service"
+
+                        // service-view = view from the standpoint of service owner
+                        serviceName = filter
+                    } else if (view === "consumer") {
+                        ctx.items = jsonData.Dependencies
+                        ctx.filter_name = "Dependency"
+
+                        // consumer-view = view from the standpoint of service consumer
+                        userId = jsonData.UserId
+                        dependencyId = filter === "all" ? "" : filter
+                    } else if (view === "globalops"){
+                        ctx.items = jsonData.Users
+                        ctx.filter_name = "User"
+
+                        // globalops-view = view from the standpoint of global IT ops
+                        userId = filter
+                    }
+
+                    if (filter === ":filter") {
+                        router.push({ name: 'details', params: { view: view, filter: ctx.items[0].name }})
+                        return
+                    }
+
+                    ctx.curr_view = view;
+                    ctx.curr_filter = filter;
+
+                    ctx.views.forEach(function(item) {
+                        if (item.name === ctx.curr_view) {
+                            ctx.curr_view_title = item.title
+                        }
+                    })
+
+                    ctx.items.forEach(function(item) {
+                        if (item.name === ctx.curr_filter) {
+                            ctx.curr_filter_title = item.title
+                        }
+                    })
+
+                    drawChart(ctx.curr_view, userId, dependencyId, serviceName)
                 }, function (err) {
                     console.log("/api/details not loaded with err:")
                     console.log(err)
                 });
 
-                ok = false
-                this.users.forEach(function (item) {
-                    if (item.name === ctx.$route.params.filter) {
-                        ctx.curr_user = item.name
-                        ctx.curr_user_title = item.title
-                        ok = true
-                    }
-                });
-                if (!ok) {
-                    ctx.curr_user = ""
-                }
+                ///
+                $("#mygraph").html("");
 
-                ok = false
-                this.dependencies.forEach(function (item) {
-                    if (item.name === ctx.$route.params.filter) {
-                        ctx.curr_dep = item.title
-                        ok = true
-                    }
-                });
-                if (!ok) {
-                    ctx.curr_dep = ""
-                }
 
-                drawChart(ctx.curr_view, "100", ctx.curr_dep)
+//                var ok = false;
+//                this.views.forEach(function (item) {
+//                    if (item.name === ctx.$route.params.view) {
+//                        ctx.curr_view = item.name
+//                        ctx.curr_view_title = item.title
+//                        ok = true
+//                    }
+//                });
+//                if (!ok) {
+//                    ctx.curr_view = ""
+//                    ctx.curr_view_title = ""
+//                }
+//
+
+//
+//                ok = false
+//                this.users.forEach(function (item) {
+//                    if (item.name === ctx.$route.params.filter) {
+//                        ctx.curr_user = item.name
+//                        ctx.curr_user_title = item.title
+//                        ok = true
+//                    }
+//                });
+//                if (!ok) {
+//                    ctx.curr_user = ""
+//                }
+//
+//                ok = false
+//                this.dependencies.forEach(function (item) {
+//                    if (item.name === ctx.$route.params.filter) {
+//                        ctx.curr_dep = item.title
+//                        ok = true
+//                    }
+//                });
+//                if (!ok) {
+//                    ctx.curr_dep = ""
+//                }
+
             }
         }
     })
