@@ -558,11 +558,11 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-for="(endpoints, user) in all_endpoints" v-if="endpoints.length > 0">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>Services Endpoints </h5>
+                    <h5>Services Endpoints of user {{ user }} </h5>
 
                     <!--<div class="ibox-tools">-->
                     <!--<a class="collapse-link">-->
@@ -583,62 +583,15 @@
                     <!--</div>-->
                 </div>
                 <div class="ibox-content">
-                    <div class="row">
-                        <div class="col-sm-9 m-b-xs">
-                            Filter by:
-
-                            <!-- Single button -->
-                            <div class="btn-group m-l-sm">
-                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Action <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#">Action</a></li>
-                                    <li><a href="#">Another action</a></li>
-                                    <li><a href="#">Something else here</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="#">Separated link</a></li>
-                                </ul>
-                            </div>
-
-                            <span class="m-l-xl">User: </span>
-                            <!-- Single button -->
-                            <div class="btn-group m-l-sm">
-                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Action <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#">Action</a></li>
-                                    <li><a href="#">Another action</a></li>
-                                    <li><a href="#">Something else here</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="#">Separated link</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!--<div class="col-sm-9 m-b-xs">-->
-                        <!--<div data-toggle="buttons" class="btn-group">-->
-                        <!--<label class="btn btn-sm btn-white active"> <input type="radio" id="option-all" name="options"> All </label>-->
-                        <!--<label class="btn btn-sm btn-white"> <input type="radio" id="option1" name="options"> Service 1 </label>-->
-                        <!--<label class="btn btn-sm btn-white"> <input type="radio" id="option2" name="options"> Service 2 </label>-->
-                        <!--<label class="btn btn-sm btn-white"> <input type="radio" id="option3" name="options"> Service 3 </label>-->
-                        <!--</div>-->
-                        <!--</div>-->
-                        <!--<div class="col-sm-3">-->
-                        <!--<div class="input-group"><input type="text" placeholder="Search" class="input-sm form-control"> <span class="input-group-btn">-->
-                        <!--<button type="button" class="btn btn-sm btn-primary"> Go!</button> </span></div>-->
-                        <!--</div>-->
-                    </div>
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                             <tr>
-
-                                <th>Cluster </th>
                                 <th>Service </th>
                                 <th>Context </th>
                                 <th>Allocation </th>
-                                <th>Link </th>
+                                <th>Component</th>
+                                <th>Links</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -648,6 +601,17 @@
                                 <td>0800 051213</td>
                                 <td>Inceptos Hymenaeos Ltd</td>
                                 <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+                            </tr>
+                            <tr v-for="endpoint in endpoints">
+                                <td>{{ endpoint.Service }}</td>
+                                <td>{{ endpoint.Context }}</td>
+                                <td>{{ endpoint.Allocation }}</td>
+                                <td>{{ endpoint.Component }}</td>
+                                <td>
+                                    <div v-for="link in endpoint.Links">
+                                        <a v-bind:href="link.Link">{{ link.Name }}</a>
+                                    </div>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
@@ -666,13 +630,11 @@
     const CompHome = Vue.component('home', {
         template: '#template-home',
         data: function () {
-            console.log("home#data()");
             return {
-                counter: 0
+                all_endpoints: {}
             }
         },
         created: function () {
-            console.log("home#created()");
             this.fetch_data()
         },
         watch: {
@@ -680,8 +642,15 @@
         },
         methods: {
             fetch_data: function () {
-                console.log("home#methods#fetch_data");
-                console.log(this.$route);
+                var ctx = this
+
+                loadJSON("/api/endpoints", function (jsonData) {
+                    ctx.all_endpoints = jsonData.Endpoints
+                    console.log(ctx.all_endpoints)
+                }, function (err) {
+                    console.log("/api/endpoints not loaded with err:")
+                    console.log(err)
+                })
             }
         }
     });
