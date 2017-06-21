@@ -23,6 +23,7 @@ components:
       type: aptomi/code/unittests
       params:
         address: "{{ .Discovery.component1.component2.instance }}"
+        queue: " {{ .User.Labels.changinglabel }} "
     labels:
       set: # add/modify
         some-test-context-specific-label: some-value

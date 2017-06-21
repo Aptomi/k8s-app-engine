@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
+	"time"
 )
 
 func TestPolicyResolve(t *testing.T) {
@@ -39,20 +40,17 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	users := LoadUsersFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
-	// Get usage state prev
+	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(&policy, &dependencies, &users)
 	usageStatePrev.ResolveAllDependencies()
-
-	// Emulate saving and loading again
-	usageStatePrevSavedLoaded := ServiceUsageState{}
-	yaml.Unmarshal([]byte(serializeObject(usageStatePrev)), &usageStatePrevSavedLoaded)
+	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Get usage state next
 	usageStateNext := NewServiceUsageState(&policy, &dependencies, &users)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
-	diff := usageStateNext.CalculateDifference(&usageStatePrevSavedLoaded)
+	diff := usageStateNext.CalculateDifference(&usageStatePrev)
 
 	assert.False(t, diff.hasChanges(), "Diff should not have any changes")
 	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Empty diff should not have any component instantiations")
@@ -67,13 +65,10 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	users := LoadUsersFromDir("testdata/unittests")
 	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
 
-	// Get usage state prev
+	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, &users)
 	usageStatePrev.ResolveAllDependencies()
-
-	// Emulate saving and loading again
-	usageStatePrevSavedLoaded := ServiceUsageState{}
-	yaml.Unmarshal([]byte(serializeObject(usageStatePrev)), &usageStatePrevSavedLoaded)
+	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
 	dependenciesNext := dependenciesPrev.makeCopy();
@@ -88,7 +83,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
-	diff := usageStateNext.CalculateDifference(&usageStatePrevSavedLoaded)
+	diff := usageStateNext.CalculateDifference(&usageStatePrev)
 
 	assert.True(t, diff.hasChanges(), "Diff should have changes")
 	assert.Equal(t, 7, len(diff.ComponentInstantiate), "Diff should have component instantiations")
@@ -96,6 +91,90 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Diff should not have any component updates")
 	assert.Equal(t, 7, len(diff.ComponentAttachDependency), "Diff should have 7 dependencies attached to components")
 	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
+}
+
+func TestDiffUpdateAndComponentTimes(t *testing.T) {
+	policy := LoadPolicyFromDir("testdata/unittests")
+	users := LoadUsersFromDir("testdata/unittests")
+	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
+
+	var key string
+	var timePrevCreated, timePrevUpdated, timeNextCreated, timeNextUpdated time.Time
+
+	// Create initial empty state
+	uEmpty := NewServiceUsageState(&policy, &dependenciesPrev, &users)
+
+	// Resolve, calculate difference against empty state, emulate save/load
+	uInitial := NewServiceUsageState(&policy, &dependenciesPrev, &users)
+	uInitial.ResolveAllDependencies()
+	uInitial.CalculateDifference(&uEmpty)
+	uInitial = emulateSaveAndLoad(uInitial)
+
+	// Check creation/update times
+	key = "kafka#test#test-platform_services#component2"
+	timeNextCreated = uInitial.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uInitial.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	assert.WithinDuration(t, time.Now(), timeNextCreated, time.Second, "Creation time should be initialized correctly for kafka")
+	assert.Equal(t, timeNextUpdated, timeNextUpdated, "Update time should be equal to creation time")
+
+	// Sleep a little bit to introduce time delay
+	time.Sleep(25 * time.Millisecond)
+
+	// Add another dependency, resolve, calculate difference against prev state, emulate save/load
+	dependenciesNext := dependenciesPrev.makeCopy();
+	dependenciesNext.appendDependency(
+		&Dependency{
+			ID:      "dep_id_5",
+			UserID:  "5",
+			Service: "kafka",
+		},
+	)
+	uNewDependency := NewServiceUsageState(&policy, &dependenciesNext, &users)
+	uNewDependency.ResolveAllDependencies()
+	uNewDependency.CalculateDifference(&uInitial)
+
+	// Check creation/update times
+	timePrevCreated = uInitial.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timePrevUpdated = uInitial.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
+	assert.Equal(t, timePrevUpdated, timeNextUpdated, "Update time should be carried over to remain the same")
+
+	// Sleep a little bit to introduce time delay
+	time.Sleep(25 * time.Millisecond)
+
+	// Update user label, re-evaluate and see that component instance has changed
+	users.Users["5"].Labels["changinglabel"] = "newvalue"
+	uUpdatedDependency := NewServiceUsageState(&policy, &dependenciesNext, &users)
+	uUpdatedDependency.ResolveAllDependencies()
+	diff := uUpdatedDependency.CalculateDifference(&uNewDependency)
+
+	// Check that update has been performed
+	assert.True(t, diff.hasChanges(), "Diff should have changes")
+	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Diff should not have component instantiations")
+	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
+	assert.Equal(t, 1, len(diff.ComponentUpdate), "Diff should have component update")
+	assert.Equal(t, 0, len(diff.ComponentAttachDependency), "Diff should not have any dependencies attached to components")
+	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
+
+	// Check creation/update times for component
+	key = "kafka#prod#prod-Elena#component2"
+	timePrevCreated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timePrevUpdated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
+	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed")
+
+	// Check creation/update times for service
+	key = "kafka#prod#prod-Elena#root"
+	timePrevCreated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timePrevUpdated = uNewDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	timeNextCreated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].CreatedOn
+	timeNextUpdated = uUpdatedDependency.ResolvedUsage.ComponentInstanceMap[key].UpdatedOn
+	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
+	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed for service")
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
@@ -109,4 +188,12 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 	assert.Equal(t, "component1", c[0].Name, "Component topological sort should produce correct order")
 	assert.Equal(t, "component2", c[1].Name, "Component topological sort should produce correct order")
 	assert.Equal(t, "component3", c[2].Name, "Component topological sort should produce correct order")
+}
+
+func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
+	// Emulate saving and loading again
+	savedObjectAsString := serializeObject(state)
+	loadedObject := ServiceUsageState{}
+	yaml.Unmarshal([]byte(savedObjectAsString), &loadedObject)
+	return loadedObject
 }

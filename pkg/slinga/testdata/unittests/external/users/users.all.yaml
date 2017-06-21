@@ -6,6 +6,7 @@
     team: platform_services
     dev: yes
     prod: no
+    changinglabel: 123
 
 - id: 2
   name: Bob
@@ -15,6 +16,7 @@
     team: platform_services
     dev: no
     prod: yes
+    changinglabel: 123
 
 - id: 3
   name: Carol
@@ -25,6 +27,7 @@
     dev: no
     prod: yes
     compromised: true
+    changinglabel: 123
 
 # Special user to test partial matching (it has access to kafka, but not to zookeeper that kafka depends on)
 - id: 4
@@ -36,6 +39,7 @@
     dev: yes
     prod: no
     nozookeeper: true
+    changinglabel: 123
 
 # Special user to test policy diff
 - id: 5
@@ -46,3 +50,5 @@
     team: platform_services
     dev: no
     prod: yes
+    changinglabel: 123
+

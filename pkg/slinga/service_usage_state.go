@@ -40,8 +40,9 @@ func newResolvedServiceUsageData() *ResolvedServiceUsageData {
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
 type ComponentInstance struct {
-	// When this instance was created
+	// When this instance was created & last updated on
 	CreatedOn time.Time
+	UpdatedOn time.Time
 
 	// List of dependencies which are keeping this component instantiated
 	DependencyIds []string
@@ -59,7 +60,6 @@ type ComponentInstance struct {
 // Creates a new component instance
 func newComponentInstance() *ComponentInstance {
 	return &ComponentInstance{
-		CreatedOn:            time.Now(),
 		CalculatedLabels:     LabelSet{},
 		CalculatedDiscovery:  NestedParameterMap{},
 		CalculatedCodeParams: NestedParameterMap{},

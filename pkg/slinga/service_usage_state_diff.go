@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
+	"time"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -226,11 +227,13 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		// see if a component needs to be instantiated
 		if depIdsPrev == nil && depIdsNext != nil {
 			diff.ComponentInstantiate[k] = true
+			diff.updateTimes(k, time.Now(), time.Now())
 		}
 
 		// see if a component needs to be destructed
 		if depIdsPrev != nil && depIdsNext == nil {
 			diff.ComponentDestruct[k] = true
+			diff.updateTimes(k, uPrev.CreatedOn, time.Now())
 		}
 
 		// see if a component needs to be updated
@@ -238,6 +241,9 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 			sameParams := uPrev.CalculatedCodeParams.deepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				diff.ComponentUpdate[k] = true
+				diff.updateTimes(k, uPrev.CreatedOn, time.Now())
+			} else {
+				diff.updateTimes(k, uPrev.CreatedOn, uPrev.UpdatedOn)
 			}
 		}
 
@@ -257,6 +263,28 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 			if !depPrevIdsMap[dependencyId] {
 				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyId})
 			}
+		}
+	}
+}
+
+// updated timestamps for component (and root service, if/as needed)
+func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, updatedOn time.Time) {
+	// update for component
+	uNext := diff.Next.GetResolvedUsage().ComponentInstanceMap[k]
+	uNext.CreatedOn = createdOn
+	uNext.UpdatedOn = updatedOn
+
+	// update for service if/as needed
+	serviceName, contextName , allocationName, componentName := ParseServiceUsageKey(k)
+	if componentName != ComponentRootName {
+		kService := createServiceUsageKeyFromStr(serviceName, contextName , allocationName, ComponentRootName)
+		uNextSvc := diff.Next.GetResolvedUsage().ComponentInstanceMap[kService]
+
+		if createdOn.After(uNextSvc.CreatedOn) {
+			uNextSvc.CreatedOn = createdOn
+		}
+		if updatedOn.After(uNextSvc.UpdatedOn) {
+			uNextSvc.UpdatedOn = updatedOn
 		}
 	}
 }
@@ -351,8 +379,9 @@ func (diff ServiceUsageStateDiff) Print(verbose bool) {
 func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 	// If we are requesting full policy processing, then we will need to re-create all objects
 	if full {
-		for key := range diff.Next.GetResolvedUsage().ComponentInstanceMap {
-			diff.ComponentInstantiate[key] = true
+		for k, v := range diff.Next.GetResolvedUsage().ComponentInstanceMap {
+			diff.ComponentInstantiate[k] = true
+			diff.updateTimes(k, v.CreatedOn, time.Now())
 		}
 	}
 }
