@@ -15,10 +15,11 @@ type detail struct {
 	Users        []*item
 	Services     []*item
 	Dependencies []*item
+	Views        []*item
 }
 
 func NewDetails(userId string, globalUsers slinga.GlobalUsers, state slinga.ServiceUsageState) detail {
-	r := detail{userId, make([]*item, 0), make([]*item, 0), make([]*item, 0)}
+	r := detail{userId, make([]*item, 0), make([]*item, 0), make([]*item, 0), make([]*item, 0)}
 
 	// Users
 	userIds := make([]string, 0)
@@ -63,6 +64,16 @@ func NewDetails(userId string, globalUsers slinga.GlobalUsers, state slinga.Serv
 
 	for _, svcId := range svcIds {
 		r.Services = append(r.Services, &item{svcId, state.Policy.Services[svcId].Name})
+	}
+
+	if len(r.Dependencies) > 0 {
+		r.Views = append(r.Views, &item{"consumer", "Service Consumer View"})
+	}
+	if len(r.Services) > 0 {
+		r.Views = append(r.Views, &item{"service", "Service Owner View"})
+	}
+	if globalUsers.Users[userId].Labels["globalit"] == "true" {
+		r.Views = append(r.Views, &item{"globalops", "Global IT/Ops View"})
 	}
 
 	return r
