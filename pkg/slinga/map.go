@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"reflect"
 	log "github.com/Sirupsen/logrus"
+	"reflect"
 )
 
 func countElements(m interface{}) int {
@@ -46,7 +46,7 @@ func GetSortedStringKeys(m interface{}) []string {
 		if !ok {
 			debug.WithFields(log.Fields{
 				"data": m,
-				"key": key,
+				"key":  key,
 			}).Panic("Expected a string key")
 		}
 		result = append(result, k)

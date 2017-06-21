@@ -2,6 +2,7 @@ package slinga
 
 import "strings"
 
+// ComponentRootName is a name of component for service entry (which in turn consists of components)
 const ComponentRootName = "root"
 
 // Create key for the map

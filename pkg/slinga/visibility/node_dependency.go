@@ -27,9 +27,8 @@ func (n dependencyNode) getGroup() string {
 	}
 	if len(n.dependency.ResolvesTo) > 0 {
 		return "dependencyLongResolved"
-	} else {
-		return "dependencyLongNotResolved"
 	}
+	return "dependencyLongNotResolved"
 }
 
 func (n dependencyNode) getID() string {
@@ -45,10 +44,9 @@ func (n dependencyNode) getLabel() string {
 	if n.short {
 		// for service owner view, don't display much other than a user name
 		return userName
-	} else {
-		// for consumer view - display full dependency info "user name -> service"
-		return fmt.Sprintf("%s \u2192 %s", userName, n.dependency.Service)
 	}
+	// for consumer view - display full dependency info "user name -> service"
+	return fmt.Sprintf("%s \u2192 %s", userName, n.dependency.Service)
 }
 
 func (n dependencyNode) getEdgeLabel(dst graphNode) string {

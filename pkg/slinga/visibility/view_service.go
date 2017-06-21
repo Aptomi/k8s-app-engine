@@ -16,12 +16,12 @@ func NewServiceView(serviceName string, state slinga.ServiceUsageState) ServiceV
 	return ServiceView{
 		serviceName: serviceName,
 		state:       state,
-		g:           NewGraph(),
+		g:           newGraph(),
 	}
 }
 
 // GetData returns graph for a given view
-func (view ServiceView) GetData() graphEntry {
+func (view ServiceView) GetData() interface{} {
 	// Step 1 - add a node with a given service
 	svcNode := newServiceNode(view.serviceName)
 	view.g.addNode(svcNode, 0)
@@ -75,7 +75,7 @@ func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePre
 				view.g.addEdge(svcInstanceNodePrev, svcInstanceNode)
 
 				// proceed further with updated service instance node
-				view.addEveryoneWhoUses(k, svcInstanceNode, nextLevel + 1)
+				view.addEveryoneWhoUses(k, svcInstanceNode, nextLevel+1)
 			} else {
 				// proceed further, carry prev service instance node
 				view.addEveryoneWhoUses(k, svcInstanceNodePrev, nextLevel)

@@ -2,16 +2,16 @@ package slinga
 
 import "fmt"
 
-// RuleLogEntryType is a type of the log entry (e.g. rule evaluation, or just informational record)
+// RuleLogType is a type of the log entry (e.g. rule evaluation, or just informational record)
 type RuleLogType string
 
-// RuleLogTypeInfo is for debug (something low-level happened)
+// RuleLogTypeDebug is for debug (something low-level happened)
 const RuleLogTypeDebug RuleLogType = "Debug"
 
 // RuleLogTypeInfo is for info records (something happened)
 const RuleLogTypeInfo RuleLogType = "Info"
 
-// RuleLogTypeInfo is for test records (something is being tested)
+// RuleLogTypeTest is for test records (something is being tested)
 const RuleLogTypeTest RuleLogType = "Test"
 
 // RuleLogScope is a scope of the rule entry
@@ -60,6 +60,7 @@ type RuleLogWriter struct {
 	queue []*RuleLogEntry
 }
 
+// NewRuleLogWriter creates new RuleLogWriter for writing rule logs
 func NewRuleLogWriter(resolvedUsage *ResolvedServiceUsageData, dependency *Dependency) *RuleLogWriter {
 	return &RuleLogWriter{
 		resolvedUsage: resolvedUsage,

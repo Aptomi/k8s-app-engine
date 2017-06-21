@@ -252,16 +252,16 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		depNextIdsMap := toMap(depIdsNext)
 
 		// see if a user needs to be detached from a component
-		for dependencyId := range depPrevIdsMap {
-			if !depNextIdsMap[dependencyId] {
-				diff.ComponentDetachDependency = append(diff.ComponentDetachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyId})
+		for dependencyID := range depPrevIdsMap {
+			if !depNextIdsMap[dependencyID] {
+				diff.ComponentDetachDependency = append(diff.ComponentDetachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyID})
 			}
 		}
 
 		// see if a user needs to be attached to a component
-		for dependencyId := range depNextIdsMap {
-			if !depPrevIdsMap[dependencyId] {
-				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyId})
+		for dependencyID := range depNextIdsMap {
+			if !depPrevIdsMap[dependencyID] {
+				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyID})
 			}
 		}
 	}
@@ -279,10 +279,10 @@ func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, up
 	}
 
 	// if it's a component instance, then update for its parent service instance as well
-	serviceName, contextName , allocationName, componentName := ParseServiceUsageKey(k)
+	serviceName, contextName, allocationName, componentName := ParseServiceUsageKey(k)
 	if componentName != ComponentRootName {
-		kService := createServiceUsageKeyFromStr(serviceName, contextName , allocationName, ComponentRootName)
-		diff.updateTimes(kService, createdOn, updatedOn)
+		serviceKey := createServiceUsageKeyFromStr(serviceName, contextName, allocationName, ComponentRootName)
+		diff.updateTimes(serviceKey, createdOn, updatedOn)
 	}
 }
 
@@ -480,7 +480,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -523,7 +523,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{

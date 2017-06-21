@@ -7,8 +7,8 @@ import (
 
 type graph struct {
 	hasObject map[string]bool
-	nodes   graphEntryList
-	edges   graphEntryList
+	nodes     graphEntryList
+	edges     graphEntryList
 }
 
 type graphEntry map[string]interface{}
@@ -20,18 +20,19 @@ func (list graphEntryList) Len() int {
 }
 
 func (list graphEntryList) Less(i, j int) bool {
-	return list[i]["id"].(string) < list[j]["id"].(string);
+	return list[i]["id"].(string) < list[j]["id"].(string)
 }
 
 func (list graphEntryList) Swap(i, j int) {
 	list[i], list[j] = list[j], list[i]
 }
 
-func NewGraph() *graph {
+// Creates a new graph
+func newGraph() *graph {
 	return &graph{
 		hasObject: make(map[string]bool),
-		nodes:   graphEntryList{},
-		edges:   graphEntryList{},
+		nodes:     graphEntryList{},
+		edges:     graphEntryList{},
 	}
 }
 
@@ -65,7 +66,7 @@ func (g *graph) addEdge(src graphNode, dst graphNode) {
 	key := fmt.Sprintf("edge-%s-%s", src.getID(), dst.getID())
 	if !g.hasObject[key] {
 		g.edges = append(g.edges, graphEntry{
-			"id":	 key,
+			"id":    key,
 			"from":  src.getID(),
 			"to":    dst.getID(),
 			"label": src.getEdgeLabel(dst),

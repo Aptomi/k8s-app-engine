@@ -23,23 +23,23 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
 
-	filterUserId := ""
-	for userId, user := range slinga.LoadUsers().Users {
+	filterUserID := ""
+	for userID, user := range slinga.LoadUsers().Users {
 		if user.Name == username {
-			filterUserId = userId
+			filterUserID = userID
 		}
 	}
 
-	endpoints := state.Endpoints(filterUserId)
+	endpoints := state.Endpoints(filterUserID)
 
 	writeJSON(w, endpoints)
 }
 
 func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
-	userId := r.URL.Query().Get("userId")
-	dependencyId := r.URL.Query().Get("dependencyId")
-	view := visibility.NewConsumerView(userId, dependencyId, state)
+	userID := r.URL.Query().Get("userId")
+	dependencyID := r.URL.Query().Get("dependencyId")
+	view := visibility.NewConsumerView(userID, dependencyID, state)
 	writeJSON(w, view.GetData())
 }
 

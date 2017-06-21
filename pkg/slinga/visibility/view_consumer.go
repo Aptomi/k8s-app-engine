@@ -6,27 +6,27 @@ import (
 
 // ConsumerView represents a view from a particular consumer (service consumer point of view)
 type ConsumerView struct {
-	userId       string
-	dependencyId string
+	userID       string
+	dependencyID string
 	state        slinga.ServiceUsageState
 	g            *graph
 }
 
 // NewConsumerView creates a new ConsumerView
-func NewConsumerView(userId string, dependencyId string, state slinga.ServiceUsageState) ConsumerView {
+func NewConsumerView(userID string, dependencyID string, state slinga.ServiceUsageState) ConsumerView {
 	return ConsumerView{
-		userId:       userId,
-		dependencyId: dependencyId,
+		userID:       userID,
+		dependencyID: dependencyID,
 		state:        state,
-		g:            NewGraph(),
+		g:            newGraph(),
 	}
 }
 
 // GetData returns graph for a given view
-func (view ConsumerView) GetData() graphEntry {
+func (view ConsumerView) GetData() interface{} {
 	// go over all dependencies of a given user
 	for _, dependency := range view.state.Dependencies.DependenciesByID {
-		if dependency.UserID == view.userId && (len(view.dependencyId) <= 0 || dependency.ID == view.dependencyId) {
+		if dependency.UserID == view.userID && (len(view.dependencyID) <= 0 || dependency.ID == view.dependencyID) {
 			// Step 1 - add a node for every matching dependency found
 			dependencyNode := newDependencyNode(dependency, false)
 			view.g.addNode(dependencyNode, 0)

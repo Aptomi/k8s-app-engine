@@ -1,8 +1,8 @@
 package visibility
 
 import (
-	"reflect"
 	"github.com/Frostman/aptomi/pkg/slinga"
+	"reflect"
 	"strings"
 )
 
@@ -12,7 +12,7 @@ type loadableObject interface {
 }
 
 func getLoadableObject(id string) loadableObject {
-	var registeredObjects = []reflect.Type {
+	var registeredObjects = []reflect.Type{
 		reflect.TypeOf(loadableObject(dependencyNode{})),
 		reflect.TypeOf(loadableObject(serviceNode{})),
 		reflect.TypeOf(loadableObject(serviceInstanceNode{})),

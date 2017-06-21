@@ -46,7 +46,8 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 		ResolvedUsage: newResolvedServiceUsageData()}
 }
 
-// Records usage event
+// GetResolvedUsage returns usage.ResolvedUsage
+// TODO: we can get likely rid of this method (but need to check serialization, etc)
 func (usage *ServiceUsageState) GetResolvedUsage() *ResolvedServiceUsageData {
 	if usage.ResolvedUsage == nil {
 		usage.ResolvedUsage = newResolvedServiceUsageData()

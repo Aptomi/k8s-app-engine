@@ -5,7 +5,7 @@ import (
 )
 
 // Endpoints returns map from key to map from port type to url for all services
-func (state *ServiceUsageState) Endpoints(filterUserId string) map[string]map[string]string {
+func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[string]string {
 	result := make(map[string]map[string]string)
 
 	for _, key := range state.GetResolvedUsage().ComponentProcessingOrder {
@@ -14,10 +14,10 @@ func (state *ServiceUsageState) Endpoints(filterUserId string) map[string]map[st
 		}
 
 		instance := state.GetResolvedUsage().ComponentInstanceMap[key]
-		used := filterUserId == ""
+		used := filterUserID == ""
 		for _, dependencyID := range instance.DependencyIds {
 			userID := state.Dependencies.DependenciesByID[dependencyID].UserID
-			if userID == filterUserId {
+			if userID == filterUserID {
 				used = true
 				break
 			}

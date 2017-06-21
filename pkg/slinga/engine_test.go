@@ -71,7 +71,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
-	dependenciesNext := dependenciesPrev.makeCopy();
+	dependenciesNext := dependenciesPrev.makeCopy()
 	dependenciesNext.appendDependency(
 		&Dependency{
 			ID:      "dep_id_5",
@@ -121,7 +121,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	time.Sleep(25 * time.Millisecond)
 
 	// Add another dependency, resolve, calculate difference against prev state, emulate save/load
-	dependenciesNext := dependenciesPrev.makeCopy();
+	dependenciesNext := dependenciesPrev.makeCopy()
 	dependenciesNext.appendDependency(
 		&Dependency{
 			ID:      "dep_id_5",
