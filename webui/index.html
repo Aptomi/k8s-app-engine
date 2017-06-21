@@ -563,10 +563,7 @@
                     { name: 'globalops', title: 'Global IT/Ops View' }
                 ],
                 curr_user: "",
-                users: [
-                    { name: '100', title: 'Alice' },
-                    { name: '101', title: 'Bob' },
-                ]
+                users: []
             }
         },
         created: function () {
@@ -592,6 +589,13 @@
                     ctx.curr_view = ""
                     ctx.curr_view_title = ""
                 }
+
+                loadJSON("/api/details", function (jsonData) {
+                    ctx.users = jsonData.Users
+                }, function (err) {
+                    console.log("/api/details not loaded with err:")
+                    console.log(err)
+                });
 
                 ok = false
                 this.users.forEach(function (item) {
