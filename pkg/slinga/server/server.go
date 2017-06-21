@@ -14,23 +14,12 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
-	// prefer explicitly passed username through query
-	username := r.URL.Query().Get("username")
-	if username == "" {
-		username = getUsername(r)
-	}
+	userID := r.URL.Query().Get("userId")
 
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
 	users := slinga.LoadUsers().Users
-	filterUserID := ""
-	for userID, user := range users {
-		if user.Name == username {
-			filterUserID = userID
-		}
-	}
-
-	endpoints := visibility.Endpoints(filterUserID, users, state)
+	endpoints := visibility.Endpoints(userID, users, state)
 
 	writeJSON(w, endpoints)
 }
