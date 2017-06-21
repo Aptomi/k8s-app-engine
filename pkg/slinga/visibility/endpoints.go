@@ -1,7 +1,6 @@
 package visibility
 
 import (
-	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
