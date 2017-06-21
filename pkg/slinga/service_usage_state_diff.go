@@ -372,19 +372,19 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 		if err != nil {
 			debug.WithFields(log.Fields{
 				"error": err,
-			}).Fatal("Error while destructing components")
+			}).Panic("Error while destructing components")
 		}
 		err = diff.processUpdates()
 		if err != nil {
 			debug.WithFields(log.Fields{
 				"error": err,
-			}).Fatal("Error while updating components")
+			}).Panic("Error while updating components")
 		}
 		err = diff.processInstantiations()
 		if err != nil {
 			debug.WithFields(log.Fields{
 				"error": err,
-			}).Fatal("Error while instantiating components")
+			}).Panic("Error while instantiating components")
 		}
 
 		// Don't forget to stop the progress bar and print its final state

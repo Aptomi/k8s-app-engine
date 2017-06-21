@@ -15,7 +15,7 @@ func evaluate(expression string, params LabelSet) bool {
 		debug.WithFields(log.Fields{
 			"expression": expression,
 			"error":      e,
-		}).Fatal("Invalid expression")
+		}).Panic("Invalid expression")
 	}
 
 	// Populate parameter map
@@ -43,7 +43,7 @@ func evaluate(expression string, params LabelSet) bool {
 			"expression": expression,
 			"parameters": parameters,
 			"error":      e,
-		}).Fatal("Cannot evaluate expression")
+		}).Panic("Cannot evaluate expression")
 	}
 
 	// Convert result to bool
@@ -53,7 +53,7 @@ func evaluate(expression string, params LabelSet) bool {
 			"expression": expression,
 			"parameters": parameters,
 			"result":     result,
-		}).Fatal("Expression doesn't evaluate to boolean")
+		}).Panic("Expression doesn't evaluate to boolean")
 	}
 
 	return resultBool

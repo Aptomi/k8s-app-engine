@@ -34,14 +34,14 @@ func (state *ServiceUsageState) Endpoints(filterUserId string) map[string]map[st
 				debug.WithFields(log.Fields{
 					"key":   key,
 					"error": err,
-				}).Fatal("Unable to get CodeExecutor")
+				}).Panic("Unable to get CodeExecutor")
 			}
 			endpoints, err := codeExecutor.Endpoints()
 			if err != nil {
 				debug.WithFields(log.Fields{
 					"key":   key,
 					"error": err,
-				}).Fatal("Error while getting endpoints")
+				}).Panic("Error while getting endpoints")
 			}
 
 			if len(endpoints) > 0 {

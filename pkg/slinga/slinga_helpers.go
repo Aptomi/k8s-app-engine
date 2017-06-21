@@ -72,7 +72,7 @@ func serializeObject(t interface{}) string {
 		debug.WithFields(log.Fields{
 			"object": t,
 			"error":  e,
-		}).Fatal("Can't serialize object", e)
+		}).Panic("Can't serialize object", e)
 	}
 	return string(d)
 }
@@ -89,14 +89,14 @@ func loadObjectFromFile(fileName string, data interface{}) interface{} {
 		debug.WithFields(log.Fields{
 			"file":  fileName,
 			"error": e,
-		}).Fatal("Unable to read file")
+		}).Panic("Unable to read file")
 	}
 	e = yaml.Unmarshal([]byte(dat), data)
 	if e != nil {
 		debug.WithFields(log.Fields{
 			"file":  fileName,
 			"error": e,
-		}).Fatal("Unable to unmarshal entity")
+		}).Panic("Unable to unmarshal entity")
 	}
 	return data
 }
@@ -122,7 +122,7 @@ func loadObjectFromFileDefaultEmpty(fileName string, data interface{}) interface
 		debug.WithFields(log.Fields{
 			"file":  fileName,
 			"error": e,
-		}).Fatal("Unable to read file")
+		}).Panic("Unable to read file")
 	}
 
 	e = yaml.Unmarshal([]byte(dat), data)
@@ -130,7 +130,7 @@ func loadObjectFromFileDefaultEmpty(fileName string, data interface{}) interface
 		debug.WithFields(log.Fields{
 			"file":  fileName,
 			"error": e,
-		}).Fatal("Unable to unmarshal entity")
+		}).Panic("Unable to unmarshal entity")
 	}
 	return data
 }
@@ -147,6 +147,6 @@ func saveObjectToFile(fileName string, data interface{}) {
 		debug.WithFields(log.Fields{
 			"file":  fileName,
 			"error": e,
-		}).Fatal("Unable to save entity")
+		}).Panic("Unable to save entity")
 	}
 }

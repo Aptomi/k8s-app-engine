@@ -117,7 +117,7 @@ func (resolvedUsage *ResolvedServiceUsageData) storeCodeParams(key string, codeP
 			"componentKey":   key,
 			"prevCodeParams": cInstance.CalculatedCodeParams,
 			"nextCodeParams": codeParams,
-		}).Fatal("Invalid policy. Arrived to the same component with different code parameters")
+		}).Panic("Invalid policy. Arrived to the same component with different code parameters")
 	}
 }
 
@@ -133,7 +133,7 @@ func (resolvedUsage *ResolvedServiceUsageData) storeDiscoveryParams(key string, 
 			"componentKey":        key,
 			"prevDiscoveryParams": cInstance.CalculatedDiscovery,
 			"nextDiscoveryParams": discoveryParams,
-		}).Fatal("Invalid policy. Arrived to the same component with different discovery parameters")
+		}).Panic("Invalid policy. Arrived to the same component with different discovery parameters")
 	}
 }
 

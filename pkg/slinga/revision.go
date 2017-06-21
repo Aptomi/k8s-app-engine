@@ -37,7 +37,7 @@ func GetLastRevision(baseDir string) AptomiRevision {
 	if len(files) > 1 {
 		debug.WithFields(log.Fields{
 			"files": files,
-		}).Fatal("Found more than one revision files")
+		}).Panic("Found more than one revision files")
 	}
 	return loadRevisionFromFile(files[0])
 }

@@ -62,7 +62,7 @@ func (usage *ServiceUsageState) newResolutionNode(d *Dependency) *resolutionNode
 		// Resolving allocations for service
 		debug.WithFields(log.Fields{
 			"dependency": d,
-		}).Fatal("Dependency refers to non-existing user")
+		}).Panic("Dependency refers to non-existing user")
 	}
 	return &resolutionNode{
 		resolved:   false,
@@ -147,7 +147,7 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 		debug.WithFields(log.Fields{
 			"service":   node.service.Name,
 			"component": node.component.Name,
-		}).Fatal("Invalid component (not code and not service")
+		}).Panic("Invalid component (not code and not service")
 	}
 }
 
@@ -235,7 +235,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 				debug.WithFields(log.Fields{
 					"allocation": a,
 					"labels":     labels.Labels,
-				}).Fatal("Can't find cluster for allocation (based on label 'cluster')")
+				}).Panic("Can't find cluster for allocation (based on label 'cluster')")
 			}
 		}
 
@@ -255,7 +255,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 				"allocation": allocationMatched.Name,
 				"user":       node.user.Name,
 				"error":      err,
-			}).Fatal("Cannot resolve name for an allocation")
+			}).Panic("Cannot resolve name for an allocation")
 		}
 		debug.WithFields(log.Fields{
 			"service":            node.service.Name,

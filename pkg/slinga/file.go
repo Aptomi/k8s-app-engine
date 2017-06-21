@@ -117,7 +117,7 @@ func writeTempFile(prefix string, content string) *os.File {
 		debug.WithFields(log.Fields{
 			"prefix": prefix,
 			"error":  err,
-		}).Fatal("Failed to create temp file")
+		}).Panic("Failed to create temp file")
 	}
 
 	_, err = tmpFile.Write([]byte(content))
@@ -126,7 +126,7 @@ func writeTempFile(prefix string, content string) *os.File {
 			"file":    tmpFile.Name(),
 			"content": content,
 			"error":   err,
-		}).Fatal("Failed to write to temp file")
+		}).Panic("Failed to write to temp file")
 	}
 
 	return tmpFile

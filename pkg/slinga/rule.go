@@ -112,7 +112,7 @@ func (globalRules *GlobalRules) insertRules(appendRules ...*Rule) {
 		if rule.FilterServices == nil {
 			debug.WithFields(log.Fields{
 				"rule": rule,
-			}).Fatal("Only service filters currently supported in rules")
+			}).Panic("Only service filters currently supported in rules")
 		}
 		for _, action := range rule.Actions {
 			if rulesList, ok := globalRules.Rules[action.Type]; ok {

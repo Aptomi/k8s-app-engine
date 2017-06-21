@@ -63,7 +63,7 @@ func (src GlobalDependencies) appendDependency(dependency *Dependency) {
 	if len(dependency.ID) <= 0 {
 		debug.WithFields(log.Fields{
 			"dependency": dependency,
-		}).Fatal("Empty dependency ID")
+		}).Panic("Empty dependency ID")
 	}
 	src.DependenciesByService[dependency.Service] = append(src.DependenciesByService[dependency.Service], dependency)
 	src.DependenciesByID[dependency.ID] = dependency

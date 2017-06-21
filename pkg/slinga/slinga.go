@@ -160,7 +160,7 @@ func ResetAptomiState() {
 		debug.WithFields(log.Fields{
 			"directory": baseDir,
 			"error":     err,
-		}).Fatal("Directory contents can't be deleted")
+		}).Panic("Directory contents can't be deleted")
 	}
 
 	fmt.Println("Aptomi state is now empty. Deleted all objects")

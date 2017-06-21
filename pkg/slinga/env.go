@@ -68,14 +68,14 @@ func getAptomiEnvVarAsDir(key string) string {
 	if !ok {
 		debug.WithFields(log.Fields{
 			"var": key,
-		}).Fatal("Environment variable is not present. Must point to a directory")
+		}).Panic("Environment variable is not present. Must point to a directory")
 	}
 	if stat, err := os.Stat(value); err != nil || !stat.IsDir() {
 		debug.WithFields(log.Fields{
 			"var":       key,
 			"directory": value,
 			"error":     err,
-		}).Fatal("Directory doesn't exist or error encountered")
+		}).Panic("Directory doesn't exist or error encountered")
 	}
 	return value
 }
@@ -122,14 +122,14 @@ func GetAptomiObjectWriteFileCurrentRun(baseDir string, aptomiObject AptomiOject
 			debug.WithFields(log.Fields{
 				"directory": dir,
 				"error":     err,
-			}).Fatal("Directory can't be created or error encountered")
+			}).Panic("Directory can't be created or error encountered")
 		}
 	}
 	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
 		debug.WithFields(log.Fields{
 			"directory": dir,
 			"error":     err,
-		}).Fatal("Directory can't be created or error encountered")
+		}).Panic("Directory can't be created or error encountered")
 	}
 	return filepath.Join(dir, fileName)
 }
@@ -142,6 +142,6 @@ func PrepareCurrentRunDirectory(baseDir string) {
 		debug.WithFields(log.Fields{
 			"directory": dir,
 			"error":     err,
-		}).Fatal("Directory contents can't be deleted")
+		}).Panic("Directory contents can't be deleted")
 	}
 }

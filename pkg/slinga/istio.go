@@ -42,7 +42,7 @@ func (usage *ServiceUsageState) ProcessIstioIngress(noop bool) {
 			debug.WithFields(log.Fields{
 				"key":   key,
 				"error": err,
-			}).Fatal("Unable to process Istio Ingress for component")
+			}).Panic("Unable to process Istio Ingress for component")
 		}
 		desiredRules = append(desiredRules, rules...)
 		progressBar.Incr()
@@ -118,7 +118,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 			debug.WithFields(log.Fields{
 				"component": key,
 				"labels":    labels.Labels,
-			}).Fatal("Can't find cluster for component (based on label 'cluster')")
+			}).Panic("Can't find cluster for component (based on label 'cluster')")
 		}
 	}
 
@@ -203,7 +203,7 @@ func (cluster *Cluster) getIstioRouteRules() []*IstioRouteRule {
 			"cluster": cluster.Name,
 			"cmd":     cmd,
 			"error":   err,
-		}).Fatal("Failed to get route-rules by running bash cmd")
+		}).Panic("Failed to get route-rules by running bash cmd")
 	}
 
 	rules := make([]*IstioRouteRule, 0)
@@ -236,7 +236,7 @@ func (rule *IstioRouteRule) create() {
 			"content": content,
 			"out":     out,
 			"error":   err,
-		}).Fatal("Failed to create istio rule by running bash script")
+		}).Panic("Failed to create istio rule by running bash script")
 	}
 }
 
@@ -247,7 +247,7 @@ func (rule *IstioRouteRule) delete() {
 			"cluster": rule.Cluster.Name,
 			"out":     out,
 			"error":   err,
-		}).Fatal("Failed to delete istio rule by running bash script")
+		}).Panic("Failed to delete istio rule by running bash script")
 	}
 }
 

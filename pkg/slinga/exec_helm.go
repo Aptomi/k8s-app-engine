@@ -121,7 +121,7 @@ func (exec *HelmCodeExecutor) chartName() string {
 	debug.WithFields(log.Fields{
 		"exec_key": exec.Key,
 		"params":   exec.Params,
-	}).Fatal("Params doesn't contain chartName")
+	}).Panic("Params doesn't contain chartName")
 	return ""
 }
 
@@ -137,7 +137,7 @@ func (exec HelmCodeExecutor) Install() error {
 		debug.WithFields(log.Fields{
 			"releaseName": releaseName,
 			"error":       err,
-		}).Fatal("Error while looking for release")
+		}).Panic("Error while looking for release")
 	}
 
 	if exists {
@@ -205,7 +205,7 @@ func getValidChartPath(chartName string) string {
 		debug.WithFields(log.Fields{
 			"chartName": chartName,
 			"error":     err,
-		}).Fatal("Chart lookup error")
+		}).Panic("Chart lookup error")
 	}
 	return fileName
 }

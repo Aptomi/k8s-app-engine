@@ -39,7 +39,7 @@ func GetSortedStringKeys(m interface{}) []string {
 	if v.Kind() != reflect.Map {
 		debug.WithFields(log.Fields{
 			"data": m,
-		}).Fatal("Not a map")
+		}).Panic("Not a map")
 	}
 	for _, key := range v.MapKeys() {
 		k, ok := key.Interface().(string)
@@ -47,7 +47,7 @@ func GetSortedStringKeys(m interface{}) []string {
 			debug.WithFields(log.Fields{
 				"data": m,
 				"key": key,
-			}).Fatal("Expected a string key")
+			}).Panic("Expected a string key")
 		}
 		result = append(result, k)
 	}

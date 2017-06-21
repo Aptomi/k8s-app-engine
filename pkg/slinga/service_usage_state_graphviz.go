@@ -258,7 +258,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 		debug.WithFields(log.Fields{
 			"file":  fileNameDot,
 			"error": e,
-		}).Fatal("Unable to write to a file")
+		}).Panic("Unable to write to a file")
 	}
 
 	// Call graphviz to flatten an image
@@ -276,7 +276,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 				"stdout": outb.String(),
 				"stderr": errb.String(),
 				"error":  err,
-			}).Fatal("Unable to execute graphviz")
+			}).Panic("Unable to execute graphviz")
 		}
 		debug.WithFields(log.Fields{
 			"cmd":    cmd,
@@ -300,7 +300,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 				"stdout": outb.String(),
 				"stderr": errb.String(),
 				"error":  err,
-			}).Fatal("Unable to execute graphviz")
+			}).Panic("Unable to execute graphviz")
 		}
 
 		debug.WithFields(log.Fields{
