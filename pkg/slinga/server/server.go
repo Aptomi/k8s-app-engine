@@ -38,7 +38,8 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	userId := r.URL.Query().Get("userId")
-	view := visibility.NewConsumerView(userId, state)
+	dependencyId := r.URL.Query().Get("dependencyId")
+	view := visibility.NewConsumerView(userId, dependencyId, state)
 	writeJSON(w, view.GetData())
 }
 

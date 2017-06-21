@@ -110,7 +110,7 @@
                                 <div id="mygraph"></div>
                                 <script type="text/javascript">
                                     // can be service-view, consumer-view, or globalops-view
-                                    var view = "service-view";
+                                    var view = "consumer-view";
 
                                     var apiPath = "/api/" + view;
                                     if (view === "service-view") {
@@ -121,7 +121,8 @@
                                     } else if (view === "consumer-view") {
                                         // consumer-view = view from the standpoint of service consumer
                                         var userId = "100";
-                                        apiPath += "?userId=" + userId;
+                                        var dependencyId = "alice_tests_twitter_stats_in_stage"; // if you pass dependencyId, it will filter. if you don't, it will show all dependencies of a given user
+                                        apiPath += "?userId=" + userId + "&dependencyId=" + dependencyId;
                                         document.getElementById('viewType').innerHTML = 'Service Consumer View'
                                     } else {
                                         // globalops-view = view from the standpoint of global IT ops
