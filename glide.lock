@@ -1,5 +1,5 @@
-hash: ac664f0c83cd6678563893b1d2e0db128a530217dbe00eeb4117b4538f99d712
-updated: 2017-06-19T00:30:13.536613644-07:00
+hash: 2c5992278d45edd02fbae0a79fcc2340a5891984e3bc4369a9378dadf69d016a
+updated: 2017-06-20T17:02:41.644594712-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -160,6 +160,8 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
+- name: github.com/gorilla/handlers
+  version: a4043c62cc2329bacda331d33fc908ab11ef0ec3
 - name: github.com/gosuri/uilive
   version: ac356e6e42cd31fcef8e6aec13ae9ed6fe87713e
 - name: github.com/gosuri/uiprogress
@@ -289,7 +291,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: k8s.io/helm
   version: 32562a3040bb5ca690339b9840b6f60f8ce25da4
   subpackages:
