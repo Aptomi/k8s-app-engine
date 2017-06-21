@@ -413,6 +413,8 @@
 <script src="public/js/vue.min.js"></script>
 <script src="public/js/vue-router.min.js"></script>
 
+<script src="public/js/js.cookie-2.1.4.min.js"></script>
+
 <script>
     const Foo = Vue.component('foo', {
         template: '<div>foo {{ counter }}</div>',
@@ -502,6 +504,13 @@
         router: router,
         data: {
             routes: routes
+        },
+        computed: {
+            user: function () {
+                return {
+                    name: Cookies.get("username")
+                }
+            }
         }
     });
 
