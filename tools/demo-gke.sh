@@ -29,7 +29,7 @@ export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
 function main() {
     if [ "$#" -ne "1" ]; then
         echo "ERROR: (demo-gke.sh) Too few arguments"
-        echo "Usage: demo-gke.sh <up | status | down>"
+        echo "Usage: demo-gke.sh <up | down>"
         exit 1
     fi
 
@@ -101,12 +101,6 @@ function main() {
 
         gke_cluster_wait_deleted $cluster_big_name $cluster_big_region
         gke_cluster_wait_deleted $cluster_small_name $cluster_small_region
-    elif [ "status" == "$1" ]; then
-        k8s_alive $cluster_big_name
-        helm_alive $cluster_big_name
-
-        k8s_alive $cluster_small_name
-        helm_alive $cluster_small_name
     elif [ "cleanup" == "$1" ]; then
         helm_cleanup $cluster_big_name
         helm_cleanup $cluster_small_name
