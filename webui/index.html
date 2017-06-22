@@ -97,6 +97,7 @@
                         <div v-for="obj in obj_view">
                             <div class="table-responsive" v-for="(rules, dep) in obj.RuleLog" v-if="'RuleLog' in obj">
                                 <table class="table table-striped">
+                                    <h5>Key: {{ obj.Key }}</h5>
                                     <h5>Dependency: {{ dep }}</h5>
                                     <thead>
                                         <tr>
