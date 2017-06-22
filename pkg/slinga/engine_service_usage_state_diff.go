@@ -366,7 +366,7 @@ func getSummaryLine(name string, cntPrev int, cntNext int) string {
 	if cntPrev != cntNext {
 		delta := ""
 		if cntPrev > 0 {
-			fmt.Sprintf(" [%+d]", cntNext-cntPrev)
+			delta = fmt.Sprintf(" [%+d]", cntNext-cntPrev)
 		}
 		return fmt.Sprintf("  %s: %d -> %d%s", name, cntPrev, cntNext, delta)
 	} else {
@@ -383,8 +383,8 @@ func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
 	log.Println(getSummaryLine("Contexts", prev.Contexts, next.Contexts))
 	log.Println(getSummaryLine("Clusters", prev.Clusters, next.Clusters))
 	log.Println(getSummaryLine("Rules", prev.Rules, next.Rules))
-	log.Println(getSummaryLine("Users", prev.Users, next.Users))
 	log.Println(getSummaryLine("Dependencies", prev.Dependencies, next.Dependencies))
+	log.Println(getSummaryLine("Users", next.Users, next.Users)) // Users we always print current number
 }
 
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
