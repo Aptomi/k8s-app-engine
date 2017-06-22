@@ -3,15 +3,13 @@ name: prod
 # This context describes twitter_stats in production
 service: twitter_stats
 
-# This context is for people from it/analytics_ops_team (they control production instance)
+# This context is for people from it ops (they control production instance)
 criteria:
   accept:
     - org == 'it' && is_operator
-  reject:
-    - meow
 
 # In production:
-# - service will be deployed in us-west
+# - service will be deployed in us-east
 # - as a single production instance
 allocations:
   - name: "production"

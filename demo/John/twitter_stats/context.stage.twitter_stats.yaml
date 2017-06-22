@@ -3,15 +3,13 @@ name: stage
 # This context describes twitter_stats in staging
 service: twitter_stats
 
-# This context is for people from dev (they can run their instances in stage)
+# This context is for people from dev (they can run their own instances in stage)
 criteria:
   accept:
     - org == 'dev'
-  reject:
-    - meow
 
 # In stage:
-# - services will be deployed in us-east
+# - services will be deployed in us-west
 # - each developer will get its own instance
 allocations:
   - name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"

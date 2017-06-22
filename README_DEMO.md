@@ -34,38 +34,41 @@ gcloud config set project bright-torus-169502
     - Aptomi only knows about 2 kubernetes clusters (us-east and us-west) and 5 users
 
 2. Frank is an Service Ops guy. He comes and defines analytics-pipeline service in Aptomi
+    - He defines all components of this service and specifies where the containers are
+    - He defines contexts for his service
+    - Context is our secret sauce. It describes who the service is for and how resources are allocated/shared
+    - In this case Frank offers analytics-pipeline in 2 contexts
+      - for analytics_ops_team (who control production instance)
+          - for them the service will run in cluster-us-east
+      - for development (who will share instance of this service)
+          - for them the service will run in cluster-us-west
     - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
     - Show UI - audit log
     - Show UI - delta picture
     - New service definition has been published to aptomi
         - analytics pipeline, all its dependencies, and contexts
-        - Context = who it's for and how resources are allocated/shared
 
 3. John is another Service Ops guy. He comes and defines twitter-stats service in Aptomi
+    - John's service relies on Frank's service analytics-pipeline
+      - and it contains additional components for reading/processing/visualizing messages from twitter stream
+    - John offers twitter-stats in 2 contexts as well
+      - for analytics_ops_team (who control production instance)
+          - for them the service will run in cluster-us-east. same as Frank's
+      - for development (who will
+          - for them the service will run in cluster-us-west
+          - but every developer
+
     - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
     - Show UI - audit log
     - Show UI - delta picture
     - New service definition has been published to aptomi
-        - analytics pipeline, all its dependencies, and contexts
-        - Context = who it's for and how resources are allocated/shared
 
 ## Suntrust demo / story:
 
 2. Show policy
-   - We have a language.
-      - Ops guy defined a policy - service & context
-      - Context = who it's for and how resources are allocated/shared
    - Show k8s clusters
       - `kubectl config get-contexts`
       - `kubectl config view`
-   - Show services
-      - Analytics Pipeline
-      - Twitter Stats
-   - Show users
-   - Show dependencies
-   - Show contexts (where the secret sauce is)
-      - Twitter Stats
-      - Analytics Pipeline
 
 3. Deploy AP + TS for user Alice (ID=1)
    - Explain what will get matched (Alice doesn't specify, policy controls that)
