@@ -20,7 +20,9 @@ gcloud config set project bright-torus-169502
 ```
 
 2. Create k8s clusters
-    - `./tools/demo-gke.sh up`
+    - `./tools/demo-gke.sh status`
+        - if clusters are already up, then `./tools/demo-gke.sh cleanup`
+        - if clusters are not up, then `./tools/demo-gke.sh up`
 
 3. Initialize demo repository on GitHub and start auto-apply
     - ./tools/demo-init.sh
@@ -97,6 +99,8 @@ HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
       - Show Home Page
       - Show Policy Explorer
 
+8. Show that everything is working
+    - Endpoints
 
 
 ## Suntrust demo / story:
