@@ -301,18 +301,6 @@
                 </div>
             </div>
         </div>
-        <div class="row animated fadeInUp">
-            <div class="col-lg-12">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <h5>Raw data</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div id="mypanel">No data loaded</div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </script>
 
@@ -476,7 +464,6 @@
             if (id) {
                 loadJSON("/api/object-view?id=" + id, objectLoaded, objectNotLoaded);
             } else {
-                document.getElementById('mypanel').innerHTML = 'No data loaded'
                 app.obj_view = [];
             }
         }
@@ -494,16 +481,13 @@
 
         function objectLoaded(jsonData) {
             if (jsonData) {
-                document.getElementById('mypanel').innerHTML = '<pre>' + JSON.stringify(jsonData, null, 4) + '</pre>';
                 app.obj_view = [jsonData];
             } else {
-                document.getElementById('mypanel').innerHTML = 'No data loaded'
                 app.obj_view = [];
             }
         }
 
         function objectNotLoaded(err) {
-            document.getElementById('mypanel').innerHTML = '<h2>Unable to load data</h2>' + err
             app.obj_view = [];
         }
     };
