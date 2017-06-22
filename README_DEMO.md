@@ -38,9 +38,9 @@ gcloud config set project bright-torus-169502
     - He defines contexts for his service
     - Context is our secret sauce. It describes who the service is for and how resources are allocated/shared
     - In this case Frank offers analytics-pipeline in 2 contexts
-      - for analytics_ops_team (who control production instance)
+      - for it ops (who control production instance)
           - for them the service will run in cluster-us-east
-      - for development (who will share instance of this service)
+      - for developers (who will share instance of this service)
           - for them the service will run in cluster-us-west
     - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
     - Show UI - audit log
@@ -52,13 +52,13 @@ gcloud config set project bright-torus-169502
     - John's service relies on Frank's service analytics-pipeline
       - and it contains additional components for reading/processing/visualizing messages from twitter stream
     - John offers twitter-stats in 2 contexts as well
-      - for analytics_ops_team (who control production instance)
+      - for it ops (who control production instance)
           - for them the service will run in cluster-us-east. same as Frank's
-      - for development (who will
+      - for developers
           - for them the service will run in cluster-us-west
-          - but every developer
-
-    - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
+          - but when they request an instance, every developer will get its own instance of twitter-stats
+          - as opposed to sharing it
+    - enabled = true in John/twitter_stats/service.twitter_stats.yaml
     - Show UI - audit log
     - Show UI - delta picture
     - New service definition has been published to aptomi
