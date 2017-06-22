@@ -463,52 +463,66 @@
             <div class="col-md-2">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <span class="label label-primary pull-right">Available</span>
+                        <span class="label label-primary pull-right">Total</span>
                         <h5>Services</h5>
                     </div>
                     <div class="ibox-content">
-                        <h1 class="no-margins">4</h1>
-                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                        <!--<small>Total views</small>-->
+                        <h1 class="no-margins">{{ summary.Services }}</h1>
                     </div>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <span class="label label-primary pull-right">Available</span>
+                        <span class="label label-primary pull-right">Total</span>
                         <h5>Contexts</h5>
                     </div>
                     <div class="ibox-content">
-                        <h1 class="no-margins">8</h1>
-                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                        <!--<small>Total views</small>-->
+                        <h1 class="no-margins">{{ summary.Contexts }}</h1>
                     </div>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <span class="label label-primary pull-right">Global</span>
+                        <span class="label label-primary pull-right">Total</span>
                         <h5>Clusters</h5>
                     </div>
                     <div class="ibox-content">
-                        <h1 class="no-margins">2</h1>
-                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                        <!--<small>Total views</small>-->
+                        <h1 class="no-margins">{{ summary.Clusters }}</h1>
                     </div>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <span class="label label-primary pull-right">Global</span>
+                        <span class="label label-primary pull-right">Total</span>
                         <h5>Rules</h5>
                     </div>
                     <div class="ibox-content">
-                        <h1 class="no-margins">4</h1>
-                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                        <!--<small>Total views</small>-->
+                        <h1 class="no-margins">{{ summary.Rules }}</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">Total</span>
+                        <h5>Users</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">{{ summary.Users }}</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">All</span>
+                        <h5>Dependencies</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">{{ summary.Dependencies }}</h1>
                     </div>
                 </div>
             </div>
@@ -522,26 +536,26 @@
                         <h5>Services</h5>
                     </div>
                     <div class="ibox-content">
-                        <h1 class="no-margins">4</h1>
+                        <h1 class="no-margins">{{ services }}</h1>
                         <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
                         <!--<small>Total views</small>-->
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-2">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-success pull-right">Owner</span>
-                        <h5>Contexts</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h1 class="no-margins">8</h1>
-                        <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
-                        <!--<small>Total views</small>-->
-                    </div>
-                </div>
-            </div>
+            <!--<div class="col-md-2">-->
+                <!--<div class="ibox float-e-margins">-->
+                    <!--<div class="ibox-title">-->
+                        <!--<span class="label label-success pull-right">Owner</span>-->
+                        <!--<h5>Contexts</h5>-->
+                    <!--</div>-->
+                    <!--<div class="ibox-content">-->
+                        <!--<h1 class="no-margins">8</h1>-->
+                        <!--&lt;!&ndash;<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<small>Total views</small>&ndash;&gt;-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
 
             <div class="col-md-2">
                 <div class="ibox float-e-margins">
@@ -550,7 +564,7 @@
                         <h5>Dependencies</h5>
                     </div>
                     <div class="ibox-content">
-                        <h1 class="no-margins">8</h1>
+                        <h1 class="no-margins">{{ dependencies }}</h1>
                         <!--<div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>-->
                         <!--<small>Total views</small>-->
                     </div>
@@ -616,7 +630,10 @@
         template: '#template-home',
         data: function () {
             return {
-                all_endpoints: {}
+                all_endpoints: {},
+                services: 0,
+                dependencies: 0,
+                summary: {}
             }
         },
         created: function () {
@@ -628,6 +645,16 @@
         methods: {
             fetch_data: function () {
                 var ctx = this
+
+                loadJSON("/api/details", function (jsonData) {
+                    ctx.services = jsonData.Services.length
+                    ctx.dependencies = jsonData.Dependencies.length
+                    ctx.summary = jsonData.Summary
+                    console.log(ctx)
+                }, function (err) {
+                    console.log("/api/details not loaded with err:")
+                    console.log(err)
+                })
 
                 loadJSON("/api/endpoints", function (jsonData) {
                     ctx.all_endpoints = jsonData.Endpoints
