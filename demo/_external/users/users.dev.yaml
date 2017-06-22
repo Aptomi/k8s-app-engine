@@ -11,10 +11,3 @@
     description: Dev. He can test his own changes to 'twitter-stats' service (only in stage)
     short-description: Dev
     org: dev
-
-- id: 102
-  name: Carol
-  labels:
-    description: Dev. She can test his own changes to 'twitter-stats' service (only in stage)
-    short-description: Dev
-    org: dev
