@@ -1,5 +1,7 @@
 package slinga
 
+import "time"
+
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
 type ServiceUsageState struct {
 	// reference to a policy
@@ -10,6 +12,9 @@ type ServiceUsageState struct {
 
 	// reference to users
 	users *GlobalUsers
+
+	// Date when it was created
+	CreatedOn time.Time
 
 	// Diff stored as text
 	DiffAsText string
@@ -47,6 +52,7 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 		Policy:         policy,
 		Dependencies:   dependencies,
 		users:          users,
+		CreatedOn:      time.Now(),
 		ResolvedData:   newServiceUsageData(),
 		UnresolvedData: newServiceUsageData(),
 	}
@@ -128,6 +134,21 @@ func LoadServiceUsageState() ServiceUsageState {
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
 	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision, TypePolicyResolution, "db.yaml")
 	return loadServiceUsageStateFromFile(fileName)
+}
+
+// LoadServiceUsageState loads all usage states from files under Aptomi DB
+func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
+	result := make(map[int]ServiceUsageState)
+	lastRevision := GetLastRevision(GetAptomiBaseDir())
+	for rev := lastRevision; rev > lastRevisionAbsentValue; rev-- {
+		fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), rev, TypePolicyResolution, "db.yaml")
+		state := loadServiceUsageStateFromFile(fileName)
+		if state.Policy != nil {
+			// add only non-empty revisions. don't add revision which got deleted
+			result[int(rev)] = state
+		}
+	}
+	return result
 }
 
 // SaveServiceUsageState saves usage state in a file under Aptomi DB

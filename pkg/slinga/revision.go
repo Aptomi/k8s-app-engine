@@ -51,13 +51,13 @@ func (revision AptomiRevision) saveAsLastRevision() {
 // Saves contents of the current run
 func (revision AptomiRevision) saveCurrentRun() {
 	currentRunDir := filepath.Join(GetAptomiBaseDir(), aptomiCurrentRunDir)
-	savedRunDir := filepath.Join(GetAptomiBaseDir(), revision.getRunDirectory())
+	savedRunDir := filepath.Join(GetAptomiBaseDir(), revision.GetRunDirectory())
 	copyDirectory(currentRunDir, savedRunDir)
 
 	// TODO: save data about the run
 }
 
-func (revision AptomiRevision) getRunDirectory() string {
+func (revision AptomiRevision) GetRunDirectory() string {
 	return fmt.Sprintf("run-%09d", revision)
 }
 

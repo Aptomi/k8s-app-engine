@@ -67,6 +67,14 @@ func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, view.GetData())
 }
 
+func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
+	states := slinga.LoadServiceUsageStatesAll()
+	users := slinga.LoadUsers()
+	userID := getLoggedInUserId(r)
+	view := visibility.NewTimelineView(userID, states, users)
+	writeJSON(w, view.GetData())
+}
+
 // Serve starts http server on specified address that serves Aptomi API and WebUI
 func Serve(host string, port int) {
 	r := http.NewServeMux()
@@ -87,6 +95,7 @@ func Serve(host string, port int) {
 	r.Handle("/api/globalops-view", requireAuth(globalOpsViewHandler))
 	r.Handle("/api/object-view", requireAuth(objectViewHandler))
 	r.Handle("/api/summary-view", requireAuth(summaryViewHandler))
+	r.Handle("/api/timeline-view", requireAuth(timelineViewHandler))
 
 	// serve login/logout api without auth
 	r.HandleFunc("/api/login", loginHandler)

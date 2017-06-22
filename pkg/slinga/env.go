@@ -109,7 +109,7 @@ func GetAptomiObjectWriteFileGlobal(baseDir string, aptomiObject AptomiOject) st
 // GetAptomiObjectFileFromRun returns file name for aptomi objects (so they can be saved)
 // It will place files into aptomiCurrentRunDir. It will create the corresponding directories if they don't exist
 func GetAptomiObjectFileFromRun(baseDir string, revision AptomiRevision, aptomiObject AptomiOject, fileName string) string {
-	return filepath.Join(baseDir, revision.getRunDirectory(), string(aptomiObject), fileName)
+	return filepath.Join(baseDir, revision.GetRunDirectory(), string(aptomiObject), fileName)
 }
 
 // GetAptomiObjectWriteFileCurrentRun returns file name for aptomi objects (so they can be saved)
