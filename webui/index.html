@@ -62,7 +62,9 @@
                             <a href="#">
                                 <i class="fa"></i> User: <span>{{ user.name }}</span>
                                 &nbsp;
-                                <span class="label label-danger pull-right">Global IT Ops</span>
+                                <span class="label label-primary pull-right" v-if="user.descr == 'Dev'">{{ user.descr }}</span>
+                                <span class="label label-success pull-right" v-if="user.descr == 'Service Op'">{{ user.descr }}</span>
+                                <span class="label label-danger pull-right" v-if="user.descr == 'Global Op'">{{ user.descr }}</span>
                             </a>
                         </li>
                         <li>
@@ -908,7 +910,9 @@
         computed: {
             user: function () {
                 return {
-                    name: Cookies.get("logUserName")
+                    id:  Cookies.get("logUserId"),
+                    name: Cookies.get("logUserName"),
+                    descr:  Cookies.get("logUserDescr")
                 }
             }
         }

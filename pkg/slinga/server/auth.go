@@ -1,9 +1,9 @@
 package server
 
 import (
+	"github.com/Frostman/aptomi/pkg/slinga"
 	"net/http"
 	"time"
-	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 func getLoggedInUserId(r *http.Request) string {
@@ -31,14 +31,17 @@ func requireAuth(handler http.HandlerFunc) http.HandlerFunc {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("logUserID")
+	user := slinga.LoadUsers().Users[userID]
+
 	http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: userID, Path: "/"})
-	userName := slinga.LoadUsers().Users[userID].Name
-	http.SetCookie(w, &http.Cookie{Name: "logUserName", Value: userName, Path: "/"})
+	http.SetCookie(w, &http.Cookie{Name: "logUserName", Value: user.Name, Path: "/"})
+	http.SetCookie(w, &http.Cookie{Name: "logUserDescr", Value: user.Labels["short-description"], Path: "/"})
 	handleAutoRedirect(w, r)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)})
 	http.SetCookie(w, &http.Cookie{Name: "logUserName", Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)})
+	http.SetCookie(w, &http.Cookie{Name: "logUserDescr", Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)})
 	handleAutoRedirect(w, r)
 }
