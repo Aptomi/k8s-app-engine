@@ -558,7 +558,11 @@
                                     <td>{{ item.context }}</td>
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
-                                    <td>[View] (Link to watch dependencies by dependencyId in globalops view)</td>
+                                    <td>
+                                        <router-link v-bind:to="{ name: 'details', params: { view: 'globalops', filter: item.dependencyId } }">
+                                            [View]
+                                        </router-link>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -650,7 +654,11 @@
                                     <td>{{ item.context }}</td>
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
-                                    <td>[View] (Service owner view by id)</td>
+                                    <td>
+                                        <router-link v-bind:to="{ name: 'details', params: { view: 'service', filter: item.serviceName } }">
+                                            [View]
+                                        </router-link>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -698,7 +706,11 @@
                                     <td>{{ item.context }}</td>
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
-                                    <td>[View] (open link in service consumer view)</td>
+                                    <td>
+                                        <router-link v-bind:to="{ name: 'details', params: { view: 'consumer', filter: item.dependencyId } }">
+                                            [View]
+                                        </router-link>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
