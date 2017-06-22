@@ -3,6 +3,8 @@ name: analytics_pipeline
 
 owner: 202
 
+enabled: false
+
 components:
 
   - name: kafka

@@ -1,5 +1,6 @@
 - id: alice_tests_twitter_stats_in_stage
   userid: 100
+  enabled: false
   service: twitter_stats
   labels:
     # TODO: remove stage def from here
@@ -10,6 +11,7 @@
 
 - id: alice_tests_twitter_stats_in_stage_another_time
   userid: 100
+  enabled: false
   service: twitter_stats
   labels:
     # TODO: remove stage def from here

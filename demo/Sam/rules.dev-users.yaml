@@ -1,4 +1,5 @@
 - name: dev_users_forbid_prod_clusters
+  enabled: false
   filterservices:
     user:
       accept:

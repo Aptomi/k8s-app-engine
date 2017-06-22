@@ -3,6 +3,8 @@ name: twitter_stats
 
 owner: 201
 
+enabled: false
+
 components:
 
   - name: analytics_pipeline

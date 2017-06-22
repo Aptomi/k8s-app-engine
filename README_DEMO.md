@@ -33,8 +33,21 @@ gcloud config set project bright-torus-169502
     - No services have been defined
     - Aptomi only knows about 2 kubernetes clusters (us-east and us-west) and 5 users
 
-2. Frank comes and defines analytics-pipeline
+2. Frank is an Service Ops guy. He comes and defines analytics-pipeline service in Aptomi
+    - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
+    - Show UI - audit log
+    - Show UI - delta picture
+    - New service definition has been published to aptomi
+        - analytics pipeline, all its dependencies, and contexts
+        - Context = who it's for and how resources are allocated/shared
 
+3. John is another Service Ops guy. He comes and defines twitter-stats service in Aptomi
+    - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
+    - Show UI - audit log
+    - Show UI - delta picture
+    - New service definition has been published to aptomi
+        - analytics pipeline, all its dependencies, and contexts
+        - Context = who it's for and how resources are allocated/shared
 
 ## Suntrust demo / story:
 
