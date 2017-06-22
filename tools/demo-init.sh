@@ -4,14 +4,11 @@ set -exou pipefail
 
 echo "APTOMI_DB=$APTOMI_DB"
 
-# Build & install the latest aptomi binary
-make install
+# Init local database
+./tools/local-policy-init.sh
 
-# Reset aptomi policy
-aptomi policy reset --force
+# Push demo policy to remote github repo
+./tools/demo-push.sh
 
-# Sync demo policy
-cp -r ./demo/ $APTOMI_DB/policy
-
-# Run aptomi policy apply in noop mode
-aptomi policy apply --noop
+# Start watcher/puller from that remote github repo
+./tools/demo-watch-apply.sh
