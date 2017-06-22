@@ -144,6 +144,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	}
 
 	// read all services
+	/*
 	files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeService))
 	sort.Strings(files)
 	for _, f := range files {
@@ -151,6 +152,40 @@ func LoadPolicyFromDir(baseDir string) Policy {
 		if service.Enabled {
 			s.Services[service.Name] = service
 		}
+	}
+	*/
+
+	// TODO: remove later - it's a temporary hack for the demo, so we can enable/disable groups of services
+	files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeService))
+	sort.Strings(files)
+	for _, f := range files {
+		service := loadServiceFromFile(f)
+		s.Services[service.Name] = service
+	}
+	toDisable := map[string][]string {
+		"analytics_pipeline": {"hdfs", "kafka", "spark", "zookeeper"},
+	}
+	disabled := make(map[string]bool)
+	changed := true
+	for changed {
+		changed = false
+		for _, service := range s.Services {
+			if !service.Enabled || disabled[service.Name] {
+				if !disabled[service.Name] {
+					changed = true
+				}
+				disabled[service.Name] = true
+				for _, componentName := range toDisable[service.Name] {
+					if !disabled[componentName] {
+						changed = true
+					}
+					disabled[componentName] = true
+				}
+			}
+		}
+	}
+	for serviceName := range disabled {
+		delete(s.Services, serviceName)
 	}
 
 	// read all contexts
