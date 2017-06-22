@@ -55,11 +55,6 @@
                     <ul class="nav navbar-top-links navbar-right">
                         <li>
                             <a href="#">
-                                <i class="fa"></i> [TODO: Select Run]
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
                                 <i class="fa"></i> User: <span>{{ user.name }}</span>
                                 &nbsp;
                                 <span class="label label-primary pull-right" v-if="user.descr == 'Dev'">{{ user.descr }}</span>
@@ -113,7 +108,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="rule in rules" v-if="rule.Type != 'Debug'">
+                                        <tr v-for="rule in rules" v-if="rule.Type != 'Debug' && rule.Condition != 'N/A'">
                                             <td>{{ rule.Result }}</td>
                                             <td>{{ rule.Type }}</td>
                                             <td>{{ rule.Scope }}</td>
