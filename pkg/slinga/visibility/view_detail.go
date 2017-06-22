@@ -12,12 +12,13 @@ type item struct {
 
 // TODO: change UserId -> UserId (and don't break UI...)
 type detail struct {
-	UserId       string
-	Users        []*item
-	Services     []*item
-	Dependencies []*item
-	Views        []*item
-	Summary      slinga.ServiceUsageStateSummary
+	UserId          string
+	Users           []*item
+	Services        []*item
+	Dependencies    []*item
+	AllDependencies []*item
+	Views           []*item
+	Summary         slinga.ServiceUsageStateSummary
 }
 
 func NewDetails(userID string, globalUsers slinga.GlobalUsers, state slinga.ServiceUsageState) detail {
@@ -25,6 +26,7 @@ func NewDetails(userID string, globalUsers slinga.GlobalUsers, state slinga.Serv
 	summary.Users = len(globalUsers.Users)
 	r := detail{
 		userID,
+		make([]*item, 0),
 		make([]*item, 0),
 		make([]*item, 0),
 		make([]*item, 0),
@@ -65,6 +67,20 @@ func NewDetails(userID string, globalUsers slinga.GlobalUsers, state slinga.Serv
 	}
 	for _, depID := range depIds {
 		r.Dependencies = append(r.Dependencies, &item{depID, deps[depID].ID})
+	}
+
+	allDepIds := make([]string, 0)
+	for depID := range deps {
+		allDepIds = append(allDepIds, depID)
+	}
+
+	sort.Strings(allDepIds)
+
+	if len(allDepIds) > 1 {
+		r.AllDependencies = append([]*item{{"all", "All"}}, r.AllDependencies...)
+	}
+	for _, depID := range allDepIds {
+		r.AllDependencies = append(r.AllDependencies, &item{depID, deps[depID].ID})
 	}
 
 	// Services

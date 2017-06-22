@@ -47,7 +47,8 @@ func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
 func globalOpsViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	userID := r.URL.Query().Get("userId")
-	view := visibility.NewConsumerView(userID, "", state)
+	dependencyID := r.URL.Query().Get("dependencyId")
+	view := visibility.NewConsumerView(userID, dependencyID, state)
 	writeJSON(w, view.GetData())
 }
 
