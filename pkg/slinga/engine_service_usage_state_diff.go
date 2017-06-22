@@ -5,7 +5,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
 	"time"
-	"reflect"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -56,8 +55,24 @@ type ServiceUsageStateSummary struct {
 	Dependencies int
 }
 
-func (summary ServiceUsageStateSummary) deepEqual(that ServiceUsageStateSummary) bool {
-	return reflect.DeepEqual(summary, that)
+// compare everything, but not users. users are external to us
+func (summary ServiceUsageStateSummary) equal(that ServiceUsageStateSummary) bool {
+	if summary.Services != that.Services {
+		return false
+	}
+	if summary.Contexts != that.Contexts {
+		return false
+	}
+	if summary.Clusters != that.Clusters {
+		return false
+	}
+	if summary.Rules != that.Rules {
+		return false
+	}
+	if summary.Dependencies != that.Dependencies {
+		return false
+	}
+	return true
 }
 
 func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
@@ -81,7 +96,7 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
 func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, newrevision bool, noop bool) {
 	fmt.Println("[Revision]")
-	if newrevision || (!noop && diff.shouldGenerateNewRevision()) {
+	if newrevision || (!noop && diff.ShouldGenerateNewRevision()) {
 		// Increment a revision
 		newRevision := revision.increment()
 
@@ -296,8 +311,8 @@ func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, up
 
 // This method became one of the key methods.
 // If it returns false, then new run and new revision will not be generated
-func (diff *ServiceUsageStateDiff) shouldGenerateNewRevision() bool {
-	if !diff.Next.GetSummary().deepEqual(diff.Prev.GetSummary()) {
+func (diff *ServiceUsageStateDiff) ShouldGenerateNewRevision() bool {
+	if !diff.Next.GetSummary().equal(diff.Prev.GetSummary()) {
 		return true
 	}
 	if len(diff.ComponentInstantiate) > 0 {
@@ -317,7 +332,6 @@ func (diff *ServiceUsageStateDiff) shouldGenerateNewRevision() bool {
 	}
 
 	// TODO: this key method doesn't take into account presence of Istio rules
-
 	return false
 }
 
@@ -343,21 +357,21 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool,
 			if len(diff.ComponentInstantiate) > 0 {
 				log.Debug("  New:")
 				for k := range diff.ComponentInstantiate {
-					log.Debug("    [+] %s\n", k)
+					log.Printf("    [+] %s", k)
 				}
 			}
 
 			if len(diff.ComponentDestruct) > 0 {
 				log.Debug("  Deleted:")
 				for k := range diff.ComponentDestruct {
-					log.Debug("    [-] %s\n", k)
+					log.Printf("    [-] %s", k)
 				}
 			}
 
 			if len(diff.ComponentUpdate) > 0 {
 				log.Debug("  Updated:")
 				for k := range diff.ComponentUpdate {
-					log.Debug("    [*] %s\n", k)
+					log.Printf("    [*] %s", k)
 				}
 			}
 		} else {

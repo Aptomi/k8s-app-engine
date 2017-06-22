@@ -69,7 +69,13 @@ gcloud config set project bright-torus-169502
 5. Declaring dependencies
     - Production
         - let Ops team to instantiate twitter-stats service in production
-    -
+    - enabled = true in John/dependencies.john-ts.yaml
+    - Show UI - audit log
+    - Show UI - delta picture
+HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
+    - Show containers on k8s
+        - watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods
+
 
 ## Suntrust demo / story:
 
