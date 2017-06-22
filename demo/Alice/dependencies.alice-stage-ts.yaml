@@ -1,23 +1,14 @@
-- id: alice_tests_twitter_stats_in_stage
+- id: alice_tests_new_code_for_twitter_stats_in_stage
   userid: 100
   enabled: false
   service: twitter_stats
   labels:
-    # TODO: remove stage def from here
-    tstype: stage
-    tsvisimage: demo-v61
-    # Mexico
-    locations: -119.883662,13.301958,-91.780634,27.018021
+      # TODO: remove stage def from here
+      tstype: stage
+      # Deploy new version of visualization code (pass image tag for container)
+      tsvisimage: demo-v62
+      # San Francisco, Boston, New York
+      locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
 
-- id: alice_tests_twitter_stats_in_stage_another_time
-  userid: 100
-  enabled: false
-  service: twitter_stats
-  labels:
-    # TODO: remove stage def from here
-    tstype: stage
-    tsvisimage: demo-v61
-    meow: true
-    # Mexico
-    locations: -119.883662,13.301958,-91.780634,27.018021
-
+      # Alice will try to add this explicit label to promote to prod
+      # cluster: prod

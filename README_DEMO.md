@@ -66,7 +66,7 @@ gcloud config set project bright-torus-169502
 4. At this point Aptomi just has service definitions and nothing has been instantiated yet
     - Now let's have some consumers declare dependencies on the services defined by John and Frank
 
-5. Declaring dependencies
+5. Declaring dependencies (Prod)
     - Production
         - let Ops team to instantiate twitter-stats service in production
     - enabled = true in John/dependencies.john-ts.yaml
@@ -75,6 +75,28 @@ gcloud config set project bright-torus-169502
 HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
     - Show containers on k8s
         - watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods
+
+6. Declaring dependencies (Dev)
+    - Developers
+        - let Alice to instantiate twitter-stats service
+           - enabled = true in Alice/dependencies.alice-stage-ts.yaml
+        - let Bob instantiate twitter-stats service
+           - enabled = true in Bob/dependencies.bob-stage-ts.yaml
+    - Show UI - audit log
+    - Show UI - delta picture
+    - Show containers on k8s
+        - watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods
+
+7. Now, what happened exactly
+    - John is seeing that his twitter_stats service got allocated to 3 consumers (per the rules he defined)
+      - Log in as John
+      - Show Home Page
+      - Show Policy Explorer
+    - Frank is seeing that his analytics_pipeline service got allocated 2 times (per the rules he defined)
+      - Log in as John
+      - Show Home Page
+      - Show Policy Explorer
+
 
 
 ## Suntrust demo / story:

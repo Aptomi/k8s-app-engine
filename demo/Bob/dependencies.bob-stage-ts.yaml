@@ -3,12 +3,8 @@
   service: twitter_stats
   enabled: false
   labels:
-    # TODO: remove stage def from here
-    tstype: stage
-    # Deploy specific version of tweeviz (image tag)
-    tsvisimage: demo-v62
-    # San Francisco, Boston, New York
-    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
-
-    # Bob adds this label to promote to prod
-    # cluster: prod
+      # TODO: remove stage def from here
+      tstype: stage
+      tsvisimage: demo-v61
+      # Mexico
+      locations: -119.883662,13.301958,-91.780634,27.018021
