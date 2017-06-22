@@ -2,6 +2,7 @@
   name: John
   labels:
     description: Ops for 'analytics-pipeline' service. He controls its sharing/consumption (prod/stage)
+    short-description: Service Op
     org: it
     is_operator: true
     team: analytics_ops_team
@@ -10,6 +11,7 @@
   name: Frank
   labels:
     description: Ops for 'twitter-stats' service. He controls its sharing/consumption (prod/stage)
+    short-description: Service Op
     org: it
     is_operator: true
     team: web_ops_team
