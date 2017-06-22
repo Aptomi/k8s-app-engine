@@ -5,18 +5,16 @@ import (
 	"time"
 )
 
-func getUsername(r *http.Request) string {
-	username := r.Header.Get("username")
-	if username == "" {
-		if cookie, err := r.Cookie("username"); err == nil {
-			username = cookie.Value
-		}
+func getLoggedInUserId(r *http.Request) string {
+	userID := ""
+	if cookie, err := r.Cookie("logUserID"); err == nil {
+		userID = cookie.Value
 	}
-	return username
+	return userID
 }
 
 func isUnauthorized(r *http.Request) bool {
-	return getUsername(r) == ""
+	return len(getLoggedInUserId(r)) <= 0
 }
 
 func requireAuth(handler http.HandlerFunc) http.HandlerFunc {
@@ -31,15 +29,12 @@ func requireAuth(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Query().Get("username")
-	http.SetCookie(w, &http.Cookie{Name: "username", Value: username, Path: "/"})
-
+	userID := r.URL.Query().Get("logUserID")
+	http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: userID, Path: "/"})
 	handleAutoRedirect(w, r)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	// == delete cookie
-	http.SetCookie(w, &http.Cookie{Name: "username", Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)})
-
+	http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: "", Path: "/", Expires: time.Now().AddDate(-1, 0, 0)})
 	handleAutoRedirect(w, r)
 }

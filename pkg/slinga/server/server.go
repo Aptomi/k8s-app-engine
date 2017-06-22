@@ -17,28 +17,15 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
 	users := slinga.LoadUsers().Users
-	endpoints := visibility.Endpoints(getUsername(r), users, state)
+	endpoints := visibility.Endpoints(getLoggedInUserId(r), users, state)
 
 	writeJSON(w, endpoints)
 }
 
 func detailViewHandler(w http.ResponseWriter, r *http.Request) {
-	// prefer explicitly passed username through query
-	username := r.URL.Query().Get("username")
-	if username == "" {
-		username = getUsername(r)
-	}
-
 	state := slinga.LoadServiceUsageState()
-
-	filterUserID := ""
-	for userID, user := range slinga.LoadUsers().Users {
-		if user.Name == username {
-			filterUserID = userID
-		}
-	}
-
-	view := visibility.NewDetails(filterUserID, slinga.LoadUsers(), state)
+	userID := getLoggedInUserId(r)
+	view := visibility.NewDetails(userID, slinga.LoadUsers(), state)
 	writeJSON(w, view)
 }
 
@@ -67,8 +54,15 @@ func globalOpsViewHandler(w http.ResponseWriter, r *http.Request) {
 func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	objectID := r.URL.Query().Get("id")
-	ov := visibility.NewObjectView(objectID, state)
-	writeJSON(w, ov.GetData())
+	view := visibility.NewObjectView(objectID, state)
+	writeJSON(w, view.GetData())
+}
+
+func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
+	state := slinga.LoadServiceUsageState()
+	userID := getLoggedInUserId(r)
+	view := visibility.NewSummaryView(userID, state)
+	writeJSON(w, view.GetData())
 }
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI
@@ -90,6 +84,7 @@ func Serve(host string, port int) {
 	r.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
 	r.Handle("/api/globalops-view", requireAuth(globalOpsViewHandler))
 	r.Handle("/api/object-view", requireAuth(objectViewHandler))
+	r.Handle("/api/summary-view", requireAuth(summaryViewHandler))
 
 	// serve login/logout api without auth
 	r.HandleFunc("/api/login", loginHandler)
