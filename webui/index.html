@@ -571,7 +571,7 @@
 
         <div class="row animated fadeInUp">
             <div class="col-lg-12">
-                <div class="ibox float-e-margins">
+                <div class="ibox float-e-margins" v-if="summary.globalRules.length > 0">
                     <div class="ibox-title">
                         <h5>Global Rules</h5>
                     </div>
@@ -603,20 +603,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>ruleName</td>
-                                    <td>appliedTo</td>
+                                <tr v-for="item in summary.globalRules">
+                                    <td>{{ item.ruleName }}</td>
+                                    <td>{{ item.appliedTo }}</td>
                                     <!--<td>[View]</td>-->
-                                </tr>
-                                <tr>
-                                    <td>dev_users_huj</td>
-                                    <td>0 instances</td>
-                                    <td>[View]</td>
-                                </tr>
-                                <tr>
-                                    <td>dev_users_huj2</td>
-                                    <td>15 instances</td>
-                                    <td>[View]</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -629,7 +619,7 @@
 
         <div class="row animated fadeInUp">
             <div class="col-lg-12">
-                <div class="ibox float-e-margins">
+                <div class="ibox float-e-margins" v-if="summary.servicesOwned.length > 0">
                     <div class="ibox-title">
                         <h5>Services I own</h5>
                     </div>
@@ -655,19 +645,12 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>analytics_pipeline</td>
-                                    <td>prod/production</td>
-                                    <td>cluster-us-east</td>
-                                    <td>3 hours running</td>
-                                    <td>[View]--Service owner view </td>
-                                </tr>
-                                <tr>
-                                    <td>analytics_pipeline</td>
-                                    <td>stage/shit</td>
-                                    <td>cluster-us-west</td>
-                                    <td>3 hours running</td>
-                                    <td>[View]</td>
+                                <tr v-for="item in summary.servicesOwned">
+                                    <td>{{ item.serviceName }}</td>
+                                    <td>{{ item.context }}</td>
+                                    <td>{{ item.cluster }}</td>
+                                    <td>{{ item.stats }}</td>
+                                    <td>[View] (Service owner view by id)</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -680,7 +663,7 @@
 
         <div class="row animated fadeInUp">
             <div class="col-lg-12">
-                <div class="ibox float-e-margins">
+                <div class="ibox float-e-margins" v-if="summary.servicesUsing.length > 0">
                     <div class="ibox-title">
                         <h5>Services I am using</h5>
                     </div>
@@ -709,12 +692,13 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>twitter_stats</td>
-                                    <td>prod/production</td>
-                                    <td>cluster-us-east</td>
-                                    <td>3 hours running</td>
-                                    <td>[View]--open </td>
+                                <tr v-for="item in summary.servicesUsing">
+                                    <td>{{ item.resolved }} </td>
+                                    <td>{{ item.serviceName }}</td>
+                                    <td>{{ item.context }}</td>
+                                    <td>{{ item.cluster }}</td>
+                                    <td>{{ item.stats }}</td>
+                                    <td>[View] (open link in service consumer view)</td>
                                 </tr>
                                 </tbody>
                             </table>
