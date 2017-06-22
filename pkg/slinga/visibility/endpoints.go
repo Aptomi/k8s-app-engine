@@ -27,14 +27,12 @@ type endpointsView struct {
 	Endpoints []userEndpoints
 }
 
-func Endpoints(userID string, users map[string]*slinga.User, state slinga.ServiceUsageState) endpointsView {
+func Endpoints(userID string, users slinga.GlobalUsers, state slinga.ServiceUsageState) endpointsView {
 	uR := endpointsView{make([]userEndpoints, 0)}
 
-	isGlobalOp := users[userID].Labels["global_ops"] == "true"
-
 	userIds := make([]string, 0)
-	for userID, user := range users {
-		if !isGlobalOp && user.ID != userID {
+	for userID, user := range users.Users {
+		if !user.IsGlobalOps() && user.ID != userID {
 			continue
 		}
 		userIds = append(userIds, userID)
@@ -58,7 +56,7 @@ func Endpoints(userID string, users map[string]*slinga.User, state slinga.Servic
 			r = append(r, rEndpoint{service, context, allocation, component, rLinks})
 		}
 
-		uR.Endpoints = append(uR.Endpoints, userEndpoints{users[userID], r})
+		uR.Endpoints = append(uR.Endpoints, userEndpoints{users.Users[userID], r})
 	}
 
 	return uR

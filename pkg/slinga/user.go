@@ -54,3 +54,8 @@ func LoadUsersFromDir(baseDir string) GlobalUsers {
 func LoadUsers() GlobalUsers {
 	return LoadUsersFromDir(GetAptomiBaseDir())
 }
+
+// IsGlobalOps returns if user is a global ops guy
+func (user *User) IsGlobalOps() bool {
+	return user.Labels["global_ops"] == "true"
+}

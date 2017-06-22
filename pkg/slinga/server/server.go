@@ -16,7 +16,7 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
-	users := slinga.LoadUsers().Users
+	users := slinga.LoadUsers()
 	endpoints := visibility.Endpoints(getLoggedInUserId(r), users, state)
 
 	writeJSON(w, endpoints)
@@ -60,8 +60,9 @@ func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 
 func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
+	users := slinga.LoadUsers()
 	userID := getLoggedInUserId(r)
-	view := visibility.NewSummaryView(userID, state)
+	view := visibility.NewSummaryView(userID, state, users)
 	writeJSON(w, view.GetData())
 }
 
