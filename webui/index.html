@@ -843,7 +843,6 @@
                                 <tr>
                                     <th>Service </th>
                                     <th>Context </th>
-                                    <th>Allocation </th>
                                     <th>Component</th>
                                     <th>Links</th>
                                 </tr>
@@ -851,12 +850,11 @@
                                 <tbody>
                                 <tr v-for="endpoint in user_endpoints.Endpoints">
                                     <td>{{ endpoint.Service }}</td>
-                                    <td>{{ endpoint.Context }}</td>
-                                    <td>{{ endpoint.Allocation }}</td>
+                                    <td>{{ endpoint.Context }}/{{ endpoint.Allocation }}</td>
                                     <td>{{ endpoint.Component }}</td>
                                     <td>
                                         <div v-for="link in endpoint.Links">
-                                            <a v-bind:href="link.Link">{{ link.Name }}</a>
+                                            {{ link.Name }}: <a v-bind:href="link.Link">{{ link.Link }}</a>
                                         </div>
                                     </td>
                                 </tr>
