@@ -17,10 +17,20 @@ type detail struct {
 	Services     []*item
 	Dependencies []*item
 	Views        []*item
+	Summary      slinga.ServiceUsageStateSummary
 }
 
 func NewDetails(userID string, globalUsers slinga.GlobalUsers, state slinga.ServiceUsageState) detail {
-	r := detail{userID, make([]*item, 0), make([]*item, 0), make([]*item, 0), make([]*item, 0)}
+	summary := state.GetSummary()
+	summary.Users = len(globalUsers.Users)
+	r := detail{
+		userID,
+		make([]*item, 0),
+		make([]*item, 0),
+		make([]*item, 0),
+		make([]*item, 0),
+		summary,
+	}
 
 	// Users
 	userIds := make([]string, 0)

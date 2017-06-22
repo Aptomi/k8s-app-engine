@@ -56,12 +56,16 @@ type ServiceUsageStateSummary struct {
 }
 
 func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
+	users := 0
+	if state.users != nil {
+		users = state.users.count()
+	}
 	return ServiceUsageStateSummary{
 		state.Policy.countServices(),
 		state.Policy.countContexts(),
 		state.Policy.countClusters(),
 		state.Policy.Rules.count(),
-		state.users.count(),
+		users,
 		state.Dependencies.count(),
 	}
 }
