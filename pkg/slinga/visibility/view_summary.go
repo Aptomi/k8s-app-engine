@@ -42,8 +42,8 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 			"resolved":     dependency.Resolved,
 			"userName":     view.users.Users[dependency.UserID].Name,
 			"serviceName":  dependency.Service,
-			"context":      view.getResolvedContextName(dependency),
-			"cluster":      view.getResolvedClusterName(dependency),
+			"context":      view.getResolvedContextNameByDep(dependency),
+			"cluster":      view.getResolvedClusterNameByDep(dependency),
 			"stats":        view.getDependencyStats(dependency),
 			"dependencyId": dependency.ID,
 			"id":           view.users.Users[dependency.UserID].Name, // entries will be sorted by ID
@@ -63,10 +63,10 @@ func (view SummaryView) getGlobalRulesData() interface{} {
 	for _, ruleList := range view.state.Policy.Rules.Rules {
 		for _, rule := range ruleList {
 			entry := lineEntry{
-				"ruleName":     rule.Name,
-				"ruleObject":   rule.FilterServices,
-				"appliedTo":    view.getRuleAppliedTo(rule),
-				"id":           rule.Name, // entries will be sorted by ID
+				"ruleName":   rule.Name,
+				"ruleObject": rule.FilterServices,
+				"appliedTo":  view.getRuleAppliedTo(rule),
+				"id":         rule.Name, // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}
@@ -76,9 +76,51 @@ func (view SummaryView) getGlobalRulesData() interface{} {
 }
 
 func (view SummaryView) getServicesOwned() interface{} {
-	return "not implemented"
+	result := lineEntryList{}
+	for _, service := range view.state.Policy.Services {
+		if service.Owner == view.userID {
+			// if I own this service, let's find all its instances
+			instanceMap := make(map[string]bool)
+			for _, dependency := range view.state.Dependencies.DependenciesByService[service.Name] {
+				if dependency.Resolved {
+					instanceMap[dependency.ServiceKey] = true
+				}
+			}
+
+			// Add info about every allocated instance
+			for key := range instanceMap {
+				instance := view.state.ResolvedData.ComponentInstanceMap[key]
+				entry := lineEntry{
+					"serviceName": service.Name,
+					"context":     view.getResolvedContextNameByInst(instance),
+					"cluster":     view.getResolvedClusterNameByInst(instance),
+					"stats":       view.getInstanceStats(instance),
+					"id":          getWebIDByComponentKey(key), // entries will be sorted by ID
+				}
+				result = append(result, entry)
+			}
+		}
+	}
+	sort.Sort(result)
+	return result
 }
 
 func (view SummaryView) getServicesUsing() interface{} {
-	return "not implemented"
+	result := lineEntryList{}
+	for _, dependency := range view.state.Dependencies.DependenciesByID {
+		if dependency.UserID == view.userID {
+			entry := lineEntry{
+				"resolved":     dependency.Resolved,
+				"serviceName":  dependency.Service,
+				"context":      view.getResolvedContextNameByDep(dependency),
+				"cluster":      view.getResolvedClusterNameByDep(dependency),
+				"stats":        view.getDependencyStats(dependency),
+				"dependencyId": dependency.ID,
+				"id":           dependency.ID, // entries will be sorted by ID
+			}
+			result = append(result, entry)
+		}
+	}
+	sort.Sort(result)
+	return result
 }

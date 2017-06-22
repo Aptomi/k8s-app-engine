@@ -5,7 +5,6 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/time"
 	"html"
-	"strings"
 )
 
 type serviceInstanceNode struct {
@@ -40,11 +39,11 @@ func (n serviceInstanceNode) getGroup() string {
 }
 
 func (n serviceInstanceNode) getID() string {
-	return fmt.Sprintf("%s%s", n.getIDPrefix(), strings.Replace(n.key, "#", ".", -1))
+	return fmt.Sprintf("%s%s", n.getIDPrefix(), getWebIDByComponentKey(n.key))
 }
 
 func (n serviceInstanceNode) isItMyID(id string) string {
-	return strings.Replace(cutPrefixOrEmpty(id, n.getIDPrefix()), ".", "#", -1)
+	return getWebComponentKeyByID(cutPrefixOrEmpty(id, n.getIDPrefix()))
 }
 
 func (n serviceInstanceNode) getLabel() string {
