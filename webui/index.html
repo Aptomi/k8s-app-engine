@@ -109,7 +109,8 @@
                                     </thead>
                                     <tbody>
                                         <tr v-for="rule in rules" v-if="rule.Type != 'Debug' && rule.Condition != 'N/A'">
-                                            <td>{{ rule.Result }}</td>
+                                            <td v-if="rule.Result"><span class="label label-primary">{{ rule.Result }}</span></td>
+                                            <td v-else><span class="label label-danger">{{ rule.Result }}</span></td>
                                             <td>{{ rule.Type }}</td>
                                             <td>{{ rule.Scope }}</td>
                                             <td>{{ rule.Name }}</td>
@@ -650,7 +651,8 @@
                                 </thead>
                                 <tbody>
                                 <tr v-for="item in summary.globalDependencies">
-                                    <td>{{ item.resolved }}</td>
+                                    <td v-if="item.resolved"><span class="label label-primary">{{ item.resolved }}</span></td>
+                                    <td v-else><span class="label label-danger">{{ item.resolved }}</span></td>
                                     <td>{{ item.userName }}</td>
                                     <td>{{ item.serviceName }}</td>
                                     <td>{{ item.context }}</td>
@@ -799,7 +801,8 @@
                                 </thead>
                                 <tbody>
                                 <tr v-for="item in summary.servicesUsing">
-                                    <td>{{ item.resolved }} </td>
+                                    <td v-if="item.resolved"><span class="label label-primary">{{ item.resolved }}</span></td>
+                                    <td v-else><span class="label label-danger">{{ item.resolved }}</span></td>
                                     <td>{{ item.serviceName }}</td>
                                     <td>{{ item.context }}</td>
                                     <td>{{ item.cluster }}</td>
