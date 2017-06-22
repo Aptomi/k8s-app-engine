@@ -191,7 +191,11 @@
                             </div>
 
                             <div class="vertical-timeline-content">
-                                <h2>Revision: {{ item.revisionNumber }} ({{ time_ago(item.createdOn) }})</h2>
+                                <h2>
+                                    Revision: {{ item.revisionNumber }} &nbsp;
+                                    ({{ time_ago(item.createdOn) }}) &nbsp;
+                                    (<a v-bind:href="'/run/' + item.dir + '/graphics/graph_delta.png'">delta graph</a>)
+                                </h2>
                                 <p><pre>{{ item.diff }}</pre></p>
                                 <span class="vertical-date">
                                         <!--Today <br/>-->
