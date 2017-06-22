@@ -87,7 +87,50 @@
                 <strong>Copyright</strong> Aptomi &copy; 2017
             </div>
         </div>
+        <div class="modal inmodal fade" id="details-modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">Modal title</h4>
+                        <small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small>
+                    </div>
+                    <div class="modal-body">
 
+                        <div v-for="obj in obj_view">
+                            <div class="table-responsive" v-for="(rules, dep) in obj.RuleLog" v-if="'RuleLog' in obj">
+                                <table class="table table-striped">
+                                    <h5>Dependency: {{ dep }}</h5>
+                                    <thead>
+                                        <tr>
+                                            <th>Result </th><!--todo(slukjanov): green/red-->
+                                            <th>Type </th>
+                                            <th>Scope </th>
+                                            <th>Name </th><!--todo(slukjanov): tooltip with message-->
+                                            <th>Condition </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="rule in rules" v-if="rule.Type != 'Debug'">
+                                            <td>{{ rule.Result }}</td>
+                                            <td>{{ rule.Type }}</td>
+                                            <td>{{ rule.Scope }}</td>
+                                            <td>{{ rule.Name }}</td>
+                                            <td>{{ rule.Condition }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!--<div class="modal-footer">-->
+                    <!--<button type="button" class="btn btn-white" data-dismiss="modal">Close</button>-->
+                    <!--</div>-->
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -102,9 +145,11 @@
 <script src="public/js/inspinia.js"></script>
 <script src="public/js/plugins/pace/pace.min.js"></script>
 
+<!-- Vue JS -->
 <script src="public/js/vue.min.js"></script>
 <script src="public/js/vue-router.min.js"></script>
 
+<!-- Cookies wrapper -->
 <script src="public/js/js.cookie-2.1.4.min.js"></script>
 
 <script type="text/javascript" src="public/vis/dist/vis.js"></script>
@@ -144,7 +189,7 @@
                 <div class="ibox float-e-margins">
                     <div class="ibox-content">
                         <div class="row m-b-xs">
-                            <div class="col-sm-12">
+                            <div class="col-sm-10">
                                 <span class="m-l-xs m-r-sm">View: </span>
                                 <details-filter v-bind:items="views" v-bind:current_title="curr_view_title" target_view=""/>
 
@@ -152,6 +197,12 @@
                                 <details-filter v-if="items.length > 0"
                                                 v-bind:items="items" v-bind:current_title="curr_filter_title" v-bind:target_view="curr_view"/>
 
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-primary"
+                                        data-toggle="modal" data-target="#details-modal">
+                                    Rule log
+                                </button>
                             </div>
                         </div>
                         <div id="mygraph"></div>
@@ -163,103 +214,10 @@
             <div class="col-lg-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <h5>Details</h5>
+                        <h5>Raw data</h5>
                     </div>
                     <div class="ibox-content">
                         <div id="mypanel">No data loaded</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row animated fadeInUp">
-            <div class="col-lg-12">
-                <div class="ibox float-e-margins">
-                    <div class="" id="ibox-content">
-
-                        <div id="vertical-timeline" class="vertical-container light-timeline">
-                            <div class="vertical-timeline-block">
-                                <div class="vertical-timeline-icon navy-bg">
-                                    <i class="fa fa-briefcase"></i>
-                                </div>
-
-                                <div class="vertical-timeline-content">
-                                    <h2>Meeting</h2>
-                                    <p>Conference on the sales results for the previous year. Monica please examine sales trends in marketing and products. Below please find the current status of the sale.
-                                    </p>
-                                    <a href="#" class="btn btn-sm btn-primary"> More info</a>
-                                    <span class="vertical-date">
-                                        Today <br/>
-                                        <small>Dec 24</small>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="vertical-timeline-block">
-                                <div class="vertical-timeline-icon blue-bg">
-                                    <i class="fa fa-file-text"></i>
-                                </div>
-
-                                <div class="vertical-timeline-content">
-                                    <h2>Send documents to Mike</h2>
-                                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since.</p>
-                                    <a href="#" class="btn btn-sm btn-success"> Download document </a>
-                                    <span class="vertical-date">
-                                        Today <br/>
-                                        <small>Dec 24</small>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="vertical-timeline-block">
-                                <div class="vertical-timeline-icon lazur-bg">
-                                    <i class="fa fa-coffee"></i>
-                                </div>
-
-                                <div class="vertical-timeline-content">
-                                    <h2>Coffee Break</h2>
-                                    <p>Go to shop and find some products. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's. </p>
-                                    <a href="#" class="btn btn-sm btn-info">Read more</a>
-                                    <span class="vertical-date"> Yesterday <br/><small>Dec 23</small></span>
-                                </div>
-                            </div>
-
-                            <div class="vertical-timeline-block">
-                                <div class="vertical-timeline-icon yellow-bg">
-                                    <i class="fa fa-phone"></i>
-                                </div>
-
-                                <div class="vertical-timeline-content">
-                                    <h2>Phone with Jeronimo</h2>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
-                                    <span class="vertical-date">Yesterday <br/><small>Dec 23</small></span>
-                                </div>
-                            </div>
-
-                            <div class="vertical-timeline-block">
-                                <div class="vertical-timeline-icon lazur-bg">
-                                    <i class="fa fa-user-md"></i>
-                                </div>
-
-                                <div class="vertical-timeline-content">
-                                    <h2>Go to the doctor dr Smith</h2>
-                                    <p>Find some issue and go to doctor. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. </p>
-                                    <span class="vertical-date">Yesterday <br/><small>Dec 23</small></span>
-                                </div>
-                            </div>
-
-                            <div class="vertical-timeline-block">
-                                <div class="vertical-timeline-icon navy-bg">
-                                    <i class="fa fa-comments"></i>
-                                </div>
-
-                                <div class="vertical-timeline-content">
-                                    <h2>Chat with Monica and Sandra</h2>
-                                    <p>Web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like). </p>
-                                    <span class="vertical-date">Yesterday <br/><small>Dec 23</small></span>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -297,7 +255,7 @@
         }
 
         loadJSON(apiPath, jsonLoaded, function (err) {
-            console.log('error')
+            console.log(err)
         });
 
         // create a network
@@ -428,6 +386,7 @@
                 loadJSON("/api/object-view?id=" + id, objectLoaded, objectNotLoaded);
             } else {
                 document.getElementById('mypanel').innerHTML = 'No data loaded'
+                app.obj_view = [];
             }
         }
 
@@ -437,7 +396,7 @@
                 edges: jsonData.edges
             };
 
-            network = new vis.Network(container, data, options);
+            var network = new vis.Network(container, data, options);
             network.on("click", clickedNode);
             network.fit();
         }
@@ -445,13 +404,16 @@
         function objectLoaded(jsonData) {
             if (jsonData) {
                 document.getElementById('mypanel').innerHTML = '<pre>' + JSON.stringify(jsonData, null, 4) + '</pre>';
+                app.obj_view = [jsonData];
             } else {
                 document.getElementById('mypanel').innerHTML = 'No data loaded'
+                app.obj_view = [];
             }
         }
 
         function objectNotLoaded(err) {
             document.getElementById('mypanel').innerHTML = '<h2>Unable to load data</h2>' + err
+            app.obj_view = [];
         }
     };
 </script>
@@ -491,6 +453,7 @@
                     var view = ctx.$route.params.view;
                     var filter = ctx.$route.params.filter;
 
+                    app.obj_view = [];
                     ctx.views = jsonData.Views;
 
                     if (view === ":view") {
@@ -870,7 +833,6 @@
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -940,7 +902,8 @@
         el: '#wrapper',
         router: router,
         data: {
-            routes: routes
+            routes: routes,
+            obj_view: []
         },
         computed: {
             user: function () {
