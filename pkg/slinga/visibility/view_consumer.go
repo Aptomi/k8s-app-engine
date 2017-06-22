@@ -4,32 +4,13 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
-// ConsumerView represents a view from a particular consumer (service consumer point of view)
+// ConsumerView represents a view from a particular consumer(s) (service consumer point of view)
 // TODO: userId and dependencyId must be userID and dependencyID (but it kinda breaks UI...)
 type ConsumerView struct {
 	userId       string
 	dependencyId string
 	state        slinga.ServiceUsageState
 	g            *graph
-}
-
-// TODO: why the fuck NewConsumerView returns ConsumerView, and this returns graph...?!?!?!
-func NewGlobalConsumerView(filterUserID string, users map[string]*slinga.User, state slinga.ServiceUsageState) graph {
-	g := newGraph()
-	for userID := range users {
-		if filterUserID != "" && userID != filterUserID {
-			continue
-		}
-		view := ConsumerView{
-			userId:       userID,
-			dependencyId: "",
-			state:        state,
-			g:            g,
-		}
-		view.GetData()
-	}
-
-	return *g
 }
 
 // NewConsumerView creates a new ConsumerView
@@ -46,7 +27,7 @@ func NewConsumerView(userID string, dependencyID string, state slinga.ServiceUsa
 func (view ConsumerView) GetData() interface{} {
 	// go over all dependencies of a given user
 	for _, dependency := range view.state.Dependencies.DependenciesByID {
-		if dependency.UserID == view.userId && (len(view.dependencyId) <= 0 || dependency.ID == view.dependencyId) {
+		if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.ID, view.dependencyId) {
 			// Step 1 - add a node for every matching dependency found
 			dependencyNode := newDependencyNode(dependency, false)
 			view.g.addNode(dependencyNode, 0)
@@ -57,6 +38,11 @@ func (view ConsumerView) GetData() interface{} {
 	}
 
 	return view.g.GetData()
+}
+
+// Returns if value is good with respect to filterValue
+func filterMatches(value string, filterValue string) bool {
+	return len(filterValue) <= 0 || filterValue == value
 }
 
 // Adds to the graph nodes/edges which are triggered by usage of a given dependency
