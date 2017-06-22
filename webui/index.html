@@ -736,22 +736,24 @@
 
                                 <thead>
                                 <tr>
+                                    <th>Status</th>
                                     <th>Service</th>
                                     <th>Context</th>
                                     <th>Cluster</th>
-                                    <th>Stats</th>
+                                    <th>Uptime</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="item in summary.servicesOwned">
+                                    <td><span class="label label-primary">Running</span></td>
                                     <td>{{ item.serviceName }}</td>
                                     <td>{{ item.context }}</td>
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
                                     <td>
                                         <router-link v-bind:to="{ name: 'details', params: { view: 'service', filter: item.serviceName } }">
-                                            [View]
+                                            [Open In Policy Explorer]
                                         </router-link>
                                     </td>
                                 </tr>

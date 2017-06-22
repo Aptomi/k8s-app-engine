@@ -12,7 +12,7 @@ func (view SummaryView) getDependencyStats(dependency *slinga.Dependency) string
 		return "N/A"
 	}
 	runningTime := time.NewDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
-	return fmt.Sprintf("%s running", runningTime)
+	return fmt.Sprintf("%s", runningTime)
 }
 
 func (view SummaryView) getResolvedClusterNameByDep(dependency *slinga.Dependency) string {
@@ -37,7 +37,7 @@ func (view SummaryView) getRuleAppliedTo(rule *slinga.Rule) string {
 
 func (view SummaryView) getInstanceStats(instance *slinga.ComponentInstance) string {
 	runningTime := time.NewDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key].GetRunningTime()).Humanize()
-	return fmt.Sprintf("%s running", runningTime)
+	return fmt.Sprintf("%s", runningTime)
 }
 
 func (view SummaryView) getResolvedClusterNameByInst(instance *slinga.ComponentInstance) string {

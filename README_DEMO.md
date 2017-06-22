@@ -20,9 +20,8 @@ gcloud config set project bright-torus-169502
 ```
 
 2. Create k8s clusters
-    - `./tools/demo-gke.sh status`
-        - if clusters are already up, then `./tools/demo-gke.sh cleanup`
-        - if clusters are not up, then `./tools/demo-gke.sh up`
+    - `./tools/demo-gke.sh up`
+    - `./tools/demo-gke.sh cleanup`
 
 3. Initialize local DB, initialize demo repository on GitHub and start watcher/auto-applier
     - `./tools/demo-init.sh`
@@ -33,6 +32,8 @@ gcloud config set project bright-torus-169502
 5. Run k8s monitoring in background in two separate tabs
     - `watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods`
     - `watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods`
+
+6. Ideally, run the initial deployment once to cache all container images
 
 ### Demo scenario
 
