@@ -35,13 +35,26 @@ func stringHasAnyPrefix(str string, prefix ...string) bool {
 	return false
 }
 
-func staticFilesHandler(path string, root http.FileSystem) http.Handler {
+func publicFilesHandler(path string, root http.FileSystem) http.Handler {
 	return http.StripPrefix(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "login.html" && !stringHasAnyPrefix(pathlib.Clean(r.URL.Path), "public/") {
 			if isUnauthorized(r) {
 				http.Redirect(w, r, "/ui/login.html", http.StatusTemporaryRedirect)
 				return
 			}
+		}
+
+		fileServer := http.FileServer(root)
+		fileServer.ServeHTTP(w, r)
+	}))
+}
+
+func runFilesHandler(path string, root http.FileSystem) http.Handler {
+	return http.StripPrefix(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := pathlib.Clean(r.URL.Path)
+		if isUnauthorized(r) || !stringHasAnyPrefix(p, "run-") || !strings.HasSuffix(p, ".png") {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
 		}
 
 		fileServer := http.FileServer(root)

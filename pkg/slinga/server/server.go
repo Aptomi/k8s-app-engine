@@ -85,7 +85,8 @@ func Serve(host string, port int) {
 	r.Handle("/", http.RedirectHandler("/ui/", http.StatusTemporaryRedirect))
 
 	// serve all files from "webui" folder and require auth for everything except login.html
-	r.Handle("/ui/", staticFilesHandler("/ui/", http.Dir("./webui/")))
+	r.Handle("/ui/", publicFilesHandler("/ui/", http.Dir("./webui/")))
+	r.Handle("/run/", runFilesHandler("/run/", http.Dir(slinga.GetAptomiBaseDir())))
 
 	// serve all API endpoints at /api/ path and require auth
 	r.Handle("/api/endpoints", requireAuth(endpointsHandler))
