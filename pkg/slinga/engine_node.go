@@ -173,7 +173,6 @@ func (node *resolutionNode) cannotResolve() error {
 	}).Info("Cannot resolve instance")
 
 	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
-
 	if len(node.serviceKey) <= 0 {
 		// Create service key
 		node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)

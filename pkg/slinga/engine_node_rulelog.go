@@ -25,23 +25,25 @@ const RuleLogScopeGlobal RuleLogScope = "Global"
 
 // RuleLogEntry is an entry that corresponds to rule
 type RuleLogEntry struct {
-	Type      RuleLogType
-	Scope     RuleLogScope
-	Name      string
-	Message   string
-	Condition string
-	Result    bool
+	Type          RuleLogType
+	Scope         RuleLogScope
+	Name          string
+	Message       string
+	Condition     string
+	Result        bool
+	TerminalError bool
 }
 
 // NewRuleLogEntry creates new RuleLogEntry
-func NewRuleLogEntry(ruleLogType RuleLogType, ruleLogScope RuleLogScope, name string, message string, condition string, result bool) *RuleLogEntry {
+func NewRuleLogEntry(ruleLogType RuleLogType, ruleLogScope RuleLogScope, name string, message string, condition string, result bool, terminalError bool) *RuleLogEntry {
 	return &RuleLogEntry{
-		Type:      ruleLogType,
-		Scope:     ruleLogScope,
-		Name:      name,
-		Message:   message,
-		Condition: condition,
-		Result:    result,
+		Type:          ruleLogType,
+		Scope:         ruleLogScope,
+		Name:          name,
+		Message:       message,
+		Condition:     condition,
+		Result:        result,
+		TerminalError: terminalError,
 	}
 }
 
@@ -102,6 +104,7 @@ func entryResolvingDependencyStart(serviceName string, user *User) *RuleLogEntry
 		fmt.Sprintf("Resolving dependency for service '%s', user '%s' (ID = %s)", serviceName, user.Name, user.ID),
 		"N/A",
 		true,
+		false,
 	)
 }
 
@@ -113,6 +116,7 @@ func entryResolvingDependencyEnd(service *Service, user *User) *RuleLogEntry {
 		fmt.Sprintf("Successfully resolved dependency for service '%s', user '%s' (ID = %s)", service.Name, user.Name, user.ID),
 		"N/A",
 		true,
+		false,
 	)
 }
 
@@ -124,6 +128,7 @@ func entryLabels(labels LabelSet) *RuleLogEntry {
 		fmt.Sprintf("Labels: '%s'", labels),
 		"N/A",
 		true,
+		false,
 	)
 }
 
@@ -135,6 +140,7 @@ func entryContextsFound(service *Service, result bool) *RuleLogEntry {
 		fmt.Sprintf("Checking if contexts are present for service '%s'", service.Name),
 		"has(contexts)",
 		result,
+		false,
 	)
 }
 
@@ -146,6 +152,7 @@ func entryContextCriteriaTesting(context *Context, matched bool) *RuleLogEntry {
 		fmt.Sprintf("Testing context (criteria): '%s'", context.Name),
 		fmt.Sprintf("%+v", context.Criteria),
 		matched,
+		false,
 	)
 }
 
@@ -164,6 +171,7 @@ func entryContextMatched(service *Service, contextMatched *Context) *RuleLogEntr
 		message,
 		"N/A",
 		contextMatched != nil,
+		contextMatched == nil,
 	)
 }
 
@@ -175,6 +183,7 @@ func entryAllocationsFound(service *Service, context *Context, result bool) *Rul
 		fmt.Sprintf("Checking if allocations are present for service '%s', context '%s'", service.Name, context.Name),
 		"has(allocations)",
 		result,
+		false,
 	)
 }
 
@@ -186,6 +195,7 @@ func entryAllocationCriteriaTesting(allocation *Allocation, matched bool) *RuleL
 		fmt.Sprintf("Testing allocation (criteria): '%s'", allocation.Name),
 		fmt.Sprintf("%+v", allocation.Criteria),
 		matched,
+		false,
 	)
 }
 
@@ -197,6 +207,7 @@ func entryAllocationGlobalRuleTesting(allocation *Allocation, rule *Rule, matche
 		fmt.Sprintf("Testing if global rule '%s' applies to allocation '%s'", rule.Name, allocation.Name),
 		fmt.Sprintf("%+v", rule.FilterServices),
 		matched,
+		false,
 	)
 }
 
@@ -208,6 +219,7 @@ func entryAllocationGlobalRulesNoViolations(allocation *Allocation, matched bool
 		fmt.Sprintf("Checking global rule violations for allocation: '%s'", allocation.Name),
 		"!has(global_rule_violations)",
 		matched,
+		false,
 	)
 }
 
@@ -226,5 +238,6 @@ func entryAllocationMatched(service *Service, context *Context, allocationMatche
 		message,
 		"N/A",
 		allocationMatched != nil,
+		allocationMatched == nil,
 	)
 }
