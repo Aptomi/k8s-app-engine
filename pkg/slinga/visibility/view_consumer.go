@@ -5,9 +5,10 @@ import (
 )
 
 // ConsumerView represents a view from a particular consumer (service consumer point of view)
+// TODO: userId and dependencyId must be userID and dependencyID (but it kinda breaks UI...)
 type ConsumerView struct {
-	userID       string
-	dependencyID string
+	userId       string
+	dependencyId string
 	state        slinga.ServiceUsageState
 	g            *graph
 }
@@ -20,8 +21,8 @@ func NewGlobalConsumerView(filterUserID string, users map[string]*slinga.User, s
 			continue
 		}
 		view := ConsumerView{
-			userID:       userID,
-			dependencyID: "",
+			userId:       userID,
+			dependencyId: "",
 			state:        state,
 			g:            g,
 		}
@@ -34,8 +35,8 @@ func NewGlobalConsumerView(filterUserID string, users map[string]*slinga.User, s
 // NewConsumerView creates a new ConsumerView
 func NewConsumerView(userID string, dependencyID string, state slinga.ServiceUsageState) ConsumerView {
 	return ConsumerView{
-		userID:       userID,
-		dependencyID: dependencyID,
+		userId:       userID,
+		dependencyId: dependencyID,
 		state:        state,
 		g:            newGraph(),
 	}
@@ -45,7 +46,7 @@ func NewConsumerView(userID string, dependencyID string, state slinga.ServiceUsa
 func (view ConsumerView) GetData() interface{} {
 	// go over all dependencies of a given user
 	for _, dependency := range view.state.Dependencies.DependenciesByID {
-		if dependency.UserID == view.userID && (len(view.dependencyID) <= 0 || dependency.ID == view.dependencyID) {
+		if dependency.UserID == view.userId && (len(view.dependencyId) <= 0 || dependency.ID == view.dependencyId) {
 			// Step 1 - add a node for every matching dependency found
 			dependencyNode := newDependencyNode(dependency, false)
 			view.g.addNode(dependencyNode, 0)

@@ -10,6 +10,7 @@ type item struct {
 	Title string `json:"title"`
 }
 
+// TODO: change UserId -> UserID (and don't break UI...)
 type detail struct {
 	UserID       string
 	Users        []*item
