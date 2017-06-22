@@ -15,6 +15,7 @@
     <link href="public/css/style.css" rel="stylesheet">
 
     <link href="public/vis/dist/vis-network.min.css" rel="stylesheet" type="text/css"/>
+    <link href="public/css/vis-custom.css" rel="stylesheet" type="text/css"/>
 
     <style>
         #mygraph {
@@ -441,7 +442,9 @@
                 }
             },
             interaction: {
-                hover: true
+                hover: true,
+                navigationButtons: true,
+                keyboard: true
             },
             physics: false
         };
