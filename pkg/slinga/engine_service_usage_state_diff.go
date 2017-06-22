@@ -56,6 +56,9 @@ type ServiceUsageStateSummary struct {
 }
 
 func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
+	if state.Policy == nil {
+		return ServiceUsageStateSummary{}
+	}
 	users := 0
 	if state.users != nil {
 		users = state.users.count()
@@ -68,18 +71,6 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 		users,
 		state.Dependencies.count(),
 	}
-}
-
-// PrintSummary prints policy object counts to the screen
-func (state ServiceUsageState) PrintSummary() {
-	fmt.Println("[Policy]")
-	summary := state.GetSummary()
-	state.printSummaryLine("Services", summary.Services)
-	state.printSummaryLine("Contexts", summary.Contexts)
-	state.printSummaryLine("Clusters", summary.Clusters)
-	state.printSummaryLine("Rules", summary.Rules)
-	state.printSummaryLine("Users", summary.Users)
-	state.printSummaryLine("Dependencies", summary.Dependencies)
 }
 
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
@@ -103,14 +94,10 @@ func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRev
 	}
 }
 
-func (state ServiceUsageState) printSummaryLine(name string, cnt int) {
-	fmt.Printf("  %s: %d\n", name, cnt)
-}
-
 // On a service level -- see which keys appear and disappear
-func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) {
+func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logger) {
 
-	fmt.Println("[Services]")
+	log.Println("[Services]")
 
 	// High-level service resolutions in prev (user -> serviceName -> serviceKey -> count)
 	pMap := make(map[string]map[string]map[string]int)
@@ -210,15 +197,15 @@ func (diff *ServiceUsageStateDiff) printDifferenceOnServicesLevel(verbose bool) 
 	printed := false
 	for userID, sKeys := range textMap {
 		user := LoadUserByIDFromDir(GetAptomiBaseDir(), userID)
-		fmt.Printf("  %s (ID=%s)\n", user.Name, user.ID)
+		log.Printf("  %s (ID=%s)", user.Name, user.ID)
 		for _, s := range sKeys {
-			fmt.Printf("    %s\n", s)
+			log.Printf("    %s", s)
 		}
 		printed = true
 	}
 
 	if !printed {
-		fmt.Println("  [*] No changes")
+		log.Println("  [*] No changes")
 	}
 }
 
@@ -330,54 +317,83 @@ func (diff *ServiceUsageStateDiff) getDifferenceLen() int {
 }
 
 // On a component level -- see which keys appear and disappear
-func (diff *ServiceUsageStateDiff) printDifferenceOnComponentLevel(verbose bool) {
-	fmt.Println("[Components]")
+func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool, log *log.Logger) {
+	log.Println("[Components]")
 
 	// Print
 	printed := diff.getDifferenceLen() > 0
 
 	if printed {
-		fmt.Printf("  New instances:     %d\n", len(diff.ComponentInstantiate))
-		fmt.Printf("  Deleted instances: %d\n", len(diff.ComponentDestruct))
-		fmt.Printf("  Updated instances: %d\n", len(diff.ComponentUpdate))
+		log.Printf("  New instances:     %d", len(diff.ComponentInstantiate))
+		log.Printf("  Deleted instances: %d", len(diff.ComponentDestruct))
+		log.Printf("  Updated instances: %d", len(diff.ComponentUpdate))
 
-		fmt.Println("[Component Instances]")
+		log.Println("[Component Instances]")
 		if verbose {
 			if len(diff.ComponentInstantiate) > 0 {
-				fmt.Println("  New:")
+				log.Debug("  New:")
 				for k := range diff.ComponentInstantiate {
-					fmt.Printf("    [+] %s\n", k)
+					log.Debug("    [+] %s\n", k)
 				}
 			}
 
 			if len(diff.ComponentDestruct) > 0 {
-				fmt.Println("  Deleted:")
+				log.Debug("  Deleted:")
 				for k := range diff.ComponentDestruct {
-					fmt.Printf("    [-] %s\n", k)
+					log.Debug("    [-] %s\n", k)
 				}
 			}
 
 			if len(diff.ComponentUpdate) > 0 {
-				fmt.Println("  Updated:")
+				log.Debug("  Updated:")
 				for k := range diff.ComponentUpdate {
-					fmt.Printf("    [*] %s\n", k)
+					log.Debug("    [*] %s\n", k)
 				}
 			}
 		} else {
-			fmt.Println("  Use --verbose to see the list")
+			log.Println("  Use --verbose to see the list")
 		}
 	}
 
 	if !printed {
-		fmt.Println("  [*] No changes")
+		log.Println("  [*] No changes")
 	}
 
 }
 
+// Returns summary line with two object counts
+func getSummaryLine(name string, cntPrev int, cntNext int) string {
+	if cntPrev != cntNext {
+		delta := ""
+		if cntPrev > 0 {
+			fmt.Sprintf(" [%+d]", cntNext-cntPrev)
+		}
+		return fmt.Sprintf("  %s: %d -> %d%s", name, cntPrev, cntNext, delta)
+	} else {
+		return fmt.Sprintf("  %s: %d", name, cntPrev)
+	}
+}
+
+// PrintSummary prints policy object counts to the screen
+func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
+	prev := diff.Prev.GetSummary()
+	next := diff.Next.GetSummary()
+	log.Println("[Policy]")
+	log.Println(getSummaryLine("Services", prev.Services, next.Services))
+	log.Println(getSummaryLine("Contexts", prev.Contexts, next.Contexts))
+	log.Println(getSummaryLine("Clusters", prev.Clusters, next.Clusters))
+	log.Println(getSummaryLine("Rules", prev.Rules, next.Rules))
+	log.Println(getSummaryLine("Users", prev.Users, next.Users))
+	log.Println(getSummaryLine("Dependencies", prev.Dependencies, next.Dependencies))
+}
+
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
-func (diff ServiceUsageStateDiff) Print(verbose bool) {
-	diff.printDifferenceOnServicesLevel(verbose)
-	diff.printDifferenceOnComponentLevel(verbose)
+func (diff ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
+	memLog := NewPlainMemoryLogger(verbose)
+	diff.writeSummary(memLog.logger)
+	diff.writeDifferenceOnServicesLevel(memLog.logger)
+	diff.writeDifferenceOnComponentLevel(verbose, memLog.logger)
+	diff.Next.DiffAsText = memLog.buf.String()
 }
 
 // AlterDifference basically marks all objects in diff for recreation/update if full update is requested. This is useful to re-create missing objects if they got deleted externally after deployment
@@ -488,7 +504,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{
@@ -531,7 +547,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
 				debug.WithFields(log.Fields{

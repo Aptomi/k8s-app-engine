@@ -41,7 +41,6 @@ var policyCmdApply = &cobra.Command{
 		dependencies := slinga.LoadDependenciesFromDir(policyDir)
 
 		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &users)
-		nextUsageState.PrintSummary()
 		err := nextUsageState.ResolveAllDependencies()
 
 		if err != nil {
@@ -51,9 +50,10 @@ var policyCmdApply = &cobra.Command{
 		// Process differences
 		diff := nextUsageState.CalculateDifference(&prevUsageState)
 		diff.AlterDifference(full)
+		diff.StoreDiffAsText(verbose)
 
 		// Print on screen
-		diff.Print(verbose)
+		fmt.Print(diff.Next.DiffAsText)
 
 		// Generate pictures, if needed
 		if show {

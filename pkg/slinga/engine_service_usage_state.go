@@ -11,6 +11,9 @@ type ServiceUsageState struct {
 	// reference to users
 	users *GlobalUsers
 
+	// Diff stored as text
+	DiffAsText string
+
 	// resolved usage - stores full information about dependencies which have been successfully resolved. should ideally be accessed by a getter
 	ResolvedData *ServiceUsageData
 

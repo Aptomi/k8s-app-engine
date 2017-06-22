@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"os"
+	"bytes"
 )
 
 // Debug logger writes debug information into a file
@@ -15,7 +16,7 @@ type PlainFormatter struct{}
 
 // Format just returns entry message without formatting it
 func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
-	return []byte(entry.Message), nil
+	return []byte(entry.Message + "\n"), nil
 }
 
 // SetDebugLevel sets level for the debug logger
@@ -64,4 +65,22 @@ func (l *logHook) Fire(e *log.Entry) error {
 	fmt.Printf("  %s\n", e.Message)
 	fmt.Printf("  %v\n", e.Data)
 	return nil
+}
+
+type PlainMemoryLogger struct {
+	buf    *bytes.Buffer
+	logger *log.Logger
+}
+
+func NewPlainMemoryLogger(verbose bool) PlainMemoryLogger {
+	buf := &bytes.Buffer{}
+	logger := log.New()
+	logger.Out = buf
+	logger.Formatter = new(PlainFormatter)
+	if verbose {
+		logger.Level = log.DebugLevel
+	} else {
+		logger.Level = log.InfoLevel
+	}
+	return PlainMemoryLogger{buf: buf, logger: logger}
 }
