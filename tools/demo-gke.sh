@@ -23,6 +23,9 @@ fi
 
 #################### Main section
 
+# We shouldn't use OAuth2, just use k8s own auth
+export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
+
 function main() {
     if [ "$#" -ne "1" ]; then
         echo "ERROR: (demo-gke.sh) Too few arguments"
