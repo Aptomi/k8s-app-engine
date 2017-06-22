@@ -99,7 +99,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		resolved: false,
 
 		data:          node.data,
-		ruleLogWriter: node.ruleLogWriter,
+		ruleLogWriter: NewRuleLogWriter(node.data, node.dependency),
 
 		depth:      node.depth + 1,
 		dependency: node.dependency,
@@ -121,23 +121,25 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 
 func (node *resolutionNode) debugResolvingDependencyStart() {
 	debug.WithFields(log.Fields{
-		"service": node.serviceName,
+		"dependency": node.dependency,
 		"user":    node.user.Name,
 		"labels":  node.labels,
+		"dependsOn": node.serviceName,
 	}).Info("Resolving dependency")
 
-	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyStart(node.serviceName, node.user))
+	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyStart(node.serviceName, node.user, node.dependency))
 	node.ruleLogWriter.addRuleLogEntry(entryLabels(node.labels))
 }
 
 func (node *resolutionNode) debugResolvingDependencyEnd() {
 	debug.WithFields(log.Fields{
-		"service": node.serviceName,
+		"dependency": node.dependency,
 		"user":    node.user.Name,
 		"labels":  node.labels,
+		"dependsOn": node.serviceName,
 	}).Info("Successfully resolved dependency")
 
-	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyEnd(node.service, node.user))
+	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyEnd(node.serviceName, node.user, node.dependency))
 }
 
 func (node *resolutionNode) debugResolvingDependencyOnComponent() {

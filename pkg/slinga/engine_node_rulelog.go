@@ -96,24 +96,24 @@ func (writer *RuleLogWriter) addRuleLogEntry(entry *RuleLogEntry) {
 	}
 }
 
-func entryResolvingDependencyStart(serviceName string, user *User) *RuleLogEntry {
+func entryResolvingDependencyStart(serviceName string, user *User, dependency *Dependency) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeInfo,
 		RuleLogScopeLocal,
 		"Resolve (Dependency)",
-		fmt.Sprintf("Resolving dependency for service '%s', user '%s' (ID = %s)", serviceName, user.Name, user.ID),
+		fmt.Sprintf("Resolving '%s' -> '%s', depends on '%s'", user.Name, dependency.Service, serviceName),
 		"N/A",
 		true,
 		false,
 	)
 }
 
-func entryResolvingDependencyEnd(service *Service, user *User) *RuleLogEntry {
+func entryResolvingDependencyEnd(serviceName string, user *User, dependency *Dependency) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeInfo,
 		RuleLogScopeLocal,
 		"Resolved (Dependency)",
-		fmt.Sprintf("Successfully resolved dependency for service '%s', user '%s' (ID = %s)", service.Name, user.Name, user.ID),
+		fmt.Sprintf("Successfully resolved '%s' -> '%s', dependency on '%s'", user.Name, dependency.Service, serviceName),
 		"N/A",
 		true,
 		false,
