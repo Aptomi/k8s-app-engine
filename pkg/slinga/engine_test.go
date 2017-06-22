@@ -52,7 +52,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrev)
 
-	assert.False(t, diff.hasChanges(), "Diff should not have any changes")
+	assert.False(t, diff.shouldGenerateNewRevision(), "Diff should not have any changes")
 	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Empty diff should not have any component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Empty diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Empty diff should not have any component updates")
@@ -85,7 +85,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrev)
 
-	assert.True(t, diff.hasChanges(), "Diff should have changes")
+	assert.True(t, diff.shouldGenerateNewRevision(), "Diff should have changes")
 	assert.Equal(t, 7, len(diff.ComponentInstantiate), "Diff should have component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Diff should not have any component updates")
@@ -151,7 +151,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	diff := uUpdatedDependency.CalculateDifference(&uNewDependency)
 
 	// Check that update has been performed
-	assert.True(t, diff.hasChanges(), "Diff should have changes")
+	assert.True(t, diff.shouldGenerateNewRevision(), "Diff should have changes")
 	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Diff should not have component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
 	assert.Equal(t, 1, len(diff.ComponentUpdate), "Diff should have component update")
@@ -193,7 +193,8 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
 	savedObjectAsString := serializeObject(state)
-	loadedObject := ServiceUsageState{}
+	users := LoadUsersFromDir("testdata/unittests")
+	loadedObject := ServiceUsageState{users: &users}
 	yaml.Unmarshal([]byte(savedObjectAsString), &loadedObject)
 	return loadedObject
 }

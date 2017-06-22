@@ -164,6 +164,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	}
 	toDisable := map[string][]string {
 		"analytics_pipeline": {"hdfs", "kafka", "spark", "zookeeper"},
+		"twitter_stats": {"istio"},
 	}
 	disabled := make(map[string]bool)
 	changed := true

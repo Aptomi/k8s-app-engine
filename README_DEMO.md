@@ -1,7 +1,9 @@
 ## Demo slides:
     - https://docs.google.com/a/renski.com/presentation/d/10X8oEjBqLPSfxf5KHhg8n_tBtYa7bAERHkZZiynjwyc/edit?usp=sharing
 
-## Demo scenario:
+## Demo steps
+
+### Preparation
 
 1. Switch to the Aptomi GCloud account and project
 
@@ -20,8 +22,18 @@ gcloud config set project bright-torus-169502
 2. Create k8s clusters
     - `./tools/demo-gke.sh up`
 
-3. Initialize github repo with demo policy
-    -
+3. Initialize demo repository on GitHub and start auto-apply
+    - ./tools/demo-init.sh
+    - ./tools/demo-push.sh
+    - ./tools/demo-watch-apply.sh
+
+### Demo scenario
+
+1. Explain initial state
+    - No services have been defined
+    - Aptomi only knows about 2 kubernetes clusters (us-east and us-west) and 5 users
+
+2. Frank comes and defines analytics-pipeline
 
 
 ## Suntrust demo / story:

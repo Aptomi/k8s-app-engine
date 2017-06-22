@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
 	"time"
+	"reflect"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -55,6 +56,10 @@ type ServiceUsageStateSummary struct {
 	Dependencies int
 }
 
+func (summary ServiceUsageStateSummary) deepEqual(that ServiceUsageStateSummary) bool {
+	return reflect.DeepEqual(summary, that)
+}
+
 func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 	if state.Policy == nil {
 		return ServiceUsageStateSummary{}
@@ -74,9 +79,9 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 }
 
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
-func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, forceSave bool, noop bool) {
+func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, newrevision bool, noop bool) {
 	fmt.Println("[Revision]")
-	if forceSave || (!noop && diff.hasChanges()) {
+	if newrevision || (!noop && diff.shouldGenerateNewRevision()) {
 		// Increment a revision
 		newRevision := revision.increment()
 
@@ -291,8 +296,10 @@ func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, up
 
 // This method became one of the key methods.
 // If it returns false, then new run and new revision will not be generated
-func (diff *ServiceUsageStateDiff) hasChanges() bool {
-	// TODO: this key method doesn't take into account presence of Istio rules
+func (diff *ServiceUsageStateDiff) shouldGenerateNewRevision() bool {
+	if !diff.Next.GetSummary().deepEqual(diff.Prev.GetSummary()) {
+		return true
+	}
 	if len(diff.ComponentInstantiate) > 0 {
 		return true
 	}
@@ -308,6 +315,9 @@ func (diff *ServiceUsageStateDiff) hasChanges() bool {
 	if len(diff.ComponentDetachDependency) > 0 {
 		return true
 	}
+
+	// TODO: this key method doesn't take into account presence of Istio rules
+
 	return false
 }
 
@@ -365,10 +375,10 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool,
 func getSummaryLine(name string, cntPrev int, cntNext int) string {
 	if cntPrev != cntNext {
 		delta := ""
-		if cntPrev > 0 {
+		if cntNext-cntPrev != 0 {
 			delta = fmt.Sprintf(" [%+d]", cntNext-cntPrev)
 		}
-		return fmt.Sprintf("  %s: %d -> %d%s", name, cntPrev, cntNext, delta)
+		return fmt.Sprintf("  %s: %d%s", name, cntNext, delta)
 	} else {
 		return fmt.Sprintf("  %s: %d", name, cntPrev)
 	}
