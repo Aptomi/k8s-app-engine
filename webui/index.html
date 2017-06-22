@@ -520,15 +520,28 @@
     <div>
         <div class="row animated fadeInUp">
             <div class="col-lg-12">
-                <div class="ibox float-e-margins">
+                <div class="ibox float-e-margins" v-if="summary.globalDependencies.length > 0">
                     <div class="ibox-title">
                         <h5>Global Dependencies</h5>
                     </div>
                     <div class="ibox-content">
                         <div class="table-responsive">
                             <table class="table table-striped">
+
+                                <!--{-->
+                                <!--"cluster": "cluster-us-west",-->
+                                <!--"context": "stage/dev-Alice-stage",-->
+                                <!--"dependencyId": "alice_tests_twitter_stats_in_stage",-->
+                                <!--"id": "Alice",-->
+                                <!--"resolved": true,-->
+                                <!--"serviceName": "twitter_stats",-->
+                                <!--"stats": "-1 containers/1 hour running",-->
+                                <!--"userName": "Alice"-->
+                                <!--},-->
+
                                 <thead>
                                 <tr>
+                                    <th>Resolved</th>
                                     <th>User</th>
                                     <th>Depends on</th>
                                     <th>Context</th>
@@ -538,13 +551,14 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>Alice</td>
-                                    <td>analytics_pipeline</td>
-                                    <td>prod/production</td>
-                                    <td>cluster-us-east</td>
-                                    <td>3 hours running</td>
-                                    <td>[View]</td>
+                                <tr v-for="item in summary.globalDependencies">
+                                    <td>{{ item.resolved }}</td>
+                                    <td>{{ item.userName }}</td>
+                                    <td>{{ item.serviceName }}</td>
+                                    <td>{{ item.context }}</td>
+                                    <td>{{ item.cluster }}</td>
+                                    <td>{{ item.stats }}</td>
+                                    <td>[View] (Link to watch dependencies by dependencyId in globalops view)</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -564,18 +578,35 @@
                     <div class="ibox-content">
                         <div class="table-responsive">
                             <table class="table table-striped">
+
+                                <!--{-->
+                                <!--"appliedTo": "-1 instances",-->
+                                <!--"id": "compromised_users_forbid_all_services",-->
+                                <!--"ruleName": "compromised_users_forbid_all_services",-->
+                                <!--"ruleObject": {-->
+                                <!--"Cluster": null,-->
+                                <!--"Labels": null,-->
+                                <!--"User": {-->
+                                <!--"Accept": [-->
+                                <!--"deactivated"-->
+                                <!--],-->
+                                <!--"Reject": []-->
+                                <!--}-->
+                                <!--}-->
+                                <!--},-->
+
                                 <thead>
                                 <tr>
                                     <th>Rule</th>
                                     <th>Applied to</th>
-                                    <th>Action</th>
+                                    <!--<th>Action</th>-->
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>dev_users_ttl</td>
-                                    <td>3 instances</td>
-                                    <td>[View]</td>
+                                    <td>ruleName</td>
+                                    <td>appliedTo</td>
+                                    <!--<td>[View]</td>-->
                                 </tr>
                                 <tr>
                                     <td>dev_users_huj</td>
@@ -605,6 +636,15 @@
                     <div class="ibox-content">
                         <div class="table-responsive">
                             <table class="table table-striped">
+
+                                <!--{-->
+                                <!--"cluster": "cluster-us-east",-->
+                                <!--"context": "prod/production",-->
+                                <!--"id": "twitter_stats.prod.production.root",-->
+                                <!--"serviceName": "twitter_stats",-->
+                                <!--"stats": "-1 containers/1 hour running"-->
+                                <!--}-->
+
                                 <thead>
                                 <tr>
                                     <th>Service</th>
@@ -620,7 +660,7 @@
                                     <td>prod/production</td>
                                     <td>cluster-us-east</td>
                                     <td>3 hours running</td>
-                                    <td>[View]</td>
+                                    <td>[View]--Service owner view </td>
                                 </tr>
                                 <tr>
                                     <td>analytics_pipeline</td>
@@ -647,8 +687,20 @@
                     <div class="ibox-content">
                         <div class="table-responsive">
                             <table class="table table-striped">
+
+                                <!--{-->
+                                <!--"cluster": "cluster-us-west",-->
+                                <!--"context": "stage/dev-Alice-stage",-->
+                                <!--"dependencyId": "alice_tests_twitter_stats_in_stage",-->
+                                <!--"id": "alice_tests_twitter_stats_in_stage",-->
+                                <!--"resolved": true,-->
+                                <!--"serviceName": "twitter_stats",-->
+                                <!--"stats": "-1 containers/1 hour running"-->
+                                <!--},-->
+
                                 <thead>
                                 <tr>
+                                    <th>Resolved</th>
                                     <th>Service</th>
                                     <th>Context</th>
                                     <th>Cluster</th>
@@ -662,7 +714,7 @@
                                     <td>prod/production</td>
                                     <td>cluster-us-east</td>
                                     <td>3 hours running</td>
-                                    <td>[View]</td>
+                                    <td>[View]--open </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -733,7 +785,12 @@
                 all_endpoints: {},
                 services: 0,
                 dependencies: 0,
-                summary: {}
+                summary: {
+                    globalDependencies: [],
+                    globalRules: [],
+                    servicesOwned: [],
+                    servicesUsing: []
+                }
             }
         },
         created: function () {
