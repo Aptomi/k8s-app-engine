@@ -58,7 +58,7 @@ func handleAutoRedirect(w http.ResponseWriter, r *http.Request) {
 func writeJSON(w http.ResponseWriter, obj interface{}) {
 	res, err := json.Marshal(obj)
 	if err != nil {
-		fmt.Fprint(w,"Unable to serialize object: %v", err)
+		fmt.Fprintf(w, "Unable to serialize object: %v", err)
 	} else {
 		fmt.Fprint(w, string(res))
 	}

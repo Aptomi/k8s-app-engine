@@ -66,7 +66,6 @@ func (data *ServiceUsageData) getComponentInstanceEntry(key string) *ComponentIn
 	return data.ComponentInstanceMap[key]
 }
 
-
 // Record dependency for component instance
 func (data *ServiceUsageData) recordResolvedAndDependency(key string, dependency *Dependency) {
 	data.getComponentInstanceEntry(key).setResolved(true)
@@ -96,6 +95,7 @@ func (data *ServiceUsageData) recordLabels(key string, labels LabelSet) {
 	data.getComponentInstanceEntry(key).addLabels(labels)
 
 }
+
 // Stores an outgoing edge for component instance as we are traversing the graph
 func (data *ServiceUsageData) storeEdge(key string, keyDst string) {
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that

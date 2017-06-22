@@ -1,11 +1,11 @@
 package slinga
 
 import (
+	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
-	"encoding/json"
 )
 
 /*
@@ -75,9 +75,9 @@ type Service struct {
 
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	Name   string
-	Type   string
-	Labels map[string]string
+	Name     string
+	Type     string
+	Labels   map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string

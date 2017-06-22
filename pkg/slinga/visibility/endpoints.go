@@ -39,19 +39,19 @@ func Endpoints(username string, users map[string]*slinga.User, state slinga.Serv
 	}
 
 	userIds := make([]string, 0)
-	for userId, user := range users {
+	for userID, user := range users {
 		if !isGlobalOp && username != "" && user.Name != username {
 			continue
 		}
-		userIds = append(userIds, userId)
+		userIds = append(userIds, userID)
 	}
 
 	sort.Strings(userIds)
 
-	for _, userId := range userIds {
+	for _, userID := range userIds {
 		r := make([]rEndpoint, 0)
 
-		endpoints := state.Endpoints(userId)
+		endpoints := state.Endpoints(userID)
 
 		for key, links := range endpoints {
 			service, context, allocation, component := slinga.ParseServiceUsageKey(key)
@@ -64,7 +64,7 @@ func Endpoints(username string, users map[string]*slinga.User, state slinga.Serv
 			r = append(r, rEndpoint{service, context, allocation, component, rLinks})
 		}
 
-		uR.Endpoints = append(uR.Endpoints, userEndpoints{users[userId], r})
+		uR.Endpoints = append(uR.Endpoints, userEndpoints{users[userID], r})
 	}
 
 	return uR

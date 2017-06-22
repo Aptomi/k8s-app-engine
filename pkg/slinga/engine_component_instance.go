@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	"time"
 	log "github.com/Sirupsen/logrus"
+	"time"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -58,7 +58,7 @@ func (instance *ComponentInstance) setResolved(resolved bool) {
 		instance.Resolved = resolved
 	} else if !resolved {
 		debug.WithFields(log.Fields{
-			"key":            instance.Key,
+			"key": instance.Key,
 		}).Panic("Invalid action. Trying to unset Resolved flag for instance")
 	}
 }
@@ -88,7 +88,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	} else if !instance.CalculatedDiscovery.deepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		debug.WithFields(log.Fields{
-			"key":                 instance.Key,
+			"key": instance.Key,
 			"prevDiscoveryParams": instance.CalculatedDiscovery,
 			"nextDiscoveryParams": discoveryParams,
 		}).Panic("Invalid policy. Arrived to the same component with different discovery parameters")
@@ -100,7 +100,7 @@ func (instance *ComponentInstance) addLabels(labels LabelSet) {
 	instance.CalculatedLabels = instance.CalculatedLabels.addLabels(labels)
 }
 
-func (instance *ComponentInstance) addRuleLogEntries(dependencyID string, entry ... *RuleLogEntry) {
+func (instance *ComponentInstance) addRuleLogEntries(dependencyID string, entry ...*RuleLogEntry) {
 	instance.RuleLog[dependencyID] = append(instance.RuleLog[dependencyID], entry...)
 }
 

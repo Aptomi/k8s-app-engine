@@ -12,14 +12,15 @@ type ConsumerView struct {
 	g            *graph
 }
 
-func NewGlobalConsumerView(filterUserId string, users map[string]*slinga.User, state slinga.ServiceUsageState) graph {
+// TODO: why the fuck NewConsumerView returns ConsumerView, and this returns graph...?!?!?!
+func NewGlobalConsumerView(filterUserID string, users map[string]*slinga.User, state slinga.ServiceUsageState) graph {
 	g := newGraph()
-	for userId := range users {
-		if filterUserId != "" && userId != filterUserId {
+	for userID := range users {
+		if filterUserID != "" && userID != filterUserID {
 			continue
 		}
 		view := ConsumerView{
-			userID:       userId,
+			userID:       userID,
 			dependencyID: "",
 			state:        state,
 			g:            g,
