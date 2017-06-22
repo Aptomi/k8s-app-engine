@@ -11,14 +11,8 @@ func (view SummaryView) getDependencyStats(dependency *slinga.Dependency) string
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	containers := view.getNumberOfContainersByDep(dependency)
 	runningTime := time.NewDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
-	return fmt.Sprintf("%d containers/%s running", containers, runningTime)
-}
-
-func (view SummaryView) getNumberOfContainersByDep(dependency *slinga.Dependency) int {
-	// TODO: return number of containers for a given dependency
-	return -1
+	return fmt.Sprintf("%s running", runningTime)
 }
 
 func (view SummaryView) getResolvedClusterNameByDep(dependency *slinga.Dependency) string {
@@ -42,9 +36,8 @@ func (view SummaryView) getRuleAppliedTo(rule *slinga.Rule) string {
 }
 
 func (view SummaryView) getInstanceStats(instance *slinga.ComponentInstance) string {
-	containers := view.getNumberOfContainersByInst(instance)
 	runningTime := time.NewDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key].GetRunningTime()).Humanize()
-	return fmt.Sprintf("%d containers/%s running", containers, runningTime)
+	return fmt.Sprintf("%s running", runningTime)
 }
 
 func (view SummaryView) getResolvedClusterNameByInst(instance *slinga.ComponentInstance) string {
@@ -54,11 +47,6 @@ func (view SummaryView) getResolvedClusterNameByInst(instance *slinga.ComponentI
 func (view SummaryView) getResolvedContextNameByInst(instance *slinga.ComponentInstance) string {
 	_, context, allocation, _ := slinga.ParseServiceUsageKey(instance.Key)
 	return fmt.Sprintf("%s/%s", context, allocation)
-}
-
-func (view SummaryView) getNumberOfContainersByInst(instance *slinga.ComponentInstance) int {
-	// TODO: return number of containers for a given instance
-	return -1
 }
 
 func getWebIDByComponentKey(key string) string {
