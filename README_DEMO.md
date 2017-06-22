@@ -63,6 +63,14 @@ gcloud config set project bright-torus-169502
     - Show UI - delta picture
     - New service definition has been published to aptomi
 
+4. At this point Aptomi just has service definitions and nothing has been instantiated yet
+    - Now let's have some consumers declare dependencies on the services defined by John and Frank
+
+5. Declaring dependencies
+    - Production
+        - let Ops team to instantiate twitter-stats service in production
+    -
+
 ## Suntrust demo / story:
 
 2. Show policy
