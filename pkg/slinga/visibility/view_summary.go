@@ -81,9 +81,12 @@ func (view SummaryView) getServicesOwned() interface{} {
 		if service.Owner == view.userID {
 			// if I own this service, let's find all its instances
 			instanceMap := make(map[string]bool)
-			for _, dependency := range view.state.Dependencies.DependenciesByService[service.Name] {
-				if dependency.Resolved {
-					instanceMap[dependency.ServiceKey] = true
+			for key, instance := range view.state.ResolvedData.ComponentInstanceMap {
+				if instance.Resolved {
+					serviceName, _, _, componentName := slinga.ParseServiceUsageKey(key)
+					if serviceName == service.Name && componentName == slinga.ComponentRootName {
+						instanceMap[key] = true
+					}
 				}
 			}
 
