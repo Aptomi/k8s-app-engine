@@ -132,7 +132,7 @@ function cluster_log_name() {
 function gcloud_check() {
     log "Gcloud verification"
 
-    if ! gcloud auth list 2>/dev/null | grep "ACTIVE\$" ; then
+    if ! gcloud auth list 2>/dev/null | grep "^*" ; then
         log "There is no active gcloud account"
         log "Run 'gcloud auth list' to get account name"
         log "If no entries run 'gcloud auth login' to setup account"
