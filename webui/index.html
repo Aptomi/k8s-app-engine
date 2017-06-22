@@ -751,10 +751,17 @@
             fetch_data: function () {
                 var ctx = this;
 
+                loadJSON("/api/summary-view", function (jsonData) {
+                    ctx.summary = jsonData;
+                    console.log(ctx);
+                }, function (err) {
+                    console.log("/api/summary-view not loaded with err:");
+                    console.log(err);
+                });
+
                 loadJSON("/api/details", function (jsonData) {
                     ctx.services = jsonData.Services.length;
                     ctx.dependencies = jsonData.Dependencies.length;
-                    ctx.summary = jsonData.Summary;
                     console.log(ctx);
                 }, function (err) {
                     console.log("/api/details not loaded with err:");
