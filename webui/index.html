@@ -89,8 +89,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title">Modal title</h4>
-                        <small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small>
+                        <h4 class="modal-title">Policy evaluation log</h4>
+                        <!--<small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small>-->
                     </div>
                     <div class="modal-body">
 
@@ -290,8 +290,8 @@
 
                             </div>
                             <div class="col-sm-2">
-                                <button type="button" class="btn btn-primary"
-                                        data-toggle="modal" data-target="#details-modal">
+                                <button type="button" class="btn btn-primary" id="rule-log-button"
+                                        data-toggle="modal" data-target="#details-modal" style="display: none;">
                                     Rule log
                                 </button>
                             </div>
@@ -463,6 +463,8 @@
             }
             if (id) {
                 loadJSON("/api/object-view?id=" + id, objectLoaded, objectNotLoaded);
+
+                $("#rule-log-button").click();
             } else {
                 app.obj_view = [];
             }
