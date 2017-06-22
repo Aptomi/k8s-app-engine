@@ -182,17 +182,17 @@
                             </div>
                         </div>
 
-                        <div class="vertical-timeline-block">
+                        <div class="vertical-timeline-block" v-for="item in timeline">
                             <div class="vertical-timeline-icon blue-bg">
                                 <i class="fa fa-file-text"></i>
                             </div>
 
                             <div class="vertical-timeline-content">
-                                <h2>Send documents to Mike1111</h2>
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since.</p>
+                                <h2>Revision: {{ item.revisionNumber }} ({{ time_ago(item.createdOn) }})</h2>
+                                <p><pre>{{ item.diff }}</pre></p>
                                 <span class="vertical-date">
-                                        Today <br/>
-                                        <small>Dec 24</small>
+                                        <!--Today <br/>-->
+                                        <small>{{ time_nice(item.createdOn) }}</small>
                                     </span>
                             </div>
                         </div>
@@ -223,17 +223,23 @@
             fetch_data: function () {
                 var ctx = this;
 
-                loadJSON("/api/summary-view", function (jsonData) {
-                    ctx.summary = jsonData;
+                loadJSON("/api/timeline-view", function (jsonData) {
+                    ctx.timeline = jsonData;
                     console.log(ctx);
                 }, function (err) {
-                    console.log("/api/summary-view not loaded with err:");
+                    console.log("/api/timeline-view not loaded with err:");
                     console.log(err);
                 });
             },
             toggle_style: function (event) {
 //                event.preventDefault();
                 $('#vertical-timeline').toggleClass('center-orientation');
+            },
+            time_ago: function (t) {
+                return moment(t).fromNow()
+            },
+            time_nice: function(t) {
+                return moment(t).format("dddd, MMMM Do YYYY, h:mm:ss a");
             }
         }
     });
