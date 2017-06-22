@@ -87,6 +87,9 @@ func (writer *RuleLogWriter) flushQueue() {
 
 // Adds an entry into rule log
 func (writer *RuleLogWriter) addRuleLogEntry(entry *RuleLogEntry) {
+	if entry == nil {
+		return
+	}
 	if len(writer.key) <= 0 {
 		// no key is set -> put into queue
 		writer.queue = append(writer.queue, entry)
@@ -130,6 +133,21 @@ func entryLabels(labels LabelSet) *RuleLogEntry {
 		true,
 		false,
 	)
+}
+
+func entryServiceMatched(serviceName string, found bool) *RuleLogEntry {
+	if !found {
+		return NewRuleLogEntry(
+			RuleLogTypeInfo,
+			RuleLogScopeLocal,
+			"Found (Service)",
+			fmt.Sprintf("Unable to find service '%s'", serviceName),
+			"N/A",
+			false,
+			true,
+		)
+	}
+	return nil
 }
 
 func entryContextsFound(service *Service, result bool) *RuleLogEntry {

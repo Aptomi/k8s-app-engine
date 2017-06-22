@@ -61,6 +61,7 @@ type ServiceComponent struct {
 
 // Service defines individual service
 type Service struct {
+	Enabled    bool
 	Name       string
 	Owner      string
 	Labels     *LabelOperations
@@ -73,11 +74,22 @@ type Service struct {
 	componentsMap map[string]*ServiceComponent
 }
 
+// UnmarshalYAML is a custom unmarshaller for Service, which sets Enabled to True before unmarshalling
+func (s *Service) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type Alias Service
+	instance := Alias{Enabled: true}
+	if err := unmarshal(&instance); err != nil {
+		return err
+	}
+	*s = Service(instance)
+	return nil
+}
+
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	Name     string
-	Type     string
-	Labels   map[string]string
+	Name   string
+	Type   string
+	Labels map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
@@ -120,6 +132,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 		Services: make(map[string]*Service),
 		Contexts: make(map[string][]*Context),
 		Clusters: make(map[string]*Cluster),
+		Rules: NewGlobalRules(),
 	}
 
 	// read all clusters
@@ -135,7 +148,9 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	sort.Strings(files)
 	for _, f := range files {
 		service := loadServiceFromFile(f)
-		s.Services[service.Name] = service
+		if service.Enabled {
+			s.Services[service.Name] = service
+		}
 	}
 
 	// read all contexts
@@ -143,11 +158,22 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	sort.Strings(files)
 	for _, f := range files {
 		context := loadContextFromFile(f)
-		s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
+		if s.Services[context.Service] != nil {
+			s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
+		}
 	}
 
 	// read all rules
-	s.Rules = LoadRulesFromDir(baseDir)
+	files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeRules))
+	sort.Strings(files)
+	for _, f := range files {
+		rules := loadRulesFromFile(f)
+		for _, rule := range rules {
+			if rule.Enabled {
+				s.Rules.addRule(rule)
+			}
+		}
+	}
 
 	return s
 }

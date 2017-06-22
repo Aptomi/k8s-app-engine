@@ -1,7 +1,7 @@
 - id: bob_tests_twitter_stats_vis_in_stage
   userid: 101
   service: twitter_stats
-  disabled: true
+  enabled: false
   labels:
     # TODO: remove stage def from here
     tstype: stage

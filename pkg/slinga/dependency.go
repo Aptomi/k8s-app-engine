@@ -12,15 +12,26 @@ import (
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
 type Dependency struct {
-	ID       string
-	UserID   string
-	Service  string
-	Labels   map[string]string
-	Disabled bool
+	Enabled bool
+	ID      string
+	UserID  string
+	Service string
+	Labels  map[string]string
 
 	// This fields are populated when dependency gets resolved
 	Resolved   bool
 	ServiceKey string
+}
+
+// UnmarshalYAML is a custom unmarshaller for Dependency, which sets Enabled to True before unmarshalling
+func (s *Dependency) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type Alias Dependency
+	instance := Alias{Enabled: true}
+	if err := unmarshal(&instance); err != nil {
+		return err
+	}
+	*s = Dependency(instance)
+	return nil
 }
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)
@@ -79,10 +90,9 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 	for _, fileName := range files {
 		t := loadDependenciesFromFile(fileName)
 		for _, d := range t {
-			if d.Disabled {
-				continue
+			if d.Enabled {
+				result.appendDependency(d)
 			}
-			result.appendDependency(d)
 		}
 	}
 	return result

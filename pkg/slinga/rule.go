@@ -2,8 +2,6 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/mattn/go-zglob"
-	"sort"
 )
 
 // LabelsFilter is a labels filter
@@ -24,9 +22,21 @@ type Action struct {
 
 // Rule is a global rule
 type Rule struct {
+	Enabled        bool
 	Name           string
 	FilterServices *ServiceFilter
 	Actions        []*Action
+}
+
+// UnmarshalYAML is a custom unmarshaller for Rule, which sets Enabled to True before unmarshalling
+func (s *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type Alias Rule
+	instance := Alias{Enabled: true}
+	if err := unmarshal(&instance); err != nil {
+		return err
+	}
+	*s = Rule(instance)
+	return nil
 }
 
 // GlobalRules is a list of global rules
@@ -78,31 +88,17 @@ func NewGlobalRules() GlobalRules {
 	return GlobalRules{Rules: make(map[string][]*Rule, 0)}
 }
 
-// LoadRulesFromDir loads all rules from a given directory
-func LoadRulesFromDir(baseDir string) GlobalRules {
-	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeRules))
-	sort.Strings(files)
-	r := NewGlobalRules()
-	for _, f := range files {
-		rules := loadRulesFromFile(f)
-		r.insertRules(rules...)
+func (globalRules *GlobalRules) addRule(rule *Rule) {
+	if rule.FilterServices == nil {
+		debug.WithFields(log.Fields{
+			"rule": rule,
+		}).Panic("Only service filters currently supported in rules")
 	}
-	return r
-}
-
-func (globalRules *GlobalRules) insertRules(appendRules ...*Rule) {
-	for _, rule := range appendRules {
-		if rule.FilterServices == nil {
-			debug.WithFields(log.Fields{
-				"rule": rule,
-			}).Panic("Only service filters currently supported in rules")
-		}
-		for _, action := range rule.Actions {
-			if rulesList, ok := globalRules.Rules[action.Type]; ok {
-				globalRules.Rules[action.Type] = append(rulesList, rule)
-			} else {
-				globalRules.Rules[action.Type] = []*Rule{rule}
-			}
+	for _, action := range rule.Actions {
+		if rulesList, ok := globalRules.Rules[action.Type]; ok {
+			globalRules.Rules[action.Type] = append(rulesList, rule)
+		} else {
+			globalRules.Rules[action.Type] = []*Rule{rule}
 		}
 	}
 }

@@ -33,8 +33,8 @@ func getComponentNameUnsafe(component *ServiceComponent) string {
 }
 
 // Create key for the map
-func createServiceUsageKey(service *Service, context *Context, allocation *Allocation, component *ServiceComponent) string {
-	return createServiceUsageKeyFromStr(service.Name, getContextNameUnsafe(context), getAllocationNameUnsafe(allocation), getComponentNameUnsafe(component))
+func createServiceUsageKey(serviceName string, context *Context, allocation *Allocation, component *ServiceComponent) string {
+	return createServiceUsageKeyFromStr(serviceName, getContextNameUnsafe(context), getAllocationNameUnsafe(allocation), getComponentNameUnsafe(component))
 }
 
 // Create key for the map

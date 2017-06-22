@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"errors"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -168,7 +167,7 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 
 func (node *resolutionNode) cannotResolve() error {
 	debug.WithFields(log.Fields{
-		"service":       node.service.Name,
+		"service":       node.serviceName,
 		"componentObj":  node.component,
 		"contextObj":    node.context,
 		"allocationObj": node.allocation,
@@ -177,7 +176,7 @@ func (node *resolutionNode) cannotResolve() error {
 	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
 	if len(node.serviceKey) <= 0 {
 		// Create service key
-		node.serviceKey = createServiceUsageKey(node.service, node.context, node.allocation, nil)
+		node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocation, nil)
 
 		// Once instance is figured out, make sure to attach rule logs to that instance
 		node.ruleLogWriter.attachToInstance(node.serviceKey)
@@ -186,13 +185,11 @@ func (node *resolutionNode) cannotResolve() error {
 	return nil
 }
 
-func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) {
-	// Locate the service
+// Helper to get a matched service
+func (node *resolutionNode) getMatchedService(policy *Policy) *Service {
 	service := policy.Services[node.serviceName]
-	if service == nil {
-		return nil, errors.New("Service " + node.serviceName + " not found")
-	}
-	return service, nil
+	node.ruleLogWriter.addRuleLogEntry(entryServiceMatched(node.serviceName, service != nil))
+	return service
 }
 
 // Helper to get a matched context
