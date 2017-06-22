@@ -248,7 +248,7 @@
         } else {
             // globalops-view = view from the standpoint of global IT ops
 //            var userId = "100";
-            apiPath += "?userId=" + userId;
+            apiPath += "?userId=" + userId + "&dependencyId=" + dependencyId;
         }
 
         loadJSON(apiPath, jsonLoaded, function (err) {
@@ -479,11 +479,16 @@
                         userId = jsonData.UserId
                         dependencyId = filter === "all" ? "" : filter
                     } else if (view === "globalops"){
-                        ctx.items = jsonData.Users;
-                        ctx.filter_name = "User";
+//                        ctx.items = jsonData.Users;
+//                        ctx.filter_name = "User";
+//                        userId = filter === "all" ? "" : filter
+
+                        ctx.items = jsonData.AllDependencies;
+                        ctx.filter_name = "Dependency";
+                        dependencyId = filter === "all" ? "" : filter
 
                         // globalops-view = view from the standpoint of global IT ops
-                        userId = filter === "all" ? "" : filter
+
                     }
 
                     ctx.views.forEach(function(item) {
