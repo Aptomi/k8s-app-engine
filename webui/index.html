@@ -61,6 +61,8 @@
                         <li>
                             <a href="#">
                                 <i class="fa"></i> User: <span>{{ user.name }}</span>
+                                &nbsp;
+                                <span class="label label-danger pull-right">Global IT Ops</span>
                             </a>
                         </li>
                         <li>
@@ -362,7 +364,7 @@
                 dependencyLongResolved: {
                     shape: 'icon',
                     font: {
-                        multi: 'html',
+                        multi: 'html'
                     },
                     icon: {
                         face: 'FontAwesome',
@@ -489,36 +491,36 @@
                     var view = ctx.$route.params.view;
                     var filter = ctx.$route.params.filter;
 
-                    ctx.views = jsonData.Views
+                    ctx.views = jsonData.Views;
 
                     if (view === ":view") {
-                        router.push({ name: 'details', params: { view: ctx.views[0].name }})
+                        router.push({ name: 'details', params: { view: ctx.views[0].name }});
                         return
                     }
 
                     ctx.curr_view = view;
                     ctx.curr_filter = filter;
 
-                    var userId = ""
-                    var dependencyId = ""
-                    var serviceName = ""
+                    var userId = "";
+                    var dependencyId = "";
+                    var serviceName = "";
 
                     if (view === "service") {
-                        ctx.items = jsonData.Services
-                        ctx.filter_name = "Service"
+                        ctx.items = jsonData.Services;
+                        ctx.filter_name = "Service";
 
                         // service-view = view from the standpoint of service owner
                         serviceName = filter
                     } else if (view === "consumer") {
-                        ctx.items = jsonData.Dependencies
-                        ctx.filter_name = "Dependency"
+                        ctx.items = jsonData.Dependencies;
+                        ctx.filter_name = "Dependency";
 
                         // consumer-view = view from the standpoint of service consumer
                         userId = jsonData.UserId
                         dependencyId = filter === "all" ? "" : filter
                     } else if (view === "globalops"){
-                        ctx.items = jsonData.Users
-                        ctx.filter_name = "User"
+                        ctx.items = jsonData.Users;
+                        ctx.filter_name = "User";
 
                         // globalops-view = view from the standpoint of global IT ops
                         userId = filter === "all" ? "" : filter
@@ -528,13 +530,13 @@
                         if (item.name === ctx.curr_view) {
                             ctx.curr_view_title = item.title
                         }
-                    })
+                    });
 
                     ctx.items.forEach(function(item) {
                         if (item.name === ctx.curr_filter) {
                             ctx.curr_filter_title = item.title
                         }
-                    })
+                    });
 
                     if (filter === ":filter") {
                         if (ctx.items.length > 0) {
@@ -545,7 +547,7 @@
 
                     drawChart(ctx.curr_view, userId, dependencyId, serviceName)
                 }, function (err) {
-                    console.log("/api/details not loaded with err:")
+                    console.log("/api/details not loaded with err:");
                     console.log(err)
                 });
             }
@@ -669,6 +671,161 @@
             </div>
         </div>
 
+        <div class="row animated fadeInUp">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-left">Global Dependencies</span>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Depends on</th>
+                                    <th>Context</th>
+                                    <th>Cluster</th>
+                                    <th>Stats</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Alice</td>
+                                    <td>analytics_pipeline</td>
+                                    <td>prod/production</td>
+                                    <td>cluster-us-east</td>
+                                    <td>128 containers / 3 hours running</td>
+                                    <td>[View]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row animated fadeInUp">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-left">Global Rules</span>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Rule</th>
+                                    <th>Applied to</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>dev_users_ttl</td>
+                                    <td>3 instances</td>
+                                    <td>[View]</td>
+                                </tr>
+                                <tr>
+                                    <td>dev_users_huj</td>
+                                    <td>0 instances</td>
+                                    <td>[View]</td>
+                                </tr>
+                                <tr>
+                                    <td>dev_users_huj2</td>
+                                    <td>15 instances</td>
+                                    <td>[View]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row animated fadeInUp">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-left">Services I own</span>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Context</th>
+                                    <th>Cluster</th>
+                                    <th>Stats</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>analytics_pipeline</td>
+                                    <td>prod/production</td>
+                                    <td>cluster-us-east</td>
+                                    <td>128 containers / 3 hours running</td>
+                                    <td>[View]</td>
+                                </tr>
+                                <tr>
+                                    <td>analytics_pipeline</td>
+                                    <td>stage/shit</td>
+                                    <td>cluster-us-west</td>
+                                    <td>50 containers / 3 hours running</td>
+                                    <td>[View]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row animated fadeInUp">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-left">Services I am using</span>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Context</th>
+                                    <th>Cluster</th>
+                                    <th>Stats</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>twitter_stats</td>
+                                    <td>prod/production</td>
+                                    <td>cluster-us-east</td>
+                                    <td>128 containers / 3 hours running</td>
+                                    <td>[View]</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row animated fadeInUp" v-for="user_endpoints in all_endpoints">
             <div class="col-lg-12">
                 <div class="ibox float-e-margins">
@@ -741,24 +898,24 @@
         },
         methods: {
             fetch_data: function () {
-                var ctx = this
+                var ctx = this;
 
                 loadJSON("/api/details", function (jsonData) {
-                    ctx.services = jsonData.Services.length
-                    ctx.dependencies = jsonData.Dependencies.length
-                    ctx.summary = jsonData.Summary
-                    console.log(ctx)
+                    ctx.services = jsonData.Services.length;
+                    ctx.dependencies = jsonData.Dependencies.length;
+                    ctx.summary = jsonData.Summary;
+                    console.log(ctx);
                 }, function (err) {
-                    console.log("/api/details not loaded with err:")
-                    console.log(err)
-                })
+                    console.log("/api/details not loaded with err:");
+                    console.log(err);
+                });
 
                 loadJSON("/api/endpoints", function (jsonData) {
-                    ctx.all_endpoints = jsonData.Endpoints
-                    console.log(ctx.all_endpoints)
+                    ctx.all_endpoints = jsonData.Endpoints;
+                    console.log(ctx.all_endpoints);
                 }, function (err) {
-                    console.log("/api/endpoints not loaded with err:")
-                    console.log(err)
+                    console.log("/api/endpoints not loaded with err:");
+                    console.log(err);
                 })
             }
         }
