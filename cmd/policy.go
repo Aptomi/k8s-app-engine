@@ -55,10 +55,10 @@ var policyCmdApply = &cobra.Command{
 		// Print on screen
 		fmt.Print(diff.Next.DiffAsText)
 
-		// Generate pictures, if needed
+		// Generate pictures
+		visual := slinga.NewPolicyVisualization(diff)
+		visual.DrawAndStore()
 		if show {
-			visual := slinga.NewPolicyVisualization(diff)
-			visual.DrawAndStore()
 			visual.OpenInPreview()
 		}
 
@@ -94,7 +94,7 @@ func init() {
 	// Flags for the apply command
 	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
 	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "Fully re-evaluate the policy. Create new revision. Re-create missing instances (if they were manually deleted from the underlying cloud), update running instances ")
-	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Display a picture, showing how policy will be evaluated and applied")
+	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Open diff in preview on Mac OS")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
 	policyCmdApply.Flags().BoolVarP(&emulateDeployment, "emulate", "e", false, "Process a policy, do not deploy anything (emulate deployment), save state to the database")
 
