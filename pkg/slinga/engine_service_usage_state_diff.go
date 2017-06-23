@@ -409,9 +409,9 @@ func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
 	log.Println("[Policy]")
 	log.Println(getSummaryLine("Services", prev.Services, next.Services))
 	log.Println(getSummaryLine("Contexts", prev.Contexts, next.Contexts))
+	log.Println(getSummaryLine("Dependencies", prev.Dependencies, next.Dependencies))
 	log.Println(getSummaryLine("Clusters", prev.Clusters, next.Clusters))
 	log.Println(getSummaryLine("Rules", prev.Rules, next.Rules))
-	log.Println(getSummaryLine("Dependencies", prev.Dependencies, next.Dependencies))
 	log.Println(getSummaryLine("Users", next.Users, next.Users)) // Users we always print current number
 }
 

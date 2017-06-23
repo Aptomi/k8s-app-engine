@@ -234,7 +234,7 @@ func entryAllocationGlobalRulesNoViolations(allocation *Allocation, matched bool
 		RuleLogTypeTest,
 		RuleLogScopeGlobal,
 		"No Global Rule Violations (Allocation)",
-		fmt.Sprintf("Checking global rule violations for allocation: '%s'", allocation.Name),
+		fmt.Sprintf("Verify there are no global rule violations for allocation: '%s'", allocation.Name),
 		"!has(global_rule_violations)",
 		matched,
 		false,

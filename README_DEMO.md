@@ -111,10 +111,11 @@ HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
         - Alice opens dev endpoints for twitter stats (different visualization)
         - Bob opens dev endpoints for twitter stats (standard visualization, but Mexico)
 
-6. Alice asks Frank to propagate staging version to production
-    - Now let's say Alice is happy with her change
-    - There is no way Alice can deploy to production cluster directly by herself
-        - Because Aptomi will never allow that
+6. Updating production instance of twitter stats
+    - Now let's say Alice is happy with her change and this change needs to be rolled out to production
+    - There is no way Alice can deploy to production directly by herself
+        - Aptomi will actually never allow that, because of the global rule Dev -> only Dev cluster
+        - So Alice has to ask John, who owns production instance
     - So Alice gets rid of her instance
         - enabled = false in Alice/dependencies.alice-stage-ts.yaml
     - John promotes new version of visualization app to production
@@ -125,9 +126,11 @@ HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
    - Nothing will get allocated because of the global rule
    - Show Carol's home page
    - Show Policy Explorer
+   - Show Rule Log
 
 8. Bob gets marked as "deactivated"
    - deactivated = true in _external/users/users.dev.yaml
    - Loses access to his instance (via Istio)
 
-9. TODO: show rule UI from SAM's POV
+9. Show Rules on home page from Sam's point of view
+   - What rules get applied where
