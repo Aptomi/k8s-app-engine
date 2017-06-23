@@ -104,6 +104,7 @@ HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
       - Log in as John
       - Show Home Page
       - Show Policy Explorer
+      - Show
 
 8. Show that everything is working
     - Endpoints
