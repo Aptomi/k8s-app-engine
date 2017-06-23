@@ -299,6 +299,10 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, updatedOn time.Time) {
 	// update for a given node
 	instance := diff.Next.GetResolvedData().ComponentInstanceMap[k]
+	if instance == nil {
+		// likely this component has been deleted as a part of the diff
+		return
+	}
 	instance.updateTimes(createdOn, updatedOn)
 
 	// if it's a component instance, then update for its parent service instance as well
