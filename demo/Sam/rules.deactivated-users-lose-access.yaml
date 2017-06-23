@@ -4,7 +4,6 @@
     user:
       accept:
         - deactivated
-    labels:
   actions:
     - type: ingress
       content: block

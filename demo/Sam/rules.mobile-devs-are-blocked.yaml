@@ -4,9 +4,6 @@
     user:
       accept:
         - org == 'mobile-dev'
-    cluster:
-      accept:
-        - true
   actions:
     - type: dependency
       content: forbid
