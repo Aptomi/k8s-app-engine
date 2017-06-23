@@ -37,10 +37,19 @@ func (rule *Rule) DescribeConditions() map[string][]string {
 		userFilter := rule.FilterServices.User
 		if userFilter != nil {
 			if len(userFilter.Accept) > 0 {
-				descr["Any user with labels matching"] = userFilter.Accept
+				descr["User with labels matching"] = userFilter.Accept
 			}
 			if len(userFilter.Reject) > 0 {
-				descr["Any user without labels matching"] = userFilter.Reject
+				descr["User without labels matching"] = userFilter.Reject
+			}
+		}
+		clusterFilter := rule.FilterServices.Cluster
+		if clusterFilter != nil {
+			if len(clusterFilter.Accept) > 0 {
+				descr["Cluster with labels matching"] = clusterFilter.Accept
+			}
+			if len(clusterFilter.Reject) > 0 {
+				descr["Cluster without labels matching"] = clusterFilter.Reject
 			}
 		}
 	}
