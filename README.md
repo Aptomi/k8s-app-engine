@@ -125,3 +125,5 @@ go run main.go policy apply --trace
 
 1. Structure of Go project
   1. Right now everything is in one package. Not very good
+
+1. Allow IT to create namespaces in Aptomi polity and set access rules
