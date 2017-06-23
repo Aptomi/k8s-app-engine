@@ -134,12 +134,14 @@ function gcloud_check() {
         log "Run 'gcloud auth list' to get account name"
         log "If no entries run 'gcloud auth login' to setup account"
         log "Or run 'gcloud config set account <account>' to select account"
+        exit 1
     fi
 
     if [ -z "$(gcloud config get-value project 2>/dev/null)" ]; then
         log "Gcloud project isn't set."
         log "You can find projects using 'gcloud projects list'"
         log "Use 'gcloud config set project <project_id>' to set project ID"
+        exit 1
     fi
 
     if ! gke list 1>/dev/null ; then
@@ -149,6 +151,7 @@ function gcloud_check() {
 
     if ! gcf list 1>/dev/null ; then
         log "Can't get firewall rules list, check permissions"
+        exit 1
     fi
 }
 
