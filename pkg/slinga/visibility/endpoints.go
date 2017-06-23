@@ -27,12 +27,20 @@ type endpointsView struct {
 	Endpoints []userEndpoints
 }
 
-func Endpoints(userID string, users slinga.GlobalUsers, state slinga.ServiceUsageState) endpointsView {
+func Endpoints(currentUserID string, users slinga.GlobalUsers, state slinga.ServiceUsageState) endpointsView {
 	uR := endpointsView{make([]userEndpoints, 0)}
+
+	isGlobalOp := false
+	for userID, user := range users.Users {
+		if currentUserID == userID {
+			isGlobalOp = user.IsGlobalOps()
+			break
+		}
+	}
 
 	userIds := make([]string, 0)
 	for userID, user := range users.Users {
-		if !user.IsGlobalOps() && user.ID != userID {
+		if !isGlobalOp && user.ID != currentUserID {
 			continue
 		}
 		userIds = append(userIds, userID)
