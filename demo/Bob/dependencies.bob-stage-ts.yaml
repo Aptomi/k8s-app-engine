@@ -3,7 +3,6 @@
   service: twitter_stats
   enabled: false
   labels:
-      # TODO: remove stage def from here
       tstype: stage
       tsvisimage: demo-v61
       # Mexico

@@ -87,69 +87,41 @@ HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
 6. Declaring dependencies (Dev)
     - Developers
         - let Alice to instantiate twitter-stats service
-           - enabled = true in Alice/dependencies.alice-stage-ts.yaml
+            - Alice tests a new web app code for visualizing data from twitter
+            - enabled = true in Alice/dependencies.alice-stage-ts.yaml
         - let Bob instantiate twitter-stats service
-           - enabled = true in Bob/dependencies.bob-stage-ts.yaml
+            - enabled = true in Bob/dependencies.bob-stage-ts.yaml
     - Show UI - audit log
     - Show UI - delta picture
     - Show containers on k8s
         - watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods
 
 7. Now, what happened exactly
-    - John is seeing that his twitter_stats service got allocated to 3 consumers (per the rules he defined)
-      - Log in as John
-      - Show Home Page
-      - Show Policy Explorer
     - Frank is seeing that his analytics_pipeline service got allocated 2 times (per the rules he defined)
-      - Log in as John
-      - Show Home Page
-      - Show Policy Explorer
-      - Show
+        - Log in as John
+        - Show Home Page
+        - Show Policy Explorer (e.g. service view from the standpoint of zookeeper)
+    - John is seeing that his twitter_stats service got allocated to 3 consumers (per the rules he defined)
+        - Log in as John
+        - Show Home Page
+        - Show Policy Explorer (twitter stats that he OWNS)
+        - Show Policy Explorer (twitter stats that he RUNS)
+    - Show that everything got deployed and working
+        - John opens production endpoints for twitter stats
+        - Alice opens dev endpoints for twitter stats (different visualization)
+        - Bob opens dev endpoints for twitter stats (standard visualization, but Mexico)
 
-8. Show that everything is working
-    - Endpoints
+6. Alice asks Frank to propagate staging version to production
+    - Now let's say Alice is happy with her change
+    - There is no way Alice can deploy to production cluster directly by herself
+        - Because Aptomi will never allow that
+    - So Alice gets rid of her instance
+        - enabled = false in Alice/dependencies.alice-stage-ts.yaml
+    - John promotes new version of visualization app to production
+        - tsvisimage: demo-v62 in John/dependencies.john-ts.yaml
 
 
 ## Suntrust demo / story:
-
-2. Show policy
-   - Show k8s clusters
-      - `kubectl config get-contexts`
-      - `kubectl config view`
-
-3. Deploy AP + TS for user Alice (ID=1)
-   - Explain what will get matched (Alice doesn't specify, policy controls that)
-     - low-Alice (priority < 200), team-platform-services (priority < 200)
-   - Run aptomi
-     - `./aptomi policy apply --noop`
-     - `./aptomi policy apply --noop --show`
-     - `./aptomi policy apply`
-   - Run aptomi again
-     - `./aptomi policy apply` - to ensure there are no more changes to apply
-   - While it's loading, we can show tracing
-     - `./aptomi policy apply --noop --trace`
-   - Show kubectl output
-     - `kubectl --context cluster-us-west -n demo get pods`
-     - `watch -n1 -d -- kubectl --context cluster-us-rwest -n demo get pods`
-   - Show endpoints
-     - `./aptomi endpoint show`
-   - Open Tweeviz UI
-     - Shows SF, NY, Boston tweets
-
-4. Deploy AP + TS for user Bob (ID=2). Alice (ID=1) deploys new staging version of TS (Canary testing/updates)
-  - Alice - with "demo-v42" and "stage" as tags
-  - Explain what will get matched
-     - low-Bob (priority < 200), team-platform-services (priority < 200)
-     - meaning, dedicated TS and shared AP
-   - Run aptomi
-     - `./aptomi policy apply --noop`
-     - `./aptomi policy apply --noop --show` (explain share and reuse of services)
-     - `./aptomi policy apply`
-   - Show endpoints
-     - `./aptomi endpoint show`
-   - Open Tweeviz UI
-     - Show stage Alice (different UI)
-     - Show prod Bob (Japan tweets)
 
 5. Alice (ID=1) propagates staging version to production (making a change)
    - Staging TS gets deleted
