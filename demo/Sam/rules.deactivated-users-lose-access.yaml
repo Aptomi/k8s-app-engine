@@ -1,5 +1,5 @@
-- name: compromised_users_forbid_all_services
-  enabled: false
+- name: deactivated_users_lose_access
+  enabled: true
   filterservices:
     user:
       accept:

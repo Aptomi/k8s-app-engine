@@ -1,12 +1,12 @@
-- name: dev_users_forbid_prod_clusters
-  enabled: false
+- name: mobile_devs_are_blocked
+  enabled: true
   filterservices:
     user:
       accept:
-        - org == 'dev'
+        - org == 'mobile-dev'
     cluster:
       accept:
-        - prod
+        - true
   actions:
     - type: dependency
       content: forbid

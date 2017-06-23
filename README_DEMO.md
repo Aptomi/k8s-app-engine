@@ -120,29 +120,14 @@ HERE GCLOUD TOKEN SHIT BROKE AGAIN IN WATCHER !!!! !!!! !!!!
     - John promotes new version of visualization app to production
         - tsvisimage: demo-v62 in John/dependencies.john-ts.yaml
 
+7. Show rejected access. Carol tries to get her service twitter_stats
+   - enabled = true in Carol/dependencies.carol-stage-ts.yaml
+   - Nothing will get allocated because of the global rule
+   - Show Carol's home page
+   - Show Policy Explorer
 
-## Suntrust demo / story:
+8. Bob gets marked as "deactivated"
+   - deactivated = true in _external/users/users.dev.yaml
+   - Loses access to his instance (via Istio)
 
-5. Alice (ID=1) propagates staging version to production (making a change)
-   - Staging TS gets deleted
-   - Production TS gets updated
-   - Make sure to use `./aptomi policy apply --noop --show --verbose` to see deletions and updates
-   - Refresh in browser
-     - Stage instance disappears
-     - Prod instance changes look and feel to demo-v42
-
-6. Change # of top tweets
-   - Default -> 3 and redeploy
-
-7. Alice (ID=1) gets marked as "compromised"
-   - Loses access to her "prod"
-   - Right now all objects get deleted, but this behavior will be customizable
-
-8. Low-priority user Carol (ID=3)
-   - Gets nothing due to priority < 50
-
-9. Deploy dedicated DAP for Carol (ID=3) in its own k8s cluster
-   - Priority = 200
-   - Show kubectl output
-     - `kubectl --context cluster-us-east -n demo get pods`
-     - `watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods`
+9. TODO: show rule UI from SAM's POV
