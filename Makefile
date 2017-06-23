@@ -26,7 +26,11 @@ smoke: test build install clean-run-noop
 .PHONY: emulate
 emulate:
 	tools/local-policy-init.sh
-	aptomi policy apply --emulate --full
+	aptomi policy apply --emulate
+	aptomi policy apply --emulate --newrevision
+	tools/dev-enable-all.sh
+	aptomi policy apply --emulate
+	aptomi policy apply --emulate --newrevision
 
 .PHONY: build
 build:
