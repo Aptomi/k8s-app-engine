@@ -616,7 +616,7 @@
             <div class="col-lg-12">
                 <div class="ibox float-e-margins" v-if="summary.globalDependencies.length > 0">
                     <div class="ibox-title">
-                        <h5>Global Dependencies</h5>
+                        <h5>Global List of services in use</h5>
                     </div>
                     <div class="ibox-content">
                         <div class="table-responsive">
@@ -635,19 +635,19 @@
 
                                 <thead>
                                 <tr>
-                                    <th>Resolved</th>
+                                    <th>Status</th>
                                     <th>User</th>
-                                    <th>Depends on</th>
+                                    <th>Consumes</th>
                                     <th>Context</th>
                                     <th>Cluster</th>
-                                    <th>Stats</th>
+                                    <th>Uptime</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="item in summary.globalDependencies">
-                                    <td v-if="item.resolved"><span class="label label-primary">{{ item.resolved }}</span></td>
-                                    <td v-else><span class="label label-danger">{{ item.resolved }}</span></td>
+                                    <td v-if="item.resolved"><span class="label label-primary">Running</span></td>
+                                    <td v-else><span class="label label-danger">Not Running</span></td>
                                     <td>{{ item.userName }}</td>
                                     <td>{{ item.serviceName }}</td>
                                     <td>{{ item.context }}</td>
@@ -655,7 +655,7 @@
                                     <td>{{ item.stats }}</td>
                                     <td>
                                         <router-link v-bind:to="{ name: 'details', params: { view: 'globalops', filter: item.dependencyId } }">
-                                            [View]
+                                            [Open In Policy Explorer]
                                         </router-link>
                                     </td>
                                 </tr>
@@ -770,7 +770,7 @@
             <div class="col-lg-12">
                 <div class="ibox float-e-margins" v-if="summary.servicesUsing.length > 0">
                     <div class="ibox-title">
-                        <h5>Services I run</h5>
+                        <h5>Services I consume</h5>
                     </div>
                     <div class="ibox-content">
                         <div class="table-responsive">
@@ -806,7 +806,7 @@
                                     <td>{{ item.stats }}</td>
                                     <td>
                                         <router-link v-bind:to="{ name: 'details', params: { view: 'consumer', filter: item.dependencyId } }">
-                                            [View]
+                                            [Open In Policy Explorer]
                                         </router-link>
                                     </td>
                                 </tr>
