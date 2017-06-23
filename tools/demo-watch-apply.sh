@@ -65,7 +65,7 @@ pushd $tmp 1>/dev/null
             log "Running aptomi policy apply --noop to ensure that policy isn't broken"
             if aptomi policy apply --noop ; then
                 log "Running aptomi policy apply"
-                if ! aptomi policy apply ; then
+                if ! aptomi policy apply --newrevision; then
                     log "aptomi policy apply failed, will re-try next time"
                 else
                     log "aptomi policy apply success, switched to new HEAD"
