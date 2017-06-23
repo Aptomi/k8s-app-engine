@@ -893,8 +893,6 @@
         data: function () {
             return {
                 all_endpoints: {},
-                services: 0,
-                dependencies: 0,
                 summary: {
                     globalDependencies: [],
                     globalRules: [],
@@ -918,15 +916,6 @@
                     console.log(ctx);
                 }, function (err) {
                     console.log("/api/summary-view not loaded with err:");
-                    console.log(err);
-                });
-
-                loadJSON("/api/details", function (jsonData) {
-                    ctx.services = jsonData.Services.length;
-                    ctx.dependencies = jsonData.Dependencies.length;
-                    console.log(ctx);
-                }, function (err) {
-                    console.log("/api/details not loaded with err:");
                     console.log(err);
                 });
 
