@@ -1,6 +1,7 @@
 package slinga
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -26,6 +27,45 @@ type Rule struct {
 	Name           string
 	FilterServices *ServiceFilter
 	Actions        []*Action
+}
+
+// Describe return full description of the rule - conditions and actions description
+func (rule *Rule) DescribeConditions() map[string][]string {
+	descr := make(map[string][]string)
+
+	if rule.FilterServices != nil {
+		userFilter := rule.FilterServices.User
+		if userFilter != nil {
+			if len(userFilter.Accept) > 0 {
+				descr["Any user with labels matching"] = userFilter.Accept
+			}
+			if len(userFilter.Reject) > 0 {
+				descr["Any user without labels matching"] = userFilter.Reject
+			}
+		}
+	}
+
+	return descr
+}
+
+func (rule *Rule) DescribeActions() []string {
+	descr := make([]string, 0)
+
+	for _, action := range rule.Actions {
+		if action.Type == "dependency" && action.Content == "forbid" {
+			descr = append(descr, "Forbid using services")
+		} else if action.Type == "ingress" && action.Content == "block" {
+			descr = append(descr, "Block external access to services")
+		} else {
+			descr = append(descr, fmt.Sprintf("type: %s, content: %s", action.Type, action.Content))
+		}
+	}
+
+	return descr
+}
+
+func (rule *Rule) MatchUser(user *User) bool {
+	return rule.FilterServices != nil && rule.FilterServices.match(LabelSet{}, user, nil)
 }
 
 // UnmarshalYAML is a custom unmarshaller for Rule, which sets Enabled to True before unmarshalling

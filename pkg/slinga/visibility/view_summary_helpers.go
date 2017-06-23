@@ -1,9 +1,9 @@
 package visibility
 
 import (
+	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/time"
-	"fmt"
 	"strings"
 )
 
@@ -33,6 +33,18 @@ func (view SummaryView) getResolvedContextNameByDep(dependency *slinga.Dependenc
 func (view SummaryView) getRuleAppliedTo(rule *slinga.Rule) string {
 	// TODO: complete
 	return "-1 instances"
+}
+
+func (view SummaryView) getRuleMatchedUsers(rule *slinga.Rule) []*slinga.User {
+	matchedUsers := make([]*slinga.User, 0)
+
+	for _, user := range view.users.Users {
+		if rule.MatchUser(user) {
+			matchedUsers = append(matchedUsers, user)
+		}
+	}
+
+	return matchedUsers
 }
 
 func (view SummaryView) getInstanceStats(instance *slinga.ComponentInstance) string {

@@ -66,7 +66,11 @@ func (view SummaryView) getGlobalRulesData() interface{} {
 				"ruleName":   rule.Name,
 				"ruleObject": rule.FilterServices,
 				"appliedTo":  view.getRuleAppliedTo(rule),
-				"id":         rule.Name, // entries will be sorted by ID
+				// currently we're only matching users by labels (for demo with rules w/o any other filters)
+				"matchedUsers": view.getRuleMatchedUsers(rule),
+				"conditions":   rule.DescribeConditions(),
+				"actions":      rule.DescribeActions(),
+				"id":           rule.Name, // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}
