@@ -696,16 +696,32 @@
 
                                 <thead>
                                 <tr>
+                                    <th>Status</th>
                                     <th>Rule</th>
+                                    <th>Conditions</th>
+                                    <th>Actions</th>
                                     <th>Applied to</th>
-                                    <!--<th>Action</th>-->
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="item in summary.globalRules">
+                                    <td v-if="item.matchedUsers.length > 0"><span class="label label-primary">Active</span></td>
+                                    <td v-else><span class="label label-warning">Inactive</span></td>
                                     <td>{{ item.ruleName }}</td>
-                                    <td>{{ item.appliedTo }}</td>
-                                    <!--<td>[View]</td>-->
+                                    <td>
+                                        <p v-for="(details, condition) in item.conditions">
+                                            {{ condition }}
+                                            <ul>
+                                                <li v-for="detail in details">{{ detail }}</li>
+                                            </ul>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <p v-for="item in item.actions">{{ item }}</p>
+                                    </td>
+                                    <td>
+                                        <p v-for="item in item.matchedUsers">{{ item.Name }} (ID: {{ item.ID }})</p>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
