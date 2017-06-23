@@ -3,7 +3,7 @@
   filterservices:
     user:
       accept:
-        - org == 'mobile-dev'
+        - team == 'mobile-dev'
   actions:
     - type: dependency
       content: forbid
