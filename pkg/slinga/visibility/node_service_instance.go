@@ -49,6 +49,15 @@ func (n serviceInstanceNode) isItMyID(id string) string {
 func (n serviceInstanceNode) getLabel() string {
 	// for not resolved instances
 	if !n.instance.Resolved {
+		if n.service == nil {
+			serviceName, _, _, _ := slinga.ParseServiceUsageKey(n.key)
+			return fmt.Sprintf(
+				`<b>%s</b>
+					ERROR`,
+				html.EscapeString(serviceName),
+			)
+		}
+
 		return fmt.Sprintf(
 			`<b>%s</b>
 				ERROR`,
