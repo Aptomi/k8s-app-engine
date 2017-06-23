@@ -2,7 +2,7 @@
   name: Sam
   labels:
     description: Global Op. He controls clusters and global rules
-    short-description: Global Op
+    short-description: Global Ops
     org: it
     is_operator: true
     global_ops: true
