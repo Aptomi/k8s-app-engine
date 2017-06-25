@@ -18,14 +18,12 @@ const CompTimeline = Vue.component('timeline', {
 
             loadJSON("/api/timeline-view", function (jsonData) {
                 ctx.timeline = jsonData;
-                console.log(ctx);
             }, function (err) {
                 console.log("/api/timeline-view not loaded with err:");
                 console.log(err);
             });
         },
         toggle_style: function (event) {
-//                event.preventDefault();
             $('#vertical-timeline').toggleClass('center-orientation');
         },
         time_ago: function (t) {
@@ -41,33 +39,22 @@ const CompTimeline = Vue.component('timeline', {
 const CompDetailsFilter = Vue.component('details-filter', {
         template: '#template-details-filter',
         props: ['items', 'current_title', 'target_view']
-    })
+});
 
 // JS for drawing charts on /details
 const drawChart = function (inputView, userId, dependencyId, serviceName) {
-    console.log("Draw chart with params: ")
-    console.log(inputView)
-    console.log(userId)
-    console.log(dependencyId)
-    console.log(serviceName)
-    console.log("==== Draw")
-
     // can be service-view, consumer-view, or globalops-view
     var view = inputView + "-view";
 
     var apiPath = "/api/" + view;
     if (view === "service-view") {
         // service-view = view from the standpoint of service owner
-//            var serviceName = "analytics_pipeline";
         apiPath += "?serviceName=" + serviceName;
     } else if (view === "consumer-view") {
         // consumer-view = view from the standpoint of service consumer
-//            var userId = "100";
-//            var dependencyId = "" //"alice_tests_twitter_stats_in_stage"; // if you pass dependencyId, it will filter. if you don't, it will show all dependencies of a given user
         apiPath += "?userId=" + userId + "&dependencyId=" + dependencyId;
     } else {
         // globalops-view = view from the standpoint of global IT ops
-//            var userId = "100";
         apiPath += "?userId=" + userId + "&dependencyId=" + dependencyId;
     }
 
@@ -180,7 +167,7 @@ const drawChart = function (inputView, userId, dependencyId, serviceName) {
         physics: false
     };
 
-    // hack to better display consumer view
+    // hack to better display consumer and globalops views
     if (view === "consumer-view" || view === "globalops-view") {
         options.layout.hierarchical.levelSeparation = 130;
     }
@@ -287,26 +274,21 @@ const CompDetails = Vue.component('details', {
                         ctx.items = jsonData.Services;
                         ctx.filter_name = "Service";
 
-                        // service-view = view from the standpoint of service owner
                         serviceName = filter
                     } else if (view === "consumer") {
                         ctx.items = jsonData.Dependencies;
                         ctx.filter_name = "Dependency";
 
-                        // consumer-view = view from the standpoint of service consumer
-                        userId = jsonData.UserId
+                        userId = jsonData.UserId;
                         dependencyId = filter === "all" ? "" : filter
                     } else if (view === "globalops"){
-//                        ctx.items = jsonData.Users;
-//                        ctx.filter_name = "User";
-//                        userId = filter === "all" ? "" : filter
-
+                        // ctx.items = jsonData.Users;
+                        // ctx.filter_name = "User";
                         ctx.items = jsonData.AllDependencies;
                         ctx.filter_name = "Dependency";
+
+                        // userId = filter === "all" ? "" : filter
                         dependencyId = filter === "all" ? "" : filter
-
-                        // globalops-view = view from the standpoint of global IT ops
-
                     }
 
                     ctx.views.forEach(function(item) {
@@ -335,7 +317,7 @@ const CompDetails = Vue.component('details', {
                 });
             }
         }
-    })
+});
 
 // JS for /home
 const CompHome = Vue.component('home', {
@@ -363,7 +345,6 @@ const CompHome = Vue.component('home', {
 
             loadJSON("/api/summary-view", function (jsonData) {
                 ctx.summary = jsonData;
-                console.log(ctx);
             }, function (err) {
                 console.log("/api/summary-view not loaded with err:");
                 console.log(err);
@@ -371,7 +352,6 @@ const CompHome = Vue.component('home', {
 
             loadJSON("/api/endpoints", function (jsonData) {
                 ctx.all_endpoints = jsonData.Endpoints;
-                console.log(ctx.all_endpoints);
             }, function (err) {
                 console.log("/api/endpoints not loaded with err:");
                 console.log(err);
