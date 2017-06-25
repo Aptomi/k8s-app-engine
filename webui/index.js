@@ -76,7 +76,7 @@ const drawChart = function (inputView, userId, dependencyId, serviceName) {
     });
 
     // create a network
-    var container = document.getElementById('mygraph');
+    var container = document.getElementById('details_graph');
     var options = {
         nodes: {
             font: {
@@ -262,7 +262,7 @@ const CompDetails = Vue.component('details', {
             fetch_data: function () {
                 var ctx = this;
 
-                $("#mygraph").html("");
+                $("#details_graph").html("");
 
                 loadJSON("/api/details", function (jsonData) {
                     var view = ctx.$route.params.view;
