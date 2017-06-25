@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/handlers"
 	"net/http"
 	"os"
+	"time"
 )
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -105,11 +106,17 @@ func Serve(host string, port int) {
 	listenAddr := fmt.Sprintf("%s:%d", host, port)
 	fmt.Println("Serving at", listenAddr)
 
-	var server http.Handler = r
+	var h http.Handler = r
 
-	server = handlers.CombinedLoggingHandler(os.Stdout, server)
-	server = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(server)
+	h = handlers.CombinedLoggingHandler(os.Stdout, h)
+	h = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(h)
 
-	// todo better handle error returned from ListenAndServe (path to Fatal??)
-	panic(http.ListenAndServe(listenAddr, server))
+	srv := &http.Server{
+		Handler:      h,
+		Addr:         listenAddr,
+		WriteTimeout: 5 * time.Second,
+		ReadTimeout:  30 * time.Second,
+	}
+
+	panic(srv.ListenAndServe())
 }
