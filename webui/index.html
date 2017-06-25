@@ -841,7 +841,7 @@
 <!--Main Vue JS-->
 <script>
     function loadComponent(name) {
-        return Vue.component(name, httpVueLoader("components/" + name + ".vue"), name);
+        return Vue.component(name, httpVueLoader("components/" + name), name);
     }
 
     const CompTimeline = loadComponent("timeline");
