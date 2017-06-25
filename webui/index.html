@@ -149,7 +149,6 @@
 <!-- Vue JS -->
 <script src="public/js/vue.min.js"></script>
 <script src="public/js/vue-router.min.js"></script>
-<script src="public/js/http-vue-loader.js"></script>
 
 <!-- Cookies wrapper -->
 <script src="public/js/js.cookie-2.1.4.min.js"></script>
@@ -159,6 +158,100 @@
 
 <script type="text/javascript" src="public/vis/dist/vis.js"></script>
 <script type="text/javascript" src="public/vis/dist/vis-util.js"></script>
+
+<!--Template for /timeline -->
+<script type="text/x-template" id="template-timeline">
+    <div class="row animated fadeInRight">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="" id="ibox-content">
+                    <div id="vertical-timeline" class="vertical-container light-timeline center-orientation"
+                         v-if="timeline.length > 0">
+
+                        <div class="vertical-timeline-block">
+                            <div class="vertical-timeline-icon navy-bg">
+                                <i class="fa fa-briefcase"></i>
+                            </div>
+
+                            <div class="vertical-timeline-content">
+                                <h2>Now</h2>
+                                <p>This Timeline visualizes all changes applied to Aptomi policies.</p>
+
+                                <a class="btn btn-sm btn-default" v-on:click="toggle_style"> Toggle style</a>
+
+                                <span class="vertical-date">
+                                        Now <br/>
+                                        <!--<small>Dec 24</small>-->
+                                    </span>
+                            </div>
+                        </div>
+
+                        <div class="vertical-timeline-block" v-for="item in timeline">
+                            <div class="vertical-timeline-icon blue-bg">
+                                <i class="fa fa-file-text"></i>
+                            </div>
+
+                            <div class="vertical-timeline-content">
+                                <h2>
+                                    Revision: {{ item.revisionNumber }} &nbsp;
+                                    ({{ time_ago(item.createdOn) }}) &nbsp;
+                                    (<a v-bind:href="'/run/' + item.dir + '/graphics/graph_delta.png'" target="_blank">delta graph</a>)
+                                </h2>
+                                <p><pre>{{ item.diff }}</pre></p>
+                                <span class="vertical-date">
+                                        <!--Today <br/>-->
+                                        <small>{{ time_nice(item.createdOn) }}</small>
+                                    </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!--JS for /timeline-->
+<script>
+    const CompTimeline = Vue.component('timeline', {
+        template: '#template-timeline',
+        data: function () {
+            return {
+                timeline: []
+            }
+        },
+        created: function () {
+            this.fetch_data()
+        },
+        watch: {
+            '$route': 'fetch_data'
+        },
+        methods: {
+            fetch_data: function () {
+                var ctx = this;
+
+                loadJSON("/api/timeline-view", function (jsonData) {
+                    ctx.timeline = jsonData;
+                    console.log(ctx);
+                }, function (err) {
+                    console.log("/api/timeline-view not loaded with err:");
+                    console.log(err);
+                });
+            },
+            toggle_style: function (event) {
+//                event.preventDefault();
+                $('#vertical-timeline').toggleClass('center-orientation');
+            },
+            time_ago: function (t) {
+                return moment(t).fromNow()
+            },
+            time_nice: function(t) {
+                return moment(t).format("dddd, MMMM Do YYYY, h:mm:ss a");
+            }
+        }
+    });
+</script>
 
 <!--Template for /details filter-->
 <script type="text/x-template" id="template-details-filter">
@@ -840,12 +933,6 @@
 
 <!--Main Vue JS-->
 <script>
-    function loadComponent(name) {
-        return Vue.component(name, httpVueLoader("components/" + name), name);
-    }
-
-    const CompTimeline = loadComponent("timeline");
-
     const routes = [
         { name: 'home', path: '/home', title: "Home", component: CompHome },
         { name: 'details', path: '/details/:view/:filter', title: 'Policy Explorer', component: CompDetails },
