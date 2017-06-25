@@ -42,9 +42,9 @@
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
                                     <td>
-                                        <router-link v-bind:to="{ name: 'details', params: { view: 'globalops', filter: item.dependencyId } }">
-                                            [Open In Policy Explorer]
-                                        </router-link>
+                                        <!--<router-link v-bind:to="{ name: 'details', params: { view: 'globalops', filter: item.dependencyId } }">-->
+                                            <!--[Open In Policy Explorer]-->
+                                        <!--</router-link>-->
                                     </td>
                                 </tr>
                                 </tbody>
@@ -156,9 +156,9 @@
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
                                     <td>
-                                        <router-link v-bind:to="{ name: 'details', params: { view: 'service', filter: item.serviceName } }">
-                                            [Open In Policy Explorer]
-                                        </router-link>
+                                        <!--<router-link v-bind:to="{ name: 'details', params: { view: 'service', filter: item.serviceName } }">-->
+                                            <!--[Open In Policy Explorer]-->
+                                        <!--</router-link>-->
                                     </td>
                                 </tr>
                                 </tbody>
@@ -209,9 +209,9 @@
                                     <td>{{ item.cluster }}</td>
                                     <td>{{ item.stats }}</td>
                                     <td>
-                                        <router-link v-bind:to="{ name: 'details', params: { view: 'consumer', filter: item.dependencyId } }">
-                                            [Open In Policy Explorer]
-                                        </router-link>
+                                        <!--<router-link v-bind:to="{ name: 'details', params: { view: 'consumer', filter: item.dependencyId } }">-->
+                                            <!--[Open In Policy Explorer]-->
+                                        <!--</router-link>-->
                                     </td>
                                 </tr>
                                 </tbody>
