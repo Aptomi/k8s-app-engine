@@ -2,7 +2,7 @@ package slinga
 
 import (
 	"fmt"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"

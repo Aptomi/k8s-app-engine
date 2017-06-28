@@ -3,6 +3,7 @@ package fileio
 import (
 	"os"
 	"path/filepath"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 )
 
 // AptomiOject represents an aptomi entity, which gets stored in aptomi DB
