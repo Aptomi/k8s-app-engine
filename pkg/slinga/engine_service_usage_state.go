@@ -2,7 +2,6 @@ package slinga
 
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	debug "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	"github.com/spf13/cobra"
 	"os"
 )

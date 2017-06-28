@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
-	//log "github.com/Sirupsen/logrus"
 	"fmt"
 	"github.com/spf13/cobra"
 	"sort"

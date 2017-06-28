@@ -1,7 +1,7 @@
 package language
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
