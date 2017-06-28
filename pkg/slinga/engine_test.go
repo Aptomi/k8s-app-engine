@@ -2,9 +2,8 @@ package slinga
 
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 	"testing"
 	"time"
 )
@@ -194,9 +193,9 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
-	savedObjectAsString := SerializeObject(state)
+	savedObjectAsString := yaml.SerializeObject(state)
 	users := LoadUsersFromDir("testdata/unittests")
 	loadedObject := ServiceUsageState{users: &users}
-	yaml.Unmarshal([]byte(savedObjectAsString), &loadedObject)
+	yaml.DeserializeObject(savedObjectAsString, &loadedObject)
 	return loadedObject
 }

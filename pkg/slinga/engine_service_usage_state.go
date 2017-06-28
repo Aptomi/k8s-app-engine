@@ -4,7 +4,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"time"
 )
@@ -161,10 +161,10 @@ func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
 // SaveServiceUsageState saves usage state in a file under Aptomi DB
 func (state ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
-	SaveObjectToFile(fileName, state)
+	yaml.SaveObjectToFile(fileName, state)
 }
 
 // Loads usage state from file
 func loadServiceUsageStateFromFile(fileName string) ServiceUsageState {
-	return *LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
 }

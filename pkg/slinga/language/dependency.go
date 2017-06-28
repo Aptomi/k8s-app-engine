@@ -7,6 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 /*
@@ -100,4 +101,9 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 		}
 	}
 	return result
+}
+
+// Loads dependencies from file
+func loadDependenciesFromFile(fileName string) []*Dependency {
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*Dependency{}).(*[]*Dependency)
 }

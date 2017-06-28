@@ -4,6 +4,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	"github.com/mattn/go-zglob"
 	"sort"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 /*
@@ -38,4 +39,9 @@ func LoadUserSecretsByIDFromDir(baseDir string, id string) map[string]string {
 	}
 
 	return make(map[string]string)
+}
+
+// Loads secrets from file
+func loadUserSecretsFromFile(fileName string) []*UserSecrets {
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*UserSecrets{}).(*[]*UserSecrets)
 }

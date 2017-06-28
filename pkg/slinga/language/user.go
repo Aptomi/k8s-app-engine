@@ -4,6 +4,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 /*
@@ -61,4 +62,9 @@ func LoadUsers() GlobalUsers {
 // IsGlobalOps returns if user is a global ops guy
 func (user *User) IsGlobalOps() bool {
 	return user.Labels["global_ops"] == "true"
+}
+
+// Loads users from file
+func loadUsersFromFile(fileName string) []*User {
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*User{}).(*[]*User)
 }

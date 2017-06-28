@@ -5,6 +5,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 // LabelsFilter is a labels filter
@@ -161,4 +162,9 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 // Count returns the total number of rules
 func (globalRules *GlobalRules) Count() int {
 	return CountElements(globalRules.Rules)
+}
+
+// Loads rules from file
+func loadRulesFromFile(fileName string) []*Rule {
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*Rule{}).(*[]*Rule)
 }

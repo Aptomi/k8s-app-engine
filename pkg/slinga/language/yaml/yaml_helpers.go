@@ -9,6 +9,11 @@ import (
 	"os"
 )
 
+// DeserializeObject deserializes YAML into object
+func DeserializeObject(s string, object interface{}) error {
+	return yaml.Unmarshal([]byte(s), object)
+}
+
 // SerializeObject serializes object into YAML
 func SerializeObject(t interface{}) string {
 	d, e := yaml.Marshal(&t)
