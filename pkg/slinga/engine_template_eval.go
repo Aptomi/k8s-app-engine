@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 type templateData struct {
@@ -48,7 +49,7 @@ func (component *ServiceComponent) processTemplateParams(template ParameterTree,
 	}
 
 	// Create a copy of discovery tree, so we can add our own instance into it
-	discoveryTreeCopy := discoveryTree.makeCopy()
+	discoveryTreeCopy := discoveryTree.MakeCopy()
 	discoveryTreeCopy["instance"] = EscapeName(componentKey)
 
 	tData := templateData{

@@ -2,6 +2,7 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -111,7 +112,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		labels: node.componentLabels,
 
 		// move further by the discovery tree via component name link
-		discoveryTreeNode: node.discoveryTreeNode.getNestedMap(node.component.Name),
+		discoveryTreeNode: node.discoveryTreeNode.GetNestedMap(node.component.Name),
 
 		// remember the last arrival key
 		arrivalKey: node.componentKey,
@@ -332,9 +333,9 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
-	node.discoveryTreeNode.getNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey)
+	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey)
 	for k, v := range componentDiscoveryParams {
-		node.discoveryTreeNode.getNestedMap(node.component.Name)[k] = v
+		node.discoveryTreeNode.GetNestedMap(node.component.Name)[k] = v
 	}
 
 	return err

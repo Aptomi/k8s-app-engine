@@ -1,4 +1,4 @@
-package slinga
+package maputil
 
 import "reflect"
 
@@ -10,7 +10,7 @@ import "reflect"
 type NestedParameterMap map[string]interface{}
 
 // Makes of copy of parameter structure
-func (src NestedParameterMap) makeCopy() NestedParameterMap {
+func (src NestedParameterMap) MakeCopy() NestedParameterMap {
 	result := NestedParameterMap{}
 	for k, v := range src {
 		result[k] = v
@@ -19,12 +19,12 @@ func (src NestedParameterMap) makeCopy() NestedParameterMap {
 }
 
 // Gets nested parameter map
-func (src NestedParameterMap) getNestedMap(key string) NestedParameterMap {
+func (src NestedParameterMap) GetNestedMap(key string) NestedParameterMap {
 	return src[key].(NestedParameterMap)
 }
 
 // Function to compare two nested maps. If one is nil and another one is empty, it will return true as well
-func (src NestedParameterMap) deepEqual(dst NestedParameterMap) bool {
+func (src NestedParameterMap) DeepEqual(dst NestedParameterMap) bool {
 	if len(src) == 0 && len(dst) == 0 {
 		return true
 	}

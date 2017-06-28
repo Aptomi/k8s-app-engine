@@ -3,6 +3,7 @@ package slinga
 import (
 	log "github.com/Sirupsen/logrus"
 	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -71,7 +72,7 @@ func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) 
 	if len(instance.CalculatedCodeParams) == 0 {
 		// Record code parameters
 		instance.CalculatedCodeParams = codeParams
-	} else if !instance.CalculatedCodeParams.deepEqual(codeParams) {
+	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
 		debug.WithFields(log.Fields{
 			"key":            instance.Key,
@@ -85,10 +86,10 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	if len(instance.CalculatedDiscovery) == 0 {
 		// Record discovery parameters
 		instance.CalculatedDiscovery = discoveryParams
-	} else if !instance.CalculatedDiscovery.deepEqual(discoveryParams) {
+	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		debug.WithFields(log.Fields{
-			"key": instance.Key,
+			"key":                 instance.Key,
 			"prevDiscoveryParams": instance.CalculatedDiscovery,
 			"nextDiscoveryParams": discoveryParams,
 		}).Panic("Invalid policy. Arrived to the same component with different discovery parameters")

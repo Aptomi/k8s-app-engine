@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"path/filepath"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 // If revision is absent, assume this value

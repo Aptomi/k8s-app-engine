@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html

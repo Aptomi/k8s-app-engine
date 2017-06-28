@@ -1,6 +1,9 @@
 package slinga
 
-import "time"
+import (
+	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+)
 
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
 type ServiceUsageState struct {

@@ -1,6 +1,9 @@
 package slinga
 
-import "time"
+import (
+	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+)
 
 // FakeCodeExecutor is a mock executor that does nothing
 type FakeCodeExecutor struct {

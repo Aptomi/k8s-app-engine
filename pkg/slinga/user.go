@@ -2,6 +2,7 @@ package slinga
 
 import (
 	"github.com/mattn/go-zglob"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 /*
@@ -24,7 +25,7 @@ type GlobalUsers struct {
 }
 
 func (users *GlobalUsers) count() int {
-	return countElements(users.Users)
+	return CountElements(users.Users)
 }
 
 // LoadUserByIDFromDir loads a given user from a given directory

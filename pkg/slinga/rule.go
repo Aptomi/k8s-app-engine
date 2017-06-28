@@ -3,6 +3,7 @@ package slinga
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 // LabelsFilter is a labels filter
@@ -153,5 +154,5 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 }
 
 func (globalRules *GlobalRules) count() int {
-	return countElements(globalRules.Rules)
+	return CountElements(globalRules.Rules)
 }

@@ -270,7 +270,7 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 
 		// see if a component needs to be updated
 		if len(depIdsPrev) > 0 && len(depIdsNext) > 0 {
-			sameParams := uPrev.CalculatedCodeParams.deepEqual(uNext.CalculatedCodeParams)
+			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				diff.ComponentUpdate[k] = true
 				diff.updateTimes(k, uPrev.CreatedOn, time.Now())

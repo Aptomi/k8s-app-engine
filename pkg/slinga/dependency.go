@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 /*
@@ -45,7 +46,7 @@ type GlobalDependencies struct {
 }
 
 func (src *GlobalDependencies) count() int {
-	return countElements(src.DependenciesByID)
+	return CountElements(src.DependenciesByID)
 }
 
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies

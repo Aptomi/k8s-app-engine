@@ -1,7 +1,6 @@
-package _map
+package maputil
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"reflect"
 )
 
@@ -39,17 +38,12 @@ func GetSortedStringKeys(m interface{}) []string {
 
 	v := reflect.ValueOf(m)
 	if v.Kind() != reflect.Map {
-		debug.WithFields(log.Fields{
-			"data": m,
-		}).Panic("Not a map")
+		panic("Not a map")
 	}
 	for _, key := range v.MapKeys() {
 		k, ok := key.Interface().(string)
 		if !ok {
-			debug.WithFields(log.Fields{
-				"data": m,
-				"key":  key,
-			}).Panic("Expected a string key")
+			panic("Expected a string key")
 		}
 		result = append(result, k)
 	}

@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
 /*
@@ -115,15 +116,15 @@ type Policy struct {
 }
 
 func (policy *Policy) countServices() int {
-	return countElements(policy.Services)
+	return CountElements(policy.Services)
 }
 
 func (policy *Policy) countContexts() int {
-	return countElements(policy.Contexts)
+	return CountElements(policy.Contexts)
 }
 
 func (policy *Policy) countClusters() int {
-	return countElements(policy.Clusters)
+	return CountElements(policy.Clusters)
 }
 
 // LoadPolicyFromDir loads policy from a directory, recursively processing all files
