@@ -3,6 +3,7 @@ package slinga
 import (
 	"github.com/mattn/go-zglob"
 	"sort"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 /*

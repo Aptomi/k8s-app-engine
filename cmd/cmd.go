@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -17,7 +17,7 @@ var RootCmd = &cobra.Command{
 	Long:  `Aptomi - policy & governance for microservices`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if debug {
-			slinga.SetDebugLevel(log.DebugLevel)
+			SetDebugLevel(log.DebugLevel)
 		}
 	},
 	// Uncomment the following line if your bare application

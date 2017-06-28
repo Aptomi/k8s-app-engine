@@ -19,6 +19,8 @@ import (
 	"errors"
 	"github.com/mattn/go-zglob"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
@@ -33,7 +35,7 @@ type HelmCodeExecutor struct {
 func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
 	// First of all, redirect Helm/grpc logging to our own debug stream
 	// We don't want these messages to be printed to Stdout/Stderr
-	grpclog.SetLogger(debug)
+	grpclog.SetLogger(Debug)
 
 	// todo: should we check key existence first?
 	if clusterName, ok := codeParams["cluster"].(string); !ok {
@@ -84,7 +86,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 
 	exec.Cluster.Metadata.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"port": tunnel.Local,
 	}).Info("Created k8s tunnel using local port")
 
@@ -119,7 +121,7 @@ func (exec *HelmCodeExecutor) chartName() string {
 		return chartName
 	}
 
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"exec_key": exec.Key,
 		"params":   exec.Params,
 	}).Panic("Params doesn't contain chartName")
@@ -135,7 +137,7 @@ func (exec HelmCodeExecutor) Install() error {
 
 	exists, err := findHelmRelease(helmClient, releaseName)
 	if err != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"releaseName": releaseName,
 			"error":       err,
 		}).Panic("Error while looking for release")
@@ -143,7 +145,7 @@ func (exec HelmCodeExecutor) Install() error {
 
 	if exists {
 		// If a release already exists, let's just go ahead and update it
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"releaseName": releaseName,
 		}).Info("Found that release already exists. Calling an update on it")
 		return exec.Update()
@@ -156,7 +158,7 @@ func (exec HelmCodeExecutor) Install() error {
 		return err
 	}
 
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"release": releaseName,
 		"chart":   chartName,
 		"path":    chartPath,
@@ -184,7 +186,7 @@ func (exec HelmCodeExecutor) Update() error {
 		return err
 	}
 
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"release": releaseName,
 		"chart":   chartName,
 		"path":    chartPath,
@@ -201,9 +203,9 @@ func (exec HelmCodeExecutor) Update() error {
 
 func getValidChartPath(chartName string) string {
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternTgz(GetAptomiBaseDir(), TypeCharts, chartName))
-	fileName, err := ensureSingleFile(files)
+	fileName, err := EnsureSingleFile(files)
 	if err != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"chartName": chartName,
 			"error":     err,
 		}).Panic("Chart lookup error")
@@ -217,7 +219,7 @@ func (exec HelmCodeExecutor) Destroy() error {
 
 	helmClient := exec.newHelmClient()
 
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"release": releaseName,
 	}).Info("Deleting Helm release")
 

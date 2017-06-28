@@ -2,6 +2,7 @@ package slinga
 
 import (
 	log "github.com/Sirupsen/logrus"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // Endpoints returns map from key to map from port type to url for all services
@@ -31,14 +32,14 @@ func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[st
 		if component != nil && component.Code != nil {
 			codeExecutor, err := component.Code.GetCodeExecutor(key, state.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
 			if err != nil {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"key":   key,
 					"error": err,
 				}).Panic("Unable to get CodeExecutor")
 			}
 			endpoints, err := codeExecutor.Endpoints()
 			if err != nil {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"key":   key,
 					"error": err,
 				}).Panic("Error while getting endpoints")

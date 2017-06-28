@@ -4,6 +4,7 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"sort"
 	"strconv"
+	. "github.com/Frostman/aptomi/pkg/slinga/db"
 )
 
 // TimelineView represents timeline view
@@ -31,7 +32,7 @@ func (view TimelineView) GetData() interface{} {
 	}
 	*/
 	for revisionNumber, state := range view.states {
-		rev := slinga.AptomiRevision(revisionNumber)
+		rev := AptomiRevision(revisionNumber)
 		entry := lineEntry{
 			"id": rev.GetRunDirectory(),
 			"revisionNumber": strconv.Itoa(revisionNumber),

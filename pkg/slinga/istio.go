@@ -6,6 +6,8 @@ import (
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"strings"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 // IstioRouteRule is istio route rule
@@ -39,7 +41,7 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	for _, key := range state.GetResolvedData().ComponentProcessingOrder {
 		rules, err := processComponent(key, state)
 		if err != nil {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"key":   key,
 				"error": err,
 			}).Panic("Unable to process Istio Ingress for component")
@@ -115,7 +117,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	var cluster *Cluster
 	if clusterLabel, ok := labels.Labels["cluster"]; ok {
 		if cluster, ok = usage.Policy.Clusters[clusterLabel]; !ok {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"component": key,
 				"labels":    labels.Labels,
 			}).Panic("Can't find cluster for component (based on label 'cluster')")
@@ -199,7 +201,7 @@ func (cluster *Cluster) getIstioRouteRules() []*IstioRouteRule {
 	cmd := "get route-rules"
 	rulesStr, err := cluster.runIstioCmd(cmd)
 	if err != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"cluster": cluster.Name,
 			"cmd":     cmd,
 			"error":   err,
@@ -227,11 +229,11 @@ func (rule *IstioRouteRule) create() {
 	content += "    simpleTimeout:\n"
 	content += "      timeout: 1ms\n"
 
-	ruleFile := writeTempFile("istio-rule", content)
+	ruleFile := WriteTempFile("istio-rule", content)
 
 	out, err := rule.Cluster.runIstioCmd("create -f " + ruleFile.Name())
 	if err != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
 			"content": content,
 			"out":     out,
@@ -243,7 +245,7 @@ func (rule *IstioRouteRule) create() {
 func (rule *IstioRouteRule) delete() {
 	out, err := rule.Cluster.runIstioCmd("delete route-rule " + rule.Service)
 	if err != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
 			"out":     out,
 			"error":   err,
@@ -321,7 +323,7 @@ func (cluster *Cluster) runIstioCmd(cmd string) (string, error) {
 	content += "istioctl --configAPIService " + cluster.Metadata.istioSvc + " --namespace " + cluster.Metadata.Namespace + " "
 	content += cmd + "\n"
 
-	cmdFile := writeTempFile("istioctl-cmd", content)
+	cmdFile := WriteTempFile("istioctl-cmd", content)
 
 	out, err := runCmd("bash", cmdFile.Name())
 	if err != nil {

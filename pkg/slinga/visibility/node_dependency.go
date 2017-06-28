@@ -3,6 +3,7 @@ package visibility
 import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 type dependencyNode struct {
@@ -40,7 +41,7 @@ func (n dependencyNode) isItMyID(id string) string {
 }
 
 func (n dependencyNode) getLabel() string {
-	userName := slinga.LoadUserByIDFromDir(slinga.GetAptomiBaseDir(), n.dependency.UserID).Name
+	userName := slinga.LoadUserByIDFromDir(GetAptomiBaseDir(), n.dependency.UserID).Name
 	if n.short {
 		// for service owner view, don't display much other than a user name
 		return userName

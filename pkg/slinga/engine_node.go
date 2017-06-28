@@ -3,6 +3,7 @@ package slinga
 import (
 	log "github.com/Sirupsen/logrus"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -66,7 +67,7 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resol
 	user := state.users.Users[dependency.UserID]
 	if user == nil {
 		// Resolving allocations for service
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"dependency": dependency,
 		}).Panic("Dependency refers to non-existing user")
 	}
@@ -120,7 +121,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 }
 
 func (node *resolutionNode) debugResolvingDependencyStart() {
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"dependency": node.dependency,
 		"user":    node.user.Name,
 		"labels":  node.labels,
@@ -132,7 +133,7 @@ func (node *resolutionNode) debugResolvingDependencyStart() {
 }
 
 func (node *resolutionNode) debugResolvingDependencyEnd() {
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"dependency": node.dependency,
 		"user":    node.user.Name,
 		"labels":  node.labels,
@@ -144,14 +145,14 @@ func (node *resolutionNode) debugResolvingDependencyEnd() {
 
 func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service":    node.service.Name,
 			"component":  node.component.Name,
 			"context":    node.context.Name,
 			"allocation": node.allocation.NameResolved,
 		}).Info("Processing dependency on code execution")
 	} else if node.component.Service != "" {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service":          node.service.Name,
 			"component":        node.component.Name,
 			"context":          node.context.Name,
@@ -159,7 +160,7 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 	} else {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service":   node.service.Name,
 			"component": node.component.Name,
 		}).Panic("Invalid component (not code and not service")
@@ -167,7 +168,7 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 }
 
 func (node *resolutionNode) cannotResolve() error {
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"service":       node.serviceName,
 		"componentObj":  node.component,
 		"contextObj":    node.context,
@@ -211,13 +212,13 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	}
 
 	if contextMatched != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service": node.service.Name,
 			"context": contextMatched.Name,
 			"user":    node.user.Name,
 		}).Info("Matched context")
 	} else {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service": node.service.Name,
 			"user":    node.user.Name,
 		}).Info("No context matched")
@@ -248,7 +249,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 		var cluster *Cluster
 		if clusterLabel, ok := labels.Labels["cluster"]; ok {
 			if cluster, ok = policy.Clusters[clusterLabel]; !ok {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"allocation": allocation,
 					"labels":     labels.Labels,
 				}).Panic("Can't find cluster for allocation (based on label 'cluster')")
@@ -267,7 +268,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	if allocationMatched != nil {
 		err := allocationMatched.resolveName(node.user, node.labels)
 		if err != nil {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"service":    node.service.Name,
 				"context":    node.context.Name,
 				"allocation": allocationMatched.Name,
@@ -275,7 +276,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 				"error":      err,
 			}).Panic("Cannot resolve name for an allocation")
 		}
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service":            node.service.Name,
 			"context":            node.context.Name,
 			"allocation":         allocationMatched.Name,
@@ -283,7 +284,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 			"user":               node.user.Name,
 		}).Info("Matched allocation")
 	} else {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"service": node.service.Name,
 			"context": node.context.Name,
 			"user":    node.user.Name,

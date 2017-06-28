@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -256,7 +258,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 	e := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 
 	if e != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"file":  fileNameDot,
 			"error": e,
 		}).Panic("Unable to write to a file")
@@ -271,7 +273,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"cmd":    cmd,
 				"args":   args,
 				"stdout": outb.String(),
@@ -279,7 +281,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 				"error":  err,
 			}).Panic("Unable to execute graphviz")
 		}
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"cmd":    cmd,
 			"args":   args,
 			"stdout": outb.String(),
@@ -296,7 +298,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"cmd":    cmd,
 				"stdout": outb.String(),
 				"stderr": errb.String(),
@@ -304,7 +306,7 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 			}).Panic("Unable to execute graphviz")
 		}
 
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"cmd":    cmd,
 			"args":   args,
 			"stdout": outb.String(),

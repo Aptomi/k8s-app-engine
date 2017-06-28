@@ -5,6 +5,8 @@ import (
 	"github.com/mattn/go-zglob"
 	"sort"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 /*
@@ -65,7 +67,7 @@ func (dependency *Dependency) getLabelSet() LabelSet {
 // Append a single dependency to an existing object
 func (src GlobalDependencies) appendDependency(dependency *Dependency) {
 	if len(dependency.ID) <= 0 {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"dependency": dependency,
 		}).Panic("Empty dependency ID")
 	}

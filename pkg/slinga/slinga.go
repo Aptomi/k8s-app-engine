@@ -7,6 +7,8 @@ import (
 	"github.com/mattn/go-zglob"
 	"sort"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 /*
@@ -219,13 +221,13 @@ func LoadPolicyFromDir(baseDir string) Policy {
 // That includes all revisions of policy, resolution data, logs, etc
 func ResetAptomiState() {
 	baseDir := GetAptomiBaseDir()
-	debug.WithFields(log.Fields{
+	Debug.WithFields(log.Fields{
 		"baseDir": baseDir,
 	}).Info("Resetting aptomi state")
 
-	err := deleteDirectoryContents(baseDir)
+	err := DeleteDirectoryContents(baseDir)
 	if err != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"directory": baseDir,
 			"error":     err,
 		}).Panic("Directory contents can't be deleted")

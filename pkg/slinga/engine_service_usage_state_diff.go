@@ -5,6 +5,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
 	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -98,13 +101,13 @@ func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRev
 	fmt.Println("[Revision]")
 	if newrevision || (!noop && diff.ShouldGenerateNewRevision()) {
 		// Increment a revision
-		newRevision := revision.increment()
+		newRevision := revision.Increment()
 
 		// Save results of the current run
-		newRevision.saveCurrentRun()
+		newRevision.SaveCurrentRun()
 
 		// Save updated revision number
-		newRevision.saveAsLastRevision()
+		newRevision.SaveAsLastRevision()
 
 		// Print revision numbers
 		fmt.Printf("  Previous: %s\n", revision.String())
@@ -418,10 +421,10 @@ func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
 // Print method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
 	memLog := NewPlainMemoryLogger(verbose)
-	diff.writeSummary(memLog.logger)
-	diff.writeDifferenceOnServicesLevel(memLog.logger)
-	diff.writeDifferenceOnComponentLevel(verbose, memLog.logger)
-	diff.Next.DiffAsText = memLog.buf.String()
+	diff.writeSummary(memLog.GetLogger())
+	diff.writeDifferenceOnServicesLevel(memLog.GetLogger())
+	diff.writeDifferenceOnComponentLevel(verbose, memLog.GetLogger())
+	diff.Next.DiffAsText = memLog.GetBuffer().String()
 }
 
 // AlterDifference basically marks all objects in diff for recreation/update if full update is requested. This is useful to re-create missing objects if they got deleted externally after deployment
@@ -448,19 +451,19 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 
 		err := diff.processDestructions()
 		if err != nil {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"error": err,
 			}).Panic("Error while destructing components")
 		}
 		err = diff.processUpdates()
 		if err != nil {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"error": err,
 			}).Panic("Error while updating components")
 		}
 		err = diff.processInstantiations()
 		if err != nil {
-			debug.WithFields(log.Fields{
+			Debug.WithFields(log.Fields{
 				"error": err,
 			}).Panic("Error while instantiating components")
 		}
@@ -492,14 +495,14 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
 
 			if component == nil {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"serviceKey": key,
 					"service":    serviceName,
 				}).Info("Instantiating service")
 
 				// TODO: add processing code
 			} else {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"componentKey": key,
 					"component":    component.Name,
 					"code":         component.Code,
@@ -535,14 +538,14 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"serviceKey": key,
 					"service":    serviceName,
 				}).Info("Updating service")
 
 				// TODO: add processing code
 			} else {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"componentKey": key,
 					"component":    component.Name,
 					"code":         component.Code,
@@ -578,14 +581,14 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
 			if component == nil {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"serviceKey": key,
 					"service":    serviceName,
 				}).Info("Destructing service")
 
 				// TODO: add processing code
 			} else {
-				debug.WithFields(log.Fields{
+				Debug.WithFields(log.Fields{
 					"componentKey": key,
 					"component":    component.Name,
 					"code":         component.Code,

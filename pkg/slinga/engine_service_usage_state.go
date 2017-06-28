@@ -3,6 +3,9 @@ package slinga
 import (
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
@@ -135,7 +138,7 @@ func (data *ServiceUsageData) appendData(ops *ServiceUsageData) {
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
 func LoadServiceUsageState() ServiceUsageState {
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
-	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision, TypePolicyResolution, "db.yaml")
+	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision.GetRunDirectory(), TypePolicyResolution, "db.yaml")
 	return loadServiceUsageStateFromFile(fileName)
 }
 
@@ -143,8 +146,8 @@ func LoadServiceUsageState() ServiceUsageState {
 func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
 	result := make(map[int]ServiceUsageState)
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
-	for rev := lastRevision; rev > lastRevisionAbsentValue; rev-- {
-		fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), rev, TypePolicyResolution, "db.yaml")
+	for rev := lastRevision; rev > LastRevisionAbsentValue; rev-- {
+		fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), rev.GetRunDirectory(), TypePolicyResolution, "db.yaml")
 		state := loadServiceUsageStateFromFile(fileName)
 		if state.Policy != nil {
 			// add only non-empty revisions. don't add revision which got deleted
@@ -157,5 +160,5 @@ func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
 // SaveServiceUsageState saves usage state in a file under Aptomi DB
 func (state ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
-	saveObjectToFile(fileName, state)
+	SaveObjectToFile(fileName, state)
 }

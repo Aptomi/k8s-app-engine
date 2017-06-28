@@ -1,6 +1,9 @@
 package slinga
 
-import "fmt"
+import (
+	"fmt"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+)
 
 // RuleLogType is a type of the log entry (e.g. rule evaluation, or just informational record)
 type RuleLogType string
@@ -72,7 +75,7 @@ func NewRuleLogWriter(data *ServiceUsageData, dependency *Dependency) *RuleLogWr
 
 func (writer *RuleLogWriter) attachToInstance(key string) {
 	if len(key) <= 0 {
-		debug.Panic("Empty instance key")
+		Debug.Panic("Empty instance key")
 	}
 	writer.key = key
 	writer.flushQueue()

@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -58,7 +59,7 @@ func (instance *ComponentInstance) setResolved(resolved bool) {
 	if !instance.Resolved {
 		instance.Resolved = resolved
 	} else if !resolved {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"key": instance.Key,
 		}).Panic("Invalid action. Trying to unset Resolved flag for instance")
 	}
@@ -74,7 +75,7 @@ func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) 
 		instance.CalculatedCodeParams = codeParams
 	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"key":            instance.Key,
 			"prevCodeParams": instance.CalculatedCodeParams,
 			"nextCodeParams": codeParams,
@@ -88,7 +89,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 		instance.CalculatedDiscovery = discoveryParams
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"key":                 instance.Key,
 			"prevDiscoveryParams": instance.CalculatedDiscovery,
 			"nextDiscoveryParams": discoveryParams,
@@ -125,7 +126,7 @@ func (instance *ComponentInstance) updateTimes(createdOn time.Time, updatedOn ti
 func (instance *ComponentInstance) checkTimesAreEmpty() {
 	if !time.Time.IsZero(instance.CreatedOn) || !time.Time.IsZero(instance.UpdatedOn) {
 		// Same component instance, different code parameters
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"key":       instance.Key,
 			"createdOn": instance.CreatedOn,
 			"updatedOn": instance.UpdatedOn,

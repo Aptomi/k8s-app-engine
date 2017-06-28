@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // LabelsFilter is a labels filter
@@ -140,7 +141,7 @@ func NewGlobalRules() GlobalRules {
 
 func (globalRules *GlobalRules) addRule(rule *Rule) {
 	if rule.FilterServices == nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"rule": rule,
 		}).Panic("Only service filters currently supported in rules")
 	}

@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"strconv"
 	"strings"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // Evaluate an expression, given a set of labels
@@ -12,7 +13,7 @@ func evaluate(expression string, params LabelSet) bool {
 	// Create an expression
 	expressionObject, e := govaluate.NewEvaluableExpression(expression)
 	if e != nil {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"expression": expression,
 			"error":      e,
 		}).Panic("Invalid expression")
@@ -39,7 +40,7 @@ func evaluate(expression string, params LabelSet) bool {
 		if strings.Contains(e.Error(), "No parameter") && strings.Contains(e.Error(), "found") {
 			return false
 		}
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"expression": expression,
 			"parameters": parameters,
 			"error":      e,
@@ -49,7 +50,7 @@ func evaluate(expression string, params LabelSet) bool {
 	// Convert result to bool
 	resultBool, ok := result.(bool)
 	if !ok {
-		debug.WithFields(log.Fields{
+		Debug.WithFields(log.Fields{
 			"expression": expression,
 			"parameters": parameters,
 			"result":     result,

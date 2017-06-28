@@ -1,4 +1,4 @@
-package slinga
+package log
 
 import (
 	"flag"
@@ -6,10 +6,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"os"
 	"bytes"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 // Debug logger writes debug information into a file
-var debug *log.Logger
+var Debug *log.Logger
 
 // PlainFormatter just formats messages into plain text
 type PlainFormatter struct{}
@@ -21,15 +22,15 @@ func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 // SetDebugLevel sets level for the debug logger
 func SetDebugLevel(level log.Level) {
-	debug.Level = level
+	Debug.Level = level
 }
 
 func init() {
-	debug = log.New()
+	Debug = log.New()
 
 	// if we are running normally (not in unit tests)
 	if flag.Lookup("test.v") == nil {
-		// Make sure we have a place to write the current state to
+		// Make sure we have a clean place to write the current run to
 		// This is a bit of a hack to clean up the current directory here
 		// But you can't really do this in policy.go, because this will cause a race condition with init()
 		PrepareCurrentRunDirectory(GetAptomiBaseDir())
@@ -37,14 +38,14 @@ func init() {
 		// setup debug logger
 		// don't log much by default. log level will be overridden when called from CLU
 		fileNameDebug := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeLogs, "debug.log")
-		debug.Out, _ = os.OpenFile(fileNameDebug, os.O_CREATE|os.O_WRONLY, 0644)
-		debug.Level = log.PanicLevel
+		Debug.Out, _ = os.OpenFile(fileNameDebug, os.O_CREATE|os.O_WRONLY, 0644)
+		Debug.Level = log.PanicLevel
 
 		// Add a hook to print important errors to stdout as well
-		debug.Hooks.Add(&logHook{})
+		Debug.Hooks.Add(&logHook{})
 	} else {
 		// running under unit tests
-		debug.Level = log.WarnLevel
+		Debug.Level = log.WarnLevel
 	}
 }
 
@@ -83,4 +84,12 @@ func NewPlainMemoryLogger(verbose bool) PlainMemoryLogger {
 		logger.Level = log.InfoLevel
 	}
 	return PlainMemoryLogger{buf: buf, logger: logger}
+}
+
+func (pml *PlainMemoryLogger) GetLogger() *log.Logger {
+	return pml.logger
+}
+
+func (pml *PlainMemoryLogger) GetBuffer() *bytes.Buffer {
+	return pml.buf
 }

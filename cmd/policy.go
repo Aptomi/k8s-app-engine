@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -33,15 +35,15 @@ var policyCmdApply = &cobra.Command{
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load the previous usage state
-		prevUsageState := slinga.LoadServiceUsageState()
+		prevUsageState := LoadServiceUsageState()
 
 		// Generate the next usage state
-		policyDir := slinga.GetAptomiPolicyDir()
-		policy := slinga.LoadPolicyFromDir(policyDir)
-		users := slinga.LoadUsersFromDir(policyDir)
-		dependencies := slinga.LoadDependenciesFromDir(policyDir)
+		policyDir := GetAptomiPolicyDir()
+		policy := LoadPolicyFromDir(policyDir)
+		users := LoadUsersFromDir(policyDir)
+		dependencies := LoadDependenciesFromDir(policyDir)
 
-		nextUsageState := slinga.NewServiceUsageState(&policy, &dependencies, &users)
+		nextUsageState := NewServiceUsageState(&policy, &dependencies, &users)
 		err := nextUsageState.ResolveAllDependencies()
 
 		if err != nil {
@@ -57,7 +59,7 @@ var policyCmdApply = &cobra.Command{
 		fmt.Print(diff.Next.DiffAsText)
 
 		// Generate pictures
-		visual := slinga.NewPolicyVisualization(diff)
+		visual := NewPolicyVisualization(diff)
 		visual.DrawAndStore()
 		if show {
 			visual.OpenInPreview()
@@ -68,7 +70,7 @@ var policyCmdApply = &cobra.Command{
 
 		// If everything is successful, then increment revision and save run
 		// if emulateDeployment == true --> we set noop to false to write state on disk)
-		revision := slinga.GetLastRevision(slinga.GetAptomiBaseDir())
+		revision := GetLastRevision(GetAptomiBaseDir())
 		diff.ProcessSuccessfulExecution(revision, newrevision, noop && !emulateDeployment)
 	},
 }
@@ -79,9 +81,9 @@ var policyCmdReset = &cobra.Command{
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		if force {
-			slinga.ResetAptomiState()
+			ResetAptomiState()
 		} else {
-			fmt.Println("This will erase everything under " + slinga.GetAptomiBaseDir())
+			fmt.Println("This will erase everything under " + GetAptomiBaseDir())
 			fmt.Println("No action is taken. If you are sure, use --force to delete all the data")
 		}
 	},

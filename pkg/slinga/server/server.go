@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +88,7 @@ func Serve(host string, port int) {
 
 	// serve all files from "webui" folder and require auth for everything except login.html
 	r.Handle("/ui/", publicFilesHandler("/ui/", http.Dir("./webui/")))
-	r.Handle("/run/", runFilesHandler("/run/", http.Dir(slinga.GetAptomiBaseDir())))
+	r.Handle("/run/", runFilesHandler("/run/", http.Dir(GetAptomiBaseDir())))
 
 	// serve all API endpoints at /api/ path and require auth
 	r.Handle("/api/endpoints", requireAuth(endpointsHandler))

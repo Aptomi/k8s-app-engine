@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"testing"
 	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 func TestPolicyResolve(t *testing.T) {
@@ -192,7 +193,7 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
-	savedObjectAsString := serializeObject(state)
+	savedObjectAsString := SerializeObject(state)
 	users := LoadUsersFromDir("testdata/unittests")
 	loadedObject := ServiceUsageState{users: &users}
 	yaml.Unmarshal([]byte(savedObjectAsString), &loadedObject)

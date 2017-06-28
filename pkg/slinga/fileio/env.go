@@ -1,7 +1,6 @@
-package slinga
+package fileio
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"os"
 	"path/filepath"
 )
@@ -10,7 +9,7 @@ import (
 type AptomiOject string
 
 // AptomiResolutionDir is where results of the last run are stored
-const aptomiCurrentRunDir = "last-run-results"
+const AptomiCurrentRunDir = "last-run-results"
 
 const (
 	/*
@@ -66,16 +65,10 @@ const (
 func getAptomiEnvVarAsDir(key string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		debug.WithFields(log.Fields{
-			"var": key,
-		}).Panic("Environment variable is not present. Must point to a directory")
+		panic("Environment variable is not present. Must point to a directory")
 	}
 	if stat, err := os.Stat(value); err != nil || !stat.IsDir() {
-		debug.WithFields(log.Fields{
-			"var":       key,
-			"directory": value,
-			"error":     err,
-		}).Panic("Directory doesn't exist or error encountered")
+		panic("Directory doesn't exist or error encountered")
 	}
 	return value
 }
@@ -101,47 +94,38 @@ func GetAptomiObjectFilePatternTgz(baseDir string, aptomiObject AptomiOject, cha
 }
 
 // GetAptomiObjectWriteFileGlobal returns file name for global aptomi objects (e.g. revision)
-// It will place files into aptomiCurrentRunDir. It will create the corresponding directories if they don't exist
+// It will place files into AptomiCurrentRunDir. It will create the corresponding directories if they don't exist
 func GetAptomiObjectWriteFileGlobal(baseDir string, aptomiObject AptomiOject) string {
 	return filepath.Join(baseDir, string(aptomiObject)+".yaml")
 }
 
 // GetAptomiObjectFileFromRun returns file name for aptomi objects (so they can be saved)
-// It will place files into aptomiCurrentRunDir. It will create the corresponding directories if they don't exist
-func GetAptomiObjectFileFromRun(baseDir string, revision AptomiRevision, aptomiObject AptomiOject, fileName string) string {
-	return filepath.Join(baseDir, revision.GetRunDirectory(), string(aptomiObject), fileName)
+// It will place files into AptomiCurrentRunDir. It will create the corresponding directories if they don't exist
+func GetAptomiObjectFileFromRun(baseDir string, runDir string, aptomiObject AptomiOject, fileName string) string {
+	return filepath.Join(baseDir, runDir, string(aptomiObject), fileName)
 }
 
 // GetAptomiObjectWriteFileCurrentRun returns file name for aptomi objects (so they can be saved)
-// It will place files into aptomiCurrentRunDir. It will create the corresponding directories if they don't exist
+// It will place files into AptomiCurrentRunDir. It will create the corresponding directories if they don't exist
 func GetAptomiObjectWriteFileCurrentRun(baseDir string, aptomiObject AptomiOject, fileName string) string {
-	dir := filepath.Join(baseDir, aptomiCurrentRunDir, string(aptomiObject))
+	dir := filepath.Join(baseDir, AptomiCurrentRunDir, string(aptomiObject))
 	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
 		err = os.MkdirAll(dir, 0755)
 		if err != nil {
-			debug.WithFields(log.Fields{
-				"directory": dir,
-				"error":     err,
-			}).Panic("Directory can't be created or error encountered")
+			panic("Directory can't be created or error encountered")
 		}
 	}
 	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
-		debug.WithFields(log.Fields{
-			"directory": dir,
-			"error":     err,
-		}).Panic("Directory can't be created or error encountered")
+		panic("Directory can't be created or error encountered")
 	}
 	return filepath.Join(dir, fileName)
 }
 
 // PrepareCurrentRunDirectory deletes contents of a "current run" directory
 func PrepareCurrentRunDirectory(baseDir string) {
-	dir := filepath.Join(baseDir, aptomiCurrentRunDir)
-	err := deleteDirectoryContents(dir)
+	dir := filepath.Join(baseDir, AptomiCurrentRunDir)
+	err := DeleteDirectoryContents(dir)
 	if err != nil {
-		debug.WithFields(log.Fields{
-			"directory": dir,
-			"error":     err,
-		}).Panic("Directory contents can't be deleted")
+		panic("Directory contents can't be deleted")
 	}
 }
