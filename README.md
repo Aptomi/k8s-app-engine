@@ -40,6 +40,16 @@ To run tests on specific package:
 go test -v ./pkg/slinga
 ```
 
+## How to install & configure LDAP Server
+1. Download & configure LDAP server, including creation of all the test users
+```shell
+cd tools/ldap-server
+ldap_server_init.sh
+```
+2. Download and install Apache Directory Studio. Check that connection can be established
+  - http://directory.apache.org/studio/
+  - http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html
+
 ## How to build and run
 
 Directory 'testdata' is excluded from processing by 'go' tool:
