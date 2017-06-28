@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -157,11 +156,6 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 			globalRules.Rules[action.Type] = []*Rule{rule}
 		}
 	}
-}
-
-// Count returns the total number of rules
-func (globalRules *GlobalRules) Count() int {
-	return CountElements(globalRules.Rules)
 }
 
 // Loads rules from file

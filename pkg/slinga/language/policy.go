@@ -2,7 +2,6 @@ package language
 
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 	"sort"
 )
@@ -17,21 +16,6 @@ type Policy struct {
 	Contexts map[string][]*Context
 	Clusters map[string]*Cluster
 	Rules    GlobalRules
-}
-
-// CountServices returns number of services in the policy
-func (policy *Policy) CountServices() int {
-	return CountElements(policy.Services)
-}
-
-// CountContexts returns number of contexts in the policy
-func (policy *Policy) CountContexts() int {
-	return CountElements(policy.Contexts)
-}
-
-// CountClusters returns number of clusters in the policy
-func (policy *Policy) CountClusters() int {
-	return CountElements(policy.Clusters)
 }
 
 // LoadPolicyFromDir loads policy from a directory, recursively processing all files

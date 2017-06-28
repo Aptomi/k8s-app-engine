@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
 	"time"
@@ -84,12 +85,12 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 		return ServiceUsageStateSummary{}
 	}
 	return ServiceUsageStateSummary{
-		state.Policy.CountServices(),
-		state.Policy.CountContexts(),
-		state.Policy.CountClusters(),
-		state.Policy.Rules.Count(),
+		CountElements(state.Policy.Services),
+		CountElements(state.Policy.Contexts),
+		CountElements(state.Policy.Clusters),
+		CountElements(state.Policy.Rules.Rules),
 		state.userLoader.Summary(),
-		state.Dependencies.Count(),
+		CountElements(state.Dependencies.DependenciesByID),
 	}
 }
 
@@ -539,7 +540,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{
@@ -582,7 +583,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{

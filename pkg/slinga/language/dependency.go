@@ -4,7 +4,6 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
@@ -46,11 +45,6 @@ type GlobalDependencies struct {
 
 	// dependencies <id> -> dependency
 	DependenciesByID map[string]*Dependency
-}
-
-// Count returns total number of dependencies
-func (src *GlobalDependencies) Count() int {
-	return CountElements(src.DependenciesByID)
 }
 
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
