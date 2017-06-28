@@ -38,7 +38,7 @@ if [ ! -f $VER.tar.gz ]; then
 fi
 
 # Remove previous version and unpack
-rm -rf $VER/
+rm -rf ./$VER/
 tar -zxf $VER.tar.gz
 
 # Start LDAP server
