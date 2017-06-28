@@ -43,8 +43,29 @@ func evaluateTemplate(templateStr string, user *User, labels LabelSet) (string, 
 	return doc.String(), nil
 }
 
+func evaluateParamTemplate(templateStr string, tData templateData) (string, error) {
+	tmpl, err := template.New("").Parse(templateStr)
+	if err != nil {
+		return "", errors.New("Invalid template " + templateStr)
+	}
+
+	var doc bytes.Buffer
+	err = tmpl.Execute(&doc, tData)
+
+	if err != nil {
+		return "", errors.New("Cannot evaluate template " + templateStr)
+	}
+
+	result := doc.String()
+	if strings.Contains(result, "<no value>") {
+		return "", errors.New("Cannot evaluate template " + templateStr)
+	}
+
+	return EscapeName(doc.String()), nil
+}
+
 // ProcessTemplateParams processes template params
-func ProcessTemplateParams(template ParameterTree, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
+func ProcessTemplateParams(template ParameterTree, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap) (NestedParameterMap, error) {
 	if template == nil {
 		return nil, nil
 	}
@@ -77,7 +98,7 @@ func ProcessTemplateParams(template ParameterTree, componentKey string, labels L
 
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
-			evaluatedValue, err := evaluateCodeParamTemplate(paramsStr, tData)
+			evaluatedValue, err := evaluateParamTemplate(paramsStr, tData)
 			// TODO: we may want to debug paramsStr -> evaluatedValue here
 			if err != nil {
 				return nil, err
@@ -104,23 +125,3 @@ func ProcessTemplateParams(template ParameterTree, componentKey string, labels L
 	return result, err
 }
 
-func evaluateCodeParamTemplate(templateStr string, tData templateData) (string, error) {
-	tmpl, err := template.New("").Parse(templateStr)
-	if err != nil {
-		return "", errors.New("Invalid template " + templateStr)
-	}
-
-	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, tData)
-
-	if err != nil {
-		return "", errors.New("Cannot evaluate template " + templateStr)
-	}
-
-	result := doc.String()
-	if strings.Contains(result, "<no value>") {
-		return "", errors.New("Cannot evaluate template " + templateStr)
-	}
-
-	return EscapeName(doc.String()), nil
-}
