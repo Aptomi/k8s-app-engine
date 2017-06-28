@@ -2,7 +2,6 @@ package slinga
 
 import (
 	"bytes"
-	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
@@ -42,20 +41,6 @@ func (vis PolicyVisualization) DrawAndStore() {
 	// Draw delta (i.e. difference between resulting state and previous state)
 	deltaGraph := vis.Delta(prevGraph, nextGraph)
 	vis.saveGraph("delta", deltaGraph)
-}
-
-// OpenInPreview opens a picture in preview
-func (vis PolicyVisualization) OpenInPreview() {
-	vis.OpenInPreviewWithSuffix("delta")
-}
-
-// OpenInPreviewWithSuffix opens a picture in preview, given a suffix
-func (vis PolicyVisualization) OpenInPreviewWithSuffix(suffix string) {
-	fileName := vis.getVisualFileNamePNG(suffix)
-	command := exec.Command("open", []string{fileName}...)
-	if err := command.Run(); err != nil {
-		fmt.Print("Allocations (PNG): " + fileName)
-	}
 }
 
 // Delta calculates difference between two graphs and returns it as a graph (it also modifies <next> to represent that difference)

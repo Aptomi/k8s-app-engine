@@ -11,7 +11,6 @@ import (
 
 // For apply command
 var noop bool
-var show bool
 var full bool
 var newrevision bool
 var verbose bool
@@ -66,9 +65,6 @@ var policyCmdApply = &cobra.Command{
 		// Generate pictures
 		visual := NewPolicyVisualization(diff)
 		visual.DrawAndStore()
-		if show {
-			visual.OpenInPreview()
-		}
 
 		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
 		diff.Apply(noop || emulateDeployment)
@@ -101,9 +97,8 @@ func init() {
 
 	// Flags for the apply command
 	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
-	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "Fully re-evaluate the policy, re-create missing instances (if they were manually deleted from the underlying cloud), update running instances")
+	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "Re-create missing instances (if they were manually deleted from the underlying cloud), update running instances")
 	policyCmdApply.Flags().BoolVarP(&newrevision, "newrevision", "c", false, "Create new revision, irrespective of whether there are changes in the policy or not")
-	policyCmdApply.Flags().BoolVarP(&show, "show", "s", false, "Open diff in preview on Mac OS")
 	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
 	policyCmdApply.Flags().BoolVarP(&emulateDeployment, "emulate", "e", false, "Process a policy, do not deploy anything (emulate deployment), save state to the database")
 
