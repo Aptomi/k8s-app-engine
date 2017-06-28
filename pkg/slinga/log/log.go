@@ -11,14 +11,6 @@ import (
 // Debug logger writes debug information into a file
 var Debug *log.Logger
 
-// PlainFormatter just formats messages into plain text
-type PlainFormatter struct{}
-
-// Format just returns entry message without formatting it
-func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
-	return []byte(entry.Message + "\n"), nil
-}
-
 // SetDebugLevel sets level for the debug logger
 func SetDebugLevel(level log.Level) {
 	Debug.Level = level

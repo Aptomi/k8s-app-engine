@@ -11,6 +11,14 @@ type PlainMemoryLogger struct {
 	logger *log.Logger
 }
 
+// PlainFormatter just formats messages into plain text
+type PlainFormatter struct{}
+
+// Format just returns entry message without formatting it
+func (f *PlainFormatter) Format(entry *log.Entry) ([]byte, error) {
+	return []byte(entry.Message + "\n"), nil
+}
+
 // NewPlainMemoryLogger creates a new PlainMemoryLogger
 func NewPlainMemoryLogger(verbose bool) PlainMemoryLogger {
 	buf := &bytes.Buffer{}
