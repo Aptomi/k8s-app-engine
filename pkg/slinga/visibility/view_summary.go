@@ -3,17 +3,18 @@ package visibility
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"sort"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // SummaryView represents summary view that we show on the home page
 type SummaryView struct {
 	userID string
 	state  slinga.ServiceUsageState
-	users  slinga.GlobalUsers
+	users  GlobalUsers
 }
 
 // NewObjectView creates a new SummaryView
-func NewSummaryView(userID string, state slinga.ServiceUsageState, users slinga.GlobalUsers) SummaryView {
+func NewSummaryView(userID string, state slinga.ServiceUsageState, users GlobalUsers) SummaryView {
 	return SummaryView{
 		userID: userID,
 		state:  state,

@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +19,7 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
-	users := slinga.LoadUsers()
+	users := LoadUsers()
 	endpoints := visibility.Endpoints(getLoggedInUserId(r), users, state)
 
 	writeJSON(w, endpoints)
@@ -27,7 +28,7 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 func detailViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	userID := getLoggedInUserId(r)
-	view := visibility.NewDetails(userID, slinga.LoadUsers(), state)
+	view := visibility.NewDetails(userID, LoadUsers(), state)
 	writeJSON(w, view)
 }
 
@@ -63,7 +64,7 @@ func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 
 func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
-	users := slinga.LoadUsers()
+	users := LoadUsers()
 	userID := getLoggedInUserId(r)
 	view := visibility.NewSummaryView(userID, state, users)
 	writeJSON(w, view.GetData())
@@ -71,7 +72,7 @@ func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
 
 func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
 	states := slinga.LoadServiceUsageStatesAll()
-	users := slinga.LoadUsers()
+	users := LoadUsers()
 	userID := getLoggedInUserId(r)
 	view := visibility.NewTimelineView(userID, states, users)
 	writeJSON(w, view.GetData())

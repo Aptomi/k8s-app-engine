@@ -1,8 +1,9 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"sort"
+	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 type rLink struct {
@@ -19,7 +20,7 @@ type rEndpoint struct {
 }
 
 type userEndpoints struct {
-	User      *slinga.User
+	User      *User
 	Endpoints []rEndpoint
 }
 
@@ -27,7 +28,7 @@ type endpointsView struct {
 	Endpoints []userEndpoints
 }
 
-func Endpoints(currentUserID string, users slinga.GlobalUsers, state slinga.ServiceUsageState) endpointsView {
+func Endpoints(currentUserID string, users GlobalUsers, state slinga.ServiceUsageState) endpointsView {
 	uR := endpointsView{make([]userEndpoints, 0)}
 
 	isGlobalOp := false

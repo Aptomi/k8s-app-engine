@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadDependencies(t *testing.T) {
-	dependencies := LoadDependenciesFromDir("testdata/unittests")
+	dependencies := LoadDependenciesFromDir("../testdata/unittests")
 	assert.Equal(t, 4, len(dependencies.DependenciesByService["kafka"]), "Correct number of dependencies should be loaded")
 	assert.Equal(t, "dep_id_1", dependencies.DependenciesByService["kafka"][0].ID, "Dependency ID should be correct")
 	assert.Equal(t, 0, len(dependencies.DependenciesByService["kafka"][0].Labels), "First dependency should have 0 labels")

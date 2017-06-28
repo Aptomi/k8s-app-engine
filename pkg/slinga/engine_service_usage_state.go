@@ -6,6 +6,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
@@ -161,4 +162,9 @@ func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
 func (state ServiceUsageState) SaveServiceUsageState() {
 	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
 	SaveObjectToFile(fileName, state)
+}
+
+// Loads usage state from file
+func loadServiceUsageStateFromFile(fileName string) ServiceUsageState {
+	return *LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
 }

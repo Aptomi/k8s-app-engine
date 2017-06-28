@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	log "github.com/Sirupsen/logrus"
@@ -47,7 +47,7 @@ type GlobalDependencies struct {
 	DependenciesByID map[string]*Dependency
 }
 
-func (src *GlobalDependencies) count() int {
+func (src *GlobalDependencies) Count() int {
 	return CountElements(src.DependenciesByID)
 }
 
@@ -60,12 +60,12 @@ func NewGlobalDependencies() GlobalDependencies {
 }
 
 // Apply set of transformations to labels
-func (dependency *Dependency) getLabelSet() LabelSet {
+func (dependency *Dependency) GetLabelSet() LabelSet {
 	return LabelSet{Labels: dependency.Labels}
 }
 
 // Append a single dependency to an existing object
-func (src GlobalDependencies) appendDependency(dependency *Dependency) {
+func (src GlobalDependencies) AppendDependency(dependency *Dependency) {
 	if len(dependency.ID) <= 0 {
 		Debug.WithFields(log.Fields{
 			"dependency": dependency,
@@ -76,10 +76,10 @@ func (src GlobalDependencies) appendDependency(dependency *Dependency) {
 }
 
 // Copy the whole structure with dependencies
-func (src GlobalDependencies) makeCopy() GlobalDependencies {
+func (src GlobalDependencies) MakeCopy() GlobalDependencies {
 	result := NewGlobalDependencies()
 	for _, v := range src.DependenciesByID {
-		result.appendDependency(v)
+		result.AppendDependency(v)
 	}
 	return result
 }
@@ -94,7 +94,7 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 		t := loadDependenciesFromFile(fileName)
 		for _, d := range t {
 			if d.Enabled {
-				result.appendDependency(d)
+				result.AppendDependency(d)
 			}
 		}
 	}

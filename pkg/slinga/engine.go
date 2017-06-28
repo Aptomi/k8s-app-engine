@@ -1,7 +1,6 @@
 package slinga
 
 import (
-	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 )
 
@@ -94,7 +93,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.data.storeEdge(node.arrivalKey, node.serviceKey)
 
 	// Now, sort all components in topological order
-	componentsOrdered, err := node.service.getComponentsSortedTopologically()
+	componentsOrdered, err := node.service.GetComponentsSortedTopologically()
 	if err != nil {
 		return err
 	}
@@ -162,45 +161,3 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	return nil
 }
 
-// Topologically sort components and return true if there is a cycle detected
-func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]int) error {
-	colors[u.Name] = 1
-
-	for _, vName := range u.Dependencies {
-		v, exists := service.getComponentsMap()[vName]
-		if !exists {
-			return fmt.Errorf("Service %s has a dependency to non-existing component %s", service.Name, vName)
-		}
-		if vColor, ok := colors[v.Name]; !ok {
-			// not visited yet -> visit and exit if a cycle was found or another error occured
-			if err := service.dfsComponentSort(v, colors); err != nil {
-				return err
-			}
-		} else if vColor == 1 {
-			return fmt.Errorf("Component cycle detected while processing service %s", service.Name)
-		}
-	}
-
-	service.componentsOrdered = append(service.componentsOrdered, u)
-	colors[u.Name] = 2
-	return nil
-}
-
-// Sorts all components in a topological way
-func (service *Service) getComponentsSortedTopologically() ([]*ServiceComponent, error) {
-	if service.componentsOrdered == nil {
-		// Initiate colors
-		colors := make(map[string]int)
-
-		// Dfs
-		for _, c := range service.Components {
-			if _, ok := colors[c.Name]; !ok {
-				if err := service.dfsComponentSort(c, colors); err != nil {
-					return nil, err
-				}
-			}
-		}
-	}
-
-	return service.componentsOrdered, nil
-}

@@ -1,6 +1,9 @@
 package slinga
 
-import "strings"
+import (
+	"strings"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+)
 
 // ComponentUnresolvedName is placeholder for unresolved entries
 const ComponentUnresolvedName = "unknown"

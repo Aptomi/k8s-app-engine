@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import "reflect"
 
@@ -8,17 +8,17 @@ type LabelSet struct {
 }
 
 // Returns a set of user labels
-func (user *User) getLabelSet() LabelSet {
+func (user *User) GetLabelSet() LabelSet {
 	return LabelSet{Labels: user.Labels}
 }
 
 // Returns a set of user secrets
-func (user *User) getSecretSet() LabelSet {
+func (user *User) GetSecretSet() LabelSet {
 	return LabelSet{Labels: user.Secrets}
 }
 
 // Apply set of transformations to labels
-func (src *LabelSet) applyTransform(ops *LabelOperations) LabelSet {
+func (src *LabelSet) ApplyTransform(ops *LabelOperations) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
 
 	// copy original labels
@@ -42,7 +42,7 @@ func (src *LabelSet) applyTransform(ops *LabelOperations) LabelSet {
 }
 
 // Merge two sets of labels
-func (src LabelSet) addLabels(ops LabelSet) LabelSet {
+func (src LabelSet) AddLabels(ops LabelSet) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
 
 	// copy original labels
@@ -59,13 +59,13 @@ func (src LabelSet) addLabels(ops LabelSet) LabelSet {
 }
 
 // Function to compare two labels sets. If one is nil and another one is empty, it will return true as well
-func (src LabelSet) equal(dst LabelSet) bool {
+func (src LabelSet) Equal(dst LabelSet) bool {
 	if len(src.Labels) == 0 && len(dst.Labels) == 0 {
 		return true
 	}
 	return reflect.DeepEqual(src.Labels, dst.Labels)
 }
 
-func (cluster *Cluster) getLabelSet() LabelSet {
+func (cluster *Cluster) GetLabelSet() LabelSet {
 	return LabelSet{Labels: cluster.Labels}
 }

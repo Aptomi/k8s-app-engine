@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadSecrets(t *testing.T) {
-	secrets := LoadUserSecretsByIDFromDir("testdata/unittests", "1")
+	secrets := LoadUserSecretsByIDFromDir("../testdata/unittests", "1")
 
 	assert.Equal(t, 4, len(secrets))
 	assert.Equal(t, "aliceappkey", secrets["twitterAppKey"])
@@ -14,7 +14,7 @@ func TestLoadSecrets(t *testing.T) {
 	assert.Equal(t, "alicetokenkey", secrets["twitterTokenKey"])
 	assert.Equal(t, "alicetokensecret", secrets["twitterTokenSecret"])
 
-	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "2")
+	secrets = LoadUserSecretsByIDFromDir("../testdata/unittests", "2")
 
 	assert.Equal(t, 4, len(secrets))
 	assert.Equal(t, "bobappkey", secrets["twitterAppKey"])
@@ -22,25 +22,25 @@ func TestLoadSecrets(t *testing.T) {
 	assert.Equal(t, "bobtokenkey", secrets["twitterTokenKey"])
 	assert.Equal(t, "bobtokensecret", secrets["twitterTokenSecret"])
 
-	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "3")
+	secrets = LoadUserSecretsByIDFromDir("../testdata/unittests", "3")
 	assert.Equal(t, 1, len(secrets))
 	assert.Equal(t, "topsecret", secrets["someSecret"])
 
-	secrets = LoadUserSecretsByIDFromDir("testdata/unittests", "4")
+	secrets = LoadUserSecretsByIDFromDir("../testdata/unittests", "4")
 	assert.Equal(t, 0, len(secrets))
 }
 
 func TestUserWithSecrets(t *testing.T) {
-	userAlice := LoadUserByIDFromDir("testdata/unittests", "1")
-	secrets := userAlice.getSecretSet()
+	userAlice := LoadUserByIDFromDir("../testdata/unittests", "1")
+	secrets := userAlice.GetSecretSet()
 
 	assert.Equal(t, 4, len(secrets.Labels))
 	assert.Equal(t, "aliceappkey", secrets.Labels["twitterAppKey"])
 }
 
 func TestUserWithEmptySecrets(t *testing.T) {
-	userDave := LoadUserByIDFromDir("testdata/unittests", "5")
-	secrets := userDave.getSecretSet()
+	userDave := LoadUserByIDFromDir("../testdata/unittests", "5")
+	secrets := userDave.GetSecretSet()
 
 	assert.Equal(t, 0, len(secrets.Labels))
 }

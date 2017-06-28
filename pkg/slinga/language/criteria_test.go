@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/stretchr/testify/assert"

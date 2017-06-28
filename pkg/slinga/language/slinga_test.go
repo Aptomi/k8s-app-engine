@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadPolicy(t *testing.T) {
-	state := LoadPolicyFromDir("testdata/unittests")
+	state := LoadPolicyFromDir("../testdata/unittests")
 
 	assert.Equal(t, 2, len(state.Services), "Two services should be loaded")
 

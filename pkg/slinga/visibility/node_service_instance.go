@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/time"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"html"
 )
 
 type serviceInstanceNode struct {
 	key        string
-	service    *slinga.Service
+	service    *Service
 	context    string
 	allocation string
 	instance   *slinga.ComponentInstance
 	primary    bool
 }
 
-func newServiceInstanceNode(key string, service *slinga.Service, context string, allocation string, instance *slinga.ComponentInstance, primary bool) graphNode {
+func newServiceInstanceNode(key string, service *Service, context string, allocation string, instance *slinga.ComponentInstance, primary bool) graphNode {
 	return serviceInstanceNode{
 		key:        key,
 		service:    service,

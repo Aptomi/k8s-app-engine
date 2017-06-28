@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"encoding/json"
@@ -17,12 +17,6 @@ import (
 
 // LabelOperations defines the set of label manipulations (e.g. set/remove)
 type LabelOperations map[string]map[string]string
-
-// Criteria defines a structure with criteria accept/reject syntax
-type Criteria struct {
-	Accept []string
-	Reject []string
-}
 
 // Allocation defines within a Context for a given service
 type Allocation struct {
@@ -99,13 +93,13 @@ type Cluster struct {
 		Namespace       string
 
 		// store local proxy address when connection established
-		tillerHost string
+		TillerHost string
 
 		// store kube external address
-		kubeExternalAddress string
+		KubeExternalAddress string
 
 		// store istio svc name
-		istioSvc string
+		IstioSvc string
 	}
 }
 
@@ -117,15 +111,15 @@ type Policy struct {
 	Rules    GlobalRules
 }
 
-func (policy *Policy) countServices() int {
+func (policy *Policy) CountServices() int {
 	return CountElements(policy.Services)
 }
 
-func (policy *Policy) countContexts() int {
+func (policy *Policy) CountContexts() int {
 	return CountElements(policy.Contexts)
 }
 
-func (policy *Policy) countClusters() int {
+func (policy *Policy) CountClusters() int {
 	return CountElements(policy.Clusters)
 }
 
@@ -250,3 +244,77 @@ func (u *ServiceComponent) MarshalJSON() ([]byte, error) {
 		Alias:     (*Alias)(u),
 	})
 }
+
+// Lazily initializes and returns a map of name -> component
+func (service *Service) GetComponentsMap() map[string]*ServiceComponent {
+	if service.componentsMap == nil {
+		// Put all components into map
+		service.componentsMap = make(map[string]*ServiceComponent)
+		for _, c := range service.Components {
+			service.componentsMap[c.Name] = c
+		}
+	}
+	return service.componentsMap
+}
+
+// Topologically sort components of a given service and return true if there is a cycle detected
+func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]int) error {
+	colors[u.Name] = 1
+
+	for _, vName := range u.Dependencies {
+		v, exists := service.GetComponentsMap()[vName]
+		if !exists {
+			return fmt.Errorf("Service %s has a dependency to non-existing component %s", service.Name, vName)
+		}
+		if vColor, ok := colors[v.Name]; !ok {
+			// not visited yet -> visit and exit if a cycle was found or another error occured
+			if err := service.dfsComponentSort(v, colors); err != nil {
+				return err
+			}
+		} else if vColor == 1 {
+			return fmt.Errorf("Component cycle detected while processing service %s", service.Name)
+		}
+	}
+
+	service.componentsOrdered = append(service.componentsOrdered, u)
+	colors[u.Name] = 2
+	return nil
+}
+
+// GetComponentsSortedTopologically returns all components sorted in a topological order
+func (service *Service) GetComponentsSortedTopologically() ([]*ServiceComponent, error) {
+	if service.componentsOrdered == nil {
+		// Initiate colors
+		colors := make(map[string]int)
+
+		// Dfs
+		for _, c := range service.Components {
+			if _, ok := colors[c.Name]; !ok {
+				if err := service.dfsComponentSort(c, colors); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	return service.componentsOrdered, nil
+}
+
+
+// Check if context criteria is satisfied
+func (context *Context) Matches(labels LabelSet) bool {
+	return context.Criteria == nil || context.Criteria.allows(labels)
+}
+
+// Check if allocation criteria is satisfied
+func (allocation *Allocation) Matches(labels LabelSet) bool {
+	return allocation.Criteria == nil || allocation.Criteria.allows(labels)
+}
+
+// Resolve name for an allocation
+func (allocation *Allocation) ResolveName(user *User, labels LabelSet) error {
+	result, err := evaluateTemplate(allocation.Name, user, labels)
+	allocation.NameResolved = result
+	return err
+}
+

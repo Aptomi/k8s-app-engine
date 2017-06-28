@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/Frostman/aptomi/pkg/slinga/time"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"strings"
 )
 
-func (view SummaryView) getDependencyStats(dependency *slinga.Dependency) string {
+func (view SummaryView) getDependencyStats(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
@@ -15,14 +16,14 @@ func (view SummaryView) getDependencyStats(dependency *slinga.Dependency) string
 	return fmt.Sprintf("%s", runningTime)
 }
 
-func (view SummaryView) getResolvedClusterNameByDep(dependency *slinga.Dependency) string {
+func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
 	return view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels["cluster"]
 }
 
-func (view SummaryView) getResolvedContextNameByDep(dependency *slinga.Dependency) string {
+func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
@@ -30,13 +31,13 @@ func (view SummaryView) getResolvedContextNameByDep(dependency *slinga.Dependenc
 	return fmt.Sprintf("%s/%s", context, allocation)
 }
 
-func (view SummaryView) getRuleAppliedTo(rule *slinga.Rule) string {
+func (view SummaryView) getRuleAppliedTo(rule *Rule) string {
 	// TODO: complete
 	return "-1 instances"
 }
 
-func (view SummaryView) getRuleMatchedUsers(rule *slinga.Rule) []*slinga.User {
-	matchedUsers := make([]*slinga.User, 0)
+func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
+	matchedUsers := make([]*User, 0)
 
 	for _, user := range view.users.Users {
 		if rule.MatchUser(user) {

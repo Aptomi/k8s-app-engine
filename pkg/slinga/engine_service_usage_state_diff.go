@@ -8,6 +8,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -84,15 +85,15 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 	}
 	users := 0
 	if state.users != nil {
-		users = state.users.count()
+		users = state.users.Count()
 	}
 	return ServiceUsageStateSummary{
-		state.Policy.countServices(),
-		state.Policy.countContexts(),
-		state.Policy.countClusters(),
-		state.Policy.Rules.count(),
+		state.Policy.CountServices(),
+		state.Policy.CountContexts(),
+		state.Policy.CountClusters(),
+		state.Policy.Rules.Count(),
 		users,
-		state.Dependencies.count(),
+		state.Dependencies.Count(),
 	}
 }
 
@@ -492,7 +493,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 			}
 
 			serviceName, _, _, componentName := ParseServiceUsageKey(key)
-			component := diff.Next.Policy.Services[serviceName].getComponentsMap()[componentName]
+			component := diff.Next.Policy.Services[serviceName].GetComponentsMap()[componentName]
 
 			if component == nil {
 				Debug.WithFields(log.Fields{
@@ -509,7 +510,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := GetCodeExecutor(component.Code, key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -536,7 +537,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 			}
 
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
+			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{
 					"serviceKey": key,
@@ -552,7 +553,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				}).Info("Updating component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := GetCodeExecutor(component.Code, key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -579,7 +580,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 			}
 
 			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].getComponentsMap()[componentName]
+			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{
 					"serviceKey": key,
@@ -595,7 +596,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				}).Info("Destructing component")
 
 				if component.Code != nil {
-					codeExecutor, err := component.Code.GetCodeExecutor(key, diff.Prev.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
+					codeExecutor, err := GetCodeExecutor(component.Code, key, diff.Prev.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
 					if err != nil {
 						return err
 					}

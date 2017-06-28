@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/Knetic/govaluate"
@@ -7,6 +7,36 @@ import (
 	"strings"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
+
+// Criteria defines a structure with criteria accept/reject syntax
+type Criteria struct {
+	Accept []string
+	Reject []string
+}
+
+// Whether criteria evaluates to "true" for a given set of labels or not
+func (criteria *Criteria) allows(labels LabelSet) bool {
+	// If one of the reject criterias matches, then it's not allowed
+	for _, reject := range criteria.Reject {
+		if evaluate(reject, labels) {
+			return false
+		}
+	}
+
+	// If one of the accept criterias matches, then it's allowed
+	for _, reject := range criteria.Accept {
+		if evaluate(reject, labels) {
+			return true
+		}
+	}
+
+	// If the accept section is empty, return true
+	if len(criteria.Accept) == 0 {
+		return true
+	}
+
+	return false
+}
 
 // Evaluate an expression, given a set of labels
 func evaluate(expression string, params LabelSet) bool {

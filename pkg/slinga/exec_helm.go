@@ -21,6 +21,8 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
@@ -52,7 +54,7 @@ func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, 
 	}
 }
 
-func (cluster *Cluster) newKubeClient() (*restclient.Config, *internalclientset.Clientset, error) {
+func newKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Clientset, error) {
 	kubeContext := cluster.Metadata.KubeContext
 	config, err := kube.GetConfig(kubeContext).ClientConfig()
 	if err != nil {
@@ -66,11 +68,11 @@ func (cluster *Cluster) newKubeClient() (*restclient.Config, *internalclientset.
 }
 
 func (exec *HelmCodeExecutor) setupTillerConnection() error {
-	if exec.Cluster.Metadata.tillerHost != "" {
+	if exec.Cluster.Metadata.TillerHost != "" {
 		return nil
 	}
 
-	config, client, err := exec.Cluster.newKubeClient()
+	config, client, err := newKubeClient(exec.Cluster)
 	if err != nil {
 		return err
 	}
@@ -84,7 +86,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 		return err
 	}
 
-	exec.Cluster.Metadata.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
+	exec.Cluster.Metadata.TillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 
 	Debug.WithFields(log.Fields{
 		"port": tunnel.Local,
@@ -94,7 +96,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 }
 
 func (exec *HelmCodeExecutor) newHelmClient() *helm.Client {
-	return helm.NewClient(helm.Host(exec.Cluster.Metadata.tillerHost))
+	return helm.NewClient(helm.Host(exec.Cluster.Metadata.TillerHost))
 }
 
 func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
@@ -232,7 +234,7 @@ func (exec HelmCodeExecutor) Destroy() error {
 
 // Endpoints returns map from port type to url for all services of the current chart
 func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
-	_, clientset, err := exec.Cluster.newKubeClient()
+	_, clientset, err := newKubeClient(exec.Cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -264,9 +266,9 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 				sURL := fmt.Sprintf("%s:%d", kubeHost, port.NodePort)
 
 				// todo(slukjanov): could we somehow detect real schema? I think no :(
-				if stringContainsAny(port.Name, "https") {
+				if StringContainsAny(port.Name, "https") {
 					sURL = "https://" + sURL
-				} else if stringContainsAny(port.Name, "ui", "rest", "http", "grafana") {
+				} else if StringContainsAny(port.Name, "ui", "rest", "http", "grafana") {
 					sURL = "http://" + sURL
 				}
 
@@ -322,8 +324,8 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 }
 
 func (exec HelmCodeExecutor) getKubeExternalAddress(client internalversioncore.CoreInterface) (string, error) {
-	if exec.Cluster.Metadata.kubeExternalAddress != "" {
-		return exec.Cluster.Metadata.kubeExternalAddress, nil
+	if exec.Cluster.Metadata.KubeExternalAddress != "" {
+		return exec.Cluster.Metadata.KubeExternalAddress, nil
 	}
 
 	nodes, err := client.Nodes().List(api.ListOptions{})
@@ -356,6 +358,6 @@ func (exec HelmCodeExecutor) getKubeExternalAddress(client internalversioncore.C
 		return "", errors.New("Couldn't find external IP for cluster")
 	}
 
-	exec.Cluster.Metadata.kubeExternalAddress = addr
+	exec.Cluster.Metadata.KubeExternalAddress = addr
 	return addr, nil
 }

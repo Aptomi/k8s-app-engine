@@ -12,6 +12,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html

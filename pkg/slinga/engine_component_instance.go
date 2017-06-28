@@ -5,6 +5,7 @@ import (
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -99,7 +100,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 
 func (instance *ComponentInstance) addLabels(labels LabelSet) {
 	// Unfortunately it's pretty typical for us to come with different labels to a component instance, let's combine them all
-	instance.CalculatedLabels = instance.CalculatedLabels.addLabels(labels)
+	instance.CalculatedLabels = instance.CalculatedLabels.AddLabels(labels)
 }
 
 func (instance *ComponentInstance) addRuleLogEntries(dependencyID string, entry ...*RuleLogEntry) {

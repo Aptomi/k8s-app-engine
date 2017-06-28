@@ -1,4 +1,4 @@
-package slinga
+package util
 
 import (
 	"strings"
@@ -10,7 +10,8 @@ func EscapeName(str string) string {
 	return r.Replace(str)
 }
 
-func stringContainsAny(str string, substrs ...string) bool {
+// StringContainsAny returns if string contains any of the given substrings
+func StringContainsAny(str string, substrs ...string) bool {
 	for _, substr := range substrs {
 		if strings.Contains(str, substr) {
 			return true

@@ -5,17 +5,18 @@ import (
 	"sort"
 	"strconv"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // TimelineView represents timeline view
 type TimelineView struct {
 	userID string
 	states map[int]slinga.ServiceUsageState
-	users  slinga.GlobalUsers
+	users  GlobalUsers
 }
 
 // NewObjectView creates a new SummaryView
-func NewTimelineView(userID string, states map[int]slinga.ServiceUsageState, users slinga.GlobalUsers) TimelineView {
+func NewTimelineView(userID string, states map[int]slinga.ServiceUsageState, users GlobalUsers) TimelineView {
 	return TimelineView{
 		userID: userID,
 		states: states,

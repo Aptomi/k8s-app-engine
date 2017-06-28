@@ -1,7 +1,7 @@
-package slinga
+package language
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 // Loads service from file
@@ -17,11 +17,6 @@ func loadContextFromFile(fileName string) *Context {
 // Loads cluster from file
 func loadClusterFromFile(fileName string) *Cluster {
 	return LoadObjectFromFile(fileName, new(Cluster)).(*Cluster)
-}
-
-// Loads usage state from file
-func loadServiceUsageStateFromFile(fileName string) ServiceUsageState {
-	return *LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
 }
 
 // Loads rules from file

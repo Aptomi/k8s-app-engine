@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
 	"net/http"
 	"time"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 func getLoggedInUserId(r *http.Request) string {
@@ -31,7 +31,7 @@ func requireAuth(handler http.HandlerFunc) http.HandlerFunc {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("logUserID")
-	user := slinga.LoadUsers().Users[userID]
+	user := LoadUsers().Users[userID]
 
 	http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: userID, Path: "/"})
 	http.SetCookie(w, &http.Cookie{Name: "logUserName", Value: user.Name, Path: "/"})

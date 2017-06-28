@@ -3,6 +3,7 @@ package visibility
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"sort"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 type item struct {
@@ -21,7 +22,7 @@ type detail struct {
 	Summary         slinga.ServiceUsageStateSummary
 }
 
-func NewDetails(userID string, globalUsers slinga.GlobalUsers, state slinga.ServiceUsageState) detail {
+func NewDetails(userID string, globalUsers GlobalUsers, state slinga.ServiceUsageState) detail {
 	summary := state.GetSummary()
 	summary.Users = len(globalUsers.Users)
 	r := detail{

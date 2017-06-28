@@ -4,6 +4,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -87,7 +89,7 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resol
 		serviceName: dependency.Service,
 
 		// combining user labels and dependency labels
-		labels: user.getLabelSet().addLabels(user.getSecretSet()).addLabels(dependency.getLabelSet()),
+		labels: user.GetLabelSet().AddLabels(user.GetSecretSet()).AddLabels(dependency.GetLabelSet()),
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
@@ -203,7 +205,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	// Find matching context
 	var contextMatched *Context
 	for _, context := range contexts {
-		matched := context.matches(node.labels)
+		matched := context.Matches(node.labels)
 		node.ruleLogWriter.addRuleLogEntry(entryContextCriteriaTesting(context, matched))
 		if matched {
 			contextMatched = context
@@ -236,7 +238,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	// Find matching allocation
 	var allocationMatched *Allocation
 	for _, allocation := range node.context.Allocations {
-		matched := allocation.matches(node.labels)
+		matched := allocation.Matches(node.labels)
 		node.ruleLogWriter.addRuleLogEntry(entryAllocationCriteriaTesting(allocation, matched))
 		if !matched {
 			continue
@@ -266,7 +268,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 
 	// Check errors and resolve allocation name (it can be dynamic, depending on user labels)
 	if allocationMatched != nil {
-		err := allocationMatched.resolveName(node.user, node.labels)
+		err := allocationMatched.ResolveName(node.user, node.labels)
 		if err != nil {
 			Debug.WithFields(log.Fields{
 				"service":    node.service.Name,
@@ -297,8 +299,8 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 }
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
-	result := labels.applyTransform(operations)
-	if !labels.equal(result) {
+	result := labels.ApplyTransform(operations)
+	if !labels.Equal(result) {
 		node.ruleLogWriter.addRuleLogEntry(entryLabels(result))
 	}
 	return result
@@ -308,7 +310,7 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
-			matched := rule.FilterServices.match(labels, node.user, cluster)
+			matched := rule.FilterServices.Match(labels, node.user, cluster)
 			node.ruleLogWriter.addRuleLogEntry(entryAllocationGlobalRuleTesting(allocation, rule, matched))
 			if matched {
 				for _, action := range rule.Actions {
@@ -324,13 +326,13 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	componentCodeParams, err := node.component.processTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
+	componentCodeParams, err := ProcessTemplateParams(node.component, node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
 	node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	componentDiscoveryParams, err := node.component.processTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
+	componentDiscoveryParams, err := ProcessTemplateParams(node.component, node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)

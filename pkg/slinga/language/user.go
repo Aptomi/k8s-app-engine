@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/mattn/go-zglob"
@@ -25,7 +25,7 @@ type GlobalUsers struct {
 	Users map[string]*User
 }
 
-func (users *GlobalUsers) count() int {
+func (users *GlobalUsers) Count() int {
 	return CountElements(users.Users)
 }
 

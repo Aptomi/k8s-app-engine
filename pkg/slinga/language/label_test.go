@@ -1,4 +1,4 @@
-package slinga
+package language
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -12,7 +12,7 @@ func TestLabelOperations(t *testing.T) {
 	(*ops)["set"] = map[string]string{"a": "b", "c": "d"}
 	(*ops)["remove"] = map[string]string{"l1": ""}
 
-	labelsAfter := labelsBefore.applyTransform(ops)
+	labelsAfter := labelsBefore.ApplyTransform(ops)
 
 	assert.Equal(t, 4, len(labelsAfter.Labels), "Correct number of labels should be retained after transform")
 	assert.Equal(t, "2", labelsAfter.Labels["l2"], "Label 'l2' should be retained")
@@ -21,6 +21,6 @@ func TestLabelOperations(t *testing.T) {
 	assert.Equal(t, "d", labelsAfter.Labels["c"], "Label 'c' should be added")
 	assert.Equal(t, "", labelsAfter.Labels["l1"], "Label 'l1' should not be present")
 
-	labelsAfter = labelsAfter.applyTransform(nil)
+	labelsAfter = labelsAfter.ApplyTransform(nil)
 	assert.Equal(t, 4, len(labelsAfter.Labels), "Correct number of labels should be retained after transform")
 }

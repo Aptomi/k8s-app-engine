@@ -3,6 +3,7 @@ package slinga
 import (
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // FakeCodeExecutor is a mock executor that does nothing

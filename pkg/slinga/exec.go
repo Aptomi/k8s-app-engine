@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // CodeExecutor is an interface that allows to create different executors for component allocation (e.g. helm, kube.libsonnet, etc)
@@ -15,7 +16,7 @@ type CodeExecutor interface {
 }
 
 // GetCodeExecutor returns an executor based on code.Type
-func (code *Code) GetCodeExecutor(key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
+func GetCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
 		return NewHelmCodeExecutor(code, key, codeParams, clusters)

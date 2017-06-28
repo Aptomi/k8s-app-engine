@@ -8,6 +8,7 @@ import (
 	"strings"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // IstioRouteRule is istio route rule
@@ -30,7 +31,7 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	existingRules := make([]*IstioRouteRule, 0)
 
 	for _, cluster := range state.Policy.Clusters {
-		existingRules = append(existingRules, cluster.getIstioRouteRules()...)
+		existingRules = append(existingRules, getIstioRouteRules(cluster)...)
 
 		progressBar.Incr()
 	}
@@ -109,7 +110,7 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 
 func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, error) {
 	serviceName, _, _, componentName := ParseServiceUsageKey(key)
-	component := usage.Policy.Services[serviceName].getComponentsMap()[componentName]
+	component := usage.Policy.Services[serviceName].GetComponentsMap()[componentName]
 
 	labels := usage.GetResolvedData().ComponentInstanceMap[key].CalculatedLabels
 
@@ -133,8 +134,8 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 		users = append(users, usage.users.Users[userID])
 	}
 
-	if !usage.Policy.Rules.allowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
-		codeExecutor, err := component.Code.GetCodeExecutor(key, usage.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
+	if !usage.Policy.Rules.AllowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
+		codeExecutor, err := GetCodeExecutor(component.Code, key, usage.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +161,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 
 // httpServices returns list of services for the current chart
 func (exec HelmCodeExecutor) httpServices() ([]string, error) {
-	_, clientset, err := exec.Cluster.newKubeClient()
+	_, clientset, err := newKubeClient(exec.Cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -197,9 +198,9 @@ func (exec HelmCodeExecutor) httpServices() ([]string, error) {
 	return nil, nil
 }
 
-func (cluster *Cluster) getIstioRouteRules() []*IstioRouteRule {
+func getIstioRouteRules(cluster *Cluster) []*IstioRouteRule {
 	cmd := "get route-rules"
-	rulesStr, err := cluster.runIstioCmd(cmd)
+	rulesStr, err := runIstioCmd(cluster, cmd)
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"cluster": cluster.Name,
@@ -231,7 +232,7 @@ func (rule *IstioRouteRule) create() {
 
 	ruleFile := WriteTempFile("istio-rule", content)
 
-	out, err := rule.Cluster.runIstioCmd("create -f " + ruleFile.Name())
+	out, err := runIstioCmd(rule.Cluster, "create -f " + ruleFile.Name())
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
@@ -243,7 +244,7 @@ func (rule *IstioRouteRule) create() {
 }
 
 func (rule *IstioRouteRule) delete() {
-	out, err := rule.Cluster.runIstioCmd("delete route-rule " + rule.Service)
+	out, err := runIstioCmd(rule.Cluster, "delete route-rule " + rule.Service)
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
@@ -253,10 +254,10 @@ func (rule *IstioRouteRule) delete() {
 	}
 }
 
-func (cluster *Cluster) runIstioCmd(cmd string) (string, error) {
-	istioSvc := cluster.Metadata.istioSvc
+func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
+	istioSvc := cluster.Metadata.IstioSvc
 	if istioSvc == "" {
-		_, clientset, err := cluster.newKubeClient()
+		_, clientset, err := newKubeClient(cluster)
 		if err != nil {
 			return "", err
 		}
@@ -306,7 +307,7 @@ func (cluster *Cluster) runIstioCmd(cmd string) (string, error) {
 						}
 					}
 
-					cluster.Metadata.istioSvc = istioSvc
+					cluster.Metadata.IstioSvc = istioSvc
 					break
 				}
 			}
@@ -320,7 +321,7 @@ func (cluster *Cluster) runIstioCmd(cmd string) (string, error) {
 
 	content := "set -e\n"
 	content += "kubectl config use-context " + cluster.Name + " 1>/dev/null\n"
-	content += "istioctl --configAPIService " + cluster.Metadata.istioSvc + " --namespace " + cluster.Metadata.Namespace + " "
+	content += "istioctl --configAPIService " + cluster.Metadata.IstioSvc + " --namespace " + cluster.Metadata.Namespace + " "
 	content += cmd + "\n"
 
 	cmdFile := WriteTempFile("istioctl-cmd", content)

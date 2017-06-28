@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 func TestPolicyResolve(t *testing.T) {
@@ -72,8 +73,8 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
-	dependenciesNext := dependenciesPrev.makeCopy()
-	dependenciesNext.appendDependency(
+	dependenciesNext := dependenciesPrev.MakeCopy()
+	dependenciesNext.AppendDependency(
 		&Dependency{
 			ID:      "dep_id_5",
 			UserID:  "5",
@@ -122,8 +123,8 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	time.Sleep(25 * time.Millisecond)
 
 	// Add another dependency, resolve, calculate difference against prev state, emulate save/load
-	dependenciesNext := dependenciesPrev.makeCopy()
-	dependenciesNext.appendDependency(
+	dependenciesNext := dependenciesPrev.MakeCopy()
+	dependenciesNext.AppendDependency(
 		&Dependency{
 			ID:      "dep_id_5",
 			UserID:  "5",
@@ -182,7 +183,7 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 	state := LoadPolicyFromDir("testdata/unittests")
 	service := state.Services["kafka"]
 
-	c, err := service.getComponentsSortedTopologically()
+	c, err := service.GetComponentsSortedTopologically()
 	assert.Nil(t, err, "Service components should be topologically sorted without errors")
 
 	assert.Equal(t, len(c), 3, "Component topological sort should produce correct number of values")

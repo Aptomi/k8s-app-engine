@@ -3,6 +3,7 @@ package slinga
 import (
 	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // RuleLogType is a type of the log entry (e.g. rule evaluation, or just informational record)
