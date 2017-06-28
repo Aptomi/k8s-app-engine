@@ -21,4 +21,3 @@ func (allocation *Allocation) ResolveName(user *User, labels LabelSet) error {
 	allocation.NameResolved = result
 	return err
 }
-

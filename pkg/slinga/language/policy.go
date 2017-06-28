@@ -121,4 +121,3 @@ func LoadPolicyFromDir(baseDir string) Policy {
 
 	return s
 }
-

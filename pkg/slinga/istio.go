@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"fmt"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"

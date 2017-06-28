@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
 	"fmt"
+	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/spf13/cobra"
 	"sort"
 )

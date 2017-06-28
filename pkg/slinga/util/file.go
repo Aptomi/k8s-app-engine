@@ -48,11 +48,11 @@ func CopyDirectory(srcDir string, dstDir string) (err error) {
 	}
 
 	/*
-	// ensure destination directory does not already exist
-	_, err = os.Open(dstDir)
-	if !os.IsNotExist(err) {
-		return fmt.Errorf("Destination directory already exists")
-	}
+		// ensure destination directory does not already exist
+		_, err = os.Open(dstDir)
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("Destination directory already exists")
+		}
 	*/
 
 	// create destination dir

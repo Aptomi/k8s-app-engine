@@ -11,7 +11,7 @@ type TimeDiff struct {
 	duration time.Duration
 }
 
-// NewDiff wraps time.Duration into TimeDiff
+// NewTimeDiff wraps time.Duration into TimeDiff
 func NewTimeDiff(duration time.Duration) *TimeDiff {
 	return &TimeDiff{duration: duration}
 }

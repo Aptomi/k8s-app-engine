@@ -22,6 +22,7 @@ type detail struct {
 	Summary         slinga.ServiceUsageStateSummary
 }
 
+// NewDetails returns detail object
 func NewDetails(userID string, globalUsers GlobalUsers, state slinga.ServiceUsageState) detail {
 	summary := state.GetSummary()
 	summary.Users = len(globalUsers.Users)

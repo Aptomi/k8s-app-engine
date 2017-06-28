@@ -2,12 +2,12 @@ package language
 
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 /*

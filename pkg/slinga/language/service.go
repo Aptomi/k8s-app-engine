@@ -1,8 +1,8 @@
 package language
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 

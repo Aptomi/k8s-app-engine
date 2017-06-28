@@ -2,10 +2,10 @@ package language
 
 import (
 	"fmt"
+	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 // LabelsFilter is a labels filter

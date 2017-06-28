@@ -124,4 +124,3 @@ func ProcessTemplateParams(template ParameterTree, componentKey string, labels L
 	}
 	return result, err
 }
-
