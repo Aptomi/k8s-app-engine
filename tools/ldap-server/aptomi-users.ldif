@@ -1,0 +1,178 @@
+dn: ou=people,o=aptomiOrg
+changetype: add
+objectclass: organizationalUnit
+objectclass: top
+ou: people
+
+dn: cn=Alice,ou=people,o=aptomiOrg
+changetype: add
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+cn: Alice
+description: Alice (Developer/Service Consumer)
+sn: Alice
+mail: alice@aptomiorg.com
+userpassword: alice123
+
+dn: cn=Bob,ou=people,o=aptomiOrg
+changetype: add
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+cn: Bob
+description: Bob (Developer/Service Consumer)
+sn: Bob
+mail: bob@aptomiorg.com
+userpassword: bob123
+
+dn: cn=Carol,ou=people,o=aptomiOrg
+changetype: add
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+cn: Carol
+description: Carol (Developer/Service Consumer)
+sn: Carol
+mail: carol@aptomiorg.com
+userpassword: carol123
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: add
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+cn: Sam
+description: Sam (Global Ops). He controls global rules
+sn: Sam
+mail: sam@aptomiorg.com
+userpassword: sam123
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: add
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+cn: John
+description: John (Ops for 'twitter-stats' service). He controls its sharing/consumption (prod/stage)
+sn: John
+mail: john@aptomiorg.com
+userpassword: john123
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: add
+objectclass: inetOrgPerson
+objectclass: organizationalPerson
+objectclass: person
+objectclass: top
+cn: Frank
+description: Frank (Ops for 'analytics-pipeline' service). He controls its sharing/consumption (prod/stage)
+sn: Frank
+mail: frank@aptomiorg.com
+userpassword: frank123
+
+dn: cn=Alice,ou=people,o=aptomiOrg
+changetype: modify
+add: organizationName
+organizationName: dev
+
+dn: cn=Bob,ou=people,o=aptomiOrg
+changetype: modify
+add: organizationName
+organizationName: dev
+
+dn: cn=Carol,ou=people,o=aptomiOrg
+changetype: modify
+add: organizationName
+organizationName: dev
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: modify
+add: organizationName
+organizationName: it
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: modify
+add: organizationName
+organizationName: dev
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: organizationName
+organizationName: it
+
+dn: cn=Alice,ou=people,o=aptomiOrg
+changetype: modify
+add: objectclass
+objectclass: aptomiperson
+
+dn: cn=Bob,ou=people,o=aptomiOrg
+changetype: modify
+add: objectclass
+objectclass: aptomiperson
+
+dn: cn=Carol,ou=people,o=aptomiOrg
+changetype: modify
+add: objectclass
+objectclass: aptomiperson
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: modify
+add: objectclass
+objectclass: aptomiperson
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: modify
+add: objectclass
+objectclass: aptomiperson
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: objectclass
+objectclass: aptomiperson
+
+dn: cn=Carol,ou=people,o=aptomiOrg
+changetype: modify
+add: team
+team: mobile-dev
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: team
+team: global-ops-team
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: modify
+add: team
+team: web-ops-team
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: modify
+add: team
+team: analytics-ops-team
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: isglobalops
+isglobalops: true
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: isoperator
+isoperator: true
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: modify
+add: isoperator
+isoperator: true
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: modify
+add: isoperator
+isoperator: true
+

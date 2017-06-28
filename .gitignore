@@ -5,6 +5,7 @@ graph*.png
 graph*.dot
 test.go
 debug*.log
+apacheds-*
 
 db
 
