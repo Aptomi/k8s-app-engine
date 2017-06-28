@@ -3,7 +3,6 @@ package slinga
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 )

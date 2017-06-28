@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	"github.com/Frostman/aptomi/pkg/slinga/time"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"html"
 )
 
@@ -76,7 +76,7 @@ func (n serviceInstanceNode) getLabel() string {
 			html.EscapeString(n.service.Name),
 			len(n.service.Components), // TODO: fix
 			html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
-			html.EscapeString(time.NewDiff(n.instance.GetRunningTime()).Humanize()),
+			html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 		)
 	}
 	return fmt.Sprintf(
@@ -85,7 +85,7 @@ func (n serviceInstanceNode) getLabel() string {
 			running: <i>%s</i>`,
 		html.EscapeString(n.service.Name),
 		html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
-		html.EscapeString(time.NewDiff(n.instance.GetRunningTime()).Humanize()),
+		html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 	)
 }
 

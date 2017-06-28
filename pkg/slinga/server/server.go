@@ -5,7 +5,7 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	"github.com/Frostman/aptomi/pkg/slinga/visibility"
+	"github.com/Frostman/aptomi/pkg/slinga/server/visibility"
 	"github.com/gorilla/handlers"
 	"net/http"
 	"os"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	"github.com/Frostman/aptomi/pkg/slinga/time"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"strings"
 )
 
@@ -12,7 +12,7 @@ func (view SummaryView) getDependencyStats(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	runningTime := time.NewDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
+	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
 	return fmt.Sprintf("%s", runningTime)
 }
 
@@ -49,7 +49,7 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 }
 
 func (view SummaryView) getInstanceStats(instance *slinga.ComponentInstance) string {
-	runningTime := time.NewDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key].GetRunningTime()).Humanize()
+	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key].GetRunningTime()).Humanize()
 	return fmt.Sprintf("%s", runningTime)
 }
 

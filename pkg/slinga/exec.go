@@ -3,7 +3,7 @@ package slinga
 import (
 	"errors"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"time"
 )
 

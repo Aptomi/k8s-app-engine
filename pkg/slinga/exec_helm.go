@@ -20,7 +20,6 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 )

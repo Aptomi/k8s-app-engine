@@ -1,4 +1,4 @@
-package time
+package util
 
 import (
 	"fmt"
@@ -6,38 +6,38 @@ import (
 	"time"
 )
 
-// Diff is wrapper for time.Duration with custom methods
-type Diff struct {
+// TimeDiff is wrapper for time.Duration with custom methods
+type TimeDiff struct {
 	duration time.Duration
 }
 
-// NewDiff wraps time.Duration into Diff
-func NewDiff(duration time.Duration) *Diff {
-	return &Diff{duration: duration}
+// NewDiff wraps time.Duration into TimeDiff
+func NewTimeDiff(duration time.Duration) *TimeDiff {
+	return &TimeDiff{duration: duration}
 }
 
 // InSeconds returns time duration in seconds
-func (d *Diff) InSeconds() int {
+func (d *TimeDiff) InSeconds() int {
 	return int(d.duration.Seconds())
 }
 
 // InMinutes returns time duration in minutes
-func (d *Diff) InMinutes() int {
+func (d *TimeDiff) InMinutes() int {
 	return int(d.duration.Minutes())
 }
 
 // InHours returns time duration in hours
-func (d *Diff) InHours() int {
+func (d *TimeDiff) InHours() int {
 	return int(d.duration.Hours())
 }
 
 // InDays returns time duration in days
-func (d *Diff) InDays() int {
+func (d *TimeDiff) InDays() int {
 	return int(math.Floor(float64(d.InSeconds()) / 86400))
 }
 
 // Humanize returns duration as short human-readable string
-func (d *Diff) Humanize() string {
+func (d *TimeDiff) Humanize() string {
 	diffInSeconds := d.InSeconds()
 
 	if diffInSeconds <= 45 {
