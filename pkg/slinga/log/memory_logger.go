@@ -5,7 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// PlainMemoryLogger represents a logger that logsinto memory
+// PlainMemoryLogger represents a logger that logs into memory
 type PlainMemoryLogger struct {
 	buf    *bytes.Buffer
 	logger *log.Logger
