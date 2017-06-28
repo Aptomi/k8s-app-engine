@@ -64,6 +64,8 @@ func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, user
 	}
 }
 
+// GetUserLoader is a getter for a private field userLoader
+// The field userLoader has to stay private, so it won't get serialized into YAML
 func (state *ServiceUsageState) GetUserLoader() UserLoader {
 	return state.userLoader
 }

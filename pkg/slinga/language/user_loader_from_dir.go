@@ -1,15 +1,15 @@
 package language
 
 import (
-	"github.com/mattn/go-zglob"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+	"github.com/mattn/go-zglob"
 	"strconv"
 )
 
 // UserLoaderFromDir allows aptomi to load users from files in a given directory
 type UserLoaderFromDir struct {
-	baseDir string
+	baseDir     string
 	cachedUsers *GlobalUsers
 }
 

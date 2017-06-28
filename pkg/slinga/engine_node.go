@@ -66,7 +66,6 @@ type resolutionNode struct {
 // Creates a new resolution node as a starting point for resolving a particular dependency
 func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resolutionNode {
 
-
 	user := state.userLoader.LoadUserByID(dependency.UserID)
 	if user == nil {
 		// Resolving allocations for service

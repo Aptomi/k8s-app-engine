@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"github.com/spf13/cobra"
 	"sort"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 var endpointCmd = &cobra.Command{
