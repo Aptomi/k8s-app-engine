@@ -3,13 +3,13 @@ package server
 import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"github.com/Frostman/aptomi/pkg/slinga/visibility"
 	"github.com/gorilla/handlers"
 	"net/http"
 	"os"
 	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,14 +20,14 @@ func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
 	state := slinga.LoadServiceUsageState()
 	users := LoadUsers()
-	endpoints := visibility.Endpoints(getLoggedInUserId(r), users, state)
+	endpoints := visibility.Endpoints(getLoggedInUserID(r), users, state)
 
 	writeJSON(w, endpoints)
 }
 
 func detailViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
-	userID := getLoggedInUserId(r)
+	userID := getLoggedInUserID(r)
 	view := visibility.NewDetails(userID, LoadUsers(), state)
 	writeJSON(w, view)
 }
@@ -65,7 +65,7 @@ func objectViewHandler(w http.ResponseWriter, r *http.Request) {
 func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
 	state := slinga.LoadServiceUsageState()
 	users := LoadUsers()
-	userID := getLoggedInUserId(r)
+	userID := getLoggedInUserID(r)
 	view := visibility.NewSummaryView(userID, state, users)
 	writeJSON(w, view.GetData())
 }
@@ -73,7 +73,7 @@ func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
 func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
 	states := slinga.LoadServiceUsageStatesAll()
 	users := LoadUsers()
-	userID := getLoggedInUserId(r)
+	userID := getLoggedInUserID(r)
 	view := visibility.NewTimelineView(userID, states, users)
 	writeJSON(w, view.GetData())
 }

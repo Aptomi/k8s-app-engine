@@ -3,16 +3,16 @@ package slinga
 import (
 	"bytes"
 	"fmt"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	log "github.com/Sirupsen/logrus"
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"
 	"os/exec"
 	"strconv"
 	"strings"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html

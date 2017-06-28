@@ -3,12 +3,12 @@ package language
 import (
 	"encoding/json"
 	"fmt"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 /*
@@ -72,21 +72,21 @@ type Service struct {
 }
 
 // UnmarshalYAML is a custom unmarshaller for Service, which sets Enabled to True before unmarshalling
-func (s *Service) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (service *Service) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type Alias Service
 	instance := Alias{Enabled: true}
 	if err := unmarshal(&instance); err != nil {
 		return err
 	}
-	*s = Service(instance)
+	*service = Service(instance)
 	return nil
 }
 
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	Name   string
-	Type   string
-	Labels map[string]string
+	Name     string
+	Type     string
+	Labels   map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
@@ -111,14 +111,17 @@ type Policy struct {
 	Rules    GlobalRules
 }
 
+// CountServices returns number of services in the policy
 func (policy *Policy) CountServices() int {
 	return CountElements(policy.Services)
 }
 
+// CountContexts returns number of contexts in the policy
 func (policy *Policy) CountContexts() int {
 	return CountElements(policy.Contexts)
 }
 
+// CountClusters returns number of clusters in the policy
 func (policy *Policy) CountClusters() int {
 	return CountElements(policy.Clusters)
 }
@@ -129,7 +132,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 		Services: make(map[string]*Service),
 		Contexts: make(map[string][]*Context),
 		Clusters: make(map[string]*Cluster),
-		Rules: NewGlobalRules(),
+		Rules:    NewGlobalRules(),
 	}
 
 	// read all clusters
@@ -142,14 +145,14 @@ func LoadPolicyFromDir(baseDir string) Policy {
 
 	// read all services
 	/*
-	files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeService))
-	sort.Strings(files)
-	for _, f := range files {
-		service := loadServiceFromFile(f)
-		if service.Enabled {
-			s.Services[service.Name] = service
+		files, _ = zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeService))
+		sort.Strings(files)
+		for _, f := range files {
+			service := loadServiceFromFile(f)
+			if service.Enabled {
+				s.Services[service.Name] = service
+			}
 		}
-	}
 	*/
 
 	// TODO: remove later - it's a temporary hack for the demo, so we can enable/disable groups of services
@@ -159,9 +162,9 @@ func LoadPolicyFromDir(baseDir string) Policy {
 		service := loadServiceFromFile(f)
 		s.Services[service.Name] = service
 	}
-	toDisable := map[string][]string {
+	toDisable := map[string][]string{
 		"analytics_pipeline": {"hdfs", "kafka", "spark", "zookeeper"},
-		"twitter_stats": {"istio"},
+		"twitter_stats":      {"istio"},
 	}
 	disabled := make(map[string]bool)
 	changed := true
@@ -232,7 +235,7 @@ func ResetAptomiState() {
 
 // MarshalJSON marshals service component into a structure without freeform parameters, so UI doesn't fail
 // See http://choly.ca/post/go-json-marshalling/
-func (u *ServiceComponent) MarshalJSON() ([]byte, error) {
+func (component *ServiceComponent) MarshalJSON() ([]byte, error) {
 	type Alias ServiceComponent
 	return json.Marshal(&struct {
 		Code      *Code
@@ -241,11 +244,11 @@ func (u *ServiceComponent) MarshalJSON() ([]byte, error) {
 	}{
 		Code:      nil,
 		Discovery: nil,
-		Alias:     (*Alias)(u),
+		Alias:     (*Alias)(component),
 	})
 }
 
-// Lazily initializes and returns a map of name -> component
+// GetComponentsMap lazily initializes and returns a map of name -> component
 func (service *Service) GetComponentsMap() map[string]*ServiceComponent {
 	if service.componentsMap == nil {
 		// Put all components into map
@@ -300,21 +303,19 @@ func (service *Service) GetComponentsSortedTopologically() ([]*ServiceComponent,
 	return service.componentsOrdered, nil
 }
 
-
-// Check if context criteria is satisfied
+// Matches checks if context criteria is satisfied
 func (context *Context) Matches(labels LabelSet) bool {
 	return context.Criteria == nil || context.Criteria.allows(labels)
 }
 
-// Check if allocation criteria is satisfied
+// Matches checks if allocation criteria is satisfied
 func (allocation *Allocation) Matches(labels LabelSet) bool {
 	return allocation.Criteria == nil || allocation.Criteria.allows(labels)
 }
 
-// Resolve name for an allocation
+// ResolveName resolves name for an allocation
 func (allocation *Allocation) ResolveName(user *User, labels LabelSet) error {
 	result, err := evaluateTemplate(allocation.Name, user, labels)
 	allocation.NameResolved = result
 	return err
 }
-

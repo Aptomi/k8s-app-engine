@@ -2,13 +2,13 @@ package slinga
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"github.com/gosuri/uiprogress"
-	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	log "github.com/Sirupsen/logrus"
+	"github.com/gosuri/uiprogress"
+	"time"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -50,6 +50,7 @@ func (state *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Se
 	return result
 }
 
+// ServiceUsageStateSummary returns integer counts for all policy objects
 type ServiceUsageStateSummary struct {
 	Services     int
 	Contexts     int
@@ -79,6 +80,7 @@ func (summary ServiceUsageStateSummary) equal(that ServiceUsageStateSummary) boo
 	return true
 }
 
+// GetSummary returns summary object for the policy
 func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 	if state.Policy == nil {
 		return ServiceUsageStateSummary{}
@@ -317,7 +319,7 @@ func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, up
 	}
 }
 
-// This method became one of the key methods.
+// ShouldGenerateNewRevision became one of the key methods.
 // If it returns false, then new run and new revision will not be generated
 func (diff *ServiceUsageStateDiff) ShouldGenerateNewRevision() bool {
 	if !diff.Next.GetSummary().equal(diff.Prev.GetSummary()) {
@@ -401,9 +403,8 @@ func getSummaryLine(name string, cntPrev int, cntNext int) string {
 			delta = fmt.Sprintf(" [%+d]", cntNext-cntPrev)
 		}
 		return fmt.Sprintf("  %s: %d%s", name, cntNext, delta)
-	} else {
-		return fmt.Sprintf("  %s: %d", name, cntPrev)
 	}
+	return fmt.Sprintf("  %s: %d", name, cntPrev)
 }
 
 // PrintSummary prints policy object counts to the screen
@@ -419,7 +420,7 @@ func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
 	log.Println(getSummaryLine("Users", next.Users, next.Users)) // Users we always print current number
 }
 
-// Print method prints changes onto the screen (i.e. delta - what got added/removed)
+// StoreDiffAsText method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
 	memLog := NewPlainMemoryLogger(verbose)
 	diff.writeSummary(memLog.GetLogger())
@@ -536,7 +537,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{
@@ -579,7 +580,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/ , _ /*allocationName*/ , componentName := ParseServiceUsageKey(key)
+			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
 			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{

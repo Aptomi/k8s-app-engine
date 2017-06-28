@@ -1,12 +1,12 @@
 package language
 
 import (
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 /*
@@ -27,13 +27,13 @@ type Dependency struct {
 }
 
 // UnmarshalYAML is a custom unmarshaller for Dependency, which sets Enabled to True before unmarshalling
-func (s *Dependency) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (dependency *Dependency) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type Alias Dependency
 	instance := Alias{Enabled: true}
 	if err := unmarshal(&instance); err != nil {
 		return err
 	}
-	*s = Dependency(instance)
+	*dependency = Dependency(instance)
 	return nil
 }
 
@@ -47,6 +47,7 @@ type GlobalDependencies struct {
 	DependenciesByID map[string]*Dependency
 }
 
+// Count returns total number of dependencies
 func (src *GlobalDependencies) Count() int {
 	return CountElements(src.DependenciesByID)
 }
@@ -59,12 +60,12 @@ func NewGlobalDependencies() GlobalDependencies {
 	}
 }
 
-// Apply set of transformations to labels
+// GetLabelSet applies set of transformations to labels
 func (dependency *Dependency) GetLabelSet() LabelSet {
 	return LabelSet{Labels: dependency.Labels}
 }
 
-// Append a single dependency to an existing object
+// AppendDependency appends a single dependency to an existing object
 func (src GlobalDependencies) AppendDependency(dependency *Dependency) {
 	if len(dependency.ID) <= 0 {
 		Debug.WithFields(log.Fields{
@@ -75,7 +76,7 @@ func (src GlobalDependencies) AppendDependency(dependency *Dependency) {
 	src.DependenciesByID[dependency.ID] = dependency
 }
 
-// Copy the whole structure with dependencies
+// MakeCopy copies the whole structure with dependencies
 func (src GlobalDependencies) MakeCopy() GlobalDependencies {
 	result := NewGlobalDependencies()
 	for _, v := range src.DependenciesByID {

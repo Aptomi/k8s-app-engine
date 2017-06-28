@@ -1,11 +1,11 @@
 package slinga
 
 import (
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	log "github.com/Sirupsen/logrus"
 	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -91,7 +91,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		Debug.WithFields(log.Fields{
-			"key":                 instance.Key,
+			"key": instance.Key,
 			"prevDiscoveryParams": instance.CalculatedDiscovery,
 			"nextDiscoveryParams": discoveryParams,
 		}).Panic("Invalid policy. Arrived to the same component with different discovery parameters")

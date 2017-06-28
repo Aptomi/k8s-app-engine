@@ -2,9 +2,9 @@ package language
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	log "github.com/Sirupsen/logrus"
 )
 
 // LabelsFilter is a labels filter
@@ -31,7 +31,7 @@ type Rule struct {
 	Actions        []*Action
 }
 
-// Describe return full description of the rule - conditions and actions description
+// DescribeConditions returns full description of the rule - conditions and actions description
 func (rule *Rule) DescribeConditions() map[string][]string {
 	descr := make(map[string][]string)
 
@@ -59,6 +59,7 @@ func (rule *Rule) DescribeConditions() map[string][]string {
 	return descr
 }
 
+// DescribeActions describes all actions
 func (rule *Rule) DescribeActions() []string {
 	descr := make([]string, 0)
 
@@ -75,18 +76,19 @@ func (rule *Rule) DescribeActions() []string {
 	return descr
 }
 
+// MatchUser returns if a rue matches a user
 func (rule *Rule) MatchUser(user *User) bool {
 	return rule.FilterServices != nil && rule.FilterServices.Match(LabelSet{}, user, nil)
 }
 
 // UnmarshalYAML is a custom unmarshaller for Rule, which sets Enabled to True before unmarshalling
-func (s *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (rule *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type Alias Rule
 	instance := Alias{Enabled: true}
 	if err := unmarshal(&instance); err != nil {
 		return err
 	}
-	*s = Rule(instance)
+	*rule = Rule(instance)
 	return nil
 }
 
@@ -96,6 +98,7 @@ type GlobalRules struct {
 	Rules map[string][]*Rule
 }
 
+// AllowsIngressAccess returns true if a rule allows ingress access
 func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*User, cluster *Cluster) bool {
 	if rules, ok := globalRules.Rules["ingress"]; ok {
 		for _, rule := range rules {
@@ -116,6 +119,7 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 	return true
 }
 
+// Match returns if a given parameters match a service filter
 func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster) bool {
 	// check if service filters for another service labels
 	if filter.Labels != nil && !filter.Labels.allows(labels) {
@@ -154,6 +158,7 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 	}
 }
 
+// Count returns the total number of rules
 func (globalRules *GlobalRules) Count() int {
 	return CountElements(globalRules.Rules)
 }

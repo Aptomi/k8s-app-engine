@@ -1,11 +1,11 @@
 package slinga
 
 import (
-	log "github.com/Sirupsen/logrus"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	log "github.com/Sirupsen/logrus"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -125,9 +125,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 func (node *resolutionNode) debugResolvingDependencyStart() {
 	Debug.WithFields(log.Fields{
 		"dependency": node.dependency,
-		"user":    node.user.Name,
-		"labels":  node.labels,
-		"dependsOn": node.serviceName,
+		"user":       node.user.Name,
+		"labels":     node.labels,
+		"dependsOn":  node.serviceName,
 	}).Info("Resolving dependency")
 
 	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyStart(node.serviceName, node.user, node.dependency))
@@ -137,9 +137,9 @@ func (node *resolutionNode) debugResolvingDependencyStart() {
 func (node *resolutionNode) debugResolvingDependencyEnd() {
 	Debug.WithFields(log.Fields{
 		"dependency": node.dependency,
-		"user":    node.user.Name,
-		"labels":  node.labels,
-		"dependsOn": node.serviceName,
+		"user":       node.user.Name,
+		"labels":     node.labels,
+		"dependsOn":  node.serviceName,
 	}).Info("Successfully resolved dependency")
 
 	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyEnd(node.serviceName, node.user, node.dependency))
@@ -326,13 +326,13 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	componentCodeParams, err := ProcessTemplateParams(node.component, node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
+	componentCodeParams, err := ProcessTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
 	node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	componentDiscoveryParams, err := ProcessTemplateParams(node.component, node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
+	componentDiscoveryParams, err := ProcessTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)

@@ -1,11 +1,11 @@
 package language
 
 import (
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	"github.com/Knetic/govaluate"
 	log "github.com/Sirupsen/logrus"
 	"strconv"
 	"strings"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // Criteria defines a structure with criteria accept/reject syntax

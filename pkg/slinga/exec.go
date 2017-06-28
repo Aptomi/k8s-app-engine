@@ -2,9 +2,9 @@ package slinga
 
 import (
 	"errors"
-	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	"time"
 )
 
 // CodeExecutor is an interface that allows to create different executors for component allocation (e.g. helm, kube.libsonnet, etc)

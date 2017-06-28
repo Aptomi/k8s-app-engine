@@ -2,8 +2,8 @@ package visibility
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
-	"sort"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	"sort"
 )
 
 type item struct {

@@ -1,12 +1,12 @@
 package slinga
 
 import (
-	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	"time"
 )
 
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
@@ -143,7 +143,7 @@ func LoadServiceUsageState() ServiceUsageState {
 	return loadServiceUsageStateFromFile(fileName)
 }
 
-// LoadServiceUsageState loads all usage states from files under Aptomi DB
+// LoadServiceUsageStatesAll loads all usage states from files under Aptomi DB
 func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
 	result := make(map[int]ServiceUsageState)
 	lastRevision := GetLastRevision(GetAptomiBaseDir())

@@ -3,8 +3,8 @@ package visibility
 import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
-	"github.com/Frostman/aptomi/pkg/slinga/time"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	"github.com/Frostman/aptomi/pkg/slinga/time"
 	"html"
 )
 

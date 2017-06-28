@@ -1,8 +1,8 @@
 package slinga
 
 import (
-	log "github.com/Sirupsen/logrus"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Endpoints returns map from key to map from port type to url for all services

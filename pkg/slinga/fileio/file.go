@@ -35,7 +35,7 @@ func CopyFile(src, dst string) (err error) {
 	return
 }
 
-// Recursively copies a directory tree
+// CopyDirectory recursively copies a directory tree
 // Source directory must exist, destination directory must not exist
 func CopyDirectory(srcDir string, dstDir string) (err error) {
 	// get properties of source directory

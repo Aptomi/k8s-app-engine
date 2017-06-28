@@ -1,9 +1,9 @@
 package language
 
 import (
-	"github.com/mattn/go-zglob"
-	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
+	"github.com/mattn/go-zglob"
 )
 
 /*
@@ -25,6 +25,7 @@ type GlobalUsers struct {
 	Users map[string]*User
 }
 
+// Count returns total number of users
 func (users *GlobalUsers) Count() int {
 	return CountElements(users.Users)
 }

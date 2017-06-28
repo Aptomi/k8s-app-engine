@@ -1,12 +1,12 @@
 package server
 
 import (
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"net/http"
 	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
-func getLoggedInUserId(r *http.Request) string {
+func getLoggedInUserID(r *http.Request) string {
 	userID := ""
 	if cookie, err := r.Cookie("logUserID"); err == nil {
 		userID = cookie.Value
@@ -15,7 +15,7 @@ func getLoggedInUserId(r *http.Request) string {
 }
 
 func isUnauthorized(r *http.Request) bool {
-	return len(getLoggedInUserId(r)) <= 0
+	return len(getLoggedInUserID(r)) <= 0
 }
 
 func requireAuth(handler http.HandlerFunc) http.HandlerFunc {

@@ -1,9 +1,9 @@
 package language
 
 import (
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	"github.com/mattn/go-zglob"
 	"sort"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 /*

@@ -3,10 +3,9 @@ package log
 import (
 	"flag"
 	"fmt"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	log "github.com/Sirupsen/logrus"
 	"os"
-	"bytes"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 )
 
 // Debug logger writes debug information into a file
@@ -66,30 +65,4 @@ func (l *logHook) Fire(e *log.Entry) error {
 	fmt.Printf("  %s\n", e.Message)
 	fmt.Printf("  %v\n", e.Data)
 	return nil
-}
-
-type PlainMemoryLogger struct {
-	buf    *bytes.Buffer
-	logger *log.Logger
-}
-
-func NewPlainMemoryLogger(verbose bool) PlainMemoryLogger {
-	buf := &bytes.Buffer{}
-	logger := log.New()
-	logger.Out = buf
-	logger.Formatter = new(PlainFormatter)
-	if verbose {
-		logger.Level = log.DebugLevel
-	} else {
-		logger.Level = log.InfoLevel
-	}
-	return PlainMemoryLogger{buf: buf, logger: logger}
-}
-
-func (pml *PlainMemoryLogger) GetLogger() *log.Logger {
-	return pml.logger
-}
-
-func (pml *PlainMemoryLogger) GetBuffer() *bytes.Buffer {
-	return pml.buf
 }

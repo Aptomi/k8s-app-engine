@@ -7,17 +7,17 @@ type LabelSet struct {
 	Labels map[string]string
 }
 
-// Returns a set of user labels
+// GetLabelSet returns a set of user labels
 func (user *User) GetLabelSet() LabelSet {
 	return LabelSet{Labels: user.Labels}
 }
 
-// Returns a set of user secrets
+// GetSecretSet returns a set of user secrets
 func (user *User) GetSecretSet() LabelSet {
 	return LabelSet{Labels: user.Secrets}
 }
 
-// Apply set of transformations to labels
+// ApplyTransform applies set of transformations to labels
 func (src *LabelSet) ApplyTransform(ops *LabelOperations) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
 
@@ -41,7 +41,7 @@ func (src *LabelSet) ApplyTransform(ops *LabelOperations) LabelSet {
 	return result
 }
 
-// Merge two sets of labels
+// AddLabels merges two sets of labels and returns a new merged set
 func (src LabelSet) AddLabels(ops LabelSet) LabelSet {
 	result := LabelSet{Labels: make(map[string]string)}
 
@@ -58,7 +58,7 @@ func (src LabelSet) AddLabels(ops LabelSet) LabelSet {
 	return result
 }
 
-// Function to compare two labels sets. If one is nil and another one is empty, it will return true as well
+// Equal compares two labels sets. If one is nil and another one is empty, it will return true as well
 func (src LabelSet) Equal(dst LabelSet) bool {
 	if len(src.Labels) == 0 && len(dst.Labels) == 0 {
 		return true
@@ -66,6 +66,7 @@ func (src LabelSet) Equal(dst LabelSet) bool {
 	return reflect.DeepEqual(src.Labels, dst.Labels)
 }
 
+// GetLabelSet returns a set of cluster labels
 func (cluster *Cluster) GetLabelSet() LabelSet {
 	return LabelSet{Labels: cluster.Labels}
 }

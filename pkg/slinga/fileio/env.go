@@ -8,7 +8,7 @@ import (
 // AptomiOject represents an aptomi entity, which gets stored in aptomi DB
 type AptomiOject string
 
-// AptomiResolutionDir is where results of the last run are stored
+// AptomiCurrentRunDir is where results of the last run are stored
 const AptomiCurrentRunDir = "last-run-results"
 
 const (

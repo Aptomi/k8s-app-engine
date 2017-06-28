@@ -1,9 +1,9 @@
 package visibility
 
 import (
+	"github.com/Frostman/aptomi/pkg/slinga"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"sort"
-	"github.com/Frostman/aptomi/pkg/slinga"
 )
 
 type rLink struct {
@@ -28,6 +28,7 @@ type endpointsView struct {
 	Endpoints []userEndpoints
 }
 
+// Endpoints returns a view with all endpoints
 func Endpoints(currentUserID string, users GlobalUsers, state slinga.ServiceUsageState) endpointsView {
 	uR := endpointsView{make([]userEndpoints, 0)}
 

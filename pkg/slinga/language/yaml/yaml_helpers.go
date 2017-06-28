@@ -2,11 +2,11 @@ package yaml
 
 import (
 	"fmt"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
 )
 
 // SerializeObject serializes object into YAML
@@ -21,7 +21,7 @@ func SerializeObject(t interface{}) string {
 	return string(d)
 }
 
-// Loads object from YAML file
+// LoadObjectFromFile loads object from YAML file
 func LoadObjectFromFile(fileName string, data interface{}) interface{} {
 	Debug.WithFields(log.Fields{
 		"file": fileName,

@@ -160,4 +160,3 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 
 	return nil
 }
-

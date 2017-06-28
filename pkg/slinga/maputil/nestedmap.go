@@ -9,7 +9,7 @@ import "reflect"
 // NestedParameterMap allows to work with nested maps [string][string]...[string] -> value
 type NestedParameterMap map[string]interface{}
 
-// Makes of copy of parameter structure
+// MakeCopy makes a copy of parameter structure
 func (src NestedParameterMap) MakeCopy() NestedParameterMap {
 	result := NestedParameterMap{}
 	for k, v := range src {
@@ -18,12 +18,12 @@ func (src NestedParameterMap) MakeCopy() NestedParameterMap {
 	return result
 }
 
-// Gets nested parameter map
+// GetNestedMap returns nested parameter map by key
 func (src NestedParameterMap) GetNestedMap(key string) NestedParameterMap {
 	return src[key].(NestedParameterMap)
 }
 
-// Function to compare two nested maps. If one is nil and another one is empty, it will return true as well
+// DeepEqual compares two nested maps. If one is nil and another one is empty, it will return true as well
 func (src NestedParameterMap) DeepEqual(dst NestedParameterMap) bool {
 	if len(src) == 0 && len(dst) == 0 {
 		return true

@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"strings"
-	"text/template"
 	. "github.com/Frostman/aptomi/pkg/slinga/maputil"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	"strings"
+	"text/template"
 )
 
 type templateData struct {
@@ -44,7 +44,8 @@ func evaluateTemplate(templateStr string, user *User, labels LabelSet) (string, 
 	return doc.String(), nil
 }
 
-func ProcessTemplateParams(component *ServiceComponent, template ParameterTree, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
+// ProcessTemplateParams processes template params
+func ProcessTemplateParams(template ParameterTree, componentKey string, labels LabelSet, user *User, discoveryTree NestedParameterMap, templateType string, depth int) (NestedParameterMap, error) {
 	if template == nil {
 		return nil, nil
 	}

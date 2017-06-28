@@ -2,13 +2,13 @@ package slinga
 
 import (
 	"fmt"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"strings"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 // IstioRouteRule is istio route rule
@@ -232,7 +232,7 @@ func (rule *IstioRouteRule) create() {
 
 	ruleFile := WriteTempFile("istio-rule", content)
 
-	out, err := runIstioCmd(rule.Cluster, "create -f " + ruleFile.Name())
+	out, err := runIstioCmd(rule.Cluster, "create -f "+ruleFile.Name())
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,
@@ -244,7 +244,7 @@ func (rule *IstioRouteRule) create() {
 }
 
 func (rule *IstioRouteRule) delete() {
-	out, err := runIstioCmd(rule.Cluster, "delete route-rule " + rule.Service)
+	out, err := runIstioCmd(rule.Cluster, "delete route-rule "+rule.Service)
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"cluster": rule.Cluster.Name,

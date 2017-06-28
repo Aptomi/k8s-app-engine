@@ -1,12 +1,12 @@
 package slinga
 
 import (
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
 	"time"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	. "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
 )
 
 func TestPolicyResolve(t *testing.T) {

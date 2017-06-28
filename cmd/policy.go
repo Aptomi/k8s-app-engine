@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
