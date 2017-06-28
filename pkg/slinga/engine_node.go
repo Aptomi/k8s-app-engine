@@ -325,13 +325,13 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	componentCodeParams, err := ProcessTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "code", node.depth)
+	componentCodeParams, err := ProcessTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode)
 	node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	componentDiscoveryParams, err := ProcessTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode, "discovery", node.depth)
+	componentDiscoveryParams, err := ProcessTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode)
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
