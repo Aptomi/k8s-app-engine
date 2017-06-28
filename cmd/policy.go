@@ -35,6 +35,9 @@ var policyCmdApply = &cobra.Command{
 	Short: "Process policy and apply changes (supports noop mode)",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
+		// Empty current run directory
+		CleanCurrentRunDirectory(GetAptomiBaseDir())
+
 		// Load the previous usage state
 		prevUsageState := LoadServiceUsageState()
 

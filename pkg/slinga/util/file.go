@@ -47,11 +47,13 @@ func CopyDirectory(srcDir string, dstDir string) (err error) {
 		return fmt.Errorf("Source is not a directory")
 	}
 
+	/*
 	// ensure destination directory does not already exist
 	_, err = os.Open(dstDir)
 	if !os.IsNotExist(err) {
 		return fmt.Errorf("Destination directory already exists")
 	}
+	*/
 
 	// create destination dir
 	err = os.MkdirAll(dstDir, srcStat.Mode())

@@ -3,7 +3,6 @@ package log
 import (
 	"flag"
 	"fmt"
-	. "github.com/Frostman/aptomi/pkg/slinga/fileio"
 	log "github.com/Sirupsen/logrus"
 	"os"
 )
@@ -16,24 +15,22 @@ func SetDebugLevel(level log.Level) {
 	Debug.Level = level
 }
 
+// SetLogFileName redirects log to a file
+func SetLogFileName(fileName string) {
+	// Redirec to a file
+	Debug.Out, _ = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
+
+	// Add a hook to print important errors to stdout as well
+	Debug.Hooks.Add(&logHook{})
+}
+
 func init() {
 	Debug = log.New()
 
 	// if we are running normally (not in unit tests)
 	if flag.Lookup("test.v") == nil {
-		// Make sure we have a clean place to write the current run to
-		// This is a bit of a hack to clean up the current directory here
-		// But you can't really do this in policy.go, because this will cause a race condition with init()
-		PrepareCurrentRunDirectory(GetAptomiBaseDir())
-
-		// setup debug logger
-		// don't log much by default. log level will be overridden when called from CLU
-		fileNameDebug := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeLogs, "debug.log")
-		Debug.Out, _ = os.OpenFile(fileNameDebug, os.O_CREATE|os.O_WRONLY, 0644)
+		// don't log much by default. log level will be overridden when called from CLI
 		Debug.Level = log.PanicLevel
-
-		// Add a hook to print important errors to stdout as well
-		Debug.Hooks.Add(&logHook{})
 	} else {
 		// running under unit tests
 		Debug.Level = log.WarnLevel

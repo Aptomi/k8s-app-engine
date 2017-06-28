@@ -84,6 +84,21 @@ func GetAptomiPolicyDir() string {
 	return filepath.Join(GetAptomiBaseDir(), "policy")
 }
 
+// GetAptomiDebugLogName returns filename for aptomi debug log (in db, but outside of current run)
+func GetAptomiDebugLogName() string {
+	dir := filepath.Join(GetAptomiBaseDir(), string(TypeLogs))
+	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			panic("Directory can't be created or error encountered")
+		}
+	}
+	if stat, err := os.Stat(dir); err != nil || !stat.IsDir() {
+		panic("Directory can't be created or error encountered")
+	}
+	return filepath.Join(dir, "debug.log")
+}
+
 // GetAptomiObjectFilePatternYaml returns file pattern for aptomi objects (so they can be loaded from those files)
 func GetAptomiObjectFilePatternYaml(baseDir string, aptomiObject AptomiOject) string {
 	return filepath.Join(baseDir, "**", string(aptomiObject)+"*.yaml")
@@ -122,8 +137,8 @@ func GetAptomiObjectWriteFileCurrentRun(baseDir string, aptomiObject AptomiOject
 	return filepath.Join(dir, fileName)
 }
 
-// PrepareCurrentRunDirectory deletes contents of a "current run" directory
-func PrepareCurrentRunDirectory(baseDir string) {
+// CleanCurrentRunDirectory deletes contents of a "current run" directory
+func CleanCurrentRunDirectory(baseDir string) {
 	dir := filepath.Join(baseDir, AptomiCurrentRunDir)
 	err := DeleteDirectoryContents(dir)
 	if err != nil {
