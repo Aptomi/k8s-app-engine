@@ -3,19 +3,20 @@ package visibility
 import (
 	"fmt"
 	"github.com/Frostman/aptomi/pkg/slinga"
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 type dependencyNode struct {
 	dependency *Dependency
 	short      bool
+	userLoader UserLoader
 }
 
-func newDependencyNode(dependency *Dependency, short bool) graphNode {
+func newDependencyNode(dependency *Dependency, short bool, userLoader UserLoader) graphNode {
 	return dependencyNode{
 		dependency: dependency,
 		short:      short,
+		userLoader: userLoader,
 	}
 }
 
@@ -42,7 +43,7 @@ func (n dependencyNode) isItMyID(id string) string {
 }
 
 func (n dependencyNode) getLabel() string {
-	userName := LoadUserByIDFromDir(GetAptomiBaseDir(), n.dependency.UserID).Name
+	userName := n.userLoader.LoadUserByID(n.dependency.UserID).Name
 	if n.short {
 		// for service owner view, don't display much other than a user name
 		return userName

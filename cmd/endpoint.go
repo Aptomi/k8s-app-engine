@@ -5,6 +5,7 @@ import (
 	"github.com/Frostman/aptomi/pkg/slinga"
 	"github.com/spf13/cobra"
 	"sort"
+	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
 var endpointCmd = &cobra.Command{
@@ -21,8 +22,11 @@ var endpointCmdShow = &cobra.Command{
 	Short: "Show endpoints for deployed services",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
+		// User loader
+		userLoader := NewAptomiUserLoader()
+
 		// Load the previous usage state
-		state := slinga.LoadServiceUsageState()
+		state := slinga.LoadServiceUsageState(userLoader)
 
 		endpoints := state.Endpoints("")
 

@@ -131,7 +131,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exists
 		userID := usage.Dependencies.DependenciesByID[dependencyID].UserID
-		users = append(users, usage.users.Users[userID])
+		users = append(users, usage.userLoader.LoadUserByID(userID))
 	}
 
 	if !usage.Policy.Rules.AllowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {

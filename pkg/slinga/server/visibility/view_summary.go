@@ -2,7 +2,6 @@ package visibility
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"sort"
 )
 
@@ -10,15 +9,13 @@ import (
 type SummaryView struct {
 	userID string
 	state  slinga.ServiceUsageState
-	users  GlobalUsers
 }
 
 // NewSummaryView creates a new SummaryView
-func NewSummaryView(userID string, state slinga.ServiceUsageState, users GlobalUsers) SummaryView {
+func NewSummaryView(userID string, state slinga.ServiceUsageState) SummaryView {
 	return SummaryView{
 		userID: userID,
 		state:  state,
-		users:  users,
 	}
 }
 
@@ -35,19 +32,19 @@ func (view SummaryView) GetData() interface{} {
 func (view SummaryView) getGlobalDependenciesData() interface{} {
 	// table only exists for global ops people
 	result := lineEntryList{}
-	if !view.users.Users[view.userID].IsGlobalOps() {
+	if !view.state.GetUserLoader().LoadUserByID(view.userID).IsGlobalOps() {
 		return result
 	}
 	for _, dependency := range view.state.Dependencies.DependenciesByID {
 		entry := lineEntry{
 			"resolved":     dependency.Resolved,
-			"userName":     view.users.Users[dependency.UserID].Name,
+			"userName":     view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name,
 			"serviceName":  dependency.Service,
 			"context":      view.getResolvedContextNameByDep(dependency),
 			"cluster":      view.getResolvedClusterNameByDep(dependency),
 			"stats":        view.getDependencyStats(dependency),
 			"dependencyId": dependency.ID,
-			"id":           view.users.Users[dependency.UserID].Name, // entries will be sorted by ID
+			"id":           view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
 		}
 		result = append(result, entry)
 	}
@@ -58,7 +55,7 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 func (view SummaryView) getGlobalRulesData() interface{} {
 	// table only exists for global ops people
 	result := lineEntryList{}
-	if !view.users.Users[view.userID].IsGlobalOps() {
+	if !view.state.GetUserLoader().LoadUserByID(view.userID).IsGlobalOps() {
 		return result
 	}
 	for _, ruleList := range view.state.Policy.Rules.Rules {

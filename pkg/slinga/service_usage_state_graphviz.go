@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
@@ -150,8 +149,6 @@ func shorten(s string) string {
 
 // DrawVisualAndStore writes usage state visual into a file
 func (state ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Graph {
-	users := LoadUsersFromDir(GetAptomiBaseDir())
-
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -181,7 +178,7 @@ func (state ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := users.Users[d.UserID]
+				user := state.userLoader.LoadUserByID(d.UserID)
 				label := "Name: " + user.Name + " (" + user.ID + ")"
 				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {

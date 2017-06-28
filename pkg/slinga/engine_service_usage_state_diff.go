@@ -3,7 +3,6 @@ package slinga
 import (
 	"fmt"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uiprogress"
@@ -55,7 +54,7 @@ type ServiceUsageStateSummary struct {
 	Contexts     int
 	Clusters     int
 	Rules        int
-	Users        int
+	UserText     string
 	Dependencies int
 }
 
@@ -84,16 +83,12 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 	if state.Policy == nil {
 		return ServiceUsageStateSummary{}
 	}
-	users := 0
-	if state.users != nil {
-		users = state.users.Count()
-	}
 	return ServiceUsageStateSummary{
 		state.Policy.CountServices(),
 		state.Policy.CountContexts(),
 		state.Policy.CountClusters(),
 		state.Policy.Rules.Count(),
-		users,
+		state.userLoader.Summary(),
 		state.Dependencies.Count(),
 	}
 }
@@ -221,7 +216,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 	// Print
 	printed := false
 	for userID, sKeys := range textMap {
-		user := LoadUserByIDFromDir(GetAptomiBaseDir(), userID)
+		user := diff.Next.userLoader.LoadUserByID(userID)
 		log.Printf("  %s (ID=%s)", user.Name, user.ID)
 		for _, s := range sKeys {
 			log.Printf("    %s", s)
@@ -406,6 +401,14 @@ func getSummaryLine(name string, cntPrev int, cntNext int) string {
 	return fmt.Sprintf("  %s: %d", name, cntPrev)
 }
 
+// Returns summary line (as we comparing text-based data, such as summary for external users)
+func getSummaryLineAsText(name string, prevStr string, nextStr string) string {
+	if nextStr != prevStr && len(prevStr) > 0 {
+		return fmt.Sprintf("  %s: %s (was %s)", name, nextStr, prevStr)
+	}
+	return fmt.Sprintf("  %s: %s", name, nextStr)
+}
+
 // PrintSummary prints policy object counts to the screen
 func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
 	prev := diff.Prev.GetSummary()
@@ -416,7 +419,7 @@ func (diff ServiceUsageStateDiff) writeSummary(log *log.Logger) {
 	log.Println(getSummaryLine("Dependencies", prev.Dependencies, next.Dependencies))
 	log.Println(getSummaryLine("Clusters", prev.Clusters, next.Clusters))
 	log.Println(getSummaryLine("Rules", prev.Rules, next.Rules))
-	log.Println(getSummaryLine("Users", next.Users, next.Users)) // Users we always print current number
+	log.Println(getSummaryLineAsText("Users", prev.UserText, next.UserText))
 }
 
 // StoreDiffAsText method prints changes onto the screen (i.e. delta - what got added/removed)

@@ -31,7 +31,7 @@ func requireAuth(handler http.HandlerFunc) http.HandlerFunc {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("logUserID")
-	user := LoadUsers().Users[userID]
+	user := NewAptomiUserLoader().LoadUserByID(userID)
 
 	http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: userID, Path: "/"})
 	http.SetCookie(w, &http.Cookie{Name: "logUserName", Value: user.Name, Path: "/"})

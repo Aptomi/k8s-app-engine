@@ -6,7 +6,7 @@ import (
 )
 
 func TestTemplateEvaluation(t *testing.T) {
-	alice := LoadUserByIDFromDir("../testdata/unittests", "1")
+	alice := NewUserLoaderFromDir("../testdata/unittests").LoadUserByID("1")
 	labels := LabelSet{Labels: map[string]string{"tagname": "tagvalue"}}
 
 	result, err := evaluateTemplate("test-{{.User.Labels.team}}-{{.Labels.tagname}}", alice, labels)

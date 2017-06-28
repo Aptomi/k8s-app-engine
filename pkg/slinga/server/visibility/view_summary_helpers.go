@@ -39,7 +39,7 @@ func (view SummaryView) getRuleAppliedTo(rule *Rule) string {
 func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 	matchedUsers := make([]*User, 0)
 
-	for _, user := range view.users.Users {
+	for _, user := range view.state.GetUserLoader().LoadUsersAll().Users {
 		if rule.MatchUser(user) {
 			matchedUsers = append(matchedUsers, user)
 		}

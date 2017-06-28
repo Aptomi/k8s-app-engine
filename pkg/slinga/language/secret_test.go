@@ -31,7 +31,7 @@ func TestLoadSecrets(t *testing.T) {
 }
 
 func TestUserWithSecrets(t *testing.T) {
-	userAlice := LoadUserByIDFromDir("../testdata/unittests", "1")
+	userAlice := NewUserLoaderFromDir("../testdata/unittests").LoadUserByID("1")
 	secrets := userAlice.GetSecretSet()
 
 	assert.Equal(t, 4, len(secrets.Labels))
@@ -39,7 +39,7 @@ func TestUserWithSecrets(t *testing.T) {
 }
 
 func TestUserWithEmptySecrets(t *testing.T) {
-	userDave := LoadUserByIDFromDir("../testdata/unittests", "5")
+	userDave := NewUserLoaderFromDir("../testdata/unittests").LoadUserByID("5")
 	secrets := userDave.GetSecretSet()
 
 	assert.Equal(t, 0, len(secrets.Labels))

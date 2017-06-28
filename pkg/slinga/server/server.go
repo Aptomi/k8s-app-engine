@@ -18,22 +18,24 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
-	state := slinga.LoadServiceUsageState()
-	users := LoadUsers()
-	endpoints := visibility.Endpoints(getLoggedInUserID(r), users, state)
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
+	endpoints := visibility.Endpoints(getLoggedInUserID(r), state)
 
 	writeJSON(w, endpoints)
 }
 
 func detailViewHandler(w http.ResponseWriter, r *http.Request) {
-	state := slinga.LoadServiceUsageState()
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
 	userID := getLoggedInUserID(r)
-	view := visibility.NewDetails(userID, LoadUsers(), state)
+	view := visibility.NewDetails(userID, state)
 	writeJSON(w, view)
 }
 
 func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
-	state := slinga.LoadServiceUsageState()
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
 	userID := r.URL.Query().Get("userId")
 	dependencyID := r.URL.Query().Get("dependencyId")
 	view := visibility.NewConsumerView(userID, dependencyID, state)
@@ -41,14 +43,16 @@ func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
-	state := slinga.LoadServiceUsageState()
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
 	serviceName := r.URL.Query().Get("serviceName")
 	view := visibility.NewServiceView(serviceName, state)
 	writeJSON(w, view.GetData())
 }
 
 func globalOpsViewHandler(w http.ResponseWriter, r *http.Request) {
-	state := slinga.LoadServiceUsageState()
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
 	userID := r.URL.Query().Get("userId")
 	dependencyID := r.URL.Query().Get("dependencyId")
 	view := visibility.NewConsumerView(userID, dependencyID, state)
@@ -56,25 +60,26 @@ func globalOpsViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func objectViewHandler(w http.ResponseWriter, r *http.Request) {
-	state := slinga.LoadServiceUsageState()
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
 	objectID := r.URL.Query().Get("id")
 	view := visibility.NewObjectView(objectID, state)
 	writeJSON(w, view.GetData())
 }
 
 func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
-	state := slinga.LoadServiceUsageState()
-	users := LoadUsers()
+	userLoader := NewAptomiUserLoader()
+	state := slinga.LoadServiceUsageState(userLoader)
 	userID := getLoggedInUserID(r)
-	view := visibility.NewSummaryView(userID, state, users)
+	view := visibility.NewSummaryView(userID, state)
 	writeJSON(w, view.GetData())
 }
 
 func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
-	states := slinga.LoadServiceUsageStatesAll()
-	users := LoadUsers()
+	userLoader := NewAptomiUserLoader()
+	states := slinga.LoadServiceUsageStatesAll(userLoader)
 	userID := getLoggedInUserID(r)
-	view := visibility.NewTimelineView(userID, states, users)
+	view := visibility.NewTimelineView(userID, states)
 	writeJSON(w, view.GetData())
 }
 

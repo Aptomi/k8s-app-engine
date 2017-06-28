@@ -37,16 +37,18 @@ var policyCmdApply = &cobra.Command{
 		// Empty current run directory
 		CleanCurrentRunDirectory(GetAptomiBaseDir())
 
+		// User loader
+		userLoader := NewAptomiUserLoader()
+
 		// Load the previous usage state
-		prevUsageState := LoadServiceUsageState()
+		prevUsageState := LoadServiceUsageState(userLoader)
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
 		policy := LoadPolicyFromDir(policyDir)
-		users := LoadUsersFromDir(policyDir)
 		dependencies := LoadDependenciesFromDir(policyDir)
 
-		nextUsageState := NewServiceUsageState(&policy, &dependencies, &users)
+		nextUsageState := NewServiceUsageState(&policy, &dependencies, userLoader)
 		err := nextUsageState.ResolveAllDependencies()
 
 		if err != nil {

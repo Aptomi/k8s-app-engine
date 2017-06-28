@@ -10,10 +10,10 @@ import (
 
 func TestPolicyResolve(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
-	users := LoadUsersFromDir("testdata/unittests")
+	userLoader := NewUserLoaderFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
-	usageState := NewServiceUsageState(&policy, &dependencies, &users)
+	usageState := NewServiceUsageState(&policy, &dependencies, userLoader)
 	err := usageState.ResolveAllDependencies()
 	resolvedUsage := usageState.GetResolvedData()
 
@@ -38,16 +38,16 @@ func TestPolicyResolve(t *testing.T) {
 
 func TestPolicyResolveEmptyDiff(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
-	users := LoadUsersFromDir("testdata/unittests")
+	userLoader := NewUserLoaderFromDir("testdata/unittests")
 	dependencies := LoadDependenciesFromDir("testdata/unittests")
 
 	// Get usage state prev and emulate save/load
-	usageStatePrev := NewServiceUsageState(&policy, &dependencies, &users)
+	usageStatePrev := NewServiceUsageState(&policy, &dependencies, userLoader)
 	usageStatePrev.ResolveAllDependencies()
 	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Get usage state next
-	usageStateNext := NewServiceUsageState(&policy, &dependencies, &users)
+	usageStateNext := NewServiceUsageState(&policy, &dependencies, userLoader)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
@@ -63,11 +63,11 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 
 func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
-	users := LoadUsersFromDir("testdata/unittests")
+	userLoader := NewUserLoaderFromDir("testdata/unittests")
 	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
 
 	// Get usage state prev and emulate save/load
-	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, &users)
+	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
 	usageStatePrev.ResolveAllDependencies()
 	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
@@ -80,7 +80,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 			Service: "kafka",
 		},
 	)
-	usageStateNext := NewServiceUsageState(&policy, &dependenciesNext, &users)
+	usageStateNext := NewServiceUsageState(&policy, &dependenciesNext, userLoader)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
@@ -96,17 +96,17 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 
 func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	policy := LoadPolicyFromDir("testdata/unittests")
-	users := LoadUsersFromDir("testdata/unittests")
+	userLoader := NewUserLoaderFromDir("testdata/unittests")
 	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
 
 	var key string
 	var timePrevCreated, timePrevUpdated, timeNextCreated, timeNextUpdated time.Time
 
 	// Create initial empty state
-	uEmpty := NewServiceUsageState(&policy, &dependenciesPrev, &users)
+	uEmpty := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
 
 	// Resolve, calculate difference against empty state, emulate save/load
-	uInitial := NewServiceUsageState(&policy, &dependenciesPrev, &users)
+	uInitial := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
 	uInitial.ResolveAllDependencies()
 	uInitial.CalculateDifference(&uEmpty)
 	uInitial = emulateSaveAndLoad(uInitial)
@@ -130,7 +130,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 			Service: "kafka",
 		},
 	)
-	uNewDependency := NewServiceUsageState(&policy, &dependenciesNext, &users)
+	uNewDependency := NewServiceUsageState(&policy, &dependenciesNext, userLoader)
 	uNewDependency.ResolveAllDependencies()
 	uNewDependency.CalculateDifference(&uInitial)
 
@@ -146,8 +146,8 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	time.Sleep(25 * time.Millisecond)
 
 	// Update user label, re-evaluate and see that component instance has changed
-	users.Users["5"].Labels["changinglabel"] = "newvalue"
-	uUpdatedDependency := NewServiceUsageState(&policy, &dependenciesNext, &users)
+	userLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
+	uUpdatedDependency := NewServiceUsageState(&policy, &dependenciesNext, userLoader)
 	uUpdatedDependency.ResolveAllDependencies()
 	diff := uUpdatedDependency.CalculateDifference(&uNewDependency)
 
@@ -194,8 +194,8 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
 	savedObjectAsString := yaml.SerializeObject(state)
-	users := LoadUsersFromDir("testdata/unittests")
-	loadedObject := ServiceUsageState{users: &users}
+	userLoader := NewUserLoaderFromDir("testdata/unittests")
+	loadedObject := ServiceUsageState{userLoader: userLoader}
 	yaml.DeserializeObject(savedObjectAsString, &loadedObject)
 	return loadedObject
 }

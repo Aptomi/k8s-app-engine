@@ -16,8 +16,8 @@ type ServiceUsageState struct {
 	// reference to dependencies
 	Dependencies *GlobalDependencies
 
-	// reference to users
-	users *GlobalUsers
+	// user loader
+	userLoader UserLoader
 
 	// Date when it was created
 	CreatedOn time.Time
@@ -53,15 +53,19 @@ func newServiceUsageData() *ServiceUsageData {
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
-func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, users *GlobalUsers) ServiceUsageState {
+func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, userLoader UserLoader) ServiceUsageState {
 	return ServiceUsageState{
 		Policy:         policy,
 		Dependencies:   dependencies,
-		users:          users,
+		userLoader:     userLoader,
 		CreatedOn:      time.Now(),
 		ResolvedData:   newServiceUsageData(),
 		UnresolvedData: newServiceUsageData(),
 	}
+}
+
+func (state *ServiceUsageState) GetUserLoader() UserLoader {
+	return state.userLoader
 }
 
 // GetResolvedData returns usage.ResolvedData
@@ -136,19 +140,22 @@ func (data *ServiceUsageData) appendData(ops *ServiceUsageData) {
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB
-func LoadServiceUsageState() ServiceUsageState {
+func LoadServiceUsageState(userLoader UserLoader) ServiceUsageState {
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
 	fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), lastRevision.GetRunDirectory(), TypePolicyResolution, "db.yaml")
-	return loadServiceUsageStateFromFile(fileName)
+	result := loadServiceUsageStateFromFile(fileName)
+	result.userLoader = userLoader
+	return result
 }
 
 // LoadServiceUsageStatesAll loads all usage states from files under Aptomi DB
-func LoadServiceUsageStatesAll() map[int]ServiceUsageState {
+func LoadServiceUsageStatesAll(userLoader UserLoader) map[int]ServiceUsageState {
 	result := make(map[int]ServiceUsageState)
 	lastRevision := GetLastRevision(GetAptomiBaseDir())
 	for rev := lastRevision; rev > LastRevisionAbsentValue; rev-- {
 		fileName := GetAptomiObjectFileFromRun(GetAptomiBaseDir(), rev.GetRunDirectory(), TypePolicyResolution, "db.yaml")
 		state := loadServiceUsageStateFromFile(fileName)
+		state.userLoader = userLoader
 		if state.Policy != nil {
 			// add only non-empty revisions. don't add revision which got deleted
 			result[int(rev)] = state

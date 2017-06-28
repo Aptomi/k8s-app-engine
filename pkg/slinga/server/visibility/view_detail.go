@@ -2,7 +2,6 @@ package visibility
 
 import (
 	"github.com/Frostman/aptomi/pkg/slinga"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"sort"
 )
 
@@ -23,9 +22,8 @@ type detail struct {
 }
 
 // NewDetails returns detail object
-func NewDetails(userID string, globalUsers GlobalUsers, state slinga.ServiceUsageState) detail {
+func NewDetails(userID string, state slinga.ServiceUsageState) detail {
 	summary := state.GetSummary()
-	summary.Users = len(globalUsers.Users)
 	r := detail{
 		userID,
 		make([]*item, 0),
@@ -38,7 +36,7 @@ func NewDetails(userID string, globalUsers GlobalUsers, state slinga.ServiceUsag
 
 	// Users
 	userIds := make([]string, 0)
-	for userID := range globalUsers.Users {
+	for userID := range state.GetUserLoader().LoadUsersAll().Users {
 		userIds = append(userIds, userID)
 	}
 
@@ -48,7 +46,7 @@ func NewDetails(userID string, globalUsers GlobalUsers, state slinga.ServiceUsag
 		r.Users = append([]*item{{"all", "All"}}, r.Users...)
 	}
 	for _, userID := range userIds {
-		r.Users = append(r.Users, &item{userID, globalUsers.Users[userID].Name})
+		r.Users = append(r.Users, &item{userID, state.GetUserLoader().LoadUserByID(userID).Name})
 	}
 
 	// Dependencies
@@ -106,7 +104,7 @@ func NewDetails(userID string, globalUsers GlobalUsers, state slinga.ServiceUsag
 	if len(r.Services) > 0 {
 		r.Views = append(r.Views, &item{"service", "Service Owner"})
 	}
-	if globalUsers.Users[userID].Labels["global_ops"] == "true" {
+	if state.GetUserLoader().LoadUserByID(userID).Labels["global_ops"] == "true" {
 		r.Views = append(r.Views, &item{"globalops", "Global IT/Ops"})
 	}
 

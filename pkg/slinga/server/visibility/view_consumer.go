@@ -29,7 +29,7 @@ func (view ConsumerView) GetData() interface{} {
 	for _, dependency := range view.state.Dependencies.DependenciesByID {
 		if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.ID, view.dependencyId) {
 			// Step 1 - add a node for every matching dependency found
-			dependencyNode := newDependencyNode(dependency, false)
+			dependencyNode := newDependencyNode(dependency, false, view.state.GetUserLoader())
 			view.g.addNode(dependencyNode, 0)
 
 			// Step 2 - process subgraph (doesn't matter whether it's resolved successfully or not)
