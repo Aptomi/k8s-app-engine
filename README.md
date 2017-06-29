@@ -102,38 +102,42 @@ go run main.go policy apply --trace
 
 
 ## Fundamental design questions (for production code, not PoC):
-1. Model & Engine
-  1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
-  1. Two users -> same service instance -> relies on different component instances. E.g. two users, single twitter-stats, two kafkas. Invalid case? If we refer to ".instance" of kafka from twitter-stats, it won't work... (same problem as above)
-  1. Inheritance of contexts to avoid data duplication
-  1. How to implement service aliases (mysql vs. mariadb, etc). Do we match contexts first or services? With the current definition of services and contexts, there is NO way to provide different implementation of the same "service interface (e.g. SQL service -> MySQL or MariaDB)
-  1. Service, context - shall we use IDs (unique) instead of names (non-unique)?
-  1. When something failed in the middle of applying policy. How to handle it?
-  1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed
-  1. Detect circular dependencies (global cycle between services, not only cycle within one service between its components)
-  1. CLI and UI should invoke API
-  1. Policy should be segmented into pieces
-     1. Dev can have full access to its own "aptomi namespace" (create services, define instantiation rules, change dependencies) to test and deploy to his own cluster
-     1. Other pieces will have access to Ops only
-  1. Add "aptomi test" and special language for operators to write and run tests
-  1. Handle case when user gets deleted and disappears
-  1. Every object should have an ID :)
+1. Policy & Language
+    1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
+    1. Two users -> use same service instance -> it relies on different component instances. E.g. two users, single twitter-stats, then it branches into two kafkas due to labels. If we refer to ".instance" of kafka from twitter-stats, it won't work (same problem as above)
+    1. Inheritance of contexts to avoid data duplication
+    1. How to implement service aliases (mysql vs. mariadb, etc). Do we match contexts first or services? With the current definition of services and contexts, there is NO way to provide different implementation of the same "service interface (e.g. SQL service -> MySQL or MariaDB)
+    1. Add "aptomi test" and special language for Ops to write and run basic tests after the policy is defined (talk to Roman about this)
 
-1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes.
-   Right now I'm doing a workaround by reusing --full flag.
+1. Access control
+    1. Introduce a notion of user roles into Aptomi
+    1. Introduce a notion of "policy namespace" into Aptomi
+      - allow ops to create policy namespaces and specify access rules (who can make what changes in which namespace)
+      - e.g. Dev can have full access to their own playgrounds (create services, define instantiation rules, change dependencies) to test and deploy to their clusters
+      - other pieces will have access for Ops only
 
-1. We need to store history of aptomi revisions and continuously regression test against old stored runs (e.g. visualization)
+1. Integrations
+    1. Figure out a final solution for service discovery
+    1. Integration with CI/CD, at least demo "Code change -> container rebuild -> push a change to production" without having explicit tags in Aptomi policy
 
-1. CI/CD
-  1. How service developer workflow would change with aptomi? How to roll out a change to a service? Code change -> container rebuild -> push a change to production
+1. Code/Implementation
+  1. Error handling
+  1. Finish breaking it down into packages
+  1. Every object should have a kind (type) and ID. Use ID (unique) instead of names (non-unique)
+  1. Aptomi DB
+    1. Move away from file-based storage (db.yaml)
+    1. Schema changes between versions. If we change a format of parameter (e.g. 'criteria'), how to handle it correctly?
+  1. Better handling of Aptomi revisions. Compare policy, instances, users to detect difference
+  1. Right now there is no API (only partial API for UI). For processing, we run CLI in the loop. CLI does actions directly, not via API
+  1. Add unit tests for corner cases. E.g. when user gets deleted and disappears, circular service dependency, circular component dependency
+  1. When something fails in the middle of applying policy. E.g. some components got deployed and some didn't. How to handle it?
+  1. LDAP - can we subscribe to events? I.e. so we can get notified when user labels change
 
-1. Error handling
+1. Testing
+  1. Store history of aptomi revisions and continuously regression test against old stored runs. To emulate production use cases and Aptomi updates
 
-1. DB
-  1. How to handle schema change. If we change a format of parameter (e.g. 'criteria'), how do we handle it correctly?. Prev can be one version. Next can be another version
-  1. Do we need to store all versions? Every time we apply policy version would increase
+## Resolved issues
+  1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed. The whole thing should be "rolled back"
+  1. Store all revisions. Every time we apply policy version would increase
+  1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes. --newrevision
 
-1. Structure of Go project
-  1. Right now everything is in one package. Not very good
-
-1. Allow IT to create namespaces in Aptomi polity and set access rules
