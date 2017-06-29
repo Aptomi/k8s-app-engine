@@ -17,7 +17,7 @@ func SetDebugLevel(level log.Level) {
 
 // SetLogFileName redirects log to a file
 func SetLogFileName(fileName string) {
-	// Redirec to a file
+	// Redirect to a file
 	Debug.Out, _ = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
 
 	// Add a hook to print important errors to stdout as well
