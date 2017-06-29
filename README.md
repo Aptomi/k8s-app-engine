@@ -107,7 +107,7 @@ cd tools/ldap-server
 1. ```./tools/gke-demo.sh down``` - don't forget to destroy your clusters, so you don't continue to get billed for them
 
 
-## Fundamental design questions (for production code, not PoC):
+## Outstanding Issues
 1. **Policy & Language**
     1. Can arrive to the same instance with different sets of labels. Unclear what to do in this case
     1. Two users -> use same service instance -> it relies on different component instances. E.g. two users, single twitter-stats, then it branches into two kafkas due to labels. If we refer to ".instance" of kafka from twitter-stats, it won't work (same problem as above)
@@ -143,7 +143,7 @@ cd tools/ldap-server
 1. **Testing**
     1. Store history of aptomi revisions and continuously regression test against old stored runs. To emulate production use cases and Aptomi updates
 
-## Resolved issues
+## Resolved Issues
 1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed. The whole thing should be "rolled back"
 1. Store all revisions. Every time we apply policy version would increase
 1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes. --newrevision
