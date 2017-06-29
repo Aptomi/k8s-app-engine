@@ -36,8 +36,11 @@ const (
 		The following objects must be configured to point to external resources
 	*/
 
-	// TypeUsers is where users are stored (later in AD and LDAP)
-	TypeUsers AptomiOject = "users"
+	// TypeUsersFile is where users are stored (this is for file-based storage)
+	TypeUsersFile AptomiOject = "users"
+
+	// TypeUsersLDAP is where ldap configuration is stored\
+	TypeUsersLDAP AptomiOject = "ldap"
 
 	// TypeSecrets is where secret tokens are stored (later in Hashicorp Vault)
 	TypeSecrets AptomiOject = "secrets"

@@ -21,7 +21,7 @@ func NewUserLoaderFromDir(baseDir string) UserLoader {
 // LoadUsersAll loads all users
 func (loader *UserLoaderFromDir) LoadUsersAll() GlobalUsers {
 	if loader.cachedUsers == nil {
-		files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(loader.baseDir, TypeUsers))
+		files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(loader.baseDir, TypeUsersFile))
 		loader.cachedUsers = &GlobalUsers{Users: make(map[string]*User)}
 		for _, fileName := range files {
 			t := loadUsersFromFile(fileName)

@@ -1,5 +1,5 @@
-hash: 2c5992278d45edd02fbae0a79fcc2340a5891984e3bc4369a9378dadf69d016a
-updated: 2017-06-20T17:02:41.644594712-07:00
+hash: 9bc9a1121384f449c0472e57269eeae82911c4f52931e19fd49e3100a2c30283
+updated: 2017-06-28T17:18:58.799075052-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -288,8 +288,12 @@ imports:
   - naming
   - peer
   - transport
+- name: gopkg.in/asn1-ber.v1
+  version: 379148ca0225df7a432012b8df0355c2a2063ac0
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
+- name: gopkg.in/ldap.v2
+  version: 8168ee085ee43257585e50c6441aadf54ecb2c9f
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 - name: k8s.io/helm
