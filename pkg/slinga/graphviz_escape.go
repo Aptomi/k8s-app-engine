@@ -56,6 +56,10 @@ func isID(s string) bool {
 		if c == '_' {
 			return false
 		}
+		// THIS IS THE MOST IMPORTANT LINE
+		if c == '=' {
+			return false
+		}
 		i++
 	}
 	return pos
