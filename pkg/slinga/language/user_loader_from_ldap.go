@@ -50,13 +50,14 @@ func (config *LDAPConfig) getAttributes() []string {
 
 // UserLoaderFromLDAP allows aptomi to load users from LDAP
 type UserLoaderFromLDAP struct {
+	baseDir     string
 	config      *LDAPConfig
 	cachedUsers *GlobalUsers
 }
 
 // NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
 func NewUserLoaderFromLDAP(baseDir string) UserLoader {
-	return &UserLoaderFromLDAP{config: loadLDAPConfig(baseDir)}
+	return &UserLoaderFromLDAP{baseDir: baseDir, config: loadLDAPConfig(baseDir)}
 }
 
 // LoadUsersAll loads all users
@@ -66,7 +67,7 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() GlobalUsers {
 		t := loader.ldapSearch()
 		for _, u := range t {
 			// load secrets
-			u.Secrets = LoadUserSecretsByIDFromDir(GetAptomiPolicyDir(), u.ID)
+			u.Secrets = LoadUserSecretsByIDFromDir(loader.baseDir, u.ID)
 
 			// add user
 			loader.cachedUsers.Users[u.ID] = u
