@@ -166,6 +166,7 @@ gcloud config set project bright-torus-169502
 
 9. Bob gets marked as "deactivated"
    - deactivated = true in LDAP
+   - make a dummy check-in into Github (to generate a commit)
    - Loses access to his instance (via Istio)
 
 10. Show Rules on home page from Sam's point of view
