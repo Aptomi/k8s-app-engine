@@ -10,6 +10,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
+	"strings"
 )
 
 type LDAPConfig struct {
@@ -132,7 +133,7 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*User {
 			if label != "id" && label != "name" {
 				value := entry.GetAttributeValue(attr)
 				if len(value) > 0 {
-					user.Labels[label] = entry.GetAttributeValue(attr)
+					user.Labels[label] = ldapValue(value)
 				}
 			}
 		}
@@ -142,4 +143,15 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*User {
 	}
 
 	return result
+}
+
+func ldapValue(value string) string {
+	// normalize boolean values
+	if strings.ToLower(value) == "true" {
+		return "true"
+	}
+	if strings.ToLower(value) == "false" {
+		return "false"
+	}
+	return value
 }
