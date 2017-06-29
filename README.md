@@ -3,94 +3,100 @@
 ## Dependencies
 
 All Go dependencies are managed using [Glide](https://glide.sh/).
-* Install dependencies (vendor dir) with versions from ```glide.lock``` file:
-  ```glide install```
-* Update dependencies versions (in ```glide.lock``` file): ```glide update```
+* Install dependencies (vendor dir) with versions from `glide.lock` file:
+  `glide install`
+* Update dependencies versions (in `glide.lock` file): `glide update`
 
-Currently there is only one external dependency -
-[GraphViz](http://www.graphviz.org/Download..php) and it could be installed on
-macOS using ```brew install graphviz```.
-
-# If you see issue with gcloud token
-
-```shell
-kubectl --context cluster-us-east get pods
-kubectl --context cluster-us-west get pods
-helm --kube-context cluster-us-west list --all
-helm --kube-context cluster-us-east list --all
-```
+External dependencies can be installed with:
+* [GraphViz](http://www.graphviz.org/Download..php), on Mac OS via `brew install graphviz`
+* Helm, Istio, Kubectl, via `./tools/install-clients.sh`
 
 # How to test
 
-To run smoke tests (it will run unit tests and apply policy in noop mode):
+Unit test:
+```shell
+make test
+```
+
+Integration + Unit tests (LDAP must be up and running):
+```shell
+make alltest
+```
+
+Smoke tests (it will 'alltest' and apply policy in noop mode):
 
 ```shell
 make smoke
 ```
 
-To run just all unit tests:
-
-```shell
-make test
-```
-
-To run tests on specific package:
-
-```shell
-go test -v ./pkg/slinga
-```
-
-## How to install & configure LDAP Server
-1. Download & configure LDAP server, including creation of all the test users
-```shell
-cd tools/ldap-server
-ldap_server_init.sh
-```
-2. Download and install Apache Directory Studio. Check that connection can be established
-  - http://directory.apache.org/studio/
-  - http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html
-
-## How to build and run
-
-Directory 'testdata' is excluded from processing by 'go' tool:
-https://golang.org/cmd/go/#hdr-Description_of_package_lists
-
-To build a binary (named ```aptomi```):
-
-```shell
-make build
-```
-
-Must define environment variables:
-
-* ```APTOMI_DB``` = <path to aptomi working directory, where aptomi will store all its files (policy, logs, etc)>
-
-To run ```aptomi``` without compilation:
-
-```shell
-go run main.go show config
-go run main.go policy apply
-go run main.go policy apply --noop
-go run main.go policy apply --noop --show
-go run main.go policy apply --trace
-```
-
 ## Tools
 
-* ```make validate``` runs code re-format and error/warning checks on code (everything listed below). In you want to run individual things:
-  * ```make fmt``` runs fmt that will ensure code style and print changed files
+* ```make validate``` runs code re-format and error/warning checks on code (everything listed below). In you want to run individual stages:
+  * ```make fmt``` runs fmt that will re-format code and output the list of changed files
   * ```make vet``` runs vet that examines Go source code and reports suspicious
     constructs, such as Printf calls whose arguments do not align with the format
     string. Vet uses heuristics that do not guarantee all reports are genuine
     problems, but it can find errors not caught by the compilers
   * ```make lint``` runs linter for Go source code
 
+## How to build
+
+To build `aptomi` binary:
+
+```shell
+make build
+```
+
+To install `aptomi` binary:
+
+```shell
+make install
+```
+
+## How to run Aptomi
+
+Must define environment variables:
+* ```APTOMI_DB``` = <path to aptomi working directory, where aptomi will store all its files (policy, logs, etc)>
+
+Running compiled version:
+* `aptomi policy reset --force` to delete all files from Aptomi database and start from scratch with an empty state
+* `aptomi policy apply --noop` to run policy resolution, print what would be done, but don't do actual deployment
+* `aptomi policy apply --emulate` to run policy resoluton, mark objects as deployed, but don't actually deploy (emulate deployment). Useful if you want to test Aptomi engine, but don't want to wait while everything will be deployed to k8
+* `aptomi policy apply --full` to re-create missing instances and update existing instances. Useful if deployed instances somehow went missing from the underlying cloud (e.g. got manually deleted)
+* `aptomi policy apply --newrevision` generate new revision of the configuration, even if no changes were detected. Can be useful if you changed the logic of how parameters are calculated and want to re-generate aptomi DB
+
+Running without compilation, e.g.:
+```shell
+go run main.go policy apply --noop
+```
+
+
+## Provided scripts
+
+* `./tools/demo-gke.sh` - to set up 2 k8s clusters on GKE for demo. supports `up`, `down`, or `status`
+* `./tools/demo-init.sh` - starts the demo (except LDAP)
+  * `./tools/demo-local-policy-init.sh` - init local database with demo policy
+  * `./tools/demo-push.sh` - pushes demo policy to https://github.com/Frostman/aptomi-demo/
+  * `./tools/demo-watch-apply.sh` - watches remote github repo. Once new commit is detected, it updates the local copy and runs Aptomi
+* `tools/dev-watch-server.sh` - starts Aptomi UI in Dev mode. If .go files get changed, it will recompile and re-launch the server
+
+## How to install & configure local LDAP Server
+1. Download & configure LDAP server, including creation of all the test users
+```shell
+cd tools/ldap-server
+./ldap_server_init.sh
+```
+2. Download and install Apache Directory Studio. Check that connection can be established
+  - http://directory.apache.org/studio/
+  - See http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html on how to connect to LDAP
+
 ## How to set up demo environment on Google Cloud
 
 1. ```brew install kubernetes-cli kubernetes-helm```
+  * Do we still need this, in addition to `./tools/install-clients.sh`?
 1. ```curl https://sdk.cloud.google.com | bash```
-1. ```gcloud auth login```
 1. Create new project in https://console.cloud.google.com/
+1. ```gcloud auth login```
 1. ```gcloud config set project <YOUR_PROJECT_ID>```
 1. https://console.cloud.google.com/ -> API Manager -> Enable API
   1. Google Container Engine API
@@ -131,7 +137,9 @@ go run main.go policy apply --trace
   1. Right now there is no API (only partial API for UI). For processing, we run CLI in the loop. CLI does actions directly, not via API
   1. Add unit tests for corner cases. E.g. when user gets deleted and disappears, circular service dependency, circular component dependency
   1. When something fails in the middle of applying policy. E.g. some components got deployed and some didn't. How to handle it?
+  1. Re-think CLI flags and come up with better names
   1. LDAP - can we subscribe to events? I.e. so we can get notified when user labels change
+  1. Clean up Istio tech debt
 
 1. Testing
   1. Store history of aptomi revisions and continuously regression test against old stored runs. To emulate production use cases and Aptomi updates
