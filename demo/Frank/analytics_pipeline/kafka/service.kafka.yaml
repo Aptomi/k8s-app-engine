@@ -1,7 +1,7 @@
 # Definition of Kafka service
 name: kafka
 
-owner: 202
+owner: cn=Frank,ou=people,o=aptomiOrg
 
 components:
 

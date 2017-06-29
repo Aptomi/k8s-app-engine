@@ -1,7 +1,7 @@
 # Definition of HDFS service
 name: hdfs
 
-owner: 202
+owner: cn=Frank,ou=people,o=aptomiOrg
 
 components:
 

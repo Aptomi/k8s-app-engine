@@ -1,7 +1,7 @@
 # Definition of Istio service
 name: istio
 
-owner: 301
+owner: cn=Sam,ou=people,o=aptomiOrg
 
 components:
 

@@ -1,7 +1,7 @@
 # Definition of Spark service
 name: spark
 
-owner: 202
+owner: cn=Frank,ou=people,o=aptomiOrg
 
 components:
 

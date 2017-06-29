@@ -1,7 +1,7 @@
 # Definition of Zookeeper service
 name: zookeeper
 
-owner: 202
+owner: cn=Frank,ou=people,o=aptomiOrg
 
 components:
 

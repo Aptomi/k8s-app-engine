@@ -1,7 +1,7 @@
 # Definition of Analytics Pipeline service
 name: analytics_pipeline
 
-owner: 202
+owner: cn=Frank,ou=people,o=aptomiOrg
 
 enabled: false
 

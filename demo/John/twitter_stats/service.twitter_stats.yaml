@@ -1,7 +1,7 @@
 # Definition of Twitter Stats service
 name: twitter_stats
 
-owner: 201
+owner: cn=John,ou=people,o=aptomiOrg
 
 enabled: false
 
