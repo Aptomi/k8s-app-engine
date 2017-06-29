@@ -118,34 +118,33 @@ cd tools/ldap-server
 1. Access control
     1. Introduce a notion of user roles into Aptomi
     1. Introduce a notion of "policy namespace" into Aptomi
-      - allow ops to create policy namespaces and specify access rules (who can make what changes in which namespace)
-      - e.g. Dev can have full access to their own playgrounds (create services, define instantiation rules, change dependencies) to test and deploy to their clusters
-      - other pieces will have access for Ops only
+        1. allow ops to create policy namespaces and specify access rules (who can make what changes in which namespace)
+        1. e.g. Dev can have full access to their own playgrounds (create services, define instantiation rules, change dependencies) to test and deploy to their clusters. Other pieces will have access for Ops only
 
 1. Integrations
     1. Figure out a final solution for service discovery
     1. Integration with CI/CD, at least demo "Code change -> container rebuild -> push a change to production" without having explicit tags in Aptomi policy
 
 1. Code/Implementation
-  1. Error handling
-  1. Finish breaking it down into packages
-  1. Every object should have a kind (type) and ID. Use ID (unique) instead of names (non-unique)
-  1. Aptomi DB
-    1. Move away from file-based storage (db.yaml)
-    1. Schema changes between versions. If we change a format of parameter (e.g. 'criteria'), how to handle it correctly?
-  1. Better handling of Aptomi revisions. Compare policy, instances, users to detect difference
-  1. Right now there is no API (only partial API for UI). For processing, we run CLI in the loop. CLI does actions directly, not via API
-  1. Add unit tests for corner cases. E.g. when user gets deleted and disappears, circular service dependency, circular component dependency
-  1. When something fails in the middle of applying policy. E.g. some components got deployed and some didn't. How to handle it?
-  1. Re-think CLI flags and come up with better names
-  1. LDAP - can we subscribe to events? I.e. so we can get notified when user labels change
-  1. Clean up Istio tech debt
+    1. Error handling
+    1. Finish breaking it down into packages
+    1. Every object should have a kind (type) and ID. Use ID (unique) instead of names (non-unique)
+    1. Aptomi DB
+      1. Move away from file-based storage (db.yaml)
+      1. Schema changes between versions. If we change a format of parameter (e.g. 'criteria'), how to handle it correctly?
+    1. Better handling of Aptomi revisions. Compare policy, instances, users to detect difference
+    1. Right now there is no API (only partial API for UI). For processing, we run CLI in the loop. CLI does actions directly, not via API
+    1. Add unit tests for corner cases. E.g. when user gets deleted and disappears, circular service dependency, circular component dependency
+    1. When something fails in the middle of applying policy. E.g. some components got deployed and some didn't. How to handle it?
+    1. Re-think CLI flags and come up with better names
+    1. LDAP - can we subscribe to events? I.e. so we can get notified when user labels change
+    1. Clean up Istio tech debt
 
 1. Testing
-  1. Store history of aptomi revisions and continuously regression test against old stored runs. To emulate production use cases and Aptomi updates
+    1. Store history of aptomi revisions and continuously regression test against old stored runs. To emulate production use cases and Aptomi updates
 
 ## Resolved issues
-  1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed. The whole thing should be "rolled back"
-  1. Store all revisions. Every time we apply policy version would increase
-  1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes. --newrevision
+    1. Handle "partial matchings" correctly. E.g. access to kafka is allowed, but kafka depends on zookeeper and access to zookeeper is not allowed. The whole thing should be "rolled back"
+    1. Store all revisions. Every time we apply policy version would increase
+    1. If calculation logic changes between runs, how can be force these changes to be applied? It thinks that there are no changes. --newrevision
 
