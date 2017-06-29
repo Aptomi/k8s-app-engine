@@ -7,7 +7,7 @@ test.go
 debug*.log
 apacheds-*
 
-db
+/db
 
 .idea
 
