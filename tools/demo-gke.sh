@@ -29,7 +29,7 @@ export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
 function main() {
     if [ "$#" -ne "1" ]; then
         echo "ERROR: (demo-gke.sh) Too few arguments"
-        echo "Usage: demo-gke.sh <up | down>"
+        echo "Usage: demo-gke.sh <up | down | cleanup>"
         exit 1
     fi
 
