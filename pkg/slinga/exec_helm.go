@@ -67,7 +67,8 @@ func newKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Cli
 }
 
 func (exec *HelmCodeExecutor) setupTillerConnection() error {
-	if exec.Cluster.Metadata.TillerHost != "" {
+	if len(exec.Cluster.GetTillerHost()) > 0 {
+		// connection already set up, skip
 		return nil
 	}
 
@@ -85,7 +86,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 		return err
 	}
 
-	exec.Cluster.Metadata.TillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
+	exec.Cluster.SetTillerHost(fmt.Sprintf("localhost:%d", tunnel.Local))
 
 	Debug.WithFields(log.Fields{
 		"port": tunnel.Local,
@@ -95,13 +96,13 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 }
 
 func (exec *HelmCodeExecutor) newHelmClient() *helm.Client {
-	return helm.NewClient(helm.Host(exec.Cluster.Metadata.TillerHost))
+	return helm.NewClient(helm.Host(exec.Cluster.GetTillerHost()))
 }
 
 func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 	resp, err := helmClient.ListReleases()
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 
 	for _, rel := range resp.Releases {
@@ -323,8 +324,8 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 }
 
 func (exec HelmCodeExecutor) getKubeExternalAddress(client internalversioncore.CoreInterface) (string, error) {
-	if exec.Cluster.Metadata.KubeExternalAddress != "" {
-		return exec.Cluster.Metadata.KubeExternalAddress, nil
+	if len(exec.Cluster.GetKubeExternalAddress()) > 0 {
+		return exec.Cluster.GetKubeExternalAddress(), nil
 	}
 
 	nodes, err := client.Nodes().List(api.ListOptions{})
@@ -357,6 +358,6 @@ func (exec HelmCodeExecutor) getKubeExternalAddress(client internalversioncore.C
 		return "", errors.New("Couldn't find external IP for cluster")
 	}
 
-	exec.Cluster.Metadata.KubeExternalAddress = addr
+	exec.Cluster.SetKubeExternalAddress(addr)
 	return addr, nil
 }

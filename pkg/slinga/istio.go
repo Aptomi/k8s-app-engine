@@ -255,8 +255,8 @@ func (rule *IstioRouteRule) delete() {
 }
 
 func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
-	istioSvc := cluster.Metadata.IstioSvc
-	if istioSvc == "" {
+	istioSvc := cluster.GetIstioSvc()
+	if len(istioSvc) == 0 {
 		_, clientset, err := newKubeClient(cluster)
 		if err != nil {
 			return "", err
@@ -307,7 +307,7 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 						}
 					}
 
-					cluster.Metadata.IstioSvc = istioSvc
+					cluster.SetIstioSvc(istioSvc)
 					break
 				}
 			}
@@ -321,7 +321,7 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 
 	content := "set -e\n"
 	content += "kubectl config use-context " + cluster.Name + " 1>/dev/null\n"
-	content += "istioctl --configAPIService " + cluster.Metadata.IstioSvc + " --namespace " + cluster.Metadata.Namespace + " "
+	content += "istioctl --configAPIService " + cluster.GetIstioSvc() + " --namespace " + cluster.Metadata.Namespace + " "
 	content += cmd + "\n"
 
 	cmdFile := WriteTempFile("istioctl-cmd", content)
