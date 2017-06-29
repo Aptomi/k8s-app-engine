@@ -5,6 +5,7 @@
     short-description: Dev
     org: dev
     ldapDN: cn=Alice,ou=people,o=aptomiOrg
+    deactivated: false
 
 - id: 101
   name: Bob
@@ -13,6 +14,7 @@
     short-description: Dev
     org: dev
     ldapDN: cn=Bob,ou=people,o=aptomiOrg
+    deactivated: false
 
 - id: 102
   name: Carol
@@ -22,6 +24,7 @@
     org: dev
     team: mobile-dev
     ldapDN: cn=Carol,ou=people,o=aptomiOrg
+    deactivated: false
 
 - id: 201
   name: John
@@ -32,6 +35,7 @@
     is_operator: true
     team: web-ops-team
     ldapDN: cn=John,ou=people,o=aptomiOrg
+    deactivated: false
 
 - id: 202
   name: Frank
@@ -42,6 +46,7 @@
     is_operator: true
     team: analytics-ops-team
     ldapDN: cn=Frank,ou=people,o=aptomiOrg
+    deactivated: false
 
 - id: 301
   name: Sam
@@ -53,3 +58,4 @@
     global_ops: true
     team: global-ops-team
     ldapDN: cn=Sam,ou=people,o=aptomiOrg
+    deactivated: false
