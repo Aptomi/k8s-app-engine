@@ -12,3 +12,4 @@ labeltoatrributes:
   team: team
   org: o
   short-description: role
+  deactivated: deactivated

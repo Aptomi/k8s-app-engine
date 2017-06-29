@@ -1,7 +1,7 @@
 - id: carol_tests_twitter_stats_vis_in_stage
-  userid: 102
-  service: twitter_stats
+  userid: cn=Carol,ou=people,o=aptomiOrg
   enabled: false
+  service: twitter_stats
   labels:
       tstype: stage
       tsvisimage: demo-v61
