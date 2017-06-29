@@ -39,6 +39,11 @@ gcloud config set project bright-torus-169502
     - `./tools/demo-gke.sh up`
     - `./tools/demo-gke.sh cleanup`
 
+    - For faster cleanup, use:
+      - Fast cleanup in west: `kubectl --context cluster-us-west -n demo delete ns demo`
+      - Fast cleanup in east: `kubectl --context cluster-us-east -n demo delete ns demo`
+      - Delete helm objects: `./tools/demo-gke.sh cleanup`
+
 3. Terminal Tab #1: initialize local DB, initialize demo repository on GitHub and start watcher/auto-applier
     - `./tools/demo-init.sh`
 
