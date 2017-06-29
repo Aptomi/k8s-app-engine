@@ -21,8 +21,8 @@ type LDAPConfig struct {
 }
 
 // Loads LDAP configuration
-func loadLDAPConfig() *LDAPConfig {
-	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(GetAptomiPolicyDir(), TypeUsersLDAP))
+func loadLDAPConfig(baseDir string) *LDAPConfig {
+	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeUsersLDAP))
 	fileName, err := EnsureSingleFile(files)
 	if err != nil {
 		Debug.WithFields(log.Fields{
@@ -53,9 +53,9 @@ type UserLoaderFromLDAP struct {
 	cachedUsers *GlobalUsers
 }
 
-// NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given LDAP configuration file (with host/port and mapping)
-func NewUserLoaderFromLDAP() UserLoader {
-	return &UserLoaderFromLDAP{config: loadLDAPConfig()}
+// NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
+func NewUserLoaderFromLDAP(baseDir string) UserLoader {
+	return &UserLoaderFromLDAP{config: loadLDAPConfig(baseDir)}
 }
 
 // LoadUsersAll loads all users

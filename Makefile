@@ -7,9 +7,15 @@ vendor:
 
 .PHONY: test
 test:
+	go test -short -v ./cmd/...
+	go test -short -v ./pkg/...
+	@echo "\nAll unit tests passed"
+
+.PHONY: alltest
+alltest:
 	go test -v ./cmd/...
 	go test -v ./pkg/...
-	@echo "\nAll tests passed"
+	@echo "\nAll unit & integration tests passed"
 
 .PHONY: test-loop
 test-loop:
@@ -21,7 +27,7 @@ clean-run-noop:
 	APTOMI_DB=$(TMP) && tools/local-policy-init.sh
 
 .PHONY: smoke
-smoke: test build install clean-run-noop
+smoke: alltest build install clean-run-noop
 
 .PHONY: emulate
 emulate:

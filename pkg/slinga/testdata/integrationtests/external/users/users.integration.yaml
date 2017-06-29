@@ -1,0 +1,55 @@
+- id: 100
+  name: Alice
+  labels:
+    description: Alice (Developer/Service Consumer)
+    short-description: Dev
+    org: dev
+    ldapDN: cn=Alice,ou=people,o=aptomiOrg
+
+- id: 101
+  name: Bob
+  labels:
+    description: Bob (Developer/Service Consumer)
+    short-description: Dev
+    org: dev
+    ldapDN: cn=Bob,ou=people,o=aptomiOrg
+
+- id: 102
+  name: Carol
+  labels:
+    description: Carol (Developer/Service Consumer)
+    short-description: Dev
+    org: dev
+    team: mobile-dev
+    ldapDN: cn=Carol,ou=people,o=aptomiOrg
+
+- id: 201
+  name: John
+  labels:
+    description: John (Ops for 'twitter-stats' service). He controls its sharing/consumption (prod/stage)
+    short-description: Service Ops
+    org: it
+    is_operator: true
+    team: web-ops-team
+    ldapDN: cn=John,ou=people,o=aptomiOrg
+
+- id: 202
+  name: Frank
+  labels:
+    description: Frank (Ops for 'analytics-pipeline' service). He controls its sharing/consumption (prod/stage)
+    short-description: Service Ops
+    org: it
+    is_operator: true
+    team: analytics-ops-team
+    ldapDN: cn=Frank,ou=people,o=aptomiOrg
+
+- id: 301
+  name: Sam
+  labels:
+    description: Sam (Global Ops). He controls global rules
+    short-description: Global Ops
+    org: it
+    is_operator: true
+    global_ops: true
+    team: global-ops-team
+    ldapDN: cn=Sam,ou=people,o=aptomiOrg

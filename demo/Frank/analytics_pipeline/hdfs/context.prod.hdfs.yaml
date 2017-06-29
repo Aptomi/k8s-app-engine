@@ -3,7 +3,7 @@ name: prod
 # This context describes hdfs in production
 service: hdfs
 
-# This context is for people from it/analytics_ops_team (they control production instance)
+# This context is for people from it/analytics-ops-team (they control production instance)
 criteria:
   accept:
     - org == 'it' && is_operator

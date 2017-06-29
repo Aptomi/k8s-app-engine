@@ -1,9 +1,0 @@
-- id: 301
-  name: Sam
-  labels:
-    description: Global Op. He controls clusters and global rules
-    short-description: Global Ops
-    org: it
-    is_operator: true
-    global_ops: true
-    team: global_ops_team

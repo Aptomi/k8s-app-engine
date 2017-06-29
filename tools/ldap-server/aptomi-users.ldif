@@ -99,7 +99,7 @@ organizationName: it
 dn: cn=John,ou=people,o=aptomiOrg
 changetype: modify
 add: organizationName
-organizationName: dev
+organizationName: it
 
 dn: cn=Sam,ou=people,o=aptomiOrg
 changetype: modify
@@ -175,4 +175,64 @@ dn: cn=Frank,ou=people,o=aptomiOrg
 changetype: modify
 add: isoperator
 isoperator: true
+
+dn: cn=Alice,ou=people,o=aptomiOrg
+changetype: modify
+add: role
+role: Dev
+
+dn: cn=Bob,ou=people,o=aptomiOrg
+changetype: modify
+add: role
+role: Dev
+
+dn: cn=Carol,ou=people,o=aptomiOrg
+changetype: modify
+add: role
+role: Dev
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: modify
+add: role
+role: Service Ops
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: modify
+add: role
+role: Service Ops
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: role
+role: Global Ops
+
+dn: cn=Alice,ou=people,o=aptomiOrg
+changetype: modify
+add: deactivated
+deactivated: false
+
+dn: cn=Bob,ou=people,o=aptomiOrg
+changetype: modify
+add: deactivated
+deactivated: false
+
+dn: cn=Carol,ou=people,o=aptomiOrg
+changetype: modify
+add: deactivated
+deactivated: false
+
+dn: cn=John,ou=people,o=aptomiOrg
+changetype: modify
+add: deactivated
+deactivated: false
+
+dn: cn=Frank,ou=people,o=aptomiOrg
+changetype: modify
+add: deactivated
+deactivated: false
+
+dn: cn=Sam,ou=people,o=aptomiOrg
+changetype: modify
+add: deactivated
+deactivated: false
 

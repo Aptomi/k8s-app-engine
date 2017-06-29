@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestLoadUsers(t *testing.T) {
+func TestLoadUsersFromDir(t *testing.T) {
 	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 
 	users := userLoader.LoadUsersAll()
