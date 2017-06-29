@@ -130,7 +130,10 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*User {
 		}
 		for label, attr := range loader.config.LabelToAtrributes {
 			if label != "id" && label != "name" {
-				user.Labels[label] = entry.GetAttributeValue(attr)
+				value := entry.GetAttributeValue(attr)
+				if len(value) > 0 {
+					user.Labels[label] = entry.GetAttributeValue(attr)
+				}
 			}
 		}
 
