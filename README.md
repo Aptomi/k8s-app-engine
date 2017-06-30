@@ -128,6 +128,7 @@ go run main.go policy apply --noop
     1. Error handling
     1. Finish breaking it down into packages
     1. Every object should have a kind (type) and ID. Use ID (unique) instead of names (non-unique)
+    1. System of plugins for the engine, so you can easily insert additional integrations (e.g. istio)
     1. Aptomi DB
         1. Move away from file-based storage (db.yaml)
         1. Schema changes between versions. If we change a format of parameter (e.g. 'criteria'), how to handle it correctly?
