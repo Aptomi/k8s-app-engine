@@ -1,4 +1,4 @@
-package slinga
+package graphviz
 
 import (
 	"fmt"

@@ -5,6 +5,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Frostman/aptomi/pkg/slinga/graphviz"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

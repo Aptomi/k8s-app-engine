@@ -1,10 +1,11 @@
-package slinga
+package graphviz
 
 import (
 	"bytes"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	. "github.com/Frostman/aptomi/pkg/slinga"
 	log "github.com/Sirupsen/logrus"
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"
@@ -31,11 +32,11 @@ func NewPolicyVisualization(diff *ServiceUsageStateDiff) PolicyVisualization {
 // DrawAndStore draws and stores several pictures (current, prev, and delta)
 func (vis PolicyVisualization) DrawAndStore() {
 	// Draw & save resulting state
-	nextGraph := vis.diff.Next.DrawVisualAndStore("complete")
+	nextGraph := vis.DrawVisualAndStore(vis.diff.Next,"complete")
 	vis.saveGraph("complete", nextGraph)
 
 	// Draw previous state
-	prevGraph := vis.diff.Prev.DrawVisualAndStore("prev")
+	prevGraph := vis.DrawVisualAndStore(vis.diff.Prev,"prev")
 	vis.saveGraph("prev", prevGraph)
 
 	// Draw delta (i.e. difference between resulting state and previous state)
@@ -133,7 +134,7 @@ func shorten(s string) string {
 }
 
 // DrawVisualAndStore writes usage state visual into a file
-func (state ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Graph {
+func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suffix string) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -163,7 +164,7 @@ func (state ServiceUsageState) DrawVisualAndStore(suffix string) *gographviz.Gra
 				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := state.userLoader.LoadUserByID(d.UserID)
+				user := state.GetUserLoader().LoadUserByID(d.UserID)
 				label := "Name: " + user.Name + " (" + user.ID + ")"
 				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {
