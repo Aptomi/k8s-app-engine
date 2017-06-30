@@ -81,10 +81,9 @@ go run main.go policy apply --noop
 * `tools/dev-watch-server.sh` - starts Aptomi UI in Dev mode. If .go files get changed, it will recompile and re-launch the server
 
 ## How to install & configure local LDAP Server
-1. Download & configure LDAP server, including creation of all the test users
+1. Download & configure LDAP server, including creation of all the test users for the demo
 ```shell
-cd tools/ldap-server
-./ldap_server_init.sh
+./tools/ldap-server/ldap_server_init.sh
 ```
 2. Download and install Apache Directory Studio. Check that connection can be established
   - http://directory.apache.org/studio/

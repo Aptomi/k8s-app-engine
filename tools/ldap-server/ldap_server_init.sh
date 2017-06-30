@@ -29,6 +29,9 @@ restart_ldap ()
   start_ldap
 }
 
+# Change directory to the directory of the script
+cd "$(dirname "$0")"
+
 # Kill previous versions if they are still running
 pkill -f apacheds
 
