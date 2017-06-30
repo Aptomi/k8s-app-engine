@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+func BenchmarkEngine(b *testing.B) {
+	t := &testing.T{}
+	for i := 0; i < b.N; i++ {
+		TestPolicyResolve(t)
+		TestPolicyResolveEmptyDiff(t)
+		TestPolicyResolveNonEmptyDiff(t)
+		TestDiffUpdateAndComponentTimes(t)
+	}
+}
+
 func TestPolicyResolve(t *testing.T) {
 	policy := LoadPolicyFromDir("../testdata/unittests")
 	userLoader := NewUserLoaderFromDir("../testdata/unittests")
