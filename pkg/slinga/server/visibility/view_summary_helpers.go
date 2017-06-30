@@ -2,7 +2,7 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"strings"
@@ -27,7 +27,7 @@ func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) stri
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	_, context, allocation, _ := slinga.ParseServiceUsageKey(dependency.ServiceKey)
+	_, context, allocation, _ := engine.ParseServiceUsageKey(dependency.ServiceKey)
 	return fmt.Sprintf("%s/%s", context, allocation)
 }
 
@@ -48,17 +48,17 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 	return matchedUsers
 }
 
-func (view SummaryView) getInstanceStats(instance *slinga.ComponentInstance) string {
+func (view SummaryView) getInstanceStats(instance *engine.ComponentInstance) string {
 	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key].GetRunningTime()).Humanize()
 	return fmt.Sprintf("%s", runningTime)
 }
 
-func (view SummaryView) getResolvedClusterNameByInst(instance *slinga.ComponentInstance) string {
+func (view SummaryView) getResolvedClusterNameByInst(instance *engine.ComponentInstance) string {
 	return view.state.ResolvedData.ComponentInstanceMap[instance.Key].CalculatedLabels.Labels["cluster"]
 }
 
-func (view SummaryView) getResolvedContextNameByInst(instance *slinga.ComponentInstance) string {
-	_, context, allocation, _ := slinga.ParseServiceUsageKey(instance.Key)
+func (view SummaryView) getResolvedContextNameByInst(instance *engine.ComponentInstance) string {
+	_, context, allocation, _ := engine.ParseServiceUsageKey(instance.Key)
 	return fmt.Sprintf("%s/%s", context, allocation)
 }
 

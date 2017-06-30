@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	"sort"
 	"strconv"
@@ -10,11 +10,11 @@ import (
 // TimelineView represents timeline view
 type TimelineView struct {
 	userID string
-	states map[int]slinga.ServiceUsageState
+	states map[int]engine.ServiceUsageState
 }
 
 // NewTimelineView creates a new TimelineView
-func NewTimelineView(userID string, states map[int]slinga.ServiceUsageState) TimelineView {
+func NewTimelineView(userID string, states map[int]engine.ServiceUsageState) TimelineView {
 	return TimelineView{
 		userID: userID,
 		states: states,

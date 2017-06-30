@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	"sort"
 )
 
@@ -18,11 +18,11 @@ type detail struct {
 	Dependencies    []*item
 	AllDependencies []*item
 	Views           []*item
-	Summary         slinga.ServiceUsageStateSummary
+	Summary         engine.ServiceUsageStateSummary
 }
 
 // NewDetails returns detail object
-func NewDetails(userID string, state slinga.ServiceUsageState) detail {
+func NewDetails(userID string, state engine.ServiceUsageState) detail {
 	summary := state.GetSummary()
 	r := detail{
 		userID,

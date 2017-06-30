@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/engine"
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/graphviz"

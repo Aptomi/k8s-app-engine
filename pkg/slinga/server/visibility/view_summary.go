@@ -1,18 +1,18 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	"sort"
 )
 
 // SummaryView represents summary view that we show on the home page
 type SummaryView struct {
 	userID string
-	state  slinga.ServiceUsageState
+	state  engine.ServiceUsageState
 }
 
 // NewSummaryView creates a new SummaryView
-func NewSummaryView(userID string, state slinga.ServiceUsageState) SummaryView {
+func NewSummaryView(userID string, state engine.ServiceUsageState) SummaryView {
 	return SummaryView{
 		userID: userID,
 		state:  state,
@@ -85,8 +85,8 @@ func (view SummaryView) getServicesOwned() interface{} {
 			instanceMap := make(map[string]bool)
 			for key, instance := range view.state.ResolvedData.ComponentInstanceMap {
 				if instance.Resolved {
-					serviceName, _, _, componentName := slinga.ParseServiceUsageKey(key)
-					if serviceName == service.Name && componentName == slinga.ComponentRootName {
+					serviceName, _, _, componentName := engine.ParseServiceUsageKey(key)
+					if serviceName == service.Name && componentName == engine.ComponentRootName {
 						instanceMap[key] = true
 					}
 				}

@@ -1,4 +1,4 @@
-package slinga
+package engine
 
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
@@ -9,9 +9,9 @@ import (
 )
 
 func TestPolicyResolve(t *testing.T) {
-	policy := LoadPolicyFromDir("testdata/unittests")
-	userLoader := NewUserLoaderFromDir("testdata/unittests")
-	dependencies := LoadDependenciesFromDir("testdata/unittests")
+	policy := LoadPolicyFromDir("../testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
+	dependencies := LoadDependenciesFromDir("../testdata/unittests")
 
 	usageState := NewServiceUsageState(&policy, &dependencies, userLoader)
 	err := usageState.ResolveAllDependencies()
@@ -37,9 +37,9 @@ func TestPolicyResolve(t *testing.T) {
 }
 
 func TestPolicyResolveEmptyDiff(t *testing.T) {
-	policy := LoadPolicyFromDir("testdata/unittests")
-	userLoader := NewUserLoaderFromDir("testdata/unittests")
-	dependencies := LoadDependenciesFromDir("testdata/unittests")
+	policy := LoadPolicyFromDir("../testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
+	dependencies := LoadDependenciesFromDir("../testdata/unittests")
 
 	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(&policy, &dependencies, userLoader)
@@ -62,9 +62,9 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 }
 
 func TestPolicyResolveNonEmptyDiff(t *testing.T) {
-	policy := LoadPolicyFromDir("testdata/unittests")
-	userLoader := NewUserLoaderFromDir("testdata/unittests")
-	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
+	policy := LoadPolicyFromDir("../testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
+	dependenciesPrev := LoadDependenciesFromDir("../testdata/unittests")
 
 	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
@@ -95,9 +95,9 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 }
 
 func TestDiffUpdateAndComponentTimes(t *testing.T) {
-	policy := LoadPolicyFromDir("testdata/unittests")
-	userLoader := NewUserLoaderFromDir("testdata/unittests")
-	dependenciesPrev := LoadDependenciesFromDir("testdata/unittests")
+	policy := LoadPolicyFromDir("../testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
+	dependenciesPrev := LoadDependenciesFromDir("../testdata/unittests")
 
 	var key string
 	var timePrevCreated, timePrevUpdated, timeNextCreated, timeNextUpdated time.Time
@@ -179,7 +179,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
-	state := LoadPolicyFromDir("testdata/unittests")
+	state := LoadPolicyFromDir("../testdata/unittests")
 	service := state.Services["kafka"]
 
 	c, err := service.GetComponentsSortedTopologically()
@@ -194,7 +194,7 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
 	savedObjectAsString := yaml.SerializeObject(state)
-	userLoader := NewUserLoaderFromDir("testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 	loadedObject := ServiceUsageState{userLoader: userLoader}
 	yaml.DeserializeObject(savedObjectAsString, &loadedObject)
 	return loadedObject

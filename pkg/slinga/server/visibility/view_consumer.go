@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 )
 
 // ConsumerView represents a view from a particular consumer(s) (service consumer point of view)
@@ -9,12 +9,12 @@ import (
 type ConsumerView struct {
 	userId       string
 	dependencyId string
-	state        slinga.ServiceUsageState
+	state        engine.ServiceUsageState
 	g            *graph
 }
 
 // NewConsumerView creates a new ConsumerView
-func NewConsumerView(userID string, dependencyID string, state slinga.ServiceUsageState) ConsumerView {
+func NewConsumerView(userID string, dependencyID string, state engine.ServiceUsageState) ConsumerView {
 	return ConsumerView{
 		userId:       userID,
 		dependencyId: dependencyID,
@@ -48,7 +48,7 @@ func filterMatches(value string, filterValue string) bool {
 // Adds to the graph nodes/edges which are triggered by usage of a given dependency
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
 	// retrieve instance
-	service, context, allocation, component := slinga.ParseServiceUsageKey(key)
+	service, context, allocation, component := engine.ParseServiceUsageKey(key)
 
 	// try to get this component instance from resolved data
 	v := view.state.GetResolvedData().ComponentInstanceMap[key]
@@ -59,7 +59,7 @@ func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode,
 	}
 
 	// if it's a service, add node and connext with previous
-	if component == slinga.ComponentRootName {
+	if component == engine.ComponentRootName {
 		// add service instance node
 		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[service], context, allocation, v, nextLevel <= 1)
 		view.g.addNode(svcInstanceNode, nextLevel)

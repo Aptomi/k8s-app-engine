@@ -1,18 +1,18 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 )
 
 // ServiceView represents a view from a particular service (service owner point of view)
 type ServiceView struct {
 	serviceName string
-	state       slinga.ServiceUsageState
+	state       engine.ServiceUsageState
 	g           *graph
 }
 
 // NewServiceView creates a new ServiceView
-func NewServiceView(serviceName string, state slinga.ServiceUsageState) ServiceView {
+func NewServiceView(serviceName string, state engine.ServiceUsageState) ServiceView {
 	return ServiceView{
 		serviceName: serviceName,
 		state:       state,
@@ -28,8 +28,8 @@ func (view ServiceView) GetData() interface{} {
 
 	// Step 2 - find all instances of a given service. add them as "instance nodes"
 	for k, v := range view.state.ResolvedData.ComponentInstanceMap {
-		service, context, allocation, component := slinga.ParseServiceUsageKey(k)
-		if service == view.serviceName && component == slinga.ComponentRootName {
+		service, context, allocation, component := engine.ParseServiceUsageKey(k)
+		if service == view.serviceName && component == engine.ComponentRootName {
 			// add a node with an instance of our service
 			svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[service], context, allocation, v, true)
 			view.g.addNode(svcInstanceNode, 1)
@@ -64,9 +64,9 @@ func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePre
 	} else {
 		// go over all incoming edges
 		for k := range instance.EdgesIn {
-			service, context, allocation, component := slinga.ParseServiceUsageKey(k)
+			service, context, allocation, component := engine.ParseServiceUsageKey(k)
 			v := view.state.GetResolvedData().ComponentInstanceMap[k]
-			if component == slinga.ComponentRootName {
+			if component == engine.ComponentRootName {
 				// if it's a service instance, add a node
 				svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[service], context, allocation, v, false)
 				view.g.addNode(svcInstanceNode, nextLevel)

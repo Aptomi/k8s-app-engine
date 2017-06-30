@@ -1,4 +1,4 @@
-package slinga
+package engine
 
 import (
 	. "github.com/Frostman/aptomi/pkg/slinga/util"

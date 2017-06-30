@@ -5,7 +5,7 @@ import (
 	. "github.com/Frostman/aptomi/pkg/slinga/db"
 	. "github.com/Frostman/aptomi/pkg/slinga/log"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
-	. "github.com/Frostman/aptomi/pkg/slinga"
+	. "github.com/Frostman/aptomi/pkg/slinga/engine"
 	log "github.com/Sirupsen/logrus"
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"

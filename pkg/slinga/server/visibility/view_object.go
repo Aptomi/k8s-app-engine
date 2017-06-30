@@ -1,18 +1,18 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	log "github.com/Sirupsen/logrus"
 )
 
 // ObjectView represents an in-depth view for a particular object
 type ObjectView struct {
 	id    string
-	state slinga.ServiceUsageState
+	state engine.ServiceUsageState
 }
 
 // NewObjectView creates a new ObjectView
-func NewObjectView(id string, state slinga.ServiceUsageState) ObjectView {
+func NewObjectView(id string, state engine.ServiceUsageState) ObjectView {
 	return ObjectView{
 		id:    id,
 		state: state,

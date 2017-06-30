@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	"github.com/spf13/cobra"
 	"sort"
@@ -26,7 +26,7 @@ var endpointCmdShow = &cobra.Command{
 		userLoader := NewAptomiUserLoader()
 
 		// Load the previous usage state
-		state := slinga.LoadServiceUsageState(userLoader)
+		state := engine.LoadServiceUsageState(userLoader)
 
 		endpoints := state.Endpoints("")
 
@@ -38,7 +38,7 @@ var endpointCmdShow = &cobra.Command{
 
 		for _, key := range keys {
 			keyEndpoints := endpoints[key]
-			serviceName, contextName, allocationName, componentName := slinga.ParseServiceUsageKey(key)
+			serviceName, contextName, allocationName, componentName := engine.ParseServiceUsageKey(key)
 			fmt.Println("Service:", serviceName, " |  Context:", contextName, " |  Allocation:", allocationName, " |  Component:", componentName)
 
 			for tp, url := range keyEndpoints {

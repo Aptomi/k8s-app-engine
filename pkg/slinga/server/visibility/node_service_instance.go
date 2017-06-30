@@ -2,7 +2,7 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 	. "github.com/Frostman/aptomi/pkg/slinga/util"
 	"html"
@@ -13,11 +13,11 @@ type serviceInstanceNode struct {
 	service    *Service
 	context    string
 	allocation string
-	instance   *slinga.ComponentInstance
+	instance   *engine.ComponentInstance
 	primary    bool
 }
 
-func newServiceInstanceNode(key string, service *Service, context string, allocation string, instance *slinga.ComponentInstance, primary bool) graphNode {
+func newServiceInstanceNode(key string, service *Service, context string, allocation string, instance *engine.ComponentInstance, primary bool) graphNode {
 	return serviceInstanceNode{
 		key:        key,
 		service:    service,
@@ -51,7 +51,7 @@ func (n serviceInstanceNode) getLabel() string {
 	// for not resolved instances
 	if !n.instance.Resolved {
 		if n.service == nil {
-			serviceName, _, _, _ := slinga.ParseServiceUsageKey(n.key)
+			serviceName, _, _, _ := engine.ParseServiceUsageKey(n.key)
 			return fmt.Sprintf(
 				`<b>%s</b>
 					ERROR`,
@@ -93,7 +93,7 @@ func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceInstanceNode) getDetails(id string, state slinga.ServiceUsageState) interface{} {
+func (n serviceInstanceNode) getDetails(id string, state engine.ServiceUsageState) interface{} {
 	result := state.ResolvedData.ComponentInstanceMap[id]
 	if result == nil {
 		result = state.UnresolvedData.ComponentInstanceMap[id]

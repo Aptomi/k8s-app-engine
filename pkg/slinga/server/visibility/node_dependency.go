@@ -2,7 +2,7 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 	. "github.com/Frostman/aptomi/pkg/slinga/language"
 )
 
@@ -56,6 +56,6 @@ func (n dependencyNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n dependencyNode) getDetails(id string, state slinga.ServiceUsageState) interface{} {
+func (n dependencyNode) getDetails(id string, state engine.ServiceUsageState) interface{} {
 	return state.Dependencies.DependenciesByID[id]
 }

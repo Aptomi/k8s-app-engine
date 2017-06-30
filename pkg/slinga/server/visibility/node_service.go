@@ -2,7 +2,7 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga"
+	"github.com/Frostman/aptomi/pkg/slinga/engine"
 )
 
 type serviceNode struct {
@@ -41,6 +41,6 @@ func (n serviceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceNode) getDetails(id string, state slinga.ServiceUsageState) interface{} {
+func (n serviceNode) getDetails(id string, state engine.ServiceUsageState) interface{} {
 	return state.Policy.Services[id]
 }
