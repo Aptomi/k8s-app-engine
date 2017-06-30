@@ -326,7 +326,7 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 
 	cmdFile := WriteTempFile("istioctl-cmd", content)
 
-	out, err := runCmd("bash", cmdFile.Name())
+	out, err := RunCmd("bash", cmdFile.Name())
 	if err != nil {
 		return "", err
 	}

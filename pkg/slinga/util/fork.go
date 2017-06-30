@@ -1,11 +1,12 @@
-package slinga
+package util
 
 import (
 	"fmt"
 	"os/exec"
 )
 
-func runCmd(cmdName string, cmdArgs ...string) (string, error) {
+// RunCmd runs specified command with arguments and returns its standard output.
+func RunCmd(cmdName string, cmdArgs ...string) (string, error) {
 	out, err := exec.Command(cmdName, cmdArgs...).Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
