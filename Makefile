@@ -7,7 +7,7 @@ vendor:
 
 .PHONY: profile
 profile:
-	echo "Profiling CPU for 15 seconds"
+	@echo "Profiling CPU for 15 seconds"
 	go test -bench . -benchtime 15s ./pkg/slinga/engine -cpuprofile cpu.out
 	go tool pprof -web engine.test cpu.out
 
