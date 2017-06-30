@@ -24,14 +24,14 @@ test-loop:
 .PHONY: clean-run-noop
 clean-run-noop:
 	$(eval TMP := $(shell mktemp -d))
-	APTOMI_DB=$(TMP) && tools/local-policy-init.sh
+	APTOMI_DB=$(TMP) && tools/demo-local-policy-init.sh
 
 .PHONY: smoke
 smoke: alltest build install clean-run-noop
 
 .PHONY: emulate
 emulate:
-	tools/local-policy-init.sh
+	tools/demo-local-policy-init.sh
 	aptomi policy apply --emulate
 	aptomi policy apply --emulate --newrevision
 	tools/dev-enable-all.sh
