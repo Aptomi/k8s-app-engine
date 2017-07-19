@@ -1,8 +1,8 @@
 package engine
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

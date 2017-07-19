@@ -1,6 +1,6 @@
 package language
 
-import "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+import "github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 
 // Context for a given service
 type Context struct {

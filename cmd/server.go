@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga/server"
+	"github.com/Aptomi/aptomi/pkg/slinga/server"
 	"github.com/spf13/cobra"
 )
 

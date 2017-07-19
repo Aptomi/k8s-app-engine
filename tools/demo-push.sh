@@ -10,6 +10,6 @@ pushd $tmp
     git add -A
     git add -f _external/charts/*.tgz
     git commit -a -m "Initial demo state $(date)"
-    git remote add origin git@github.com:Frostman/aptomi-demo.git
+    git remote add origin git@github.com:Aptomi/aptomi-demo.git
     git push -f origin master
 popd

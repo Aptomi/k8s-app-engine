@@ -1,7 +1,7 @@
 package engine
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 /*

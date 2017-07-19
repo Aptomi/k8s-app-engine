@@ -1,7 +1,7 @@
 package server
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"net/http"
 	"time"
 	"fmt"

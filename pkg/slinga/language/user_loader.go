@@ -1,7 +1,7 @@
 package language
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 )
 
 // UserLoader is an interface which allows aptomi to load users from different sources (e.g. file, LDAP, etc)

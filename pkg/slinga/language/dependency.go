@@ -1,9 +1,9 @@
 package language
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"sort"

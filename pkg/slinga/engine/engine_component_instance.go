@@ -1,9 +1,9 @@
 package engine
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/log"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"time"
 )

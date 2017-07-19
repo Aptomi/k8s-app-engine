@@ -2,9 +2,9 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga/engine"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"strings"
 )
 

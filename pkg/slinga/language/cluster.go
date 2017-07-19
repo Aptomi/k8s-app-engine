@@ -1,6 +1,6 @@
 package language
 
-import "github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+import "github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {

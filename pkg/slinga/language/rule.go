@@ -2,8 +2,8 @@ package language
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
-	. "github.com/Frostman/aptomi/pkg/slinga/log"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 )
 

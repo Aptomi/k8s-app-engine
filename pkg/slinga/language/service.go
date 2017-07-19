@@ -3,7 +3,7 @@ package language
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 )
 
 // Service defines individual service

@@ -1,10 +1,10 @@
 package engine
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"time"
 )
 

@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	debug "github.com/Frostman/aptomi/pkg/slinga/log"
+	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	debug "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"

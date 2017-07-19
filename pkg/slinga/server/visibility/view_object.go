@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	log "github.com/Sirupsen/logrus"
 )
 

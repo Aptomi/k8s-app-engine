@@ -2,8 +2,8 @@ package db
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga/language/yaml"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 	"path/filepath"
 )

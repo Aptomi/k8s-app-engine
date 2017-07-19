@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga/engine"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/spf13/cobra"
 	"sort"
 )

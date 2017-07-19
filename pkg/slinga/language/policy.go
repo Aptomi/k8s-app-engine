@@ -1,7 +1,7 @@
 package language
 
 import (
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/mattn/go-zglob"
 	"sort"
 )

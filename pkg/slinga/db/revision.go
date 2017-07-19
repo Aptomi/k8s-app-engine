@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	. "github.com/Frostman/aptomi/pkg/slinga/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // LastRevisionAbsentValue represents initial state ("zero revision")

@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Frostman/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 )
 
 // ConsumerView represents a view from a particular consumer(s) (service consumer point of view)

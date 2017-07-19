@@ -29,7 +29,7 @@ function log() {
     fi
 }
 
-repo="git@github.com:Frostman/aptomi-demo.git"
+repo="git@github.com:Aptomi/aptomi-demo.git"
 interval=1
 
 #git log -n 1 --pretty=format:"%H"

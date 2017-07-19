@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
-	"github.com/Frostman/aptomi/pkg/slinga/engine"
-	. "github.com/Frostman/aptomi/pkg/slinga/db"
-	. "github.com/Frostman/aptomi/pkg/slinga/language"
-	"github.com/Frostman/aptomi/pkg/slinga/server/visibility"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/visibility"
 	"github.com/gorilla/handlers"
 	"net/http"
 	"os"
