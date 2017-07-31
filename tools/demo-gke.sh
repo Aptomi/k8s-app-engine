@@ -35,7 +35,7 @@ function main() {
 
     # TODO(slukjanov): should we load params from config file?
     # defaults
-    k8s_version=1.6.4
+    k8s_version=1.6.7
     disk_size=100
 
     cluster_big_name=cluster-us-west
@@ -419,7 +419,7 @@ function helm_init() {
     helm_tiller_image="$2"
 
     if ! helm_alive $name ; then
-        if ! helm --kube-context $name init --tiller-image "$helm_tiller_image" 2>/dev/null ; then
+        if ! helm --kube-context $name init 2>/dev/null ; then
             log "Helm init failed in cluster $name"
             exit 1
         fi
