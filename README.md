@@ -13,7 +13,7 @@ External dependencies can be installed with:
 
 # How to test
 
-Unit test:
+Unit tests:
 ```shell
 make test
 ```
