@@ -4,11 +4,11 @@ import "github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 
 // Context for a given service
 type Context struct {
-	Name        string
-	Service     string
-	Criteria    *Criteria
-	Labels      *LabelOperations
-	Allocations []*Allocation
+	Name       string
+	Service    string
+	Criteria   *Criteria
+	Labels     *LabelOperations
+	Allocation *Allocation
 }
 
 // Matches checks if context criteria is satisfied

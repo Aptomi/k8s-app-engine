@@ -11,8 +11,8 @@ criteria:
 # In stage:
 # - services will be deployed in us-west
 # - each developer will get its own instance
-allocations:
-  - name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
-    labels:
-      set:
-        cluster: cluster-us-west
+allocation:
+  name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
+  labels:
+    set:
+      cluster: cluster-us-west

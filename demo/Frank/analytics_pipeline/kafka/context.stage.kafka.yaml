@@ -11,5 +11,5 @@ criteria:
 # In stage:
 # - service will be deployed in a cluster specified by label
 # - all developers will rely on the same instance
-allocations:
-  - name: "shared"
+allocation:
+  name: "shared"

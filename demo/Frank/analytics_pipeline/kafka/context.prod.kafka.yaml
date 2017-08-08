@@ -11,5 +11,5 @@ criteria:
 # In production:
 # - service will be deployed in a cluster specified by label
 # - as a single production instance
-allocations:
-  - name: "production"
+allocation:
+  name: "production"

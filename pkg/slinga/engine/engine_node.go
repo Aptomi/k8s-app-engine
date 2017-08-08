@@ -233,18 +233,12 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 
 // Helper to get a matched allocation
 func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, error) {
-	node.ruleLogWriter.addRuleLogEntry(entryAllocationsFound(node.service, node.context, len(node.context.Allocations) > 0))
+	node.ruleLogWriter.addRuleLogEntry(entryAllocationPresent(node.service, node.context, node.context.Allocation))
 
 	// Find matching allocation
 	var allocationMatched *Allocation
-	for _, allocation := range node.context.Allocations {
-		matched := allocation.Matches(node.labels)
-		node.ruleLogWriter.addRuleLogEntry(entryAllocationCriteriaTesting(allocation, matched))
-		if !matched {
-			continue
-		}
-
-		// use labels for allocation
+	if node.context.Allocation != nil {
+		allocation := node.context.Allocation
 		labels := node.transformLabels(node.labels, allocation.Labels)
 
 		// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
@@ -258,11 +252,10 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 			}
 		}
 
-		matched = node.allowsAllocation(policy, allocation, labels, cluster)
+		matched := node.allowsAllocation(policy, allocation, labels, cluster)
 		node.ruleLogWriter.addRuleLogEntry(entryAllocationGlobalRulesNoViolations(allocation, matched))
 		if matched {
 			allocationMatched = allocation
-			break
 		}
 	}
 

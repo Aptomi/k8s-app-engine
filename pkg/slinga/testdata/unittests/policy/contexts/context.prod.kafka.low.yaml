@@ -1,10 +1,10 @@
-name: test
+name: prod
 
 service: kafka
 
 criteria:
   accept:
-    - dev == "yes" && prod == "no"
+    - dev == "no" && prod == "yes" && priority < 200
 
 labels:
   set:
@@ -14,7 +14,7 @@ labels:
     b:
 
 allocation:
-  name: "test-{{.User.Labels.team}}"
+  name: "prod-{{.User.Labels.team}}"
   labels:
     set:
       some-test-context-specific-label: some-value

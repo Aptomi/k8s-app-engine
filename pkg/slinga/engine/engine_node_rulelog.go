@@ -197,26 +197,14 @@ func entryContextMatched(service *Service, contextMatched *Context) *RuleLogEntr
 	)
 }
 
-func entryAllocationsFound(service *Service, context *Context, result bool) *RuleLogEntry {
+func entryAllocationPresent(service *Service, context *Context, allocation *Allocation) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeTest,
 		RuleLogScopeLocal,
-		"Exist (Allocations)",
-		fmt.Sprintf("Checking if allocations are present for service '%s', context '%s'", service.Name, context.Name),
-		"has(allocations)",
-		result,
-		false,
-	)
-}
-
-func entryAllocationCriteriaTesting(allocation *Allocation, matched bool) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeTest,
-		RuleLogScopeLocal,
-		"Matches (Allocation)",
-		fmt.Sprintf("Testing allocation (criteria): '%s'", allocation.Name),
-		fmt.Sprintf("%+v", allocation.Criteria),
-		matched,
+		"Exist (Allocation)",
+		fmt.Sprintf("Checking if allocation is present for service '%s', context '%s'", service.Name, context.Name),
+		"has(allocation)",
+		allocation != nil,
 		false,
 	)
 }

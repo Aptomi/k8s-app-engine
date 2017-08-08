@@ -11,8 +11,8 @@ criteria:
 # In stage:
 # - service will be deployed in us-west
 # - all consumers will rely on the same instance of analytics_pipeline
-allocations:
-  - name: "shared"
-    labels:
-      set:
-        cluster: cluster-us-west
+allocation:
+  name: "shared"
+  labels:
+    set:
+      cluster: cluster-us-west

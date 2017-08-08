@@ -11,8 +11,8 @@ criteria:
 # In stage:
 # - service will be deployed in us-east
 # - all developers will rely on the same instance of analytics_pipeline
-allocations:
-  - name: "staging"
-    labels:
-      set:
-        cluster: cluster-us-west
+allocation:
+  name: "staging"
+  labels:
+    set:
+      cluster: cluster-us-west
