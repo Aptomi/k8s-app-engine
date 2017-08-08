@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Frostman/aptomi/cmd"
+	"github.com/Aptomi/aptomi/cmd"
 )
 
 func main() {
