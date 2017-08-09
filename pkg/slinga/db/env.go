@@ -39,7 +39,7 @@ const (
 	// TypeUsersFile is where users are stored (this is for file-based storage)
 	TypeUsersFile AptomiOject = "users"
 
-	// TypeUsersLDAP is where ldap configuration is stored\
+	// TypeUsersLDAP is where ldap configuration is stored
 	TypeUsersLDAP AptomiOject = "ldap"
 
 	// TypeSecrets is where secret tokens are stored (later in Hashicorp Vault)
