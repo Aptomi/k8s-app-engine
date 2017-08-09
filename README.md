@@ -1,6 +1,6 @@
 # Aptomi
 
-[![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi - make test)](https://ci.aptomi.io/job/aptomi - make test)
+[![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi - make test)](https://ci.aptomi.io/job/aptomi%20-%20make%20test/)
 
 ## Dependencies
 
