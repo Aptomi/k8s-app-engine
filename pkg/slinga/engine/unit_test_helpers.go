@@ -5,6 +5,6 @@ import (
 )
 
 func loadUnitTestsPolicy() *Policy {
-	db := NewSlingaObjectDatabaseDir("../testdata/unittests_new")
+	db := NewSlingaObjectDatabaseDir("../testdata/unittests")
 	return db.LoadPolicyObjects(-1, "")
 }

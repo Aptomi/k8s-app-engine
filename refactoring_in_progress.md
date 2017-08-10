@@ -4,7 +4,6 @@ What is going on:
 
 Items to complete:
 - get rid of all previous loading code
-- rename "unittests_new" back to "unittests"
 - we need to deal with context inheritance (when we go into dependent services, service.Name won't work; need to figure out label-based thing)
   - e.g. list of services to which the context applies to
   - or do "and" condition (e.g. org == dev and services in [...])

@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadUsersFromDir(t *testing.T) {
-	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 
 	users := userLoader.LoadUsersAll()
 	assert.Equal(t, 5, len(users.Users), "Correct number of users should be loaded")

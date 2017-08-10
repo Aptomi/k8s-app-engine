@@ -20,7 +20,7 @@ func BenchmarkEngine(b *testing.B) {
 
 func TestPolicyResolve(t *testing.T) {
 	policy := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 
 	usageState := NewServiceUsageState(policy, userLoader)
 	err := usageState.ResolveAllDependencies()
@@ -47,7 +47,7 @@ func TestPolicyResolve(t *testing.T) {
 
 func TestPolicyResolveEmptyDiff(t *testing.T) {
 	policy := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 
 	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(policy, userLoader)
@@ -71,7 +71,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 
 func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	policyPrev := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 
 	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(policyPrev, userLoader)
@@ -103,7 +103,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 
 func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	policyPrev := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 
 	var key string
 	var timePrevCreated, timePrevUpdated, timeNextCreated, timeNextUpdated time.Time
@@ -200,7 +200,7 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
 	savedObjectAsString := yaml.SerializeObject(state)
-	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 	loadedObject := ServiceUsageState{userLoader: userLoader}
 	yaml.DeserializeObject(savedObjectAsString, &loadedObject)
 	return loadedObject
