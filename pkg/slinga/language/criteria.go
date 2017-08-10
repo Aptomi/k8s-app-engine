@@ -15,6 +15,7 @@ type Criteria struct {
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
+// TODO: add caching for expression evaluation
 func (criteria *Criteria) allows(labels LabelSet) bool {
 	// If one of the reject criterias matches, then it's not allowed
 	for _, reject := range criteria.Reject {
@@ -40,6 +41,13 @@ func (criteria *Criteria) allows(labels LabelSet) bool {
 
 // Evaluate an expression, given a set of labels
 func evaluate(expression string, params LabelSet) bool {
+	// Special case for service.Name, so we can refer to it
+	// TODO: hack to implement service.Name (Knetic doesn't allow dots in string literals)
+	if strings.Contains(expression, "service.Name") {
+		expression = strings.Replace(expression, "service.Name", "serviceName_expr_key", -1)
+		params.Labels["serviceName_expr_key"] = params.Labels["service.Name"]
+	}
+
 	// Create an expression
 	expressionObject, e := govaluate.NewEvaluableExpression(expression)
 	if e != nil {

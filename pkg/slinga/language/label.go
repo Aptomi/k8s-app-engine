@@ -70,3 +70,4 @@ func (src LabelSet) Equal(dst LabelSet) bool {
 func (cluster *Cluster) GetLabelSet() LabelSet {
 	return LabelSet{Labels: cluster.Labels}
 }
+

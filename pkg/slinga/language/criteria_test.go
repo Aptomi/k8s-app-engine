@@ -6,7 +6,14 @@ import (
 )
 
 func TestExpressions(t *testing.T) {
-	labels := LabelSet{Labels: map[string]string{"foo": "10", "unusedLabel": "3", "a": "valueOfA", "bar": "true", "anotherbar": "t"}}
+	labels := LabelSet{Labels: map[string]string{
+		"foo":          "10",
+		"unusedLabel":  "3",
+		"a":            "valueOfA",
+		"bar":          "true",
+		"anotherbar":   "t",
+		"service.Name": "myservicename",
+	}}
 
 	// simple case with bool variable
 	assert.Equal(t, true, evaluate("anotherbar == true", labels), "Evaluate expression with boolean")
@@ -44,4 +51,8 @@ func TestExpressions(t *testing.T) {
 
 	// we are explicitly converting all integer-like labels to integers, so this will always be false (expected behavior)
 	assert.Equal(t, false, evaluate("foo == '10'", labels), "All integer values are always converted to ints, they should never be equal to a string")
+
+	// check that service name expression works
+	assert.Equal(t, true, evaluate("service.Name == 'myservicename'", labels), "Check that service.Name reference works correctly")
+	assert.Equal(t, false, evaluate("service.Name == 'incorrectservicename'", labels), "Check that service.Name reference works correctly")
 }

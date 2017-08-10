@@ -31,7 +31,7 @@ func TestPolicyResolve(t *testing.T) {
 	assert.NotEqual(t, 0, len(resolvedUsage.ComponentProcessingOrder), "Policy usage should have entries")
 
 	kafkaTest := resolvedUsage.ComponentInstanceMap["kafka#test#test-platform_services#component2"]
-	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod#prod-platform_services#component2"]
+	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod-low#prod-team-platform_services#component2"]
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
 	assert.Equal(t, "1", policy.Dependencies.DependenciesByID["dep_id_1"].UserID, "Only Alice should have access to test")
 
@@ -166,7 +166,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
 
 	// Check creation/update times for component
-	key = "kafka#prod#prod-Elena#component2"
+	key = "kafka#prod-high#prod-Elena#component2"
 	timePrevCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
 	timePrevUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	timeNextCreated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
@@ -175,7 +175,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed")
 
 	// Check creation/update times for service
-	key = "kafka#prod#prod-Elena#root"
+	key = "kafka#prod-high#prod-Elena#root"
 	timePrevCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
 	timePrevUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	timeNextCreated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
@@ -185,8 +185,8 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
-	state := LoadPolicyFromDir("../testdata/unittests_new")
-	service := state.Services["kafka"]
+	policy := loadUnitTestsPolicy()
+	service := policy.Services["kafka"]
 
 	c, err := service.GetComponentsSortedTopologically()
 	assert.Nil(t, err, "Service components should be topologically sorted without errors")

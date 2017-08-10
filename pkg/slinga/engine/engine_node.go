@@ -88,8 +88,11 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resol
 		// we start with the service specified in the dependency
 		serviceName: dependency.Service,
 
-		// combining user labels and dependency labels
-		labels: user.GetLabelSet().AddLabels(user.GetSecretSet()).AddLabels(dependency.GetLabelSet()),
+		// combining user labels, dependency labels, and making service.Name available to the engine as special variable
+		labels: user.GetLabelSet().
+			AddLabels(user.GetSecretSet()).
+			AddLabels(dependency.GetLabelSet()).
+			AddLabels(LabelSet{Labels: map[string]string{"service.Name": dependency.Service}}),
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
@@ -111,8 +114,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		// we take the current component we are iterating over, and get its service name
 		serviceName: node.component.Service,
 
-		// we take current processed labels for the component we are iterating over
-		labels: node.componentLabels,
+		// we take current processed labels for the component we are iterating over, and making service.Name available to the engine as special variable
+		labels: node.componentLabels.
+			AddLabels(LabelSet{Labels: map[string]string{"service.Name": node.component.Service}}),
 
 		// move further by the discovery tree via component name link
 		discoveryTreeNode: node.discoveryTreeNode.GetNestedMap(node.component.Name),

@@ -17,7 +17,7 @@
       accept:
         - dev == "no" && prod == "yes" && priority >= 200
       reject:
-        - serviceName == "zookeeper" && nozookeeper
+        - service.Name == "zookeeper" && nozookeeper
 
     allocation:
       name: "prod-{{.User.Name}}"
@@ -47,10 +47,10 @@
       accept:
         - dev == "no" && prod == "yes" && priority < 200
       reject:
-        - serviceName == "zookeeper" && nozookeeper
+        - service.Name == "zookeeper" && nozookeeper
 
     allocation:
-      name: "prod-{{.User.Labels.team}}"
+      name: "prod-team-{{.User.Labels.team}}"
       labels:
         set:
           some-test-context-specific-label: some-value
@@ -77,10 +77,10 @@
       accept:
         - dev == "yes" && prod == "no"
       reject:
-        - serviceName == "zookeeper" && nozookeeper
+        - service.Name == "zookeeper" && nozookeeper
 
     allocation:
-      name: "prod-{{.User.Labels.team}}"
+      name: "test-{{.User.Labels.team}}"
       labels:
         set:
           some-test-context-specific-label: some-value
