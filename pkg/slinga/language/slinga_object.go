@@ -49,7 +49,6 @@ func (object *SlingaObject) GetName() string {
 	return object.Metadata.Name
 }
 
-
 // TODO: it would be great to implement context inheritance that way:
 // - service name is removed from context definition
 // - we declare a context in a namespace

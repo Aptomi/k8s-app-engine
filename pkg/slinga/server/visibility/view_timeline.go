@@ -1,8 +1,8 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	"sort"
 	"strconv"
 )

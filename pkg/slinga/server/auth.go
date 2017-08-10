@@ -1,10 +1,10 @@
 package server
 
 import (
+	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"net/http"
 	"time"
-	"fmt"
 )
 
 func getLoggedInUserID(r *http.Request) string {

@@ -1,9 +1,9 @@
 package language
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"fmt"
 )
 
 func TestLoadUsersFromLDAP(t *testing.T) {
@@ -15,7 +15,7 @@ func TestLoadUsersFromLDAP(t *testing.T) {
 
 	usersDir := userLoaderDir.LoadUsersAll()
 	usersLDAP := userLoaderLDAP.LoadUsersAll()
-	assert.Equal(t, len(usersDir.Users), len(usersLDAP.Users),"Correct number of users should be loaded from LDAP")
+	assert.Equal(t, len(usersDir.Users), len(usersLDAP.Users), "Correct number of users should be loaded from LDAP")
 
 	for _, uDir := range usersDir.Users {
 		id := uDir.Labels["ldapDN"]

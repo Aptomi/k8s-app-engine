@@ -4,8 +4,8 @@ package language
 type Cluster struct {
 	*SlingaObject
 
-	Type   string
-	Labels map[string]string
+	Type     string
+	Labels   map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string

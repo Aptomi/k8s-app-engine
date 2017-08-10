@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/server/visibility"
 	"github.com/gorilla/handlers"

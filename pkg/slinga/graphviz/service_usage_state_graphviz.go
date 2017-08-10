@@ -3,9 +3,9 @@ package graphviz
 import (
 	"bytes"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
 	log "github.com/Sirupsen/logrus"
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"
@@ -32,11 +32,11 @@ func NewPolicyVisualization(diff *ServiceUsageStateDiff) PolicyVisualization {
 // DrawAndStore draws and stores several pictures (current, prev, and delta)
 func (vis PolicyVisualization) DrawAndStore() {
 	// Draw & save resulting state
-	nextGraph := vis.DrawVisualAndStore(vis.diff.Next,"complete")
+	nextGraph := vis.DrawVisualAndStore(vis.diff.Next, "complete")
 	vis.saveGraph("complete", nextGraph)
 
 	// Draw previous state
-	prevGraph := vis.DrawVisualAndStore(vis.diff.Prev,"prev")
+	prevGraph := vis.DrawVisualAndStore(vis.diff.Prev, "prev")
 	vis.saveGraph("prev", prevGraph)
 
 	// Draw delta (i.e. difference between resulting state and previous state)

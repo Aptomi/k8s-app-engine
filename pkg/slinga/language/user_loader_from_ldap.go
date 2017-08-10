@@ -1,15 +1,15 @@
 package language
 
 import (
-	"strconv"
-	"gopkg.in/ldap.v2"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
+	"gopkg.in/ldap.v2"
+	"strconv"
 	"strings"
 )
 

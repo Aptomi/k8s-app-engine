@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/graphviz"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

@@ -1,10 +1,10 @@
 package language
 
 import (
-	"github.com/mattn/go-zglob"
-	"sort"
-	"path/filepath"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	"github.com/mattn/go-zglob"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
