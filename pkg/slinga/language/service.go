@@ -9,7 +9,6 @@ import (
 type Service struct {
 	*SlingaObject
 
-	Enabled    bool
 	Owner      string
 	Labels     *LabelOperations
 	Components []*ServiceComponent
@@ -42,17 +41,6 @@ type Code struct {
 
 // LabelOperations defines the set of label manipulations (e.g. set/remove)
 type LabelOperations map[string]map[string]string
-
-// UnmarshalYAML is a custom unmarshaller for Service, which sets Enabled to True before unmarshalling
-func (service *Service) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type Alias Service
-	instance := Alias{Enabled: true}
-	if err := unmarshal(&instance); err != nil {
-		return err
-	}
-	*service = Service(instance)
-	return nil
-}
 
 // MarshalJSON marshals service component into a structure without freeform parameters, so UI doesn't fail
 // See http://choly.ca/post/go-json-marshalling/

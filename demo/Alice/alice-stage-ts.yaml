@@ -4,7 +4,6 @@
     name: alice_tests_new_code_for_twitter_stats_in_stage
   spec:
     userid: cn=Alice,ou=people,o=aptomiOrg
-    enabled: false
     service: twitter_stats
     labels:
         tstype: stage

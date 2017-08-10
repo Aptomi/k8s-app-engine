@@ -3,7 +3,6 @@
     namespace: main
     name: dev_cannot_deploy_to_prod_cluster
   spec:
-    enabled: true
     filterservices:
       user:
         accept:
@@ -20,7 +19,6 @@
     namespace: main
     name: deactivated_users_lose_access
   spec:
-    enabled: true
     filterservices:
       user:
         accept:
@@ -34,7 +32,6 @@
     namespace: main
     name: mobile_devs_are_blocked
   spec:
-    enabled: true
     filterservices:
       user:
         accept:

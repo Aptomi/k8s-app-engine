@@ -8,8 +8,6 @@
   spec:
     owner: cn=Frank,ou=people,o=aptomiOrg
 
-    enabled: false
-
     components:
 
       - name: kafka

@@ -26,7 +26,6 @@ type Action struct {
 type Rule struct {
 	*SlingaObject
 
-	Enabled        bool
 	FilterServices *ServiceFilter
 	Actions        []*Action
 }
@@ -79,17 +78,6 @@ func (rule *Rule) DescribeActions() []string {
 // MatchUser returns if a rue matches a user
 func (rule *Rule) MatchUser(user *User) bool {
 	return rule.FilterServices != nil && rule.FilterServices.Match(LabelSet{}, user, nil)
-}
-
-// UnmarshalYAML is a custom unmarshaller for Rule, which sets Enabled to True before unmarshalling
-func (rule *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type Alias Rule
-	instance := Alias{Enabled: true}
-	if err := unmarshal(&instance); err != nil {
-		return err
-	}
-	*rule = Rule(instance)
-	return nil
 }
 
 // GlobalRules is a list of global rules

@@ -4,7 +4,6 @@
     name: carol_tests_twitter_stats_vis_in_stage
   spec:
     userid: cn=Carol,ou=people,o=aptomiOrg
-    enabled: false
     service: twitter_stats
     labels:
         tstype: stage

@@ -7,7 +7,6 @@ Items to complete:
 - we need to deal with context inheritance (when we go into dependent services, service.Name won't work; need to figure out label-based thing)
   - e.g. list of services to which the context applies to
   - or do "and" condition (e.g. org == dev and services in [...])
-- remove enabled flag
 - inheritance / make sure we are looking for contexts in the right namespace
 - add support for namespaces
   - we need to make sure everything that calls getName() is within a namespace

@@ -8,8 +8,6 @@
   spec:
     owner: cn=John,ou=people,o=aptomiOrg
 
-    enabled: false
-
     components:
 
       - name: analytics_pipeline

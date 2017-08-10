@@ -170,5 +170,9 @@ func (state ServiceUsageState) SaveServiceUsageState() {
 
 // Loads usage state from file
 func loadServiceUsageStateFromFile(fileName string) ServiceUsageState {
-	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
+	result := *yaml.LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
+	if result.Policy == nil {
+		result.Policy = NewPolicy()
+	}
+	return result
 }

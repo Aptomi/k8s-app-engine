@@ -13,7 +13,6 @@ import (
 type Dependency struct {
 	*SlingaObject
 
-	Enabled bool
 	UserID  string
 	Service string
 	Labels  map[string]string
@@ -21,17 +20,6 @@ type Dependency struct {
 	// This fields are populated when dependency gets resolved
 	Resolved   bool
 	ServiceKey string
-}
-
-// UnmarshalYAML is a custom unmarshaller for Dependency, which sets Enabled to True before unmarshalling
-func (dependency *Dependency) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type Alias Dependency
-	instance := Alias{Enabled: true}
-	if err := unmarshal(&instance); err != nil {
-		return err
-	}
-	*dependency = Dependency(instance)
-	return nil
 }
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)
