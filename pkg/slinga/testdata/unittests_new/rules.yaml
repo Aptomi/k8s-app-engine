@@ -1,0 +1,61 @@
+- kind: rule
+  metadata:
+    namespace: main
+    name: compromised_cluster_block_sensitive_services
+  spec:
+    filterservices:
+      cluster:
+        accept:
+          - compromised
+      labels:
+        accept:
+          - sensitive
+    actions:
+      - type: ingress
+        content: block
+
+- kind: rule
+  metadata:
+    namespace: main
+    name: compromised_users_forbid_all_services
+  spec:
+    filterservices:
+      user:
+        accept:
+          - compromised
+      labels:
+    actions:
+      - type: dependency
+        content: forbid
+
+- kind: rule
+  metadata:
+    namespace: main
+    name: low_prio_users_forbid_sensitive_services
+  spec:
+    filterservices:
+      user:
+        accept:
+          - priority < 100
+      labels:
+        accept:
+          - sensitive
+    actions:
+      - type: dependency
+        content: forbid
+
+- kind: rule
+  metadata:
+    namespace: main
+    name: dev_cluster_forbid_sensitive_service
+  spec:
+    filterservices:
+      cluster:
+        accept:
+          - dev
+      labels:
+        accept:
+          - sensitive
+    actions:
+      - type: dependency
+        content: forbid

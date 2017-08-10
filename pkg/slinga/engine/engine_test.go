@@ -19,11 +19,10 @@ func BenchmarkEngine(b *testing.B) {
 }
 
 func TestPolicyResolve(t *testing.T) {
-	policy := LoadPolicyFromDir("../testdata/unittests")
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-	dependencies := LoadDependenciesFromDir("../testdata/unittests")
+	policy := loadUnitTestsPolicy()
+	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
 
-	usageState := NewServiceUsageState(&policy, &dependencies, userLoader)
+	usageState := NewServiceUsageState(policy, userLoader)
 	err := usageState.ResolveAllDependencies()
 	resolvedUsage := usageState.GetResolvedData()
 
@@ -34,10 +33,10 @@ func TestPolicyResolve(t *testing.T) {
 	kafkaTest := resolvedUsage.ComponentInstanceMap["kafka#test#test-platform_services#component2"]
 	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod#prod-platform_services#component2"]
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
-	assert.Equal(t, "1", dependencies.DependenciesByID["dep_id_1"].UserID, "Only Alice should have access to test")
+	assert.Equal(t, "1", policy.Dependencies.DependenciesByID["dep_id_1"].UserID, "Only Alice should have access to test")
 
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
-	assert.Equal(t, "2", dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
+	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 
 	// Check that code parameters evaluate correctly
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
@@ -47,17 +46,16 @@ func TestPolicyResolve(t *testing.T) {
 }
 
 func TestPolicyResolveEmptyDiff(t *testing.T) {
-	policy := LoadPolicyFromDir("../testdata/unittests")
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-	dependencies := LoadDependenciesFromDir("../testdata/unittests")
+	policy := loadUnitTestsPolicy()
+	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
 
 	// Get usage state prev and emulate save/load
-	usageStatePrev := NewServiceUsageState(&policy, &dependencies, userLoader)
+	usageStatePrev := NewServiceUsageState(policy, userLoader)
 	usageStatePrev.ResolveAllDependencies()
 	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Get usage state next
-	usageStateNext := NewServiceUsageState(&policy, &dependencies, userLoader)
+	usageStateNext := NewServiceUsageState(policy, userLoader)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
@@ -72,25 +70,24 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 }
 
 func TestPolicyResolveNonEmptyDiff(t *testing.T) {
-	policy := LoadPolicyFromDir("../testdata/unittests")
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-	dependenciesPrev := LoadDependenciesFromDir("../testdata/unittests")
+	policyPrev := loadUnitTestsPolicy()
+	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
 
 	// Get usage state prev and emulate save/load
-	usageStatePrev := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
+	usageStatePrev := NewServiceUsageState(policyPrev, userLoader)
 	usageStatePrev.ResolveAllDependencies()
 	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
-	dependenciesNext := dependenciesPrev.MakeCopy()
-	dependenciesNext.AppendDependency(
+	policyNext := loadUnitTestsPolicy()
+	policyNext.Dependencies.AddDependency(
 		&Dependency{
 			ID:      "dep_id_5",
 			UserID:  "5",
 			Service: "kafka",
 		},
 	)
-	usageStateNext := NewServiceUsageState(&policy, &dependenciesNext, userLoader)
+	usageStateNext := NewServiceUsageState(policyNext, userLoader)
 	usageStateNext.ResolveAllDependencies()
 
 	// Calculate difference
@@ -105,18 +102,17 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 }
 
 func TestDiffUpdateAndComponentTimes(t *testing.T) {
-	policy := LoadPolicyFromDir("../testdata/unittests")
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-	dependenciesPrev := LoadDependenciesFromDir("../testdata/unittests")
+	policyPrev := loadUnitTestsPolicy()
+	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
 
 	var key string
 	var timePrevCreated, timePrevUpdated, timeNextCreated, timeNextUpdated time.Time
 
-	// Create initial empty state
-	uEmpty := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
+	// Create initial empty state (do not resolve any dependencies)
+	uEmpty := NewServiceUsageState(policyPrev, userLoader)
 
 	// Resolve, calculate difference against empty state, emulate save/load
-	uInitial := NewServiceUsageState(&policy, &dependenciesPrev, userLoader)
+	uInitial := NewServiceUsageState(policyPrev, userLoader)
 	uInitial.ResolveAllDependencies()
 	uInitial.CalculateDifference(&uEmpty)
 	uInitial = emulateSaveAndLoad(uInitial)
@@ -132,15 +128,15 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	time.Sleep(25 * time.Millisecond)
 
 	// Add another dependency, resolve, calculate difference against prev state, emulate save/load
-	dependenciesNext := dependenciesPrev.MakeCopy()
-	dependenciesNext.AppendDependency(
+	policyNext := loadUnitTestsPolicy()
+	policyNext.Dependencies.AddDependency(
 		&Dependency{
 			ID:      "dep_id_5",
 			UserID:  "5",
 			Service: "kafka",
 		},
 	)
-	uNewDependency := NewServiceUsageState(&policy, &dependenciesNext, userLoader)
+	uNewDependency := NewServiceUsageState(policyNext, userLoader)
 	uNewDependency.ResolveAllDependencies()
 	uNewDependency.CalculateDifference(&uInitial)
 
@@ -157,7 +153,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 
 	// Update user label, re-evaluate and see that component instance has changed
 	userLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
-	uUpdatedDependency := NewServiceUsageState(&policy, &dependenciesNext, userLoader)
+	uUpdatedDependency := NewServiceUsageState(policyNext, userLoader)
 	uUpdatedDependency.ResolveAllDependencies()
 	diff := uUpdatedDependency.CalculateDifference(&uNewDependency)
 
@@ -189,7 +185,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 }
 
 func TestServiceComponentsTopologicalOrder(t *testing.T) {
-	state := LoadPolicyFromDir("../testdata/unittests")
+	state := LoadPolicyFromDir("../testdata/unittests_new")
 	service := state.Services["kafka"]
 
 	c, err := service.GetComponentsSortedTopologically()
@@ -204,7 +200,7 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
 	savedObjectAsString := yaml.SerializeObject(state)
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../testdata/unittests_new")
 	loadedObject := ServiceUsageState{userLoader: userLoader}
 	yaml.DeserializeObject(savedObjectAsString, &loadedObject)
 	return loadedObject

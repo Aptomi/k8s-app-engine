@@ -25,8 +25,9 @@ type Action struct {
 
 // Rule is a global rule
 type Rule struct {
+	*SlingaObject
+
 	Enabled        bool
-	Name           string
 	FilterServices *ServiceFilter
 	Actions        []*Action
 }
@@ -139,8 +140,8 @@ func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster
 }
 
 // NewGlobalRules creates and initializes a new empty list of global rules
-func NewGlobalRules() GlobalRules {
-	return GlobalRules{Rules: make(map[string][]*Rule, 0)}
+func NewGlobalRules() *GlobalRules {
+	return &GlobalRules{Rules: make(map[string][]*Rule, 0)}
 }
 
 func (globalRules *GlobalRules) addRule(rule *Rule) {
@@ -161,4 +162,8 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 // Loads rules from file
 func loadRulesFromFile(fileName string) []*Rule {
 	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*Rule{}).(*[]*Rule)
+}
+
+func (rule *Rule) GetObjectType() SlingaObjectType {
+	return TypePolicy
 }

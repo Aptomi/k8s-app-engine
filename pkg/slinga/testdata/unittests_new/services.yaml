@@ -1,0 +1,94 @@
+# Service definition for Zookeeper
+- kind: service
+
+  metadata:
+    namespace: main
+    name: zookeeper
+
+  labels:
+    set:
+      a: b
+
+  spec:
+    components:
+      - name: component1
+        code:
+          type: aptomi/code/unittests
+          metadata:
+            service: zookeeper
+            component: component1
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a:
+            b:
+        dependencies:
+          - component2
+
+      - name: component2
+        code:
+          type: aptomi/code/unittests
+          metadata:
+            service: zookeeper
+            component: component2
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a:
+            b:
+
+# Service definition for Kafka
+- kind: service
+
+  metadata:
+    namespace: main
+    name: kafka
+
+  labels:
+    set:
+      a: b
+
+  spec:
+    components:
+      - name: component1
+        service: zookeeper
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a:
+            b:
+
+      - name: component2
+        discovery:
+          url: "kafka-{{ .Discovery.instance }}-url"
+        code:
+          type: aptomi/code/unittests
+          params:
+            address: "{{ .Discovery.component1.component2.instance }}"
+            queue: " {{ .User.Labels.changinglabel }} "
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a:
+            b:
+        dependencies:
+          - component1
+
+      - name: component3
+        code:
+          type: aptomi/code/unittests
+          metadata:
+            service: kafka
+            component: component3
+        labels:
+          set: # add/modify
+            some-test-context-specific-label: some-value
+          remove:
+            a:
+            b:
+        dependencies:
+          - component2

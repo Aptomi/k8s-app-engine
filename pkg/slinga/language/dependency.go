@@ -15,8 +15,10 @@ import (
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
 type Dependency struct {
+	*SlingaObject
+
 	Enabled bool
-	ID      string
+	ID      string // TODO: get rid of this field
 	UserID  string
 	Service string
 	Labels  map[string]string
@@ -48,8 +50,8 @@ type GlobalDependencies struct {
 }
 
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
-func NewGlobalDependencies() GlobalDependencies {
-	return GlobalDependencies{
+func NewGlobalDependencies() *GlobalDependencies {
+	return &GlobalDependencies{
 		DependenciesByService: make(map[string][]*Dependency),
 		DependenciesByID:      make(map[string]*Dependency),
 	}
@@ -60,8 +62,8 @@ func (dependency *Dependency) GetLabelSet() LabelSet {
 	return LabelSet{Labels: dependency.Labels}
 }
 
-// AppendDependency appends a single dependency to an existing object
-func (src GlobalDependencies) AppendDependency(dependency *Dependency) {
+// AddDependency appends a single dependency to an existing object
+func (src GlobalDependencies) AddDependency(dependency *Dependency) {
 	if len(dependency.ID) <= 0 {
 		Debug.WithFields(log.Fields{
 			"dependency": dependency,
@@ -71,17 +73,20 @@ func (src GlobalDependencies) AppendDependency(dependency *Dependency) {
 	src.DependenciesByID[dependency.ID] = dependency
 }
 
+/*
+TODO: delete
 // MakeCopy copies the whole structure with dependencies
-func (src GlobalDependencies) MakeCopy() GlobalDependencies {
+func (src GlobalDependencies) MakeCopy() *GlobalDependencies {
 	result := NewGlobalDependencies()
 	for _, v := range src.DependenciesByID {
-		result.AppendDependency(v)
+		result.AddDependency(v)
 	}
 	return result
 }
+*/
 
 // LoadDependenciesFromDir loads all dependencies from a given directory
-func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
+func LoadDependenciesFromDir(baseDir string) *GlobalDependencies {
 	// read all services
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeDependencies))
 	sort.Strings(files)
@@ -90,7 +95,7 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 		t := loadDependenciesFromFile(fileName)
 		for _, d := range t {
 			if d.Enabled {
-				result.AppendDependency(d)
+				result.AddDependency(d)
 			}
 		}
 	}
@@ -100,4 +105,8 @@ func LoadDependenciesFromDir(baseDir string) GlobalDependencies {
 // Loads dependencies from file
 func loadDependenciesFromFile(fileName string) []*Dependency {
 	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*Dependency{}).(*[]*Dependency)
+}
+
+func (dependency *Dependency) GetObjectType() SlingaObjectType {
+	return TypePolicy
 }

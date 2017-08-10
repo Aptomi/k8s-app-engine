@@ -148,22 +148,22 @@ func (node *resolutionNode) debugResolvingDependencyEnd() {
 func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
 		Debug.WithFields(log.Fields{
-			"service":    node.service.Name,
+			"service":    node.service.GetName(),
 			"component":  node.component.Name,
-			"context":    node.context.Name,
+			"context":    node.context.GetName(),
 			"allocation": node.allocation.NameResolved,
 		}).Info("Processing dependency on code execution")
 	} else if node.component.Service != "" {
 		Debug.WithFields(log.Fields{
-			"service":          node.service.Name,
+			"service":          node.service.GetName(),
 			"component":        node.component.Name,
-			"context":          node.context.Name,
+			"context":          node.context.GetName(),
 			"allocation":       node.allocation.NameResolved,
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 	} else {
 		Debug.WithFields(log.Fields{
-			"service":   node.service.Name,
+			"service":   node.service.GetName(),
 			"component": node.component.Name,
 		}).Panic("Invalid component (not code and not service")
 	}
@@ -199,12 +199,11 @@ func (node *resolutionNode) getMatchedService(policy *Policy) *Service {
 // Helper to get a matched context
 func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) {
 	// Locate the list of contexts for service
-	contexts := policy.Contexts[node.service.Name]
-	node.ruleLogWriter.addRuleLogEntry(entryContextsFound(node.service, len(contexts) > 0))
+	node.ruleLogWriter.addRuleLogEntry(entryContextsFound(len(policy.Contexts) > 0))
 
 	// Find matching context
 	var contextMatched *Context
-	for _, context := range contexts {
+	for _, context := range policy.Contexts {
 		matched := context.Matches(node.labels)
 		node.ruleLogWriter.addRuleLogEntry(entryContextCriteriaTesting(context, matched))
 		if matched {
@@ -215,13 +214,13 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 
 	if contextMatched != nil {
 		Debug.WithFields(log.Fields{
-			"service": node.service.Name,
-			"context": contextMatched.Name,
+			"service": node.service.GetName(),
+			"context": contextMatched.GetName(),
 			"user":    node.user.Name,
 		}).Info("Matched context")
 	} else {
 		Debug.WithFields(log.Fields{
-			"service": node.service.Name,
+			"service": node.service.GetName(),
 			"user":    node.user.Name,
 		}).Info("No context matched")
 	}
@@ -264,24 +263,24 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 		err := allocationMatched.ResolveName(node.user, node.labels)
 		if err != nil {
 			Debug.WithFields(log.Fields{
-				"service":    node.service.Name,
-				"context":    node.context.Name,
+				"service":    node.service.GetName(),
+				"context":    node.context.GetName(),
 				"allocation": allocationMatched.Name,
 				"user":       node.user.Name,
 				"error":      err,
 			}).Panic("Cannot resolve name for an allocation")
 		}
 		Debug.WithFields(log.Fields{
-			"service":            node.service.Name,
-			"context":            node.context.Name,
+			"service":            node.service.GetName(),
+			"context":            node.context.GetName(),
 			"allocation":         allocationMatched.Name,
 			"allocationResolved": allocationMatched.NameResolved,
 			"user":               node.user.Name,
 		}).Info("Matched allocation")
 	} else {
 		Debug.WithFields(log.Fields{
-			"service": node.service.Name,
-			"context": node.context.Name,
+			"service": node.service.GetName(),
+			"context": node.context.GetName(),
 			"user":    node.user.Name,
 		}).Info("No allocation matched")
 	}

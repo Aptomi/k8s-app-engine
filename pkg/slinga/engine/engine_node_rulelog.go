@@ -154,12 +154,12 @@ func entryServiceMatched(serviceName string, found bool) *RuleLogEntry {
 	return nil
 }
 
-func entryContextsFound(service *Service, result bool) *RuleLogEntry {
+func entryContextsFound(result bool) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeTest,
 		RuleLogScopeLocal,
 		"Exist (Contexts)",
-		fmt.Sprintf("Checking if contexts are present for service '%s'", service.Name),
+		fmt.Sprintf("Checking if contexts are present in the namespace"),
 		"has(contexts)",
 		result,
 		false,
@@ -171,7 +171,7 @@ func entryContextCriteriaTesting(context *Context, matched bool) *RuleLogEntry {
 		RuleLogTypeTest,
 		RuleLogScopeLocal,
 		"Matches (Context)",
-		fmt.Sprintf("Testing context (criteria): '%s'", context.Name),
+		fmt.Sprintf("Testing context (criteria): '%s'", context.GetName()),
 		fmt.Sprintf("%+v", context.Criteria),
 		matched,
 		false,
@@ -181,9 +181,9 @@ func entryContextCriteriaTesting(context *Context, matched bool) *RuleLogEntry {
 func entryContextMatched(service *Service, contextMatched *Context) *RuleLogEntry {
 	var message string
 	if contextMatched != nil {
-		message = fmt.Sprintf("Context matched for service '%s': %s", service.Name, contextMatched.Name)
+		message = fmt.Sprintf("Context matched for service '%s': %s", service.GetName(), contextMatched.GetName())
 	} else {
-		message = fmt.Sprintf("Unable to find matching context for service '%s'", service.Name)
+		message = fmt.Sprintf("Unable to find matching context for service '%s'", service.GetName())
 	}
 
 	return NewRuleLogEntry(
@@ -202,7 +202,7 @@ func entryAllocationPresent(service *Service, context *Context, allocation *Allo
 		RuleLogTypeTest,
 		RuleLogScopeLocal,
 		"Exist (Allocation)",
-		fmt.Sprintf("Checking if allocation is present for service '%s', context '%s'", service.Name, context.Name),
+		fmt.Sprintf("Checking if allocation is present for service '%s', context '%s'", service.GetName(), context.GetName()),
 		"has(allocation)",
 		allocation != nil,
 		false,
@@ -214,7 +214,7 @@ func entryAllocationGlobalRuleTesting(allocation *Allocation, rule *Rule, matche
 		RuleLogTypeTest,
 		RuleLogScopeGlobal,
 		"Global Rule (Allocation)",
-		fmt.Sprintf("Testing if global rule '%s' applies to allocation '%s'", rule.Name, allocation.Name),
+		fmt.Sprintf("Testing if global rule '%s' applies to allocation '%s'", rule.GetName(), allocation.Name),
 		fmt.Sprintf("%+v", rule.FilterServices),
 		matched,
 		false,
@@ -236,9 +236,9 @@ func entryAllocationGlobalRulesNoViolations(allocation *Allocation, matched bool
 func entryAllocationMatched(service *Service, context *Context, allocationMatched *Allocation) *RuleLogEntry {
 	var message string
 	if allocationMatched != nil {
-		message = fmt.Sprintf("Allocation matched for service '%s', context '%s': %s", service.Name, context.Name, allocationMatched.NameResolved)
+		message = fmt.Sprintf("Allocation matched for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationMatched.NameResolved)
 	} else {
-		message = fmt.Sprintf("Unable to find matching allocation for service '%s', context '%s'", service.Name, context.Name)
+		message = fmt.Sprintf("Unable to find matching allocation for service '%s', context '%s'", service.GetName(), context.GetName())
 	}
 
 	return NewRuleLogEntry(

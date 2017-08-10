@@ -26,7 +26,7 @@ func NewConsumerView(userID string, dependencyID string, state engine.ServiceUsa
 // GetData returns graph for a given view
 func (view ConsumerView) GetData() interface{} {
 	// go over all dependencies of a given user
-	for _, dependency := range view.state.Dependencies.DependenciesByID {
+	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.ID, view.dependencyId) {
 			// Step 1 - add a node for every matching dependency found
 			dependencyNode := newDependencyNode(dependency, false, view.state.GetUserLoader())

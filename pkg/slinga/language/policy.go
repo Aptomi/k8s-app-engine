@@ -4,6 +4,8 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/mattn/go-zglob"
 	"sort"
+	"fmt"
+	"reflect"
 )
 
 /*
@@ -12,17 +14,50 @@ import (
 
 // Policy is a global policy object with services and contexts
 type Policy struct {
-	Services map[string]*Service
-	Contexts map[string][]*Context
-	Clusters map[string]*Cluster
-	Rules    GlobalRules
+	Services     map[string]*Service
+	Contexts     map[string]*Context
+	Clusters     map[string]*Cluster
+	Rules        *GlobalRules
+	Dependencies *GlobalDependencies
+}
+
+func NewPolicy() *Policy {
+	return &Policy{
+		Services: make(map[string]*Service),
+		Contexts: make(map[string]*Context),
+		Clusters: make(map[string]*Cluster),
+		Rules:    NewGlobalRules(),
+		Dependencies: NewGlobalDependencies(),
+	}
+}
+
+// TODO: deal with namespaces
+func (policy *Policy) addObject(object SlingaObjectInterface) {
+	if object.GetObjectType() == TypePolicy {
+		p := reflect.ValueOf(object).Interface()
+
+		switch v := p.(type) {
+		case *Service:
+			policy.Services[v.GetName()] = v
+		case *Context:
+			policy.Contexts[v.GetName()] = v
+		case *Cluster:
+			policy.Clusters[v.GetName()] = v
+		case *Rule:
+			policy.Rules.addRule(v)
+		case *Dependency:
+			policy.Dependencies.AddDependency(v)
+		default:
+			panic(fmt.Sprintf("Can't add object to policy: %v", object))
+		}
+	}
 }
 
 // LoadPolicyFromDir loads policy from a directory, recursively processing all files
 func LoadPolicyFromDir(baseDir string) Policy {
 	s := Policy{
 		Services: make(map[string]*Service),
-		Contexts: make(map[string][]*Context),
+		Contexts: make(map[string]*Context),
 		Clusters: make(map[string]*Cluster),
 		Rules:    NewGlobalRules(),
 	}
@@ -32,7 +67,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	sort.Strings(files)
 	for _, f := range files {
 		cluster := loadClusterFromFile(f)
-		s.Clusters[cluster.Name] = cluster
+		s.Clusters[cluster.GetName()] = cluster
 	}
 
 	// read all services
@@ -52,7 +87,7 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	sort.Strings(files)
 	for _, f := range files {
 		service := loadServiceFromFile(f)
-		s.Services[service.Name] = service
+		s.Services[service.GetName()] = service
 	}
 	toDisable := map[string][]string{
 		"analytics_pipeline": {"hdfs", "kafka", "spark", "zookeeper"},
@@ -63,12 +98,12 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	for changed {
 		changed = false
 		for _, service := range s.Services {
-			if !service.Enabled || disabled[service.Name] {
-				if !disabled[service.Name] {
+			if !service.Enabled || disabled[service.GetName()] {
+				if !disabled[service.GetName()] {
 					changed = true
 				}
-				disabled[service.Name] = true
-				for _, componentName := range toDisable[service.Name] {
+				disabled[service.GetName()] = true
+				for _, componentName := range toDisable[service.GetName()] {
 					if !disabled[componentName] {
 						changed = true
 					}
@@ -86,8 +121,8 @@ func LoadPolicyFromDir(baseDir string) Policy {
 	sort.Strings(files)
 	for _, f := range files {
 		context := loadContextFromFile(f)
-		if s.Services[context.Service] != nil {
-			s.Contexts[context.Service] = append(s.Contexts[context.Service], context)
+		if s.Services[context.GetName()] != nil {
+			s.Contexts[context.GetName()] = context
 		}
 	}
 

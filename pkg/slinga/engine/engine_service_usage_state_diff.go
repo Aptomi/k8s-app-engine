@@ -90,7 +90,7 @@ func (state ServiceUsageState) GetSummary() ServiceUsageStateSummary {
 		CountElements(state.Policy.Clusters),
 		CountElements(state.Policy.Rules.Rules),
 		state.userLoader.Summary(),
-		CountElements(state.Dependencies.DependenciesByID),
+		CountElements(state.Policy.Dependencies.DependenciesByID),
 	}
 }
 
@@ -122,8 +122,8 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 
 	// High-level service resolutions in prev (user -> serviceName -> serviceKey -> count)
 	pMap := make(map[string]map[string]map[string]int)
-	if diff.Prev.Dependencies != nil {
-		for _, deps := range diff.Prev.Dependencies.DependenciesByService {
+	if diff.Prev.Policy.Dependencies != nil {
+		for _, deps := range diff.Prev.Policy.Dependencies.DependenciesByService {
 			for _, d := range deps {
 				// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
 				if d.Resolved {
@@ -141,7 +141,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 
 	// High-level service resolutions in next (user -> serviceName -> serviceKey -> count)
 	cMap := make(map[string]map[string]map[string]int)
-	for _, deps := range diff.Next.Dependencies.DependenciesByService {
+	for _, deps := range diff.Next.Policy.Dependencies.DependenciesByService {
 		for _, d := range deps {
 			// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
 			if d.Resolved {

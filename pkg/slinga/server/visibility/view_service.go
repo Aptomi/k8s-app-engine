@@ -55,7 +55,7 @@ func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePre
 		// add nodes for all dependencies
 		for dependencyID := range instance.DependencyIds {
 			// add a node for dependency
-			dependencyNode := newDependencyNode(view.state.Dependencies.DependenciesByID[dependencyID], true, view.state.GetUserLoader())
+			dependencyNode := newDependencyNode(view.state.Policy.Dependencies.DependenciesByID[dependencyID], true, view.state.GetUserLoader())
 			view.g.addNode(dependencyNode, nextLevel)
 
 			// connect prev service instance node and dependency node

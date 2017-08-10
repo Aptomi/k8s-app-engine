@@ -154,8 +154,8 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	if state.Dependencies != nil {
-		for service, dependencies := range state.Dependencies.DependenciesByService {
+	if state.Policy.Dependencies != nil {
+		for service, dependencies := range state.Policy.Dependencies.DependenciesByService {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
@@ -204,7 +204,7 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 
 		// Add an edge from service to allocation box
 		for dependencyID := range linkStruct.DependencyIds {
-			userID := state.Dependencies.DependenciesByID[dependencyID].UserID
+			userID := state.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, service, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}

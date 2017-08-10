@@ -62,7 +62,7 @@ func (n serviceInstanceNode) getLabel() string {
 		return fmt.Sprintf(
 			`<b>%s</b>
 				ERROR`,
-			html.EscapeString(n.service.Name),
+			html.EscapeString(n.service.GetName()),
 		)
 	}
 
@@ -73,7 +73,7 @@ func (n serviceInstanceNode) getLabel() string {
 				components: <i>%d</i>
 				cluster: <i>%s</i>
 				running: <i>%s</i>`,
-			html.EscapeString(n.service.Name),
+			html.EscapeString(n.service.GetName()),
 			len(n.service.Components), // TODO: fix
 			html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
 			html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
@@ -83,7 +83,7 @@ func (n serviceInstanceNode) getLabel() string {
 		`<b>%s</b>
 			cluster: <i>%s</i>
 			running: <i>%s</i>`,
-		html.EscapeString(n.service.Name),
+		html.EscapeString(n.service.GetName()),
 		html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
 		html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 	)

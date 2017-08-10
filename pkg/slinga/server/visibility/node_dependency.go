@@ -57,5 +57,5 @@ func (n dependencyNode) getEdgeLabel(dst graphNode) string {
 }
 
 func (n dependencyNode) getDetails(id string, state engine.ServiceUsageState) interface{} {
-	return state.Dependencies.DependenciesByID[id]
+	return state.Policy.Dependencies.DependenciesByID[id]
 }

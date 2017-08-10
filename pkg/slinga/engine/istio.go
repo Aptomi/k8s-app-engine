@@ -57,7 +57,7 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	for _, existingRule := range existingRules {
 		found := false
 		for _, desiredRule := range desiredRules {
-			if existingRule.Service == desiredRule.Service && existingRule.Cluster.Name == desiredRule.Cluster.Name {
+			if existingRule.Service == desiredRule.Service && existingRule.Cluster.GetName() == desiredRule.Cluster.GetName() {
 				found = true
 			}
 		}
@@ -69,7 +69,7 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 	for _, desiredRule := range desiredRules {
 		found := false
 		for _, existingRule := range existingRules {
-			if desiredRule.Service == existingRule.Service && desiredRule.Cluster.Name == existingRule.Cluster.Name {
+			if desiredRule.Service == existingRule.Service && desiredRule.Cluster.GetName() == existingRule.Cluster.GetName() {
 				found = true
 			}
 		}
@@ -130,7 +130,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	users := make([]*User, 0)
 	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exists
-		userID := usage.Dependencies.DependenciesByID[dependencyID].UserID
+		userID := usage.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 		users = append(users, usage.userLoader.LoadUserByID(userID))
 	}
 
@@ -203,7 +203,7 @@ func getIstioRouteRules(cluster *Cluster) []*IstioRouteRule {
 	rulesStr, err := runIstioCmd(cluster, cmd)
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"cluster": cluster.Name,
+			"cluster": cluster.GetName(),
 			"cmd":     cmd,
 			"error":   err,
 		}).Panic("Failed to get route-rules by running bash cmd")
@@ -235,7 +235,7 @@ func (rule *IstioRouteRule) create() {
 	out, err := runIstioCmd(rule.Cluster, "create -f "+ruleFile.Name())
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"cluster": rule.Cluster.Name,
+			"cluster": rule.Cluster.GetName(),
 			"content": content,
 			"out":     out,
 			"error":   err,
@@ -247,7 +247,7 @@ func (rule *IstioRouteRule) delete() {
 	out, err := runIstioCmd(rule.Cluster, "delete route-rule "+rule.Service)
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"cluster": rule.Cluster.Name,
+			"cluster": rule.Cluster.GetName(),
 			"out":     out,
 			"error":   err,
 		}).Panic("Failed to delete istio rule by running bash script")
@@ -320,7 +320,7 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 	}
 
 	content := "set -e\n"
-	content += "kubectl config use-context " + cluster.Name + " 1>/dev/null\n"
+	content += "kubectl config use-context " + cluster.GetName() + " 1>/dev/null\n"
 	content += "istioctl --configAPIService " + cluster.GetIstioSvc() + " --namespace " + cluster.Metadata.Namespace + " "
 	content += cmd + "\n"
 

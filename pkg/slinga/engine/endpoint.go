@@ -17,7 +17,7 @@ func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[st
 		instance := state.GetResolvedData().ComponentInstanceMap[key]
 		used := filterUserID == ""
 		for dependencyID := range instance.DependencyIds {
-			userID := state.Dependencies.DependenciesByID[dependencyID].UserID
+			userID := state.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 			if userID == filterUserID {
 				used = true
 				break

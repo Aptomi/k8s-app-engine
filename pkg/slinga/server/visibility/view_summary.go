@@ -35,7 +35,7 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 	if !view.state.GetUserLoader().LoadUserByID(view.userID).IsGlobalOps() {
 		return result
 	}
-	for _, dependency := range view.state.Dependencies.DependenciesByID {
+	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		entry := lineEntry{
 			"resolved":     dependency.Resolved,
 			"userName":     view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name,
@@ -61,14 +61,14 @@ func (view SummaryView) getGlobalRulesData() interface{} {
 	for _, ruleList := range view.state.Policy.Rules.Rules {
 		for _, rule := range ruleList {
 			entry := lineEntry{
-				"ruleName":   rule.Name,
+				"ruleName":   rule.GetName(),
 				"ruleObject": rule.FilterServices,
 				"appliedTo":  view.getRuleAppliedTo(rule),
 				// currently we're only matching users by labels (for demo with rules w/o any other filters)
 				"matchedUsers": view.getRuleMatchedUsers(rule),
 				"conditions":   rule.DescribeConditions(),
 				"actions":      rule.DescribeActions(),
-				"id":           rule.Name, // entries will be sorted by ID
+				"id":           rule.GetName(), // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}
@@ -86,7 +86,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 			for key, instance := range view.state.ResolvedData.ComponentInstanceMap {
 				if instance.Resolved {
 					serviceName, _, _, componentName := engine.ParseServiceUsageKey(key)
-					if serviceName == service.Name && componentName == engine.ComponentRootName {
+					if serviceName == service.GetName() && componentName == engine.ComponentRootName {
 						instanceMap[key] = true
 					}
 				}
@@ -96,7 +96,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 			for key := range instanceMap {
 				instance := view.state.ResolvedData.ComponentInstanceMap[key]
 				entry := lineEntry{
-					"serviceName": service.Name,
+					"serviceName": service.GetName(),
 					"context":     view.getResolvedContextNameByInst(instance),
 					"cluster":     view.getResolvedClusterNameByInst(instance),
 					"stats":       view.getInstanceStats(instance),
@@ -112,7 +112,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 
 func (view SummaryView) getServicesUsing() interface{} {
 	result := lineEntryList{}
-	for _, dependency := range view.state.Dependencies.DependenciesByID {
+	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		if dependency.UserID == view.userID {
 			entry := lineEntry{
 				"resolved":     dependency.Resolved,

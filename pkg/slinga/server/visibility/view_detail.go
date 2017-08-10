@@ -51,7 +51,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 
 	// Dependencies
 	depIds := make([]string, 0)
-	deps := state.Dependencies.DependenciesByID
+	deps := state.Policy.Dependencies.DependenciesByID
 	for depID, dep := range deps {
 		if dep.UserID != userID {
 			continue
@@ -95,7 +95,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 	sort.Strings(svcIds)
 
 	for _, svcID := range svcIds {
-		r.Services = append(r.Services, &item{svcID, state.Policy.Services[svcID].Name})
+		r.Services = append(r.Services, &item{svcID, state.Policy.Services[svcID].GetName()})
 	}
 
 	if len(r.Dependencies) > 0 {

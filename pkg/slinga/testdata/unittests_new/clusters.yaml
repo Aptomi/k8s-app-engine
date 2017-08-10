@@ -1,0 +1,21 @@
+# Context definition for us-east
+- kind: cluster
+  metadata:
+    namespace: main
+    name: cluster-us-east
+  spec:
+    type: kubernetes
+    metadata:
+      kubecontext: cluster-us-east
+      namespace: demo
+
+# Context definition for us-west
+- kind: cluster
+  metadata:
+    namespace: main
+    name: cluster-us-west
+  spec:
+    type: kubernetes
+    metadata:
+      kubecontext: cluster-us-west
+      namespace: demo

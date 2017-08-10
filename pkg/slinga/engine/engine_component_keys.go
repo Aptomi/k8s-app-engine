@@ -16,7 +16,7 @@ func getContextNameUnsafe(context *Context) string {
 	if context == nil {
 		return ComponentUnresolvedName
 	}
-	return context.Name
+	return context.GetName()
 }
 
 // If allocation has not been resolved and we need a key, generate one

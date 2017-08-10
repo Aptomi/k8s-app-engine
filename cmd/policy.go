@@ -47,8 +47,9 @@ var policyCmdApply = &cobra.Command{
 		policyDir := GetAptomiPolicyDir()
 		policy := LoadPolicyFromDir(policyDir)
 		dependencies := LoadDependenciesFromDir(policyDir)
+		policy.Dependencies = dependencies
 
-		nextUsageState := NewServiceUsageState(&policy, &dependencies, userLoader)
+		nextUsageState := NewServiceUsageState(&policy, userLoader)
 		err := nextUsageState.ResolveAllDependencies()
 
 		if err != nil {

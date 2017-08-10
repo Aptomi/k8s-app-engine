@@ -13,9 +13,6 @@ type ServiceUsageState struct {
 	// reference to a policy
 	Policy *Policy
 
-	// reference to dependencies
-	Dependencies *GlobalDependencies
-
 	// user loader
 	userLoader UserLoader
 
@@ -53,10 +50,9 @@ func newServiceUsageData() *ServiceUsageData {
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
-func NewServiceUsageState(policy *Policy, dependencies *GlobalDependencies, userLoader UserLoader) ServiceUsageState {
+func NewServiceUsageState(policy *Policy, userLoader UserLoader) ServiceUsageState {
 	return ServiceUsageState{
 		Policy:         policy,
-		Dependencies:   dependencies,
 		userLoader:     userLoader,
 		CreatedOn:      time.Now(),
 		ResolvedData:   newServiceUsageData(),

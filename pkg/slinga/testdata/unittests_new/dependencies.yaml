@@ -1,0 +1,37 @@
+- kind: dependency
+  metadata:
+    namespace: main
+    name: dep_id_1
+  spec:
+    id: dep_id_1
+    userid: 1
+    service: kafka
+
+- kind: dependency
+  metadata:
+    namespace: main
+    name: dep_id_2
+  spec:
+    id: dep_id_2
+    userid: 2
+    service: kafka
+    labels:
+      important: yes
+
+- kind: dependency
+  metadata:
+    namespace: main
+    name: dep_id_3
+  spec:
+    id: dep_id_3
+    userid: 3
+    service: kafka
+
+- kind: dependency
+  metadata:
+    namespace: main
+    name: dep_id_4
+  spec:
+    id: dep_id_4
+    userid: 4
+    service: kafka

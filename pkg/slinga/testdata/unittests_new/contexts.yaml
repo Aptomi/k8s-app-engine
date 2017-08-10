@@ -1,0 +1,89 @@
+# Context definition for prod (high priority)
+- kind: context
+
+  metadata:
+    namespace: main
+    name: prod-high
+
+  labels:
+    set:
+      some-test-context-specific-label: some-value
+    remove:
+      a:
+      b:
+
+  spec:
+    criteria:
+      accept:
+        - dev == "no" && prod == "yes" && priority >= 200
+      reject:
+        - serviceName == "zookeeper" && nozookeeper
+
+    allocation:
+      name: "prod-{{.User.Name}}"
+      labels:
+        set:
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+
+# Context definition for prod (low priority)
+- kind: context
+
+  metadata:
+    namespace: main
+    name: prod-low
+
+  labels:
+    set:
+      some-test-context-specific-label: some-value
+    remove:
+      a:
+      b:
+
+  spec:
+    criteria:
+      accept:
+        - dev == "no" && prod == "yes" && priority < 200
+      reject:
+        - serviceName == "zookeeper" && nozookeeper
+
+    allocation:
+      name: "prod-{{.User.Labels.team}}"
+      labels:
+        set:
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+
+# Context definition for test
+- kind: context
+
+  metadata:
+    namespace: main
+    name: test
+
+  labels:
+    set:
+      some-test-context-specific-label: some-value
+    remove:
+      a:
+      b:
+
+  spec:
+    criteria:
+      accept:
+        - dev == "yes" && prod == "no"
+      reject:
+        - serviceName == "zookeeper" && nozookeeper
+
+    allocation:
+      name: "prod-{{.User.Labels.team}}"
+      labels:
+        set:
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
