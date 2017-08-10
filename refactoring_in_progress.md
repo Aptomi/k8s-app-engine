@@ -4,7 +4,7 @@ What is going on:
 
 Items to complete:
 - get rid of all previous loading code
-- delete old "unittests" directory
+- rename "unittests_new" back to "unittests"
 - remove enabled flag
 - inheritance / make sure we are looking for contexts in the right namespace
 - add support for namespaces
@@ -12,3 +12,5 @@ Items to complete:
 - add support not only for policy objects, but for generated objects as well
 - get rid of dependency ID
 - get rid of revision.yaml
+- deal with external entities (charts, secrets, ldap configuration)
+- we don't have any unit tests to verify label calculation in the engine while policy is being resolved

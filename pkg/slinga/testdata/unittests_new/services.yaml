@@ -5,11 +5,11 @@
     namespace: main
     name: zookeeper
 
-  labels:
-    set:
-      a: b
-
   spec:
+    labels:
+      set:
+        a: b
+
     components:
       - name: component1
         code:
@@ -46,11 +46,11 @@
     namespace: main
     name: kafka
 
-  labels:
-    set:
-      a: b
-
   spec:
+    labels:
+      set:
+        a: b
+
     components:
       - name: component1
         service: zookeeper

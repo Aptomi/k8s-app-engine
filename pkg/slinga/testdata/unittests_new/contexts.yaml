@@ -5,14 +5,14 @@
     namespace: main
     name: prod-high
 
-  labels:
-    set:
-      some-test-context-specific-label: some-value
-    remove:
-      a:
-      b:
-
   spec:
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
     criteria:
       accept:
         - dev == "no" && prod == "yes" && priority >= 200
@@ -35,14 +35,14 @@
     namespace: main
     name: prod-low
 
-  labels:
-    set:
-      some-test-context-specific-label: some-value
-    remove:
-      a:
-      b:
-
   spec:
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
     criteria:
       accept:
         - dev == "no" && prod == "yes" && priority < 200
@@ -65,14 +65,15 @@
     namespace: main
     name: test
 
-  labels:
-    set:
-      some-test-context-specific-label: some-value
-    remove:
-      a:
-      b:
 
   spec:
+    labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
     criteria:
       accept:
         - dev == "yes" && prod == "no"
