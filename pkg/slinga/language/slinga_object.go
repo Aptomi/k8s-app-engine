@@ -13,22 +13,25 @@ type SlingaObject struct {
 	Kind string
 
 	// Metadata is a set of pre-defined fields that every object has
-	Metadata struct {
-		// Name of a namespace within aptomi
-		Namespace string
-
-		// Name of an object (unique within a namespace for a given object kind)
-		Name string
-	}
+	Metadata SlingaObjectMetadata
 
 	// Spec will be parsed using a parser, which is specific for a given object kind
 	Spec interface{}
 }
 
+// Metadata is a set of pre-defined fields that every object has
+type SlingaObjectMetadata struct {
+	// Name of a namespace within aptomi
+	Namespace string
+
+	// Name of an object (unique within a namespace for a given object kind)
+	Name string
+}
+
 // SlingaObjectInterface defines common methods on SlingaObject
 type SlingaObjectInterface interface {
+	GetNamespace() string
 	GetName() string
-
 	GetObjectType() SlingaObjectType
 
 	// Returns unique object key (by default: kind -> namespace -> name, standard implementation in SlingaObject)
@@ -38,9 +41,14 @@ type SlingaObjectInterface interface {
 	// GetDiff() string
 }
 
+func (object *SlingaObject) GetNamespace() string {
+	return object.Metadata.Namespace
+}
+
 func (object *SlingaObject) GetName() string {
 	return object.Metadata.Name
 }
+
 
 // TODO: it would be great to implement context inheritance that way:
 // - service name is removed from context definition

@@ -82,7 +82,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	policyNext := loadUnitTestsPolicy()
 	policyNext.Dependencies.AddDependency(
 		&Dependency{
-			ID:      "dep_id_5",
+			SlingaObject: &SlingaObject{Metadata: SlingaObjectMetadata{Namespace: "main", Name: "dep_id_5"}},
 			UserID:  "5",
 			Service: "kafka",
 		},
@@ -131,7 +131,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	policyNext := loadUnitTestsPolicy()
 	policyNext.Dependencies.AddDependency(
 		&Dependency{
-			ID:      "dep_id_5",
+			SlingaObject: &SlingaObject{Metadata: SlingaObjectMetadata{Namespace: "main", Name: "dep_id_5"}},
 			UserID:  "5",
 			Service: "kafka",
 		},

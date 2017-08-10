@@ -43,7 +43,7 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 			"context":      view.getResolvedContextNameByDep(dependency),
 			"cluster":      view.getResolvedClusterNameByDep(dependency),
 			"stats":        view.getDependencyStats(dependency),
-			"dependencyId": dependency.ID,
+			"dependencyId": dependency.GetID(),
 			"id":           view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
 		}
 		result = append(result, entry)
@@ -120,8 +120,8 @@ func (view SummaryView) getServicesUsing() interface{} {
 				"context":      view.getResolvedContextNameByDep(dependency),
 				"cluster":      view.getResolvedClusterNameByDep(dependency),
 				"stats":        view.getDependencyStats(dependency),
-				"dependencyId": dependency.ID,
-				"id":           dependency.ID, // entries will be sorted by ID
+				"dependencyId": dependency.GetID(),
+				"id":           dependency.GetID(), // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}

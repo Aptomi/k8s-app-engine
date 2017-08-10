@@ -86,7 +86,7 @@ func (data *ServiceUsageData) getComponentInstanceEntry(key string) *ComponentIn
 // Record dependency for component instance
 func (data *ServiceUsageData) recordResolvedAndDependency(key string, dependency *Dependency) {
 	data.getComponentInstanceEntry(key).setResolved(true)
-	data.getComponentInstanceEntry(key).addDependency(dependency.ID)
+	data.getComponentInstanceEntry(key).addDependency(dependency.GetID())
 }
 
 // Record processing order for component instance
@@ -124,7 +124,7 @@ func (data *ServiceUsageData) storeEdge(key string, keyDst string) {
 
 // Stores rule log entry, attaching it to component instance by dependency
 func (data *ServiceUsageData) storeRuleLogEntry(key string, dependency *Dependency, entry *RuleLogEntry) {
-	data.getComponentInstanceEntry(key).addRuleLogEntries(dependency.ID, entry)
+	data.getComponentInstanceEntry(key).addRuleLogEntries(dependency.GetID(), entry)
 }
 
 // Appends data to the current ServiceUsageData

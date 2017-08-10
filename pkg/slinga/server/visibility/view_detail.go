@@ -66,7 +66,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 		r.Dependencies = append([]*item{{"all", "All"}}, r.Dependencies...)
 	}
 	for _, depID := range depIds {
-		r.Dependencies = append(r.Dependencies, &item{depID, deps[depID].ID})
+		r.Dependencies = append(r.Dependencies, &item{depID, deps[depID].GetID()})
 	}
 
 	allDepIds := make([]string, 0)
@@ -80,7 +80,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 		r.AllDependencies = append([]*item{{"all", "All"}}, r.AllDependencies...)
 	}
 	for _, depID := range allDepIds {
-		r.AllDependencies = append(r.AllDependencies, &item{depID, deps[depID].ID})
+		r.AllDependencies = append(r.AllDependencies, &item{depID, deps[depID].GetID()})
 	}
 
 	// Services

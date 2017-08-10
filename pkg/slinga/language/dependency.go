@@ -1,12 +1,8 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
-	"github.com/mattn/go-zglob"
-	"sort"
 )
 
 /*
@@ -18,7 +14,6 @@ type Dependency struct {
 	*SlingaObject
 
 	Enabled bool
-	ID      string // TODO: get rid of this field
 	UserID  string
 	Service string
 	Labels  map[string]string
@@ -64,47 +59,18 @@ func (dependency *Dependency) GetLabelSet() LabelSet {
 
 // AddDependency appends a single dependency to an existing object
 func (src GlobalDependencies) AddDependency(dependency *Dependency) {
-	if len(dependency.ID) <= 0 {
+	if len(dependency.GetID()) <= 0 {
 		Debug.WithFields(log.Fields{
 			"dependency": dependency,
 		}).Panic("Empty dependency ID")
 	}
 	src.DependenciesByService[dependency.Service] = append(src.DependenciesByService[dependency.Service], dependency)
-	src.DependenciesByID[dependency.ID] = dependency
+	src.DependenciesByID[dependency.GetID()] = dependency
 }
 
-/*
-TODO: delete
-// MakeCopy copies the whole structure with dependencies
-func (src GlobalDependencies) MakeCopy() *GlobalDependencies {
-	result := NewGlobalDependencies()
-	for _, v := range src.DependenciesByID {
-		result.AddDependency(v)
-	}
-	return result
-}
-*/
-
-// LoadDependenciesFromDir loads all dependencies from a given directory
-func LoadDependenciesFromDir(baseDir string) *GlobalDependencies {
-	// read all services
-	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeDependencies))
-	sort.Strings(files)
-	result := NewGlobalDependencies()
-	for _, fileName := range files {
-		t := loadDependenciesFromFile(fileName)
-		for _, d := range t {
-			if d.Enabled {
-				result.AddDependency(d)
-			}
-		}
-	}
-	return result
-}
-
-// Loads dependencies from file
-func loadDependenciesFromFile(fileName string) []*Dependency {
-	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*Dependency{}).(*[]*Dependency)
+// TODO: added temporary method to deal with existing dependency IDs. Once we implement namespaces, may be this has to be re-thinked
+func (dependency *Dependency) GetID() string {
+	return dependency.GetName()
 }
 
 func (dependency *Dependency) GetObjectType() SlingaObjectType {
