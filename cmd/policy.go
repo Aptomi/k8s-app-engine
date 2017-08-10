@@ -45,11 +45,9 @@ var policyCmdApply = &cobra.Command{
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
-		policy := LoadPolicyFromDir(policyDir)
-		dependencies := LoadDependenciesFromDir(policyDir)
-		policy.Dependencies = dependencies
+		policy := NewSlingaObjectDatabaseDir(policyDir).LoadPolicyObjects(-1, "")
 
-		nextUsageState := NewServiceUsageState(&policy, userLoader)
+		nextUsageState := NewServiceUsageState(policy, userLoader)
 		err := nextUsageState.ResolveAllDependencies()
 
 		if err != nil {

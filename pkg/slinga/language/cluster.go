@@ -1,13 +1,11 @@
 package language
 
-import "github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
-
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
 	*SlingaObject
 
-	Type     string
-	Labels   map[string]string
+	Type   string
+	Labels map[string]string
 	Metadata struct {
 		KubeContext     string
 		TillerNamespace string
@@ -47,11 +45,6 @@ func (cluster *Cluster) SetIstioSvc(istioSvc string) {
 
 func (cluster *Cluster) GetIstioSvc() string {
 	return cluster.Cache.istioSvc
-}
-
-// Loads cluster from file
-func loadClusterFromFile(fileName string) *Cluster {
-	return yaml.LoadObjectFromFile(fileName, new(Cluster)).(*Cluster)
 }
 
 func (cluster *Cluster) GetObjectType() SlingaObjectType {

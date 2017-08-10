@@ -1,0 +1,89 @@
+# Definition of Twitter Stats service
+- kind: service
+
+  metadata:
+    namespace: main
+    name: twitter_stats
+
+  spec:
+    owner: cn=John,ou=people,o=aptomiOrg
+
+    enabled: false
+
+    components:
+
+      - name: analytics_pipeline
+        service: analytics_pipeline
+
+      - name: istio
+        service: istio
+
+      # Publisher (Twitter Streaming API -> kafka)
+      - name: tweepub
+        code:
+          type: aptomi/code/kubernetes-helm
+          params:
+            chartName: tweepub-1.0.0
+            cluster: "{{ .Labels.cluster }}"
+
+            # Pass labels to publisher application
+            twitter:
+              appKey: "{{ .Labels.appKey }}"
+              appSecret: "{{ .Labels.appSecret }}"
+              tokenKey: "{{ .Labels.tokenKey }}"
+              tokenSecret: "{{ .Labels.tokenSecret }}"
+              locations: "{{ .Labels.locations }}"
+
+            # Tell publisher where to put messages (kafka connection url & topic)
+            kafka:
+              externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
+              topic: "tweepub-{{ .User.Name }}-{{ .Labels.tstype }}"
+        dependencies:
+          - analytics_pipeline
+
+      # Spark job (takes tweets -> does hashtags stats -> puts stats into hdfs)
+      - name: tweetics
+        code:
+          type: aptomi/code/kubernetes-helm
+          params:
+            chartName: tweetics-0.1.0
+            cluster: "{{ .Labels.cluster }}"
+
+            zookeeper:
+              externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
+
+            kafka:
+              externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
+              topic: "tweepub-{{ .User.Name }}-{{ .Labels.tstype }}"
+
+            spark:
+              externalAddress: "{{ .Discovery.analytics_pipeline.spark.spark.url }}"
+
+            hdfs:
+              externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
+              path: "/twitter-{{ .User.Name }}-{{ .Labels.tstype }}/results"
+        dependencies:
+          - analytics_pipeline
+
+      # Visualizer (takes stats from hdfs and shows on web page)
+      - name: tweeviz
+        code:
+          type: aptomi/code/kubernetes-helm
+          params:
+            chartName: tweeviz-0.1.0
+            cluster: "{{ .Labels.cluster }}"
+
+            image:
+              repository: frostman/
+              name: tweeviz
+              tag: "{{ .Labels.tsvisimage }}"
+
+    #        topListSize: 25
+
+            header: Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})
+
+            hdfs:
+              externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
+              path: "/twitter-{{ .User.Name }}-{{ .Labels.tstype }}"
+        dependencies:
+          - analytics_pipeline

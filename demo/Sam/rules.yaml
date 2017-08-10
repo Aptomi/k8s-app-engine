@@ -1,0 +1,44 @@
+- kind: rule
+  metadata:
+    namespace: main
+    name: dev_cannot_deploy_to_prod_cluster
+  spec:
+    enabled: true
+    filterservices:
+      user:
+        accept:
+          - org == 'dev'
+      cluster:
+        accept:
+          - prod
+    actions:
+      - type: dependency
+        content: forbid
+
+- kind: rule
+  metadata:
+    namespace: main
+    name: deactivated_users_lose_access
+  spec:
+    enabled: true
+    filterservices:
+      user:
+        accept:
+          - deactivated
+    actions:
+      - type: ingress
+        content: block
+
+- kind: rule
+  metadata:
+    namespace: main
+    name: mobile_devs_are_blocked
+  spec:
+    enabled: true
+    filterservices:
+      user:
+        accept:
+          - team == 'mobile-dev'
+    actions:
+      - type: dependency
+        content: forbid

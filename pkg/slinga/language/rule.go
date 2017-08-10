@@ -2,7 +2,6 @@ package language
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 )
@@ -157,11 +156,6 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 			globalRules.Rules[action.Type] = []*Rule{rule}
 		}
 	}
-}
-
-// Loads rules from file
-func loadRulesFromFile(fileName string) []*Rule {
-	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*Rule{}).(*[]*Rule)
 }
 
 func (rule *Rule) GetObjectType() SlingaObjectType {

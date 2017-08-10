@@ -1,0 +1,102 @@
+# Definition of Istio service
+- kind: service
+
+  metadata:
+    namespace: main
+    name: istio
+
+  spec:
+    owner: cn=Sam,ou=people,o=aptomiOrg
+
+    components:
+      - name: istio
+        code:
+          type: aptomi/code/kubernetes-helm
+          params:
+            chartName: istio-0.2.1
+            cluster: "{{ .Labels.cluster }}"
+
+            istioRelease: 0.1.6
+
+            auth:
+              enabled: false
+
+            mixer:
+              deployment:
+                name: mixer
+                image: frostman/istio-mixer
+                imagePullPolicy: IfNotPresent
+                resources: {}
+
+            pilot:
+              deployment:
+                discovery:
+                  image: frostman/istio-pilot
+                  imagePullPolicy: IfNotPresent
+                  resources: {}
+
+                apiserver:
+                  image: frostman/istio-pilot
+                  imagePullPolicy: IfNotPresent
+                  resources: {}
+
+            ingress:
+              service:
+                type: NodePort
+                externalHttpPort: 80
+                externalHttpsPort: 443
+
+              deployment:
+                image: frostman/istio-proxy-debug
+                imagePullPolicy: IfNotPresent
+                resources: {}
+
+            egress:
+              deployment:
+                image: frostman/istio-proxy-debug
+                imagePullPolicy: IfNotPresent
+                replicas: 1
+                resources: {}
+
+            ca:
+              deployment:
+                image: frostman/istio-istio-ca
+                imagePullPolicy: IfNotPresent
+                resources: {}
+
+            addons:
+              zipkin:
+                enabled: false
+
+              prometheus:
+                enabled: true
+
+                service:
+                  type: NodePort
+
+                deployment:
+                  replicas: 1
+                  resources: {}
+
+              grafana:
+                enabled: true
+
+                service:
+                  type: NodePort
+
+                deployment:
+                  replicas: 1
+                  resources: {}
+
+              servicegraph:
+                enabled: true
+
+                service:
+                  type: NodePort
+
+                deployment:
+                  image: frostman/istio-servicegraph
+                  imageTag: latest
+                  imagePullPolicy: Always
+                  replicas: 1
+                  resources: {}

@@ -1,0 +1,23 @@
+# This context describes twitter_stats in staging
+- kind: context
+
+  metadata:
+    namespace: main
+    name: stage_ts
+
+  spec:
+    # This context is for people from dev (they can run their own instances in stage)
+    criteria:
+      accept:
+        - org == 'dev'
+      reject:
+        - service.Name != 'twitter_stats'
+
+    # In stage:
+    # - services will be deployed in us-west
+    # - each developer will get its own instance
+    allocation:
+      name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
+      labels:
+        set:
+          cluster: cluster-us-west

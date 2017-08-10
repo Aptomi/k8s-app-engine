@@ -1,0 +1,24 @@
+# Definition of HDFS service
+- kind: service
+
+  metadata:
+    namespace: main
+    name: hdfs
+
+  spec:
+    owner: cn=Frank,ou=people,o=aptomiOrg
+
+    components:
+
+      - name: hdfs
+        discovery:
+          url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}"
+        code:
+          type: aptomi/code/kubernetes-helm
+          params:
+            chartName: hdfs-1.0.0
+            cluster: "{{ .Labels.cluster }}"
+
+            datanode:
+              replicas: 1
+              antiAffinity: "soft"

@@ -3,7 +3,6 @@ package language
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 )
 
 // Service defines individual service
@@ -123,11 +122,6 @@ func (service *Service) GetComponentsSortedTopologically() ([]*ServiceComponent,
 	}
 
 	return service.componentsOrdered, nil
-}
-
-// Loads service from file
-func loadServiceFromFile(fileName string) *Service {
-	return yaml.LoadObjectFromFile(fileName, new(Service)).(*Service)
 }
 
 func (service *Service) GetObjectType() SlingaObjectType {
