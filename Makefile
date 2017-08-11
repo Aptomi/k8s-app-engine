@@ -1,3 +1,7 @@
+VERSION=$(shell git describe --tags --long --dirty)
+BUILD_TIME=$(shell date +%FT%T%z)
+LDFLAGS=-ldflags "-X github.com/Aptomi/aptomi/cmd.Version=${VERSION} -X github.com/Aptomi/aptomi/cmd.BuildTime=${BUILD_TIME}"
+
 .PHONY: default
 default: clean build test
 
@@ -46,11 +50,11 @@ emulate:
 
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build -i -o aptomi
+	CGO_ENABLED=0 go build ${LDFLAGS} -i -o aptomi
 
 .PHONY: install
 install:
-	go install
+	go install ${LDFLAGS}
 
 .PHONY: fmt
 fmt:
