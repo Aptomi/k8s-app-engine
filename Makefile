@@ -46,7 +46,7 @@ emulate:
 
 .PHONY: build
 build:
-	go build -i -o aptomi
+	CGO_ENABLED=0 go build -i -o aptomi
 
 .PHONY: install
 install:
