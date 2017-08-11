@@ -1,4 +1,4 @@
-package: github.com/Frostman/aptomi
+package: github.com/Aptomi/aptomi
 import:
 - package: gopkg.in/yaml.v2
 - package: github.com/Knetic/govaluate
