@@ -10,12 +10,13 @@ func init() {
 }
 
 var Version string
+var GitCommit string
 var BuildTime string
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version string of Aptomi",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Aptomi commit: %s\n       built: %s\n", Version, BuildTime)
+		fmt.Printf("Aptomi version: %s\n       git commit: %s\n       built: %s\n", Version, GitCommit, BuildTime)
 	},
 }

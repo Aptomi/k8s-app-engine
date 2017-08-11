@@ -1,6 +1,7 @@
 VERSION=$(shell git describe --tags --long --dirty)
+GIT_COMMIT=$(shell git log --format="%h" -n 1)
 BUILD_TIME=$(shell date +%FT%T%z)
-LDFLAGS=-ldflags "-X github.com/Aptomi/aptomi/cmd.Version=${VERSION} -X github.com/Aptomi/aptomi/cmd.BuildTime=${BUILD_TIME}"
+LDFLAGS=-ldflags "-X github.com/Aptomi/aptomi/cmd.Version=${VERSION} -X github.com/Aptomi/aptomi/cmd.GitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/cmd.BuildTime=${BUILD_TIME}"
 
 .PHONY: default
 default: clean build test
