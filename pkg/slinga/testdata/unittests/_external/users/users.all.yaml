@@ -4,8 +4,8 @@
     priority: 3
     org: corporate_it
     team: platform_services
-    dev: yes
-    prod: no
+    dev: "yes"
+    prod: "no"
     changinglabel: 123
 
 - id: 2
@@ -14,8 +14,8 @@
     priority: 20
     org: corporate_it
     team: platform_services
-    dev: no
-    prod: yes
+    dev: "no"
+    prod: "yes"
     changinglabel: 123
 
 - id: 3
@@ -24,8 +24,8 @@
     priority: 20
     org: corporate_it
     team: platform_services
-    dev: no
-    prod: yes
+    dev: "no"
+    prod: "yes"
     compromised: true
     changinglabel: 123
 
@@ -36,8 +36,8 @@
     priority: 3
     org: corporate_it
     team: platform_services
-    dev: yes
-    prod: no
+    dev: "yes"
+    prod: "no"
     nozookeeper: true
     changinglabel: 123
 
@@ -48,7 +48,7 @@
     priority: 200
     org: corporate_it
     team: platform_services
-    dev: no
-    prod: yes
+    dev: "no"
+    prod: "yes"
     changinglabel: 123
 

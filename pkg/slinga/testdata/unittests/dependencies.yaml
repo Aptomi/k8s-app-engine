@@ -14,7 +14,8 @@
     userid: 2
     service: kafka
     labels:
-      important: yes
+      important: "yes"
+      some-label-to-be-removed: "yes"
 
 - kind: dependency
   metadata:

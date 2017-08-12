@@ -38,10 +38,9 @@
   spec:
     change-labels:
       set:
-        some-test-context-specific-label: some-value
+        prod-low-ctx: true
       remove:
-        a:
-        b:
+        some-label-to-be-removed:
 
     criteria:
       require-any:
@@ -53,7 +52,7 @@
       name: "prod-team-{{.User.Labels.team}}"
       change-labels:
         set:
-          some-test-context-specific-label: some-value
+          prod-low-alloc: true
         remove:
           a:
           b:

@@ -39,6 +39,14 @@ func TestPolicyResolve(t *testing.T) {
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
 	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 
+	// Check labels for Bob's dependency
+	key := policy.Dependencies.DependenciesByID["dep_id_2"].ServiceKey
+	labels := usageState.ResolvedData.ComponentInstanceMap[key].CalculatedLabels.Labels
+	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
+	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")
+	assert.Equal(t, "", labels["some-label-to-be-removed"], "Label 'some-label-to-be-removed' should be removed on context match")
+	assert.Equal(t, "true", labels["prod-low-alloc"], "Label 'prod-low-alloc=true' should be added on allocation match")
+
 	// Check that code parameters evaluate correctly
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
 

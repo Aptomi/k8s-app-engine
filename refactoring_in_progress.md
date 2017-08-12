@@ -1,7 +1,5 @@
 Items to complete:
 
-1. Add unit tests to verify label calculation in the engine while policy is being resolved
-
 3. Support for namespaces
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
@@ -29,7 +27,6 @@ Items to complete:
 
 
 Done:
-
 * Flexible contexts (==inheritance, ==more powerful expressions)
 
 * Check security issues with Knetic (possible to call methods on objects from the policy expressions)
@@ -40,3 +37,5 @@ Done:
 - so that services can have labels (and we can refer to them from criteria expressions)
 - and services can have labels operations (set/remove, etc)
 - just rename existing "labels" (ops) to "change-labels" in yaml to avoid confusion
+
+* add unit test to verify label calculation in the engine while policy is being resolved
