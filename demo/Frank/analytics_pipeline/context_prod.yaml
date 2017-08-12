@@ -9,9 +9,9 @@
     # Applies to all services owned by 'analytics-ops-team'
     # For consumers with org == 'it' && is_operator
     criteria:
-      filter:
+      require-all:
         - service.Owner.Labels.team == 'analytics-ops-team'
-      accept:
+      require-any:
         - org == 'it' && is_operator
 
     # In production:

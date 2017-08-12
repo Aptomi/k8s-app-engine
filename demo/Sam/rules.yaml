@@ -5,10 +5,10 @@
   spec:
     filterservices:
       user:
-        accept:
+        require-any:
           - org == 'dev'
       cluster:
-        accept:
+        require-any:
           - prod
     actions:
       - type: dependency
@@ -21,7 +21,7 @@
   spec:
     filterservices:
       user:
-        accept:
+        require-any:
           - deactivated
     actions:
       - type: ingress
@@ -34,7 +34,7 @@
   spec:
     filterservices:
       user:
-        accept:
+        require-any:
           - team == 'mobile-dev'
     actions:
       - type: dependency

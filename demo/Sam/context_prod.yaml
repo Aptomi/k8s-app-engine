@@ -9,9 +9,9 @@
     # Only applies to istio service
     # For consumers with org == 'it' && is_operator
     criteria:
-      filter:
+      require-all:
         - service.Metadata.Name == 'istio'
-      accept:
+      require-any:
         - org == 'it' && is_operator
 
     # In production:

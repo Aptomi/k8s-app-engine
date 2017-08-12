@@ -9,9 +9,9 @@
     # Applies to all services owned by 'web-ops-team'
     # For consumers with org == 'dev'
     criteria:
-      filter:
+      require-all:
         - service.Owner.Labels.team == 'web-ops-team'
-      accept:
+      require-any:
         - org == 'dev'
 
     # In stage:

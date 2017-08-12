@@ -3,9 +3,6 @@ What is going on:
 * dealing with context inheritance (== contexts not tied to services)
 
 Items to complete:
-1. Change criteria to <RequireAll>, <RequireAny> and <RequireNone>
-  - under pkg/ and demo/
-
 2. We likely need to separate labels from label operations
 - so that services can have labels (and we can refer to them from criteria expressions)
 - and services can have labels ops (set/remove, etc)
@@ -40,6 +37,8 @@ Items to complete:
 
 Done:
 
-* Context inheritance
+* Flexible contexts (==inheritance, ==more powerful expressions)
 
 * Check security issues with Knetic (possible to call methods on objects from the policy expressions)
+
+* Change criteria to <RequireAll>, <RequireAny> and <RequireNone>

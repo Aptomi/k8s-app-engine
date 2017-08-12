@@ -5,10 +5,10 @@
   spec:
     filterservices:
       cluster:
-        accept:
+        require-any:
           - compromised
       labels:
-        accept:
+        require-any:
           - sensitive
     actions:
       - type: ingress
@@ -21,7 +21,7 @@
   spec:
     filterservices:
       user:
-        accept:
+        require-any:
           - compromised
       labels:
     actions:
@@ -35,10 +35,10 @@
   spec:
     filterservices:
       user:
-        accept:
+        require-any:
           - priority < 100
       labels:
-        accept:
+        require-any:
           - sensitive
     actions:
       - type: dependency
@@ -51,10 +51,10 @@
   spec:
     filterservices:
       cluster:
-        accept:
+        require-any:
           - dev
       labels:
-        accept:
+        require-any:
           - sensitive
     actions:
       - type: dependency

@@ -9,9 +9,9 @@
     # Only applies to istio service
     # For consumers with org == 'dev'
     criteria:
-      filter:
+      require-all:
         - service.Metadata.Name == 'istio'
-      accept:
+      require-any:
         - org == 'dev'
 
     # In stage:

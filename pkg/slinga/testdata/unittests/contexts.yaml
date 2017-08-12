@@ -14,9 +14,9 @@
         b:
 
     criteria:
-      accept:
+      require-any:
         - dev == "no" && prod == "yes" && priority >= 200
-      reject:
+      require-none:
         - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:
@@ -44,9 +44,9 @@
         b:
 
     criteria:
-      accept:
+      require-any:
         - dev == "no" && prod == "yes" && priority < 200
-      reject:
+      require-none:
         - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:
@@ -74,13 +74,13 @@
         b:
 
     criteria:
-      filter:
+      require-all:
         - 10 > 5
         - 20 > 10
         - 100 > 50
-      accept:
+      require-any:
         - dev == "yes" && prod == "no"
-      reject:
+      require-none:
         - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:

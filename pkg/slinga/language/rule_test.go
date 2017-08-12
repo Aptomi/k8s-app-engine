@@ -8,6 +8,6 @@ import (
 func TestLoadRules(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 	assert.Equal(t, 2, len(policy.Rules.Rules), "Correct number of rule action types should be loaded")
-	assert.Equal(t, "compromised", policy.Rules.Rules["ingress"][0].FilterServices.Cluster.Accept[0])
-	assert.Equal(t, "sensitive", policy.Rules.Rules["ingress"][0].FilterServices.Labels.Accept[0])
+	assert.Equal(t, "compromised", policy.Rules.Rules["ingress"][0].FilterServices.Cluster.RequireAny[0])
+	assert.Equal(t, "sensitive", policy.Rules.Rules["ingress"][0].FilterServices.Labels.RequireAny[0])
 }

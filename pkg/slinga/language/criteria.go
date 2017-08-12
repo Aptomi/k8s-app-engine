@@ -4,37 +4,25 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 )
 
-// Criteria defines a structure with criteria filter/accept/reject syntax
+// Criteria defines a structure with require-all, require-any and require-none syntax
 type Criteria struct {
-	// This follows 'AND' logic. This is basically a pre-condition, and all expressions should be evaluated to true in order to proceed to the next section
-	Filter []string
+	// This follows 'AND' logic. This is basically a pre-condition, and all of its expressions are required to evaluate to true
+	RequireAll []string `yaml:"require-all"`
 
-	// This follows 'OR' logic. If any of this evaluates to true, we will proceed to the next section
-	Accept []string
+	// This follows 'OR' logic. At least one of its expressions is required to evaluate to true
+	RequireAny []string `yaml:"require-any"`
 
-	// This follows 'AND NOT' logic. If any of this evaluates to true, criteria will evaluate to false immediately
-	Reject []string
+	// This follows 'AND NOT' logic. None of its expressions should evaluate to true
+	RequireNone []string `yaml:"require-none"`
 
 	cachedExpressions map[string]*expression.Expression
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
 func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
-	// If one of the reject expressions matches, then the criteria is not allowed
-	for _, rejectExpr := range criteria.Reject {
-		result, err := criteria.evaluateBool(rejectExpr, params)
-		if err != nil {
-			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
-			panic(err)
-		}
-		if result {
-			return false
-		}
-	}
-
-	// If one of the filter expressions does not match, then the criteria is not allowed
-	for _, filterExpr := range criteria.Filter {
-		result, err := criteria.evaluateBool(filterExpr, params)
+	// Make sure all "require-all" criterias evaluate to true
+	for _, exprShouldBeTrue := range criteria.RequireAll {
+		result, err := criteria.evaluateBool(exprShouldBeTrue, params)
 		if err != nil {
 			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
 			panic(err)
@@ -44,24 +32,37 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
 		}
 	}
 
-	// If one of the accept expressions matches, then the criteria is allowed
-	for _, acceptExpr := range criteria.Accept {
-		result, err := criteria.evaluateBool(acceptExpr, params)
+	// Make sure that none of "require-none" criterias evaluate to true
+	for _, exprShouldBeFalse := range criteria.RequireNone {
+		result, err := criteria.evaluateBool(exprShouldBeFalse, params)
 		if err != nil {
 			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
 			panic(err)
 		}
 		if result {
-			return true
+			return false
 		}
 	}
 
-	// If the accept section is empty, return true
-	if len(criteria.Accept) == 0 {
-		return true
+	// Make sure at least one "require-any" criterias evaluates to true
+	if len(criteria.RequireAny) > 0 {
+		for _, exprShouldBeTrue := range criteria.RequireAny {
+			result, err := criteria.evaluateBool(exprShouldBeTrue, params)
+			if err != nil {
+				// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
+				panic(err)
+			}
+			if result {
+				return true
+			}
+		}
+
+		// If no criteria got evaluated to true, return false
+		return false
 	}
 
-	return false
+	// Everything is fine and "require-any" is empty, let's return true
+	return true
 }
 
 func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters) (bool, error) {
