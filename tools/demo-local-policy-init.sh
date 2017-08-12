@@ -4,9 +4,6 @@ set -exou pipefail
 
 echo "APTOMI_DB=$APTOMI_DB"
 
-# Build & install the latest aptomi binary
-make install
-
 # Reset aptomi policy
 aptomi policy reset --force
 

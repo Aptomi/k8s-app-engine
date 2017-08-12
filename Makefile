@@ -38,7 +38,8 @@ clean-run-noop:
 	APTOMI_DB=$(TMP) && tools/demo-local-policy-init.sh
 
 .PHONY: smoke
-smoke: alltest build install clean-run-noop
+smoke: alltest install clean-run-noop
+	-rm -f aptomi
 
 .PHONY: emulate
 emulate:
