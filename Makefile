@@ -41,15 +41,6 @@ clean-run-noop:
 smoke: alltest install clean-run-noop
 	-rm -f aptomi
 
-.PHONY: emulate
-emulate:
-	tools/demo-local-policy-init.sh
-	aptomi policy apply --emulate
-	aptomi policy apply --emulate --newrevision
-	tools/dev-enable-all.sh
-	aptomi policy apply --emulate
-	aptomi policy apply --emulate --newrevision
-
 .PHONY: build
 build:
 	CGO_ENABLED=0 go build ${LDFLAGS} -i -o aptomi
