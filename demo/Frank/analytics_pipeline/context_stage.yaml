@@ -3,14 +3,17 @@
 
   metadata:
     namespace: main
-    name: stage
+    name: stage-analytics-ops
 
   spec:
+    # Applies to all services owned by 'analytics-ops-team'
+    # For consumers with org == 'dev'
     criteria:
+      filter:
+        - service.Owner.Labels.team == 'analytics-ops-team'
       accept:
         - org == 'dev'
-      reject:
-        - service.Name == 'twitter_stats'
+
 
     # In stage:
     # - service will be deployed in us-west

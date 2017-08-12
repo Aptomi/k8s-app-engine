@@ -3,19 +3,20 @@
 
   metadata:
     namespace: main
-    name: stage_ts
+    name: stage-istio
 
   spec:
-    # This context is for people from dev (they can run their own instances in stage)
+    # Only applies to istio service
+    # For consumers with org == 'dev'
     criteria:
+      filter:
+        - service.Metadata.Name == 'istio'
       accept:
         - org == 'dev'
-      reject:
-        - service.Name != 'twitter_stats'
 
     # In stage:
     # - services will be deployed in us-west
-    # - each developer will get its own instance
+    # - each dev will get their own instance
     allocation:
       name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
       labels:

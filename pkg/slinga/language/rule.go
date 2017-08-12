@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 )
 
 // LabelsFilter is a labels filter
@@ -110,16 +111,16 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 // Match returns if a given parameters match a service filter
 func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster) bool {
 	// check if service filters for another service labels
-	if filter.Labels != nil && !filter.Labels.allows(labels) {
+	if filter.Labels != nil && !filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil)) {
 		return false
 	}
 
 	// check if service filters for another user labels
-	if filter.User != nil && !filter.User.allows(user.GetLabelSet()) {
+	if filter.User != nil && !filter.User.allows(expression.NewExpressionParams(user.GetLabelSet().Labels, nil)) {
 		return false
 	}
 
-	if filter.Cluster != nil && cluster != nil && !filter.Cluster.allows(cluster.GetLabelSet()) {
+	if filter.Cluster != nil && cluster != nil && !filter.Cluster.allows(expression.NewExpressionParams(cluster.GetLabelSet().Labels, nil)) {
 		return false
 	}
 

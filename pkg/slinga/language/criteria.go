@@ -1,32 +1,57 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
-	"github.com/Knetic/govaluate"
-	log "github.com/Sirupsen/logrus"
-	"strconv"
-	"strings"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 )
 
-// Criteria defines a structure with criteria accept/reject syntax
+// Criteria defines a structure with criteria filter/accept/reject syntax
 type Criteria struct {
+	// This follows 'AND' logic. This is basically a pre-condition, and all expressions should be evaluated to true in order to proceed to the next section
+	Filter []string
+
+	// This follows 'OR' logic. If any of this evaluates to true, we will proceed to the next section
 	Accept []string
+
+	// This follows 'AND NOT' logic. If any of this evaluates to true, criteria will evaluate to false immediately
 	Reject []string
+
+	cachedExpressions map[string]*expression.Expression
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
-// TODO: add caching for expression evaluation
-func (criteria *Criteria) allows(labels LabelSet) bool {
-	// If one of the reject criterias matches, then it's not allowed
-	for _, reject := range criteria.Reject {
-		if evaluate(reject, labels) {
+func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
+	// If one of the reject expressions matches, then the criteria is not allowed
+	for _, rejectExpr := range criteria.Reject {
+		result, err := criteria.evaluateBool(rejectExpr, params)
+		if err != nil {
+			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
+			panic(err)
+		}
+		if result {
 			return false
 		}
 	}
 
-	// If one of the accept criterias matches, then it's allowed
-	for _, reject := range criteria.Accept {
-		if evaluate(reject, labels) {
+	// If one of the filter expressions does not match, then the criteria is not allowed
+	for _, filterExpr := range criteria.Filter {
+		result, err := criteria.evaluateBool(filterExpr, params)
+		if err != nil {
+			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
+			panic(err)
+		}
+		if !result {
+			return false
+		}
+	}
+
+	// If one of the accept expressions matches, then the criteria is allowed
+	for _, acceptExpr := range criteria.Accept {
+		result, err := criteria.evaluateBool(acceptExpr, params)
+		if err != nil {
+			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
+			panic(err)
+		}
+		if result {
 			return true
 		}
 	}
@@ -39,61 +64,25 @@ func (criteria *Criteria) allows(labels LabelSet) bool {
 	return false
 }
 
-// Evaluate an expression, given a set of labels
-func evaluate(expression string, params LabelSet) bool {
-	// Special case for service.Name, so we can refer to it
-	// TODO: hack to implement service.Name (Knetic doesn't allow dots in string literals)
-	if strings.Contains(expression, "service.Name") {
-		expression = strings.Replace(expression, "service.Name", "serviceName_expr_key", -1)
-		params.Labels["serviceName_expr_key"] = params.Labels["service.Name"]
+func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters) (bool, error) {
+	// Initialize cache if it's empty
+	if criteria.cachedExpressions == nil {
+		criteria.cachedExpressions = make(map[string]*expression.Expression)
 	}
 
-	// Create an expression
-	expressionObject, e := govaluate.NewEvaluableExpression(expression)
-	if e != nil {
-		Debug.WithFields(log.Fields{
-			"expression": expression,
-			"error":      e,
-		}).Panic("Invalid expression")
-	}
-
-	// Populate parameter map
-	parameters := make(map[string]interface{}, len(params.Labels))
-	for k, v := range params.Labels {
-		// all labels are strings. we need to cast them to the appropriate type before evaluation
-		if vInt, err := strconv.Atoi(v); err == nil {
-			parameters[k] = vInt
-		} else if vBool, err := strconv.ParseBool(v); err == nil {
-			parameters[k] = vBool
-		} else {
-			parameters[k] = v
+	// Look up expression from cache or compile
+	var expr *expression.Expression
+	var ok bool
+	expr, ok = criteria.cachedExpressions[expressionStr]
+	if !ok {
+		var err error
+		expr, err = expression.NewExpression(expressionStr)
+		if err != nil {
+			return false, err
 		}
+		criteria.cachedExpressions[expressionStr] = expr
 	}
 
 	// Evaluate
-	result, e := expressionObject.Evaluate(parameters)
-	if e != nil {
-		// see if it's missing parameter? then return false
-		// TODO: this is a hack to deal with missing labels. Will need to rewrite it
-		if strings.Contains(e.Error(), "No parameter") && strings.Contains(e.Error(), "found") {
-			return false
-		}
-		Debug.WithFields(log.Fields{
-			"expression": expression,
-			"parameters": parameters,
-			"error":      e,
-		}).Panic("Cannot evaluate expression")
-	}
-
-	// Convert result to bool
-	resultBool, ok := result.(bool)
-	if !ok {
-		Debug.WithFields(log.Fields{
-			"expression": expression,
-			"parameters": parameters,
-			"result":     result,
-		}).Panic("Expression doesn't evaluate to boolean")
-	}
-
-	return resultBool
+	return expr.EvaluateAsBool(params)
 }

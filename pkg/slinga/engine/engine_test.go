@@ -33,7 +33,8 @@ func TestPolicyResolve(t *testing.T) {
 	kafkaTest := resolvedUsage.ComponentInstanceMap["kafka#test#test-platform_services#component2"]
 	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod-low#prod-team-platform_services#component2"]
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
-	assert.Equal(t, "1", policy.Dependencies.DependenciesByID["dep_id_1"].UserID, "Only Alice should have access to test")
+	assert.True(t, policy.Dependencies.DependenciesByID["dep_id_1"].Resolved, "Only Alice should have access to test")
+	assert.False(t, policy.Dependencies.DependenciesByID["dep_id_4"].Resolved, "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
 
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
 	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")

@@ -1,8 +1,8 @@
 package: github.com/Aptomi/aptomi
 import:
 - package: gopkg.in/yaml.v2
-- package: github.com/Knetic/govaluate
-  version: ^3.0.0
+- package: github.com/ralekseenkov/govaluate
+  version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
 - package: github.com/awalterschulze/gographviz
   version: ^2.0.0
 - package: github.com/spf13/cobra

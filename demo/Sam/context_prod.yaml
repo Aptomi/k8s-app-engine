@@ -3,14 +3,14 @@
 
   metadata:
     namespace: main
-    name: prod-analytics-ops
+    name: prod-istio
 
   spec:
-    # Applies to all services owned by 'analytics-ops-team'
+    # Only applies to istio service
     # For consumers with org == 'it' && is_operator
     criteria:
       filter:
-        - service.Owner.Labels.team == 'analytics-ops-team'
+        - service.Metadata.Name == 'istio'
       accept:
         - org == 'it' && is_operator
 

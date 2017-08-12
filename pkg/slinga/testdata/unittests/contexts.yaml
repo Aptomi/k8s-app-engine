@@ -17,7 +17,7 @@
       accept:
         - dev == "no" && prod == "yes" && priority >= 200
       reject:
-        - service.Name == "zookeeper" && nozookeeper
+        - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:
       name: "prod-{{.User.Name}}"
@@ -47,7 +47,7 @@
       accept:
         - dev == "no" && prod == "yes" && priority < 200
       reject:
-        - service.Name == "zookeeper" && nozookeeper
+        - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:
       name: "prod-team-{{.User.Labels.team}}"
@@ -65,7 +65,6 @@
     namespace: main
     name: test
 
-
   spec:
     labels:
       set:
@@ -75,10 +74,14 @@
         b:
 
     criteria:
+      filter:
+        - 10 > 5
+        - 20 > 10
+        - 100 > 50
       accept:
         - dev == "yes" && prod == "no"
       reject:
-        - service.Name == "zookeeper" && nozookeeper
+        - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:
       name: "test-{{.User.Labels.team}}"

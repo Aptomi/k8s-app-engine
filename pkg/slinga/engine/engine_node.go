@@ -13,6 +13,9 @@ type resolutionNode struct {
 	// whether we successfully resolved this node or not
 	resolved bool
 
+	// pointer to ServiceUsageState
+	state *ServiceUsageState
+
 	// new instance of ServiceUsageData, where resolution data will be stored
 	data *ServiceUsageData
 
@@ -78,6 +81,8 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resol
 	return &resolutionNode{
 		resolved: false,
 
+		state: state,
+
 		data:          data,
 		ruleLogWriter: NewRuleLogWriter(data, dependency),
 
@@ -103,6 +108,8 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resol
 func (node *resolutionNode) createChildNode() *resolutionNode {
 	return &resolutionNode{
 		resolved: false,
+
+		state: node.state,
 
 		data:          node.data,
 		ruleLogWriter: NewRuleLogWriter(node.data, node.dependency),
@@ -208,7 +215,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	// Find matching context
 	var contextMatched *Context
 	for _, context := range policy.Contexts {
-		matched := context.Matches(node.labels)
+		matched := context.Matches(node.getContextualDataForExpression())
 		node.ruleLogWriter.addRuleLogEntry(entryContextCriteriaTesting(context, matched))
 		if matched {
 			contextMatched = context

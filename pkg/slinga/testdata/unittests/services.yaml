@@ -6,6 +6,8 @@
     name: zookeeper
 
   spec:
+    owner: 1
+
     labels:
       set:
         a: b
@@ -47,6 +49,8 @@
     name: kafka
 
   spec:
+    owner: 1
+
     labels:
       set:
         a: b

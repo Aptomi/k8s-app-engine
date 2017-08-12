@@ -3,14 +3,14 @@
 
   metadata:
     namespace: main
-    name: prod-analytics-ops
+    name: prod-web-ops
 
   spec:
-    # Applies to all services owned by 'analytics-ops-team'
+    # Applies to all services owned by 'web-ops-team'
     # For consumers with org == 'it' && is_operator
     criteria:
       filter:
-        - service.Owner.Labels.team == 'analytics-ops-team'
+        - service.Owner.Labels.team == 'web-ops-team'
       accept:
         - org == 'it' && is_operator
 
