@@ -15,7 +15,7 @@ type Criteria struct {
 	// This follows 'AND NOT' logic. None of its expressions should evaluate to true
 	RequireNone []string `yaml:"require-none"`
 
-	cachedExpressions map[string]*expression.Expression
+	cachedExpressions expression.ExpressionCache
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
@@ -68,22 +68,7 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
 func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters) (bool, error) {
 	// Initialize cache if it's empty
 	if criteria.cachedExpressions == nil {
-		criteria.cachedExpressions = make(map[string]*expression.Expression)
+		criteria.cachedExpressions = expression.NewExpressionCache()
 	}
-
-	// Look up expression from cache or compile
-	var expr *expression.Expression
-	var ok bool
-	expr, ok = criteria.cachedExpressions[expressionStr]
-	if !ok {
-		var err error
-		expr, err = expression.NewExpression(expressionStr)
-		if err != nil {
-			return false, err
-		}
-		criteria.cachedExpressions[expressionStr] = expr
-	}
-
-	// Evaluate
-	return expr.EvaluateAsBool(params)
+	return criteria.cachedExpressions.EvaluateAsBool(expressionStr, params)
 }
