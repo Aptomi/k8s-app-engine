@@ -1,12 +1,9 @@
 package language
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	"strings"
-	"text/template"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 )
 
 type templateData struct {
@@ -21,47 +18,25 @@ func evaluateTemplate(templateStr string, user *User, labels LabelSet) (string, 
 		User   *User
 		Labels map[string]string
 	}
-	param := Parameters{User: user, Labels: labels.Labels}
-
-	tmpl, err := template.New("").Parse(templateStr)
+	params := Parameters{User: user, Labels: labels.Labels}
+	t, err := template.NewTemplate(templateStr)
 	if err != nil {
-		return "", fmt.Errorf("Invalid template %s: %s", templateStr, err.Error())
+		return "", err
 	}
-
-	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, param)
-
-	if err != nil {
-		return "", fmt.Errorf("Cannot evaluate template %s: %s", templateStr, err.Error())
-	}
-
-	result := doc.String()
-	if strings.Contains(result, "<no value>") {
-		return "", fmt.Errorf("Cannot evaluate template %s: <no value>", templateStr)
-	}
-
-	return doc.String(), nil
+	return t.Evaluate(template.NewTemplateParams(params))
 }
 
-func evaluateParamTemplate(templateStr string, tData templateData) (string, error) {
-	tmpl, err := template.New("").Parse(templateStr)
+func evaluateTemplateAndEscape(templateStr string, tData templateData) (string, error) {
+	t, err := template.NewTemplate(templateStr)
 	if err != nil {
-		return "", errors.New("Invalid template " + templateStr)
+		return "", err
 	}
 
-	var doc bytes.Buffer
-	err = tmpl.Execute(&doc, tData)
-
+	result, err := t.Evaluate(template.NewTemplateParams(tData))
 	if err != nil {
-		return "", errors.New("Cannot evaluate template " + templateStr)
+		return "", err
 	}
-
-	result := doc.String()
-	if strings.Contains(result, "<no value>") {
-		return "", errors.New("Cannot evaluate template " + templateStr)
-	}
-
-	return EscapeName(doc.String()), nil
+	return EscapeName(result), nil
 }
 
 // ProcessTemplateParams processes template params
@@ -98,7 +73,7 @@ func ProcessTemplateParams(template ParameterTree, componentKey string, labels L
 
 			return resultMap, nil
 		} else if paramsStr, ok := params.(string); ok {
-			evaluatedValue, err := evaluateParamTemplate(paramsStr, tData)
+			evaluatedValue, err := evaluateTemplateAndEscape(paramsStr, tData)
 			// TODO: we may want to debug paramsStr -> evaluatedValue here
 			if err != nil {
 				return nil, err

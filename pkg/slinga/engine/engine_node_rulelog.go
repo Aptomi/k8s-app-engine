@@ -233,10 +233,10 @@ func entryAllocationGlobalRulesNoViolations(allocation *Allocation, matched bool
 	)
 }
 
-func entryAllocationMatched(service *Service, context *Context, allocationMatched *Allocation) *RuleLogEntry {
+func entryAllocationMatched(service *Service, context *Context, allocationMatched *Allocation, allocationNameResolved string) *RuleLogEntry {
 	var message string
 	if allocationMatched != nil {
-		message = fmt.Sprintf("Allocation matched for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationMatched.NameResolved)
+		message = fmt.Sprintf("Allocation matched for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationNameResolved)
 	} else {
 		message = fmt.Sprintf("Unable to find matching allocation for service '%s', context '%s'", service.GetName(), context.GetName())
 	}

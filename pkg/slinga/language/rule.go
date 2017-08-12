@@ -78,7 +78,7 @@ func (rule *Rule) DescribeActions() []string {
 
 // MatchUser returns if a rue matches a user
 func (rule *Rule) MatchUser(user *User) bool {
-	return rule.FilterServices != nil && rule.FilterServices.Match(LabelSet{}, user, nil)
+	return rule.FilterServices != nil && rule.FilterServices.Match(LabelSet{}, user, nil, nil)
 }
 
 // GlobalRules is a list of global rules
@@ -93,8 +93,10 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 		for _, rule := range rules {
 			// for all users of the service
 			for _, user := range users {
-				// TODO: this is pretty shitty that it's not a part of engine_node. so you can't even log into "rule log" (new replacement of tracing)
-				if rule.FilterServices.Match(labels, user, cluster) {
+				// TODO: this is pretty shitty that it's not a part of engine_node
+				//       you can't log into "rule log" (new replacement of tracing)
+				//       you can't use engine cache for expressions/template
+				if rule.FilterServices.Match(labels, user, cluster, nil) {
 					for _, action := range rule.Actions {
 						if action.Type == "ingress" && action.Content == "block" {
 							return false
@@ -109,18 +111,18 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 }
 
 // Match returns if a given parameters match a service filter
-func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster) bool {
+func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster, cache expression.ExpressionCache) bool {
 	// check if service filters for another service labels
-	if filter.Labels != nil && !filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil)) {
+	if filter.Labels != nil && !filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil), cache) {
 		return false
 	}
 
 	// check if service filters for another user labels
-	if filter.User != nil && !filter.User.allows(expression.NewExpressionParams(user.GetLabelSet().Labels, nil)) {
+	if filter.User != nil && !filter.User.allows(expression.NewExpressionParams(user.GetLabelSet().Labels, nil), cache) {
 		return false
 	}
 
-	if filter.Cluster != nil && cluster != nil && !filter.Cluster.allows(expression.NewExpressionParams(cluster.GetLabelSet().Labels, nil)) {
+	if filter.Cluster != nil && cluster != nil && !filter.Cluster.allows(expression.NewExpressionParams(cluster.GetLabelSet().Labels, nil), cache) {
 		return false
 	}
 

@@ -28,7 +28,7 @@ func loadLDAPConfig(baseDir string) *LDAPConfig {
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"error": err,
-		}).Panic("LDAP config lookup error")
+		}).Panicf("LDAP config lookup error. Directory '%s'", baseDir)
 	}
 	result := yaml.LoadObjectFromFile(fileName, &LDAPConfig{}).(*LDAPConfig)
 

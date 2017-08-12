@@ -12,9 +12,10 @@ import (
 func (state *ServiceUsageState) ResolveAllDependencies() error {
 
 	// Run every declared dependency via policy and resolve it
+	cache := NewEngineCache()
 	for _, dependencies := range state.Policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
-			node := state.newResolutionNode(d)
+			node := state.newResolutionNode(d, cache)
 
 			// resolve usage via applying policy
 			err := state.resolveDependency(node)
@@ -81,7 +82,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.labels = node.transformLabels(node.labels, node.allocation.ChangeLabels)
 
 	// Create service key
-	node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocation, nil)
+	node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, nil)
 
 	// Once instance is figured out, make sure to attach rule logs to that instance
 	node.ruleLogWriter.attachToInstance(node.serviceKey)
@@ -102,7 +103,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	// Note that discovery variables can refer to other variables announced by dependents in the discovery tree
 	for _, node.component = range componentsOrdered {
 		// Create key
-		node.componentKey = createServiceUsageKey(node.serviceName, node.context, node.allocation, node.component)
+		node.componentKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, node.component)
 
 		// Store edge (service instance -> component instance)
 		node.data.storeEdge(node.serviceKey, node.componentKey)

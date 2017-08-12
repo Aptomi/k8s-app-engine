@@ -20,11 +20,11 @@ func getContextNameUnsafe(context *Context) string {
 }
 
 // If allocation has not been resolved and we need a key, generate one
-func getAllocationNameUnsafe(allocation *Allocation) string {
-	if allocation == nil || len(allocation.NameResolved) <= 0 {
+func getAllocationNameUnsafe(allocationNameResolved string) string {
+	if len(allocationNameResolved) <= 0 {
 		return ComponentUnresolvedName
 	}
-	return allocation.NameResolved
+	return allocationNameResolved
 }
 
 // If component has not been resolved and we need a key, generate one
@@ -36,8 +36,8 @@ func getComponentNameUnsafe(component *ServiceComponent) string {
 }
 
 // Create key for the map
-func createServiceUsageKey(serviceName string, context *Context, allocation *Allocation, component *ServiceComponent) string {
-	return createServiceUsageKeyFromStr(serviceName, getContextNameUnsafe(context), getAllocationNameUnsafe(allocation), getComponentNameUnsafe(component))
+func createServiceUsageKey(serviceName string, context *Context, allocationNameResolved string, component *ServiceComponent) string {
+	return createServiceUsageKeyFromStr(serviceName, getContextNameUnsafe(context), getAllocationNameUnsafe(allocationNameResolved), getComponentNameUnsafe(component))
 }
 
 // Create key for the map

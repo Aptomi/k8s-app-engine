@@ -13,6 +13,9 @@ type resolutionNode struct {
 	// whether we successfully resolved this node or not
 	resolved bool
 
+	// reference to a cache
+	cache *EngineCache
+
 	// pointer to ServiceUsageState
 	state *ServiceUsageState
 
@@ -38,8 +41,9 @@ type resolutionNode struct {
 	// reference to the context that was matched
 	context *Context
 
-	// reference to the context that was matched
-	allocation *Allocation
+	// reference to the allocation that was matched
+	allocation             *Allocation
+	allocationNameResolved string
 
 	// reference to the current node in discovery tree for components announcing their discovery properties
 	// component1...component2...component3 -> component instance key
@@ -67,7 +71,7 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resolutionNode {
+func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache) *resolutionNode {
 
 	user := state.userLoader.LoadUserByID(dependency.UserID)
 	if user == nil {
@@ -82,6 +86,7 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency) *resol
 		resolved: false,
 
 		state: state,
+		cache: cache,
 
 		data:          data,
 		ruleLogWriter: NewRuleLogWriter(data, dependency),
@@ -110,6 +115,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		resolved: false,
 
 		state: node.state,
+		cache: node.cache,
 
 		data:          node.data,
 		ruleLogWriter: NewRuleLogWriter(node.data, node.dependency),
@@ -162,14 +168,14 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 			"service":    node.service.GetName(),
 			"component":  node.component.Name,
 			"context":    node.context.GetName(),
-			"allocation": node.allocation.NameResolved,
+			"allocation": node.allocationNameResolved,
 		}).Info("Processing dependency on code execution")
 	} else if node.component.Service != "" {
 		Debug.WithFields(log.Fields{
 			"service":          node.service.GetName(),
 			"component":        node.component.Name,
 			"context":          node.context.GetName(),
-			"allocation":       node.allocation.NameResolved,
+			"allocation":       node.allocationNameResolved,
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 	} else {
@@ -191,7 +197,7 @@ func (node *resolutionNode) cannotResolve() error {
 	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
 	if len(node.serviceKey) <= 0 {
 		// Create service key
-		node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocation, nil)
+		node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, nil)
 
 		// Once instance is figured out, make sure to attach rule logs to that instance
 		node.ruleLogWriter.attachToInstance(node.serviceKey)
@@ -215,7 +221,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	// Find matching context
 	var contextMatched *Context
 	for _, context := range policy.Contexts {
-		matched := context.Matches(node.getContextualDataForExpression())
+		matched := context.Matches(node.getContextualDataForExpression(), node.cache.expressionCache)
 		node.ruleLogWriter.addRuleLogEntry(entryContextCriteriaTesting(context, matched))
 		if matched {
 			contextMatched = context
@@ -271,7 +277,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 
 	// Check errors and resolve allocation name (it can be dynamic, depending on user labels)
 	if allocationMatched != nil {
-		err := allocationMatched.ResolveName(node.user, node.labels)
+		nameResolved, err := allocationMatched.ResolveName(node.user, node.labels)
 		if err != nil {
 			Debug.WithFields(log.Fields{
 				"service":    node.service.GetName(),
@@ -285,9 +291,10 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 			"service":            node.service.GetName(),
 			"context":            node.context.GetName(),
 			"allocation":         allocationMatched.Name,
-			"allocationResolved": allocationMatched.NameResolved,
+			"allocationResolved": node.allocationNameResolved,
 			"user":               node.user.Name,
 		}).Info("Matched allocation")
+		node.allocationNameResolved = nameResolved
 	} else {
 		Debug.WithFields(log.Fields{
 			"service": node.service.GetName(),
@@ -296,7 +303,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 		}).Info("No allocation matched")
 	}
 
-	node.ruleLogWriter.addRuleLogEntry(entryAllocationMatched(node.service, node.context, allocationMatched))
+	node.ruleLogWriter.addRuleLogEntry(entryAllocationMatched(node.service, node.context, allocationMatched, node.allocationNameResolved))
 
 	return allocationMatched, nil
 }
@@ -313,7 +320,7 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
-			matched := rule.FilterServices.Match(labels, node.user, cluster)
+			matched := rule.FilterServices.Match(labels, node.user, cluster, node.cache.expressionCache)
 			node.ruleLogWriter.addRuleLogEntry(entryAllocationGlobalRuleTesting(allocation, rule, matched))
 			if matched {
 				for _, action := range rule.Actions {

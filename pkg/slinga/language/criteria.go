@@ -14,15 +14,13 @@ type Criteria struct {
 
 	// This follows 'AND NOT' logic. None of its expressions should evaluate to true
 	RequireNone []string `yaml:"require-none"`
-
-	cachedExpressions expression.ExpressionCache
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
-func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
+func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache expression.ExpressionCache) bool {
 	// Make sure all "require-all" criterias evaluate to true
 	for _, exprShouldBeTrue := range criteria.RequireAll {
-		result, err := criteria.evaluateBool(exprShouldBeTrue, params)
+		result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)
 		if err != nil {
 			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
 			panic(err)
@@ -34,7 +32,7 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
 
 	// Make sure that none of "require-none" criterias evaluate to true
 	for _, exprShouldBeFalse := range criteria.RequireNone {
-		result, err := criteria.evaluateBool(exprShouldBeFalse, params)
+		result, err := criteria.evaluateBool(exprShouldBeFalse, params, cache)
 		if err != nil {
 			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
 			panic(err)
@@ -47,7 +45,7 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
 	// Make sure at least one "require-any" criterias evaluates to true
 	if len(criteria.RequireAny) > 0 {
 		for _, exprShouldBeTrue := range criteria.RequireAny {
-			result, err := criteria.evaluateBool(exprShouldBeTrue, params)
+			result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)
 			if err != nil {
 				// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
 				panic(err)
@@ -65,10 +63,9 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters) bool {
 	return true
 }
 
-func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters) (bool, error) {
-	// Initialize cache if it's empty
-	if criteria.cachedExpressions == nil {
-		criteria.cachedExpressions = expression.NewExpressionCache()
+func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {
+	if cache == nil {
+		cache = expression.NewExpressionCache()
 	}
-	return criteria.cachedExpressions.EvaluateAsBool(expressionStr, params)
+	return cache.EvaluateAsBool(expressionStr, params)
 }

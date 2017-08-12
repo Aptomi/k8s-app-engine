@@ -4,14 +4,9 @@ package language
 type Allocation struct {
 	Name         string
 	ChangeLabels *LabelOperations `yaml:"change-labels"`
-
-	// Evaluated field (when parameters in name are substituted with real values)
-	NameResolved string
 }
 
 // ResolveName resolves name for an allocation
-func (allocation *Allocation) ResolveName(user *User, labels LabelSet) error {
-	result, err := evaluateTemplate(allocation.Name, user, labels)
-	allocation.NameResolved = result
-	return err
+func (allocation *Allocation) ResolveName(user *User, labels LabelSet) (string, error) {
+	return evaluateTemplate(allocation.Name, user, labels)
 }

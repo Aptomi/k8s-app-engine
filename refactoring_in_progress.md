@@ -1,5 +1,11 @@
 Items to complete:
 
+10. Expose contextual data to templates as well
+  - same way, as we are doing for expressions
+
+11. Add caching for expressions and templates
+
+
 3. Support for namespaces
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
@@ -21,9 +27,6 @@ Items to complete:
   - do we want to show users a full log for policy evaluation?
   - only show a particular namespace?
   - e.g. what if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string), how do we propagate this to the user?
-
-10. Expose contextual data to templates as well
-  - same way, as we are doing for expressions
 
 
 Done:
