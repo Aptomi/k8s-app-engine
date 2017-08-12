@@ -6,7 +6,7 @@
     name: prod-high
 
   spec:
-    labels:
+    change-labels:
       set:
         some-test-context-specific-label: some-value
       remove:
@@ -21,7 +21,7 @@
 
     allocation:
       name: "prod-{{.User.Name}}"
-      labels:
+      change-labels:
         set:
           some-test-context-specific-label: some-value
         remove:
@@ -36,7 +36,7 @@
     name: prod-low
 
   spec:
-    labels:
+    change-labels:
       set:
         some-test-context-specific-label: some-value
       remove:
@@ -51,7 +51,7 @@
 
     allocation:
       name: "prod-team-{{.User.Labels.team}}"
-      labels:
+      change-labels:
         set:
           some-test-context-specific-label: some-value
         remove:
@@ -66,7 +66,7 @@
     name: test
 
   spec:
-    labels:
+    change-labels:
       set:
         some-test-context-specific-label: some-value
       remove:
@@ -85,7 +85,7 @@
 
     allocation:
       name: "test-{{.User.Labels.team}}"
-      labels:
+      change-labels:
         set:
           some-test-context-specific-label: some-value
         remove:

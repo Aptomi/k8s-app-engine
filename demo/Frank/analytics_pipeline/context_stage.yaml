@@ -20,6 +20,6 @@
     # - all consumers will rely on the same instance of analytics_pipeline
     allocation:
       name: "staging"
-      labels:
+      change-labels:
         set:
           cluster: cluster-us-west

@@ -2,8 +2,8 @@ package language
 
 // Allocation defines within a Context for a given service
 type Allocation struct {
-	Name   string
-	Labels *LabelOperations
+	Name         string
+	ChangeLabels *LabelOperations `yaml:"change-labels"`
 
 	// Evaluated field (when parameters in name are substituted with real values)
 	NameResolved string

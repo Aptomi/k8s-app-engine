@@ -19,6 +19,6 @@
     # - as a single production instance
     allocation:
       name: "production"
-      labels:
+      change-labels:
         set:
           cluster: cluster-us-east

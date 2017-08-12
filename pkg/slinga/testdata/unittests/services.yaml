@@ -8,7 +8,7 @@
   spec:
     owner: 1
 
-    labels:
+    change-labels:
       set:
         a: b
 
@@ -19,7 +19,7 @@
           metadata:
             service: zookeeper
             component: component1
-        labels:
+        change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value
           remove:
@@ -34,7 +34,7 @@
           metadata:
             service: zookeeper
             component: component2
-        labels:
+        change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value
           remove:
@@ -51,14 +51,14 @@
   spec:
     owner: 1
 
-    labels:
+    change-labels:
       set:
         a: b
 
     components:
       - name: component1
         service: zookeeper
-        labels:
+        change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value
           remove:
@@ -73,7 +73,7 @@
           params:
             address: "{{ .Discovery.component1.component2.instance }}"
             queue: " {{ .User.Labels.changinglabel }} "
-        labels:
+        change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value
           remove:
@@ -88,7 +88,7 @@
           metadata:
             service: kafka
             component: component3
-        labels:
+        change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value
           remove:

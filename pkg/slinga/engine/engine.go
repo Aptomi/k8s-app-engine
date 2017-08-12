@@ -52,7 +52,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	}
 
 	// Process service and transform labels
-	node.labels = node.transformLabels(node.labels, node.service.Labels)
+	node.labels = node.transformLabels(node.labels, node.service.ChangeLabels)
 
 	// Match the context
 	node.context, err = node.getMatchedContext(state.Policy)
@@ -65,7 +65,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	}
 
 	// Process context and transform labels
-	node.labels = node.transformLabels(node.labels, node.context.Labels)
+	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
 
 	// Match the allocation
 	node.allocation, err = node.getMatchedAllocation(state.Policy)
@@ -78,7 +78,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	}
 
 	// Process allocation, transform
-	node.labels = node.transformLabels(node.labels, node.allocation.Labels)
+	node.labels = node.transformLabels(node.labels, node.allocation.ChangeLabels)
 
 	// Create service key
 	node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocation, nil)
@@ -108,7 +108,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		node.data.storeEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
-		node.componentLabels = node.transformLabels(node.labels, node.component.Labels)
+		node.componentLabels = node.transformLabels(node.labels, node.component.ChangeLabels)
 		node.data.recordLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component

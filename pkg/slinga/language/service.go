@@ -9,9 +9,9 @@ import (
 type Service struct {
 	*SlingaObject
 
-	Owner      string
-	Labels     *LabelOperations
-	Components []*ServiceComponent
+	Owner        string
+	ChangeLabels *LabelOperations `yaml:"change-labels"`
+	Components   []*ServiceComponent
 
 	// Lazily evaluated field (all components topologically sorted). Use via getter
 	componentsOrdered []*ServiceComponent
@@ -27,7 +27,7 @@ type ServiceComponent struct {
 	Code         *Code
 	Discovery    ParameterTree
 	Dependencies []string
-	Labels       *LabelOperations
+	ChangeLabels *LabelOperations `yaml:"change-labels"`
 }
 
 // ParameterTree is a special type alias defined for freeform blocks with parameters

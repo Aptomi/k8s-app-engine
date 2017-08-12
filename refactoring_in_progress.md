@@ -1,12 +1,6 @@
-What is going on:
-* introducing universal objects
-* dealing with context inheritance (== contexts not tied to services)
-
 Items to complete:
-2. We likely need to separate labels from label operations
-- so that services can have labels (and we can refer to them from criteria expressions)
-- and services can have labels ops (set/remove, etc)
-- just rename existing "labels" (ops) to "change-labels" in yaml
+
+1. Add unit tests to verify label calculation in the engine while policy is being resolved
 
 3. Support for namespaces
   - we need to make sure everything that calls getName() is within a namespace
@@ -24,8 +18,6 @@ Items to complete:
 
 7. Deal with external entities (charts, secrets, ldap configuration)
 
-8. Add unit tests to verify label calculation in the engine while policy is being resolved
-
 9. Figure out what to do with logging... it's messed up right now
   - RIGHT NOW IT'S VERY HARD TO DEBUG POLICY / UNDERSTAND WHAT'S GOING ON
   - do we want to show users a full log for policy evaluation?
@@ -35,6 +27,7 @@ Items to complete:
 10. Expose contextual data to templates as well
   - same way, as we are doing for expressions
 
+
 Done:
 
 * Flexible contexts (==inheritance, ==more powerful expressions)
@@ -42,3 +35,8 @@ Done:
 * Check security issues with Knetic (possible to call methods on objects from the policy expressions)
 
 * Change criteria to <RequireAll>, <RequireAny> and <RequireNone>
+
+* Separate labels from label operations
+- so that services can have labels (and we can refer to them from criteria expressions)
+- and services can have labels operations (set/remove, etc)
+- just rename existing "labels" (ops) to "change-labels" in yaml to avoid confusion

@@ -19,6 +19,6 @@
     # - each dev will get their own instance
     allocation:
       name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
-      labels:
+      change-labels:
         set:
           cluster: cluster-us-west

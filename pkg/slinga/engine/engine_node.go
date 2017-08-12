@@ -249,7 +249,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	var allocationMatched *Allocation
 	if node.context.Allocation != nil {
 		allocation := node.context.Allocation
-		labels := node.transformLabels(node.labels, allocation.Labels)
+		labels := node.transformLabels(node.labels, allocation.ChangeLabels)
 
 		// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
 		var cluster *Cluster

@@ -6,9 +6,9 @@ import "github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 type Context struct {
 	*SlingaObject
 
-	Criteria   *Criteria
-	Labels     *LabelOperations
-	Allocation *Allocation
+	Criteria     *Criteria
+	ChangeLabels *LabelOperations `yaml:"change-labels"`
+	Allocation   *Allocation
 }
 
 // Matches checks if context criteria is satisfied
