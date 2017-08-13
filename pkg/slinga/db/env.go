@@ -14,25 +14,6 @@ const AptomiCurrentRunDir = "last-run-results"
 
 const (
 	/*
-		The following objects can be added to Aptomi
-	*/
-
-	// TypeCluster is k8s cluster or any other cluster
-	TypeCluster AptomiOject = "cluster"
-
-	// TypeService is service definitions
-	TypeService AptomiOject = "service"
-
-	// TypeContext is how service gets allocated
-	TypeContext AptomiOject = "context"
-
-	// TypeRules is global rules of the land
-	TypeRules AptomiOject = "rules"
-
-	// TypeDependencies is who requested what
-	TypeDependencies AptomiOject = "dependencies"
-
-	/*
 		The following objects must be configured to point to external resources
 	*/
 
