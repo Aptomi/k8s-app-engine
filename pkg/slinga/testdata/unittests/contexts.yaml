@@ -49,7 +49,7 @@
         - service.Metadata.Name == "zookeeper" && nozookeeper
 
     allocation:
-      name: "prod-team-{{.User.Labels.team}}"
+      name: "prod-team-{{.User.Labels.team}}-{{index .Labels \"prod-low-ctx\"}}"
       change-labels:
         set:
           prod-low-alloc: true

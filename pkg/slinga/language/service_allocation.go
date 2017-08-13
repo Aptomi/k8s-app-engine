@@ -1,5 +1,7 @@
 package language
 
+import "github.com/Aptomi/aptomi/pkg/slinga/language/template"
+
 // Allocation defines within a Context for a given service
 type Allocation struct {
 	Name         string
@@ -7,6 +9,9 @@ type Allocation struct {
 }
 
 // ResolveName resolves name for an allocation
-func (allocation *Allocation) ResolveName(user *User, labels LabelSet) (string, error) {
-	return evaluateTemplate(allocation.Name, user, labels)
+func (allocation *Allocation) ResolveName(parameters *template.TemplateParameters, cache template.TemplateCache) (string, error) {
+	if cache == nil {
+		cache = template.NewTemplateCache()
+	}
+	return cache.Evaluate(allocation.Name, parameters)
 }

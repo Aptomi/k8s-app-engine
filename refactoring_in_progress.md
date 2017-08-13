@@ -1,11 +1,5 @@
 Items to complete:
 
-10. Expose contextual data to templates as well
-  - same way, as we are doing for expressions
-
-11. Add caching for expressions and templates
-
-
 3. Support for namespaces
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
@@ -42,3 +36,10 @@ Done:
 - just rename existing "labels" (ops) to "change-labels" in yaml to avoid confusion
 
 * add unit test to verify label calculation in the engine while policy is being resolved
+
+* expose contextual data to templates as well
+  - same way, as we are doing for expressions
+
+* add caching for expressions and templates
+
+* add unit tests for allocation name resolution with variables (referring with .User and .Labels)

@@ -72,7 +72,8 @@
           type: aptomi/code/unittests
           params:
             address: "{{ .Discovery.component1.component2.instance }}"
-            queue: " {{ .User.Labels.changinglabel }} "
+            queue: "{{ .User.Labels.changinglabel }}"
+            someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"
         change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value

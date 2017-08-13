@@ -277,7 +277,7 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 
 	// Check errors and resolve allocation name (it can be dynamic, depending on user labels)
 	if allocationMatched != nil {
-		nameResolved, err := allocationMatched.ResolveName(node.user, node.labels)
+		nameResolved, err := allocationMatched.ResolveName(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
 		if err != nil {
 			Debug.WithFields(log.Fields{
 				"service":    node.service.GetName(),
@@ -336,13 +336,13 @@ func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocat
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	componentCodeParams, err := ProcessTemplateParams(node.component.Code.Params, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode)
+	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
 	node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	componentDiscoveryParams, err := ProcessTemplateParams(node.component.Discovery, node.componentKey, node.componentLabels, node.user, node.discoveryTreeNode)
+	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
