@@ -3,15 +3,17 @@ package util
 // based on k8s uuid usage
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/db2"
+	"fmt"
 	"github.com/pborman/uuid"
 	"sync"
 )
 
+type UID string
+
 var uuidCreationLock sync.Mutex
 var lastCreatedUUID uuid.UUID
 
-func NewUUID() db2.UID {
+func NewUUID() UID {
 	uuidCreationLock.Lock()
 	defer uuidCreationLock.Unlock()
 
@@ -21,9 +23,10 @@ func NewUUID() db2.UID {
 	// between NewUUID calls. Let's wait until new UUID generated.
 	// UUID uses 100 ns increments, so, it's okay to just poll for new value
 	for uuid.Equal(lastCreatedUUID, newUUID) == true {
+		fmt.Println("Same UUID generated!!!")
 		newUUID = uuid.NewUUID()
 	}
 	lastCreatedUUID = newUUID
 
-	return db2.UID(newUUID.String())
+	return UID(newUUID.String())
 }
