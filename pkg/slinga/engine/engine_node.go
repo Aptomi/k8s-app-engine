@@ -255,20 +255,19 @@ func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, e
 	var allocationMatched *Allocation
 	if node.context.Allocation != nil {
 		allocation := node.context.Allocation
-		labels := node.transformLabels(node.labels, allocation.ChangeLabels)
 
 		// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
 		var cluster *Cluster
-		if clusterLabel, ok := labels.Labels["cluster"]; ok {
+		if clusterLabel, ok := node.labels.Labels["cluster"]; ok {
 			if cluster, ok = policy.Clusters[clusterLabel]; !ok {
 				Debug.WithFields(log.Fields{
 					"allocation": allocation,
-					"labels":     labels.Labels,
+					"labels":     node.labels.Labels,
 				}).Panic("Can't find cluster for allocation (based on label 'cluster')")
 			}
 		}
 
-		matched := node.allowsAllocation(policy, allocation, labels, cluster)
+		matched := node.allowsAllocation(policy, allocation, node.labels, cluster)
 		node.ruleLogWriter.addRuleLogEntry(entryAllocationGlobalRulesNoViolations(allocation, matched))
 		if matched {
 			allocationMatched = allocation

@@ -2,10 +2,9 @@ package language
 
 import "github.com/Aptomi/aptomi/pkg/slinga/language/template"
 
-// Allocation defines within a Context for a given service
+// Allocation defines how service is allocated
 type Allocation struct {
 	Name         string
-	ChangeLabels *LabelOperations `yaml:"change-labels"`
 }
 
 // ResolveName resolves name for an allocation

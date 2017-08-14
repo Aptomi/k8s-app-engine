@@ -14,11 +14,11 @@
       require-any:
         - org == 'it' && is_operator
 
-    # In production:
-    # - service will be deployed in us-east
-    # - as a single production instance
+    # Set cluster label to deploy in us-east
+    change-labels:
+      set:
+        cluster: cluster-us-east
+
+    # Single production instance
     allocation:
       name: "production"
-      change-labels:
-        set:
-          cluster: cluster-us-east

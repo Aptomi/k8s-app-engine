@@ -14,11 +14,11 @@
       require-any:
         - org == 'dev'
 
-    # In stage:
-    # - services will be deployed in us-west
-    # - each dev will get their own instance
+    # Set cluster label to deploy in us-west
+    change-labels:
+      set:
+        cluster: cluster-us-west
+
+    # Each dev will get their own instance
     allocation:
       name: "dev-{{ .User.Name }}-{{ .Labels.tstype }}"
-      change-labels:
-        set:
-          cluster: cluster-us-west

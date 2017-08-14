@@ -78,9 +78,6 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		return node.cannotResolve()
 	}
 
-	// Process allocation, transform
-	node.labels = node.transformLabels(node.labels, node.allocation.ChangeLabels)
-
 	// Create service key
 	node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, nil)
 

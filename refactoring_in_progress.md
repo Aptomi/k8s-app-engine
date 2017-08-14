@@ -22,9 +22,9 @@ Items to complete:
   - only show a particular namespace?
   - e.g. what if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string), how do we propagate this to the user?
 
-10. Do we need change-labels for allocation?
-
 11. Remove custom JSON serializers
+
+12. Code coverage
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
@@ -46,3 +46,6 @@ Done:
 * add caching for expressions and templates
 
 * add unit tests for allocation name resolution with variables (referring with .User and .Labels)
+
+* removed change-labels for allocation?
+

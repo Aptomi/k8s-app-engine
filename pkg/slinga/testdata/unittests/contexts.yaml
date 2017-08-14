@@ -6,6 +6,12 @@
     name: prod-high
 
   spec:
+    criteria:
+      require-any:
+        - dev == "no" && prod == "yes" && priority >= 200
+      require-none:
+        - service.Metadata.Name == "zookeeper" && nozookeeper
+
     change-labels:
       set:
         some-test-context-specific-label: some-value
@@ -13,20 +19,8 @@
         a:
         b:
 
-    criteria:
-      require-any:
-        - dev == "no" && prod == "yes" && priority >= 200
-      require-none:
-        - service.Metadata.Name == "zookeeper" && nozookeeper
-
     allocation:
       name: "prod-{{.User.Name}}"
-      change-labels:
-        set:
-          some-test-context-specific-label: some-value
-        remove:
-          a:
-          b:
 
 # Context definition for prod (low priority)
 - kind: context
@@ -36,26 +30,21 @@
     name: prod-low
 
   spec:
-    change-labels:
-      set:
-        prod-low-ctx: true
-      remove:
-        some-label-to-be-removed:
-
     criteria:
       require-any:
         - dev == "no" && prod == "yes" && priority < 200
       require-none:
         - service.Metadata.Name == "zookeeper" && nozookeeper
 
+    change-labels:
+      set:
+        prod-low-ctx: true
+        prod-low-alloc: true
+      remove:
+        some-label-to-be-removed:
+
     allocation:
       name: "prod-team-{{.User.Labels.team}}-{{index .Labels \"prod-low-ctx\"}}"
-      change-labels:
-        set:
-          prod-low-alloc: true
-        remove:
-          a:
-          b:
 
 # Context definition for test
 - kind: context
@@ -65,13 +54,6 @@
     name: test
 
   spec:
-    change-labels:
-      set:
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
-
     criteria:
       require-all:
         - 10 > 5
@@ -82,11 +64,12 @@
       require-none:
         - service.Metadata.Name == "zookeeper" && nozookeeper
 
+    change-labels:
+      set:
+        some-test-context-specific-label: some-value
+      remove:
+        a:
+        b:
+
     allocation:
       name: "test-{{.User.Labels.team}}"
-      change-labels:
-        set:
-          some-test-context-specific-label: some-value
-        remove:
-          a:
-          b:
