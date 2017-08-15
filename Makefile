@@ -30,7 +30,7 @@ alltest:
 
 .PHONY: test-loop
 test-loop:
-	while go test -v ./pkg/slinga; do :; done
+	while go test -v ./pkg/...; do :; done
 
 .PHONY: clean-run-noop
 clean-run-noop:

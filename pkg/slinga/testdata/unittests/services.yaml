@@ -74,6 +74,30 @@
             address: "{{ .Discovery.component1.component2.instance }}"
             queue: "{{ .User.Labels.changinglabel }}"
             someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"
+            data1:
+              param:
+                name: value1
+            data2:
+              param:
+                name: value2
+            data3:
+              param:
+                name: value3
+            data4:
+              param:
+                name: value4
+            data5:
+              param:
+                name: value5
+            data6:
+              param:
+                name: 123456789
+            data7:
+              param:
+                name: true
+            data8:
+              param:
+                name: false
         change-labels:
           set: # add/modify
             some-test-context-specific-label: some-value

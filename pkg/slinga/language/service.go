@@ -2,6 +2,7 @@ package language
 
 import (
 	"fmt"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // Service defines individual service
@@ -24,18 +25,15 @@ type ServiceComponent struct {
 	Name         string
 	Service      string
 	Code         *Code
-	Discovery    ParameterTree
+	Discovery    NestedParameterMap
 	Dependencies []string
 	ChangeLabels *LabelOperations `yaml:"change-labels"`
 }
 
-// ParameterTree is a special type alias defined for freeform blocks with parameters
-type ParameterTree interface{}
-
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type   string
-	Params ParameterTree
+	Params NestedParameterMap
 }
 
 // LabelOperations defines the set of label manipulations (e.g. set/remove)

@@ -2,12 +2,11 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 	"fmt"
 )
 
-func processParameterTreeNode(node ParameterTree, parameters *template.TemplateParameters, result NestedParameterMap, key string, cache template.TemplateCache) error {
+func processParameterTreeNode(node interface{}, parameters *template.TemplateParameters, result NestedParameterMap, key string, cache template.TemplateCache) error {
 	if node == nil {
 		return nil
 	}
@@ -22,23 +21,14 @@ func processParameterTreeNode(node ParameterTree, parameters *template.TemplateP
 		return nil
 	}
 
-	// If it's an int, put it directly
-	if paramsInt, ok := node.(int); ok {
-		result[key] = paramsInt
-		return nil
-	}
-
-	// If it's a bool, put it directly
-	if paramsBool, ok := node.(bool); ok {
-		result[key] = paramsBool
-		return nil
-	}
-
 	// If it's a map, process it recursively
-	if paramsMap, ok := node.(map[interface{}]interface{}); ok {
-		for key, value := range paramsMap {
-			result[key.(string)] = NestedParameterMap{}
-			err := processParameterTreeNode(value, parameters, result, key.(string), cache)
+	if paramsMap, ok := node.(NestedParameterMap); ok {
+		if len(key) > 0 {
+			result = result.GetNestedMap(key)
+		}
+		for pKey, pValue := range paramsMap {
+			result[pKey] = NestedParameterMap{}
+			err := processParameterTreeNode(pValue, parameters, result, pKey, cache)
 			if err != nil {
 				return err
 			}
@@ -47,11 +37,11 @@ func processParameterTreeNode(node ParameterTree, parameters *template.TemplateP
 	}
 
 	// Unknown type, return an error
-	return fmt.Errorf("There should be map[string]interface{} or a primitive type, but found %v", node)
+	return fmt.Errorf("There should a string or NestedParameterMap, but found %v", node)
 }
 
 // evaluateParameterTree processes code or discovery params and calculates the whole tree
-func evaluateParameterTree(tree ParameterTree, parameters *template.TemplateParameters, cache template.TemplateCache) (NestedParameterMap, error) {
+func evaluateParameterTree(tree NestedParameterMap, parameters *template.TemplateParameters, cache template.TemplateCache) (NestedParameterMap, error) {
 	if tree == nil {
 		return nil, nil
 	}

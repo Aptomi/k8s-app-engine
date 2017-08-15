@@ -2,10 +2,10 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+	"strconv"
 )
 
 func BenchmarkEngine(b *testing.B) {
@@ -52,6 +52,11 @@ func TestPolicyResolve(t *testing.T) {
 
 	// Check that discovery parameters evaluate correctly
 	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+
+	// Check that nested parameters evaluate correctly
+	for i := 1; i <= 5; i++ {
+		assert.Equal(t, "value"+strconv.Itoa(i), kafkaTest.CalculatedCodeParams.GetNestedMap("data" + strconv.Itoa(i)).GetNestedMap("param")["name"], "Nested code parameters should be calculated correctly")
+	}
 }
 
 func TestPolicyResolveEmptyDiff(t *testing.T) {
@@ -61,7 +66,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(policy, userLoader)
 	usageStatePrev.ResolveAllDependencies()
-	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
+	usageStatePrev = emulateSaveAndLoadState(usageStatePrev)
 
 	// Get usage state next
 	usageStateNext := NewServiceUsageState(policy, userLoader)
@@ -85,7 +90,7 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	// Get usage state prev and emulate save/load
 	usageStatePrev := NewServiceUsageState(policyPrev, userLoader)
 	usageStatePrev.ResolveAllDependencies()
-	usageStatePrev = emulateSaveAndLoad(usageStatePrev)
+	usageStatePrev = emulateSaveAndLoadState(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
 	policyNext := loadUnitTestsPolicy()
@@ -124,7 +129,7 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	uInitial := NewServiceUsageState(policyPrev, userLoader)
 	uInitial.ResolveAllDependencies()
 	uInitial.CalculateDifference(&uEmpty)
-	uInitial = emulateSaveAndLoad(uInitial)
+	uInitial = emulateSaveAndLoadState(uInitial)
 
 	// Check creation/update times
 	key = "kafka#test#test-platform_services#component2"
@@ -204,13 +209,4 @@ func TestServiceComponentsTopologicalOrder(t *testing.T) {
 	assert.Equal(t, "component1", c[0].Name, "Component topological sort should produce correct order")
 	assert.Equal(t, "component2", c[1].Name, "Component topological sort should produce correct order")
 	assert.Equal(t, "component3", c[2].Name, "Component topological sort should produce correct order")
-}
-
-func emulateSaveAndLoad(state ServiceUsageState) ServiceUsageState {
-	// Emulate saving and loading again
-	savedObjectAsString := yaml.SerializeObject(state)
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-	loadedObject := ServiceUsageState{userLoader: userLoader}
-	yaml.DeserializeObject(savedObjectAsString, &loadedObject)
-	return loadedObject
 }
