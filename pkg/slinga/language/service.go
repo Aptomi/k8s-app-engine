@@ -1,7 +1,6 @@
 package language
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -41,21 +40,6 @@ type Code struct {
 
 // LabelOperations defines the set of label manipulations (e.g. set/remove)
 type LabelOperations map[string]map[string]string
-
-// MarshalJSON marshals service component into a structure without freeform parameters, so UI doesn't fail
-// See http://choly.ca/post/go-json-marshalling/
-func (component *ServiceComponent) MarshalJSON() ([]byte, error) {
-	type Alias ServiceComponent
-	return json.Marshal(&struct {
-		Code      *Code
-		Discovery ParameterTree
-		*Alias
-	}{
-		Code:      nil,
-		Discovery: nil,
-		Alias:     (*Alias)(component),
-	})
-}
 
 // GetComponentsMap lazily initializes and returns a map of name -> component
 func (service *Service) GetComponentsMap() map[string]*ServiceComponent {
