@@ -41,8 +41,7 @@ type resolutionNode struct {
 	// reference to the context that was matched
 	context *Context
 
-	// reference to the allocation that was matched
-	allocation             *Allocation
+	// reference to the allocation name that was matched and resolved
 	allocationNameResolved string
 
 	// reference to the current node in discovery tree for components announcing their discovery properties
@@ -188,10 +187,10 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 
 func (node *resolutionNode) cannotResolve() error {
 	Debug.WithFields(log.Fields{
-		"service":       node.serviceName,
-		"componentObj":  node.component,
-		"contextObj":    node.context,
-		"allocationObj": node.allocation,
+		"service":                node.serviceName,
+		"componentObj":           node.component,
+		"contextObj":             node.context,
+		"allocationNameResolved": node.allocationNameResolved,
 	}).Info("Cannot resolve instance")
 
 	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
@@ -214,18 +213,26 @@ func (node *resolutionNode) getMatchedService(policy *Policy) *Service {
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) {
+func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context) {
 	// Locate the list of contexts for service
 	node.ruleLogWriter.addRuleLogEntry(entryContextsFound(len(policy.Contexts) > 0))
 
 	// Find matching context
 	var contextMatched *Context
 	for _, context := range policy.Contexts {
+		// Get matching context
 		matched := context.Matches(node.getContextualDataForExpression(), node.cache.expressionCache)
 		node.ruleLogWriter.addRuleLogEntry(entryContextCriteriaTesting(context, matched))
 		if matched {
-			contextMatched = context
-			break
+			// Match is only valid if there are no global rule voilations context
+			labels := node.transformLabels(node.labels, context.ChangeLabels)
+			cluster := node.getCluster(policy, labels, context)
+			globalRuleViolations := node.hasGlobalRuleViolations(policy, context, labels, cluster)
+			node.ruleLogWriter.addRuleLogEntry(entryContextGlobalRulesNoViolations(context, !globalRuleViolations))
+			if !globalRuleViolations {
+				contextMatched = context
+				break
+			}
 		}
 	}
 
@@ -244,67 +251,57 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 
 	node.ruleLogWriter.addRuleLogEntry(entryContextMatched(node.service, contextMatched))
 
-	return contextMatched, nil
+	return contextMatched
 }
 
 // Helper to get a matched allocation
-func (node *resolutionNode) getMatchedAllocation(policy *Policy) (*Allocation, error) {
-	node.ruleLogWriter.addRuleLogEntry(entryAllocationPresent(node.service, node.context, node.context.Allocation))
-
-	// Find matching allocation
-	var allocationMatched *Allocation
-	if node.context.Allocation != nil {
-		allocation := node.context.Allocation
-
-		// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
-		var cluster *Cluster
-		if clusterLabel, ok := node.labels.Labels["cluster"]; ok {
-			if cluster, ok = policy.Clusters[clusterLabel]; !ok {
-				Debug.WithFields(log.Fields{
-					"allocation": allocation,
-					"labels":     node.labels.Labels,
-				}).Panic("Can't find cluster for allocation (based on label 'cluster')")
-			}
-		}
-
-		matched := node.allowsAllocation(policy, allocation, node.labels, cluster)
-		node.ruleLogWriter.addRuleLogEntry(entryAllocationGlobalRulesNoViolations(allocation, matched))
-		if matched {
-			allocationMatched = allocation
-		}
-	}
-
-	// Check errors and resolve allocation name (it can be dynamic, depending on user labels)
-	if allocationMatched != nil {
-		nameResolved, err := allocationMatched.ResolveName(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
-		if err != nil {
-			Debug.WithFields(log.Fields{
-				"service":    node.service.GetName(),
-				"context":    node.context.GetName(),
-				"allocation": allocationMatched.Name,
-				"user":       node.user.Name,
-				"error":      err,
-			}).Panic("Cannot resolve name for an allocation")
-		}
-		Debug.WithFields(log.Fields{
-			"service":            node.service.GetName(),
-			"context":            node.context.GetName(),
-			"allocation":         allocationMatched.Name,
-			"allocationResolved": node.allocationNameResolved,
-			"user":               node.user.Name,
-		}).Info("Matched allocation")
-		node.allocationNameResolved = nameResolved
-	} else {
+func (node *resolutionNode) resolveAllocationName(policy *Policy) string {
+	// If there is no allocation, exit
+	if node.context.Allocation == nil {
 		Debug.WithFields(log.Fields{
 			"service": node.service.GetName(),
 			"context": node.context.GetName(),
 			"user":    node.user.Name,
-		}).Info("No allocation matched")
+		}).Info("No allocation present")
+		return ""
 	}
 
-	node.ruleLogWriter.addRuleLogEntry(entryAllocationMatched(node.service, node.context, allocationMatched, node.allocationNameResolved))
+	// Resolve allocation name (it can be dynamic, depending on user labels)
+	allocationNameResolved, err := node.context.ResolveAllocationName(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
+	if err != nil {
+		Debug.WithFields(log.Fields{
+			"service":        node.service.GetName(),
+			"context":        node.context.GetName(),
+			"allocationName": node.context.Allocation.Name,
+			"user":           node.user.Name,
+			"error":          err,
+		}).Panic("Cannot resolve name for an allocation")
+	}
+	Debug.WithFields(log.Fields{
+		"service":            node.service.GetName(),
+		"context":            node.context.GetName(),
+		"allocationName":     node.context.Allocation.Name,
+		"allocationResolved": node.allocationNameResolved,
+		"user":               node.user.Name,
+	}).Info("Allocation name resolved")
 
-	return allocationMatched, nil
+	node.ruleLogWriter.addRuleLogEntry(entryAllocationMatched(node.service, node.context, allocationNameResolved))
+	return allocationNameResolved
+}
+
+func (node *resolutionNode) getCluster(policy *Policy, labels LabelSet, context *Context) (*Cluster) {
+	// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
+	var cluster *Cluster
+	if clusterLabel, ok := labels.Labels["cluster"]; ok {
+		if cluster, ok = policy.Clusters[clusterLabel]; !ok {
+			Debug.WithFields(log.Fields{
+				"service": node.service,
+				"context": context,
+				"labels":  labels.Labels,
+			}).Panic("Can't find cluster (based on label 'cluster')")
+		}
+	}
+	return cluster
 }
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
@@ -315,23 +312,23 @@ func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOp
 	return result
 }
 
-func (node *resolutionNode) allowsAllocation(policy *Policy, allocation *Allocation, labels LabelSet, cluster *Cluster) bool {
+func (node *resolutionNode) hasGlobalRuleViolations(policy *Policy, context *Context, labels LabelSet, cluster *Cluster) bool {
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
 			matched := rule.FilterServices.Match(labels, node.user, cluster, node.cache.expressionCache)
-			node.ruleLogWriter.addRuleLogEntry(entryAllocationGlobalRuleTesting(allocation, rule, matched))
+			node.ruleLogWriter.addRuleLogEntry(entryContextGlobalRuleTesting(context, rule, matched))
 			if matched {
 				for _, action := range rule.Actions {
 					if action.Type == "dependency" && action.Content == "forbid" {
-						return false
+						return true
 					}
 				}
 			}
 		}
 	}
 
-	return true
+	return false
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {

@@ -197,45 +197,33 @@ func entryContextMatched(service *Service, contextMatched *Context) *RuleLogEntr
 	)
 }
 
-func entryAllocationPresent(service *Service, context *Context, allocation *Allocation) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeTest,
-		RuleLogScopeLocal,
-		"Exist (Allocation)",
-		fmt.Sprintf("Checking if allocation is present for service '%s', context '%s'", service.GetName(), context.GetName()),
-		"has(allocation)",
-		allocation != nil,
-		false,
-	)
-}
-
-func entryAllocationGlobalRuleTesting(allocation *Allocation, rule *Rule, matched bool) *RuleLogEntry {
+func entryContextGlobalRuleTesting(context *Context, rule *Rule, matched bool) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeTest,
 		RuleLogScopeGlobal,
-		"Global Rule (Allocation)",
-		fmt.Sprintf("Testing if global rule '%s' applies to allocation '%s'", rule.GetName(), allocation.Name),
+		"Global Rule (Context)",
+		fmt.Sprintf("Testing if global rule '%s' applies to context '%s'", rule.GetName(), context.Metadata.Name),
 		fmt.Sprintf("%+v", rule.FilterServices),
 		matched,
 		false,
 	)
 }
 
-func entryAllocationGlobalRulesNoViolations(allocation *Allocation, matched bool) *RuleLogEntry {
+func entryContextGlobalRulesNoViolations(context *Context, noViolations bool) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeTest,
 		RuleLogScopeGlobal,
-		"No Global Rule Violations (Allocation)",
-		fmt.Sprintf("Verify there are no global rule violations for allocation: '%s'", allocation.Name),
+		"No Global Rule Violations (Context)",
+		fmt.Sprintf("Verify there are no global rule violations for context: '%s'", context.Metadata.Name),
 		"!has(global_rule_violations)",
-		matched,
+		noViolations,
 		false,
 	)
 }
 
-func entryAllocationMatched(service *Service, context *Context, allocationMatched *Allocation, allocationNameResolved string) *RuleLogEntry {
+func entryAllocationMatched(service *Service, context *Context, allocationNameResolved string) *RuleLogEntry {
 	var message string
-	if allocationMatched != nil {
+	if len(allocationNameResolved) > 0 {
 		message = fmt.Sprintf("Allocation matched for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationNameResolved)
 	} else {
 		message = fmt.Sprintf("Unable to find matching allocation for service '%s', context '%s'", service.GetName(), context.GetName())
@@ -247,7 +235,7 @@ func entryAllocationMatched(service *Service, context *Context, allocationMatche
 		"Matched (Allocation)",
 		message,
 		"N/A",
-		allocationMatched != nil,
-		allocationMatched == nil,
+		len(allocationNameResolved) > 0,
+		len(allocationNameResolved) == 0,
 	)
 }

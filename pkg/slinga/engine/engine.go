@@ -48,6 +48,8 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 
 	// Locate the service
 	node.service = node.getMatchedService(state.Policy)
+
+	// If no service is found, the dependency cannot be resolved
 	if node.service == nil {
 		return node.cannotResolve()
 	}
@@ -56,11 +58,9 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.labels = node.transformLabels(node.labels, node.service.ChangeLabels)
 
 	// Match the context
-	node.context, err = node.getMatchedContext(state.Policy)
-	if err != nil {
-		return err
-	}
-	// If no matching context is found, let's just exit
+	node.context = node.getMatchedContext(state.Policy)
+
+	// If no matching context is found, the dependency cannot be resolved
 	if node.context == nil {
 		return node.cannotResolve()
 	}
@@ -68,13 +68,9 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	// Process context and transform labels
 	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
 
-	// Match the allocation
-	node.allocation, err = node.getMatchedAllocation(state.Policy)
-	if err != nil {
-		return err
-	}
-	// If no matching allocation is found, let's just exit
-	if node.allocation == nil {
+	// Resolve allocation name
+	node.allocationNameResolved = node.resolveAllocationName(state.Policy)
+	if len(node.allocationNameResolved) <= 0 {
 		return node.cannotResolve()
 	}
 
