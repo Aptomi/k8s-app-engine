@@ -221,18 +221,18 @@ func entryContextGlobalRulesNoViolations(context *Context, noViolations bool) *R
 	)
 }
 
-func entryAllocationMatched(service *Service, context *Context, allocationNameResolved string) *RuleLogEntry {
+func entryAllocationNameResolved(service *Service, context *Context, allocationNameResolved string) *RuleLogEntry {
 	var message string
 	if len(allocationNameResolved) > 0 {
-		message = fmt.Sprintf("Allocation matched for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationNameResolved)
+		message = fmt.Sprintf("Allocation name resolved for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationNameResolved)
 	} else {
-		message = fmt.Sprintf("Unable to find matching allocation for service '%s', context '%s'", service.GetName(), context.GetName())
+		message = fmt.Sprintf("Unable to resolve allocation name for service '%s', context '%s'", service.GetName(), context.GetName())
 	}
 
 	return NewRuleLogEntry(
 		RuleLogTypeInfo,
 		RuleLogScopeLocal,
-		"Matched (Allocation)",
+		"Name Resolution (Allocation)",
 		message,
 		"N/A",
 		len(allocationNameResolved) > 0,
