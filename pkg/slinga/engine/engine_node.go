@@ -283,7 +283,7 @@ func (node *resolutionNode) resolveAllocationName(policy *Policy) string {
 		"user":               node.user.Name,
 	}).Info("Allocation name resolved")
 
-	node.ruleLogWriter.addRuleLogEntry(entryAllocationMatched(node.service, node.context, allocationNameResolved))
+	node.ruleLogWriter.addRuleLogEntry(entryAllocationNameResolved(node.service, node.context, allocationNameResolved))
 	return allocationNameResolved
 }
 
