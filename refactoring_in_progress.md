@@ -47,5 +47,4 @@ Done:
 
 * add unit tests for allocation name resolution with variables (referring with .User and .Labels)
 
-* removed change-labels for allocation?
-
+* removed change-labels for allocation
