@@ -8,11 +8,13 @@ import (
 	"sync"
 )
 
+// UID represents unique ID
 type UID string
 
 var uuidCreationLock sync.Mutex
 var lastCreatedUUID uuid.UUID
 
+// NewUUID creates new guaranteed unique thread-safe unique ID
 func NewUUID() UID {
 	uuidCreationLock.Lock()
 	defer uuidCreationLock.Unlock()
