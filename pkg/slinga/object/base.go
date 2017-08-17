@@ -1,4 +1,4 @@
-package db2
+package object
 
 import (
 	"fmt"

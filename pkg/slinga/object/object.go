@@ -1,4 +1,5 @@
-package db2
+// Object package includes all unified Object stuff and ways to persist it
+package object
 
 // ObjectKind represents object name like Cluster, Service, Context, etc.
 type ObjectKind string
