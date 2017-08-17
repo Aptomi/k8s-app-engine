@@ -23,6 +23,7 @@ type BaseObject struct {
 	Spec     interface{}
 }
 
+// BaseObjectMetadata represents standard metadata for unified objects
 type BaseObjectMetadata struct {
 	UID        UID
 	Generation Generation
@@ -46,8 +47,8 @@ func (object *BaseObject) GetGeneration() Generation {
 	return object.Metadata.Generation
 }
 
-// TODO(slukjanov): should we only store key or uid / gen? or cache key inside metadata?
 // GetKey returns object's Key
+// TODO(slukjanov): should we only store key or uid / gen? or cache key inside metadata?
 func (object *BaseObject) GetKey() Key {
 	return KeyFromParts(object.Metadata.UID, object.Metadata.Generation)
 }

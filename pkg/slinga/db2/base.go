@@ -83,6 +83,7 @@ func (key Key) GetGeneration() Generation {
 	return Generation(val)
 }
 
+// KeyFromParts return uid and generation combined into Key
 func KeyFromParts(uid UID, generation Generation) Key {
 	return Key(uid.String() + KeySeparator + generation.String())
 }
