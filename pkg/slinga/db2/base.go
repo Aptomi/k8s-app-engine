@@ -34,6 +34,7 @@ func NewUUID() UID {
 	// between NewUUID calls. Let's wait until new UUID generated.
 	// UUID uses 100 ns increments, so, it's okay to just poll for new value
 	for uuid.Equal(lastCreatedUUID, newUUID) == true {
+		// TODO(slukjanov): replace with some WARN message and/or event
 		fmt.Println("Same UUID generated!!!")
 		newUUID = uuid.NewUUID()
 	}
