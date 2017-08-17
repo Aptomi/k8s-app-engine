@@ -7,7 +7,7 @@ type LabelSet struct {
 	Labels map[string]string
 }
 
-// NewLabelSet creates a new empty LabelSet
+// NewLabelSetEmpty creates a new empty LabelSet
 func NewLabelSetEmpty() LabelSet {
 	return LabelSet{Labels: make(map[string]string)}
 }
@@ -18,7 +18,7 @@ func NewLabelSet(labels map[string]string) LabelSet {
 }
 
 // NewLabelSet creates a new LabelSet from a given set of labels
-func (src *LabelSet) MakeCopy() LabelSet {
+func (src LabelSet) MakeCopy() LabelSet {
 	result := NewLabelSetEmpty()
 	for k, v := range src.Labels {
 		result.Labels[k] = v
@@ -27,17 +27,17 @@ func (src *LabelSet) MakeCopy() LabelSet {
 }
 
 // ApplyTransform applies set of transformations to labels
-func (src *LabelSet) ApplyTransform(ops *LabelOperations) LabelSet {
+func (src LabelSet) ApplyTransform(ops LabelOperations) LabelSet {
 	result := src.MakeCopy()
 
 	if ops != nil {
 		// set labels
-		for k, v := range (*ops)["set"] {
+		for k, v := range ops["set"] {
 			result.Labels[k] = v
 		}
 
 		// remove labels
-		for k := range (*ops)["remove"] {
+		for k := range ops["remove"] {
 			delete(result.Labels, k)
 		}
 	}
@@ -54,13 +54,6 @@ func (src LabelSet) AddLabels(addSet LabelSet) LabelSet {
 		result.Labels[k] = v
 	}
 
-	return result
-}
-
-// AddLabel adds a single label to the label set
-func (src LabelSet) AddLabel(k string, v string) LabelSet {
-	result := src.MakeCopy()
-	result.Labels[k] = v
 	return result
 }
 

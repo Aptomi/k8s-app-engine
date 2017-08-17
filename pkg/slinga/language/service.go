@@ -10,7 +10,7 @@ type Service struct {
 	*SlingaObject
 
 	Owner        string
-	ChangeLabels *LabelOperations `yaml:"change-labels"`
+	ChangeLabels LabelOperations `yaml:"change-labels"`
 	Components   []*ServiceComponent
 
 	// Lazily evaluated field (all components topologically sorted). Use via getter
@@ -27,7 +27,7 @@ type ServiceComponent struct {
 	Code         *Code
 	Discovery    NestedParameterMap
 	Dependencies []string
-	ChangeLabels *LabelOperations `yaml:"change-labels"`
+	ChangeLabels LabelOperations `yaml:"change-labels"`
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances
@@ -35,9 +35,6 @@ type Code struct {
 	Type   string
 	Params NestedParameterMap
 }
-
-// LabelOperations defines the set of label manipulations (e.g. set/remove)
-type LabelOperations map[string]map[string]string
 
 // GetComponentsMap lazily initializes and returns a map of name -> component
 func (service *Service) GetComponentsMap() map[string]*ServiceComponent {

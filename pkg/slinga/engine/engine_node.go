@@ -99,7 +99,7 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 		labels: user.GetLabelSet().
 			AddLabels(user.GetSecretSet()).
 			AddLabels(dependency.GetLabelSet()).
-			AddLabel("service.Name", dependency.Service),
+			ApplyTransform(NewLabelOperationsSetSingleLabel("service.Name", dependency.Service)),
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
@@ -126,7 +126,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 
 		// we take current processed labels for the component we are iterating over, and making service.Name available to the engine as special variable
 		labels: node.componentLabels.
-			AddLabel("service.Name", node.component.Service),
+			ApplyTransform(NewLabelOperationsSetSingleLabel("service.Name", node.component.Service)),
 
 		// move further by the discovery tree via component name link
 		discoveryTreeNode: node.discoveryTreeNode.GetNestedMap(node.component.Name),
@@ -302,7 +302,7 @@ func (node *resolutionNode) getCluster(policy *Policy, labels LabelSet, context 
 	return cluster
 }
 
-func (node *resolutionNode) transformLabels(labels LabelSet, operations *LabelOperations) LabelSet {
+func (node *resolutionNode) transformLabels(labels LabelSet, operations LabelOperations) LabelSet {
 	result := labels.ApplyTransform(operations)
 	if !labels.Equal(result) {
 		node.ruleLogWriter.addRuleLogEntry(entryLabels(result))

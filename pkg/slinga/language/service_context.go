@@ -10,7 +10,7 @@ type Context struct {
 	*SlingaObject
 
 	Criteria     *Criteria
-	ChangeLabels *LabelOperations `yaml:"change-labels"`
+	ChangeLabels LabelOperations `yaml:"change-labels"`
 	Allocation *struct {
 		Name string
 	}

@@ -8,9 +8,10 @@ import (
 func TestLabelOperations(t *testing.T) {
 	labelsBefore := NewLabelSet(map[string]string{"l1": "1", "l2": "2", "l3": "3"})
 
-	ops := &LabelOperations{}
-	(*ops)["set"] = map[string]string{"a": "b", "c": "d"}
-	(*ops)["remove"] = map[string]string{"l1": ""}
+	ops := NewLabelOperations(
+		map[string]string{"a": "b", "c": "d"},
+		map[string]string{"l1": ""},
+	)
 
 	labelsAfter := labelsBefore.ApplyTransform(ops)
 
