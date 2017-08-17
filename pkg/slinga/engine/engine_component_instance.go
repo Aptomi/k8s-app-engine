@@ -42,7 +42,7 @@ func newComponentInstance(key string) *ComponentInstance {
 	return &ComponentInstance{
 		Key:                  key,
 		DependencyIds:        make(map[string]bool),
-		CalculatedLabels:     LabelSet{},
+		CalculatedLabels:     NewLabelSetEmpty(),
 		CalculatedDiscovery:  NestedParameterMap{},
 		CalculatedCodeParams: NestedParameterMap{},
 		EdgesIn:              make(map[string]bool),

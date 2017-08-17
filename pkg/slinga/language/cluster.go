@@ -50,3 +50,8 @@ func (cluster *Cluster) GetIstioSvc() string {
 func (cluster *Cluster) GetObjectType() SlingaObjectType {
 	return TypePolicy
 }
+
+// GetLabelSet returns a set of cluster labels
+func (cluster *Cluster) GetLabelSet() LabelSet {
+	return NewLabelSet(cluster.Labels)
+}

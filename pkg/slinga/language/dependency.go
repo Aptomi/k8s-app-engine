@@ -42,7 +42,7 @@ func NewGlobalDependencies() *GlobalDependencies {
 
 // GetLabelSet applies set of transformations to labels
 func (dependency *Dependency) GetLabelSet() LabelSet {
-	return LabelSet{Labels: dependency.Labels}
+	return NewLabelSet(dependency.Labels)
 }
 
 // AddDependency appends a single dependency to an existing object

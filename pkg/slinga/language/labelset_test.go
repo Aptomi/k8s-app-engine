@@ -6,7 +6,7 @@ import (
 )
 
 func TestLabelOperations(t *testing.T) {
-	labelsBefore := LabelSet{Labels: map[string]string{"l1": "1", "l2": "2", "l3": "3"}}
+	labelsBefore := NewLabelSet(map[string]string{"l1": "1", "l2": "2", "l3": "3"})
 
 	ops := &LabelOperations{}
 	(*ops)["set"] = map[string]string{"a": "b", "c": "d"}

@@ -78,7 +78,7 @@ func (rule *Rule) DescribeActions() []string {
 
 // MatchUser returns if a rue matches a user
 func (rule *Rule) MatchUser(user *User) bool {
-	return rule.FilterServices != nil && rule.FilterServices.Match(LabelSet{}, user, nil, nil)
+	return rule.FilterServices != nil && rule.FilterServices.Match(NewLabelSetEmpty(), user, nil, nil)
 }
 
 // GlobalRules is a list of global rules
