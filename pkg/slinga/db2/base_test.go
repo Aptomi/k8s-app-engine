@@ -6,7 +6,7 @@ import (
 )
 
 func TestKey(t *testing.T) {
-	correctKey := Key("72b062c1-7fcf-11e7-ab09-acde48001122" + KeySeparator + "42")
+	correctKey := KeyFromParts("72b062c1-7fcf-11e7-ab09-acde48001122", 42)
 
 	assert.Equal(t, UID("72b062c1-7fcf-11e7-ab09-acde48001122"), correctKey.GetUID(), "Correct UID expected")
 	assert.Equal(t, Generation(42), correctKey.GetGeneration(), "Correct Generation expected")
