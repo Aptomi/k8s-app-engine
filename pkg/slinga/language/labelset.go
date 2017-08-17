@@ -64,4 +64,3 @@ func (src LabelSet) Equal(dst LabelSet) bool {
 	}
 	return reflect.DeepEqual(src.Labels, dst.Labels)
 }
-

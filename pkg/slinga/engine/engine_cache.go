@@ -13,6 +13,6 @@ type EngineCache struct {
 func NewEngineCache() *EngineCache {
 	return &EngineCache{
 		expressionCache: expression.NewExpressionCache(),
-		templateCache: template.NewTemplateCache(),
+		templateCache:   template.NewTemplateCache(),
 	}
 }

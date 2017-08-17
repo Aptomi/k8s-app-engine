@@ -211,7 +211,7 @@ func (node *resolutionNode) getMatchedService(policy *Policy) *Service {
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context) {
+func (node *resolutionNode) getMatchedContext(policy *Policy) *Context {
 	// Locate the list of contexts for service
 	node.ruleLogWriter.addRuleLogEntry(entryContextsFound(len(policy.Contexts) > 0))
 
@@ -287,7 +287,7 @@ func (node *resolutionNode) resolveAllocationName(policy *Policy) string {
 	return allocationNameResolved
 }
 
-func (node *resolutionNode) getCluster(policy *Policy, labels LabelSet, context *Context) (*Cluster) {
+func (node *resolutionNode) getCluster(policy *Policy, labels LabelSet, context *Context) *Cluster {
 	// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
 	var cluster *Cluster
 	if clusterLabel, ok := labels.Labels["cluster"]; ok {

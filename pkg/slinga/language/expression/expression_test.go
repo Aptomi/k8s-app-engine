@@ -31,11 +31,11 @@ func TestExpressions(t *testing.T) {
 
 		map[string]interface{}{
 			"service": struct {
-				Name string
+				Name   string
 				Labels map[string]string
 			}{
 				"myservicename",
-				map[string]string {
+				map[string]string{
 					"Name": "Value",
 				},
 			},
@@ -43,10 +43,10 @@ func TestExpressions(t *testing.T) {
 	)
 
 	// simple case with bool variable
-	assert.Equal(t, true, evaluate(t,"anotherbar == true", params), "Evaluate expression with boolean")
+	assert.Equal(t, true, evaluate(t, "anotherbar == true", params), "Evaluate expression with boolean")
 
 	// simple case with bool variable
-	assert.Equal(t, true, evaluate(t,"anotherbar", params), "Evaluate expression with boolean")
+	assert.Equal(t, true, evaluate(t, "anotherbar", params), "Evaluate expression with boolean")
 
 	// simple case with bool variable
 	// TODO: we need to fix this test

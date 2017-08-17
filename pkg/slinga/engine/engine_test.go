@@ -3,9 +3,9 @@ package engine
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 	"time"
-	"strconv"
 )
 
 func BenchmarkEngine(b *testing.B) {

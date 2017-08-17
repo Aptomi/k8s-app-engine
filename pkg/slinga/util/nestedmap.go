@@ -1,9 +1,9 @@
 package util
 
 import (
-	"reflect"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	"reflect"
 	"strconv"
 )
 

@@ -1,10 +1,10 @@
 package template
 
 import (
-	t "text/template"
 	"bytes"
 	"fmt"
 	"strings"
+	t "text/template"
 )
 
 type Template struct {

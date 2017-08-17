@@ -9,11 +9,11 @@ import (
 func (node *resolutionNode) getContextualDataForAllocationTemplate() *template.TemplateParameters {
 	return template.NewTemplateParams(
 		struct {
-			User      interface{}
-			Labels    interface{}
+			User   interface{}
+			Labels interface{}
 		}{
-			User:      node.proxyUser(node.user),
-			Labels:    node.labels.Labels,
+			User:   node.proxyUser(node.user),
+			Labels: node.labels.Labels,
 		},
 	)
 }

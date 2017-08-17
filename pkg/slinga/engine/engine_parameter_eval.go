@@ -1,9 +1,9 @@
 package engine
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 func processParameterTreeNode(node interface{}, parameters *template.TemplateParameters, result NestedParameterMap, key string, cache template.TemplateCache) error {

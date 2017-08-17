@@ -33,4 +33,3 @@ func (user *User) GetLabelSet() LabelSet {
 func (user *User) GetSecretSet() LabelSet {
 	return NewLabelSet(user.Secrets)
 }
-

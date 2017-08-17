@@ -1,8 +1,8 @@
 package expression
 
 import (
-	"github.com/ralekseenkov/govaluate"
 	"errors"
+	"github.com/ralekseenkov/govaluate"
 )
 
 type Expression struct {
