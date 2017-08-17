@@ -6,7 +6,7 @@ import (
 )
 
 func TestKey(t *testing.T) {
-	correctKey := Key("72b062c1-7fcf-11e7-ab09-acde48001122$42")
+	correctKey := Key("72b062c1-7fcf-11e7-ab09-acde48001122" + KeySeparator + "42")
 
 	assert.Equal(t, UID("72b062c1-7fcf-11e7-ab09-acde48001122"), correctKey.GetUID(), "Correct UID expected")
 	assert.Equal(t, Generation(42), correctKey.GetGeneration(), "Correct Generation expected")
@@ -16,7 +16,7 @@ func TestKey(t *testing.T) {
 	assert.Panics(t, func() { noGenerationKey.GetUID() }, "Panic expected if key is incorrect")
 	assert.Panics(t, func() { noGenerationKey.GetGeneration() }, "Panic expected if key is incorrect")
 
-	invalidGenerationKey := Key("72b062c1-7fcf-11e7-ab09-acde48001122$bad")
+	invalidGenerationKey := Key("72b062c1-7fcf-11e7-ab09-acde48001122" + KeySeparator + "bad")
 
 	assert.Equal(t, UID("72b062c1-7fcf-11e7-ab09-acde48001122"), correctKey.GetUID(), "Correct UID expected")
 	assert.Panics(t, func() { invalidGenerationKey.GetGeneration() }, "Panic expected if key is incorrect")

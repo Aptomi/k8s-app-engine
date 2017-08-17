@@ -52,7 +52,7 @@ const KeySeparator = "$"
 type Key string
 
 func (key Key) parts() []string {
-	parts := strings.Split(string(key), "$")
+	parts := strings.Split(string(key), KeySeparator)
 	if len(parts) != 2 {
 		panic("Key should consist of two parts separated by " + KeySeparator)
 	}
