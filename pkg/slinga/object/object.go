@@ -4,6 +4,10 @@ package object
 // Kind represents object name like Cluster, Service, Context, etc.
 type Kind string
 
+func (kind Kind) String() string {
+	return string(kind)
+}
+
 // BaseObject interface represents unified object that could be stored in DB, accessed through API, etc.
 type BaseObject interface {
 	GetKind() Kind
@@ -56,4 +60,8 @@ func (meta *Metadata) GetNamespace() string {
 // GetName returns object's Name
 func (meta *Metadata) GetName() string {
 	return meta.Name
+}
+
+type emptyObject struct {
+	Metadata
 }
