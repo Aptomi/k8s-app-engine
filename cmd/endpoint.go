@@ -38,8 +38,8 @@ var endpointCmdShow = &cobra.Command{
 
 		for _, key := range keys {
 			keyEndpoints := endpoints[key]
-			serviceName, contextName, allocationName, componentName := engine.ParseServiceUsageKey(key)
-			fmt.Println("Service:", serviceName, " |  Context:", contextName, " |  Allocation:", allocationName, " |  Component:", componentName)
+			instance := state.GetResolvedData().ComponentInstanceMap[key]
+			fmt.Println("Service:", instance.Key.ServiceName, " |  Context:", instance.Key.ContextName, " |  Allocation:", instance.Key.AllocationName, " |  Component:", instance.Key.ComponentName)
 
 			for tp, url := range keyEndpoints {
 				fmt.Println("	", tp, url)

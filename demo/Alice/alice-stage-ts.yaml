@@ -6,7 +6,6 @@
     userid: cn=Alice,ou=people,o=aptomiOrg
     service: twitter_stats
     labels:
-        tstype: stage
         # Deploy new version of visualization code (pass image tag for container)
         tsvisimage: demo-v62
         # San Francisco, Boston, New York

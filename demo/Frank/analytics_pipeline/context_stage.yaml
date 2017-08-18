@@ -21,4 +21,4 @@
 
     # All consumers will rely on the same instance of analytics_pipeline
     allocation:
-      name: "staging"
+      name: stage

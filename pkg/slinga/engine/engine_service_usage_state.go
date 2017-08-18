@@ -76,21 +76,24 @@ func (state *ServiceUsageState) GetResolvedData() *ServiceUsageData {
 }
 
 // Gets a component instance entry or creates an new entry if it doesn't exist
-func (data *ServiceUsageData) getComponentInstanceEntry(key string) *ComponentInstance {
+func (data *ServiceUsageData) getComponentInstanceEntry(cik *ComponentInstanceKey) *ComponentInstance {
+	key := cik.GetKey()
 	if _, ok := data.ComponentInstanceMap[key]; !ok {
-		data.ComponentInstanceMap[key] = newComponentInstance(key)
+		data.ComponentInstanceMap[key] = newComponentInstance(cik)
 	}
 	return data.ComponentInstanceMap[key]
 }
 
 // Record dependency for component instance
-func (data *ServiceUsageData) recordResolvedAndDependency(key string, dependency *Dependency) {
-	data.getComponentInstanceEntry(key).setResolved(true)
-	data.getComponentInstanceEntry(key).addDependency(dependency.GetID())
+func (data *ServiceUsageData) recordResolvedAndDependency(cik *ComponentInstanceKey, dependency *Dependency) {
+	instance := data.getComponentInstanceEntry(cik)
+	instance.setResolved(true)
+	instance.addDependency(dependency.GetID())
 }
 
 // Record processing order for component instance
-func (data *ServiceUsageData) recordProcessingOrder(key string) {
+func (data *ServiceUsageData) recordProcessingOrder(cik *ComponentInstanceKey) {
+	key := cik.GetKey()
 	if !data.componentProcessingOrderHas[key] {
 		data.componentProcessingOrderHas[key] = true
 		data.ComponentProcessingOrder = append(data.ComponentProcessingOrder, key)
@@ -98,42 +101,41 @@ func (data *ServiceUsageData) recordProcessingOrder(key string) {
 }
 
 // Stores calculated discovery params for component instance
-func (data *ServiceUsageData) recordCodeParams(key string, codeParams NestedParameterMap) {
-	data.getComponentInstanceEntry(key).addCodeParams(codeParams)
+func (data *ServiceUsageData) recordCodeParams(cik *ComponentInstanceKey, codeParams NestedParameterMap) {
+	data.getComponentInstanceEntry(cik).addCodeParams(codeParams)
 }
 
 // Stores calculated discovery params for component instance
-func (data *ServiceUsageData) recordDiscoveryParams(key string, discoveryParams NestedParameterMap) {
-	data.getComponentInstanceEntry(key).addDiscoveryParams(discoveryParams)
+func (data *ServiceUsageData) recordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams NestedParameterMap) {
+	data.getComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
 }
 
 // Stores calculated labels for component instance
-func (data *ServiceUsageData) recordLabels(key string, labels LabelSet) {
-	data.getComponentInstanceEntry(key).addLabels(labels)
-
+func (data *ServiceUsageData) recordLabels(cik *ComponentInstanceKey, labels LabelSet) {
+	data.getComponentInstanceEntry(cik).addLabels(labels)
 }
 
 // Stores an outgoing edge for component instance as we are traversing the graph
-func (data *ServiceUsageData) storeEdge(key string, keyDst string) {
+func (data *ServiceUsageData) storeEdge(src *ComponentInstanceKey, dst *ComponentInstanceKey) {
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that
-	if len(key) > 0 && len(keyDst) > 0 {
-		data.getComponentInstanceEntry(key).addEdgeOut(keyDst)
-		data.getComponentInstanceEntry(keyDst).addEdgeIn(key)
+	if src != nil && dst != nil {
+		data.getComponentInstanceEntry(src).addEdgeOut(dst.GetKey())
+		data.getComponentInstanceEntry(dst).addEdgeIn(src.GetKey())
 	}
 }
 
 // Stores rule log entry, attaching it to component instance by dependency
-func (data *ServiceUsageData) storeRuleLogEntry(key string, dependency *Dependency, entry *RuleLogEntry) {
-	data.getComponentInstanceEntry(key).addRuleLogEntries(dependency.GetID(), entry)
+func (data *ServiceUsageData) storeRuleLogEntry(cik *ComponentInstanceKey, dependency *Dependency, entry *RuleLogEntry) {
+	data.getComponentInstanceEntry(cik).addRuleLogEntries(dependency.GetID(), entry)
 }
 
 // Appends data to the current ServiceUsageData
 func (data *ServiceUsageData) appendData(ops *ServiceUsageData) {
-	for key, instance := range ops.ComponentInstanceMap {
-		data.getComponentInstanceEntry(key).appendData(instance)
+	for _, instance := range ops.ComponentInstanceMap {
+		data.getComponentInstanceEntry(instance.Key).appendData(instance)
 	}
 	for _, key := range ops.ComponentProcessingOrder {
-		data.recordProcessingOrder(key)
+		data.recordProcessingOrder(ops.ComponentInstanceMap[key].Key)
 	}
 }
 

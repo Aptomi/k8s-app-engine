@@ -28,6 +28,22 @@ Items to complete:
   - We need to have packages completely independent. With their own independent code coverage. Can't rely on cross-package tests
   - Also see https://github.com/pierrre/gotestcover
 
+7. Reformat, deal with code style and missing comments
+
+8. Shall we consider renaming .User -> .Consumer?
+
+9. Component keys
+   - permanent key: service, context, allocation, component
+   - additional keys defined by the context:
+        e.g. "stage" means that "User.ID" gets inserted into the key
+
+   - Think about Discovery.instance
+   - Get rid of allocationNameResolved -> allocation key resolution
+
+   // keyArray := strings.Split(key, "#") --- fix those as well
+   // if component != ComponentRootName {
+   get rid of ComponentRootName everywhere
+
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)

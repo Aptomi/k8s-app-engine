@@ -5,6 +5,8 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	"errors"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -41,8 +43,8 @@ type resolutionNode struct {
 	// reference to the context that was matched
 	context *Context
 
-	// reference to the allocation name that was matched and resolved
-	allocationNameResolved string
+	// reference to the allocation keys that were resolved
+	allocationKeysResolved []string
 
 	// reference to the current node in discovery tree for components announcing their discovery properties
 	// component1...component2...component3 -> component instance key
@@ -52,16 +54,16 @@ type resolutionNode struct {
 	component *ServiceComponent
 
 	// reference to the current component key
-	componentKey string
+	componentKey *ComponentInstanceKey
 
 	// reference to the current labels during component processing
 	componentLabels LabelSet
 
 	// reference to the current service key
-	serviceKey string
+	serviceKey *ComponentInstanceKey
 
 	// reference to the last key we arrived with, so we can reconstruct graph edges between keys
-	arrivalKey string
+	arrivalKey *ComponentInstanceKey
 
 	// reference to rule log writer
 	ruleLogWriter *RuleLogWriter
@@ -165,14 +167,14 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 			"service":    node.service.GetName(),
 			"component":  node.component.Name,
 			"context":    node.context.GetName(),
-			"allocation": node.allocationNameResolved,
+			"allocation": node.context.Allocation.Name,
 		}).Info("Processing dependency on code execution")
 	} else if node.component.Service != "" {
 		Debug.WithFields(log.Fields{
 			"service":          node.service.GetName(),
 			"component":        node.component.Name,
 			"context":          node.context.GetName(),
-			"allocation":       node.allocationNameResolved,
+			"allocation":       node.context.Allocation.Name,
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 	} else {
@@ -185,16 +187,15 @@ func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 
 func (node *resolutionNode) cannotResolve() error {
 	Debug.WithFields(log.Fields{
-		"service":                node.serviceName,
-		"componentObj":           node.component,
-		"contextObj":             node.context,
-		"allocationNameResolved": node.allocationNameResolved,
+		"service":      node.serviceName,
+		"componentObj": node.component,
+		"contextObj":   node.context,
 	}).Info("Cannot resolve instance")
 
 	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
-	if len(node.serviceKey) <= 0 {
+	if node.serviceKey == nil {
 		// Create service key
-		node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, nil)
+		node.serviceKey = node.createComponentKey(nil)
 
 		// Once instance is figured out, make sure to attach rule logs to that instance
 		node.ruleLogWriter.attachToInstance(node.serviceKey)
@@ -253,38 +254,55 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) *Context {
 }
 
 // Helper to get a matched allocation
-func (node *resolutionNode) resolveAllocationName(policy *Policy) string {
+func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, error) {
 	// If there is no allocation, exit
 	if node.context.Allocation == nil {
-		Debug.WithFields(log.Fields{
-			"service": node.service.GetName(),
-			"context": node.context.GetName(),
-			"user":    node.user.Name,
-		}).Info("No allocation present")
-		return ""
+		return nil, errors.New("No allocation present")
 	}
 
-	// Resolve allocation name (it can be dynamic, depending on user labels)
-	allocationNameResolved, err := node.context.ResolveAllocationName(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
-	if err != nil {
-		Debug.WithFields(log.Fields{
-			"service":        node.service.GetName(),
-			"context":        node.context.GetName(),
-			"allocationName": node.context.Allocation.Name,
-			"user":           node.user.Name,
-			"error":          err,
-		}).Panic("Cannot resolve name for an allocation")
+	// Resolve allocation keys (they can be dynamic, depending on user labels)
+	result := []string{}
+	for _, key := range node.context.Allocation.Keys {
+		keyResolved, err := node.resolveAllocationKey(key, node.getContextualDataForAllocationTemplate())
+		if err != nil {
+			Debug.WithFields(log.Fields{
+				"service":    node.service.GetName(),
+				"context":    node.context.GetName(),
+				"allocation": node.context.Allocation.Name,
+				"key":        key,
+				"user":       node.user.Name,
+				"error":      err,
+			}).Info("Cannot resolve key within an allocation")
+			return nil, err
+		}
+		result = append(result, keyResolved)
 	}
-	Debug.WithFields(log.Fields{
-		"service":            node.service.GetName(),
-		"context":            node.context.GetName(),
-		"allocationName":     node.context.Allocation.Name,
-		"allocationResolved": node.allocationNameResolved,
-		"user":               node.user.Name,
-	}).Info("Allocation name resolved")
 
-	node.ruleLogWriter.addRuleLogEntry(entryAllocationNameResolved(node.service, node.context, allocationNameResolved))
-	return allocationNameResolved
+	if len(node.context.Allocation.Keys) > 0 {
+		Debug.WithFields(log.Fields{
+			"service":    node.service.GetName(),
+			"context":    node.context.GetName(),
+			"allocation": node.context.Allocation.Name,
+			"user":       node.user.Name,
+		}).Info("All allocation keys resolved")
+		node.ruleLogWriter.addRuleLogEntry(entryAllocationKeysResolved(node.service, node.context, result))
+	}
+	return result, nil
+}
+
+// resolveAllocationKey resolves allocation key
+func (node *resolutionNode) resolveAllocationKey(key string, parameters *template.TemplateParameters) (string, error) {
+	return node.cache.templateCache.Evaluate(key, parameters)
+}
+
+// createComponentKey creates a component key
+func (node *resolutionNode) createComponentKey(component *ServiceComponent) *ComponentInstanceKey {
+	return NewComponentInstanceKey(
+		node.serviceName,
+		node.context,
+		node.allocationKeysResolved,
+		component,
+	)
 }
 
 func (node *resolutionNode) getCluster(policy *Policy, labels LabelSet, context *Context) *Cluster {
@@ -340,7 +358,7 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
-	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey)
+	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey.GetKey())
 	for k, v := range componentDiscoveryParams {
 		node.discoveryTreeNode.GetNestedMap(node.component.Name)[k] = v
 	}

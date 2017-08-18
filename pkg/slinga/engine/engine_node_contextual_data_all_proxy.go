@@ -28,8 +28,27 @@ func (node *resolutionNode) proxyUser(user *language.User) interface{} {
 }
 
 // How discovery tree is visible from the policy language
-func (node *resolutionNode) proxyDiscovery(discoveryTree NestedParameterMap, componentKey string) interface{} {
+func (node *resolutionNode) proxyDiscovery(discoveryTree NestedParameterMap, cik *ComponentInstanceKey) interface{} {
 	result := discoveryTree.MakeCopy()
-	result["instance"] = EscapeName(componentKey)
+
+	// special case to announce own component instance
+	result["instance"] = EscapeName(cik.GetKey())
+
+	// special case to announce own component ID
+	result["instanceId"] = HashFnv(cik.GetKey())
+
+	// expose parent service information as well
+	serviceCik := cik.GetParentServiceKey()
+	if cik != serviceCik {
+		// create a bucket for service
+		result["service"] = NestedParameterMap{}
+
+		// special case to announce own component instance
+		result.GetNestedMap("service")["instance"] = EscapeName(serviceCik.GetKey())
+
+		// special case to announce own component ID
+		result.GetNestedMap("service")["instanceId"] = HashFnv(serviceCik.GetKey())
+	}
+
 	return result
 }

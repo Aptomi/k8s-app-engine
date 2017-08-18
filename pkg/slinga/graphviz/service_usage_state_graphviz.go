@@ -179,34 +179,31 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 	}
 
 	// Second, visualize evaluated links
-	for key, linkStruct := range state.GetResolvedData().ComponentInstanceMap {
-		keyArray := strings.Split(key, "#")
-		service := keyArray[0]
-		contextAndAllocation := keyArray[1] + "#" + keyArray[2]
-		component := keyArray[3]
+	for _, instance := range state.GetResolvedData().ComponentInstanceMap {
+		key := instance.Key
 
 		// only add edges to "root" components (i.e. services)
-		if component != ComponentRootName {
+		if key.ComponentName != ComponentRootName {
 			continue
 		}
 
 		// Key for allocation
-		serviceAllocationKey := service + "_" + contextAndAllocation
+		serviceAllocationKey := key.ServiceName + "_" + key.ContextName + "#" + key.GetAllocationNameWithKeys()
 
 		// Add a node with service
-		addNodeOnce(graph, "cluster_Services", service, nil, was)
+		addNodeOnce(graph, "cluster_Services", key.ServiceName, nil, was)
 
 		// Add box/subgraph for a given service, containing all its allocations
-		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_"+service, map[string]string{"label": "Allocations for service: " + service}, was)
+		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_"+key.ServiceName, map[string]string{"label": "Allocations for service: " + key.ServiceName}, was)
 
 		// Add a node with allocation
-		addNodeOnce(graph, "cluster_Service_Allocations_"+service, serviceAllocationKey, map[string]string{"label": "Context: " + keyArray[1] + "\n" + "Allocation: " + keyArray[2]}, was)
+		addNodeOnce(graph, "cluster_Service_Allocations_"+key.ServiceName, serviceAllocationKey, map[string]string{"label": "Context: " + key.ContextName + "\n" + "Allocation: " + key.GetAllocationNameWithKeys()}, was)
 
 		// Add an edge from service to allocation box
-		for dependencyID := range linkStruct.DependencyIds {
+		for dependencyID := range instance.DependencyIds {
 			userID := state.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
-			addEdge(graph, service, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+			addEdge(graph, key.ServiceName, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 

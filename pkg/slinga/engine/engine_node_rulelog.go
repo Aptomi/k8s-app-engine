@@ -57,7 +57,7 @@ type RuleLogWriter struct {
 	data *ServiceUsageData
 
 	// instance key where rule logs should be attached to (initially will be empty, but will be set as evaluation goes on)
-	key string
+	cik *ComponentInstanceKey
 
 	// dependency where rule logs should be attached to
 	dependency *Dependency
@@ -74,18 +74,18 @@ func NewRuleLogWriter(data *ServiceUsageData, dependency *Dependency) *RuleLogWr
 	}
 }
 
-func (writer *RuleLogWriter) attachToInstance(key string) {
-	if len(key) <= 0 {
+func (writer *RuleLogWriter) attachToInstance(cik *ComponentInstanceKey) {
+	if cik == nil {
 		Debug.Panic("Empty instance key")
 	}
-	writer.key = key
+	writer.cik = cik
 	writer.flushQueue()
 }
 
 func (writer *RuleLogWriter) flushQueue() {
 	// store all items from queue
 	for _, entry := range writer.queue {
-		writer.data.storeRuleLogEntry(writer.key, writer.dependency, entry)
+		writer.data.storeRuleLogEntry(writer.cik, writer.dependency, entry)
 	}
 }
 
@@ -94,12 +94,12 @@ func (writer *RuleLogWriter) addRuleLogEntry(entry *RuleLogEntry) {
 	if entry == nil {
 		return
 	}
-	if len(writer.key) <= 0 {
+	if writer.cik == nil {
 		// no key is set -> put into queue
 		writer.queue = append(writer.queue, entry)
 	} else {
 		// store item directly
-		writer.data.storeRuleLogEntry(writer.key, writer.dependency, entry)
+		writer.data.storeRuleLogEntry(writer.cik, writer.dependency, entry)
 	}
 }
 
@@ -221,21 +221,19 @@ func entryContextGlobalRulesNoViolations(context *Context, noViolations bool) *R
 	)
 }
 
-func entryAllocationNameResolved(service *Service, context *Context, allocationNameResolved string) *RuleLogEntry {
+func entryAllocationKeysResolved(service *Service, context *Context, allocationKeys [] string) *RuleLogEntry {
 	var message string
-	if len(allocationNameResolved) > 0 {
-		message = fmt.Sprintf("Allocation name resolved for service '%s', context '%s': %s", service.GetName(), context.GetName(), allocationNameResolved)
-	} else {
-		message = fmt.Sprintf("Unable to resolve allocation name for service '%s', context '%s'", service.GetName(), context.GetName())
+	if len(allocationKeys) > 0 {
+		message = fmt.Sprintf("Allocation keys resolved for service '%s', context '%s': %v", service.GetName(), context.GetName(), allocationKeys)
 	}
 
 	return NewRuleLogEntry(
 		RuleLogTypeInfo,
 		RuleLogScopeLocal,
-		"Name Resolution (Allocation)",
+		"Keys Resolution (Allocation)",
 		message,
 		"N/A",
-		len(allocationNameResolved) > 0,
-		len(allocationNameResolved) == 0,
+		true,
+		false,
 	)
 }

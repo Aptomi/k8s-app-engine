@@ -47,9 +47,6 @@ func filterMatches(value string, filterValue string) bool {
 
 // Adds to the graph nodes/edges which are triggered by usage of a given dependency
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
-	// retrieve instance
-	service, context, allocation, component := engine.ParseServiceUsageKey(key)
-
 	// try to get this component instance from resolved data
 	v := view.state.GetResolvedData().ComponentInstanceMap[key]
 
@@ -59,9 +56,9 @@ func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode,
 	}
 
 	// if it's a service, add node and connext with previous
-	if component == engine.ComponentRootName {
+	if v.Key.ComponentName == engine.ComponentRootName {
 		// add service instance node
-		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[service], context, allocation, v, nextLevel <= 1)
+		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, nextLevel <= 1)
 		view.g.addNode(svcInstanceNode, nextLevel)
 
 		// connect service instance nodes

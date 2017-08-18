@@ -6,7 +6,6 @@
     userid: cn=Carol,ou=people,o=aptomiOrg
     service: twitter_stats
     labels:
-        tstype: stage
         tsvisimage: demo-v61
         # San Francisco, Boston, New York
         locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41

@@ -15,7 +15,7 @@ type ComponentInstance struct {
 	Resolved bool
 
 	// Key
-	Key string
+	Key *ComponentInstanceKey
 
 	// When this instance was created & last updated on
 	CreatedOn time.Time
@@ -38,9 +38,9 @@ type ComponentInstance struct {
 }
 
 // Creates a new component instance
-func newComponentInstance(key string) *ComponentInstance {
+func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
-		Key:                  key,
+		Key:                  cik,
 		DependencyIds:        make(map[string]bool),
 		CalculatedLabels:     NewLabelSetEmpty(),
 		CalculatedDiscovery:  NestedParameterMap{},
@@ -107,12 +107,12 @@ func (instance *ComponentInstance) addRuleLogEntries(dependencyID string, entry 
 	instance.RuleLog[dependencyID] = append(instance.RuleLog[dependencyID], entry...)
 }
 
-func (instance *ComponentInstance) addEdgeIn(key string) {
-	instance.EdgesIn[key] = true
+func (instance *ComponentInstance) addEdgeIn(srcKey string) {
+	instance.EdgesIn[srcKey] = true
 }
 
-func (instance *ComponentInstance) addEdgeOut(keyDst string) {
-	instance.EdgesOut[keyDst] = true
+func (instance *ComponentInstance) addEdgeOut(dstKey string) {
+	instance.EdgesOut[dstKey] = true
 }
 
 func (instance *ComponentInstance) updateTimes(createdOn time.Time, updatedOn time.Time) {

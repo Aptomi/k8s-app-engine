@@ -2,7 +2,6 @@ package language
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 )
 
 // Context for a given service
@@ -11,8 +10,9 @@ type Context struct {
 
 	Criteria     *Criteria
 	ChangeLabels LabelOperations `yaml:"change-labels"`
-	Allocation   *struct {
+	Allocation *struct {
 		Name string
+		Keys []string
 	}
 }
 
@@ -23,12 +23,4 @@ func (context *Context) Matches(params *expression.ExpressionParameters, cache e
 
 func (context *Context) GetObjectType() SlingaObjectType {
 	return TypePolicy
-}
-
-// ResolveName resolves name for an allocation
-func (context *Context) ResolveAllocationName(parameters *template.TemplateParameters, cache template.TemplateCache) (string, error) {
-	if cache == nil {
-		cache = template.NewTemplateCache()
-	}
-	return cache.Evaluate(context.Allocation.Name, parameters)
 }

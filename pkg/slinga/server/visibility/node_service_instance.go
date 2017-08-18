@@ -51,11 +51,10 @@ func (n serviceInstanceNode) getLabel() string {
 	// for not resolved instances
 	if !n.instance.Resolved {
 		if n.service == nil {
-			serviceName, _, _, _ := engine.ParseServiceUsageKey(n.key)
 			return fmt.Sprintf(
 				`<b>%s</b>
 					ERROR`,
-				html.EscapeString(serviceName),
+				html.EscapeString(n.instance.Key.ServiceName),
 			)
 		}
 

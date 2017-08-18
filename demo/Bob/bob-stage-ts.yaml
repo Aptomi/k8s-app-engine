@@ -6,7 +6,6 @@
     userid: cn=Bob,ou=people,o=aptomiOrg
     service: twitter_stats
     labels:
-        tstype: stage
         tsvisimage: demo-v61
         # Mexico
         locations: -119.883662,13.301958,-91.780634,27.018021

@@ -20,7 +20,9 @@
         b:
 
     allocation:
-      name: "prod-{{.User.Name}}"
+      name: prod
+      keys:
+        - "{{.User.Name}}"
 
 # Context definition for prod (low priority)
 - kind: context
@@ -44,7 +46,10 @@
         some-label-to-be-removed:
 
     allocation:
-      name: "prod-team-{{.User.Labels.team}}-{{index .Labels \"prod-low-ctx\"}}"
+      name: prod
+      keys:
+        - "team-{{.User.Labels.team}}"
+        - "{{index .Labels \"prod-low-ctx\"}}"
 
 # Context definition for test
 - kind: context
@@ -72,4 +77,6 @@
         b:
 
     allocation:
-      name: "test-{{.User.Labels.team}}"
+      name: test
+      keys:
+        - "{{.User.Labels.team}}"

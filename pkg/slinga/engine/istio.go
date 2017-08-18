@@ -109,8 +109,8 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 }
 
 func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, error) {
-	serviceName, _, _, componentName := ParseServiceUsageKey(key)
-	component := usage.Policy.Services[serviceName].GetComponentsMap()[componentName]
+	instance := usage.GetResolvedData().ComponentInstanceMap[key]
+	component := usage.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	labels := usage.GetResolvedData().ComponentInstanceMap[key].CalculatedLabels
 

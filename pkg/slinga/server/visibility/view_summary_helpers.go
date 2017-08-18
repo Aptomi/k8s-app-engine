@@ -27,8 +27,8 @@ func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) stri
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	_, context, allocation, _ := engine.ParseServiceUsageKey(dependency.ServiceKey)
-	return fmt.Sprintf("%s/%s", context, allocation)
+	instance := view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey]
+	return fmt.Sprintf("%s/%s", instance.Key.ContextName, instance.Key.AllocationName)
 }
 
 func (view SummaryView) getRuleAppliedTo(rule *Rule) string {
@@ -49,17 +49,16 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 }
 
 func (view SummaryView) getInstanceStats(instance *engine.ComponentInstance) string {
-	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key].GetRunningTime()).Humanize()
+	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].GetRunningTime()).Humanize()
 	return fmt.Sprintf("%s", runningTime)
 }
 
 func (view SummaryView) getResolvedClusterNameByInst(instance *engine.ComponentInstance) string {
-	return view.state.ResolvedData.ComponentInstanceMap[instance.Key].CalculatedLabels.Labels["cluster"]
+	return view.state.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels["cluster"]
 }
 
 func (view SummaryView) getResolvedContextNameByInst(instance *engine.ComponentInstance) string {
-	_, context, allocation, _ := engine.ParseServiceUsageKey(instance.Key)
-	return fmt.Sprintf("%s/%s", context, allocation)
+	return fmt.Sprintf("%s/%s", instance.Key.ContextName, instance.Key.AllocationName)
 }
 
 func getWebIDByComponentKey(key string) string {

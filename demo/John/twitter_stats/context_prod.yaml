@@ -21,4 +21,4 @@
 
     # Single production instance
     allocation:
-      name: "production"
+      name: prod

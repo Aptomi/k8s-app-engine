@@ -58,14 +58,14 @@ func Endpoints(currentUserID string, state engine.ServiceUsageState) endpointsVi
 		endpoints := state.Endpoints(userID)
 
 		for key, links := range endpoints {
-			service, context, allocation, component := engine.ParseServiceUsageKey(key)
+			instance := state.ResolvedData.ComponentInstanceMap[key]
 			rLinks := make([]rLink, 0)
 
 			for linkName, link := range links {
 				rLinks = append(rLinks, rLink{linkName, link})
 			}
 
-			r = append(r, rEndpoint{service, context, allocation, component, rLinks})
+			r = append(r, rEndpoint{instance.Key.ServiceName, instance.Key.ContextName, instance.Key.AllocationName, instance.Key.ComponentName, rLinks})
 		}
 
 		uR.Endpoints = append(uR.Endpoints, userEndpoints{users[userID], r})

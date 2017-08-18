@@ -15,7 +15,7 @@ func processParameterTreeNode(node interface{}, parameters *template.TemplatePar
 	if paramsStr, ok := node.(string); ok {
 		evaluatedValue, err := cache.Evaluate(paramsStr, parameters)
 		if err != nil {
-			return nil
+			return err
 		}
 		result[key] = EscapeName(evaluatedValue)
 		return nil

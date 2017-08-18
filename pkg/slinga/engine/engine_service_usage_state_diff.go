@@ -260,13 +260,13 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 		// see if a component needs to be instantiated
 		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
 			diff.ComponentInstantiate[k] = true
-			diff.updateTimes(k, time.Now(), time.Now())
+			diff.updateTimes(uNext.Key, time.Now(), time.Now())
 		}
 
 		// see if a component needs to be destructed
 		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
 			diff.ComponentDestruct[k] = true
-			diff.updateTimes(k, uPrev.CreatedOn, time.Now())
+			diff.updateTimes(uPrev.Key, uPrev.CreatedOn, time.Now())
 		}
 
 		// see if a component needs to be updated
@@ -274,9 +274,9 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				diff.ComponentUpdate[k] = true
-				diff.updateTimes(k, uPrev.CreatedOn, time.Now())
+				diff.updateTimes(uNext.Key, uPrev.CreatedOn, time.Now())
 			} else {
-				diff.updateTimes(k, uPrev.CreatedOn, uPrev.UpdatedOn)
+				diff.updateTimes(uNext.Key, uPrev.CreatedOn, uPrev.UpdatedOn)
 			}
 		}
 
@@ -297,9 +297,9 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 }
 
 // updated timestamps for component (and root service, if/as needed)
-func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, updatedOn time.Time) {
+func (diff *ServiceUsageStateDiff) updateTimes(cik *ComponentInstanceKey, createdOn time.Time, updatedOn time.Time) {
 	// update for a given node
-	instance := diff.Next.GetResolvedData().ComponentInstanceMap[k]
+	instance := diff.Next.GetResolvedData().ComponentInstanceMap[cik.GetKey()]
 	if instance == nil {
 		// likely this component has been deleted as a part of the diff
 		return
@@ -307,10 +307,9 @@ func (diff *ServiceUsageStateDiff) updateTimes(k string, createdOn time.Time, up
 	instance.updateTimes(createdOn, updatedOn)
 
 	// if it's a component instance, then update for its parent service instance as well
-	serviceName, contextName, allocationName, componentName := ParseServiceUsageKey(k)
-	if componentName != ComponentRootName {
-		serviceKey := createServiceUsageKeyFromStr(serviceName, contextName, allocationName, ComponentRootName)
-		diff.updateTimes(serviceKey, createdOn, updatedOn)
+	serviceCik := cik.GetParentServiceKey()
+	if serviceCik != cik {
+		diff.updateTimes(serviceCik, createdOn, updatedOn)
 	}
 }
 
@@ -436,9 +435,9 @@ func (diff ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
 func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 	// If we are requesting full policy processing, then we will need to re-create all objects
 	if full {
-		for k, v := range diff.Next.GetResolvedData().ComponentInstanceMap {
-			diff.ComponentInstantiate[k] = true
-			diff.updateTimes(k, v.CreatedOn, time.Now())
+		for key, instance := range diff.Next.GetResolvedData().ComponentInstanceMap {
+			diff.ComponentInstantiate[key] = true
+			diff.updateTimes(instance.Key, instance.CreatedOn, time.Now())
 		}
 	}
 }
@@ -496,13 +495,13 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _, _, componentName := ParseServiceUsageKey(key)
-			component := diff.Next.Policy.Services[serviceName].GetComponentsMap()[componentName]
+			instance := diff.Next.GetResolvedData().ComponentInstanceMap[key]
+			component := diff.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 			if component == nil {
 				Debug.WithFields(log.Fields{
 					"serviceKey": key,
-					"service":    serviceName,
+					"service":    instance.Key.ServiceName,
 				}).Info("Instantiating service")
 
 				// TODO: add processing code
@@ -540,12 +539,12 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
+			instance := diff.Next.GetResolvedData().ComponentInstanceMap[key]
+			component := diff.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{
 					"serviceKey": key,
-					"service":    serviceName,
+					"service":    instance.Key.ServiceName,
 				}).Info("Updating service")
 
 				// TODO: add processing code
@@ -583,12 +582,12 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				diff.progressBar.Incr()
 			}
 
-			serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
-			component := diff.Prev.Policy.Services[serviceName].GetComponentsMap()[componentName]
+			instance := diff.Prev.GetResolvedData().ComponentInstanceMap[key]
+			component := diff.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 			if component == nil {
 				Debug.WithFields(log.Fields{
 					"serviceKey": key,
-					"service":    serviceName,
+					"service":    instance.Key.ServiceName,
 				}).Info("Destructing service")
 
 				// TODO: add processing code

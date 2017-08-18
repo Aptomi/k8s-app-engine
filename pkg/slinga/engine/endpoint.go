@@ -27,8 +27,7 @@ func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[st
 			continue
 		}
 
-		serviceName, _ /*contextName*/, _ /*allocationName*/, componentName := ParseServiceUsageKey(key)
-		component := state.Policy.Services[serviceName].GetComponentsMap()[componentName]
+		component := state.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 		if component != nil && component.Code != nil {
 			codeExecutor, err := GetCodeExecutor(component.Code, key, state.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
 			if err != nil {

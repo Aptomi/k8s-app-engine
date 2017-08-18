@@ -27,7 +27,7 @@ func (state *ServiceUsageState) ResolveAllDependencies() error {
 
 			// record and put usages in the right place
 			d.Resolved = node.resolved
-			d.ServiceKey = node.serviceKey
+			d.ServiceKey = node.serviceKey.GetKey()
 			if node.resolved {
 				state.ResolvedData.appendData(node.data)
 			} else {
@@ -69,13 +69,13 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
 
 	// Resolve allocation name
-	node.allocationNameResolved = node.resolveAllocationName(state.Policy)
-	if len(node.allocationNameResolved) <= 0 {
+	node.allocationKeysResolved, err = node.resolveAllocationKeys(state.Policy)
+	if err != nil {
 		return node.cannotResolve()
 	}
 
 	// Create service key
-	node.serviceKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, nil)
+	node.serviceKey = node.createComponentKey(nil)
 
 	// Once instance is figured out, make sure to attach rule logs to that instance
 	node.ruleLogWriter.attachToInstance(node.serviceKey)
@@ -96,7 +96,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	// Note that discovery variables can refer to other variables announced by dependents in the discovery tree
 	for _, node.component = range componentsOrdered {
 		// Create key
-		node.componentKey = createServiceUsageKey(node.serviceName, node.context, node.allocationNameResolved, node.component)
+		node.componentKey = node.createComponentKey(node.component)
 
 		// Store edge (service instance -> component instance)
 		node.data.storeEdge(node.serviceKey, node.componentKey)
