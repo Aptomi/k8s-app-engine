@@ -1,70 +1,59 @@
-// Object package includes all unified Object stuff and ways to persist it
+// Package object includes all unified Object stuff and ways to persist it
 package object
 
-// ObjectKind represents object name like Cluster, Service, Context, etc.
-type ObjectKind string
+// Kind represents object name like Cluster, Service, Context, etc.
+type Kind string
 
-// Object interface represents unified object that could be stored in DB, accessed through API, etc.
-type Object interface {
-	GetKind() ObjectKind
+// BaseObject interface represents unified object that could be stored in DB, accessed through API, etc.
+type BaseObject interface {
+	GetKind() Kind
 	GetKey() Key
 	GetUID() UID
 	GetGeneration() Generation
 	GetName() string
 	GetNamespace() string
-	GetSpec() interface{}
-
-	// TODO(slukjanov): should any object have owner?
 }
 
-// BaseObject provides basic implementation of the Object interface
-type BaseObject struct {
-	Kind     ObjectKind
-	Metadata BaseObjectMetadata
-	Spec     interface{}
-}
-
-// BaseObjectMetadata represents standard metadata for unified objects
-type BaseObjectMetadata struct {
+// Metadata represents standard metadata for unified objects.
+// It implements BaseObject interface and it's enough to include it into any struct to make object DB and API
+// layers compatible.
+type Metadata struct {
+	Kind       Kind
 	UID        UID
 	Generation Generation
 	Name       string
 	Namespace  string
 	// TODO(slukjanov): do we need CreatedAt string? I think yes
+	// TODO(slukjanov): should any object have owner?
 }
 
-// GetKind returns object's ObjectKind
-func (object *BaseObject) GetKind() ObjectKind {
-	return object.Kind
+// GetKind returns object's Kind
+func (meta *Metadata) GetKind() Kind {
+	return meta.Kind
 }
 
 // GetUID returns object's UID
-func (object *BaseObject) GetUID() UID {
-	return object.Metadata.UID
+func (meta *Metadata) GetUID() UID {
+	return meta.UID
 }
 
 // GetGeneration returns object's Generation ("version")
-func (object *BaseObject) GetGeneration() Generation {
-	return object.Metadata.Generation
+func (meta *Metadata) GetGeneration() Generation {
+	return meta.Generation
 }
 
 // GetKey returns object's Key
 // TODO(slukjanov): should we only store key or uid / gen? or cache key inside metadata?
-func (object *BaseObject) GetKey() Key {
-	return KeyFromParts(object.Metadata.UID, object.Metadata.Generation)
+func (meta *Metadata) GetKey() Key {
+	return KeyFromParts(meta.UID, meta.Generation)
 }
 
 // GetNamespace returns object's Namespace
-func (object *BaseObject) GetNamespace() string {
-	return object.Metadata.Namespace
+func (meta *Metadata) GetNamespace() string {
+	return meta.Namespace
 }
 
 // GetName returns object's Name
-func (object *BaseObject) GetName() string {
-	return object.Metadata.Name
-}
-
-// GetSpec returns object's Spec
-func (object *BaseObject) GetSpec() interface{} {
-	return object.Spec
+func (meta *Metadata) GetName() string {
+	return meta.Name
 }
