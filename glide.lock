@@ -1,5 +1,5 @@
-hash: 55d634bfbff7bbb4a8e55b45d94bd772b5dde87095bc3dd773260734ccb55125
-updated: 2017-08-17T21:51:50.815880798-07:00
+hash: 6854ca64d32b91d2d95be66eb8a9373a5baba90cb2fd60dce8deda02d042df10
+updated: 2017-08-18T03:11:08.08348188-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -20,6 +20,8 @@ imports:
   - winterm
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
+- name: github.com/boltdb/bolt
+  version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
 - name: github.com/coreos/go-oidc
   version: 5644a2f50e2d2d5ba0b474bc5bc55fea1925936d
   subpackages:
