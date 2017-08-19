@@ -61,7 +61,3 @@ func (meta *Metadata) GetNamespace() string {
 func (meta *Metadata) GetName() string {
 	return meta.Name
 }
-
-type emptyObject struct {
-	Metadata
-}
