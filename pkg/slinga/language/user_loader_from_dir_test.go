@@ -20,4 +20,6 @@ func TestLoadUsersFromDir(t *testing.T) {
 	assert.Equal(t, "Alice", userAlice.Name, "Should load Alice user by ID")
 	assert.Equal(t, "yes", userAlice.Labels["dev"], "Alice should have dev='yes' label")
 	assert.Equal(t, "no", userAlice.Labels["prod"], "Alice should have prod='no' label")
+
+	assert.Equal(t, "5 (from filesystem)", userLoader.Summary())
 }

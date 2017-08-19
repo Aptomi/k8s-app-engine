@@ -18,6 +18,5 @@ type UserLoader interface {
 
 // NewAptomiUserLoader returns configured user loader for aptomi
 func NewAptomiUserLoader() UserLoader {
-	// return NewUserLoaderFromDir(GetAptomiPolicyDir())
 	return NewUserLoaderFromLDAP(GetAptomiPolicyDir())
 }
