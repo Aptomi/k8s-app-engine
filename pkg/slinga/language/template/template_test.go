@@ -5,12 +5,38 @@ import (
 	"testing"
 )
 
-func evaluate(templateStr string, params *TemplateParameters) (string, error) {
-	t, err := NewTemplate(templateStr)
-	if err != nil {
-		return "", err
+const (
+	ResSuccess      = iota
+	ResCompileError = iota
+	ResEvalError    = iota
+)
+
+func evaluate(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *TemplateParameters) {
+	// Check for compilation
+	tmpl, err := NewTemplate(templateStr)
+	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Template compilation (success vs. error): "+templateStr) || expectedResult == ResCompileError {
+		return
 	}
-	return t.Evaluate(params)
+
+	// Check for evaluation
+	resultStr, err := tmpl.Evaluate(params)
+	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Template evaluation (success vs. error): "+templateStr) || expectedResult == ResEvalError {
+		return
+	}
+
+	// Check for result
+	assert.Equal(t, expectedStr, resultStr, "Template evaluation result: "+templateStr)
+}
+
+func evaluateWithCache(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *TemplateParameters, cache TemplateCache) {
+	// Check for compilation & evaluation
+	resultStr, err := cache.Evaluate(templateStr, params)
+	if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Template compilation (success vs. error): "+templateStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
+		return
+	}
+
+	// Check for result
+	assert.Equal(t, expectedStr, resultStr, "[Cache] Template evaluation result: "+templateStr)
 }
 
 func TestTemplateEvaluation(t *testing.T) {
@@ -31,13 +57,31 @@ func TestTemplateEvaluation(t *testing.T) {
 		},
 	})
 
-	result, err := evaluate("test-{{.User.Labels.team}}-{{.Labels.tagname}}", params)
-	assert.Nil(t, err, "Template should evaluate without errors")
-	assert.Equal(t, "test-platform_services-tagvalue", result, "Template should be evaluated correctly, user team parameter must be substituted with its value")
+	tests := []struct {
+		template       string
+		result         int
+		expectedString string
+	}{
+		// successful evaluation
+		{"test-{{.User.Labels.team}}-{{.Labels.tagname}}", ResSuccess, "test-platform_services-tagvalue"},
 
-	result, err = evaluate("test-{{.User.MissingField}}-{{.MissingObject}}", params)
-	assert.NotNil(t, err, "Template should not evaluate, because there is a missing field")
+		// missing fields
+		{"test-{{.User.MissingField}}-{{.MissingObject}}", ResEvalError, ""},
+		{"test-{{.User.Labels.missinglabel}}", ResEvalError, ""},
 
-	result, err = evaluate("test-{{.User.Labels.missinglabel}}", params)
-	assert.NotNil(t, err, "Template should not evaluate, because there is a missing label")
+		// cannot be compiled
+		{"{{ bs }}", ResCompileError, ""},
+		{"{{ index a a a a a }}", ResCompileError, ""},
+		{"{{ hello", ResCompileError, ""},
+	}
+
+	for _, test := range tests {
+		evaluate(t, test.template, test.result, test.expectedString, params)
+	}
+
+	cache := NewTemplateCache()
+	for _, test := range tests {
+		evaluateWithCache(t, test.template, test.result, test.expectedString, params, cache)
+	}
+
 }
