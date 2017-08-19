@@ -221,7 +221,7 @@ func entryContextGlobalRulesNoViolations(context *Context, noViolations bool) *R
 	)
 }
 
-func entryAllocationKeysResolved(service *Service, context *Context, allocationKeys [] string) *RuleLogEntry {
+func entryAllocationKeysResolved(service *Service, context *Context, allocationKeys []string) *RuleLogEntry {
 	var message string
 	if len(allocationKeys) > 0 {
 		message = fmt.Sprintf("Allocation keys resolved for service '%s', context '%s': %v", service.GetName(), context.GetName(), allocationKeys)

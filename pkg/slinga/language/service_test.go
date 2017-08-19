@@ -1,8 +1,8 @@
 package language
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func toStringArray(components []*ServiceComponent) []string {

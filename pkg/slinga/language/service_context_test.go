@@ -1,11 +1,11 @@
 package language
 
 import (
-	"testing"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
-	"github.com/stretchr/testify/assert"
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected bool, cache expression.ExpressionCache) {

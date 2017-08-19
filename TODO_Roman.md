@@ -18,6 +18,8 @@ Items to complete:
   - only show a particular namespace?
   - e.g. what if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string), how do we propagate this to the user?
   - debug log vs. rule log
+  - get rid of all debug in language
+  - use logging only in engine
 
 5. Code coverage & packages
   - Go tooling for code coverage works for individual packages

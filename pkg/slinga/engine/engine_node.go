@@ -1,11 +1,11 @@
 package engine
 
 import (
+	"errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
-	"errors"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency

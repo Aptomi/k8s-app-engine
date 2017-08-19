@@ -67,4 +67,3 @@ func TestLabelSetAdd(t *testing.T) {
 	labelsEqual := NewLabelSet(map[string]string{"a": "1", "b": "2", "c": "4", "d": "5", "e": "6"})
 	assert.True(t, labelsAfter.Equal(labelsEqual), "Label sets addition should work")
 }
-
