@@ -32,6 +32,6 @@
 
             zookeeper:
               externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
-              path: "/{{ .Discovery.instance }}"
+              path: "/{{ .Discovery.service.instanceId }}"
         dependencies:
           - zookeeper
