@@ -31,6 +31,8 @@ Items to complete:
 
 8. Separate progress calculation code from progress bar
 
+9. Implement polling for external entities & storing objects in DB
+
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
 

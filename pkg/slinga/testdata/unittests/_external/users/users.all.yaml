@@ -52,3 +52,11 @@
     prod: "yes"
     changinglabel: 123
 
+# Special user to test global ops flag
+- id: 6
+  name: Sam
+  labels:
+    org: corporate_it
+    is_operator: true
+    global_ops: true
+    team: global-ops-team
