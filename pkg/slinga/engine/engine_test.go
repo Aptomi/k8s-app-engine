@@ -108,10 +108,10 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 	diff := usageStateNext.CalculateDifference(&usageStatePrev)
 
 	assert.True(t, diff.ShouldGenerateNewRevision(), "Diff should have changes")
-	assert.Equal(t, 7, len(diff.ComponentInstantiate), "Diff should have component instantiations")
+	assert.Equal(t, 8, len(diff.ComponentInstantiate), "Diff should have component instantiations")
 	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
 	assert.Equal(t, 0, len(diff.ComponentUpdate), "Diff should not have any component updates")
-	assert.Equal(t, 7, len(diff.ComponentAttachDependency), "Diff should have 7 dependencies attached to components")
+	assert.Equal(t, 8, len(diff.ComponentAttachDependency), "Diff should have 7 dependencies attached to components")
 	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
 }
 
@@ -196,17 +196,4 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	timeNextUpdated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
 	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed for service")
-}
-
-func TestServiceComponentsTopologicalOrder(t *testing.T) {
-	policy := loadUnitTestsPolicy()
-	service := policy.Services["kafka"]
-
-	c, err := service.GetComponentsSortedTopologically()
-	assert.Nil(t, err, "Service components should be topologically sorted without errors")
-
-	assert.Equal(t, len(c), 3, "Component topological sort should produce correct number of values")
-	assert.Equal(t, "component1", c[0].Name, "Component topological sort should produce correct order")
-	assert.Equal(t, "component2", c[1].Name, "Component topological sort should produce correct order")
-	assert.Equal(t, "component3", c[2].Name, "Component topological sort should produce correct order")
 }
