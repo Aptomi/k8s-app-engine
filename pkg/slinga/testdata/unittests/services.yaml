@@ -64,6 +64,8 @@
           remove:
             a:
             b:
+        dependencies:
+          - component4
 
       - name: component2
         discovery:
@@ -121,3 +123,58 @@
             b:
         dependencies:
           - component2
+
+      - name: component4
+        code:
+          type: aptomi/code/unittests
+          metadata:
+            service: kafka
+            component: component4
+
+# Service definition for cyclic service
+- kind: service
+
+  metadata:
+    namespace: main
+    name: cyclic
+
+  spec:
+    owner: 1
+
+    components:
+      - name: component1
+        dependencies:
+          - component2
+      - name: component2
+        dependencies:
+          - component3
+      - name: component3
+        dependencies:
+          - component4
+      - name: component4
+        dependencies:
+          - component2
+
+# Service definition for cyclic service
+- kind: service
+
+  metadata:
+    namespace: main
+    name: badcomponentdependency
+
+  spec:
+    owner: 1
+
+    components:
+      - name: component1
+        dependencies:
+          - component2
+      - name: component2
+        dependencies:
+          - component3
+      - name: component3
+        dependencies:
+          - component4
+      - name: component4
+        dependencies:
+          - component5

@@ -9,9 +9,9 @@ func TestLoadPolicy(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
 	// Check services
-	assert.Equal(t, 2, len(policy.Services), "Two services should be loaded")
+	assert.Equal(t, 4, len(policy.Services), "Two services should be loaded")
 	assert.Equal(t, "kafka", policy.Services["kafka"].GetName(), "Service name should be correct")
-	assert.Equal(t, 3, len(policy.Services["kafka"].Components), "Service should have components")
+	assert.Equal(t, 4, len(policy.Services["kafka"].Components), "Service should have components")
 
 	// Check clusters
 	assert.Equal(t, 2, len(policy.Clusters), "Two clusters should be loaded")
