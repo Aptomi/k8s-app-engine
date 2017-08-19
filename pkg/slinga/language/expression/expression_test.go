@@ -5,18 +5,39 @@ import (
 	"testing"
 )
 
-func evaluate(t *testing.T, expressionStr string, params *ExpressionParameters) bool {
+const (
+	ResTrue = iota
+	ResFalse = iota
+	ResCompileError = iota
+	ResEvalError = iota
+)
+
+func evaluate(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int) {
+	// Check for compilation
 	expr, err := NewExpression(expressionStr)
-	if err != nil {
-		t.Logf("Expression didn't compile correctly: %s (%v)", expressionStr, err)
-		t.Fail()
+	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Expression compilation (success vs. error): " + expressionStr) || expectedResult == ResCompileError {
+		return
 	}
+
+	// Check for evaluation
 	result, err := expr.EvaluateAsBool(params)
-	if err != nil {
-		t.Logf("Expression evaluated with errors: %s (%v)", expressionStr, err)
-		t.Fail()
+	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Expression evaluation (success vs. error): " + expressionStr) || expectedResult == ResEvalError {
+		return
 	}
-	return result
+
+	// Check for result
+	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: " + expressionStr)
+}
+
+func evaluateWithCache(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int, cache ExpressionCache) {
+	// Check for compilation
+	result, err := cache.EvaluateAsBool(expressionStr, params)
+	if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Expression compilation && evaluation (success vs. error): " + expressionStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
+		return
+	}
+
+	// Check for result
+	assert.Equal(t, expectedResult == ResTrue, result, "[Cache] Expression evaluation result: " + expressionStr)
 }
 
 func TestExpressions(t *testing.T) {
@@ -42,45 +63,56 @@ func TestExpressions(t *testing.T) {
 		},
 	)
 
-	// simple case with bool variable
-	assert.Equal(t, true, evaluate(t, "anotherbar == true", params), "Evaluate expression with boolean")
+	tests := []struct {
+		expression string
+		result int
+	} {
+		// true (bools, ints, strings)
+		{"anotherbar == true", ResTrue},
+		{"anotherbar", ResTrue},
+		{"bar == true", ResTrue},
+		{"bar", ResTrue},
+		{"foo > 5", ResTrue},
+		{"a == 'valueOfA'", ResTrue},
+		{"foo > 5 && a == 'valueOfA'", ResTrue},
 
-	// simple case with bool variable
-	assert.Equal(t, true, evaluate(t, "anotherbar", params), "Evaluate expression with boolean")
+		// false
+		{"anotherbar == 'p'", ResFalse},
+		{"'A' + 'B' == 5", ResFalse},
 
-	// simple case with bool variable
-	// TODO: we need to fix this test
-	// assert.Equal(t, true, evaluate(t, "anotherbar == 't'", params), "Evaluate expression with boolean")
+		// check when expression involves a missing label
+		{"foo > 5 && missingLabel == 'requiredValue'", ResFalse},
+		{"foo > 5 && missingLabel == 239", ResFalse},
 
-	// simple case with bool variable
-	assert.Equal(t, false, evaluate(t, "anotherbar == 'p'", params), "Evaluate expression with boolean")
+		// we are explicitly converting all integer-like params to integers, so this should always be false (expected behavior)
+		{"foo == '10'", ResFalse},
 
-	// simple case with bool variable
-	assert.Equal(t, true, evaluate(t, "bar == true", params), "Evaluate expression with boolean")
+		// we are explicitly converting all bool-like params to bools, so this should always be false (expected behavior)
+		{"anotherbar == 't'", ResFalse},
 
-	// simple case with bool variable
-	assert.Equal(t, true, evaluate(t, "bar", params), "Evaluate expression with boolean")
+		// check that struct expressions work
+		{"service.Name == 'myservicename'", ResTrue},
+		{"service.Name == 'incorrectservicename'", ResFalse},
+		{"service.Labels.Name + 'B' == 'ValueB'", ResTrue},
+		{"serviceMissing.LabelsMissing.Name + 'B' == 'ValueB'", ResFalse},
 
-	// simple case with integer variable
-	assert.Equal(t, true, evaluate(t, "foo > 5", params), "Evaluate expression with integer")
+		// evaluation error
+		{"foo + 10 + 'test' > 0", ResEvalError},
 
-	// simple case with string variable
-	assert.Equal(t, true, evaluate(t, "a == 'valueOfA'", params), "Evaluate expression with string")
+		// not a boolean
+		{"'a' + 'b' + bar", ResEvalError},
 
-	// simple case with both variables
-	assert.Equal(t, true, evaluate(t, "foo > 5 && a == 'valueOfA'", params), "Evaluate expression with both integer and string")
+		// compilation error
+		{"(5 + 10 > 9", ResCompileError},
+	}
 
-	// simple case with missing string variable
-	assert.Equal(t, false, evaluate(t, "foo > 5 && missingLabel == 'requiredValue'", params), "Evaluate expression with missing string label")
+	// Evaluate without cache
+	for _, test := range tests {
+		evaluate(t, test.expression, params, test.result)
+	}
 
-	// simple case with missing integer variable
-	assert.Equal(t, false, evaluate(t, "foo > 5 && missingLabel == 239", params), "Evaluate expression with missing integer label")
-
-	// we are explicitly converting all integer-like params to integers, so this will always be false (expected behavior)
-	assert.Equal(t, false, evaluate(t, "foo == '10'", params), "All integer values are always converted to ints, they should never be equal to a string")
-
-	// check that struct expressions work
-	assert.Equal(t, true, evaluate(t, "service.Name == 'myservicename'", params), "Check that struct.Name expression works correctly")
-	assert.Equal(t, false, evaluate(t, "service.Name == 'incorrectservicename'", params), "Check that struct.Name expression works correctly")
-	assert.Equal(t, true, evaluate(t, "service.Labels.Name + 'B' == 'ValueB'", params), "Check that struct.Labels expression works correctly")
+	cache := NewExpressionCache()
+	for _, test := range tests {
+		evaluateWithCache(t, test.expression, params, test.result, cache)
+	}
 }
