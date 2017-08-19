@@ -21,3 +21,22 @@ func TestKey(t *testing.T) {
 	assert.Equal(t, UID("72b062c1-7fcf-11e7-ab09-acde48001122"), correctKey.GetUID(), "Correct UID expected")
 	assert.Panics(t, func() { invalidGenerationKey.GetGeneration() }, "Panic expected if key is incorrect")
 }
+
+func loopAndCheckNewUUIDs(tb testing.TB, n int) {
+	var prev UID
+	for i := 0; i < n; i++ {
+		next := NewUUID()
+		if next == prev {
+			tb.Fatal("UIDs should be different")
+		}
+		prev = next
+	}
+}
+
+func TestNewUUID(t *testing.T) {
+	loopAndCheckNewUUIDs(t, 100000)
+}
+
+func BenchmarkNewUUID(b *testing.B) {
+	loopAndCheckNewUUIDs(b, b.N)
+}
