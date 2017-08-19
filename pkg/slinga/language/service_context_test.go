@@ -12,6 +12,19 @@ func match(t *testing.T, context *Context, params *expression.ExpressionParamete
 	assert.Equal(t, expected, context.Matches(params, cache), "Context matching: "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
 }
 
+func matchContext(t *testing.T, context *Context, paramsMatch []*expression.ExpressionParameters, paramsDoesntMatch []*expression.ExpressionParameters) {
+	// Evaluate with and without cache
+	cache := expression.NewExpressionCache()
+	for _, params := range paramsMatch {
+		match(t, context, params, true, nil)
+		match(t, context, params, true, cache)
+	}
+	for _, params := range paramsDoesntMatch {
+		match(t, context, params, false, nil)
+		match(t, context, params, false, cache)
+	}
+}
+
 func evalKeys(t *testing.T, context *Context, params *template.TemplateParameters, expectedError bool, expected []string, cache template.TemplateCache) {
 	keys, err := context.ResolveKeys(params, cache)
 	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params))
@@ -70,16 +83,40 @@ func TestServiceContextMatching(t *testing.T) {
 		),
 	}
 
-	// Evaluate with and without cache
-	cache := expression.NewExpressionCache()
-	for _, params := range paramsMatch {
-		match(t, context, params, true, nil)
-		match(t, context, params, true, cache)
+	matchContext(t, context, paramsMatch, paramsDoesntMatch)
+}
+
+func TestServiceContextRequireAnyFails(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+	context := policy.Contexts["special-not-matched"]
+	paramsMatch := []*expression.ExpressionParameters{}
+	paramsDoesntMatch := []*expression.ExpressionParameters{
+		expression.NewExpressionParams(
+			map[string]string{
+				"never1": "a1",
+				"never2": "a2",
+			},
+
+			nil,
+		),
 	}
-	for _, params := range paramsDoesntMatch {
-		match(t, context, params, false, nil)
-		match(t, context, params, false, cache)
+	matchContext(t, context, paramsMatch, paramsDoesntMatch)
+}
+
+func TestServiceContextRequireAnyEmpty(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+	context := policy.Contexts["special-matched"]
+	paramsMatch := []*expression.ExpressionParameters{
+		expression.NewExpressionParams(
+			map[string]string{
+				"specialname": "specialvalue",
+			},
+
+			nil,
+		),
 	}
+	paramsDoesntMatch := []*expression.ExpressionParameters{}
+	matchContext(t, context, paramsMatch, paramsDoesntMatch)
 }
 
 func TestServiceContextKeyResolution(t *testing.T) {

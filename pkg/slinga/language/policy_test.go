@@ -17,7 +17,7 @@ func TestLoadPolicy(t *testing.T) {
 	assert.Equal(t, 2, len(policy.Clusters), "Two clusters should be loaded")
 
 	// Check contexts
-	assert.Equal(t, 3, len(policy.Contexts), "Three contexts should be loaded")
+	assert.Equal(t, 5, len(policy.Contexts), "Five contexts should be loaded")
 	assert.Equal(t, "test", policy.Contexts["test"].GetName(), "Context name should be correct")
 	assert.NotNil(t, policy.Contexts["prod-high"].Allocation, "Context should have allocations")
 	assert.NotNil(t, policy.Contexts["prod-low"].Allocation, "Context should have allocations")

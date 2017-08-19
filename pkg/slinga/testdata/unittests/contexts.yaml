@@ -84,3 +84,41 @@
       name: test
       keys:
         - "{{.User.Labels.team}}"
+
+# Special context for testing criterias (none of 'require-any' evaluates to true)
+- kind: context
+
+  metadata:
+    namespace: main
+    name: special-not-matched
+
+  spec:
+    criteria:
+      require-all:
+        - true
+      require-any:
+        - never1 == "unbeliveable_value_1"
+        - never2 == "unbeliveable_value_2"
+        - never3 == "unbeliveable_value_3"
+      require-none:
+        - false
+
+    allocation:
+      name: special-not-matched
+
+# Special context for testing criterias ('require-any' is empty)
+- kind: context
+
+  metadata:
+    namespace: main
+    name: special-matched
+
+  spec:
+    criteria:
+      require-all:
+        - specialname == "specialvalue"
+      require-none:
+        - false
+
+    allocation:
+      name: special-matched
