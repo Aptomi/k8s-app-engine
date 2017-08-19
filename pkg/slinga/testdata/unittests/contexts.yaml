@@ -7,8 +7,12 @@
 
   spec:
     criteria:
-      require-any:
+      require-all:
         - dev == "no" && prod == "yes" && priority >= 200
+      require-any:
+        - dev == "no"
+        - prod == "yes"
+        - priority >= 200
       require-none:
         - service.Metadata.Name == "zookeeper" && nozookeeper
 

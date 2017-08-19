@@ -5,7 +5,6 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 	"errors"
 )
 
@@ -261,21 +260,17 @@ func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, err
 	}
 
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
-	result := []string{}
-	for _, key := range node.context.Allocation.Keys {
-		keyResolved, err := node.resolveAllocationKey(key, node.getContextualDataForAllocationTemplate())
-		if err != nil {
-			Debug.WithFields(log.Fields{
-				"service":    node.service.GetName(),
-				"context":    node.context.GetName(),
-				"allocation": node.context.Allocation.Name,
-				"key":        key,
-				"user":       node.user.Name,
-				"error":      err,
-			}).Info("Cannot resolve key within an allocation")
-			return nil, err
-		}
-		result = append(result, keyResolved)
+	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
+	if err != nil {
+		Debug.WithFields(log.Fields{
+			"service":    node.service.GetName(),
+			"context":    node.context.GetName(),
+			"allocation": node.context.Allocation.Name,
+			"keys":       node.context.Allocation.Keys,
+			"user":       node.user.Name,
+			"error":      err,
+		}).Info("Cannot resolve one of the keys within an allocation")
+		return nil, err
 	}
 
 	if len(node.context.Allocation.Keys) > 0 {
@@ -288,11 +283,6 @@ func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, err
 		node.ruleLogWriter.addRuleLogEntry(entryAllocationKeysResolved(node.service, node.context, result))
 	}
 	return result, nil
-}
-
-// resolveAllocationKey resolves allocation key
-func (node *resolutionNode) resolveAllocationKey(key string, parameters *template.TemplateParameters) (string, error) {
-	return node.cache.templateCache.Evaluate(key, parameters)
 }
 
 // createComponentKey creates a component key
