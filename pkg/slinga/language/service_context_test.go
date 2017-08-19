@@ -14,7 +14,8 @@ func match(t *testing.T, context *Context, params *expression.ExpressionParamete
 
 func evalKeys(t *testing.T, context *Context, params *template.TemplateParameters, expectedError bool, expected []string, cache template.TemplateCache) {
 	keys, err := context.ResolveKeys(params, cache)
-	if assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params)) {
+	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params))
+	if err == nil {
 		assert.Equal(t, expected, keys, "Allocation key resolution: "+fmt.Sprintf("%+v, params %+v", context.Allocation, params))
 	}
 }
