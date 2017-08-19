@@ -6,38 +6,38 @@ import (
 )
 
 const (
-	ResTrue = iota
-	ResFalse = iota
+	ResTrue         = iota
+	ResFalse        = iota
 	ResCompileError = iota
-	ResEvalError = iota
+	ResEvalError    = iota
 )
 
 func evaluate(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int) {
 	// Check for compilation
 	expr, err := NewExpression(expressionStr)
-	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Expression compilation (success vs. error): " + expressionStr) || expectedResult == ResCompileError {
+	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Expression compilation (success vs. error): "+expressionStr) || expectedResult == ResCompileError {
 		return
 	}
 
 	// Check for evaluation
 	result, err := expr.EvaluateAsBool(params)
-	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Expression evaluation (success vs. error): " + expressionStr) || expectedResult == ResEvalError {
+	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Expression evaluation (success vs. error): "+expressionStr) || expectedResult == ResEvalError {
 		return
 	}
 
 	// Check for result
-	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: " + expressionStr)
+	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: "+expressionStr)
 }
 
 func evaluateWithCache(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int, cache ExpressionCache) {
 	// Check for compilation
 	result, err := cache.EvaluateAsBool(expressionStr, params)
-	if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Expression compilation && evaluation (success vs. error): " + expressionStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
+	if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Expression compilation && evaluation (success vs. error): "+expressionStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
 		return
 	}
 
 	// Check for result
-	assert.Equal(t, expectedResult == ResTrue, result, "[Cache] Expression evaluation result: " + expressionStr)
+	assert.Equal(t, expectedResult == ResTrue, result, "[Cache] Expression evaluation result: "+expressionStr)
 }
 
 func TestExpressions(t *testing.T) {
@@ -65,8 +65,8 @@ func TestExpressions(t *testing.T) {
 
 	tests := []struct {
 		expression string
-		result int
-	} {
+		result     int
+	}{
 		// true (bools, ints, strings)
 		{"anotherbar == true", ResTrue},
 		{"anotherbar", ResTrue},
