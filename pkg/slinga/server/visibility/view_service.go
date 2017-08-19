@@ -28,7 +28,7 @@ func (view ServiceView) GetData() interface{} {
 
 	// Step 2 - find all instances of a given service. add them as "instance nodes"
 	for k, v := range view.state.ResolvedData.ComponentInstanceMap {
-		if v.Key.ServiceName == view.serviceName && v.Key.ComponentName == engine.ComponentRootName {
+		if v.Key.ServiceName == view.serviceName && v.Key.IsService() {
 			// add a node with an instance of our service
 			svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, true)
 			view.g.addNode(svcInstanceNode, 1)
@@ -64,7 +64,7 @@ func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePre
 		// go over all incoming edges
 		for k := range instance.EdgesIn {
 			v := view.state.GetResolvedData().ComponentInstanceMap[k]
-			if v.Key.ComponentName == engine.ComponentRootName {
+			if v.Key.IsService() {
 				// if it's a service instance, add a node
 				svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, false)
 				view.g.addNode(svcInstanceNode, nextLevel)

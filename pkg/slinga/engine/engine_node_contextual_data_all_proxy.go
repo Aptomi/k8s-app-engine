@@ -38,8 +38,10 @@ func (node *resolutionNode) proxyDiscovery(discoveryTree NestedParameterMap, cik
 	result["instanceId"] = HashFnv(cik.GetKey())
 
 	// expose parent service information as well
-	serviceCik := cik.GetParentServiceKey()
-	if cik != serviceCik {
+	if cik.IsComponent() {
+		// Get service key
+		serviceCik := cik.GetParentServiceKey()
+
 		// create a bucket for service
 		result["service"] = NestedParameterMap{}
 

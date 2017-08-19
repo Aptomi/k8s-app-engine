@@ -56,7 +56,7 @@ func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode,
 	}
 
 	// if it's a service, add node and connext with previous
-	if v.Key.ComponentName == engine.ComponentRootName {
+	if v.Key.IsService() {
 		// add service instance node
 		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, nextLevel <= 1)
 		view.g.addNode(svcInstanceNode, nextLevel)

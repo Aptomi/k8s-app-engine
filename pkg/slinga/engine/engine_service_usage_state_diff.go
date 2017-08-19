@@ -307,9 +307,8 @@ func (diff *ServiceUsageStateDiff) updateTimes(cik *ComponentInstanceKey, create
 	instance.updateTimes(createdOn, updatedOn)
 
 	// if it's a component instance, then update for its parent service instance as well
-	serviceCik := cik.GetParentServiceKey()
-	if serviceCik != cik {
-		diff.updateTimes(serviceCik, createdOn, updatedOn)
+	if cik.IsComponent() {
+		diff.updateTimes(cik.GetParentServiceKey(), createdOn, updatedOn)
 	}
 }
 

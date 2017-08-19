@@ -85,7 +85,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 			instanceMap := make(map[string]bool)
 			for key, instance := range view.state.ResolvedData.ComponentInstanceMap {
 				if instance.Resolved {
-					if instance.Key.ServiceName == service.GetName() && instance.Key.ComponentName == engine.ComponentRootName {
+					if instance.Key.ServiceName == service.GetName() && instance.Key.IsService() {
 						instanceMap[key] = true
 					}
 				}

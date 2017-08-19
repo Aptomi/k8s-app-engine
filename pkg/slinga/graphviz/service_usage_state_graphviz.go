@@ -183,7 +183,7 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 		key := instance.Key
 
 		// only add edges to "root" components (i.e. services)
-		if key.ComponentName != ComponentRootName {
+		if !key.IsService() {
 			continue
 		}
 
