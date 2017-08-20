@@ -48,7 +48,7 @@ func (service *Service) GetComponentsMap() map[string]*ServiceComponent {
 	return service.componentsMap
 }
 
-// Topologically sort components of a given service and return true if there is a cycle detected
+// Topologically sort components of a given service and return error if there is a cycle detected
 func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]int) error {
 	colors[u.Name] = 1
 
