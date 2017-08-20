@@ -4,14 +4,13 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
-	"github.com/Aptomi/aptomi/pkg/slinga/object/db"
 )
 
 type Constructor func() BaseObject
 
 type Registry struct {
 	codec codec.MarshalUnmarshaler
-	store db.ObjectStore
+	//store db.ObjectStore
 	kinds map[string]Constructor
 }
 
