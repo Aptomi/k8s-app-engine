@@ -5,28 +5,70 @@ import (
 	"testing"
 )
 
-func TestMetadata(t *testing.T) {
-	type testObject struct {
-		Metadata
+type T1 struct {
+	Metadata
 
-		TestField string
-	}
+	T1F string
+}
 
-	obj := &testObject{
-		Metadata{
-			"test",
-			"4d0e5391-83ef-11e7-876b-784f435b826b",
-			42,
-			"name",
-			"namespace",
+type T2 struct {
+	Metadata
+
+	T2F string
+}
+
+var (
+	TestObjects = []BaseObject{
+		&T1{
+			Metadata{
+				"t1",
+				"uid-1",
+				11,
+				"name-1",
+				"namespace-1",
+			},
+			"t1f-1",
 		},
-		"test",
+		&T1{
+			Metadata{
+				"t1",
+				"uid-2",
+				12,
+				"name-2",
+				"namespace-2",
+			},
+			"t1f-2",
+		},
+		&T2{
+			Metadata{
+				"t2",
+				"uid-3",
+				21,
+				"name-3",
+				"namespace-3",
+			},
+			"t2f-1",
+		},
+		&T2{
+			Metadata{
+				"t2",
+				"uid-4",
+				22,
+				"name-4",
+				"namespace-4",
+			},
+			"t2f-2",
+		},
 	}
+)
 
-	assert.Equal(t, Kind("test"), obj.GetKind(), "Correct Kind expected")
-	assert.Equal(t, UID("4d0e5391-83ef-11e7-876b-784f435b826b"), obj.GetUID(), "Correct UID expected")
-	assert.Equal(t, Generation(42), obj.GetGeneration(), "Correct Generation expected")
-	assert.Equal(t, KeyFromParts("4d0e5391-83ef-11e7-876b-784f435b826b", 42), obj.GetKey(), "Correct Key expected")
-	assert.Equal(t, "namespace", obj.GetNamespace(), "Correct Namespace expected")
-	assert.Equal(t, "name", obj.GetName(), "Correct Name expected")
+func TestMetadata(t *testing.T) {
+	obj := TestObjects[0]
+
+	assert.Equal(t, Kind("t1"), obj.GetKind(), "Correct Kind expected")
+	assert.Equal(t, UID("uid-1"), obj.GetUID(), "Correct UID expected")
+	assert.Equal(t, Generation(11), obj.GetGeneration(), "Correct Generation expected")
+	assert.Equal(t, KeyFromParts("uid-1", 11), obj.GetKey(), "Correct Key expected")
+	assert.Equal(t, "namespace-1", obj.GetNamespace(), "Correct Namespace expected")
+	assert.Equal(t, "name-1", obj.GetName(), "Correct Name expected")
 }

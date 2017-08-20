@@ -1,74 +1,174 @@
 package yaml
 
 import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/object/codec"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object/codec/codectest"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-type test struct {
-	Str     string
-	Number  int
-	Nested  nested
-	Hidden1 string `yaml:"-"`
-	hidden2 string
+func newTestYamlCodec() MarshalUnmarshaler {
+	codec := &YamlCodec{}
+	codec.SetObjectCatalog(CodecTestObjectsCatalog)
+
+	return codec
 }
 
-type nested struct {
-	NestedStrs []string
-}
-
-func TestYamlCodec(t *testing.T) {
-	assert.Equal(t, "yaml", YamlCodec.GetName(), "Correct codec name expected")
-
-	object := test{
-		"str",
-		42,
-		nested{
-			[]string{
-				"nstr1",
-				"nstr2",
-				"nstr3",
-			},
-		},
-		"hidden1",
-		"hidden2",
+var (
+	CodecTestObjectsYamls = []string{`metadata:
+  kind: t1
+  uid: uid-1
+  generation: 1
+  name: name-1
+  namespace: namespace-1
+str: str-1
+number: 1
+`,
+		`metadata:
+  kind: t1
+  uid: uid-2
+  generation: 2
+  name: name-2
+  namespace: namespace-1
+str: str-2
+number: 2
+`,
+		`metadata:
+  kind: t2
+  uid: uid-3
+  generation: 3
+  name: name-3
+  namespace: namespace-2
+nested:
+  nestedstrs:
+  - "1"
+  - "2"
+  - "3"
+map:
+  k-1:
+  - uid-1$1
+  - uid-2$2
+  k-2:
+  - uid-3$1
+  - uid-4$2
+`,
+		`metadata:
+  kind: t2
+  uid: uid-4
+  generation: 4
+  name: name-4
+  namespace: namespace-2
+nested:
+  nestedstrs:
+  - "4"
+  - "5"
+  - "6"
+map:
+  k-3:
+  - uid-5$1
+  - uid-6$2
+  k-4:
+  - uid-7$1
+  - uid-8$2
+`,
 	}
-
-	yaml := `str: str
-number: 42
-nested:
-  nestedstrs:
-  - nstr1
-  - nstr2
-  - nstr3
+	CodecTestObjectsYaml = `- metadata:
+    kind: t1
+    uid: uid-1
+    generation: 1
+    name: name-1
+    namespace: namespace-1
+  str: str-1
+  number: 1
+- metadata:
+    kind: t1
+    uid: uid-2
+    generation: 2
+    name: name-2
+    namespace: namespace-1
+  str: str-2
+  number: 2
+- metadata:
+    kind: t2
+    uid: uid-3
+    generation: 3
+    name: name-3
+    namespace: namespace-2
+  nested:
+    nestedstrs:
+    - "1"
+    - "2"
+    - "3"
+  map:
+    k-1:
+    - uid-1$1
+    - uid-2$2
+    k-2:
+    - uid-3$1
+    - uid-4$2
+- metadata:
+    kind: t2
+    uid: uid-4
+    generation: 4
+    name: name-4
+    namespace: namespace-2
+  nested:
+    nestedstrs:
+    - "4"
+    - "5"
+    - "6"
+  map:
+    k-3:
+    - uid-5$1
+    - uid-6$2
+    k-4:
+    - uid-7$1
+    - uid-8$2
 `
+)
 
-	data, err := YamlCodec.Marshal(object)
-	assert.Nil(t, err, "There should be no errors marshalling provided object")
-	assert.Equal(t, yaml, string(data), "Correct marshaled bytes expected")
-
-	yamlWithHiddens := `str: str
-number: 42
-hidden1: hidden1
-hidden2: hidden2
-nested:
-  nestedstrs:
-  - nstr1
-  - nstr2
-  - nstr3
-`
-
-	unmarshObject := &test{}
-	err = YamlCodec.Unmarshal([]byte(yamlWithHiddens), unmarshObject)
-	assert.Nil(t, err, "There should be no errors unmarshaling provided bytes")
-	assert.Equal(t, object.Str, unmarshObject.Str, "Correct field value expected")
-	assert.Equal(t, object.Number, unmarshObject.Number, "Correct field value expected")
-	assert.Equal(t, object.Nested, unmarshObject.Nested, "Correct nested struct field value expected")
-	assert.Empty(t, unmarshObject.Hidden1, "Hidden field should be empty")
-	assert.Empty(t, unmarshObject.hidden2, "Hidden field should be empty")
-
-	badYaml := "str @ str"
-
-	err = YamlCodec.Unmarshal([]byte(badYaml), &test{})
-	assert.NotNil(t, err, "Unmarshaling should fail in case of invalid yaml")
+func TestYamlCodec_GetName(t *testing.T) {
+	codec := newTestYamlCodec()
+	assert.Equal(t, "yaml", codec.GetName(), "Correct codec name expected")
 }
+
+func TestYamlCodec_MarshalOne(t *testing.T) {
+	codec := newTestYamlCodec()
+
+	for idx, obj := range CodecTestObjects {
+		data, err := codec.MarshalOne(obj)
+		assert.Nil(t, err, "Error while marshaling test object #%d", idx)
+		assert.Equal(t, CodecTestObjectsYamls[idx], string(data), "Correct marshaled bytes expected for test object #%d", idx)
+	}
+}
+
+func TestYamlCodec_MarshalMany(t *testing.T) {
+	codec := newTestYamlCodec()
+
+	data, err := codec.MarshalMany(CodecTestObjects)
+	assert.Nil(t, err, "Error while marshaling test objects")
+	assert.Equal(t, CodecTestObjectsYaml, string(data), "Correct marshaled bytes expected for test objects")
+}
+
+func TestYamlCodec_UnmarshalOne(t *testing.T) {
+	codec := newTestYamlCodec()
+
+	for idx, str := range CodecTestObjectsYamls {
+		obj, err := codec.UnmarshalOne([]byte(str))
+
+		assert.Nil(t, err, "Error while unmarshaling test object #%d", idx)
+		assert.Exactly(t, CodecTestObjects[idx], obj, "Deep equal unmarshaled object of the same type expected for test object #%d", idx)
+	}
+}
+
+func TestYamlCodec_UnmarshalOneOrMany(t *testing.T) {
+	codec := newTestYamlCodec()
+	obj, err := codec.UnmarshalOneOrMany([]byte(CodecTestObjectsYaml))
+
+	assert.Nil(t, err, "Error while unmarshaling test objects")
+	assert.Exactly(t, CodecTestObjects, obj, "Deep equal unmarshaled object of the same type expected for test objects")
+}
+
+// TODO(slukjanov): add tests for hidden values
+// TODO(slukjanov): add tests for bad yaml
+// TODO(slukjanov): add tests for incorrect one/many passed to unmarshal

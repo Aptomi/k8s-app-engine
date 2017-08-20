@@ -1,21 +1,22 @@
 package codec
 
-import "fmt"
+import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+)
 
-// MarshalUnmarshaler represents objects marshaling and unmarshaling such as json, yaml, etc.
 type MarshalUnmarshaler interface {
 	GetName() string
-	Marshal(value interface{}) ([]byte, error)
-	Unmarshal(data []byte, value interface{}) error
+	SetObjectCatalog(catalog *ObjectCatalog) // todo encoders/decoders will register it internally only on this function call
+	MarshalOne(object BaseObject) ([]byte, error)
+	MarshalMany(objects []BaseObject) ([]byte, error)
+	UnmarshalOne(data []byte) (BaseObject, error)
+	UnmarshalOneOrMany(data []byte) ([]BaseObject, error)
 }
 
-func MarshalUnmarshal(codec MarshalUnmarshaler, from interface{}, to interface{}) {
-	data, err := codec.Marshal(from)
-	if err != nil {
-		panic(fmt.Sprintf("Error while marshaling object: %v", from))
-	}
-	err = codec.Unmarshal(data, to)
-	if err != nil {
-		panic(fmt.Sprintf("Error while unmarshaling object %v back from bytes: %v", from, data))
-	}
+type BaseMarshalUnmarshaler struct {
+	Catalog *ObjectCatalog
+}
+
+func (codec *BaseMarshalUnmarshaler) SetObjectCatalog(catalog *ObjectCatalog) {
+	codec.Catalog = catalog
 }
