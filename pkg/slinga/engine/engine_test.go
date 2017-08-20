@@ -11,41 +11,54 @@ import (
 func BenchmarkEngine(b *testing.B) {
 	t := &testing.T{}
 	for i := 0; i < b.N; i++ {
-		TestPolicyResolve(t)
-		TestPolicyResolveEmptyDiff(t)
-		TestPolicyResolveNonEmptyDiff(t)
-		TestDiffUpdateAndComponentTimes(t)
+		TestEngineComponentUpdateAndTimes(t)
 	}
 }
 
-func TestPolicyResolve(t *testing.T) {
-	policy := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-
-	usageState := NewServiceUsageState(policy, userLoader)
-	err := usageState.ResolveAllDependencies()
-	resolvedUsage := usageState.GetResolvedData()
+func TestEnginePolicyResolutionAndResolvedData(t *testing.T) {
+	usageState := loadPolicyAndResolve(t)
+	resolvedData := usageState.ResolvedData
 
 	// Check that policy resolution finished correctly
-	assert.Nil(t, err, "Policy usage should be resolved without errors")
-	assert.NotEqual(t, 0, len(resolvedUsage.ComponentProcessingOrder), "Policy usage should have entries")
+	assert.Equal(t, 16, len(resolvedData.ComponentProcessingOrder), "Policy usage should have correct number of entries")
 
-	kafkaTest := resolvedUsage.ComponentInstanceMap["kafka#test#test#platform_services#component2"]
-	kafkaProd := resolvedUsage.ComponentInstanceMap["kafka#prod-low#prod#team-platform_services#true#component2"]
+	// Resolution for test context
+	kafkaTest := getInstance(t, "kafka#test#test#platform_services#component2", resolvedData)
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
-	assert.True(t, policy.Dependencies.DependenciesByID["dep_id_1"].Resolved, "Only Alice should have access to test")
-	assert.False(t, policy.Dependencies.DependenciesByID["dep_id_4"].Resolved, "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
+	assert.True(t, usageState.Policy.Dependencies.DependenciesByID["dep_id_1"].Resolved, "Only Alice should have access to test")
 
+	// Resolution for prod context
+	kafkaProd := getInstance(t, "kafka#prod-low#prod#team-platform_services#true#component2", resolvedData)
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
-	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
+	assert.Equal(t, "2", usageState.Policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
+}
+
+func TestEnginePolicyResolutionAndUnresolvedData(t *testing.T) {
+	usageState := loadPolicyAndResolve(t)
+
+	// Dave dependency on kafka should not be resolved
+	daveOnKafkaDependency := usageState.Policy.Dependencies.DependenciesByID["dep_id_4"]
+	assert.False(t, daveOnKafkaDependency.Resolved, "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
+}
+
+func TestEngineLabelProcessing(t *testing.T) {
+	usageState := loadPolicyAndResolve(t)
 
 	// Check labels for Bob's dependency
-	key := policy.Dependencies.DependenciesByID["dep_id_2"].ServiceKey
-	labels := usageState.ResolvedData.ComponentInstanceMap[key].CalculatedLabels.Labels
+	key := usageState.Policy.Dependencies.DependenciesByID["dep_id_2"].ServiceKey
+	serviceInstance := getInstance(t, key, usageState.ResolvedData)
+	labels := serviceInstance.CalculatedLabels.Labels
 	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
 	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")
 	assert.Equal(t, "", labels["some-label-to-be-removed"], "Label 'some-label-to-be-removed' should be removed on context match")
 	assert.Equal(t, "true", labels["prod-low-alloc"], "Label 'prod-low-alloc=true' should be added on allocation match")
+}
+
+func TestEngineCodeAndDiscoveryParamsEval(t *testing.T) {
+	usageState := loadPolicyAndResolve(t)
+	resolvedData := usageState.ResolvedData
+
+	kafkaTest := getInstance(t, "kafka#test#test#platform_services#component2", resolvedData)
 
 	// Check that code parameters evaluate correctly
 	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
@@ -60,36 +73,19 @@ func TestPolicyResolve(t *testing.T) {
 }
 
 func TestPolicyResolveEmptyDiff(t *testing.T) {
-	policy := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-
-	// Get usage state prev and emulate save/load
-	usageStatePrev := NewServiceUsageState(policy, userLoader)
-	usageStatePrev.ResolveAllDependencies()
+	usageStatePrev := loadPolicyAndResolve(t)
 	usageStatePrev = emulateSaveAndLoadState(usageStatePrev)
 
 	// Get usage state next
-	usageStateNext := NewServiceUsageState(policy, userLoader)
-	usageStateNext.ResolveAllDependencies()
+	usageStateNext := loadPolicyAndResolve(t)
 
-	// Calculate difference
+	// Calculate and verify difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrev)
-
-	assert.False(t, diff.ShouldGenerateNewRevision(), "Diff should not have any changes")
-	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Empty diff should not have any component instantiations")
-	assert.Equal(t, 0, len(diff.ComponentDestruct), "Empty diff should not have any component destructions")
-	assert.Equal(t, 0, len(diff.ComponentUpdate), "Empty diff should not have any component updates")
-	assert.Equal(t, 0, len(diff.ComponentAttachDependency), "Empty diff should not have any dependencies attached to components")
-	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Empty diff should not have any dependencies removed from components")
+	verifyDiff(t, diff, false, 0, 0, 0, 0, 0)
 }
 
-func TestPolicyResolveNonEmptyDiff(t *testing.T) {
-	policyPrev := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-
-	// Get usage state prev and emulate save/load
-	usageStatePrev := NewServiceUsageState(policyPrev, userLoader)
-	usageStatePrev.ResolveAllDependencies()
+func TestEngineNonEmptyDiff(t *testing.T) {
+	usageStatePrev := loadPolicyAndResolve(t)
 	usageStatePrev = emulateSaveAndLoadState(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
@@ -101,42 +97,33 @@ func TestPolicyResolveNonEmptyDiff(t *testing.T) {
 			Service:      "kafka",
 		},
 	)
-	usageStateNext := NewServiceUsageState(policyNext, userLoader)
-	usageStateNext.ResolveAllDependencies()
+	usageStateNext := resolvePolicy(t, policyNext)
 
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrev)
-
-	assert.True(t, diff.ShouldGenerateNewRevision(), "Diff should have changes")
-	assert.Equal(t, 8, len(diff.ComponentInstantiate), "Diff should have component instantiations")
-	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
-	assert.Equal(t, 0, len(diff.ComponentUpdate), "Diff should not have any component updates")
-	assert.Equal(t, 8, len(diff.ComponentAttachDependency), "Diff should have 7 dependencies attached to components")
-	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
+	verifyDiff(t, diff, true, 8, 0, 0, 8, 0)
 }
 
-func TestDiffUpdateAndComponentTimes(t *testing.T) {
-	policyPrev := loadUnitTestsPolicy()
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
-
+func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	var key string
-	var timePrevCreated, timePrevUpdated, timeNextCreated, timeNextUpdated time.Time
 
 	// Create initial empty state (do not resolve any dependencies)
+	policyPrev := loadUnitTestsPolicy()
+	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 	uEmpty := NewServiceUsageState(policyPrev, userLoader)
 
-	// Resolve, calculate difference against empty state, emulate save/load
-	uInitial := NewServiceUsageState(policyPrev, userLoader)
-	uInitial.ResolveAllDependencies()
+	// Resolve all dependencies in policy
+	uInitial := loadPolicyAndResolve(t)
+
+	// Calculate difference against empty state to update times, emulate save/load
 	uInitial.CalculateDifference(&uEmpty)
 	uInitial = emulateSaveAndLoadState(uInitial)
 
 	// Check creation/update times
 	key = "kafka#test#test#platform_services#component2"
-	timeNextCreated = uInitial.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uInitial.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	assert.WithinDuration(t, time.Now(), timeNextCreated, time.Second, "Creation time should be initialized correctly for kafka")
-	assert.Equal(t, timeNextUpdated, timeNextUpdated, "Update time should be equal to creation time")
+	p := getTimesNext(t, key, uInitial)
+	assert.WithinDuration(t, time.Now(), p.timeNextCreated, time.Second, "Creation time should be initialized correctly for kafka")
+	assert.Equal(t, p.timeNextUpdated, p.timeNextUpdated, "Update time should be equal to creation time")
 
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
@@ -150,17 +137,13 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 			Service:      "kafka",
 		},
 	)
-	uNewDependency := NewServiceUsageState(policyNext, userLoader)
-	uNewDependency.ResolveAllDependencies()
+	uNewDependency := resolvePolicy(t, policyNext)
 	uNewDependency.CalculateDifference(&uInitial)
 
 	// Check creation/update times
-	timePrevCreated = uInitial.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timePrevUpdated = uInitial.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	timeNextCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
-	assert.Equal(t, timePrevUpdated, timeNextUpdated, "Update time should be carried over to remain the same")
+	pInit := getTimes(t, key, uInitial, uNewDependency)
+	assert.Equal(t, pInit.timePrevCreated, pInit.timeNextCreated, "Creation time should be carried over to remain the same")
+	assert.Equal(t, pInit.timePrevUpdated, pInit.timeNextUpdated, "Update time should be carried over to remain the same")
 
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
@@ -172,28 +155,17 @@ func TestDiffUpdateAndComponentTimes(t *testing.T) {
 	diff := uUpdatedDependency.CalculateDifference(&uNewDependency)
 
 	// Check that update has been performed
-	assert.True(t, diff.ShouldGenerateNewRevision(), "Diff should have changes")
-	assert.Equal(t, 0, len(diff.ComponentInstantiate), "Diff should not have component instantiations")
-	assert.Equal(t, 0, len(diff.ComponentDestruct), "Diff should not have any component destructions")
-	assert.Equal(t, 1, len(diff.ComponentUpdate), "Diff should have component update")
-	assert.Equal(t, 0, len(diff.ComponentAttachDependency), "Diff should not have any dependencies attached to components")
-	assert.Equal(t, 0, len(diff.ComponentDetachDependency), "Diff should not have any dependencies removed from components")
+	verifyDiff(t, diff, true, 0, 0, 1, 0, 0)
 
 	// Check creation/update times for component
 	key = "kafka#prod-high#prod#Elena#component2"
-	timePrevCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timePrevUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	timeNextCreated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
-	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed")
+	pUpdate := getTimes(t, key, uNewDependency, uUpdatedDependency)
+	assert.Equal(t, pUpdate.timePrevCreated, pUpdate.timeNextCreated, "Creation time should be carried over to remain the same")
+	assert.True(t, pUpdate.timeNextUpdated.After(pUpdate.timePrevUpdated), "Update time should be changed")
 
 	// Check creation/update times for service
 	key = "kafka#prod-high#prod#Elena#root"
-	timePrevCreated = uNewDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timePrevUpdated = uNewDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	timeNextCreated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].CreatedOn
-	timeNextUpdated = uUpdatedDependency.ResolvedData.ComponentInstanceMap[key].UpdatedOn
-	assert.Equal(t, timePrevCreated, timeNextCreated, "Creation time should be carried over to remain the same")
-	assert.True(t, timeNextUpdated.After(timePrevUpdated), "Update time should be changed for service")
+	pUpdateSvc := getTimes(t, key, uNewDependency, uUpdatedDependency)
+	assert.Equal(t, pUpdateSvc.timePrevCreated, pUpdateSvc.timeNextCreated, "Creation time should be carried over to remain the same")
+	assert.True(t, pUpdateSvc.timeNextUpdated.After(pUpdateSvc.timePrevUpdated), "Update time should be changed for service")
 }

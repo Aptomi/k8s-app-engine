@@ -35,6 +35,10 @@ Items to complete:
 
 9. Implement polling for external entities & storing objects in DB
 
+10. Do we need to move Dependency.Resolved into resolved usage state?
+
+11. Remove allocation name all together and leave only keys?
+
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
 
