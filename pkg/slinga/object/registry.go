@@ -2,13 +2,16 @@ package object
 
 import (
 	"fmt"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/db"
 )
 
 type Constructor func() BaseObject
 
 type Registry struct {
 	codec codec.MarshalUnmarshaler
+	store db.ObjectStore
 	kinds map[string]Constructor
 }
 
@@ -113,4 +116,18 @@ func (reg *Registry) unmarshalRaw(single map[interface{}]interface{}, data []byt
 	}
 
 	return obj, nil
+}
+
+type PolicyData struct {
+	Metadata
+
+	Objects []Key
+}
+
+func (reg *Registry) LoadPolicy(gen Generation) *Policy {
+	policy := &Policy{}
+
+	//reg.store.GetNewestOne("system", "policy", "main")
+
+	return policy
 }
