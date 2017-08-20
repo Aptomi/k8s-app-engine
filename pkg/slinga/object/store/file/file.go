@@ -49,7 +49,7 @@ func (store *FileStore) loadObjectsFromFile(path string) ([]object.BaseObject, e
 	if err != nil {
 		return nil, fmt.Errorf("Error while reading file %store: %store", path, err)
 	}
-	objects, err := store.Codec.UnmarshalMany(data)
+	objects, err := store.Codec.UnmarshalOneOrMany(data)
 	if err != nil {
 		return nil, fmt.Errorf("Error while unmarshaling file %store: %store", path, err)
 	}
