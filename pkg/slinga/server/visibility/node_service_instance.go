@@ -9,22 +9,22 @@ import (
 )
 
 type serviceInstanceNode struct {
-	key        string
-	service    *Service
-	context    string
-	allocation string
-	instance   *engine.ComponentInstance
-	primary    bool
+	key             string
+	service         *Service
+	context         string
+	contextWithKeys string
+	instance        *engine.ComponentInstance
+	primary         bool
 }
 
-func newServiceInstanceNode(key string, service *Service, context string, allocation string, instance *engine.ComponentInstance, primary bool) graphNode {
+func newServiceInstanceNode(key string, service *Service, context string, contextWithKeys string, instance *engine.ComponentInstance, primary bool) graphNode {
 	return serviceInstanceNode{
-		key:        key,
-		service:    service,
-		context:    context,
-		allocation: allocation,
-		instance:   instance,
-		primary:    primary,
+		key:             key,
+		service:         service,
+		context:         context,
+		contextWithKeys: contextWithKeys,
+		instance:        instance,
+		primary:         primary,
 	}
 }
 

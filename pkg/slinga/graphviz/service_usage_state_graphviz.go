@@ -187,19 +187,19 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 			continue
 		}
 
-		// Key for allocation
-		serviceAllocationKey := key.ServiceName + "_" + key.ContextName + "#" + key.GetAllocationNameWithKeys()
+		// Key for service
+		serviceAllocationKey := key.ServiceName + "_" + key.ContextNameWithKeys
 
 		// Add a node with service
 		addNodeOnce(graph, "cluster_Services", key.ServiceName, nil, was)
 
-		// Add box/subgraph for a given service, containing all its allocations
-		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_"+key.ServiceName, map[string]string{"label": "Allocations for service: " + key.ServiceName}, was)
+		// Add box/subgraph for a given service, containing all its instances
+		addSubgraphOnce(graph, "Main", "cluster_Service_Allocations_"+key.ServiceName, map[string]string{"label": "Instances for service: " + key.ServiceName}, was)
 
-		// Add a node with allocation
-		addNodeOnce(graph, "cluster_Service_Allocations_"+key.ServiceName, serviceAllocationKey, map[string]string{"label": "Context: " + key.ContextName + "\n" + "Allocation: " + key.GetAllocationNameWithKeys()}, was)
+		// Add a node with context
+		addNodeOnce(graph, "cluster_Service_Allocations_"+key.ServiceName, serviceAllocationKey, map[string]string{"label": "Context: " + key.ContextNameWithKeys}, was)
 
-		// Add an edge from service to allocation box
+		// Add an edge from service to service instances box
 		for dependencyID := range instance.DependencyIds {
 			userID := state.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)

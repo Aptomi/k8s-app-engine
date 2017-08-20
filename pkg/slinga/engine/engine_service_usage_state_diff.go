@@ -125,7 +125,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 	if diff.Prev.Policy.Dependencies != nil {
 		for _, deps := range diff.Prev.Policy.Dependencies.DependenciesByService {
 			for _, d := range deps {
-				// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
+				// Make sure to check for the case when dependency has not been resolved (e.g. no matching context found or error)
 				if d.Resolved {
 					if pMap[d.UserID] == nil {
 						pMap[d.UserID] = make(map[string]map[string]int)
@@ -143,7 +143,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 	cMap := make(map[string]map[string]map[string]int)
 	for _, deps := range diff.Next.Policy.Dependencies.DependenciesByService {
 		for _, d := range deps {
-			// Make sure to check for the case when service hasn't been resolved (no matching context/allocation found)
+			// Make sure to check for the case when dependency has not been resolved (e.g. no matching context found or error)
 			if d.Resolved {
 				if cMap[d.UserID] == nil {
 					cMap[d.UserID] = make(map[string]map[string]int)
@@ -230,7 +230,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 	}
 }
 
-// On a component level -- see which allocation keys appear and disappear
+// On a component level -- see which component instance keys appear and disappear
 func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 	// map of all instances
 	allKeys := make(map[string]bool)

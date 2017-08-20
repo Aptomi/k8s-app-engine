@@ -68,7 +68,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	// Process context and transform labels
 	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
 
-	// Resolve allocation name
+	// Resolve allocation keys for the context
 	node.allocationKeysResolved, err = node.resolveAllocationKeys(state.Policy)
 	if err != nil {
 		return node.cannotResolve()

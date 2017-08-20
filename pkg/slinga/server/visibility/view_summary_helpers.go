@@ -28,7 +28,7 @@ func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) stri
 		return "N/A"
 	}
 	instance := view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey]
-	return fmt.Sprintf("%s/%s", instance.Key.ContextName, instance.Key.AllocationName)
+	return view.getResolvedContextNameByInst(instance)
 }
 
 func (view SummaryView) getRuleAppliedTo(rule *Rule) string {
@@ -58,7 +58,7 @@ func (view SummaryView) getResolvedClusterNameByInst(instance *engine.ComponentI
 }
 
 func (view SummaryView) getResolvedContextNameByInst(instance *engine.ComponentInstance) string {
-	return fmt.Sprintf("%s/%s", instance.Key.ContextName, instance.Key.AllocationName)
+	return instance.Key.ContextNameWithKeys
 }
 
 func getWebIDByComponentKey(key string) string {

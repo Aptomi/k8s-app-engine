@@ -37,14 +37,14 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 	}
 	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		entry := lineEntry{
-			"resolved":     dependency.Resolved,
-			"userName":     view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name,
-			"serviceName":  dependency.Service,
-			"context":      view.getResolvedContextNameByDep(dependency),
-			"cluster":      view.getResolvedClusterNameByDep(dependency),
-			"stats":        view.getDependencyStats(dependency),
-			"dependencyId": dependency.GetID(),
-			"id":           view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
+			"resolved":        dependency.Resolved,
+			"userName":        view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name,
+			"serviceName":     dependency.Service,
+			"contextWithKeys": view.getResolvedContextNameByDep(dependency),
+			"cluster":         view.getResolvedClusterNameByDep(dependency),
+			"stats":           view.getDependencyStats(dependency),
+			"dependencyId":    dependency.GetID(),
+			"id":              view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
 		}
 		result = append(result, entry)
 	}
@@ -95,11 +95,11 @@ func (view SummaryView) getServicesOwned() interface{} {
 			for key := range instanceMap {
 				instance := view.state.ResolvedData.ComponentInstanceMap[key]
 				entry := lineEntry{
-					"serviceName": service.GetName(),
-					"context":     view.getResolvedContextNameByInst(instance),
-					"cluster":     view.getResolvedClusterNameByInst(instance),
-					"stats":       view.getInstanceStats(instance),
-					"id":          getWebIDByComponentKey(key), // entries will be sorted by ID
+					"serviceName":     service.GetName(),
+					"contextWithKeys": view.getResolvedContextNameByInst(instance),
+					"cluster":         view.getResolvedClusterNameByInst(instance),
+					"stats":           view.getInstanceStats(instance),
+					"id":              getWebIDByComponentKey(key), // entries will be sorted by ID
 				}
 				result = append(result, entry)
 			}
@@ -114,13 +114,13 @@ func (view SummaryView) getServicesUsing() interface{} {
 	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		if dependency.UserID == view.userID {
 			entry := lineEntry{
-				"resolved":     dependency.Resolved,
-				"serviceName":  dependency.Service,
-				"context":      view.getResolvedContextNameByDep(dependency),
-				"cluster":      view.getResolvedClusterNameByDep(dependency),
-				"stats":        view.getDependencyStats(dependency),
-				"dependencyId": dependency.GetID(),
-				"id":           dependency.GetID(), // entries will be sorted by ID
+				"resolved":        dependency.Resolved,
+				"serviceName":     dependency.Service,
+				"contextWithKeys": view.getResolvedContextNameByDep(dependency),
+				"cluster":         view.getResolvedClusterNameByDep(dependency),
+				"stats":           view.getDependencyStats(dependency),
+				"dependencyId":    dependency.GetID(),
+				"id":              dependency.GetID(), // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}

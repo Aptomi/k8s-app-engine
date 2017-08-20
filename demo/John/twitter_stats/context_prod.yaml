@@ -18,7 +18,3 @@
     change-labels:
       set:
         cluster: cluster-us-east
-
-    # Single production instance
-    allocation:
-      name: prod

@@ -12,11 +12,11 @@ type rLink struct {
 }
 
 type rEndpoint struct {
-	Service    string
-	Context    string
-	Allocation string
-	Component  string
-	Links      []rLink
+	Service         string
+	Context         string
+	ContextWithKeys string
+	Component       string
+	Links           []rLink
 }
 
 type userEndpoints struct {
@@ -65,7 +65,7 @@ func Endpoints(currentUserID string, state engine.ServiceUsageState) endpointsVi
 				rLinks = append(rLinks, rLink{linkName, link})
 			}
 
-			r = append(r, rEndpoint{instance.Key.ServiceName, instance.Key.ContextName, instance.Key.AllocationName, instance.Key.ComponentName, rLinks})
+			r = append(r, rEndpoint{instance.Key.ServiceName, instance.Key.ContextName, instance.Key.ContextNameWithKeys, instance.Key.ComponentName, rLinks})
 		}
 
 		uR.Endpoints = append(uR.Endpoints, userEndpoints{users[userID], r})

@@ -20,34 +20,32 @@ type ComponentInstanceKey struct {
 	key string
 
 	// required fields
-	ServiceName    string
-	ContextName    string
-	AllocationName string
-	ComponentName  string
-
-	// additional allocation keys
-	AllocationsKeysResolved []string
+	ServiceName         string
+	ContextName         string
+	ContextNameWithKeys string // calculated
+	ComponentName       string
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
 func NewComponentInstanceKey(serviceName string, context *Context, allocationsKeysResolved []string, component *ServiceComponent) *ComponentInstanceKey {
+	contextName := getContextNameUnsafe(context)
+	componentName := getComponentNameUnsafe(component)
+	contextNameWithKeys := getContextNameWithKeys(contextName, allocationsKeysResolved)
 	return &ComponentInstanceKey{
-		ServiceName:             serviceName,
-		ContextName:             getContextNameUnsafe(context),
-		AllocationName:          getAllocationNameUnsafe(context),
-		AllocationsKeysResolved: allocationsKeysResolved,
-		ComponentName:           getComponentNameUnsafe(component),
+		ServiceName:         serviceName,
+		ContextName:         contextName,
+		ContextNameWithKeys: contextNameWithKeys,
+		ComponentName:       componentName,
 	}
 }
 
 // MakeCopy creates a copy of ComponentInstanceKey
 func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	return &ComponentInstanceKey{
-		ServiceName:             cik.ServiceName,
-		ContextName:             cik.ContextName,
-		AllocationName:          cik.AllocationName,
-		ComponentName:           cik.ComponentName,
-		AllocationsKeysResolved: cik.AllocationsKeysResolved,
+		ServiceName:         cik.ServiceName,
+		ContextName:         cik.ContextName,
+		ContextNameWithKeys: cik.ContextNameWithKeys,
+		ComponentName:       cik.ComponentName,
 	}
 }
 
@@ -77,21 +75,11 @@ func (cik ComponentInstanceKey) GetKey() string {
 		cik.key = strings.Join(
 			[]string{
 				cik.ServiceName,
-				cik.ContextName,
-				cik.GetAllocationNameWithKeys(),
+				cik.ContextNameWithKeys,
 				cik.ComponentName,
 			}, componentInstanceKeySeparator)
 	}
 	return cik.key
-}
-
-// Returns allocation name combined with allocation keys
-func (cik ComponentInstanceKey) GetAllocationNameWithKeys() string {
-	result := cik.AllocationName
-	if len(cik.AllocationsKeysResolved) > 0 {
-		result += componentInstanceKeySeparator + strings.Join(cik.AllocationsKeysResolved, componentInstanceKeySeparator)
-	}
-	return result
 }
 
 // If context has not been resolved and we need a key, generate one
@@ -102,18 +90,19 @@ func getContextNameUnsafe(context *Context) string {
 	return context.GetName()
 }
 
-// If allocation has not been resolved and we need a key, generate one
-func getAllocationNameUnsafe(context *Context) string {
-	if context == nil || context.Allocation == nil || len(context.Allocation.Name) <= 0 {
-		return componentUnresolvedName
-	}
-	return context.Allocation.Name
-}
-
 // If component has not been resolved and we need a key, generate one
 func getComponentNameUnsafe(component *ServiceComponent) string {
 	if component == nil {
 		return componentRootName
 	}
 	return component.Name
+}
+
+// Returns context name combined with allocation keys
+func getContextNameWithKeys(contextName string, allocationKeysResolved []string) string {
+	result := contextName
+	if len(allocationKeysResolved) > 0 {
+		result += componentInstanceKeySeparator + strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
+	}
+	return result
 }

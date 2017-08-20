@@ -6,6 +6,8 @@ Items to complete:
   - add references must include "namespace/"
   - inheritance / make sure we are looking for contexts in the right namespace
   - move istio into a 'system' namespace
+  - rules in namespaces? global rules in system namespace?
+  - rules to reference namespaces?
 
 2. Add support not only for policy objects, but for generated objects as well
   - Deal with external entities (charts, secrets, ldap configuration)
@@ -36,8 +38,6 @@ Items to complete:
 9. Implement polling for external entities & storing objects in DB
 
 10. Do we need to move Dependency.Resolved into resolved usage state?
-
-11. Remove allocation name all together and leave only keys?
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
@@ -72,3 +72,5 @@ Done:
   - get rid of allocationNameResolved -> allocation key resolution
   - fix graphviz, strings.Split(key, "#")
   - get rid of ComponentRootName everywhere
+
+* Remove allocation name all together and leave only keys (engine + UI)

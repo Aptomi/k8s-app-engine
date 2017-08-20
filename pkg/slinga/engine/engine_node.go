@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -73,7 +72,6 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 
 	user := state.userLoader.LoadUserByID(dependency.UserID)
 	if user == nil {
-		// Resolving allocations for service
 		Debug.WithFields(log.Fields{
 			"dependency": dependency,
 		}).Panic("Dependency refers to non-existing user")
@@ -163,17 +161,15 @@ func (node *resolutionNode) debugResolvingDependencyEnd() {
 func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
 		Debug.WithFields(log.Fields{
-			"service":    node.service.GetName(),
-			"component":  node.component.Name,
-			"context":    node.context.GetName(),
-			"allocation": node.context.Allocation.Name,
+			"service":   node.service.GetName(),
+			"component": node.component.Name,
+			"context":   node.context.GetName(),
 		}).Info("Processing dependency on code execution")
 	} else if node.component.Service != "" {
 		Debug.WithFields(log.Fields{
 			"service":          node.service.GetName(),
 			"component":        node.component.Name,
 			"context":          node.context.GetName(),
-			"allocation":       node.context.Allocation.Name,
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 	} else {
@@ -252,33 +248,32 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) *Context {
 	return contextMatched
 }
 
-// Helper to get a matched allocation
+// Helper to resolve allocation keys
 func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, error) {
-	// If there is no allocation, exit
+	// If there is no allocation, there are no keys to resolve
 	if node.context.Allocation == nil {
-		return nil, errors.New("No allocation present")
+		return nil, nil
 	}
 
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
 	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"service":    node.service.GetName(),
-			"context":    node.context.GetName(),
-			"allocation": node.context.Allocation.Name,
-			"keys":       node.context.Allocation.Keys,
-			"user":       node.user.Name,
-			"error":      err,
+			"service": node.service.GetName(),
+			"context": node.context.GetName(),
+			"keys":    node.context.Allocation.Keys,
+			"user":    node.user.Name,
+			"error":   err,
 		}).Info("Cannot resolve one of the keys within an allocation")
 		return nil, err
 	}
 
 	if len(node.context.Allocation.Keys) > 0 {
 		Debug.WithFields(log.Fields{
-			"service":    node.service.GetName(),
-			"context":    node.context.GetName(),
-			"allocation": node.context.Allocation.Name,
-			"user":       node.user.Name,
+			"service": node.service.GetName(),
+			"context": node.context.GetName(),
+			"keys":    node.context.Allocation.Keys,
+			"user":    node.user.Name,
 		}).Info("All allocation keys resolved")
 		node.ruleLogWriter.addRuleLogEntry(entryAllocationKeysResolved(node.service, node.context, result))
 	}

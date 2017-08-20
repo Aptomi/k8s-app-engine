@@ -12,7 +12,6 @@ type Context struct {
 	Criteria     *Criteria
 	ChangeLabels LabelOperations `yaml:"change-labels"`
 	Allocation   *struct {
-		Name string
 		Keys []string
 	}
 }

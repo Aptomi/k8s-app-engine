@@ -24,7 +24,6 @@
         b:
 
     allocation:
-      name: prod
       keys:
         - "{{.User.Name}}"
 
@@ -50,7 +49,6 @@
         some-label-to-be-removed:
 
     allocation:
-      name: prod
       keys:
         - "team-{{.User.Labels.team}}"
         - "{{index .Labels \"prod-low-ctx\"}}"
@@ -81,7 +79,6 @@
         b:
 
     allocation:
-      name: test
       keys:
         - "{{.User.Labels.team}}"
 
@@ -103,9 +100,6 @@
       require-none:
         - false
 
-    allocation:
-      name: special-not-matched
-
 # Special context for testing criterias ('require-any' is empty)
 - kind: context
 
@@ -119,6 +113,3 @@
         - specialname == "specialvalue"
       require-none:
         - false
-
-    allocation:
-      name: special-matched

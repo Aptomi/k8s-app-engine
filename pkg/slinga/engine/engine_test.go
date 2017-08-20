@@ -23,12 +23,12 @@ func TestEnginePolicyResolutionAndResolvedData(t *testing.T) {
 	assert.Equal(t, 16, len(resolvedData.ComponentProcessingOrder), "Policy usage should have correct number of entries")
 
 	// Resolution for test context
-	kafkaTest := getInstance(t, "kafka#test#test#platform_services#component2", resolvedData)
+	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", usageState)
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
 	assert.True(t, usageState.Policy.Dependencies.DependenciesByID["dep_id_1"].Resolved, "Only Alice should have access to test")
 
 	// Resolution for prod context
-	kafkaProd := getInstance(t, "kafka#prod-low#prod#team-platform_services#true#component2", resolvedData)
+	kafkaProd := getInstanceByParams(t, "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", usageState)
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
 	assert.Equal(t, "2", usageState.Policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 }
@@ -56,15 +56,14 @@ func TestEngineLabelProcessing(t *testing.T) {
 
 func TestEngineCodeAndDiscoveryParamsEval(t *testing.T) {
 	usageState := loadPolicyAndResolve(t)
-	resolvedData := usageState.ResolvedData
 
-	kafkaTest := getInstance(t, "kafka#test#test#platform_services#component2", resolvedData)
+	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", usageState)
 
 	// Check that code parameters evaluate correctly
-	assert.Equal(t, "zookeeper-test-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
+	assert.Equal(t, "zookeeper-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
 
 	// Check that discovery parameters evaluate correctly
-	assert.Equal(t, "kafka-kafka-test-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+	assert.Equal(t, "kafka-kafka-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// Check that nested parameters evaluate correctly
 	for i := 1; i <= 5; i++ {
@@ -120,7 +119,7 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	uInitial = emulateSaveAndLoadState(uInitial)
 
 	// Check creation/update times
-	key = "kafka#test#test#platform_services#component2"
+	key = getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", uInitial).Key.GetKey()
 	p := getTimesNext(t, key, uInitial)
 	assert.WithinDuration(t, time.Now(), p.timeNextCreated, time.Second, "Creation time should be initialized correctly for kafka")
 	assert.Equal(t, p.timeNextUpdated, p.timeNextUpdated, "Update time should be equal to creation time")
@@ -158,13 +157,13 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	verifyDiff(t, diff, true, 0, 0, 1, 0, 0)
 
 	// Check creation/update times for component
-	key = "kafka#prod-high#prod#Elena#component2"
+	key = getInstanceByParams(t, "kafka", "prod-high", []string{"Elena"}, "component2", uNewDependency).Key.GetKey()
 	pUpdate := getTimes(t, key, uNewDependency, uUpdatedDependency)
 	assert.Equal(t, pUpdate.timePrevCreated, pUpdate.timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, pUpdate.timeNextUpdated.After(pUpdate.timePrevUpdated), "Update time should be changed")
 
 	// Check creation/update times for service
-	key = "kafka#prod-high#prod#Elena#root"
+	key = getInstanceByParams(t, "kafka", "prod-high", []string{"Elena"}, componentRootName, uNewDependency).Key.GetKey()
 	pUpdateSvc := getTimes(t, key, uNewDependency, uUpdatedDependency)
 	assert.Equal(t, pUpdateSvc.timePrevCreated, pUpdateSvc.timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, pUpdateSvc.timeNextUpdated.After(pUpdateSvc.timePrevUpdated), "Update time should be changed for service")

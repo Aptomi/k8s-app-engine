@@ -21,6 +21,5 @@
 
     # Each dev will get their own instance
     allocation:
-      name: stage
       keys:
         - "{{ .User.Name }}"

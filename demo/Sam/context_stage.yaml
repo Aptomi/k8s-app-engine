@@ -18,7 +18,3 @@
     change-labels:
       set:
         cluster: cluster-us-west
-
-    # Each dev will get their own instance
-    allocation:
-      name: stage

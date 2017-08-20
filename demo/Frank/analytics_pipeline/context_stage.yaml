@@ -18,7 +18,3 @@
     change-labels:
       set:
         cluster: cluster-us-west
-
-    # All consumers will rely on the same instance of analytics_pipeline
-    allocation:
-      name: stage

@@ -55,10 +55,10 @@ func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode,
 		v = view.state.UnresolvedData.ComponentInstanceMap[key]
 	}
 
-	// if it's a service, add node and connext with previous
+	// if it's a service, add node and connect with previous
 	if v.Key.IsService() {
 		// add service instance node
-		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, nextLevel <= 1)
+		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, nextLevel <= 1)
 		view.g.addNode(svcInstanceNode, nextLevel)
 
 		// connect service instance nodes

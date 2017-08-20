@@ -30,7 +30,7 @@ func (view ServiceView) GetData() interface{} {
 	for k, v := range view.state.ResolvedData.ComponentInstanceMap {
 		if v.Key.ServiceName == view.serviceName && v.Key.IsService() {
 			// add a node with an instance of our service
-			svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, true)
+			svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, true)
 			view.g.addNode(svcInstanceNode, 1)
 
 			// connect service node and instance node
@@ -66,7 +66,7 @@ func (view ServiceView) addEveryoneWhoUses(serviceKey string, svcInstanceNodePre
 			v := view.state.GetResolvedData().ComponentInstanceMap[k]
 			if v.Key.IsService() {
 				// if it's a service instance, add a node
-				svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.AllocationName, v, false)
+				svcInstanceNode := newServiceInstanceNode(k, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, false)
 				view.g.addNode(svcInstanceNode, nextLevel)
 
 				// connect service instance nodes

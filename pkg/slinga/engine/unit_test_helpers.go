@@ -37,12 +37,17 @@ func emulateSaveAndLoadState(state ServiceUsageState) ServiceUsageState {
 	return loadedObject
 }
 
-func getInstance(t *testing.T, key string, resolvedUsage *ServiceUsageData) *ComponentInstance {
-	instance, ok := resolvedUsage.ComponentInstanceMap[key]
-	if !assert.True(t, ok, "Component instance in resolved policy: "+key) {
+func getInstance(t *testing.T, key string, usageData *ServiceUsageData) *ComponentInstance {
+	instance, ok := usageData.ComponentInstanceMap[key]
+	if !assert.True(t, ok, "Component instance in usage data: "+key) {
 		t.FailNow()
 	}
 	return instance
+}
+
+func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, state ServiceUsageState) *ComponentInstance {
+	key := NewComponentInstanceKey(serviceName, state.Policy.Contexts[contextName], allocationKeysResolved, state.Policy.Services[serviceName].GetComponentsMap()[componentName])
+	return getInstance(t, key.GetKey(), state.ResolvedData)
 }
 
 func verifyDiff(t *testing.T, diff *ServiceUsageStateDiff, newRevision bool, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
