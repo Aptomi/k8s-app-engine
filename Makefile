@@ -61,8 +61,8 @@ fmt:
 
 .PHONY: vet
 vet:
-	go tool vet -all -shadow main.go
-	go tool vet -all -shadow ./cmd ./pkg
+	go tool vet -all -shadow main.go || echo "\nSome vet checks failed\n"
+	go tool vet -all -shadow ./cmd ./pkg || echo "\nSome vet checks failed\n"
 
 .PHONY: lint
 lint:
