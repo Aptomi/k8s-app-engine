@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func loadUnitTestsPolicy() *Policy {
+func loadUnitTestsPolicy() *PolicyNamespace {
 	policyLoader := NewSlingaObjectDatabaseDir("../testdata/unittests")
 	policy := policyLoader.LoadPolicyObjects(-1, "")
 	return policy
@@ -18,11 +18,11 @@ func loadPolicyAndResolve(t *testing.T) ServiceUsageState {
 	return resolvePolicy(t, loadUnitTestsPolicy())
 }
 
-func resolvePolicy(t *testing.T, policy *Policy) ServiceUsageState {
+func resolvePolicy(t *testing.T, policy *PolicyNamespace) ServiceUsageState {
 	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 	usageState := NewServiceUsageState(policy, userLoader)
 	err := usageState.ResolveAllDependencies()
-	if !assert.Nil(t, err, "Policy usage should be resolved without errors") {
+	if !assert.Nil(t, err, "PolicyNamespace usage should be resolved without errors") {
 		t.FailNow()
 	}
 	return usageState

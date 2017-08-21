@@ -1,6 +1,6 @@
 package language
 
-func loadUnitTestsPolicy() *Policy {
+func loadUnitTestsPolicy() *PolicyNamespace {
 	db := NewSlingaObjectDatabaseDir("../testdata/unittests")
 	return db.LoadPolicyObjects(-1, "")
 }

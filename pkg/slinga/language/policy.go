@@ -9,8 +9,8 @@ import (
 	This file declares all the necessary structures for Slinga
 */
 
-// Policy is a global policy object with services and contexts
-type Policy struct {
+// PolicyNamespace is a global policy object with services and contexts
+type PolicyNamespace struct {
 	Services     map[string]*Service
 	Contexts     map[string]*Context
 	Clusters     map[string]*Cluster
@@ -18,8 +18,8 @@ type Policy struct {
 	Dependencies *GlobalDependencies
 }
 
-func NewPolicy() *Policy {
-	return &Policy{
+func NewPolicy() *PolicyNamespace {
+	return &PolicyNamespace{
 		Services:     make(map[string]*Service),
 		Contexts:     make(map[string]*Context),
 		Clusters:     make(map[string]*Cluster),
@@ -29,7 +29,7 @@ func NewPolicy() *Policy {
 }
 
 // TODO: deal with namespaces
-func (policy *Policy) addObject(object SlingaObjectInterface) {
+func (policy *PolicyNamespace) addObject(object SlingaObjectInterface) {
 	if object.GetObjectType() == TypePolicy {
 		p := reflect.ValueOf(object).Interface()
 

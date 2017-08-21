@@ -200,14 +200,14 @@ func (node *resolutionNode) cannotResolve() error {
 }
 
 // Helper to get a matched service
-func (node *resolutionNode) getMatchedService(policy *Policy) *Service {
+func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) *Service {
 	service := policy.Services[node.serviceName]
 	node.ruleLogWriter.addRuleLogEntry(entryServiceMatched(node.serviceName, service != nil))
 	return service
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *Policy) *Context {
+func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) *Context {
 	// Locate the list of contexts for service
 	node.ruleLogWriter.addRuleLogEntry(entryContextsFound(len(policy.Contexts) > 0))
 
@@ -249,7 +249,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) *Context {
 }
 
 // Helper to resolve allocation keys
-func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, error) {
+func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]string, error) {
 	// If there is no allocation, there are no keys to resolve
 	if node.context.Allocation == nil {
 		return nil, nil
@@ -290,7 +290,7 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) *Com
 	)
 }
 
-func (node *resolutionNode) getCluster(policy *Policy, labels LabelSet, context *Context) *Cluster {
+func (node *resolutionNode) getCluster(policy *PolicyNamespace, labels LabelSet, context *Context) *Cluster {
 	// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
 	var cluster *Cluster
 	if clusterLabel, ok := labels.Labels["cluster"]; ok {
@@ -313,7 +313,7 @@ func (node *resolutionNode) transformLabels(labels LabelSet, operations LabelOpe
 	return result
 }
 
-func (node *resolutionNode) hasGlobalRuleViolations(policy *Policy, context *Context, labels LabelSet, cluster *Cluster) bool {
+func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, context *Context, labels LabelSet, cluster *Cluster) bool {
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {

@@ -16,7 +16,7 @@ func NewSlingaObjectDatabaseDir(dir string) SlingaObjectDatabase {
 	return &SlingaObjectDatabaseDir{dir: dir}
 }
 
-func (db *SlingaObjectDatabaseDir) LoadPolicyObjects(revision int, namespace string) *Policy {
+func (db *SlingaObjectDatabaseDir) LoadPolicyObjects(revision int, namespace string) *PolicyNamespace {
 	files, _ := zglob.Glob(filepath.Join(db.dir, "**", "*.yaml"))
 	sort.Strings(files)
 

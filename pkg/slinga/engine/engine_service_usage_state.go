@@ -11,7 +11,7 @@ import (
 // ServiceUsageState contains resolution data for services - who is using what, as well as contains processing order and additional data
 type ServiceUsageState struct {
 	// reference to a policy
-	Policy *Policy
+	Policy *PolicyNamespace
 
 	// user loader
 	userLoader UserLoader
@@ -50,7 +50,7 @@ func newServiceUsageData() *ServiceUsageData {
 }
 
 // NewServiceUsageState creates new empty ServiceUsageState
-func NewServiceUsageState(policy *Policy, userLoader UserLoader) ServiceUsageState {
+func NewServiceUsageState(policy *PolicyNamespace, userLoader UserLoader) ServiceUsageState {
 	return ServiceUsageState{
 		Policy:         policy,
 		userLoader:     userLoader,
