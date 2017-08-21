@@ -19,7 +19,7 @@ profile:
 .PHONY: coverage
 coverage:
 	@echo "Calculating code coverage"
-	echo 'mode: atomic' > coverage.out && go list ./pkg/... | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
+	echo 'mode: atomic' > coverage.out && go list ./pkg/... | xargs -n1 -I{} sh -c 'go test -short -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: test
