@@ -10,6 +10,10 @@ default: clean build test
 vendor:
 	glide install --strip-vendor
 
+.PHONY: vendor-no-color
+vendor-no-color:
+	glide --no-color install --strip-vendor
+
 .PHONY: profile
 profile:
 	@echo "Profiling CPU for 15 seconds"
