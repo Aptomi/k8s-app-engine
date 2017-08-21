@@ -83,7 +83,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	verifyDiff(t, diff, false, 0, 0, 0, 0, 0)
 }
 
-func TestEngineNonEmptyDiff(t *testing.T) {
+func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
 	usageStatePrev := loadPolicyAndResolve(t)
 	usageStatePrev = emulateSaveAndLoadState(usageStatePrev)
 
@@ -101,6 +101,9 @@ func TestEngineNonEmptyDiff(t *testing.T) {
 	// Calculate difference
 	diff := usageStateNext.CalculateDifference(&usageStatePrev)
 	verifyDiff(t, diff, true, 8, 0, 0, 8, 0)
+
+	// Apply diff in noop mode
+	diff.Apply(true)
 }
 
 func TestEngineComponentUpdateAndTimes(t *testing.T) {

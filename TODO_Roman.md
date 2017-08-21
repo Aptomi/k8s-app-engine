@@ -33,11 +33,11 @@ Items to complete:
 
 7. Shall we consider renaming .User -> .Consumer?
 
-8. Separate progress calculation code from progress bar
+8. Implement polling for external entities & storing objects in DB
 
-9. Implement polling for external entities & storing objects in DB
+9. Do we need to move Dependency.Resolved into resolved usage state?
 
-10. Do we need to move Dependency.Resolved into resolved usage state?
+10. Get rid of service.Metadata.Name == 'istio'
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
@@ -74,3 +74,5 @@ Done:
   - get rid of ComponentRootName everywhere
 
 * Remove allocation name all together and leave only keys (engine + UI)
+
+* Separate progress calculation code from progress bar

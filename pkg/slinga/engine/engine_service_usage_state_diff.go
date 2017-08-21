@@ -6,8 +6,8 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
-	"github.com/gosuri/uiprogress"
 	"time"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 )
 
 // ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
@@ -28,10 +28,10 @@ type ServiceUsageStateDiff struct {
 	ComponentUpdate           map[string]bool
 	ComponentAttachDependency []ServiceUsageDependencyAction
 	ComponentDetachDependency []ServiceUsageDependencyAction
+	IstioRuleEnforcer         *IstioRuleEnforcer
 
-	// Progress bar for CLI
-	progress    *uiprogress.Progress
-	progressBar *uiprogress.Bar
+	// Progress indicator
+	progress progress.ProgressIndicator
 }
 
 // CalculateDifference calculates difference between two given usage states
@@ -44,8 +44,7 @@ func (state *ServiceUsageState) CalculateDifference(prev *ServiceUsageState) *Se
 		ComponentDestruct:    make(map[string]bool),
 		ComponentUpdate:      make(map[string]bool)}
 
-	result.calculateDifferenceOnComponentLevel()
-
+	result.calculateDifference()
 	return result
 }
 
@@ -231,7 +230,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *log.Logge
 }
 
 // On a component level -- see which component instance keys appear and disappear
-func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
+func (diff *ServiceUsageStateDiff) calculateDifference() {
 	// map of all instances
 	allKeys := make(map[string]bool)
 
@@ -294,6 +293,9 @@ func (diff *ServiceUsageStateDiff) calculateDifferenceOnComponentLevel() {
 			}
 		}
 	}
+
+	// process istio
+	diff.IstioRuleEnforcer = NewIstioRuleEnforcer(diff)
 }
 
 // updated timestamps for component (and root service, if/as needed)
@@ -334,13 +336,16 @@ func (diff *ServiceUsageStateDiff) ShouldGenerateNewRevision() bool {
 		return true
 	}
 
-	// TODO: this key method doesn't take into account presence of Istio rules
+	// TODO: istio should be a part of this
 	return false
 }
 
-// On a component level -- see which keys appear and disappear
+// Returns difference length (used for progress indicator)
 func (diff *ServiceUsageStateDiff) getDifferenceLen() int {
-	return len(diff.ComponentInstantiate) + len(diff.ComponentDestruct) + len(diff.ComponentUpdate)
+	return len(diff.ComponentInstantiate) +
+		len(diff.ComponentDestruct) +
+		len(diff.ComponentUpdate) +
+		diff.IstioRuleEnforcer.getDifferenceLen()
 }
 
 // On a component level -- see which keys appear and disappear
@@ -443,14 +448,11 @@ func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 
 // Apply method applies all changes via executors, saves usage state in Aptomi DB
 func (diff ServiceUsageStateDiff) Apply(noop bool) {
+	diff.progress = progress.NewProgressNoop()
 	if !noop {
-		// add progress bar into CLI
-		dLen := diff.getDifferenceLen()
-		if dLen > 0 {
-			fmt.Println("[Applying changes]")
-			diff.progress = NewProgress()
-			diff.progressBar = AddProgressBar(diff.progress, dLen)
-		}
+		// add progress indicator
+		diff.progress = progress.NewProgressConsole()
+		diff.progress.SetTotal(diff.getDifferenceLen())
 
 		err := diff.processDestructions()
 		if err != nil {
@@ -471,17 +473,15 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 			}).Panic("Error while instantiating components")
 		}
 
-		// Don't forget to stop the progress bar and print its final state
-		if diff.progress != nil {
-			diff.progress.Stop()
-		}
-
-		// Apply changes in Istio Ingress rules
-		diff.Next.ProcessIstioIngress(noop)
+		// enforce istio rules
+		diff.IstioRuleEnforcer.Apply(noop)
 	}
 
 	// save new state in the last run directory
 	diff.Next.SaveServiceUsageState()
+
+	// Don't forget to finalize progress indicator
+	diff.progress.Done()
 }
 
 func (diff ServiceUsageStateDiff) processInstantiations() error {
@@ -489,10 +489,8 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 	for _, key := range diff.Next.GetResolvedData().ComponentProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := diff.ComponentInstantiate[key]; ok {
-			// Increment progress bar
-			if diff.progressBar != nil {
-				diff.progressBar.Incr()
-			}
+			// Advance progress indicator
+			diff.progress.Advance("Create")
 
 			instance := diff.Next.GetResolvedData().ComponentInstanceMap[key]
 			component := diff.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
@@ -533,10 +531,8 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 	for _, key := range diff.Next.GetResolvedData().ComponentProcessingOrder {
 		// Does it need to be updated?
 		if _, ok := diff.ComponentUpdate[key]; ok {
-			// Increment progress bar
-			if diff.progressBar != nil {
-				diff.progressBar.Incr()
-			}
+			// Advance progress indicator
+			diff.progress.Advance("Update")
 
 			instance := diff.Next.GetResolvedData().ComponentInstanceMap[key]
 			component := diff.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
@@ -576,10 +572,8 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 	for _, key := range diff.Prev.GetResolvedData().ComponentProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := diff.ComponentDestruct[key]; ok {
-			// Increment progress bar
-			if diff.progressBar != nil {
-				diff.progressBar.Incr()
-			}
+			// Advance progress indicator
+			diff.progress.Advance("Delete")
 
 			instance := diff.Prev.GetResolvedData().ComponentInstanceMap[key]
 			component := diff.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]

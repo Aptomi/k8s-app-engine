@@ -9,6 +9,7 @@ import (
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"strings"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 )
 
 // IstioRouteRule is istio route rule
@@ -17,48 +18,81 @@ type IstioRouteRule struct {
 	Cluster *Cluster
 }
 
-// ProcessIstioIngress processes global rules and applies Istio routing rules for ingresses
-func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
-	if len(state.GetResolvedData().ComponentProcessingOrder) == 0 || noop {
+// IstioRuleEnforcer enforces istio rules
+type IstioRuleEnforcer struct {
+	state    *ServiceUsageState
+	progress progress.ProgressIndicator
+}
+
+// NewIstioRuleEnforcer creates new IstioRuleEnforcer
+func NewIstioRuleEnforcer(diff *ServiceUsageStateDiff) *IstioRuleEnforcer {
+	return &IstioRuleEnforcer{
+		state:    diff.Next,
+		progress: diff.progress,
+	}
+}
+
+// Returns difference length (used for progress indicator)
+func (enforcer *IstioRuleEnforcer) getDifferenceLen() int {
+	result := 0
+
+	// Get istio rules for each cluster
+	result += len(enforcer.state.Policy.Clusters)
+
+	// Call processComponent() for each component
+	result += len(enforcer.state.GetResolvedData().ComponentProcessingOrder)
+
+	// Create rules for each component
+	result += len(enforcer.state.GetResolvedData().ComponentProcessingOrder)
+
+	// Delete rules (all at once)
+	result += len(enforcer.state.GetResolvedData().ComponentProcessingOrder)
+
+	return result
+}
+
+// Apply processes global rules and applies Istio routing rules for ingresses
+func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
+	if len(enforcer.state.GetResolvedData().ComponentProcessingOrder) == 0 || noop {
 		return
 	}
 
-	fmt.Println("[Route Rules (Istio)]")
-
-	progress := NewProgress()
-	progressBar := AddProgressBar(progress, len(state.GetResolvedData().ComponentProcessingOrder)+len(state.Policy.Clusters))
-
 	existingRules := make([]*IstioRouteRule, 0)
 
-	for _, cluster := range state.Policy.Clusters {
+	for _, cluster := range enforcer.state.Policy.Clusters {
 		existingRules = append(existingRules, getIstioRouteRules(cluster)...)
-
-		progressBar.Incr()
+		enforcer.progress.Advance("Istio")
 	}
 
-	desiredRules := make([]*IstioRouteRule, 0)
-
 	// Process in the right order
-	for _, key := range state.GetResolvedData().ComponentProcessingOrder {
-		rules, err := processComponent(key, state)
+	desiredRules := make(map[string][]*IstioRouteRule)
+	for _, key := range enforcer.state.GetResolvedData().ComponentProcessingOrder {
+		rules, err := processComponent(key, enforcer.state)
 		if err != nil {
 			Debug.WithFields(log.Fields{
 				"key":   key,
 				"error": err,
 			}).Panic("Unable to process Istio Ingress for component")
 		}
-		desiredRules = append(desiredRules, rules...)
-		progressBar.Incr()
+		desiredRules[key] = rules
+		enforcer.progress.Advance("Istio")
 	}
 
 	deleteRules := make([]*IstioRouteRule, 0)
-	createRules := make([]*IstioRouteRule, 0)
+	createRules := make(map[string][]*IstioRouteRule)
+
+	// populate createRules, to make sure we will get correct number of entries for progress indicator
+	for _, key := range enforcer.state.GetResolvedData().ComponentProcessingOrder {
+		createRules[key] = make([]*IstioRouteRule, 0)
+	}
 
 	for _, existingRule := range existingRules {
 		found := false
-		for _, desiredRule := range desiredRules {
-			if existingRule.Service == desiredRule.Service && existingRule.Cluster.GetName() == desiredRule.Cluster.GetName() {
-				found = true
+		for _, desiredRulesForComponent := range desiredRules {
+			for _, desiredRule := range desiredRulesForComponent {
+				if existingRule.Service == desiredRule.Service && existingRule.Cluster.GetName() == desiredRule.Cluster.GetName() {
+					found = true
+				}
 			}
 		}
 		if !found {
@@ -66,42 +100,45 @@ func (state *ServiceUsageState) ProcessIstioIngress(noop bool) {
 		}
 	}
 
-	for _, desiredRule := range desiredRules {
-		found := false
-		for _, existingRule := range existingRules {
-			if desiredRule.Service == existingRule.Service && desiredRule.Cluster.GetName() == existingRule.Cluster.GetName() {
-				found = true
+	for key, desiredRulesForComponent := range desiredRules {
+		for _, desiredRule := range desiredRulesForComponent {
+			found := false
+			for _, existingRule := range existingRules {
+				if desiredRule.Service == existingRule.Service && desiredRule.Cluster.GetName() == existingRule.Cluster.GetName() {
+					found = true
+				}
+			}
+			if !found {
+				createRules[key] = append(createRules[key], desiredRule)
 			}
 		}
-		if !found {
-			createRules = append(createRules, desiredRule)
-		}
 	}
 
-	tbdLen := len(createRules) + len(deleteRules)
-
-	if tbdLen > 0 {
-		progressBar = AddProgressBar(progress, tbdLen)
-
-		for _, rule := range createRules {
+	// process creations by component
+	changed := false
+	for _, createRulesForComponent := range createRules {
+		for _, rule := range createRulesForComponent {
 			rule.create()
-			progressBar.Incr()
+			changed = true
 		}
-
-		for _, rule := range deleteRules {
-			rule.delete()
-			progressBar.Incr()
-		}
+		enforcer.progress.Advance("Istio")
 	}
 
-	progress.Stop()
+	// process deletions all at once
+	for _, rule := range deleteRules {
+		rule.delete()
+		changed = true
+	}
+	enforcer.progress.Advance("Istio")
 
-	if tbdLen > 0 {
+	if changed {
+		for _, createRulesForComponent := range createRules {
+			for _, rule := range createRulesForComponent {
+				fmt.Println("  [+] " + rule.Service)
+			}
+		}
 		for _, rule := range deleteRules {
 			fmt.Println("  [-] " + rule.Service)
-		}
-		for _, rule := range createRules {
-			fmt.Println("  [+] " + rule.Service)
 		}
 	} else {
 		fmt.Println("  [*] No changes")
@@ -129,7 +166,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 	dependencyIds := usage.GetResolvedData().ComponentInstanceMap[key].DependencyIds
 	users := make([]*User, 0)
 	for dependencyID := range dependencyIds {
-		// todo check if user doesn't exists
+		// todo check if user doesn't exist
 		userID := usage.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 		users = append(users, usage.userLoader.LoadUserByID(userID))
 	}
