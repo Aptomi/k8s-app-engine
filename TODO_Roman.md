@@ -9,12 +9,7 @@ Items to complete:
   - rules in namespaces? global rules in system namespace?
   - rules to reference namespaces?
 
-2. Add support not only for policy objects, but for generated objects as well
-  - Deal with external entities (charts, secrets, ldap configuration)
-
-3. Get rid of dependency ID
-
-4. Figure out what to do with logging... it's messed up right now
+2. Figure out what to do with logging... it's messed up right now
   - RIGHT NOW IT'S VERY HARD TO DEBUG POLICY / UNDERSTAND WHAT'S GOING ON
   - do we want to show users a full log for policy evaluation?
   - only show a particular namespace?
@@ -22,22 +17,24 @@ Items to complete:
   - debug log vs. rule log
   - get rid of all debug in language
   - use logging only in engine
+  - implement event log (filterable by ns, obj type, etc)
 
-5. Code coverage & packages
-  - Go tooling for code coverage works for individual packages
-  - So if we have 'language' pkg at 50% and the other half is covered by tests from 'engine', it will be impossible to calculate
-  - We need to have packages completely independent. With their own independent code coverage. Can't rely on cross-package tests
-  - Also see https://github.com/pierrre/gotestcover
+3. Error handing in engine & improved engine unit test coverage for corner cases
 
-6. Reformat, deal with code style and missing comments
+4. Get rid of dependency ID
 
-7. Shall we consider renaming .User -> .Consumer?
+5. Do we need to move Dependency.Resolved into resolved usage state?
+
+6. Get rid of service.Metadata.Name == 'istio'
+
+7. Reformat, deal with code style and missing comments
 
 8. Implement polling for external entities & storing objects in DB
 
-9. Do we need to move Dependency.Resolved into resolved usage state?
 
-10. Get rid of service.Metadata.Name == 'istio'
+Questions:
+1. Shall we consider renaming .User -> .Consumer?
+
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
@@ -76,3 +73,9 @@ Done:
 * Remove allocation name all together and leave only keys (engine + UI)
 
 * Separate progress calculation code from progress bar
+
+* Make target for unit test coverage
+  - Go tooling for code coverage works for individual packages
+  - So if we have 'language' pkg at 50% and the other half is covered by tests from 'engine', it will be impossible to calculate
+  - We need to have packages completely independent. With their own independent code coverage. Can't rely on cross-package tests
+  - Also see https://github.com/pierrre/gotestcover
