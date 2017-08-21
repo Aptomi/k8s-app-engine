@@ -9,17 +9,33 @@ Items to complete:
   - rules in namespaces? global rules in system namespace?
   - rules to reference namespaces?
 
-2. Figure out what to do with logging... it's messed up right now
-  - RIGHT NOW IT'S VERY HARD TO DEBUG POLICY / UNDERSTAND WHAT'S GOING ON
-  - do we want to show users a full log for policy evaluation?
-  - only show a particular namespace?
-  - e.g. what if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string), how do we propagate this to the user?
-  - debug log vs. rule log
-  - get rid of all debug in language
-  - use logging only in engine
-  - implement event log (filterable by ns, obj type, etc)
-  - event should work for engine, external LDAP poller, etc
-  - attach event by context (not by 100 variables)
+2. Improve debugging of the policy (for successful & unsuccessful processing)
+
+  - Which event logs can we store
+      -> successful policy evaluation (gets tied to a new revision)
+      -> error during policy evaluation (not tied to anything)
+      -> external services, e.g. LDAP sync service (gets tied to a separate revision of users, and the service keeps N last revisions)
+
+  - Journal ID
+    - event log gets written to a generic event log store and gets tied to a "Journal ID"
+    - for successful policy execution, a revision will be associated with "Journal ID"
+    - if error happened during policy execution, no revision will be associated with "Journal ID" (but you can still pull log and look at what happened)
+
+  - Index/Filter
+    - namespace (e.g. show only logs for namespaces user has access to based on ACL)
+    - dependency
+    - component instance key
+
+  - Params
+    - map of freeform params (e.g. for policy evaluation - things we show on UI)
+
+  - Misc
+    - rule log must be replaced with event log, filtered by componentKey
+    - all Debug.* calls must be removed. Likely, create a logger in engine
+    - all engine events should be propagated to a user
+      - notices: e.g. context match
+      - errors: if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string)
+    - if possible, attach event by context (not by passing a bunch of variables)
 
 3. Error handing in engine & improved engine unit test coverage for corner cases
 
