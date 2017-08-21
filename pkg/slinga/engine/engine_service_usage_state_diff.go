@@ -477,9 +477,6 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 		diff.IstioRuleEnforcer.Apply(noop)
 	}
 
-	// save new state in the last run directory
-	diff.Next.SaveServiceUsageState()
-
 	// Don't forget to finalize progress indicator
 	diff.progress.Done()
 }

@@ -69,6 +69,9 @@ var policyCmdApply = &cobra.Command{
 		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
 		diff.Apply(noop || emulateDeployment)
 
+		// Save new state in the last run directory
+		diff.Next.SaveServiceUsageState()
+
 		// If everything is successful, then increment revision and save run
 		// if emulateDeployment == true --> we set noop to false to write state on disk)
 		revision := GetLastRevision(GetAptomiBaseDir())
