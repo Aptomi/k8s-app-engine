@@ -25,7 +25,7 @@ func NewProgressConsole() *ProgressConsole {
 
 func (progressConsole *ProgressConsole) createProgressBar() {
 	if progressConsole.getTotalInternal() > 0 {
-		fmt.Println(progressConsole.out, "[Applying changes]")
+		fmt.Fprintln(progressConsole.out, "[Applying changes]")
 	}
 	progressConsole.progress.SetOut(progressConsole.out)
 	progressConsole.progressBar = progressConsole.progress.AddBar(progressConsole.getTotalInternal())
