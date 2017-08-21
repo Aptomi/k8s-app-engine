@@ -1,34 +1,30 @@
-- kind: dependency
-  metadata:
+- metadata:
+    kind: dependency
     namespace: main
     name: dep_id_1
-  spec:
-    userid: 1
-    service: kafka
+  userid: 1
+  service: kafka
 
-- kind: dependency
-  metadata:
+- metadata:
+    kind: dependency
     namespace: main
     name: dep_id_2
-  spec:
-    userid: 2
-    service: kafka
-    labels:
-      important: "yes"
-      some-label-to-be-removed: "yes"
+  userid: 2
+  service: kafka
+  labels:
+    important: "yes"
+    some-label-to-be-removed: "yes"
 
-- kind: dependency
-  metadata:
+- metadata:
+    kind: dependency
     namespace: main
     name: dep_id_3
-  spec:
-    userid: 3
-    service: kafka
+  userid: 3
+  service: kafka
 
-- kind: dependency
-  metadata:
+- metadata:
+    kind: dependency
     namespace: main
     name: dep_id_4
-  spec:
-    userid: 4
-    service: kafka
+  userid: 4
+  service: kafka

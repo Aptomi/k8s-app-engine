@@ -1,25 +1,23 @@
 # This context describes twitter_stats in staging
-- kind: context
-
-  metadata:
+- metadata:
+    kind: context
     namespace: main
     name: stage-web-ops
 
-  spec:
-    # Applies to all services owned by 'web-ops-team'
-    # For consumers with org == 'dev'
-    criteria:
-      require-all:
-        - service.Owner.Labels.team == 'web-ops-team'
-      require-any:
-        - org == 'dev'
+  # Applies to all services owned by 'web-ops-team'
+  # For consumers with org == 'dev'
+  criteria:
+    require-all:
+      - service.Owner.Labels.team == 'web-ops-team'
+    require-any:
+      - org == 'dev'
 
-    # Set cluster label to deploy in us-west
-    change-labels:
-      set:
-        cluster: cluster-us-west
+  # Set cluster label to deploy in us-west
+  change-labels:
+    set:
+      cluster: cluster-us-west
 
-    # Each dev will get their own instance
-    allocation:
-      keys:
-        - "{{ .User.Name }}"
+  # Each dev will get their own instance
+  allocation:
+    keys:
+      - "{{ .User.Name }}"

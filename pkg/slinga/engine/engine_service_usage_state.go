@@ -174,7 +174,7 @@ func (state ServiceUsageState) SaveServiceUsageState() {
 func loadServiceUsageStateFromFile(fileName string) ServiceUsageState {
 	result := *yaml.LoadObjectFromFileDefaultEmpty(fileName, new(ServiceUsageState)).(*ServiceUsageState)
 	if result.Policy == nil {
-		result.Policy = NewPolicy()
+		result.Policy = NewPolicyNamespace()
 	}
 	return result
 }

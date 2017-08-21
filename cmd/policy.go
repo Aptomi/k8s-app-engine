@@ -6,6 +6,9 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/graphviz"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object/store/file"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -45,10 +48,37 @@ var policyCmdApply = &cobra.Command{
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
-		policy := NewSlingaObjectDatabaseDir(policyDir).LoadPolicyObjects(-1, "")
+
+		//policy, err := registry.NewDefaultRegistry(policyDir).LoadPolicy(0)
+		catalog := NewObjectCatalog()
+		catalog.Add(ServiceObject)
+		catalog.Add(ContextObject)
+		catalog.Add(ClusterObject)
+		catalog.Add(RuleObject)
+		catalog.Add(DependencyObject)
+
+		store := FileStore{}
+		store.Codec = &yaml.YamlCodec{}
+		store.Codec.SetObjectCatalog(catalog)
+		store.Open(policyDir)
+
+		policy := NewPolicyNamespace()
+
+		objects, err := store.LoadObjects()
+		if err != nil {
+			log.Panicf("Error while loading Policy objects: ", err)
+		}
+
+		for _, object := range objects {
+			policy.AddObject(object)
+		}
+
+		if err != nil {
+			log.Panicf("Cannot load policy from %s with error: %s", policyDir, err)
+		}
 
 		nextUsageState := NewServiceUsageState(policy, userLoader)
-		err := nextUsageState.ResolveAllDependencies()
+		err = nextUsageState.ResolveAllDependencies()
 
 		if err != nil {
 			log.Panicf("Cannot resolve usage: %v", err)

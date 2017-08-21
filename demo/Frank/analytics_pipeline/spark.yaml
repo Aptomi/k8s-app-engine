@@ -1,37 +1,35 @@
 # Definition of Spark service
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: spark
 
-  spec:
-    owner: cn=Frank,ou=people,o=aptomiOrg
+  owner: cn=Frank,ou=people,o=aptomiOrg
 
-    components:
+  components:
 
-      - name: zookeeper
-        service: zookeeper
+    - name: zookeeper
+      service: zookeeper
 
-      - name: spark
-        discovery:
-          url: "spark-master-{{ .Discovery.instance }}-0.spark-master-{{ .Discovery.instance }}:7077"
-        code:
-          type: aptomi/code/kubernetes-helm
-          params:
-            chartName: spark-1.0.0
-            cluster: "{{ .Labels.cluster }}"
+    - name: spark
+      discovery:
+        url: "spark-master-{{ .Discovery.instance }}-0.spark-master-{{ .Discovery.instance }}:7077"
+      code:
+        type: aptomi/code/kubernetes-helm
+        params:
+          chartName: spark-1.0.0
+          cluster: "{{ .Labels.cluster }}"
 
-            spark:
-              master:
-                replicas: 1
-              worker:
-                replicas: 1
-                daemonMemory: "2g"
-                executorMemory: "2g"
+          spark:
+            master:
+              replicas: 1
+            worker:
+              replicas: 1
+              daemonMemory: "2g"
+              executorMemory: "2g"
 
-            zookeeper:
-              externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
-              path: "/{{ .Discovery.service.instanceId }}"
-        dependencies:
-          - zookeeper
+          zookeeper:
+            externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
+            path: "/{{ .Discovery.service.instanceId }}"
+      dependencies:
+        - zookeeper

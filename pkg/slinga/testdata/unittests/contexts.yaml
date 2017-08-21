@@ -1,115 +1,105 @@
 # Context definition for prod (high priority)
-- kind: context
-
-  metadata:
+- metadata:
+    kind: context
     namespace: main
     name: prod-high
 
-  spec:
-    criteria:
-      require-all:
-        - dev == "no" && prod == "yes" && priority >= 200
-      require-any:
-        - dev == "no"
-        - prod == "yes"
-        - priority >= 200
-      require-none:
-        - service.Metadata.Name == "zookeeper" && nozookeeper
+  criteria:
+    require-all:
+      - dev == "no" && prod == "yes" && priority >= 200
+    require-any:
+      - dev == "no"
+      - prod == "yes"
+      - priority >= 200
+    require-none:
+      - service.Metadata.Name == "zookeeper" && nozookeeper
 
-    change-labels:
-      set:
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
+  change-labels:
+    set:
+      some-test-context-specific-label: some-value
+    remove:
+      a:
+      b:
 
-    allocation:
-      keys:
-        - "{{.User.Name}}"
+  allocation:
+    keys:
+      - "{{.User.Name}}"
 
 # Context definition for prod (low priority)
-- kind: context
-
-  metadata:
+- metadata:
+    kind: context
     namespace: main
     name: prod-low
 
-  spec:
-    criteria:
-      require-any:
-        - dev == "no" && prod == "yes" && priority < 200
-      require-none:
-        - service.Metadata.Name == "zookeeper" && nozookeeper
+  criteria:
+    require-any:
+      - dev == "no" && prod == "yes" && priority < 200
+    require-none:
+      - service.Metadata.Name == "zookeeper" && nozookeeper
 
-    change-labels:
-      set:
-        prod-low-ctx: true
-        prod-low-alloc: true
-      remove:
-        some-label-to-be-removed:
+  change-labels:
+    set:
+      prod-low-ctx: true
+      prod-low-alloc: true
+    remove:
+      some-label-to-be-removed:
 
-    allocation:
-      keys:
-        - "team-{{.User.Labels.team}}"
-        - "{{index .Labels \"prod-low-ctx\"}}"
+  allocation:
+    keys:
+      - "team-{{.User.Labels.team}}"
+      - "{{index .Labels \"prod-low-ctx\"}}"
 
 # Context definition for test
-- kind: context
-
-  metadata:
+- metadata:
+    kind: context
     namespace: main
     name: test
 
-  spec:
-    criteria:
-      require-all:
-        - 10 > 5
-        - 20 > 10
-        - 100 > 50
-      require-any:
-        - dev == "yes" && prod == "no"
-      require-none:
-        - service.Metadata.Name == "zookeeper" && nozookeeper
+  criteria:
+    require-all:
+      - 10 > 5
+      - 20 > 10
+      - 100 > 50
+    require-any:
+      - dev == "yes" && prod == "no"
+    require-none:
+      - service.Metadata.Name == "zookeeper" && nozookeeper
 
-    change-labels:
-      set:
-        some-test-context-specific-label: some-value
-      remove:
-        a:
-        b:
+  change-labels:
+    set:
+      some-test-context-specific-label: some-value
+    remove:
+      a:
+      b:
 
-    allocation:
-      keys:
-        - "{{.User.Labels.team}}"
+  allocation:
+    keys:
+      - "{{.User.Labels.team}}"
 
 # Special context for testing criterias (none of 'require-any' evaluates to true)
-- kind: context
-
-  metadata:
+- metadata:
+    kind: context
     namespace: main
     name: special-not-matched
 
-  spec:
-    criteria:
-      require-all:
-        - true
-      require-any:
-        - never1 == "unbeliveable_value_1"
-        - never2 == "unbeliveable_value_2"
-        - never3 == "unbeliveable_value_3"
-      require-none:
-        - false
+  criteria:
+    require-all:
+      - true
+    require-any:
+      - never1 == "unbeliveable_value_1"
+      - never2 == "unbeliveable_value_2"
+      - never3 == "unbeliveable_value_3"
+    require-none:
+      - false
 
 # Special context for testing criterias ('require-any' is empty)
-- kind: context
-
-  metadata:
+- metadata:
+    kind: context
     namespace: main
     name: special-matched
 
-  spec:
-    criteria:
-      require-all:
-        - specialname == "specialvalue"
-      require-none:
-        - false
+  criteria:
+    require-all:
+      - specialname == "specialvalue"
+    require-none:
+      - false

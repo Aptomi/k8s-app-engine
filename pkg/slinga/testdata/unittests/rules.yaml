@@ -1,61 +1,57 @@
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: compromised_cluster_block_sensitive_services
-  spec:
-    filterservices:
-      cluster:
-        require-any:
-          - compromised
-      labels:
-        require-any:
-          - sensitive
-    actions:
-      - type: ingress
-        content: block
+  filterservices:
+    cluster:
+      require-any:
+        - compromised
+    labels:
+      require-any:
+        - sensitive
+  actions:
+    - type: ingress
+      content: block
 
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: compromised_users_forbid_all_services
-  spec:
-    filterservices:
-      user:
-        require-any:
-          - compromised
-      labels:
-    actions:
-      - type: dependency
-        content: forbid
+  filterservices:
+    user:
+      require-any:
+        - compromised
+    labels:
+  actions:
+    - type: dependency
+      content: forbid
 
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: low_prio_users_forbid_sensitive_services
-  spec:
-    filterservices:
-      user:
-        require-any:
-          - priority < 100
-      labels:
-        require-any:
-          - sensitive
-    actions:
-      - type: dependency
-        content: forbid
+  filterservices:
+    user:
+      require-any:
+        - priority < 100
+    labels:
+      require-any:
+        - sensitive
+  actions:
+    - type: dependency
+      content: forbid
 
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: dev_cluster_forbid_sensitive_service
-  spec:
-    filterservices:
-      cluster:
-        require-any:
-          - dev
-      labels:
-        require-any:
-          - sensitive
-    actions:
-      - type: dependency
-        content: forbid
+  filterservices:
+    cluster:
+      require-any:
+        - dev
+    labels:
+      require-any:
+        - sensitive
+  actions:
+    - type: dependency
+      content: forbid

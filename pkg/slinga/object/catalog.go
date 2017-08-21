@@ -11,6 +11,12 @@ type ObjectInfo struct {
 	Constructor Constructor
 }
 
+func NewObjectCatalog() *ObjectCatalog {
+	return &ObjectCatalog{
+		make(map[Kind]*ObjectInfo, 0),
+	}
+}
+
 func (catalog *ObjectCatalog) Add(info *ObjectInfo) {
 	catalog.Infos[info.Kind] = info
 }

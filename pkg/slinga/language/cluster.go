@@ -1,12 +1,21 @@
 package language
 
+import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+)
+
+var ClusterObject = &ObjectInfo{
+	Kind("cluster"),
+	func() BaseObject { return &Cluster{} },
+}
+
 // Cluster defines individual K8s cluster and way to access it
 type Cluster struct {
-	*SlingaObject
+	Metadata
 
 	Type     string
 	Labels   map[string]string
-	Metadata struct {
+	Config struct {
 		KubeContext     string
 		TillerNamespace string
 		Namespace       string
@@ -45,10 +54,6 @@ func (cluster *Cluster) SetIstioSvc(istioSvc string) {
 
 func (cluster *Cluster) GetIstioSvc() string {
 	return cluster.Cache.istioSvc
-}
-
-func (cluster *Cluster) GetObjectType() SlingaObjectType {
-	return TypePolicy
 }
 
 // GetLabelSet returns a set of cluster labels

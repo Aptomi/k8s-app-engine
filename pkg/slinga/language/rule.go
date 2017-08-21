@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -23,9 +24,14 @@ type Action struct {
 	Content string
 }
 
+var RuleObject = &ObjectInfo{
+	Kind("rule"),
+	func() BaseObject { return &Rule{} },
+}
+
 // Rule is a global rule
 type Rule struct {
-	*SlingaObject
+	Metadata
 
 	FilterServices *ServiceFilter
 	Actions        []*Action
@@ -147,8 +153,4 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 			globalRules.Rules[action.Type] = []*Rule{rule}
 		}
 	}
-}
-
-func (rule *Rule) GetObjectType() SlingaObjectType {
-	return TypePolicy
 }

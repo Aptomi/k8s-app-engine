@@ -2,12 +2,23 @@ package language
 
 import (
 	"fmt"
-	"reflect"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 /*
 	This file declares all the necessary structures for Slinga
 */
+
+var PolicyNamespaceDataObject = &ObjectInfo{
+	Kind("policy"),
+	func() BaseObject { return &PolicyNamespaceData{} },
+}
+
+type PolicyNamespaceData struct {
+	Metadata
+
+	Objects map[Kind]Key
+}
 
 // PolicyNamespace is a global policy object with services and contexts
 type PolicyNamespace struct {
@@ -18,7 +29,7 @@ type PolicyNamespace struct {
 	Dependencies *GlobalDependencies
 }
 
-func NewPolicy() *PolicyNamespace {
+func NewPolicyNamespace() *PolicyNamespace {
 	return &PolicyNamespace{
 		Services:     make(map[string]*Service),
 		Contexts:     make(map[string]*Context),
@@ -29,23 +40,19 @@ func NewPolicy() *PolicyNamespace {
 }
 
 // TODO: deal with namespaces
-func (policy *PolicyNamespace) addObject(object SlingaObjectInterface) {
-	if object.GetObjectType() == TypePolicy {
-		p := reflect.ValueOf(object).Interface()
-
-		switch v := p.(type) {
-		case *Service:
-			policy.Services[v.GetName()] = v
-		case *Context:
-			policy.Contexts[v.GetName()] = v
-		case *Cluster:
-			policy.Clusters[v.GetName()] = v
-		case *Rule:
-			policy.Rules.addRule(v)
-		case *Dependency:
-			policy.Dependencies.AddDependency(v)
-		default:
-			panic(fmt.Sprintf("Can't add object to policy: %v", object))
-		}
+func (policy *PolicyNamespace) AddObject(object BaseObject) {
+	switch kind := object.GetKind(); kind {
+	case ServiceObject.Kind:
+		policy.Services[object.GetName()] = object.(*Service)
+	case ContextObject.Kind:
+		policy.Contexts[object.GetName()] = object.(*Context)
+	case ClusterObject.Kind:
+		policy.Clusters[object.GetName()] = object.(*Cluster)
+	case RuleObject.Kind:
+		policy.Rules.addRule(object.(*Rule))
+	case DependencyObject.Kind:
+		policy.Dependencies.AddDependency(object.(*Dependency))
+	default:
+		panic(fmt.Sprintf("Can't add object to policy: %v", object))
 	}
 }

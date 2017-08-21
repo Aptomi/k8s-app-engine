@@ -2,6 +2,7 @@ package language
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -9,9 +10,14 @@ import (
 	This file declares all the necessary structures for Dependencies (User "wants" Service)
 */
 
+var DependencyObject = &ObjectInfo{
+	Kind("dependency"),
+	func() BaseObject { return &Dependency{} },
+}
+
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
 type Dependency struct {
-	*SlingaObject
+	Metadata
 
 	UserID  string
 	Service string
@@ -59,8 +65,4 @@ func (src GlobalDependencies) AddDependency(dependency *Dependency) {
 // TODO: added temporary method to deal with existing dependency IDs. Once we implement namespaces, may be this has to be re-thinked
 func (dependency *Dependency) GetID() string {
 	return dependency.GetName()
-}
-
-func (dependency *Dependency) GetObjectType() SlingaObjectType {
-	return TypePolicy
 }

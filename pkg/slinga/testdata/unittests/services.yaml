@@ -1,180 +1,172 @@
 # Service definition for Zookeeper
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: zookeeper
 
-  spec:
-    owner: 1
+  owner: 1
 
-    change-labels:
-      set:
-        a: b
+  change-labels:
+    set:
+      a: b
 
-    components:
-      - name: component1
-        code:
-          type: aptomi/code/unittests
-          metadata:
-            service: zookeeper
-            component: component1
-        change-labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a:
-            b:
-        dependencies:
-          - component2
+  components:
+    - name: component1
+      code:
+        type: aptomi/code/unittests
+        metadata:
+          service: zookeeper
+          component: component1
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+      dependencies:
+        - component2
 
-      - name: component2
-        code:
-          type: aptomi/code/unittests
-          metadata:
-            service: zookeeper
-            component: component2
-        change-labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a:
-            b:
+    - name: component2
+      code:
+        type: aptomi/code/unittests
+        metadata:
+          service: zookeeper
+          component: component2
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
 
 # Service definition for Kafka
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: kafka
 
-  spec:
-    owner: 1
+  owner: 1
 
-    change-labels:
-      set:
-        a: b
+  change-labels:
+    set:
+      a: b
 
-    components:
-      - name: component1
-        service: zookeeper
-        change-labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a:
-            b:
-        dependencies:
-          - component4
+  components:
+    - name: component1
+      service: zookeeper
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+      dependencies:
+        - component4
 
-      - name: component2
-        discovery:
-          url: "kafka-{{ .Discovery.instance }}-url"
-        code:
-          type: aptomi/code/unittests
-          params:
-            address: "{{ .Discovery.component1.component2.instance }}"
-            queue: "{{ .User.Labels.changinglabel }}"
-            someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"
-            data1:
-              param:
-                name: value1
-            data2:
-              param:
-                name: value2
-            data3:
-              param:
-                name: value3
-            data4:
-              param:
-                name: value4
-            data5:
-              param:
-                name: value5
-            data6:
-              param:
-                name: 123456789
-            data7:
-              param:
-                name: true
-            data8:
-              param:
-                name: false
-        change-labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a:
-            b:
-        dependencies:
-          - component1
+    - name: component2
+      discovery:
+        url: "kafka-{{ .Discovery.instance }}-url"
+      code:
+        type: aptomi/code/unittests
+        params:
+          address: "{{ .Discovery.component1.component2.instance }}"
+          queue: "{{ .User.Labels.changinglabel }}"
+          someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"
+          data1:
+            param:
+              name: value1
+          data2:
+            param:
+              name: value2
+          data3:
+            param:
+              name: value3
+          data4:
+            param:
+              name: value4
+          data5:
+            param:
+              name: value5
+          data6:
+            param:
+              name: 123456789
+          data7:
+            param:
+              name: true
+          data8:
+            param:
+              name: false
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+      dependencies:
+        - component1
 
-      - name: component3
-        code:
-          type: aptomi/code/unittests
-          metadata:
-            service: kafka
-            component: component3
-        change-labels:
-          set: # add/modify
-            some-test-context-specific-label: some-value
-          remove:
-            a:
-            b:
-        dependencies:
-          - component2
+    - name: component3
+      code:
+        type: aptomi/code/unittests
+        metadata:
+          service: kafka
+          component: component3
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+      dependencies:
+        - component2
 
-      - name: component4
-        code:
-          type: aptomi/code/unittests
-          metadata:
-            service: kafka
-            component: component4
+    - name: component4
+      code:
+        type: aptomi/code/unittests
+        metadata:
+          service: kafka
+          component: component4
 
 # Service definition for cyclic service
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: cyclic
 
-  spec:
-    owner: 1
+  owner: 1
 
-    components:
-      - name: component1
-        dependencies:
-          - component2
-      - name: component2
-        dependencies:
-          - component3
-      - name: component3
-        dependencies:
-          - component4
-      - name: component4
-        dependencies:
-          - component2
+  components:
+    - name: component1
+      dependencies:
+        - component2
+    - name: component2
+      dependencies:
+        - component3
+    - name: component3
+      dependencies:
+        - component4
+    - name: component4
+      dependencies:
+        - component2
 
 # Service definition for cyclic service
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: badcomponentdependency
 
-  spec:
-    owner: 1
+  owner: 1
 
-    components:
-      - name: component1
-        dependencies:
-          - component2
-      - name: component2
-        dependencies:
-          - component3
-      - name: component3
-        dependencies:
-          - component4
-      - name: component4
-        dependencies:
-          - component5
+  components:
+    - name: component1
+      dependencies:
+        - component2
+    - name: component2
+      dependencies:
+        - component3
+    - name: component3
+      dependencies:
+        - component4
+    - name: component4
+      dependencies:
+        - component5

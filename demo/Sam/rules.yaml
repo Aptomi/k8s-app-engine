@@ -1,41 +1,38 @@
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: dev_cannot_deploy_to_prod_cluster
-  spec:
-    filterservices:
-      user:
-        require-any:
-          - org == 'dev'
-      cluster:
-        require-any:
-          - prod
-    actions:
-      - type: dependency
-        content: forbid
+  filterservices:
+    user:
+      require-any:
+        - org == 'dev'
+    cluster:
+      require-any:
+        - prod
+  actions:
+    - type: dependency
+      content: forbid
 
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: deactivated_users_lose_access
-  spec:
-    filterservices:
-      user:
-        require-any:
-          - deactivated
-    actions:
-      - type: ingress
-        content: block
+  filterservices:
+    user:
+      require-any:
+        - deactivated
+  actions:
+    - type: ingress
+      content: block
 
-- kind: rule
-  metadata:
+- metadata:
+    kind: rule
     namespace: main
     name: mobile_devs_are_blocked
-  spec:
-    filterservices:
-      user:
-        require-any:
-          - team == 'mobile-dev'
-    actions:
-      - type: dependency
-        content: forbid
+  filterservices:
+    user:
+      require-any:
+        - team == 'mobile-dev'
+  actions:
+    - type: dependency
+      content: forbid

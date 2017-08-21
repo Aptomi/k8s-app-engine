@@ -1,6 +1,7 @@
 package language
 
 import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -31,11 +32,10 @@ func TestAddDependency(t *testing.T) {
 
 	// create new dependency
 	depAdd := &Dependency{
-		SlingaObject: &SlingaObject{
-			Metadata: SlingaObjectMetadata{
-				Namespace: "main",
-				Name:      "dep_id_new",
-			}},
+		Metadata: Metadata{
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
 		UserID:  "612",
 		Service: "newservice",
 	}

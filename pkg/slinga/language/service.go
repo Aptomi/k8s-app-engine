@@ -2,12 +2,18 @@ package language
 
 import (
 	"fmt"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
+var ServiceObject = &ObjectInfo{
+	Kind("service"),
+	func() BaseObject { return &Service{} },
+}
+
 // Service defines individual service
 type Service struct {
-	*SlingaObject
+	Metadata
 
 	Owner        string
 	ChangeLabels LabelOperations `yaml:"change-labels"`
@@ -89,8 +95,4 @@ func (service *Service) GetComponentsSortedTopologically() ([]*ServiceComponent,
 	}
 
 	return service.componentsOrdered, nil
-}
-
-func (service *Service) GetObjectType() SlingaObjectType {
-	return TypePolicy
 }

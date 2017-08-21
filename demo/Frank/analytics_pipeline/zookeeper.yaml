@@ -1,23 +1,21 @@
 # Definition of Zookeeper service
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: zookeeper
 
-  spec:
-    owner: cn=Frank,ou=people,o=aptomiOrg
+  owner: cn=Frank,ou=people,o=aptomiOrg
 
-    components:
+  components:
 
-      - name: zookeeper
-        discovery:
-          url: "zk-{{ .Discovery.instance }}-0.zk-{{ .Discovery.instance }}:2181"
-        code:
-          type: aptomi/code/kubernetes-helm
-          params:
-            chartName: zookeeper-1.0.0
-            cluster: "{{ .Labels.cluster }}"
+    - name: zookeeper
+      discovery:
+        url: "zk-{{ .Discovery.instance }}-0.zk-{{ .Discovery.instance }}:2181"
+      code:
+        type: aptomi/code/kubernetes-helm
+        params:
+          chartName: zookeeper-1.0.0
+          cluster: "{{ .Labels.cluster }}"
 
-            replicas: 1
-            antiAffinity: "soft"
+          replicas: 1
+          antiAffinity: "soft"

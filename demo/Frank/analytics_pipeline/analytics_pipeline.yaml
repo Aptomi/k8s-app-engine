@@ -1,20 +1,18 @@
 # Definition of Analytics Pipeline service
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: analytics_pipeline
 
-  spec:
-    owner: cn=Frank,ou=people,o=aptomiOrg
+  owner: cn=Frank,ou=people,o=aptomiOrg
 
-    components:
+  components:
 
-      - name: kafka
-        service: kafka
+    - name: kafka
+      service: kafka
 
-      - name: spark
-        service: spark
+    - name: spark
+      service: spark
 
-      - name: hdfs
-        service: hdfs
+    - name: hdfs
+      service: hdfs

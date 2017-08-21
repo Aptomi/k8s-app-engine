@@ -3,11 +3,17 @@ package language
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 )
+
+var ContextObject = &ObjectInfo{
+	Kind("context"),
+	func() BaseObject { return &Context{} },
+}
 
 // Context for a given service
 type Context struct {
-	*SlingaObject
+	Metadata
 
 	Criteria     *Criteria
 	ChangeLabels LabelOperations `yaml:"change-labels"`
@@ -36,8 +42,4 @@ func (context *Context) ResolveKeys(params *template.TemplateParameters, cache t
 		result = append(result, keyResolved)
 	}
 	return result, nil
-}
-
-func (context *Context) GetObjectType() SlingaObjectType {
-	return TypePolicy
 }

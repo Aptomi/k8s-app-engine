@@ -2,6 +2,7 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
@@ -91,9 +92,12 @@ func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
 	policyNext := loadUnitTestsPolicy()
 	policyNext.Dependencies.AddDependency(
 		&Dependency{
-			SlingaObject: &SlingaObject{Metadata: SlingaObjectMetadata{Namespace: "main", Name: "dep_id_5"}},
-			UserID:       "5",
-			Service:      "kafka",
+			Metadata: Metadata{
+				Namespace: "main",
+				Name:      "dep_id_5",
+			},
+			UserID:  "5",
+			Service: "kafka",
 		},
 	)
 	usageStateNext := resolvePolicy(t, policyNext)
@@ -134,9 +138,12 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	policyNext := loadUnitTestsPolicy()
 	policyNext.Dependencies.AddDependency(
 		&Dependency{
-			SlingaObject: &SlingaObject{Metadata: SlingaObjectMetadata{Namespace: "main", Name: "dep_id_5"}},
-			UserID:       "5",
-			Service:      "kafka",
+			Metadata: Metadata{
+				Namespace: "main",
+				Name:      "dep_id_5",
+			},
+			UserID:  "5",
+			Service: "kafka",
 		},
 	)
 	uNewDependency := resolvePolicy(t, policyNext)

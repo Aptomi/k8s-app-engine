@@ -1,32 +1,30 @@
 # Definition of Kafka service
-- kind: service
-
-  metadata:
+- metadata:
+    kind: service
     namespace: main
     name: kafka
 
-  spec:
-    owner: cn=Frank,ou=people,o=aptomiOrg
+  owner: cn=Frank,ou=people,o=aptomiOrg
 
-    components:
+  components:
 
-      - name: zookeeper
-        service: zookeeper
+    - name: zookeeper
+      service: zookeeper
 
-      - name: kafka
-        discovery:
-          url: "kafka-{{ .Discovery.instance }}-0.kafka-{{ .Discovery.instance }}:9092"
-        code:
-          type: aptomi/code/kubernetes-helm
-          params:
-            chartName: kafka-1.0.0
-            cluster: "{{ .Labels.cluster }}"
+    - name: kafka
+      discovery:
+        url: "kafka-{{ .Discovery.instance }}-0.kafka-{{ .Discovery.instance }}:9092"
+      code:
+        type: aptomi/code/kubernetes-helm
+        params:
+          chartName: kafka-1.0.0
+          cluster: "{{ .Labels.cluster }}"
 
-            replicas: 1
-            antiAffinity: "soft"
+          replicas: 1
+          antiAffinity: "soft"
 
-            zookeeper:
-              externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
+          zookeeper:
+            externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
 
-        dependencies:
-          - zookeeper
+      dependencies:
+        - zookeeper

@@ -54,7 +54,7 @@ func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, 
 }
 
 func newKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Clientset, error) {
-	kubeContext := cluster.Metadata.KubeContext
+	kubeContext := cluster.Config.KubeContext
 	config, err := kube.GetConfig(kubeContext).ClientConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("Could not get kubernetes config for context '%s': %s", kubeContext, err)
@@ -77,7 +77,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 		return err
 	}
 
-	tillerNamespace := exec.Cluster.Metadata.TillerNamespace
+	tillerNamespace := exec.Cluster.Config.TillerNamespace
 	if tillerNamespace == "" {
 		tillerNamespace = "kube-system"
 	}
@@ -250,7 +250,7 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 	endpoints := make(map[string]string)
 
 	// Check all corresponding services
-	services, err := coreClient.Services(exec.Cluster.Metadata.Namespace).List(options)
+	services, err := coreClient.Services(exec.Cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +278,7 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 	}
 
 	// Find Istio Ingress service (how ingress itself exposed)
-	service, err := coreClient.Services(exec.Cluster.Metadata.Namespace).Get("istio-ingress")
+	service, err := coreClient.Services(exec.Cluster.Config.Namespace).Get("istio-ingress")
 	if err != nil {
 		// return if there is no Istio deployed
 		if k8serrors.IsNotFound(err) {
@@ -297,7 +297,7 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 	}
 
 	// Check all corresponding istio ingresses
-	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
+	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}

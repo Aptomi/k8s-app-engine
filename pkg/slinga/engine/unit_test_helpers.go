@@ -9,9 +9,7 @@ import (
 )
 
 func loadUnitTestsPolicy() *PolicyNamespace {
-	policyLoader := NewSlingaObjectDatabaseDir("../testdata/unittests")
-	policy := policyLoader.LoadPolicyObjects(-1, "")
-	return policy
+	return LoadTestPolicy()
 }
 
 func loadPolicyAndResolve(t *testing.T) ServiceUsageState {
