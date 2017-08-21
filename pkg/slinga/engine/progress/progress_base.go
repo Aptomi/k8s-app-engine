@@ -56,7 +56,7 @@ func (count *progressCount) GetCompletionPercent() int {
 	if count.total <= 0 {
 		return 0
 	}
-	result := int(math.Floor(100.0*float64(count.current)/float64(count.total)))
+	result := int(math.Floor(100.0 * float64(count.current) / float64(count.total)))
 	if result > 100 {
 		result = 100
 	}

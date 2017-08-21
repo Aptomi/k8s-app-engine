@@ -2,8 +2,8 @@ package progress
 
 import (
 	"github.com/stretchr/testify/assert"
-	"testing"
 	"math"
+	"testing"
 )
 
 func TestProgressNoop(t *testing.T) {

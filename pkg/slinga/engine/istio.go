@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -9,7 +10,6 @@ import (
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"strings"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 )
 
 // IstioRouteRule is istio route rule

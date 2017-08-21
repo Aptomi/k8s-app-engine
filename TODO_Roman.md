@@ -18,6 +18,8 @@ Items to complete:
   - get rid of all debug in language
   - use logging only in engine
   - implement event log (filterable by ns, obj type, etc)
+  - event should work for engine, external LDAP poller, etc
+  - attach event by context (not by 100 variables)
 
 3. Error handing in engine & improved engine unit test coverage for corner cases
 
@@ -30,6 +32,8 @@ Items to complete:
 7. Reformat, deal with code style and missing comments
 
 8. Implement polling for external entities & storing objects in DB
+
+9. Cross-service cycle in engine
 
 
 Questions:
