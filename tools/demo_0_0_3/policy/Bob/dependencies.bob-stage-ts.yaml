@@ -1,0 +1,9 @@
+- id: bob_tests_twitter_stats_vis_in_stage
+  userid: cn=Bob,ou=people,o=aptomiOrg
+  enabled: false
+  service: twitter_stats
+  labels:
+      tstype: stage
+      tsvisimage: demo-v61
+      # Mexico
+      locations: -119.883662,13.301958,-91.780634,27.018021

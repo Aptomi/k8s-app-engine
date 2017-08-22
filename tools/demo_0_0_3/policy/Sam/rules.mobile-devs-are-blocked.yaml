@@ -1,0 +1,9 @@
+- name: mobile_devs_are_blocked
+  enabled: true
+  filterservices:
+    user:
+      accept:
+        - team == 'mobile-dev'
+  actions:
+    - type: dependency
+      content: forbid

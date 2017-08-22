@@ -1,0 +1,15 @@
+host: localhost
+port: 10389
+basedn: o=aptomiOrg
+filter: (&(objectClass=organizationalPerson))
+labeltoatrributes:
+  id: dn
+  name: cn
+  description: description
+  global_ops: isglobalops
+  is_operator: isoperator
+  mail: mail
+  team: team
+  org: o
+  short-description: role
+  deactivated: deactivated

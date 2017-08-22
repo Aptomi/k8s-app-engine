@@ -1,0 +1,7 @@
+name: cluster-us-west
+
+type: kubernetes
+
+metadata:
+  kubecontext: cluster-us-west
+  namespace: demo

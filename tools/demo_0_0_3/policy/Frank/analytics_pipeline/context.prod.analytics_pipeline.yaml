@@ -1,0 +1,18 @@
+name: prod
+
+# This context describes analytics_pipeline in production
+service: analytics_pipeline
+
+# This context is for people from it ops (they control production instance)
+criteria:
+  accept:
+    - org == 'it' && is_operator
+
+# In production:
+# - service will be deployed in us-east
+# - as a single production instance
+allocation:
+  name: "production"
+  labels:
+    set:
+      cluster: cluster-us-east

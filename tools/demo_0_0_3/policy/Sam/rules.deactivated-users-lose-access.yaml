@@ -1,0 +1,9 @@
+- name: deactivated_users_lose_access
+  enabled: true
+  filterservices:
+    user:
+      accept:
+        - deactivated
+  actions:
+    - type: ingress
+      content: block

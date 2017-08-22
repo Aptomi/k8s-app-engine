@@ -45,10 +45,12 @@ gcloud config set project bright-torus-169502
       - Delete helm objects: `./tools/demo-gke.sh cleanup`
 
 3. Terminal Tab #1: initialize local DB, initialize demo repository on GitHub and start watcher/auto-applier
-    - `./tools/demo-init.sh`
+    - `cd tools/demo_0_0_3`
+    - `./demo-init.sh`
 
 4. Terminal Tab #2: run UI server
-    - `./tools/dev-watch-server.sh`
+    - `cd tools/demo_0_0_3`
+    - `./demo-start-ui.sh`
 
 5. Terminal Tab #3: run k8s monitoring (split tab horizontally)
     - `watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods`
