@@ -86,6 +86,7 @@ func (data *ServiceUsageData) getComponentInstanceEntry(cik *ComponentInstanceKe
 
 // Record dependency for component instance
 func (data *ServiceUsageData) recordResolvedAndDependency(cik *ComponentInstanceKey, dependency *Dependency) {
+	// TODO: write into event log
 	instance := data.getComponentInstanceEntry(cik)
 	instance.setResolved(true)
 	instance.addDependency(dependency.GetID())
@@ -112,6 +113,7 @@ func (data *ServiceUsageData) recordDiscoveryParams(cik *ComponentInstanceKey, d
 
 // Stores calculated labels for component instance
 func (data *ServiceUsageData) recordLabels(cik *ComponentInstanceKey, labels LabelSet) {
+	// TODO: write into event log
 	data.getComponentInstanceEntry(cik).addLabels(labels)
 }
 

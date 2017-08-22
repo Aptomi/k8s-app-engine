@@ -5,6 +5,8 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"fmt"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -18,6 +20,9 @@ type resolutionNode struct {
 
 	// pointer to ServiceUsageState
 	state *ServiceUsageState
+
+	// pointer to event log
+	eventLog *EventLog
 
 	// new instance of ServiceUsageData, where resolution data will be stored
 	data *ServiceUsageData
@@ -68,8 +73,9 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache) *resolutionNode {
+func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache, eventLog *EventLog) *resolutionNode {
 
+	// TODO: this should be loogged into the log as well
 	user := state.userLoader.LoadUserByID(dependency.UserID)
 	if user == nil {
 		Debug.WithFields(log.Fields{
@@ -81,8 +87,9 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 	return &resolutionNode{
 		resolved: false,
 
-		state: state,
-		cache: cache,
+		state:    state,
+		cache:    cache,
+		eventLog: eventLog,
 
 		data:          data,
 		ruleLogWriter: NewRuleLogWriter(data, dependency),
@@ -110,8 +117,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 	return &resolutionNode{
 		resolved: false,
 
-		state: node.state,
-		cache: node.cache,
+		state:    node.state,
+		cache:    node.cache,
+		eventLog: node.eventLog, // TODO: create new instance
 
 		data:          node.data,
 		ruleLogWriter: NewRuleLogWriter(node.data, node.dependency),
@@ -135,18 +143,6 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 	}
 }
 
-func (node *resolutionNode) debugResolvingDependencyStart() {
-	Debug.WithFields(log.Fields{
-		"dependency": node.dependency,
-		"user":       node.user.Name,
-		"labels":     node.labels,
-		"dependsOn":  node.serviceName,
-	}).Info("Resolving dependency")
-
-	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyStart(node.serviceName, node.user, node.dependency))
-	node.ruleLogWriter.addRuleLogEntry(entryLabels(node.labels))
-}
-
 func (node *resolutionNode) debugResolvingDependencyEnd() {
 	Debug.WithFields(log.Fields{
 		"dependency": node.dependency,
@@ -161,69 +157,69 @@ func (node *resolutionNode) debugResolvingDependencyEnd() {
 func (node *resolutionNode) debugResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
 		Debug.WithFields(log.Fields{
-			"service":   node.service.GetName(),
+			"service":   node.service.Name,
 			"component": node.component.Name,
-			"context":   node.context.GetName(),
+			"context":   node.context.Name,
 		}).Info("Processing dependency on code execution")
 	} else if node.component.Service != "" {
 		Debug.WithFields(log.Fields{
-			"service":          node.service.GetName(),
+			"service":          node.service.Name,
 			"component":        node.component.Name,
-			"context":          node.context.GetName(),
+			"context":          node.context.Name,
 			"dependsOnService": node.component.Service,
 		}).Info("Processing dependency on another service")
 	} else {
 		Debug.WithFields(log.Fields{
-			"service":   node.service.GetName(),
+			"service":   node.service.Name,
 			"component": node.component.Name,
 		}).Panic("Invalid component (not code and not service")
 	}
 }
 
-func (node *resolutionNode) cannotResolve() error {
-	Debug.WithFields(log.Fields{
-		"service":      node.serviceName,
-		"componentObj": node.component,
-		"contextObj":   node.context,
-	}).Info("Cannot resolve instance")
-
-	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach logs to
-	if node.serviceKey == nil {
-		// Create service key
-		node.serviceKey = node.createComponentKey(nil)
-
-		// Once instance is figured out, make sure to attach rule logs to that instance
-		node.ruleLogWriter.attachToInstance(node.serviceKey)
-	}
-
-	return nil
-}
-
 // Helper to get a matched service
-func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) *Service {
+func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) (*Service, error) {
 	service := policy.Services[node.serviceName]
-	node.ruleLogWriter.addRuleLogEntry(entryServiceMatched(node.serviceName, service != nil))
-	return service
+	if service == nil {
+		// This is considered a malformed policy, so let's return an error
+		node.logServiceNotFoundError(node.serviceName)
+		return nil, fmt.Errorf("Service not found: %s", node.serviceName)
+	}
+	node.logServiceFound(service)
+	return service, nil
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) *Context {
+func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context, error) {
 	// Locate the list of contexts for service
-	node.ruleLogWriter.addRuleLogEntry(entryContextsFound(len(policy.Contexts) > 0))
+	node.logStartMatchingContexts()
 
 	// Find matching context
 	var contextMatched *Context
 	for _, context := range policy.Contexts {
-		// Get matching context
-		matched := context.Matches(node.getContextualDataForExpression(), node.cache.expressionCache)
-		node.ruleLogWriter.addRuleLogEntry(entryContextCriteriaTesting(context, matched))
+
+		// Check if context matches (based on criteria)
+		matched, err := context.Matches(node.getContextualDataForExpression(), node.cache.expressionCache)
+		if err != nil {
+			// Propagate error up
+			node.logTestedContextCriteriaError(context, err)
+			return nil, err
+		}
+		node.logTestedContextCriteria(context, matched)
+
+		// If criteria matches, then check global rules as well
 		if matched {
-			// Match is only valid if there are no global rule voilations context
+			// Match is only valid if there are no global rule voilations for the current context
 			labels := node.transformLabels(node.labels, context.ChangeLabels)
 			cluster := node.getCluster(policy, labels, context)
-			globalRuleViolations := node.hasGlobalRuleViolations(policy, context, labels, cluster)
-			node.ruleLogWriter.addRuleLogEntry(entryContextGlobalRulesNoViolations(context, !globalRuleViolations))
-			if !globalRuleViolations {
+			hasViolations, err := node.hasGlobalRuleViolations(policy, context, labels, cluster)
+			if err != nil {
+				// Propagate error up
+				node.logTestedGlobalRuleViolationsError(context, labels, err)
+				return nil, err
+			}
+			node.logTestedGlobalRuleViolations(context, labels, !hasViolations)
+
+			if !hasViolations {
 				contextMatched = context
 				break
 			}
@@ -231,25 +227,18 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) *Context 
 	}
 
 	if contextMatched != nil {
-		Debug.WithFields(log.Fields{
-			"service": node.service.GetName(),
-			"context": contextMatched.GetName(),
-			"user":    node.user.Name,
-		}).Info("Matched context")
+		node.logContextMatched(contextMatched)
 	} else {
-		Debug.WithFields(log.Fields{
-			"service": node.service.GetName(),
-			"user":    node.user.Name,
-		}).Info("No context matched")
+		node.logContextNotMatched()
 	}
 
-	node.ruleLogWriter.addRuleLogEntry(entryContextMatched(node.service, contextMatched))
-
-	return contextMatched
+	return contextMatched, nil
 }
 
 // Helper to resolve allocation keys
 func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]string, error) {
+	// TODO: write into event log about resolving allocation keys, log errors
+
 	// If there is no allocation, there are no keys to resolve
 	if node.context.Allocation == nil {
 		return nil, nil
@@ -259,8 +248,8 @@ func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]st
 	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"service": node.service.GetName(),
-			"context": node.context.GetName(),
+			"service": node.service.Name,
+			"context": node.context.Name,
 			"keys":    node.context.Allocation.Keys,
 			"user":    node.user.Name,
 			"error":   err,
@@ -270,8 +259,8 @@ func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]st
 
 	if len(node.context.Allocation.Keys) > 0 {
 		Debug.WithFields(log.Fields{
-			"service": node.service.GetName(),
-			"context": node.context.GetName(),
+			"service": node.service.Name,
+			"context": node.context.Name,
 			"keys":    node.context.Allocation.Keys,
 			"user":    node.user.Name,
 		}).Info("All allocation keys resolved")
@@ -282,6 +271,7 @@ func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]st
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *ServiceComponent) *ComponentInstanceKey {
+	// TODO: write about creating component instance key
 	return NewComponentInstanceKey(
 		node.serviceName,
 		node.context,
@@ -306,39 +296,50 @@ func (node *resolutionNode) getCluster(policy *PolicyNamespace, labels LabelSet,
 }
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations LabelOperations) LabelSet {
+	// TODO: write about applying transform
 	result := labels.ApplyTransform(operations)
 	if !labels.Equal(result) {
-		node.ruleLogWriter.addRuleLogEntry(entryLabels(result))
+		node.logLabels(result)
 	}
 	return result
 }
 
-func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, context *Context, labels LabelSet, cluster *Cluster) bool {
+func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, context *Context, labels LabelSet, cluster *Cluster) (bool, error) {
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
-			matched := rule.FilterServices.Match(labels, node.user, cluster, node.cache.expressionCache)
-			node.ruleLogWriter.addRuleLogEntry(entryContextGlobalRuleTesting(context, rule, matched))
+			matched, err := rule.FilterServices.Match(labels, node.user, cluster, node.cache.expressionCache)
+			if err != nil {
+				node.logTestedGlobalRuleMatchError(context, rule, labels, err)
+				return true, err
+			}
+
+			node.logTestedGlobalRuleMatch(context, rule, labels, matched)
+
 			if matched {
 				for _, action := range rule.Actions {
 					if action.Type == "dependency" && action.Content == "forbid" {
-						return true
+						return true, nil
 					}
 				}
 			}
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
+	// TODO: write into event log
+
 	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
 	node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
+	// TODO: write into event log
+
 	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
 	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 

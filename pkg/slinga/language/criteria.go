@@ -17,16 +17,16 @@ type Criteria struct {
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
-func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache expression.ExpressionCache) bool {
+func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {
 	// Make sure all "require-all" criterias evaluate to true
 	for _, exprShouldBeTrue := range criteria.RequireAll {
 		result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)
 		if err != nil {
-			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
-			panic(err)
+			// propagate expression error up, if happened
+			return false, err
 		}
 		if !result {
-			return false
+			return false, nil
 		}
 	}
 
@@ -34,11 +34,11 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache 
 	for _, exprShouldBeFalse := range criteria.RequireNone {
 		result, err := criteria.evaluateBool(exprShouldBeFalse, params, cache)
 		if err != nil {
-			// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
-			panic(err)
+			// propagate expression error up, if happened
+			return false, err
 		}
 		if result {
-			return false
+			return false, nil
 		}
 	}
 
@@ -47,20 +47,20 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache 
 		for _, exprShouldBeTrue := range criteria.RequireAny {
 			result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)
 			if err != nil {
-				// TODO: we probably want to fail the whole criteria (with false) and propagate error to the user
-				panic(err)
+				// propagate expression error up, if happened
+				return false, err
 			}
 			if result {
-				return true
+				return true, nil
 			}
 		}
 
 		// If no criteria got evaluated to true, return false
-		return false
+		return false, nil
 	}
 
 	// Everything is fine and "require-any" is empty, let's return true
-	return true
+	return true, nil
 }
 
 func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {

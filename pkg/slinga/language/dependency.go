@@ -64,5 +64,5 @@ func (src GlobalDependencies) AddDependency(dependency *Dependency) {
 
 // TODO: added temporary method to deal with existing dependency IDs. Once we implement namespaces, may be this has to be re-thinked
 func (dependency *Dependency) GetID() string {
-	return dependency.GetName()
+	return dependency.Name
 }

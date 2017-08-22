@@ -23,8 +23,11 @@ type Context struct {
 }
 
 // Matches checks if context criteria is satisfied
-func (context *Context) Matches(params *expression.ExpressionParameters, cache expression.ExpressionCache) bool {
-	return context.Criteria == nil || context.Criteria.allows(params, cache)
+func (context *Context) Matches(params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {
+	if context.Criteria == nil {
+		return true, nil
+	}
+	return context.Criteria.allows(params, cache)
 }
 
 // Resolves dynamic allocation keys

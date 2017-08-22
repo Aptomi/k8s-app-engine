@@ -83,13 +83,13 @@ func (exec HelmCodeExecutor) HttpServices() ([]string, error) {
 	options := api.ListOptions{LabelSelector: selector}
 
 	// Check all corresponding services
-	services, err := coreClient.Services(exec.Cluster.Metadata.Namespace).List(options)
+	services, err := coreClient.Services(exec.Cluster.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check all corresponding Istio ingresses
-	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
+	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}

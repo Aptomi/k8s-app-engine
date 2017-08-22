@@ -91,7 +91,7 @@ func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
 		found := false
 		for _, desiredRulesForComponent := range desiredRules {
 			for _, desiredRule := range desiredRulesForComponent {
-				if existingRule.Service == desiredRule.Service && existingRule.Cluster.GetName() == desiredRule.Cluster.GetName() {
+				if existingRule.Service == desiredRule.Service && existingRule.Cluster.Name == desiredRule.Cluster.Name {
 					found = true
 				}
 			}
@@ -105,7 +105,7 @@ func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
 		for _, desiredRule := range desiredRulesForComponent {
 			found := false
 			for _, existingRule := range existingRules {
-				if desiredRule.Service == existingRule.Service && desiredRule.Cluster.GetName() == existingRule.Cluster.GetName() {
+				if desiredRule.Service == existingRule.Service && desiredRule.Cluster.Name == existingRule.Cluster.Name {
 					found = true
 				}
 			}
@@ -172,7 +172,11 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 		users = append(users, usage.userLoader.LoadUserByID(userID))
 	}
 
-	if !usage.Policy.Rules.AllowsIngressAccess(labels, users, cluster) && component != nil && component.Code != nil {
+	allows, err := usage.Policy.Rules.AllowsIngressAccess(labels, users, cluster)
+	if err != nil {
+		return nil, err
+	}
+	if !allows && component != nil && component.Code != nil {
 		codeExecutor, err := GetCodeExecutor(component.Code, key, usage.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
 		if err != nil {
 			return nil, err
@@ -202,7 +206,7 @@ func getIstioRouteRules(cluster *Cluster) []*IstioRouteRule {
 	rulesStr, err := runIstioCmd(cluster, cmd)
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"cluster": cluster.GetName(),
+			"cluster": cluster.Name,
 			"cmd":     cmd,
 			"error":   err,
 		}).Panic("Failed to get route-rules by running bash cmd")
@@ -224,7 +228,7 @@ func (rule *IstioRouteRule) create() {
 	content := "type: route-rule\n"
 	content += "name: " + rule.Service + "\n"
 	content += "spec:\n"
-	content += "  destination: " + rule.Service + "." + rule.Cluster.Metadata.Namespace + ".svc.cluster.local\n"
+	content += "  destination: " + rule.Service + "." + rule.Cluster.Namespace + ".svc.cluster.local\n"
 	content += "  httpReqTimeout:\n"
 	content += "    simpleTimeout:\n"
 	content += "      timeout: 1ms\n"
@@ -234,7 +238,7 @@ func (rule *IstioRouteRule) create() {
 	out, err := runIstioCmd(rule.Cluster, "create -f "+ruleFile.Name())
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"cluster": rule.Cluster.GetName(),
+			"cluster": rule.Cluster.Name,
 			"content": content,
 			"out":     out,
 			"error":   err,
@@ -246,7 +250,7 @@ func (rule *IstioRouteRule) delete() {
 	out, err := runIstioCmd(rule.Cluster, "delete route-rule "+rule.Service)
 	if err != nil {
 		Debug.WithFields(log.Fields{
-			"cluster": rule.Cluster.GetName(),
+			"cluster": rule.Cluster.Name,
 			"out":     out,
 			"error":   err,
 		}).Panic("Failed to delete istio rule by running bash script")
@@ -266,7 +270,7 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 		selector := k8slabels.Set{"app": "istio"}.AsSelector()
 		options := api.ListOptions{LabelSelector: selector}
 
-		pods, err := coreClient.Pods(cluster.Metadata.Namespace).List(options)
+		pods, err := coreClient.Pods(cluster.Namespace).List(options)
 		if err != nil {
 			return "", err
 		}
@@ -290,7 +294,7 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 		}
 
 		if running {
-			services, err := coreClient.Services(cluster.Metadata.Namespace).List(options)
+			services, err := coreClient.Services(cluster.Namespace).List(options)
 			if err != nil {
 				return "", err
 			}
@@ -319,8 +323,8 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 	}
 
 	content := "set -e\n"
-	content += "kubectl config use-context " + cluster.GetName() + " 1>/dev/null\n"
-	content += "istioctl --configAPIService " + cluster.GetIstioSvc() + " --namespace " + cluster.Metadata.Namespace + " "
+	content += "kubectl config use-context " + cluster.Name + " 1>/dev/null\n"
+	content += "istioctl --configAPIService " + cluster.GetIstioSvc() + " --namespace " + cluster.Namespace + " "
 	content += cmd + "\n"
 
 	cmdFile := WriteTempFile("istioctl-cmd", content)

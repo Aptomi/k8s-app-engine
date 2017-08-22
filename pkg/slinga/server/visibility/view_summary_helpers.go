@@ -40,7 +40,12 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 	matchedUsers := make([]*User, 0)
 
 	for _, user := range view.state.GetUserLoader().LoadUsersAll().Users {
-		if rule.MatchUser(user) {
+		match, err := rule.MatchUser(user)
+		if err != nil {
+			// TODO: we probably need to handle this error better here
+			panic(err)
+		}
+		if match {
 			matchedUsers = append(matchedUsers, user)
 		}
 	}

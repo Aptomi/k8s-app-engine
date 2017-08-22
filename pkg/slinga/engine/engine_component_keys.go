@@ -87,7 +87,7 @@ func getContextNameUnsafe(context *Context) string {
 	if context == nil {
 		return componentUnresolvedName
 	}
-	return context.GetName()
+	return context.Name
 }
 
 // If component has not been resolved and we need a key, generate one

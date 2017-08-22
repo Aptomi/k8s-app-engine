@@ -45,6 +45,6 @@ func TestAddDependency(t *testing.T) {
 
 	// check that it was successfully added
 	assert.Equal(t, 1, len(dependencies.DependenciesByService["newservice"]), "Dependency on 'newservice' should be added")
-	assert.Equal(t, "dep_id_new", dependencies.DependenciesByService["newservice"][0].GetName(), "Dependency on 'newservice' should be added")
-	assert.Equal(t, "dep_id_new", dependencies.DependenciesByID["dep_id_new"].GetName(), "Dependency on 'newservice' should be added")
+	assert.Equal(t, "dep_id_new", dependencies.DependenciesByService["newservice"][0].Name, "Dependency on 'newservice' should be added")
+	assert.Equal(t, "dep_id_new", dependencies.DependenciesByID["dep_id_new"].Name, "Dependency on 'newservice' should be added")
 }

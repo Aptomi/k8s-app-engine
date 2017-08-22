@@ -95,7 +95,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 	sort.Strings(svcIds)
 
 	for _, svcID := range svcIds {
-		r.Services = append(r.Services, &item{svcID, state.Policy.Services[svcID].GetName()})
+		r.Services = append(r.Services, &item{svcID, state.Policy.Services[svcID].Name})
 	}
 
 	if len(r.Dependencies) > 0 {

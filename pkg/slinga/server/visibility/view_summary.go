@@ -61,14 +61,14 @@ func (view SummaryView) getGlobalRulesData() interface{} {
 	for _, ruleList := range view.state.Policy.Rules.Rules {
 		for _, rule := range ruleList {
 			entry := lineEntry{
-				"ruleName":   rule.GetName(),
+				"ruleName":   rule.Name,
 				"ruleObject": rule.FilterServices,
 				"appliedTo":  view.getRuleAppliedTo(rule),
 				// currently we're only matching users by labels (for demo with rules w/o any other filters)
 				"matchedUsers": view.getRuleMatchedUsers(rule),
 				"conditions":   rule.DescribeConditions(),
 				"actions":      rule.DescribeActions(),
-				"id":           rule.GetName(), // entries will be sorted by ID
+				"id":           rule.Name, // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}
@@ -85,7 +85,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 			instanceMap := make(map[string]bool)
 			for key, instance := range view.state.ResolvedData.ComponentInstanceMap {
 				if instance.Resolved {
-					if instance.Key.ServiceName == service.GetName() && instance.Key.IsService() {
+					if instance.Key.ServiceName == service.Name && instance.Key.IsService() {
 						instanceMap[key] = true
 					}
 				}
@@ -95,7 +95,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 			for key := range instanceMap {
 				instance := view.state.ResolvedData.ComponentInstanceMap[key]
 				entry := lineEntry{
-					"serviceName":     service.GetName(),
+					"serviceName":     service.Name,
 					"contextWithKeys": view.getResolvedContextNameByInst(instance),
 					"cluster":         view.getResolvedClusterNameByInst(instance),
 					"stats":           view.getInstanceStats(instance),

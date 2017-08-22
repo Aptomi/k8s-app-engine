@@ -103,18 +103,6 @@ func (writer *RuleLogWriter) addRuleLogEntry(entry *RuleLogEntry) {
 	}
 }
 
-func entryResolvingDependencyStart(serviceName string, user *User, dependency *Dependency) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeInfo,
-		RuleLogScopeLocal,
-		"Resolve (Dependency)",
-		fmt.Sprintf("Resolving '%s' -> '%s', depends on '%s'", user.Name, dependency.Service, serviceName),
-		"N/A",
-		true,
-		false,
-	)
-}
-
 func entryResolvingDependencyEnd(serviceName string, user *User, dependency *Dependency) *RuleLogEntry {
 	return NewRuleLogEntry(
 		RuleLogTypeInfo,
@@ -127,104 +115,10 @@ func entryResolvingDependencyEnd(serviceName string, user *User, dependency *Dep
 	)
 }
 
-func entryLabels(labels LabelSet) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeDebug,
-		RuleLogScopeLocal,
-		"Show (Labels)",
-		fmt.Sprintf("Labels: '%s'", labels),
-		"N/A",
-		true,
-		false,
-	)
-}
-
-func entryServiceMatched(serviceName string, found bool) *RuleLogEntry {
-	if !found {
-		return NewRuleLogEntry(
-			RuleLogTypeInfo,
-			RuleLogScopeLocal,
-			"Found (Service)",
-			fmt.Sprintf("Unable to find service '%s'", serviceName),
-			"N/A",
-			false,
-			true,
-		)
-	}
-	return nil
-}
-
-func entryContextsFound(result bool) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeTest,
-		RuleLogScopeLocal,
-		"Exist (Contexts)",
-		fmt.Sprintf("Checking if contexts are present in the namespace"),
-		"has(contexts)",
-		result,
-		false,
-	)
-}
-
-func entryContextCriteriaTesting(context *Context, matched bool) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeTest,
-		RuleLogScopeLocal,
-		"Matches (Context)",
-		fmt.Sprintf("Testing context (criteria): '%s'", context.GetName()),
-		fmt.Sprintf("%+v", context.Criteria),
-		matched,
-		false,
-	)
-}
-
-func entryContextMatched(service *Service, contextMatched *Context) *RuleLogEntry {
-	var message string
-	if contextMatched != nil {
-		message = fmt.Sprintf("Context matched for service '%s': %s", service.GetName(), contextMatched.GetName())
-	} else {
-		message = fmt.Sprintf("Unable to find matching context for service '%s'", service.GetName())
-	}
-
-	return NewRuleLogEntry(
-		RuleLogTypeInfo,
-		RuleLogScopeLocal,
-		"Matched (Context)",
-		message,
-		"N/A",
-		contextMatched != nil,
-		contextMatched == nil,
-	)
-}
-
-func entryContextGlobalRuleTesting(context *Context, rule *Rule, matched bool) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeTest,
-		RuleLogScopeGlobal,
-		"Global Rule (Context)",
-		fmt.Sprintf("Testing if global rule '%s' applies to context '%s'", rule.GetName(), context.Metadata.Name),
-		fmt.Sprintf("%+v", rule.FilterServices),
-		matched,
-		false,
-	)
-}
-
-func entryContextGlobalRulesNoViolations(context *Context, noViolations bool) *RuleLogEntry {
-	return NewRuleLogEntry(
-		RuleLogTypeTest,
-		RuleLogScopeGlobal,
-		"No Global Rule Violations (Context)",
-		fmt.Sprintf("Verify there are no global rule violations for context: '%s'", context.Metadata.Name),
-		"!has(global_rule_violations)",
-		noViolations,
-		false,
-	)
-}
-
 func entryAllocationKeysResolved(service *Service, context *Context, allocationKeys []string) *RuleLogEntry {
 	var message string
 	if len(allocationKeys) > 0 {
-		message = fmt.Sprintf("Allocation keys resolved for service '%s', context '%s': %v", service.GetName(), context.GetName(), allocationKeys)
+		message = fmt.Sprintf("Allocation keys resolved for service '%s', context '%s': %v", service.Name, context.Name, allocationKeys)
 	}
 
 	return NewRuleLogEntry(

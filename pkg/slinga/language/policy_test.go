@@ -10,7 +10,7 @@ func TestLoadPolicy(t *testing.T) {
 
 	// Check services
 	assert.Equal(t, 4, len(policy.Services), "Two services should be loaded")
-	assert.Equal(t, "kafka", policy.Services["kafka"].GetName(), "Service name should be correct")
+	assert.Equal(t, "kafka", policy.Services["kafka"].Name, "Service name should be correct")
 	assert.Equal(t, 4, len(policy.Services["kafka"].Components), "Service should have components")
 
 	// Check clusters
@@ -18,7 +18,7 @@ func TestLoadPolicy(t *testing.T) {
 
 	// Check contexts
 	assert.Equal(t, 5, len(policy.Contexts), "Five contexts should be loaded")
-	assert.Equal(t, "test", policy.Contexts["test"].GetName(), "Context name should be correct")
+	assert.Equal(t, "test", policy.Contexts["test"].Name, "Context name should be correct")
 	assert.NotNil(t, policy.Contexts["prod-high"].Allocation, "Context should have allocations")
 	assert.NotNil(t, policy.Contexts["prod-low"].Allocation, "Context should have allocations")
 	assert.NotNil(t, policy.Contexts["test"].Allocation, "Context should have allocations")

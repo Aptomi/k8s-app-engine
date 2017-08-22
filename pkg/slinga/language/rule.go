@@ -83,8 +83,14 @@ func (rule *Rule) DescribeActions() []string {
 }
 
 // MatchUser returns if a rue matches a user
-func (rule *Rule) MatchUser(user *User) bool {
-	return rule.FilterServices != nil && rule.FilterServices.Match(NewLabelSetEmpty(), user, nil, nil)
+func (rule *Rule) MatchUser(user *User) (bool, error) {
+	if rule.FilterServices != nil {
+		match, err := rule.FilterServices.Match(NewLabelSetEmpty(), user, nil, nil)
+		if match || err != nil {
+			return match, err
+		}
+	}
+	return false, nil
 }
 
 // GlobalRules is a list of global rules
@@ -94,7 +100,7 @@ type GlobalRules struct {
 }
 
 // AllowsIngressAccess returns true if a rule allows ingress access
-func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*User, cluster *Cluster) bool {
+func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*User, cluster *Cluster) (bool, error) {
 	if rules, ok := globalRules.Rules["ingress"]; ok {
 		for _, rule := range rules {
 			// for all users of the service
@@ -102,10 +108,14 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 				// TODO: this is pretty shitty that it's not a part of engine_node
 				//       you can't log into "rule log" (new replacement of tracing)
 				//       you can't use engine cache for expressions/template
-				if rule.FilterServices.Match(labels, user, cluster, nil) {
+				match, err := rule.FilterServices.Match(labels, user, cluster, nil)
+				if err != nil {
+					return true, err
+				}
+				if match {
 					for _, action := range rule.Actions {
 						if action.Type == "ingress" && action.Content == "block" {
-							return false
+							return false, nil
 						}
 					}
 				}
@@ -113,26 +123,35 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 		}
 	}
 
-	return true
+	return true, nil
 }
 
 // Match returns if a given parameters match a service filter
-func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster, cache expression.ExpressionCache) bool {
+func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster, cache expression.ExpressionCache) (bool, error) {
 	// check if service filters for another service labels
-	if filter.Labels != nil && !filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil), cache) {
-		return false
+	if filter.Labels != nil {
+		allows, err := filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil), cache)
+		if !allows || err != nil {
+			return allows, err
+		}
 	}
 
 	// check if service filters for another user labels
-	if filter.User != nil && !filter.User.allows(expression.NewExpressionParams(user.GetLabelSet().Labels, nil), cache) {
-		return false
+	if filter.User != nil {
+		allows, err := filter.User.allows(expression.NewExpressionParams(user.GetLabelSet().Labels, nil), cache)
+		if !allows || err != nil {
+			return allows, err
+		}
 	}
 
-	if filter.Cluster != nil && cluster != nil && !filter.Cluster.allows(expression.NewExpressionParams(cluster.GetLabelSet().Labels, nil), cache) {
-		return false
+	if filter.Cluster != nil {
+		allows, err := filter.Cluster.allows(expression.NewExpressionParams(cluster.GetLabelSet().Labels, nil), cache)
+		if !allows || err != nil {
+			return allows, err
+		}
 	}
 
-	return true
+	return true, nil
 }
 
 // NewGlobalRules creates and initializes a new empty list of global rules

@@ -8,20 +8,30 @@ import (
 	"testing"
 )
 
-func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected bool, cache expression.ExpressionCache) {
-	assert.Equal(t, expected, context.Matches(params, cache), "Context matching: "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
+const (
+	ResTrue  = iota
+	ResFalse = iota
+	ResError = iota
+)
+
+func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected int, cache expression.ExpressionCache) {
+	result, err := context.Matches(params, cache)
+	assert.Equal(t, expected == ResError, err != nil, "Context matching (success vs. error): "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
+	if err == nil {
+		assert.Equal(t, expected == ResTrue, result, "Context matching: "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
+	}
 }
 
 func matchContext(t *testing.T, context *Context, paramsMatch []*expression.ExpressionParameters, paramsDoesntMatch []*expression.ExpressionParameters) {
 	// Evaluate with and without cache
 	cache := expression.NewExpressionCache()
 	for _, params := range paramsMatch {
-		match(t, context, params, true, nil)
-		match(t, context, params, true, cache)
+		match(t, context, params, ResTrue, nil)
+		match(t, context, params, ResTrue, cache)
 	}
 	for _, params := range paramsDoesntMatch {
-		match(t, context, params, false, nil)
-		match(t, context, params, false, cache)
+		match(t, context, params, ResFalse, nil)
+		match(t, context, params, ResFalse, cache)
 	}
 }
 

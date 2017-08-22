@@ -32,6 +32,7 @@ Items to complete:
   - Misc
     - rule log must be replaced with event log, filtered by componentKey
     - all Debug.* calls must be removed. Likely, create a logger in engine
+    - all panic() calls must be removed. E.g. getCluster
     - all engine events should be propagated to a user
       - notices: e.g. context match
       - errors: if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string)

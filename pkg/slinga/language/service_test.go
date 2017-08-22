@@ -18,9 +18,9 @@ func checkTopologicalSort(t *testing.T, serviceName string, expectedComponents [
 	service := policy.Services[serviceName]
 	componentsSorted, err := service.GetComponentsSortedTopologically()
 	componentsSortedStr := toStringArray(componentsSorted)
-	assert.Equal(t, expectedError, err != nil, "Topological sort method (success vs. error), service: "+service.GetName())
+	assert.Equal(t, expectedError, err != nil, "Topological sort method (success vs. error), service: "+service.Name)
 	if err == nil {
-		assert.Equal(t, expectedComponents, componentsSortedStr, "Topological sort should produce correct ordering of components, service: "+service.GetName())
+		assert.Equal(t, expectedComponents, componentsSortedStr, "Topological sort should produce correct ordering of components, service: "+service.Name)
 	}
 }
 
