@@ -1,4 +1,4 @@
-package engine
+package deployment
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"

@@ -1,4 +1,4 @@
-package engine
+package deployment
 
 import (
 	"fmt"
@@ -14,6 +14,7 @@ import (
 	internalversioncore "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	"k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/labels"
+
 	"strings"
 
 	"errors"
@@ -53,7 +54,7 @@ func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, 
 	}
 }
 
-func newKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Clientset, error) {
+func NewKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Clientset, error) {
 	kubeContext := cluster.Config.KubeContext
 	config, err := kube.GetConfig(kubeContext).ClientConfig()
 	if err != nil {
@@ -66,13 +67,52 @@ func newKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Cli
 	return config, client, nil
 }
 
+// HttpServices returns list of services for the current chart
+func (exec HelmCodeExecutor) HttpServices() ([]string, error) {
+	_, clientset, err := NewKubeClient(exec.Cluster)
+	if err != nil {
+		return nil, err
+	}
+
+	coreClient := clientset.Core()
+
+	releaseName := releaseName(exec.Key)
+	chartName := exec.chartName()
+
+	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
+	options := api.ListOptions{LabelSelector: selector}
+
+	// Check all corresponding services
+	services, err := coreClient.Services(exec.Cluster.Metadata.Namespace).List(options)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check all corresponding Istio ingresses
+	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(ingresses.Items) > 0 {
+		result := make([]string, 0)
+		for _, service := range services.Items {
+			result = append(result, service.Name)
+		}
+
+		return result, nil
+	}
+
+	return nil, nil
+}
+
 func (exec *HelmCodeExecutor) setupTillerConnection() error {
 	if len(exec.Cluster.GetTillerHost()) > 0 {
 		// connection already set up, skip
 		return nil
 	}
 
-	config, client, err := newKubeClient(exec.Cluster)
+	config, client, err := NewKubeClient(exec.Cluster)
 	if err != nil {
 		return err
 	}
@@ -234,7 +274,7 @@ func (exec HelmCodeExecutor) Destroy() error {
 
 // Endpoints returns map from port type to url for all services of the current chart
 func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
-	_, clientset, err := newKubeClient(exec.Cluster)
+	_, clientset, err := NewKubeClient(exec.Cluster)
 	if err != nil {
 		return nil, err
 	}

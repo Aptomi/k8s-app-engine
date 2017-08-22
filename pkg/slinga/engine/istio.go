@@ -6,6 +6,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 	log "github.com/Sirupsen/logrus"
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
@@ -178,7 +179,7 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 		}
 
 		if helmCodeExecutor, ok := codeExecutor.(HelmCodeExecutor); ok {
-			services, err := helmCodeExecutor.httpServices()
+			services, err := helmCodeExecutor.HttpServices()
 			if err != nil {
 				return nil, err
 			}
@@ -191,45 +192,6 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 
 			return rules, nil
 		}
-	}
-
-	return nil, nil
-}
-
-// httpServices returns list of services for the current chart
-func (exec HelmCodeExecutor) httpServices() ([]string, error) {
-	_, clientset, err := newKubeClient(exec.Cluster)
-	if err != nil {
-		return nil, err
-	}
-
-	coreClient := clientset.Core()
-
-	releaseName := releaseName(exec.Key)
-	chartName := exec.chartName()
-
-	selector := k8slabels.Set{"release": releaseName, "chart": chartName}.AsSelector()
-	options := api.ListOptions{LabelSelector: selector}
-
-	// Check all corresponding services
-	services, err := coreClient.Services(exec.Cluster.Metadata.Namespace).List(options)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check all corresponding Istio ingresses
-	ingresses, err := clientset.Extensions().Ingresses(exec.Cluster.Metadata.Namespace).List(options)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(ingresses.Items) > 0 {
-		result := make([]string, 0)
-		for _, service := range services.Items {
-			result = append(result, service.Name)
-		}
-
-		return result, nil
 	}
 
 	return nil, nil
@@ -294,7 +256,7 @@ func (rule *IstioRouteRule) delete() {
 func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 	istioSvc := cluster.GetIstioSvc()
 	if len(istioSvc) == 0 {
-		_, clientset, err := newKubeClient(cluster)
+		_, clientset, err := NewKubeClient(cluster)
 		if err != nil {
 			return "", err
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 	log "github.com/Sirupsen/logrus"
 	"time"
 )
@@ -507,7 +508,7 @@ func (diff ServiceUsageStateDiff) processInstantiations() error {
 				}).Info("Instantiating component")
 
 				if component.Code != nil {
-					codeExecutor, err := GetCodeExecutor(component.Code, key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := deployment.GetCodeExecutor(component.Code, key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -548,7 +549,7 @@ func (diff ServiceUsageStateDiff) processUpdates() error {
 				}).Info("Updating component")
 
 				if component.Code != nil {
-					codeExecutor, err := GetCodeExecutor(component.Code, key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
+					codeExecutor, err := deployment.GetCodeExecutor(component.Code, key, diff.Next.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Next.Policy.Clusters)
 					if err != nil {
 						return err
 					}
@@ -589,7 +590,7 @@ func (diff ServiceUsageStateDiff) processDestructions() error {
 				}).Info("Destructing component")
 
 				if component.Code != nil {
-					codeExecutor, err := GetCodeExecutor(component.Code, key, diff.Prev.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
+					codeExecutor, err := deployment.GetCodeExecutor(component.Code, key, diff.Prev.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, diff.Prev.Policy.Clusters)
 					if err != nil {
 						return err
 					}

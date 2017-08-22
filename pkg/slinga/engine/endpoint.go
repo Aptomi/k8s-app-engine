@@ -3,6 +3,7 @@ package engine
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 )
 
 // Endpoints returns map from key to map from port type to url for all services
@@ -29,7 +30,7 @@ func (state *ServiceUsageState) Endpoints(filterUserID string) map[string]map[st
 
 		component := state.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 		if component != nil && component.Code != nil {
-			codeExecutor, err := GetCodeExecutor(component.Code, key, state.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
+			codeExecutor, err := deployment.GetCodeExecutor(component.Code, key, state.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, state.Policy.Clusters)
 			if err != nil {
 				Debug.WithFields(log.Fields{
 					"key":   key,
