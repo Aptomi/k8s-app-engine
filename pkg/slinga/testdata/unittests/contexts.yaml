@@ -12,7 +12,7 @@
       - prod == "yes"
       - priority >= 200
     require-none:
-      - service.Metadata.Name == "zookeeper" && nozookeeper
+      - service.Name == "zookeeper" && nozookeeper
 
   change-labels:
     set:
@@ -35,7 +35,7 @@
     require-any:
       - dev == "no" && prod == "yes" && priority < 200
     require-none:
-      - service.Metadata.Name == "zookeeper" && nozookeeper
+      - service.Name == "zookeeper" && nozookeeper
 
   change-labels:
     set:
@@ -63,7 +63,7 @@
     require-any:
       - dev == "yes" && prod == "no"
     require-none:
-      - service.Metadata.Name == "zookeeper" && nozookeeper
+      - service.Name == "zookeeper" && nozookeeper
 
   change-labels:
     set:

@@ -3,13 +3,14 @@ package engine
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 // How service is visible from the policy language
 func (node *resolutionNode) proxyService(service *language.Service) interface{} {
 	return struct {
-		Metadata interface{}
-		Owner    interface{}
+		object.Metadata
+		Owner interface{}
 	}{
 		Metadata: service.Metadata,
 		Owner:    node.proxyUser(node.state.userLoader.LoadUserByID(service.Owner)),

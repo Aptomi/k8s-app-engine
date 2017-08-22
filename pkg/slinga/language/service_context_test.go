@@ -63,11 +63,9 @@ func TestServiceContextMatching(t *testing.T) {
 
 			map[string]interface{}{
 				"service": struct {
-					Metadata map[string]string
+					Name string
 				}{
-					map[string]string{
-						"Name": "zookeeper",
-					},
+					Name: "zookeeper",
 				},
 			},
 		),

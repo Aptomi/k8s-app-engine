@@ -8,7 +8,7 @@
   # For consumers with org == 'it' && is_operator
   criteria:
     require-all:
-      - service.Metadata.Name == 'istio'
+      - service.Name == 'istio'
     require-any:
       - org == 'it' && is_operator
 
