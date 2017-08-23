@@ -1,5 +1,5 @@
-hash: 9f48f7413939a9a1e6c7470e1ef0db471e9a70fb83a8fba585e1d9a88883bf21
-updated: 2017-08-23T20:24:15.237937384-07:00
+hash: 443a1884539bb6b7565ef217e1098683ad22996632fd8fdc65008be993ed33a2
+updated: 2017-08-24T16:53:15.742375227-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -185,6 +185,8 @@ imports:
   version: 72f9bd7c4e0c2a40055ab3d0f09654f730cce982
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
+- name: github.com/julienschmidt/httprouter
+  version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
