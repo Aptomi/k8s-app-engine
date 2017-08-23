@@ -1,5 +1,5 @@
-hash: 7bc4b0a6d9d0ee81acc604252e1de35957a5c208c7ec49c62b789f216b514ff1
-updated: 2017-08-22T21:09:03.756880557-07:00
+hash: 9cca4c222281c2bab6e7a79954b421cf7f0bf13e8ac06efde03dd228f3776e27
+updated: 2017-08-22T21:23:39.821391687-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -204,7 +204,7 @@ imports:
   subpackages:
   - ast
 - name: github.com/pborman/uuid
-  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
+  version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
