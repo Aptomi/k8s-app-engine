@@ -85,11 +85,11 @@ func (data *ServiceUsageData) getComponentInstanceEntry(cik *ComponentInstanceKe
 }
 
 // Record dependency for component instance
-func (data *ServiceUsageData) recordResolvedAndDependency(cik *ComponentInstanceKey, dependency *Dependency) {
-	// TODO: write into event log
+func (data *ServiceUsageData) recordResolved(cik *ComponentInstanceKey, dependency *Dependency) {
 	instance := data.getComponentInstanceEntry(cik)
 	instance.setResolved(true)
 	instance.addDependency(dependency.GetID())
+	data.recordProcessingOrder(cik)
 }
 
 // Record processing order for component instance

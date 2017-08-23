@@ -54,17 +54,20 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	// Indicate that we are starting to resolve dependency
 	node.logStartResolvingDependency()
 
+	// Locate the user
+	err = node.checkUserExists()
+	if err != nil {
+		// If consumer is not present, let's just say that this dependency cannot be fulfilled
+		node.logCannotResolveInstance()
+		return nil
+	}
+
 	// Locate the service
 	node.service, err = node.getMatchedService(state.Policy)
 	if err != nil {
 		// Return a policy processing error in case service is not present in policy
 		node.logCannotResolveInstance()
 		return err
-	}
-
-	// If no service is found, then error above will always be thrown
-	if node.service == nil {
-		panic("Service can never stay unresolved at this point")
 	}
 
 	// Process service and transform labels
@@ -109,10 +112,9 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.data.storeEdge(node.arrivalKey, node.serviceKey)
 
 	// Now, sort all components in topological order
-	componentsOrdered, err := node.service.GetComponentsSortedTopologically()
+	componentsOrdered, err := node.sortServiceComponents()
 	if err != nil {
-		// TODO: wrap call above into method and write into event log
-		// Return an error in case of failed
+		// Return an error in case of failed component topological sort
 		node.logCannotResolveInstance()
 		return err
 	}
@@ -141,7 +143,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		}
 
 		// Print information that we are starting to resolve dependency (on code, or on service)
-		node.debugResolvingDependencyOnComponent()
+		node.logResolvingDependencyOnComponent()
 
 		if node.component.Code != nil {
 			// Evaluate code params
@@ -154,7 +156,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 			// Create a child node for dependency resolution
 			nodeNext := node.createChildNode()
 
-			// Resolve dependency recursively
+			// Resolve dependency on another service recursively
 			err := state.resolveDependency(nodeNext)
 			if err != nil {
 				node.logCannotResolveInstance()
@@ -169,15 +171,14 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 			}
 		}
 
-		// Record usage of a given component
-		node.data.recordResolvedAndDependency(node.componentKey, node.dependency)
-		node.data.recordProcessingOrder(node.componentKey)
+		// Record usage of a given component instance
+		node.recordResolved(node.componentKey, node.dependency)
 	}
 
-	// Mark object as resolved and record usage of a given service
+	// Mark note as resolved and record usage of a given service instance
 	node.resolved = true
-	node.data.recordResolvedAndDependency(node.serviceKey, node.dependency)
-	node.data.recordProcessingOrder(node.serviceKey)
+	node.recordResolved(node.serviceKey, node.dependency)
 
 	return nil
 }
+

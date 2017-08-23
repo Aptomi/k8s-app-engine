@@ -68,7 +68,6 @@ func (node *resolutionNode) logStartMatchingContexts() {
 	node.eventLog.WithFields(Fields{
 		"dependency": node.dependency,
 		"user":       node.user,
-		"dependsOn":  node.serviceName,
 	}).Infof("Resolving context for service: '%s'. Contexts defined: %d", node.service.Name, len(node.state.Policy.Contexts))
 }
 
@@ -92,7 +91,7 @@ func (node *resolutionNode) logTestedContextCriteria(context *Context, matched b
 		"service": node.service,
 		"context": context,
 		"matched": matched,
-	}).Debugf("Testing context match for service: '%s'. Context: %s. Result: %t", node.service.Name, context.Name, matched)
+	}).Debugf("Testing context match for service: '%s'. Context: '%s'. Result: %t", node.service.Name, context.Name, matched)
 }
 
 func (node *resolutionNode) logTestedContextCriteriaError(context *Context, err error) {
@@ -100,22 +99,106 @@ func (node *resolutionNode) logTestedContextCriteriaError(context *Context, err 
 		"service": node.service,
 		"context": context,
 		"err":     err,
-	}).Errorf("Error while testing context match for service: '%s'. Context: %s. Error: %s", node.service.Name, context.Name, err.Error())
+	}).Errorf("Error while testing context match for service: '%s'. Context: '%s'. Error: %s", node.service.Name, context.Name, err.Error())
 }
 
 func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labelSet LabelSet, noViolations bool) {
-	// 		fmt.Sprintf("Verify there are no global rule violations for context: '%s'", context.Name),
+	fields := Fields{
+		"service": node.service,
+		"context": context,
+	}
+	if noViolations {
+		node.eventLog.WithFields(fields).Debugf("No global rule violations found for service: '%s', context: %s", node.service.Name, context.Name)
+	} else {
+		node.eventLog.WithFields(fields).Debugf("Detected global rule violation for service: '%s', context: %s", node.service.Name, context.Name)
+	}
 }
 
 func (node *resolutionNode) logTestedGlobalRuleViolationsError(context *Context, labelSet LabelSet, err error) {
-
+	node.eventLog.WithFields(Fields{
+		"service": node.service,
+		"context": context,
+	}).Errorf("Error while checking global rule violations found for service: '%s', context '%s'. Error: %s", node.service.Name, context.Name, string(err.Error()))
 }
 
 func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rule, labelSet LabelSet, match bool) {
-	// 		fmt.Sprintf("Testing if global rule '%s' applies to context '%s'", rule.Name, context.Name),
-
+	node.eventLog.WithFields(Fields{
+		"service": node.service,
+		"context": context,
+		"rule":    rule,
+		"labels":  labelSet,
+		"match":   match,
+	}).Debugf("Testing if global rule '%s' applies to service '%s', context '%s'. Result: ", rule.Name, node.service.Name, context.Name, match)
 }
 
 func (node *resolutionNode) logTestedGlobalRuleMatchError(context *Context, rule *Rule, labelSet LabelSet, err error) {
+	node.eventLog.WithFields(Fields{
+		"service": node.service,
+		"context": context,
+		"rule":    rule,
+		"labels":  labelSet,
+	}).Errorf("Error while testing global rule '%s' on service '%s', context '%s'. Error: %s", rule.Name, node.service.Name, context.Name, err)
+}
 
+func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys []string) {
+	node.eventLog.WithFields(Fields{
+		"service": node.service.Name,
+		"context": node.context.Name,
+		"keys":    node.context.Allocation.Keys,
+	}).Debugf("Allocation keys successfully resolved for service '%s', context '%s': %v", node.service.Name, node.context.Name, resolvedKeys)
+}
+
+func (node *resolutionNode) logResolvingAllocationKeysError(err error) {
+	node.eventLog.WithFields(Fields{
+		"service": node.service.Name,
+		"context": node.context.Name,
+		"keys":    node.context.Allocation.Keys,
+	}).Errorf("Error while resolving allocation keys for service '%s', context '%s'. Error: %s", node.service.Name, node.context.Name, err)
+}
+
+func (node *resolutionNode) logFailedTopologicalSort(err error) {
+	node.eventLog.WithFields(Fields{
+		"service":    node.service.Name,
+		"components": node.service.Components,
+	}).Errorf("Failed to topologically sort components within a service: '%s'. Error: %s", node.service.Name, err.Error())
+}
+
+func (node *resolutionNode) logResolvingDependencyOnComponent() {
+	if node.component.Code != nil {
+		node.eventLog.WithFields(Fields{
+			"service":   node.service.Name,
+			"component": node.component.Name,
+			"context":   node.context.Name,
+		}).Infof("Processing dependency on component/code: %s (%s)", node.component.Name, node.component.Code.Type)
+	} else if node.component.Service != "" {
+		node.eventLog.WithFields(Fields{
+			"service":   node.service.Name,
+			"component": node.component.Name,
+			"context":   node.context.Name,
+			"dependsOn": node.component.Service,
+		}).Infof("Processing dependency on another service: %s", node.component.Service)
+	} else {
+		node.eventLog.WithFields(Fields{
+			"service":   node.service.Name,
+			"component": node.component.Name,
+		}).Errorf("Invalid component (not code and not service")
+	}
+}
+
+func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstanceKey) {
+	fields := Fields{
+		"user":       node.user.Name,
+		"dependency": node.dependency,
+		"key":        cik,
+	}
+	if node.depth == 0 && cik.IsService() {
+		// at the top of the tree, when we resolve a root-level dependency
+		node.eventLog.WithFields(fields).Infof("Successfully resolved dependency '%s' -> '%s': %s", node.user.Name, node.dependency.Service, cik.GetKey())
+	} else if cik.IsService() {
+		// resolved service instance
+		node.eventLog.WithFields(fields).Infof("Successfully resolved service instance '%s' -> '%s': %s", node.user.Name, node.service.Name, cik.GetKey())
+	} else {
+		// resolved component instance
+		node.eventLog.WithFields(fields).Infof("Successfully resolved component instance '%s' -> '%s' ('%s'): %s", node.user.Name, node.service.Name, node.component.Name, cik.GetKey())
+	}
 }

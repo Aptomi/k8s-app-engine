@@ -152,15 +152,9 @@ func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, 
 
 	labels := usage.GetResolvedData().ComponentInstanceMap[key].CalculatedLabels
 
-	// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
-	var cluster *Cluster
-	if clusterLabel, ok := labels.Labels["cluster"]; ok {
-		if cluster, ok = usage.Policy.Clusters[clusterLabel]; !ok {
-			Debug.WithFields(log.Fields{
-				"component": key,
-				"labels":    labels.Labels,
-			}).Panic("Can't find cluster for component (based on label 'cluster')")
-		}
+	cluster, err := getCluster(usage.Policy, labels)
+	if err != nil {
+		return nil, err
 	}
 
 	// get all users who're using service

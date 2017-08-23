@@ -12,8 +12,11 @@ Items to complete:
 2. Improve debugging of the policy (for successful & unsuccessful processing)
 
   - Which event logs can we store
-      -> successful policy evaluation (gets tied to a new revision)
-      -> error during policy evaluation (not tied to anything)
+      -> policy evaluation log
+           * successful == gets tied to a revision
+           * error = stays in the journal orphan (not tied to a revision)
+      -> policy apply log
+           * gets tied to a revision
       -> external services, e.g. LDAP sync service (gets tied to a separate revision of users, and the service keeps N last revisions)
 
   - Journal ID

@@ -448,7 +448,7 @@ func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
 }
 
 // Apply method applies all changes via executors, saves usage state in Aptomi DB
-func (diff ServiceUsageStateDiff) Apply(noop bool) {
+func (diff ServiceUsageStateDiff) Apply(noop bool) error {
 	diff.progress = progress.NewProgressNoop()
 	if !noop {
 		// add progress indicator
@@ -457,21 +457,15 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 
 		err := diff.processDestructions()
 		if err != nil {
-			Debug.WithFields(log.Fields{
-				"error": err,
-			}).Panic("Error while destructing components")
+			return fmt.Errorf("Error while destructing components")
 		}
 		err = diff.processUpdates()
 		if err != nil {
-			Debug.WithFields(log.Fields{
-				"error": err,
-			}).Panic("Error while updating components")
+			return fmt.Errorf("Error while updating components")
 		}
 		err = diff.processInstantiations()
 		if err != nil {
-			Debug.WithFields(log.Fields{
-				"error": err,
-			}).Panic("Error while instantiating components")
+			return fmt.Errorf("Error while instantiating components")
 		}
 
 		// enforce istio rules
@@ -480,6 +474,7 @@ func (diff ServiceUsageStateDiff) Apply(noop bool) {
 
 	// Don't forget to finalize progress indicator
 	diff.progress.Done()
+	return nil
 }
 
 func (diff ServiceUsageStateDiff) processInstantiations() error {

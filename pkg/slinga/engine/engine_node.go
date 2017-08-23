@@ -2,9 +2,7 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	log "github.com/Sirupsen/logrus"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"fmt"
 )
@@ -75,12 +73,12 @@ type resolutionNode struct {
 // Creates a new resolution node as a starting point for resolving a particular dependency
 func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache, eventLog *EventLog) *resolutionNode {
 
-	// TODO: this should be loogged into the log as well
+	// combining user labels and dependency labels
 	user := state.userLoader.LoadUserByID(dependency.UserID)
-	if user == nil {
-		Debug.WithFields(log.Fields{
-			"dependency": dependency,
-		}).Panic("Dependency refers to non-existing user")
+	labels := dependency.GetLabelSet()
+	if user != nil {
+		labels = labels.AddLabels(user.GetLabelSet())
+		labels = labels.AddLabels(user.GetSecretSet())
 	}
 
 	data := newServiceUsageData()
@@ -101,11 +99,8 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 		// we start with the service specified in the dependency
 		serviceName: dependency.Service,
 
-		// combining user labels, dependency labels, and making service.Name available to the engine as special variable
-		labels: user.GetLabelSet().
-			AddLabels(user.GetSecretSet()).
-			AddLabels(dependency.GetLabelSet()).
-			ApplyTransform(NewLabelOperationsSetSingleLabel("service.Name", dependency.Service)),
+		// combining user labels and dependency labels
+		labels: labels,
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
@@ -131,9 +126,8 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		// we take the current component we are iterating over, and get its service name
 		serviceName: node.component.Service,
 
-		// we take current processed labels for the component we are iterating over, and making service.Name available to the engine as special variable
-		labels: node.componentLabels.
-			ApplyTransform(NewLabelOperationsSetSingleLabel("service.Name", node.component.Service)),
+		// we take current processed labels for the component
+		labels: node.componentLabels,
 
 		// move further by the discovery tree via component name link
 		discoveryTreeNode: node.discoveryTreeNode.GetNestedMap(node.component.Name),
@@ -143,37 +137,12 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 	}
 }
 
-func (node *resolutionNode) debugResolvingDependencyEnd() {
-	Debug.WithFields(log.Fields{
-		"dependency": node.dependency,
-		"user":       node.user.Name,
-		"labels":     node.labels,
-		"dependsOn":  node.serviceName,
-	}).Info("Successfully resolved dependency")
-
-	node.ruleLogWriter.addRuleLogEntry(entryResolvingDependencyEnd(node.serviceName, node.user, node.dependency))
-}
-
-func (node *resolutionNode) debugResolvingDependencyOnComponent() {
-	if node.component.Code != nil {
-		Debug.WithFields(log.Fields{
-			"service":   node.service.Name,
-			"component": node.component.Name,
-			"context":   node.context.Name,
-		}).Info("Processing dependency on code execution")
-	} else if node.component.Service != "" {
-		Debug.WithFields(log.Fields{
-			"service":          node.service.Name,
-			"component":        node.component.Name,
-			"context":          node.context.Name,
-			"dependsOnService": node.component.Service,
-		}).Info("Processing dependency on another service")
-	} else {
-		Debug.WithFields(log.Fields{
-			"service":   node.service.Name,
-			"component": node.component.Name,
-		}).Panic("Invalid component (not code and not service")
+// Helper to check that user exists
+func (node *resolutionNode) checkUserExists() error {
+	if node.user == nil {
+		return fmt.Errorf("Dependency refers to non-existing user: " + node.dependency.UserID)
 	}
+	return nil
 }
 
 // Helper to get a matched service
@@ -210,7 +179,16 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 		if matched {
 			// Match is only valid if there are no global rule voilations for the current context
 			labels := node.transformLabels(node.labels, context.ChangeLabels)
-			cluster := node.getCluster(policy, labels, context)
+
+			// Lookup cluster from a label
+			cluster, err := getCluster(policy, labels)
+			if err != nil {
+				// Propagate error up
+				node.logTestedGlobalRuleViolationsError(context, labels, err)
+				return nil, err
+			}
+
+			// Check for rule voilations
 			hasViolations, err := node.hasGlobalRuleViolations(policy, context, labels, cluster)
 			if err != nil {
 				// Propagate error up
@@ -237,8 +215,6 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 
 // Helper to resolve allocation keys
 func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]string, error) {
-	// TODO: write into event log about resolving allocation keys, log errors
-
 	// If there is no allocation, there are no keys to resolve
 	if node.context.Allocation == nil {
 		return nil, nil
@@ -247,24 +223,21 @@ func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]st
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
 	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"service": node.service.Name,
-			"context": node.context.Name,
-			"keys":    node.context.Allocation.Keys,
-			"user":    node.user.Name,
-			"error":   err,
-		}).Info("Cannot resolve one of the keys within an allocation")
+		node.logResolvingAllocationKeysError(err)
 		return nil, err
 	}
 
-	if len(node.context.Allocation.Keys) > 0 {
-		Debug.WithFields(log.Fields{
-			"service": node.service.Name,
-			"context": node.context.Name,
-			"keys":    node.context.Allocation.Keys,
-			"user":    node.user.Name,
-		}).Info("All allocation keys resolved")
-		node.ruleLogWriter.addRuleLogEntry(entryAllocationKeysResolved(node.service, node.context, result))
+	if len(result) > 0 {
+		node.logAllocationKeysSuccessfullyResolved(result)
+	}
+	return result, nil
+}
+
+func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error) {
+	result, err := node.service.GetComponentsSortedTopologically()
+	if err != nil {
+		node.logFailedTopologicalSort(err)
+		return result, err
 	}
 	return result, nil
 }
@@ -278,21 +251,6 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) *Com
 		node.allocationKeysResolved,
 		component,
 	)
-}
-
-func (node *resolutionNode) getCluster(policy *PolicyNamespace, labels LabelSet, context *Context) *Cluster {
-	// todo(slukjanov): temp hack - expecting that cluster is always passed through the label "cluster"
-	var cluster *Cluster
-	if clusterLabel, ok := labels.Labels["cluster"]; ok {
-		if cluster, ok = policy.Clusters[clusterLabel]; !ok {
-			Debug.WithFields(log.Fields{
-				"service": node.service,
-				"context": context,
-				"labels":  labels.Labels,
-			}).Panic("Can't find cluster (based on label 'cluster')")
-		}
-	}
-	return cluster
 }
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations LabelOperations) LabelSet {
@@ -350,4 +308,10 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	}
 
 	return err
+}
+
+// Mark instance as resolved and save dependency that triggered its instantiation
+func (node *resolutionNode) recordResolved(cik *ComponentInstanceKey, dependency *Dependency) {
+	node.logInstanceSuccessfullyResolved(cik)
+	node.data.recordResolved(cik, dependency)
 }

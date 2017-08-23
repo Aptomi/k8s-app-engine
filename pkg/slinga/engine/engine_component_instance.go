@@ -2,10 +2,9 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	log "github.com/Sirupsen/logrus"
 	"time"
+	"fmt"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -60,9 +59,8 @@ func (instance *ComponentInstance) setResolved(resolved bool) {
 	if !instance.Resolved {
 		instance.Resolved = resolved
 	} else if !resolved {
-		Debug.WithFields(log.Fields{
-			"key": instance.Key,
-		}).Panic("Invalid action. Trying to unset Resolved flag for instance")
+		// This should never ever get executed
+		panic("Trying to unset 'resolved' flag for component instance: " + instance.Key.GetKey())
 	}
 }
 
@@ -70,32 +68,26 @@ func (instance *ComponentInstance) addDependency(dependencyID string) {
 	instance.DependencyIds[dependencyID] = true
 }
 
-func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) {
+func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) error {
 	if len(instance.CalculatedCodeParams) == 0 {
 		// Record code parameters
 		instance.CalculatedCodeParams = codeParams
 	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
-		Debug.WithFields(log.Fields{
-			"key":            instance.Key,
-			"prevCodeParams": instance.CalculatedCodeParams,
-			"nextCodeParams": codeParams,
-		}).Panic("Invalid policy. Arrived to the same component with different code parameters")
+		return fmt.Errorf("Invalid policy. Arrived to the same component with different code parameters. Key = '%s'. Prev = '%+v'. Next = '%+v'", instance.Key.GetKey(), instance.CalculatedCodeParams, codeParams)
 	}
+	return nil
 }
 
-func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedParameterMap) {
+func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedParameterMap) error {
 	if len(instance.CalculatedDiscovery) == 0 {
 		// Record discovery parameters
 		instance.CalculatedDiscovery = discoveryParams
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
-		Debug.WithFields(log.Fields{
-			"key": instance.Key,
-			"prevDiscoveryParams": instance.CalculatedDiscovery,
-			"nextDiscoveryParams": discoveryParams,
-		}).Panic("Invalid policy. Arrived to the same component with different discovery parameters")
+		return fmt.Errorf("Invalid policy. Arrived to the same component with different code parameters. Key = '%s'. Prev = '%+v'. Next = '%+v'", instance.Key.GetKey(), instance.CalculatedDiscovery, discoveryParams)
 	}
+	return nil
 }
 
 func (instance *ComponentInstance) addLabels(labels LabelSet) {
@@ -126,12 +118,8 @@ func (instance *ComponentInstance) updateTimes(createdOn time.Time, updatedOn ti
 
 func (instance *ComponentInstance) checkTimesAreEmpty() {
 	if !time.Time.IsZero(instance.CreatedOn) || !time.Time.IsZero(instance.UpdatedOn) {
-		// Same component instance, different code parameters
-		Debug.WithFields(log.Fields{
-			"key":       instance.Key,
-			"createdOn": instance.CreatedOn,
-			"updatedOn": instance.UpdatedOn,
-		}).Panic("Expected zero times, but found non-zero times")
+		// This should never get executed
+		panic("Expected zero times in newly created component instance, but found non-zero times")
 	}
 }
 
