@@ -288,18 +288,37 @@ func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, con
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	// TODO: write into event log
-
 	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
-	node.data.recordCodeParams(node.componentKey, componentCodeParams)
+	if err != nil {
+		// TODO: write into event log
+		return err
+	}
+
+	err = node.data.recordCodeParams(node.componentKey, componentCodeParams)
+	if err != nil {
+		// TODO: write into event log
+		return err
+	}
+
+	// TODO: write about parameters which got updated
+
 	return err
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	// TODO: write into event log
-
 	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
-	node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
+	if err != nil {
+		// TODO: write into event log
+		return err
+	}
+
+	err = node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
+	if err != nil {
+		// TODO: write into event log
+		return err
+	}
+
+	// TODO: write about parameters which got updated
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
 	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey.GetKey())
@@ -308,6 +327,12 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	}
 
 	return err
+}
+
+// Stores calculated labels for component instance
+func (node *resolutionNode) recordLabels(cik *ComponentInstanceKey, labels LabelSet) {
+	// TODO: write into event log
+	node.data.recordLabels(cik, labels)
 }
 
 // Mark instance as resolved and save dependency that triggered its instantiation

@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"reflect"
 	"strconv"
+	"github.com/d4l3k/messagediff"
 )
 
 /*
@@ -83,7 +84,14 @@ func (src NestedParameterMap) DeepEqual(dst NestedParameterMap) bool {
 	return reflect.DeepEqual(src, dst)
 }
 
-// DeepEqual prints a nested map
+// Diff feturns a human-readable diff between two nested parameter maps
+func (src NestedParameterMap) Diff(dst NestedParameterMap) string {
+	// 2nd parameter is true/false, whether the structs are equal or not. We can safely ignore it
+	diff, _ := messagediff.PrettyDiff(src, dst)
+	return diff
+}
+
+// DeepEqual prints a nested parameter map
 func (src NestedParameterMap) Print() {
 	fmt.Println(yaml.SerializeObject(src))
 }

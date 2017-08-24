@@ -98,7 +98,7 @@ func (node *resolutionNode) logTestedContextCriteriaError(context *Context, err 
 	node.eventLog.WithFields(Fields{
 		"service": node.service,
 		"context": context,
-		"err":     err,
+		"error":   err,
 	}).Errorf("Error while testing context match for service: '%s'. Context: '%s'. Error: %s", node.service.Name, context.Name, err.Error())
 }
 
@@ -118,6 +118,7 @@ func (node *resolutionNode) logTestedGlobalRuleViolationsError(context *Context,
 	node.eventLog.WithFields(Fields{
 		"service": node.service,
 		"context": context,
+		"error":   err,
 	}).Errorf("Error while checking global rule violations found for service: '%s', context '%s'. Error: %s", node.service.Name, context.Name, string(err.Error()))
 }
 
@@ -137,6 +138,7 @@ func (node *resolutionNode) logTestedGlobalRuleMatchError(context *Context, rule
 		"context": context,
 		"rule":    rule,
 		"labels":  labelSet,
+		"error":   err,
 	}).Errorf("Error while testing global rule '%s' on service '%s', context '%s'. Error: %s", rule.Name, node.service.Name, context.Name, err)
 }
 
@@ -153,6 +155,7 @@ func (node *resolutionNode) logResolvingAllocationKeysError(err error) {
 		"service": node.service.Name,
 		"context": node.context.Name,
 		"keys":    node.context.Allocation.Keys,
+		"error":   err,
 	}).Errorf("Error while resolving allocation keys for service '%s', context '%s'. Error: %s", node.service.Name, node.context.Name, err)
 }
 
@@ -160,6 +163,7 @@ func (node *resolutionNode) logFailedTopologicalSort(err error) {
 	node.eventLog.WithFields(Fields{
 		"service":    node.service.Name,
 		"components": node.service.Components,
+		"error":      err,
 	}).Errorf("Failed to topologically sort components within a service: '%s'. Error: %s", node.service.Name, err.Error())
 }
 

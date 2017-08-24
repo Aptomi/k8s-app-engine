@@ -34,9 +34,17 @@ func (state *ServiceUsageState) ResolveAllDependencies() error {
 			d.Resolved = node.resolved
 			d.ServiceKey = node.serviceKey.GetKey()
 			if node.resolved {
-				state.ResolvedData.appendData(node.data)
+				err := state.ResolvedData.appendData(node.data)
+				if err != nil {
+					// TODO: log error
+					return err
+				}
 			} else {
-				state.UnresolvedData.appendData(node.data)
+				err := state.UnresolvedData.appendData(node.data)
+				if err != nil {
+					// TODO: log error
+					return err
+				}
 			}
 		}
 	}
@@ -106,7 +114,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.ruleLogWriter.attachToInstance(node.serviceKey)
 
 	// Store labels for service
-	node.data.recordLabels(node.serviceKey, node.labels)
+	node.recordLabels(node.serviceKey, node.labels)
 
 	// Store edge (last component instance -> service instance)
 	node.data.storeEdge(node.arrivalKey, node.serviceKey)
@@ -130,7 +138,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 
 		// Calculate and store labels for component
 		node.componentLabels = node.transformLabels(node.labels, node.component.ChangeLabels)
-		node.data.recordLabels(node.componentKey, node.componentLabels)
+		node.recordLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component
 		node.discoveryTreeNode[node.component.Name] = NestedParameterMap{}

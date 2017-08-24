@@ -102,18 +102,17 @@ func (data *ServiceUsageData) recordProcessingOrder(cik *ComponentInstanceKey) {
 }
 
 // Stores calculated discovery params for component instance
-func (data *ServiceUsageData) recordCodeParams(cik *ComponentInstanceKey, codeParams NestedParameterMap) {
-	data.getComponentInstanceEntry(cik).addCodeParams(codeParams)
+func (data *ServiceUsageData) recordCodeParams(cik *ComponentInstanceKey, codeParams NestedParameterMap) error {
+	return data.getComponentInstanceEntry(cik).addCodeParams(codeParams)
 }
 
 // Stores calculated discovery params for component instance
-func (data *ServiceUsageData) recordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams NestedParameterMap) {
-	data.getComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
+func (data *ServiceUsageData) recordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams NestedParameterMap) error {
+	return data.getComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
 }
 
 // Stores calculated labels for component instance
 func (data *ServiceUsageData) recordLabels(cik *ComponentInstanceKey, labels LabelSet) {
-	// TODO: write into event log
 	data.getComponentInstanceEntry(cik).addLabels(labels)
 }
 
@@ -132,13 +131,17 @@ func (data *ServiceUsageData) storeRuleLogEntry(cik *ComponentInstanceKey, depen
 }
 
 // Appends data to the current ServiceUsageData
-func (data *ServiceUsageData) appendData(ops *ServiceUsageData) {
+func (data *ServiceUsageData) appendData(ops *ServiceUsageData) error {
 	for _, instance := range ops.ComponentInstanceMap {
-		data.getComponentInstanceEntry(instance.Key).appendData(instance)
+		err := data.getComponentInstanceEntry(instance.Key).appendData(instance)
+		if err != nil {
+			return err
+		}
 	}
 	for _, key := range ops.ComponentProcessingOrder {
 		data.recordProcessingOrder(ops.ComponentInstanceMap[key].Key)
 	}
+	return nil
 }
 
 // LoadServiceUsageState loads usage state from a file under Aptomi DB

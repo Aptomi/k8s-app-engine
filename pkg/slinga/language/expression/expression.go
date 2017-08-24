@@ -1,8 +1,9 @@
 package expression
 
 import (
-	"errors"
 	"github.com/ralekseenkov/govaluate"
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 )
 
 type Expression struct {
@@ -11,9 +12,9 @@ type Expression struct {
 }
 
 func NewExpression(expressionStr string) (*Expression, error) {
-	expressionCompiled, e := govaluate.NewEvaluableExpression(expressionStr)
-	if e != nil {
-		return nil, e
+	expressionCompiled, err := govaluate.NewEvaluableExpression(expressionStr)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to compile expression '%s': %s", expressionStr, err.Error())
 	}
 	return &Expression{
 		expressionStr:      expressionStr,
@@ -24,19 +25,31 @@ func NewExpression(expressionStr string) (*Expression, error) {
 // Evaluate an expression, given a set of labels
 func (expression *Expression) EvaluateAsBool(params *ExpressionParameters) (bool, error) {
 	// Evaluate
-	result, e := expression.expressionCompiled.Evaluate(*params)
-	if e != nil {
+	result, err := expression.expressionCompiled.Evaluate(*params)
+	if err != nil {
 		// Return false and swallow the error if we encountered a missing parameter
-		if _, ok := e.(*govaluate.MissingParameterError); ok {
+		if _, ok := err.(*govaluate.MissingParameterError); ok {
 			return false, nil
 		}
-		return false, e
+		return false, errors.NewErrorWithDetails(
+			fmt.Sprintf("Unable to evaluate expression '%s': %s", expression.expressionStr, err.Error()),
+			errors.Details{
+				"expression": expression.expressionStr,
+				"params": params,
+			},
+		)
 	}
 
 	// Convert result to bool
 	value, ok := result.(bool)
 	if !ok {
-		return false, errors.New("Expression doesn't evaluate to boolean: " + expression.expressionStr)
+		return false, errors.NewErrorWithDetails(
+			fmt.Sprintf("Expression '%s' didn't evaluate to boolean", expression.expressionStr),
+			errors.Details{
+				"expression": expression.expressionStr,
+				"params": params,
+			},
+		)
 	}
 
 	return value, nil

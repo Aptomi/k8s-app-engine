@@ -4,7 +4,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"time"
-	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -74,7 +74,15 @@ func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) 
 		instance.CalculatedCodeParams = codeParams
 	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
-		return fmt.Errorf("Invalid policy. Arrived to the same component with different code parameters. Key = '%s'. Prev = '%+v'. Next = '%+v'", instance.Key.GetKey(), instance.CalculatedCodeParams, codeParams)
+		return errors.NewErrorWithDetails(
+			"Invalid policy. Arrived to the same component instance with different code parameters",
+			errors.Details{
+				"instance":             instance.Key,
+				"code_params_existing": instance.CalculatedCodeParams,
+				"code_params_new":      codeParams,
+				"diff":                 instance.CalculatedCodeParams.Diff(codeParams),
+			},
+		)
 	}
 	return nil
 }
@@ -85,7 +93,15 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 		instance.CalculatedDiscovery = discoveryParams
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
-		return fmt.Errorf("Invalid policy. Arrived to the same component with different code parameters. Key = '%s'. Prev = '%+v'. Next = '%+v'", instance.Key.GetKey(), instance.CalculatedDiscovery, discoveryParams)
+		return errors.NewErrorWithDetails(
+			"Invalid policy. Arrived to the same component instance with different discovery parameters",
+			errors.Details{
+				"instance":                  instance.Key,
+				"discovery_params_existing": instance.CalculatedDiscovery,
+				"discovery_params_new":      discoveryParams,
+				"diff":                      instance.CalculatedDiscovery.Diff(discoveryParams),
+			},
+		)
 	}
 	return nil
 }
@@ -123,7 +139,7 @@ func (instance *ComponentInstance) checkTimesAreEmpty() {
 	}
 }
 
-func (instance *ComponentInstance) appendData(ops *ComponentInstance) {
+func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	// Resolution flag
 	instance.setResolved(ops.Resolved)
 
@@ -135,10 +151,20 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) {
 		instance.addDependency(dependencyID)
 	}
 
-	// Calculated parameters for the component
+	// Combine labels
 	instance.addLabels(ops.CalculatedLabels)
-	instance.addDiscoveryParams(ops.CalculatedDiscovery)
-	instance.addCodeParams(ops.CalculatedCodeParams)
+
+	// Combine code params and discovery params for
+	var err error
+	err = instance.addDiscoveryParams(ops.CalculatedDiscovery)
+	if err != nil {
+		return err
+	}
+
+	err = instance.addCodeParams(ops.CalculatedCodeParams)
+	if err != nil {
+		return err
+	}
 
 	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
 	for key := range ops.EdgesIn {
@@ -152,4 +178,6 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) {
 	for dependencyID, entryList := range ops.RuleLog {
 		instance.addRuleLogEntries(dependencyID, entryList...)
 	}
+
+	return nil
 }

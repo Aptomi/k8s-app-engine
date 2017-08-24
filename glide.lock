@@ -1,5 +1,5 @@
-hash: 9cca4c222281c2bab6e7a79954b421cf7f0bf13e8ac06efde03dd228f3776e27
-updated: 2017-08-22T21:23:39.821391687-07:00
+hash: 54ea9a275fe9eab4ab77cd3b56c8eb2bcf069596db7c827ba9016a9b5b32a291
+updated: 2017-08-23T14:34:31.93541754-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -38,6 +38,8 @@ imports:
   - health
   - httputil
   - timeutil
+- name: github.com/d4l3k/messagediff
+  version: 7b706999d935b04cf2dbc71a5a5afcbd288aeb48
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:

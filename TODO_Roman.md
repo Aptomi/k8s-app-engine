@@ -43,17 +43,21 @@ Items to complete:
 
 3. Error handing in engine & improved engine unit test coverage for corner cases
 
-4. Get rid of dependency ID
+4. Separate apply() from diff calculation
 
-5. Do we need to move Dependency.Resolved into resolved usage state?
+5. Plugins: engine -> ComponentInstancePlugin() -> istio
 
-6. Get rid of service.Metadata.Name == 'istio'
+6. Get rid of dependency ID
 
-7. Reformat, deal with code style and missing comments
+7. Do we need to move Dependency.Resolved into resolved usage state?
 
-8. Implement polling for external entities & storing objects in DB
+8. Get rid of service.Metadata.Name == 'istio'
 
-9. Cross-service cycle in engine
+9. Reformat, deal with code style and missing comments
+
+10. Implement polling for external entities & storing objects in DB
+
+11. Cross-service cycle in engine
 
 
 Questions:
