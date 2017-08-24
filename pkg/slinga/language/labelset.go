@@ -5,6 +5,7 @@ import "reflect"
 // LabelSet defines the set of labels that will be manipulated
 type LabelSet struct {
 	Labels map[string]string
+	// TODO: secrets probably need to be moved out into a separate map[string]string
 	IsSecret map[string]bool
 }
 
@@ -68,6 +69,7 @@ func (src LabelSet) addToCurrent(addSet LabelSet) LabelSet {
 }
 
 // Equal compares two labels sets. If one is nil and another one is empty, it will return true as well
+// This method ignores IsSecret for now
 func (src LabelSet) Equal(dst LabelSet) bool {
 	if len(src.Labels) == 0 && len(dst.Labels) == 0 {
 		return true

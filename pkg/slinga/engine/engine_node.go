@@ -288,7 +288,6 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *ServiceComponent) *ComponentInstanceKey {
-	// TODO: write about creating component instance key
 	return NewComponentInstanceKey(
 		node.serviceName,
 		node.context,
@@ -298,10 +297,9 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) *Com
 }
 
 func (node *resolutionNode) transformLabels(labels LabelSet, operations LabelOperations) LabelSet {
-	// TODO: write about applying transform
 	result := labels.ApplyTransform(operations)
 	if !labels.Equal(result) {
-		node.logLabels(result)
+		node.logLabels(result, "after transform")
 	}
 	return result
 }

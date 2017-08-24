@@ -144,10 +144,10 @@ func (node *resolutionNode) logStartResolvingDependency() {
 		node.eventLog.WithFields(Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.user.Name, node.dependency.Service, node.serviceName, node.depth)
 	}
 
-	node.logLabels(node.labels)
+	node.logLabels(node.labels, "initial")
 }
 
-func (node *resolutionNode) logLabels(labelSet LabelSet) {
+func (node *resolutionNode) logLabels(labelSet LabelSet, scope string) {
 	secretCnt := 0
 	labelsMap := make(map[string]string)
 	for k, v := range labelSet.Labels {
@@ -160,7 +160,7 @@ func (node *resolutionNode) logLabels(labelSet LabelSet) {
 
 	node.eventLog.WithFields(Fields{
 		"labels": labelSet.Labels,
-	}).Infof("Labels: %s and %d secrets", labelsMap, secretCnt)
+	}).Infof("Labels (%s): %s and %d secrets", scope, labelsMap, secretCnt)
 }
 
 func (node *resolutionNode) logServiceFound(service *Service) {
