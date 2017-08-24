@@ -22,10 +22,10 @@ type ServiceUsageState struct {
 	// Diff stored as text
 	DiffAsText string
 
-	// resolved usage - stores full information about dependencies which have been successfully resolved. should ideally be accessed by a getter
+	// resolved usage - stores full information about dependencies which have been successfully resolved
 	ResolvedData *ServiceUsageData
 
-	// unresolved usage - stores full information about dependencies which were not resolved. including rule logs with reasons, etc
+	// unresolved usage - stores full information about dependencies which were not resolved
 	UnresolvedData *ServiceUsageData
 }
 
@@ -123,11 +123,6 @@ func (data *ServiceUsageData) storeEdge(src *ComponentInstanceKey, dst *Componen
 		data.getComponentInstanceEntry(src).addEdgeOut(dst.GetKey())
 		data.getComponentInstanceEntry(dst).addEdgeIn(src.GetKey())
 	}
-}
-
-// Stores rule log entry, attaching it to component instance by dependency
-func (data *ServiceUsageData) storeRuleLogEntry(cik *ComponentInstanceKey, dependency *Dependency, entry *RuleLogEntry) {
-	data.getComponentInstanceEntry(cik).addRuleLogEntries(dependency.GetID(), entry)
 }
 
 // Appends data to the current ServiceUsageData

@@ -59,8 +59,8 @@ func (node *resolutionNode) logCannotResolveInstance() {
 		// Create service key
 		node.serviceKey = node.createComponentKey(nil)
 
-		// Once instance is figured out, make sure to attach rule logs to that instance
-		node.eventLog.AttachToInstance(node.serviceKey.GetKey())
+		// Once instance is figured out, make sure to attach event logs to that instance
+		node.objectResolved(node.serviceKey)
 	}
 }
 

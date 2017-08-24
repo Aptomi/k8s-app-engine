@@ -31,9 +31,6 @@ type ComponentInstance struct {
 	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
 	EdgesIn  map[string]bool
 	EdgesOut map[string]bool
-
-	// Rule evaluation log (dependency ID -> []*RuleLogEntry)
-	RuleLog map[string][]*RuleLogEntry
 }
 
 // Creates a new component instance
@@ -46,7 +43,6 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 		CalculatedCodeParams: NestedParameterMap{},
 		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
-		RuleLog:              make(map[string][]*RuleLogEntry),
 	}
 }
 
@@ -111,10 +107,6 @@ func (instance *ComponentInstance) addLabels(labels LabelSet) {
 	instance.CalculatedLabels = instance.CalculatedLabels.AddLabels(labels)
 }
 
-func (instance *ComponentInstance) addRuleLogEntries(dependencyID string, entry ...*RuleLogEntry) {
-	instance.RuleLog[dependencyID] = append(instance.RuleLog[dependencyID], entry...)
-}
-
 func (instance *ComponentInstance) addEdgeIn(srcKey string) {
 	instance.EdgesIn[srcKey] = true
 }
@@ -172,11 +164,6 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	}
 	for keyDst := range ops.EdgesOut {
 		instance.addEdgeOut(keyDst)
-	}
-
-	// Rule evaluation log (dependency ID -> []*RuleLogEntry)
-	for dependencyID, entryList := range ops.RuleLog {
-		instance.addRuleLogEntries(dependencyID, entryList...)
 	}
 
 	return nil

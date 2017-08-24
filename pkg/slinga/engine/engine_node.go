@@ -65,9 +65,6 @@ type resolutionNode struct {
 
 	// reference to the last key we arrived with, so we can reconstruct graph edges between keys
 	arrivalKey *ComponentInstanceKey
-
-	// reference to rule log writer
-	ruleLogWriter *RuleLogWriter
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
@@ -89,8 +86,7 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 		cache:    cache,
 		eventLog: eventLog,
 
-		data:          data,
-		ruleLogWriter: NewRuleLogWriter(data, dependency),
+		data: data,
 
 		depth:      0,
 		dependency: dependency,
@@ -116,8 +112,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		cache:    node.cache,
 		eventLog: node.eventLog, // TODO: create new instance
 
-		data:          node.data,
-		ruleLogWriter: NewRuleLogWriter(node.data, node.dependency),
+		data: node.data,
 
 		depth:      node.depth + 1,
 		dependency: node.dependency,
@@ -135,6 +130,17 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		// remember the last arrival key
 		arrivalKey: node.componentKey,
 	}
+}
+
+// As the resolution goes on, this method is called when objects become resolved and available in the context
+// Right now it gets called for as the following get resolved:
+// - dependency
+// - user
+// - service
+// - context
+// - serviceKey
+func (node *resolutionNode) objectResolved(object interface{}) {
+	node.eventLog.AttachTo(object)
 }
 
 // Helper to check that user exists

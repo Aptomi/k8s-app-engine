@@ -106,7 +106,7 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 			// for all users of the service
 			for _, user := range users {
 				// TODO: this is pretty shitty that it's not a part of engine_node
-				//       you can't log into "rule log" (new replacement of tracing)
+				//       you can't log into "event log"
 				//       you can't use engine cache for expressions/template
 				match, err := rule.FilterServices.Match(labels, user, cluster, nil)
 				if err != nil {

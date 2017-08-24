@@ -61,6 +61,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 
 	// Indicate that we are starting to resolve dependency
 	node.logStartResolvingDependency()
+	node.objectResolved(node.dependency)
 
 	// Locate the user
 	err = node.checkUserExists()
@@ -69,6 +70,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		node.logCannotResolveInstance()
 		return nil
 	}
+	node.objectResolved(node.user)
 
 	// Locate the service
 	node.service, err = node.getMatchedService(state.Policy)
@@ -77,6 +79,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		node.logCannotResolveInstance()
 		return err
 	}
+	node.objectResolved(node.service)
 
 	// Process service and transform labels
 	node.labels = node.transformLabels(node.labels, node.service.ChangeLabels)
@@ -95,6 +98,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		node.logCannotResolveInstance()
 		return nil
 	}
+	node.objectResolved(node.context)
 
 	// Process context and transform labels
 	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
@@ -109,9 +113,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 
 	// Create service key
 	node.serviceKey = node.createComponentKey(nil)
-
-	// Once instance is figured out, make sure to attach rule logs to that instance
-	node.ruleLogWriter.attachToInstance(node.serviceKey)
+	node.objectResolved(node.serviceKey)
 
 	// Store labels for service
 	node.recordLabels(node.serviceKey, node.labels)
@@ -189,4 +191,3 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 
 	return nil
 }
-
