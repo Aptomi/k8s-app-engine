@@ -1,11 +1,13 @@
-hash: 54ea9a275fe9eab4ab77cd3b56c8eb2bcf069596db7c827ba9016a9b5b32a291
-updated: 2017-08-23T14:34:31.93541754-07:00
+hash: 9f48f7413939a9a1e6c7470e1ef0db471e9a70fb83a8fba585e1d9a88883bf21
+updated: 2017-08-23T20:24:15.237937384-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
   subpackages:
   - compute/metadata
   - internal
+- name: github.com/alecthomas/gometalinter
+  version: bae2f1293d092fd8167939d5108d1b025eaef9de
 - name: github.com/awalterschulze/gographviz
   version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
   subpackages:
