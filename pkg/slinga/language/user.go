@@ -32,5 +32,5 @@ func (user *User) GetLabelSet() LabelSet {
 
 // GetSecretSet returns a set of user secrets
 func (user *User) GetSecretSet() LabelSet {
-	return NewLabelSet(user.Secrets)
+	return NewLabelSetSecret(user.Secrets)
 }

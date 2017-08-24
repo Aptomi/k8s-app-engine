@@ -147,10 +147,19 @@ func (node *resolutionNode) logStartResolvingDependency() {
 }
 
 func (node *resolutionNode) logLabels(labelSet LabelSet) {
-	// TODO: figure out a better way to show than just count
+	secretCnt := 0
+	labelsMap := make(map[string]string)
+	for k, v := range labelSet.Labels {
+		if labelSet.IsSecret[k] {
+			secretCnt++
+		} else {
+			labelsMap[k] = v
+		}
+	}
+
 	node.eventLog.WithFields(Fields{
 		"labels": labelSet.Labels,
-	}).Infof("Labels: %d", len(labelSet.Labels))
+	}).Infof("Labels: %s and %d secrets", labelsMap, secretCnt)
 }
 
 func (node *resolutionNode) logServiceFound(service *Service) {
