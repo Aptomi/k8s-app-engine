@@ -70,8 +70,7 @@ vet:
 
 .PHONY: lint
 lint:
-	$$(go env GOPATH)/bin/golint $$(go list ./... | grep -v /vendor/) | grep -v 'should not use dot imports'
-	gometalinter --deadline=120s ./pkg/... ./cmd/...
+	gometalinter --deadline=120s ./pkg/... ./cmd/... | grep -v 'should not use dot imports'
 
 .PHONY: validate
 validate: fmt vet lint
