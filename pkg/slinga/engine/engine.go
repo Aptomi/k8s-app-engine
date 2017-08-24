@@ -2,7 +2,6 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 )
 
 /*
@@ -12,15 +11,14 @@ import (
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
 func (state *ServiceUsageState) ResolveAllDependencies() error {
 
-	// Run every declared dependency via policy and resolve it
+	// Create cache
 	cache := NewEngineCache()
-	eventLog := NewEventLog()
 
-	// TODO: create new event log for every node. attach to different instances. then merge then
+	// Run every declared dependency via policy and resolve it
 	for _, dependencies := range state.Policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
 			// create resolution node
-			node := state.newResolutionNode(d, cache, eventLog)
+			node := state.newResolutionNode(d, cache)
 
 			// resolve usage via applying policy
 			err := state.resolveDependency(node)

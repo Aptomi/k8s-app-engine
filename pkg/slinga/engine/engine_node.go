@@ -22,6 +22,9 @@ type resolutionNode struct {
 	// pointer to event log
 	eventLog *EventLog
 
+	// combined event logs from all resolution nodes in the subtree
+	eventLogsCombined []*EventLog
+
 	// new instance of ServiceUsageData, where resolution data will be stored
 	data *ServiceUsageData
 
@@ -68,7 +71,7 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache, eventLog *EventLog) *resolutionNode {
+func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache) *resolutionNode {
 
 	// combining user labels and dependency labels
 	user := state.userLoader.LoadUserByID(dependency.UserID)
@@ -79,12 +82,14 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 	}
 
 	data := newServiceUsageData()
+	eventLog := NewEventLog()
 	return &resolutionNode{
 		resolved: false,
 
-		state:    state,
-		cache:    cache,
-		eventLog: eventLog,
+		state:             state,
+		cache:             cache,
+		eventLog:          eventLog,
+		eventLogsCombined: []*EventLog{eventLog},
 
 		data: data,
 
@@ -105,12 +110,14 @@ func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache 
 
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
+	eventLog := NewEventLog()
+	node.eventLogsCombined = append(node.eventLogsCombined, eventLog)
 	return &resolutionNode{
 		resolved: false,
 
 		state:    node.state,
 		cache:    node.cache,
-		eventLog: node.eventLog, // TODO: create new instance
+		eventLog: eventLog,
 
 		data: node.data,
 
