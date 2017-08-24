@@ -58,15 +58,14 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	var err error
 
 	// Indicate that we are starting to resolve dependency
-	node.logStartResolvingDependency()
 	node.objectResolved(node.dependency)
+	node.logStartResolvingDependency()
 
 	// Locate the user
 	err = node.checkUserExists()
 	if err != nil {
 		// If consumer is not present, let's just say that this dependency cannot be fulfilled
-		node.logCannotResolveInstance()
-		return nil
+		return node.cannotResolveInstance(err)
 	}
 	node.objectResolved(node.user)
 
@@ -74,8 +73,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.service, err = node.getMatchedService(state.Policy)
 	if err != nil {
 		// Return a policy processing error in case service is not present in policy
-		node.logCannotResolveInstance()
-		return err
+		return node.cannotResolveInstance(err)
 	}
 	node.objectResolved(node.service)
 
@@ -86,15 +84,13 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.context, err = node.getMatchedContext(state.Policy)
 	if err != nil {
 		// Return a policy processing error in case of context resolution failure
-		node.logCannotResolveInstance()
-		return err
+		return node.cannotResolveInstance(err)
 	}
 
 	// If no matching context is found, the dependency cannot be resolved
 	if node.context == nil {
-		// This is considered a normal scenario (context not found), so no error is returned
-		node.logCannotResolveInstance()
-		return nil
+		// This is considered a normal scenario (no matching context found), so no error is returned
+		return node.cannotResolveInstance(nil)
 	}
 	node.objectResolved(node.context)
 
@@ -105,8 +101,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	node.allocationKeysResolved, err = node.resolveAllocationKeys(state.Policy)
 	if err != nil {
 		// Return an error in case of malformed policy or policy processing error
-		node.logCannotResolveInstance()
-		return err
+		return node.cannotResolveInstance(err)
 	}
 
 	// Create service key
@@ -123,8 +118,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 	componentsOrdered, err := node.sortServiceComponents()
 	if err != nil {
 		// Return an error in case of failed component topological sort
-		node.logCannotResolveInstance()
-		return err
+		return node.cannotResolveInstance(err)
 	}
 
 	// Iterate over all service components and resolve them recursively
@@ -146,8 +140,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 		// Calculate and store discovery params
 		err := node.calculateAndStoreDiscoveryParams()
 		if err != nil {
-			node.logCannotResolveInstance()
-			return err
+			return node.cannotResolveInstance(err)
 		}
 
 		// Print information that we are starting to resolve dependency (on code, or on service)
@@ -157,8 +150,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 			// Evaluate code params
 			err := node.calculateAndStoreCodeParams()
 			if err != nil {
-				node.logCannotResolveInstance()
-				return err
+				return node.cannotResolveInstance(err)
 			}
 		} else if node.component.Service != "" {
 			// Create a child node for dependency resolution
@@ -167,15 +159,13 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 			// Resolve dependency on another service recursively
 			err := state.resolveDependency(nodeNext)
 			if err != nil {
-				node.logCannotResolveInstance()
-				return err
+				return node.cannotResolveInstance(err)
 			}
 
 			// If a sub-dependency has not been fulfilled, then exit
 			if !nodeNext.resolved {
 				// This is considered a normal scenario (sub-dependency not fulfilled), so no error is returned
-				node.logCannotResolveInstance()
-				return nil
+				return node.cannotResolveInstance(nil)
 			}
 		}
 

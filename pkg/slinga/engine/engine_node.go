@@ -4,7 +4,6 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	"fmt"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -139,6 +138,46 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 	}
 }
 
+// This method is called by the main engine resolution engine when an error happens
+// If analyzes error type, writes the corresponding messages into the log
+// And makes a decision whether to swallow the error, or fail policy processing
+func (node *resolutionNode) cannotResolveInstance(err error) error {
+	var criticalError *CriticalError
+	var isCriticalError bool = false
+
+	// Log critical error as error in the event log
+	if err != nil {
+		criticalError, isCriticalError = err.(*CriticalError)
+		if isCriticalError && !criticalError.IsLogged() {
+			// Log it
+			node.logError(err)
+
+			// Mark this error as processed. So that when we go up the recursion stack, we don't log it multiple times
+			criticalError.SetLoggedFlag()
+		}
+	}
+
+	// Log that service or component instance cannot be resolved
+	node.logCannotResolveInstance()
+
+	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach event log to
+	if node.serviceKey == nil {
+		// Create service key
+		node.serviceKey = node.createComponentKey(nil)
+
+		// Once instance is figured out, make sure to attach event logs to that instance
+		node.objectResolved(node.serviceKey)
+	}
+
+	// If it's a critical error, return it
+	if isCriticalError {
+		return err
+	}
+
+	// Otherwise, tell engine to swallow it
+	return nil
+}
+
 // As the resolution goes on, this method is called when objects become resolved and available in the context
 // Right now it gets called for as the following get resolved:
 // - dependency
@@ -153,7 +192,7 @@ func (node *resolutionNode) objectResolved(object interface{}) {
 // Helper to check that user exists
 func (node *resolutionNode) checkUserExists() error {
 	if node.user == nil {
-		return fmt.Errorf("Dependency refers to non-existing user: " + node.dependency.UserID)
+		return node.errorUserDoesNotExist()
 	}
 	return nil
 }
@@ -163,8 +202,7 @@ func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) (*Service
 	service := policy.Services[node.serviceName]
 	if service == nil {
 		// This is considered a malformed policy, so let's return an error
-		node.logServiceNotFoundError(node.serviceName)
-		return nil, fmt.Errorf("Service not found: %s", node.serviceName)
+		return nil, node.errorServiceDoesNotExist()
 	}
 	node.logServiceFound(service)
 	return service, nil
@@ -183,8 +221,7 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 		matched, err := context.Matches(node.getContextualDataForExpression(), node.cache.expressionCache)
 		if err != nil {
 			// Propagate error up
-			node.logTestedContextCriteriaError(context, err)
-			return nil, err
+			return nil, node.errorWhenTestingContext(context, err)
 		}
 		node.logTestedContextCriteria(context, matched)
 
@@ -197,15 +234,13 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 			cluster, err := getCluster(policy, labels)
 			if err != nil {
 				// Propagate error up
-				node.logTestedGlobalRuleViolationsError(context, labels, err)
-				return nil, err
+				return nil, node.errorGettingClusterForGlobalRules(context, labels, err)
 			}
 
-			// Check for rule voilations
+			// Check for rule violations
 			hasViolations, err := node.hasGlobalRuleViolations(policy, context, labels, cluster)
 			if err != nil {
-				// Propagate error up
-				node.logTestedGlobalRuleViolationsError(context, labels, err)
+				// Propagate error up. Don't wrap this error into anything else. It's already good
 				return nil, err
 			}
 			node.logTestedGlobalRuleViolations(context, labels, !hasViolations)
@@ -236,21 +271,17 @@ func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]st
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
 	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
 	if err != nil {
-		node.logResolvingAllocationKeysError(err)
-		return nil, err
+		return nil, node.errorWhenResolvingAllocationKeys(err)
 	}
 
-	if len(result) > 0 {
-		node.logAllocationKeysSuccessfullyResolved(result)
-	}
+	node.logAllocationKeysSuccessfullyResolved(result)
 	return result, nil
 }
 
 func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error) {
 	result, err := node.service.GetComponentsSortedTopologically()
 	if err != nil {
-		node.logFailedTopologicalSort(err)
-		return result, err
+		return nil, node.errorWhenDoingTopologicalSort(err)
 	}
 	return result, nil
 }
@@ -281,8 +312,7 @@ func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, con
 		for _, rule := range rules {
 			matched, err := rule.FilterServices.Match(labels, node.user, cluster, node.cache.expressionCache)
 			if err != nil {
-				node.logTestedGlobalRuleMatchError(context, rule, labels, err)
-				return true, err
+				return true, node.errorWhenTestingGlobalRule(context, rule, labels, err)
 			}
 
 			node.logTestedGlobalRuleMatch(context, rule, labels, matched)
@@ -303,14 +333,12 @@ func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, con
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
 	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
 	if err != nil {
-		// TODO: write into event log
-		return err
+		return node.errorWhenProcessingCodeParams(err)
 	}
 
 	err = node.data.recordCodeParams(node.componentKey, componentCodeParams)
 	if err != nil {
-		// TODO: write into event log
-		return err
+		return node.errorWhenProcessingCodeParams(err)
 	}
 
 	// TODO: write about parameters which got updated
@@ -321,14 +349,12 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
 	if err != nil {
-		// TODO: write into event log
-		return err
+		return node.errorWhenProcessingDiscoveryParams(err)
 	}
 
 	err = node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 	if err != nil {
-		// TODO: write into event log
-		return err
+		return node.errorWhenProcessingDiscoveryParams(err)
 	}
 
 	// TODO: write about parameters which got updated
