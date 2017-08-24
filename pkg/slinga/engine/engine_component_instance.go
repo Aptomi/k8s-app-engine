@@ -5,6 +5,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"time"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	"fmt"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
@@ -71,7 +72,7 @@ func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) 
 	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
 		return errors.NewErrorWithDetails(
-			"Invalid policy. Arrived to the same component instance with different code parameters",
+			fmt.Sprintf("Invalid policy. Conflicting code parameters for component instance: %s", instance.Key.GetKey()),
 			errors.Details{
 				"instance":             instance.Key,
 				"code_params_existing": instance.CalculatedCodeParams,
@@ -90,7 +91,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		return errors.NewErrorWithDetails(
-			"Invalid policy. Arrived to the same component instance with different discovery parameters",
+			fmt.Sprintf("Invalid policy. Conflicting discovery parameters for component instance: %s", instance.Key.GetKey()),
 			errors.Details{
 				"instance":                  instance.Key,
 				"discovery_params_existing": instance.CalculatedDiscovery,

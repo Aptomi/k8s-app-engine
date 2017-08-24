@@ -2,6 +2,7 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
 /*
@@ -17,35 +18,46 @@ func (state *ServiceUsageState) ResolveAllDependencies() error {
 	// Run every declared dependency via policy and resolve it
 	for _, dependencies := range state.Policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
-			// create resolution node
-			node := state.newResolutionNode(d, cache)
-
 			// resolve usage via applying policy
-			err := state.resolveDependency(node)
+			err := state.resolveDependency(d, cache)
 
 			// see if there is an error
 			if err != nil {
 				return err
 			}
-
-			// record and put usages in the right place
-			d.Resolved = node.resolved
-			d.ServiceKey = node.serviceKey.GetKey()
-			if node.resolved {
-				err := state.ResolvedData.appendData(node.data)
-				if err != nil {
-					// TODO: log error
-					return err
-				}
-			} else {
-				err := state.UnresolvedData.appendData(node.data)
-				if err != nil {
-					// TODO: log error
-					return err
-				}
-			}
 		}
 	}
+	return nil
+}
+
+// Resolves a single dependency and puts resolution data into the overall state of the world
+func (state *ServiceUsageState) resolveDependency(d *language.Dependency, cache *EngineCache) error {
+	// create resolution node
+	node := state.newResolutionNode(d, cache)
+
+	// recursively resolve everything
+	err := state.resolveNode(node)
+	if err != nil {
+		return err
+	}
+
+	// add dependency resolution data to the rest of the records
+	d.Resolved = node.resolved
+	d.ServiceKey = node.serviceKey.GetKey()
+
+	var data *ServiceUsageData
+	if node.resolved {
+		data = state.ResolvedData
+	} else {
+		data = state.UnresolvedData
+	}
+
+	err = data.appendData(node.data)
+	if err != nil {
+		node.logError(err)
+		return err
+	}
+
 	return nil
 }
 
@@ -53,7 +65,7 @@ func (state *ServiceUsageState) ResolveAllDependencies() error {
 // Returns error only if there is an issue with the policy (e.g. it's malformed)
 // Returns nil if there is no error (it may be that nothing was still matched though)
 // If you want to check for successful resolution, use node.resolved flag
-func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
+func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 	// Error variable that we will be reusing
 	var err error
 
@@ -157,7 +169,7 @@ func (state *ServiceUsageState) resolveDependency(node *resolutionNode) error {
 			nodeNext := node.createChildNode()
 
 			// Resolve dependency on another service recursively
-			err := state.resolveDependency(nodeNext)
+			err := state.resolveNode(nodeNext)
 			if err != nil {
 				return node.cannotResolveInstance(err)
 			}
