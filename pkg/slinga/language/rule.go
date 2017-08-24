@@ -156,7 +156,7 @@ func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster
 
 // NewGlobalRules creates and initializes a new empty list of global rules
 func NewGlobalRules() *GlobalRules {
-	return &GlobalRules{Rules: make(map[string][]*Rule, 0)}
+	return &GlobalRules{Rules: make(map[string][]*Rule)}
 }
 
 func (globalRules *GlobalRules) addRule(rule *Rule) {

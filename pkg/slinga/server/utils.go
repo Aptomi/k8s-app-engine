@@ -6,6 +6,7 @@ import (
 	"net/http"
 	pathlib "path"
 	"strings"
+	"io"
 )
 
 // todo enforce login/logout to work only through POST
@@ -68,7 +69,7 @@ func handleAutoRedirect(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func writeJSON(w http.ResponseWriter, obj interface{}) {
+func writeJSON(w io.Writer, obj interface{}) {
 	res, err := json.Marshal(obj)
 	if err != nil {
 		fmt.Fprintf(w, "Unable to serialize object: %v", err)

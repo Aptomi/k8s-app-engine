@@ -308,7 +308,7 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 
 	// TODO: write about parameters which got updated
 
-	return err
+	return nil
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
@@ -332,7 +332,7 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 		node.discoveryTreeNode.GetNestedMap(node.component.Name)[k] = v
 	}
 
-	return err
+	return nil
 }
 
 // Stores calculated labels for component instance

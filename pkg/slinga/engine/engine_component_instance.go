@@ -147,8 +147,7 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	instance.addLabels(ops.CalculatedLabels)
 
 	// Combine code params and discovery params for
-	var err error
-	err = instance.addDiscoveryParams(ops.CalculatedDiscovery)
+	var err = instance.addDiscoveryParams(ops.CalculatedDiscovery)
 	if err != nil {
 		return err
 	}

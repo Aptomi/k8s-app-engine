@@ -104,6 +104,8 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 	if len(r.Services) > 0 {
 		r.Views = append(r.Views, &item{"service", "Service Owner"})
 	}
+
+	// TODO: this will have to be changed when we implement roles & ACLs
 	if state.GetUserLoader().LoadUserByID(userID).Labels["global_ops"] == "true" {
 		r.Views = append(r.Views, &item{"globalops", "Global IT/Ops"})
 	}

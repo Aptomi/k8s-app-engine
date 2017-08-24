@@ -36,7 +36,7 @@ func (n serviceNode) getLabel() string {
 func (n serviceNode) getEdgeLabel(dst graphNode) string {
 	// if it's an edge from service to service instance, write context information on it
 	if dstInst, ok := dst.(serviceInstanceNode); ok {
-		return fmt.Sprintf("%s", dstInst.contextWithKeys)
+		return dstInst.contextWithKeys
 	}
 	return ""
 }

@@ -208,10 +208,7 @@ func (exec HelmCodeExecutor) Install() error {
 	}).Info("Installing Helm release")
 
 	_, err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
@@ -236,11 +233,7 @@ func (exec HelmCodeExecutor) Update() error {
 	}).Info("Updating Helm release")
 
 	_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func getValidChartPath(chartName string) string {
@@ -265,11 +258,8 @@ func (exec HelmCodeExecutor) Destroy() error {
 		"release": releaseName,
 	}).Info("Deleting Helm release")
 
-	if _, err := helmClient.DeleteRelease(releaseName, helm.DeletePurge(true)); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := helmClient.DeleteRelease(releaseName, helm.DeletePurge(true))
+	return err
 }
 
 // Endpoints returns map from port type to url for all services of the current chart

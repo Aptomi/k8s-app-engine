@@ -1,7 +1,6 @@
 package visibility
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -12,8 +11,7 @@ func (view SummaryView) getDependencyStats(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
-	return fmt.Sprintf("%s", runningTime)
+	return NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
 }
 
 func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) string {
@@ -54,8 +52,7 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 }
 
 func (view SummaryView) getInstanceStats(instance *engine.ComponentInstance) string {
-	runningTime := NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].GetRunningTime()).Humanize()
-	return fmt.Sprintf("%s", runningTime)
+	return NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].GetRunningTime()).Humanize()
 }
 
 func (view SummaryView) getResolvedClusterNameByInst(instance *engine.ComponentInstance) string {

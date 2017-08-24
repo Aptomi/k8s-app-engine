@@ -21,10 +21,7 @@ func isUnauthorized(r *http.Request) bool {
 		return true
 	}
 	user := NewAptomiUserLoader().LoadUserByID(userID)
-	if user == nil {
-		return true
-	}
-	return false
+	return user == nil
 }
 
 func requireAuth(handler http.HandlerFunc) http.HandlerFunc {

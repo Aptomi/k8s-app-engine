@@ -107,7 +107,8 @@ func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
 	verifyDiff(t, diff, true, 8, 0, 0, 8, 0)
 
 	// Apply diff in noop mode
-	diff.Apply(true)
+	err := diff.Apply(true)
+	assert.Nil(t, err, "Policy should be applied successfully in noop mode")
 }
 
 func TestEngineComponentUpdateAndTimes(t *testing.T) {
@@ -160,7 +161,9 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	// Update user label, re-evaluate and see that component instance has changed
 	userLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
 	uUpdatedDependency := NewServiceUsageState(policyNext, userLoader)
-	uUpdatedDependency.ResolveAllDependencies()
+	err := uUpdatedDependency.ResolveAllDependencies()
+	assert.Nil(t, err, "All dependencies should be resolved successfully")
+
 	diff := uUpdatedDependency.CalculateDifference(&uNewDependency)
 
 	// Check that update has been performed

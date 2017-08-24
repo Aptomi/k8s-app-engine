@@ -40,7 +40,7 @@ func LoadObjectFromFile(fileName string, data interface{}) interface{} {
 			"error": e,
 		}).Panic("Unable to read file")
 	}
-	e = yaml.Unmarshal([]byte(dat), data)
+	e = yaml.Unmarshal(dat, data)
 	if e != nil {
 		Debug.WithFields(log.Fields{
 			"file":  fileName,
@@ -74,7 +74,7 @@ func LoadObjectFromFileDefaultEmpty(fileName string, data interface{}) interface
 		}).Panic("Unable to read file")
 	}
 
-	e = yaml.Unmarshal([]byte(dat), data)
+	e = yaml.Unmarshal(dat, data)
 	if e != nil {
 		Debug.WithFields(log.Fields{
 			"file":  fileName,

@@ -13,7 +13,7 @@ type ObjectInfo struct {
 
 func NewObjectCatalog() *ObjectCatalog {
 	return &ObjectCatalog{
-		make(map[Kind]*ObjectInfo, 0),
+		make(map[Kind]*ObjectInfo),
 	}
 }
 

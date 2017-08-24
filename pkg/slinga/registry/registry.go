@@ -9,6 +9,7 @@ import (
 )
 
 type Registry struct {
+	// TODO: looks like codec field is not used?
 	codec   MarshalUnmarshaler
 	store   ObjectStore
 	catalog *ObjectCatalog

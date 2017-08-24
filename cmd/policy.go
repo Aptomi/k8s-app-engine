@@ -66,7 +66,7 @@ var policyCmdApply = &cobra.Command{
 
 		objects, err := store.LoadObjects()
 		if err != nil {
-			log.Panicf("Error while loading Policy objects: ", err)
+			log.Panicf("Error while loading Policy objects: %v", err)
 		}
 
 		for _, object := range objects {
@@ -74,7 +74,7 @@ var policyCmdApply = &cobra.Command{
 		}
 
 		if err != nil {
-			log.Panicf("Cannot load policy from %s with error: %s", policyDir, err)
+			log.Panicf("Cannot load policy from %s with error: %v", policyDir, err)
 		}
 
 		nextUsageState := NewServiceUsageState(policy, userLoader)

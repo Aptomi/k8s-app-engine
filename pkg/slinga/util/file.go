@@ -63,6 +63,9 @@ func CopyDirectory(srcDir string, dstDir string) (err error) {
 
 	// get all entries in a directory
 	entries, err := ioutil.ReadDir(srcDir)
+	if err != nil {
+		return err
+	}
 	for _, entry := range entries {
 		sfp := filepath.Join(srcDir, entry.Name())
 		dfp := filepath.Join(dstDir, entry.Name())

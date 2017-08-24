@@ -119,7 +119,7 @@ func (node *resolutionNode) logTestedGlobalRuleViolationsError(context *Context,
 		"service": node.service,
 		"context": context,
 		"error":   err,
-	}).Errorf("Error while checking global rule violations found for service: '%s', context '%s'. Error: %s", node.service.Name, context.Name, string(err.Error()))
+	}).Errorf("Error while checking global rule violations found for service: '%s', context '%s'. Error: %s", node.service.Name, context.Name, err.Error())
 }
 
 func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rule, labelSet LabelSet, match bool) {

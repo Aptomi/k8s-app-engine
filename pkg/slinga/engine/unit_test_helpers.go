@@ -26,6 +26,7 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace) ServiceUsageState {
 	return usageState
 }
 
+// TODO: this has to be changed to use the new serialization code instead of serializing to YAML
 func emulateSaveAndLoadState(state ServiceUsageState) ServiceUsageState {
 	// Emulate saving and loading again
 	savedObjectAsString := yaml.SerializeObject(state)
