@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"reflect"
 	"strconv"
@@ -91,7 +90,7 @@ func (src NestedParameterMap) Diff(dst NestedParameterMap) string {
 	return diff
 }
 
-// DeepEqual prints a nested parameter map
-func (src NestedParameterMap) Print() {
-	fmt.Println(yaml.SerializeObject(src))
+// ToString returns a string representation of a nested parameter map
+func (src NestedParameterMap) ToString() string {
+	return yaml.SerializeObject(src)
 }

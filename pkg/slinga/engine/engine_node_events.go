@@ -5,6 +5,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	"strings"
 )
 
 /*
@@ -207,38 +208,47 @@ func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rul
 		"rule":    rule,
 		"labels":  labelSet,
 		"match":   match,
-	}).Debugf("Testing if global rule '%s' applies to service '%s', context '%s'. Result: ", rule.Name, node.service.Name, context.Name, match)
+	}).Debugf("Testing if global rule '%s' applies to service '%s', context '%s'. Result: %t", rule.Name, node.service.Name, context.Name, match)
 }
 
 func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys []string) {
 	if len(resolvedKeys) > 0 {
 		node.eventLog.WithFields(Fields{
-			"service": node.service.Name,
-			"context": node.context.Name,
-			"keys":    node.context.Allocation.Keys,
+			"keys":         node.context.Allocation.Keys,
+			"keysResolved": resolvedKeys,
 		}).Infof("Allocation keys successfully resolved for service '%s', context '%s': %s", node.service.Name, node.context.Name, resolvedKeys)
 	}
 }
 
 func (node *resolutionNode) logResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
-		node.eventLog.WithFields(Fields{
-			"service":   node.service.Name,
-			"component": node.component.Name,
-			"context":   node.context.Name,
-		}).Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
+		node.eventLog.WithFields(Fields{}).Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
 	} else if node.component.Service != "" {
-		node.eventLog.WithFields(Fields{
-			"service":   node.service.Name,
-			"component": node.component.Name,
-			"context":   node.context.Name,
-			"dependsOn": node.component.Service,
-		}).Infof("Processing dependency on another service: %s", node.component.Service)
+		node.eventLog.WithFields(Fields{}).Infof("Processing dependency on another service: %s", node.component.Service)
 	} else {
+		node.eventLog.WithFields(Fields{}).Warningf("Skipping unknown component (not code and not service): %s", node.component.Name)
+	}
+}
+
+func (node *resolutionNode) logComponentCodeParams() {
+	paramsTemplate := node.component.Code.Params
+	params := node.data.getComponentInstanceEntry(node.componentKey).CalculatedCodeParams
+	diff := strings.TrimSpace(paramsTemplate.Diff(params))
+	if len(diff) > 0 {
 		node.eventLog.WithFields(Fields{
-			"service":   node.service.Name,
-			"component": node.component.Name,
-		}).Warningf("Skipping unknown component (not code and not service): %s", node.component.Name)
+			"params": diff,
+		}).Debugf("Code params resolved for service '%s', context '%s', component '%s'", node.service.Name, node.context.Name, node.component.Name)
+	}
+}
+
+func (node *resolutionNode) logComponentDiscoveryParams() {
+	paramsTemplate := node.component.Discovery
+	params := node.data.getComponentInstanceEntry(node.componentKey).CalculatedDiscovery
+	diff := strings.TrimSpace(paramsTemplate.Diff(params))
+	if len(diff) > 0 {
+		node.eventLog.WithFields(Fields{
+			"params": diff,
+		}).Debugf("Discovery params resolved for service '%s', context '%s', component '%s'", node.service.Name, node.context.Name, node.component.Name)
 	}
 }
 

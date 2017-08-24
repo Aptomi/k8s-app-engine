@@ -14,8 +14,10 @@ type EventLog struct {
 
 // NewEventLog creates a new instance of event log
 func NewEventLog() *EventLog {
+	logger := logrus.New()
+	logger.Level = logrus.DebugLevel
 	return &EventLog{
-		Logger: logrus.New(),
+		Logger: logger,
 	}
 }
 

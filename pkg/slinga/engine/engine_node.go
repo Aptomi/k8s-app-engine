@@ -341,7 +341,7 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 		return node.errorWhenProcessingCodeParams(err)
 	}
 
-	// TODO: write about parameters which got updated
+	node.logComponentCodeParams()
 
 	return nil
 }
@@ -357,7 +357,7 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}
 
-	// TODO: write about parameters which got updated
+	node.logComponentDiscoveryParams()
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
 	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey.GetKey())
@@ -370,7 +370,6 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 
 // Stores calculated labels for component instance
 func (node *resolutionNode) recordLabels(cik *ComponentInstanceKey, labels LabelSet) {
-	// TODO: write into event log
 	node.data.recordLabels(cik, labels)
 }
 

@@ -59,6 +59,8 @@ Items to complete:
 
 11. Cross-service cycle in engine
 
+12. Secrets being printed to event log left and right. Who should be able to see them, if anyone?
+
 
 Questions:
 1. Shall we consider renaming .User -> .Consumer?
