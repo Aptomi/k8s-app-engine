@@ -35,6 +35,9 @@ func (state *ServiceUsageState) resolveDependency(d *language.Dependency, cache 
 	// create resolution node
 	node := state.newResolutionNode(d, cache)
 
+	// aggregate logs in the end
+	defer state.policyResolutionEventLog.Append(node.eventLog)
+
 	// recursively resolve everything
 	err := state.resolveNode(node)
 	if err != nil {

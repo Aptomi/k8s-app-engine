@@ -5,6 +5,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"time"
 )
 
@@ -22,11 +23,14 @@ type ServiceUsageState struct {
 	// Diff stored as text
 	DiffAsText string
 
-	// resolved usage - stores full information about dependencies which have been successfully resolved
+	// Resolved usage - stores full information about dependencies which have been successfully resolved
 	ResolvedData *ServiceUsageData
 
-	// unresolved usage - stores full information about dependencies which were not resolved
+	// Unresolved usage - stores full information about dependencies which were not resolved
 	UnresolvedData *ServiceUsageData
+
+	// Buffered event log - gets populated during policy resolution
+	policyResolutionEventLog *EventLog
 }
 
 // ServiceUsageData contains all the data that gets resolved for one or more dependencies
@@ -52,11 +56,12 @@ func newServiceUsageData() *ServiceUsageData {
 // NewServiceUsageState creates new empty ServiceUsageState
 func NewServiceUsageState(policy *PolicyNamespace, userLoader UserLoader) ServiceUsageState {
 	return ServiceUsageState{
-		Policy:         policy,
-		userLoader:     userLoader,
-		CreatedOn:      time.Now(),
-		ResolvedData:   newServiceUsageData(),
-		UnresolvedData: newServiceUsageData(),
+		Policy:                   policy,
+		userLoader:               userLoader,
+		CreatedOn:                time.Now(),
+		policyResolutionEventLog: NewEventLog(),
+		ResolvedData:             newServiceUsageData(),
+		UnresolvedData:           newServiceUsageData(),
 	}
 }
 
@@ -166,8 +171,13 @@ func LoadServiceUsageStatesAll(userLoader UserLoader) map[int]ServiceUsageState 
 
 // SaveServiceUsageState saves usage state in a file under Aptomi DB
 func (state ServiceUsageState) SaveServiceUsageState() {
+	// Save usage state
 	fileName := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypePolicyResolution, "db.yaml")
 	yaml.SaveObjectToFile(fileName, state)
+
+	// Save log
+	hook := &HookBoltDB{}
+	state.policyResolutionEventLog.Save(hook)
 }
 
 // Loads usage state from file

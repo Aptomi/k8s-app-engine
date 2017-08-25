@@ -79,7 +79,6 @@ var policyCmdApply = &cobra.Command{
 
 		nextUsageState := NewServiceUsageState(policy, userLoader)
 		err = nextUsageState.ResolveAllDependencies()
-
 		if err != nil {
 			log.Panicf("Cannot resolve usage: %v", err)
 		}
