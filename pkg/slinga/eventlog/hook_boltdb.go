@@ -18,6 +18,7 @@ func (buf *HookBoltDB) Fire(e *logrus.Entry) error {
 	delete(e.Data, "attachedTo")
 
 	// TODO: store this entry into bolt
+	// attachedToObjects is a slice with attached objects (i.e. dependency, user, service, context, serviceKey)
 	fmt.Printf("[%s] %s %p %p\n", e.Level, e.Message, e.Data, attachedToObjects)
 	return nil
 }
