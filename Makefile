@@ -53,11 +53,11 @@ smoke: alltest install clean-run-noop
 
 .PHONY: build
 build:
-	CGO_ENABLED=0 go build ${LDFLAGS} -i -o aptomi
+	CGO_ENABLED=0 go build ${LDFLAGS} -v -i -o aptomi github.com/Aptomi/aptomi/cmd/aptomi
 
 .PHONY: install
 install:
-	go install ${LDFLAGS}
+	CGO_ENABLED=0 go install -v ${LDFLAGS} github.com/Aptomi/aptomi/cmd/aptomi
 
 .PHONY: fmt
 fmt:
@@ -65,7 +65,6 @@ fmt:
 
 .PHONY: vet
 vet:
-	go tool vet -all -shadow main.go || echo "\nSome vet checks failed\n"
 	go tool vet -all -shadow ./cmd ./pkg || echo "\nSome vet checks failed\n"
 
 .PHONY: lint
