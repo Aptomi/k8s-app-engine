@@ -1,4 +1,4 @@
-./aptomi
+/aptomi
 vendor
 db*.yaml
 graph*.png
