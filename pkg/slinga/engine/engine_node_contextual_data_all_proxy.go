@@ -2,8 +2,8 @@ package engine
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
+	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // How service is visible from the policy language

@@ -1,8 +1,8 @@
 package eventlog
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 )
 

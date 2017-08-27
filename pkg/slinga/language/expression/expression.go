@@ -1,9 +1,9 @@
 package expression
 
 import (
-	"github.com/ralekseenkov/govaluate"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	"github.com/ralekseenkov/govaluate"
 )
 
 type Expression struct {
@@ -35,7 +35,7 @@ func (expression *Expression) EvaluateAsBool(params *ExpressionParameters) (bool
 			fmt.Sprintf("Unable to evaluate expression '%s': %s", expression.expressionStr, err.Error()),
 			errors.Details{
 				"expression": expression.expressionStr,
-				"params": params,
+				"params":     params,
 			},
 		)
 	}
@@ -47,7 +47,7 @@ func (expression *Expression) EvaluateAsBool(params *ExpressionParameters) (bool
 			fmt.Sprintf("Expression '%s' didn't evaluate to boolean", expression.expressionStr),
 			errors.Details{
 				"expression": expression.expressionStr,
-				"params": params,
+				"params":     params,
 			},
 		)
 	}

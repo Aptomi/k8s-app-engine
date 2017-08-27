@@ -1,17 +1,17 @@
 package engine
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"strings"
 )
 
 /*
 	Non-critical errors. If one of them occurs, the corresponding dependency will not be fulfilled
 	and engine will move on to processing other dependencies
- */
+*/
 
 func (node *resolutionNode) errorUserDoesNotExist() error {
 	return errors.NewErrorWithDetails(
@@ -23,7 +23,7 @@ func (node *resolutionNode) errorUserDoesNotExist() error {
 /*
 	Critical errors. If one of them occurs, engine will report an error and fail policy processing
 	all together
- */
+*/
 
 func (node *resolutionNode) errorServiceDoesNotExist() error {
 	err := errors.NewErrorWithDetails(
@@ -120,7 +120,7 @@ func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) erro
 
 /*
 	Event log - report error
- */
+*/
 
 func (node *resolutionNode) logError(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
@@ -133,7 +133,7 @@ func (node *resolutionNode) logError(err error) {
 
 /*
 	Event log - report debug/info/warning messages
- */
+*/
 
 func (node *resolutionNode) logStartResolvingDependency() {
 	if node.depth == 0 {

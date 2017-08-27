@@ -1,9 +1,9 @@
 package engine
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 )
 
 // Endpoints returns map from key to map from port type to url for all services

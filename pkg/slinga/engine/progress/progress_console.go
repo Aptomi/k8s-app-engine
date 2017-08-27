@@ -3,9 +3,9 @@ package progress
 import (
 	"fmt"
 	"github.com/gosuri/uiprogress"
-	"time"
-	"os"
 	"io"
+	"os"
+	"time"
 )
 
 type ProgressConsole struct {

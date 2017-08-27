@@ -1,9 +1,9 @@
 package engine
 
 import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency

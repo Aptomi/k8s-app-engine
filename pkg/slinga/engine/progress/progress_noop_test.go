@@ -1,10 +1,10 @@
 package progress
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"math"
 	"testing"
-	"bytes"
 )
 
 func makeProgressIndicators() []ProgressIndicator {

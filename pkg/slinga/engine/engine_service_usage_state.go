@@ -2,10 +2,10 @@ package engine
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"time"
 )
 

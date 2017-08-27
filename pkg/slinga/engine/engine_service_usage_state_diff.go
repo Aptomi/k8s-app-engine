@@ -3,10 +3,10 @@ package engine
 import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
 	log "github.com/Sirupsen/logrus"
 	"time"
 )

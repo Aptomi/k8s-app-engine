@@ -1,11 +1,11 @@
 package engine
 
 import (
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"time"
-	"github.com/Aptomi/aptomi/pkg/slinga/errors"
-	"fmt"
 )
 
 // ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels

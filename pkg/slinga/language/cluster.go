@@ -13,8 +13,8 @@ var ClusterObject = &ObjectInfo{
 type Cluster struct {
 	Metadata
 
-	Type     string
-	Labels   map[string]string
+	Type   string
+	Labels map[string]string
 	Config struct {
 		KubeContext     string
 		TillerNamespace string

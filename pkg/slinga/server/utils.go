@@ -3,10 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	pathlib "path"
 	"strings"
-	"io"
 )
 
 // todo enforce login/logout to work only through POST

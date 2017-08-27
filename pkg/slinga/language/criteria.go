@@ -1,8 +1,8 @@
 package language
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 )
 
 // Criteria defines a structure with require-all, require-any and require-none syntax
@@ -25,9 +25,9 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache 
 		if err != nil {
 			// propagate expression error up, if happened
 			return false, errors.NewErrorWithDetails(
-				"Can't evaluate 'require-all' in criteria: " + err.Error(),
+				"Can't evaluate 'require-all' in criteria: "+err.Error(),
 				errors.Details{
-					"criteria": criteria,
+					"criteria":   criteria,
 					"expression": exprShouldBeTrue,
 				},
 			)
@@ -43,9 +43,9 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache 
 		if err != nil {
 			// propagate expression error up, if happened
 			return false, errors.NewErrorWithDetails(
-				"Can't evaluate 'require-node' in criteria: " + err.Error(),
+				"Can't evaluate 'require-node' in criteria: "+err.Error(),
 				errors.Details{
-					"criteria": criteria,
+					"criteria":   criteria,
 					"expression": exprShouldBeFalse,
 				},
 			)
@@ -62,9 +62,9 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache 
 			if err != nil {
 				// propagate expression error up, if happened
 				return false, errors.NewErrorWithDetails(
-					"Can't evaluate 'require-any' in criteria: " + err.Error(),
+					"Can't evaluate 'require-any' in criteria: "+err.Error(),
 					errors.Details{
-						"criteria": criteria,
+						"criteria":   criteria,
 						"expression": exprShouldBeTrue,
 					},
 				)

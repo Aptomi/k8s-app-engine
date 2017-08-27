@@ -3,9 +3,9 @@ package template
 import (
 	"bytes"
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	"strings"
 	t "text/template"
-	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 )
 
 type Template struct {
@@ -34,7 +34,7 @@ func (template *Template) Evaluate(params *TemplateParameters) (string, error) {
 			fmt.Sprintf("Unable to evaluate template '%s': %s", template.templateStr, err.Error()),
 			errors.Details{
 				"template": template.templateStr,
-				"params": params,
+				"params":   params,
 			},
 		)
 	}
@@ -46,7 +46,7 @@ func (template *Template) Evaluate(params *TemplateParameters) (string, error) {
 			fmt.Sprintf("Unable to evaluate template '%s': <no value>", template.templateStr),
 			errors.Details{
 				"template": template.templateStr,
-				"params": params,
+				"params":   params,
 			},
 		)
 	}

@@ -1,8 +1,8 @@
 package eventlog
 
 import (
-	"github.com/Sirupsen/logrus"
 	"fmt"
+	"github.com/Sirupsen/logrus"
 )
 
 type HookStdout struct {
