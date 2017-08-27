@@ -1,7 +1,7 @@
-VERSION=$(shell git describe --tags --long --dirty)
-GIT_COMMIT=$(shell git log --format="%h" -n 1)
-BUILD_TIME=$(shell date +%FT%T%z)
-LDFLAGS=-ldflags "-X github.com/Aptomi/aptomi/cmd.Version=${VERSION} -X github.com/Aptomi/aptomi/cmd.GitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/cmd.BuildTime=${BUILD_TIME}"
+GIT_VERSION=$(shell git describe --tags --long --dirty)
+GIT_COMMIT=$(shell git rev-parse HEAD)
+BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+LDFLAGS=-ldflags "-X github.com/Aptomi/aptomi/pkg/slinga/version.gitVersion=${GIT_VERSION} -X github.com/Aptomi/aptomi/pkg/slinga/version.gitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/pkg/slinga/version.buildDate=${BUILD_DATE}"
 
 .PHONY: default
 default: clean build test
