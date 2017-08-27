@@ -8,12 +8,8 @@ import (
 	"time"
 )
 
-func loadUnitTestsPolicy() *PolicyNamespace {
-	return LoadTestPolicy()
-}
-
 func loadPolicyAndResolve(t *testing.T) ServiceUsageState {
-	return resolvePolicy(t, loadUnitTestsPolicy())
+	return resolvePolicy(t, LoadUnitTestsPolicy())
 }
 
 func resolvePolicy(t *testing.T, policy *PolicyNamespace) ServiceUsageState {

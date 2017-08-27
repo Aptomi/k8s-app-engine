@@ -89,7 +89,7 @@ func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
 	usageStatePrev = emulateSaveAndLoadState(usageStatePrev)
 
 	// Add another dependency and resolve usage state next
-	policyNext := loadUnitTestsPolicy()
+	policyNext := LoadUnitTestsPolicy()
 	policyNext.Dependencies.AddDependency(
 		&Dependency{
 			Metadata: Metadata{
@@ -115,7 +115,7 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	var key string
 
 	// Create initial empty state (do not resolve any dependencies)
-	policyPrev := loadUnitTestsPolicy()
+	policyPrev := LoadUnitTestsPolicy()
 	userLoader := NewUserLoaderFromDir("../testdata/unittests")
 	uEmpty := NewServiceUsageState(policyPrev, userLoader)
 
@@ -136,7 +136,7 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	time.Sleep(25 * time.Millisecond)
 
 	// Add another dependency, resolve, calculate difference against prev state, emulate save/load
-	policyNext := loadUnitTestsPolicy()
+	policyNext := LoadUnitTestsPolicy()
 	policyNext.Dependencies.AddDependency(
 		&Dependency{
 			Metadata: Metadata{

@@ -14,7 +14,7 @@ func toStringArray(components []*ServiceComponent) []string {
 }
 
 func checkTopologicalSort(t *testing.T, serviceName string, expectedComponents []string, expectedError bool) {
-	policy := loadUnitTestsPolicy()
+	policy := LoadUnitTestsPolicy()
 	service := policy.Services[serviceName]
 	componentsSorted, err := service.GetComponentsSortedTopologically()
 	componentsSortedStr := toStringArray(componentsSorted)

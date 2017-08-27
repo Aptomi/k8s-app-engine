@@ -6,7 +6,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/object/store/file"
 )
 
-func LoadTestPolicy() *PolicyNamespace {
+func LoadUnitTestsPolicy() *PolicyNamespace {
 	catalog := NewObjectCatalog()
 	catalog.Add(ServiceObject)
 	catalog.Add(ContextObject)
