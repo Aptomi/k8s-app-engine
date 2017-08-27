@@ -7,8 +7,8 @@ import (
 )
 
 var ServiceObject = &ObjectInfo{
-	Kind("service"),
-	func() BaseObject { return &Service{} },
+	Kind:        Kind("service"),
+	Constructor: func() BaseObject { return &Service{} },
 }
 
 // Service defines individual service

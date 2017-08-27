@@ -11,8 +11,8 @@ import (
 */
 
 var DependencyObject = &ObjectInfo{
-	Kind("dependency"),
-	func() BaseObject { return &Dependency{} },
+	Kind:        Kind("dependency"),
+	Constructor: func() BaseObject { return &Dependency{} },
 }
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)

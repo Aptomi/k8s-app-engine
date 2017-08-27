@@ -7,8 +7,8 @@ import (
 )
 
 var ContextObject = &ObjectInfo{
-	Kind("context"),
-	func() BaseObject { return &Context{} },
+	Kind:        Kind("context"),
+	Constructor: func() BaseObject { return &Context{} },
 }
 
 // Context for a given service

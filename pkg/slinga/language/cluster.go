@@ -5,8 +5,8 @@ import (
 )
 
 var ClusterObject = &ObjectInfo{
-	Kind("cluster"),
-	func() BaseObject { return &Cluster{} },
+	Kind:        Kind("cluster"),
+	Constructor: func() BaseObject { return &Cluster{} },
 }
 
 // Cluster defines individual K8s cluster and way to access it

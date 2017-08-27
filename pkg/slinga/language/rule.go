@@ -25,8 +25,8 @@ type Action struct {
 }
 
 var RuleObject = &ObjectInfo{
-	Kind("rule"),
-	func() BaseObject { return &Rule{} },
+	Kind:        Kind("rule"),
+	Constructor: func() BaseObject { return &Rule{} },
 }
 
 // Rule is a global rule

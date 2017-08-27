@@ -37,39 +37,39 @@ var (
 	}
 	CodecTestObjects = []BaseObject{
 		&CodecTestObject1{
-			Metadata{
+			Metadata: Metadata{
 				"t1",
 				"uid-1",
 				1,
 				"name-1",
 				"namespace-1",
 			},
-			"str-1",
-			1,
+			Str:    "str-1",
+			Number: 1,
 		},
 		&CodecTestObject1{
-			Metadata{
+			Metadata: Metadata{
 				"t1",
 				"uid-2",
 				2,
 				"name-2",
 				"namespace-1",
 			},
-			"str-2",
-			2,
+			Str:    "str-2",
+			Number: 2,
 		},
 		&CodecTestObject2{
-			Metadata{
+			Metadata: Metadata{
 				"t2",
 				"uid-3",
 				3,
 				"name-3",
 				"namespace-2",
 			},
-			CodecTestNestedObject{
+			Nested: CodecTestNestedObject{
 				[]string{"1", "2", "3"},
 			},
-			map[Kind][]Key{
+			Map: map[Kind][]Key{
 				Kind("k-1"): {
 					KeyFromParts("uid-1", 1),
 					KeyFromParts("uid-2", 2),
@@ -81,17 +81,17 @@ var (
 			},
 		},
 		&CodecTestObject2{
-			Metadata{
+			Metadata: Metadata{
 				"t2",
 				"uid-4",
 				4,
 				"name-4",
 				"namespace-2",
 			},
-			CodecTestNestedObject{
+			Nested: CodecTestNestedObject{
 				[]string{"4", "5", "6"},
 			},
-			map[Kind][]Key{
+			Map: map[Kind][]Key{
 				Kind("k-3"): {
 					KeyFromParts("uid-5", 1),
 					KeyFromParts("uid-6", 2),

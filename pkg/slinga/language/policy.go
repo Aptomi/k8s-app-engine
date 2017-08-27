@@ -10,8 +10,8 @@ import (
 */
 
 var PolicyNamespaceDataObject = &ObjectInfo{
-	Kind("policy"),
-	func() BaseObject { return &PolicyNamespaceData{} },
+	Kind:        Kind("policy"),
+	Constructor: func() BaseObject { return &PolicyNamespaceData{} },
 }
 
 type PolicyNamespaceData struct {
