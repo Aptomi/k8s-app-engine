@@ -50,8 +50,10 @@ func (reg *Registry) LoadPolicy(gen Generation) (*PolicyNamespace, error) {
 	return policy, nil
 }
 
-func NewDefaultRegistry(path string) *Registry {
-	reg := &Registry{}
+func NewDefaultRegistry() *Registry {
+	reg := &Registry{
+		catalog: NewObjectCatalog(),
+	}
 	reg.AddKind(ServiceObject)
 	reg.AddKind(ContextObject)
 	reg.AddKind(ClusterObject)
