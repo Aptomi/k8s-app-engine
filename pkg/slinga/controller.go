@@ -2,13 +2,15 @@ package slinga
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/api"
+	"github.com/Aptomi/aptomi/pkg/slinga/registry"
 	"github.com/Aptomi/aptomi/pkg/slinga/version"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
-	"os"
-	"time"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"os"
+	"time"
 )
 
 // Init http server with all handlers
@@ -31,6 +33,7 @@ func Serve() {
 	router := httprouter.New()
 
 	version.Serve(router)
+	api.Serve(router, registry.NewDefaultRegistry())
 	webui.Serve(router)
 
 	var handler http.Handler = router
