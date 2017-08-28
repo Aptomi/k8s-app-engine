@@ -34,6 +34,8 @@ import:
 - package: github.com/mitchellh/go-homedir
 - package: github.com/spf13/viper
   version: ^1.0.0
+- package: github.com/mitchellh/mapstructure # viper depends on this commit
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 testImport:
 - package: github.com/stretchr/testify
   subpackages:

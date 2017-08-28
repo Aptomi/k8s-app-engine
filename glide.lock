@@ -1,5 +1,5 @@
-hash: 31d2e24e30921a9b7dae44c04c1f99217dc403e6216c2b7c4efb3122fe67b3e5
-updated: 2017-08-28T12:59:25.823630946-07:00
+hash: ecb701e86011d962bdd14db3685acc6594ee916c265d50b661f6ccc5f11cbacd
+updated: 2017-08-28T14:28:34.949690258-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -223,7 +223,7 @@ imports:
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/mitchellh/mapstructure
-  version: 740c764bc6149d3f1806231418adb9f52c11bcbf
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/naoina/go-stringutil
   version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
 - name: github.com/naoina/toml
