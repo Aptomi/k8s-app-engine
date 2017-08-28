@@ -1,15 +1,11 @@
-package server
+package webui
 
 import (
-	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/visibility"
-	"github.com/gorilla/handlers"
+	"github.com/Aptomi/aptomi/pkg/slinga/webui/visibility"
 	"net/http"
-	"os"
-	"time"
 )
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
@@ -84,9 +80,7 @@ func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI
-func Serve(host string, port int) {
-	r := http.NewServeMux()
-
+func Serve(r *http.ServeMux) {
 	r.HandleFunc("/favicon.ico", faviconHandler)
 
 	// redirect from "/" to "/ui/"
@@ -109,21 +103,4 @@ func Serve(host string, port int) {
 	// serve login/logout api without auth
 	r.HandleFunc("/api/login", loginHandler)
 	r.HandleFunc("/api/logout", logoutHandler)
-
-	listenAddr := fmt.Sprintf("%s:%d", host, port)
-	fmt.Println("Serving at", listenAddr)
-
-	var h http.Handler = r
-
-	h = handlers.CombinedLoggingHandler(os.Stdout, h)
-	h = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(h)
-
-	srv := &http.Server{
-		Handler:      h,
-		Addr:         listenAddr,
-		WriteTimeout: 5 * time.Second,
-		ReadTimeout:  30 * time.Second,
-	}
-
-	panic(srv.ListenAndServe())
 }
