@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui/visibility"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
@@ -80,27 +81,27 @@ func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Serve starts http server on specified address that serves Aptomi API and WebUI
-func Serve(r *http.ServeMux) {
-	r.HandleFunc("/favicon.ico", faviconHandler)
+func Serve(r *httprouter.Router) {
+	r.HandlerFunc(http.MethodGet, "/favicon.ico", faviconHandler)
 
 	// redirect from "/" to "/ui/"
-	r.Handle("/", http.RedirectHandler("/ui/", http.StatusTemporaryRedirect))
+	r.Handler(http.MethodGet, "/", http.RedirectHandler("/ui/", http.StatusTemporaryRedirect))
 
 	// serve all files from "webui" folder and require auth for everything except login.html
-	r.Handle("/ui/", publicFilesHandler("/ui/", http.Dir("./webui/")))
-	r.Handle("/run/", runFilesHandler("/run/", http.Dir(GetAptomiBaseDir())))
+	r.Handler(http.MethodGet, "/ui/", publicFilesHandler("/ui/", http.Dir("./webui/")))
+	r.Handler(http.MethodGet, "/run/", runFilesHandler("/run/", http.Dir(GetAptomiBaseDir())))
 
 	// serve all API endpoints at /api/ path and require auth
-	r.Handle("/api/endpoints", requireAuth(endpointsHandler))
-	r.Handle("/api/details", requireAuth(detailViewHandler))
-	r.Handle("/api/service-view", requireAuth(serviceViewHandler))
-	r.Handle("/api/consumer-view", requireAuth(consumerViewHandler))
-	r.Handle("/api/globalops-view", requireAuth(globalOpsViewHandler))
-	r.Handle("/api/object-view", requireAuth(objectViewHandler))
-	r.Handle("/api/summary-view", requireAuth(summaryViewHandler))
-	r.Handle("/api/timeline-view", requireAuth(timelineViewHandler))
+	r.Handler(http.MethodGet, "/api/endpoints", requireAuth(endpointsHandler))
+	r.Handler(http.MethodGet, "/api/details", requireAuth(detailViewHandler))
+	r.Handler(http.MethodGet, "/api/service-view", requireAuth(serviceViewHandler))
+	r.Handler(http.MethodGet, "/api/consumer-view", requireAuth(consumerViewHandler))
+	r.Handler(http.MethodGet, "/api/globalops-view", requireAuth(globalOpsViewHandler))
+	r.Handler(http.MethodGet, "/api/object-view", requireAuth(objectViewHandler))
+	r.Handler(http.MethodGet, "/api/summary-view", requireAuth(summaryViewHandler))
+	r.Handler(http.MethodGet, "/api/timeline-view", requireAuth(timelineViewHandler))
 
 	// serve login/logout api without auth
-	r.HandleFunc("/api/login", loginHandler)
-	r.HandleFunc("/api/logout", logoutHandler)
+	r.HandlerFunc(http.MethodGet, "/api/login", loginHandler)
+	r.HandlerFunc(http.MethodGet, "/api/logout", logoutHandler)
 }

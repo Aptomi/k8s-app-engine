@@ -5,9 +5,10 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/version"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
-	"net/http"
 	"os"
 	"time"
+	"github.com/julienschmidt/httprouter"
+	"net/http"
 )
 
 // Init http server with all handlers
@@ -27,7 +28,7 @@ func Serve() {
 	host, port := "", 8080 // todo(slukjanov): load this properties from config
 	listenAddr := fmt.Sprintf("%s:%d", host, port)
 
-	router := http.NewServeMux()
+	router := httprouter.New()
 
 	version.Serve(router)
 	webui.Serve(router)
