@@ -5,7 +5,7 @@ import (
 )
 
 var ClusterObject = &ObjectInfo{
-	Kind:        Kind("cluster"),
+	Kind:        "cluster",
 	Constructor: func() BaseObject { return &Cluster{} },
 }
 

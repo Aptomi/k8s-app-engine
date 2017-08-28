@@ -11,7 +11,7 @@ import (
 */
 
 var DependencyObject = &ObjectInfo{
-	Kind:        Kind("dependency"),
+	Kind:        "dependency",
 	Constructor: func() BaseObject { return &Dependency{} },
 }
 

@@ -1,7 +1,7 @@
 package object
 
 import (
-	"github.com/satori/go.uuid"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -14,53 +14,71 @@ func (generation Generation) String() string {
 	return strconv.FormatUint(uint64(generation), 10)
 }
 
-// UID represents unique object ID.
-// It's needed because object with some name could be removed and than created again and in this case generation should
-// start from 1 again. In this case, on new object creation new UID always created that guarantees differentiation
-// between objects created with same name and deleted.
-type UID string
+// KeySeparator used to separate parts of the Key
+const KeySeparator = ":"
 
-// String returns UID as string to implement Stringer interface
-func (uid UID) String() string {
-	return string(uid)
-}
-
-// NewUUID creates new guaranteed unique thread-safe unique ID
-func NewUUID() UID {
-	return UID(uuid.NewV1().String())
-}
-
-// KeySeparator used to separate UID and Generation inside the Key
-const KeySeparator = "$"
-
-// Key represents unified object's key that includes object's UID and generation.
-// So, it means that Key could be used to reference concrete object with concrete
-// generation (while UID is a reference to the concrete object but any generation).
+// Key represents human-readable unified object's key that can always identify any object in Aptomi.
+// It consists of several parts - [<domain>:]<namespace>:<kind>:<name>:<rand_addon>:<generation>, where:
+// * domain - Aptomi deployment name, optional
+// * namespace
+// * kind
+// * name
+// * rand_addon - random 6 letters added to the Key to be able to differentiate objects re-created with the same name, unique for any specific namespace:kind:name
+// * generation - object "version", starts from 1
+// So, it means that Key could be used to reference concrete object with concrete generation.
 type Key string
 
-func (key Key) parts() []string {
+type KeyParts struct {
+	Domain     string
+	Namespace  string
+	Kind       string
+	Name       string
+	RandAddon  string
+	Generation Generation
+}
+
+func (key Key) Parts() (*KeyParts, error) {
 	parts := strings.Split(string(key), KeySeparator)
-	if len(parts) != 2 {
-		panic("Key should consist of two parts separated by " + KeySeparator)
+	partsLen := len(parts)
+
+	domain := ""
+
+	if partsLen == 6 {
+		domain = parts[0]
+		parts = parts[1:]
+	} else if partsLen != 5 {
+		return nil, fmt.Errorf("Can't parse key: %s", key)
 	}
-	return parts
-}
 
-// GetUID returns UID part of the Key
-func (key Key) GetUID() UID {
-	return UID(key.parts()[0])
-}
-
-// GetGeneration returns Generation part of the Key
-func (key Key) GetGeneration() Generation {
-	val, err := strconv.ParseUint(key.parts()[1], 10, 64)
+	gen, err := strconv.ParseUint(parts[4], 10, 64)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("Can't parse generation of key %s with error: %s", key, err)
 	}
-	return Generation(val)
+
+	return &KeyParts{
+		Domain:     domain,
+		Namespace:  parts[0],
+		Kind:       parts[1],
+		Name:       parts[2],
+		RandAddon:  parts[3],
+		Generation: Generation(gen),
+	}, nil
 }
 
 // KeyFromParts return uid and generation combined into Key
-func KeyFromParts(uid UID, generation Generation) Key {
-	return Key(uid.String() + KeySeparator + generation.String())
+func KeyFromParts(domain string, namespace string, kind string, name string, randAddon string, generation Generation) Key {
+	if len(domain) > 0 {
+		return Key(fmt.Sprintf("%s:%s:%s:%s:%s:%s", domain, namespace, kind, name, randAddon, generation))
+	}
+	return Key(fmt.Sprintf("%s:%s:%s:%s:%s", namespace, kind, name, randAddon, generation))
+}
+
+// BaseObject interface represents unified object that could be stored in DB, accessed through API, etc.
+type BaseObject interface {
+	GetKey() Key
+	GetNamespace() string
+	GetKind() string
+	GetName() string
+	GetRandAddon() string
+	GetGeneration() Generation
 }

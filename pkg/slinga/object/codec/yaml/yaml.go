@@ -104,7 +104,7 @@ func (c *YamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte
 		return nil, fmt.Errorf("Kind field in metadata isn't a string: %v", single)
 	}
 
-	objectInfo := c.Catalog.Get(Kind(kind))
+	objectInfo := c.Catalog.Get(kind)
 	if objectInfo == nil {
 		return nil, fmt.Errorf("Unknown kind: %s", kind)
 	}

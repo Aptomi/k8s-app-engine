@@ -1,29 +1,29 @@
 package object
 
 type ObjectCatalog struct {
-	Infos map[Kind]*ObjectInfo
+	Kinds map[string]*ObjectInfo
 }
 
 type Constructor func() BaseObject
 
 type ObjectInfo struct {
-	Kind        Kind
+	Kind        string
 	Constructor Constructor
 }
 
 func NewObjectCatalog() *ObjectCatalog {
 	return &ObjectCatalog{
-		make(map[Kind]*ObjectInfo),
+		make(map[string]*ObjectInfo),
 	}
 }
 
 func (catalog *ObjectCatalog) Add(info *ObjectInfo) {
-	catalog.Infos[info.Kind] = info
+	catalog.Kinds[info.Kind] = info
 }
 
-func (catalog *ObjectCatalog) Get(kind Kind) *ObjectInfo { // todo return error if not found?
+func (catalog *ObjectCatalog) Get(kind string) *ObjectInfo { // todo return error if not found?
 	// todo support default Kind?
-	return catalog.Infos[kind]
+	return catalog.Kinds[kind]
 }
 
 func (info *ObjectInfo) New() BaseObject {

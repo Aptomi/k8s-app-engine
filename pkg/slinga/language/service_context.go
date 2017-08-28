@@ -7,7 +7,7 @@ import (
 )
 
 var ContextObject = &ObjectInfo{
-	Kind:        Kind("context"),
+	Kind:        "context",
 	Constructor: func() BaseObject { return &Context{} },
 }
 

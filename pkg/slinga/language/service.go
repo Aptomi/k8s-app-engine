@@ -7,7 +7,7 @@ import (
 )
 
 var ServiceObject = &ObjectInfo{
-	Kind:        Kind("service"),
+	Kind:        "service",
 	Constructor: func() BaseObject { return &Service{} },
 }
 

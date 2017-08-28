@@ -25,7 +25,7 @@ type Action struct {
 }
 
 var RuleObject = &ObjectInfo{
-	Kind:        Kind("rule"),
+	Kind:        "rule",
 	Constructor: func() BaseObject { return &Rule{} },
 }
 

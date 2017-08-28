@@ -10,14 +10,14 @@ import (
 */
 
 var PolicyNamespaceDataObject = &ObjectInfo{
-	Kind:        Kind("policy"),
+	Kind:        "policy",
 	Constructor: func() BaseObject { return &PolicyNamespaceData{} },
 }
 
 type PolicyNamespaceData struct {
 	Metadata
 
-	Objects map[Kind]Key
+	Objects map[string]Key
 }
 
 // PolicyNamespace is a global policy object with services and contexts
