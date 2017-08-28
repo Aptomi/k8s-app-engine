@@ -43,6 +43,8 @@ func (key Key) Parts() (*KeyParts, error) {
 
 	domain := ""
 
+	// todo(slukjanov): support non-namespaced objects like clusters? userproviders? etc
+
 	if partsLen == 6 {
 		domain = parts[0]
 		parts = parts[1:]
