@@ -4,10 +4,10 @@ import "math/rand"
 
 const (
 	randAddonLength = 6
-	letterBytes     = "abcdefghijklmnopqrstuvwxyz0123456789" // all letters to be used in RandAddon
-	letterIdxBits   = 6                                      // 6 bits to represent a letter index
-	letterIdxMask   = 1<<letterIdxBits - 1                   // letter idx mask (letterIdxBits of 1)
-	letterIdxMax    = 63 / letterIdxBits                     // number of letter indices in 63 bits
+	letterBytes     = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPRSTUVWXYZ23456789" // all letters to be used in RandAddon
+	letterIdxBits   = 6                                                          // 6 bits to represent a letter index
+	letterIdxMask   = 1<<letterIdxBits - 1                                       // letter idx mask (letterIdxBits of 1)
+	letterIdxMax    = 63 / letterIdxBits                                         // number of letter indices in 63 bits
 )
 
 func init() {
