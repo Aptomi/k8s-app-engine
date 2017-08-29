@@ -2,17 +2,17 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/registry"
+	"github.com/Aptomi/aptomi/pkg/slinga/controller"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"net/http"
 )
 
-type RevisionHandler struct {
-	registry *registry.Registry
+type RevisionAPI struct {
+	ctl controller.RevisionController
 }
 
-func (h *RevisionHandler) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *RevisionAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	rev, key, ns := p.ByName("rev"), p.ByName("key"), p.ByName("ns")
 
 	fmt.Printf("[handleGetPolicy] rev: %s, key: %s, ns: %s\n", rev, key, ns)
@@ -40,7 +40,7 @@ func (h *RevisionHandler) handleGetPolicy(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (h *RevisionHandler) handleNewRevision(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *RevisionAPI) handleNewRevision(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(fmt.Sprintf("Error while reading bytes from request Body: %s", err))
@@ -52,8 +52,8 @@ func (h *RevisionHandler) handleNewRevision(w http.ResponseWriter, r *http.Reque
 	// initialize and resolve new revision here from current policy + objects
 }
 
-func Serve(router *httprouter.Router, reg *registry.Registry) {
-	h := RevisionHandler{reg}
+func Serve(router *httprouter.Router, ctl controller.RevisionController) {
+	h := RevisionAPI{ctl}
 
 	router.GET("/api/v1/revision/:rev/policy", h.handleGetPolicy)               // get full policy from specific revision
 	router.GET("/api/v1/revision/:rev/policy/key/:key", h.handleGetPolicy)      // get by key from specific revision
