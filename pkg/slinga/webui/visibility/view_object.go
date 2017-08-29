@@ -1,21 +1,21 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	log "github.com/Sirupsen/logrus"
 )
 
 // ObjectView represents an in-depth view for a particular object
 type ObjectView struct {
 	id    string
-	state engine.ServiceUsageState
+	state *resolve.ResolvedState
 }
 
 // NewObjectView creates a new ObjectView
-func NewObjectView(id string, state engine.ServiceUsageState) ObjectView {
+func NewObjectView(id string) ObjectView {
 	return ObjectView{
 		id:    id,
-		state: state,
+		state: resolve.LoadResolvedState(),
 	}
 }
 

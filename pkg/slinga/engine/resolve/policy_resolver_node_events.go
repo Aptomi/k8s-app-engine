@@ -1,4 +1,4 @@
-package engine
+package resolve
 
 import (
 	"fmt"
@@ -171,7 +171,7 @@ func (node *resolutionNode) logServiceFound(service *Service) {
 
 func (node *resolutionNode) logStartMatchingContexts() {
 	contextNames := []string{}
-	for _, context := range node.state.Policy.Contexts {
+	for _, context := range node.resolver.policy.Contexts {
 		contextNames = append(contextNames, context.Name)
 	}
 	node.eventLog.WithFields(Fields{}).Infof("Resolving context for service '%s'. Trying contexts: %s", node.service.Name, contextNames)
@@ -232,7 +232,7 @@ func (node *resolutionNode) logResolvingDependencyOnComponent() {
 
 func (node *resolutionNode) logComponentCodeParams() {
 	paramsTemplate := node.component.Code.Params
-	params := node.data.getComponentInstanceEntry(node.componentKey).CalculatedCodeParams
+	params := node.data.GetComponentInstanceEntry(node.componentKey).CalculatedCodeParams
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {
 		node.eventLog.WithFields(Fields{
@@ -243,7 +243,7 @@ func (node *resolutionNode) logComponentCodeParams() {
 
 func (node *resolutionNode) logComponentDiscoveryParams() {
 	paramsTemplate := node.component.Discovery
-	params := node.data.getComponentInstanceEntry(node.componentKey).CalculatedDiscovery
+	params := node.data.GetComponentInstanceEntry(node.componentKey).CalculatedDiscovery
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {
 		node.eventLog.WithFields(Fields{
@@ -274,6 +274,6 @@ func (node *resolutionNode) logCannotResolveInstance() {
 	if node.component == nil {
 		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve service instance: service '%s'", node.serviceName)
 	} else {
-		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve component instance: service '%s', component '%s'", node.serviceName, getComponentNameUnsafe(node.component))
+		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve component instance: service '%s', component '%s'", node.serviceName, node.component.Name)
 	}
 }

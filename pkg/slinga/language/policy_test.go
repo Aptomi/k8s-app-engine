@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadPolicy(t *testing.T) {
-	policy := LoadUnitTestsPolicy()
+	policy := LoadUnitTestsPolicy("../testdata/unittests")
 
 	// Check services
 	assert.Equal(t, 4, len(policy.Services), "Two services should be loaded")

@@ -2,8 +2,6 @@ package webui
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui/visibility"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -15,68 +13,51 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the previous usage state
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
-	endpoints := visibility.Endpoints(getLoggedInUserID(r), state)
-
+	endpoints := visibility.Endpoints(getLoggedInUserID(r))
 	writeJSON(w, endpoints)
 }
 
 func detailViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
 	userID := getLoggedInUserID(r)
-	view := visibility.NewDetails(userID, state)
+	view := visibility.NewDetails(userID)
 	writeJSON(w, view)
 }
 
 func consumerViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
 	userID := r.URL.Query().Get("userId")
 	dependencyID := r.URL.Query().Get("dependencyId")
-	view := visibility.NewConsumerView(userID, dependencyID, state)
+	view := visibility.NewConsumerView(userID, dependencyID)
 	writeJSON(w, view.GetData())
 }
 
 func serviceViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
 	serviceName := r.URL.Query().Get("serviceName")
-	view := visibility.NewServiceView(serviceName, state)
+	view := visibility.NewServiceView(serviceName)
 	writeJSON(w, view.GetData())
 }
 
 func globalOpsViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
 	userID := r.URL.Query().Get("userId")
 	dependencyID := r.URL.Query().Get("dependencyId")
-	view := visibility.NewConsumerView(userID, dependencyID, state)
+	view := visibility.NewConsumerView(userID, dependencyID)
 	writeJSON(w, view.GetData())
 }
 
 func objectViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
 	objectID := r.URL.Query().Get("id")
-	view := visibility.NewObjectView(objectID, state)
+	view := visibility.NewObjectView(objectID)
 	writeJSON(w, view.GetData())
 }
 
 func summaryViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	state := engine.LoadServiceUsageState(userLoader)
 	userID := getLoggedInUserID(r)
-	view := visibility.NewSummaryView(userID, state)
+	view := visibility.NewSummaryView(userID)
 	writeJSON(w, view.GetData())
 }
 
 func timelineViewHandler(w http.ResponseWriter, r *http.Request) {
-	userLoader := NewAptomiUserLoader()
-	states := engine.LoadServiceUsageStatesAll(userLoader)
 	userID := getLoggedInUserID(r)
-	view := visibility.NewTimelineView(userID, states)
+	view := visibility.NewTimelineView(userID)
 	writeJSON(w, view.GetData())
 }
 

@@ -1,14 +1,14 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"reflect"
 	"strings"
 )
 
 type loadableObject interface {
 	isItMyID(string) string
-	getDetails(string, engine.ServiceUsageState) interface{}
+	getDetails(string, *resolve.ResolvedState) interface{}
 }
 
 func getLoadableObject(id string) loadableObject {

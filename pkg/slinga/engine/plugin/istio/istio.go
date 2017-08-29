@@ -1,9 +1,11 @@
-package engine
+package istio
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine/deployment"
+	. "github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/util"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -21,54 +23,50 @@ type IstioRouteRule struct {
 
 // IstioRuleEnforcer enforces istio rules
 type IstioRuleEnforcer struct {
-	state    *ServiceUsageState
-	progress progress.ProgressIndicator
+	next *resolve.ResolvedState
 }
 
 // NewIstioRuleEnforcer creates new IstioRuleEnforcer
-func NewIstioRuleEnforcer(diff *ServiceUsageStateDiff) *IstioRuleEnforcer {
-	return &IstioRuleEnforcer{
-		state:    diff.Next,
-		progress: diff.progress,
-	}
+func (enforcer *IstioRuleEnforcer) Init(next *resolve.ResolvedState, prev *resolve.ResolvedState) {
+	enforcer.next = next
 }
 
 // Returns difference length (used for progress indicator)
-func (enforcer *IstioRuleEnforcer) getDifferenceLen() int {
+func (enforcer *IstioRuleEnforcer) GetApplyProgressLength() int {
 	result := 0
 
 	// Get istio rules for each cluster
-	result += len(enforcer.state.Policy.Clusters)
+	result += len(enforcer.next.Policy.Clusters)
 
 	// Call processComponent() for each component
-	result += len(enforcer.state.GetResolvedData().ComponentProcessingOrder)
+	result += len(enforcer.next.State.ResolvedData.ComponentProcessingOrder)
 
 	// Create rules for each component
-	result += len(enforcer.state.GetResolvedData().ComponentProcessingOrder)
+	result += len(enforcer.next.State.ResolvedData.ComponentProcessingOrder)
 
 	// Delete rules (all at once)
-	result += len(enforcer.state.GetResolvedData().ComponentProcessingOrder)
+	result += len(enforcer.next.State.ResolvedData.ComponentProcessingOrder)
 
 	return result
 }
 
 // Apply processes global rules and applies Istio routing rules for ingresses
-func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
-	if len(enforcer.state.GetResolvedData().ComponentProcessingOrder) == 0 || noop {
+func (enforcer *IstioRuleEnforcer) Apply(progress progress.ProgressIndicator) {
+	if len(enforcer.next.State.ResolvedData.ComponentProcessingOrder) == 0 {
 		return
 	}
 
 	existingRules := make([]*IstioRouteRule, 0)
 
-	for _, cluster := range enforcer.state.Policy.Clusters {
+	for _, cluster := range enforcer.next.Policy.Clusters {
 		existingRules = append(existingRules, getIstioRouteRules(cluster)...)
-		enforcer.progress.Advance("Istio")
+		progress.Advance("Istio")
 	}
 
 	// Process in the right order
 	desiredRules := make(map[string][]*IstioRouteRule)
-	for _, key := range enforcer.state.GetResolvedData().ComponentProcessingOrder {
-		rules, err := processComponent(key, enforcer.state)
+	for _, key := range enforcer.next.State.ResolvedData.ComponentProcessingOrder {
+		rules, err := enforcer.processComponent(key)
 		if err != nil {
 			Debug.WithFields(log.Fields{
 				"key":   key,
@@ -76,14 +74,14 @@ func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
 			}).Panic("Unable to process Istio Ingress for component")
 		}
 		desiredRules[key] = rules
-		enforcer.progress.Advance("Istio")
+		progress.Advance("Istio")
 	}
 
 	deleteRules := make([]*IstioRouteRule, 0)
 	createRules := make(map[string][]*IstioRouteRule)
 
 	// populate createRules, to make sure we will get correct number of entries for progress indicator
-	for _, key := range enforcer.state.GetResolvedData().ComponentProcessingOrder {
+	for _, key := range enforcer.next.State.ResolvedData.ComponentProcessingOrder {
 		createRules[key] = make([]*IstioRouteRule, 0)
 	}
 
@@ -122,7 +120,7 @@ func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
 			rule.create()
 			changed = true
 		}
-		enforcer.progress.Advance("Istio")
+		progress.Advance("Istio")
 	}
 
 	// process deletions all at once
@@ -130,7 +128,7 @@ func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
 		rule.delete()
 		changed = true
 	}
-	enforcer.progress.Advance("Istio")
+	progress.Advance("Istio")
 
 	if changed {
 		for _, createRulesForComponent := range createRules {
@@ -146,32 +144,34 @@ func (enforcer *IstioRuleEnforcer) Apply(noop bool) {
 	}
 }
 
-func processComponent(key string, usage *ServiceUsageState) ([]*IstioRouteRule, error) {
-	instance := usage.GetResolvedData().ComponentInstanceMap[key]
-	component := usage.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+func (enforcer *IstioRuleEnforcer) processComponent(key string) ([]*IstioRouteRule, error) {
+	usageState := enforcer.next.State
 
-	labels := usage.GetResolvedData().ComponentInstanceMap[key].CalculatedLabels
+	instance := usageState.ResolvedData.ComponentInstanceMap[key]
+	component := enforcer.next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
-	cluster, err := getCluster(usage.Policy, labels)
+	labels := usageState.ResolvedData.ComponentInstanceMap[key].CalculatedLabels
+
+	cluster, err := util.GetCluster(enforcer.next.Policy, labels)
 	if err != nil {
 		return nil, err
 	}
 
 	// get all users who're using service
-	dependencyIds := usage.GetResolvedData().ComponentInstanceMap[key].DependencyIds
+	dependencyIds := usageState.ResolvedData.ComponentInstanceMap[key].DependencyIds
 	users := make([]*User, 0)
 	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exist
-		userID := usage.Policy.Dependencies.DependenciesByID[dependencyID].UserID
-		users = append(users, usage.userLoader.LoadUserByID(userID))
+		userID := enforcer.next.Policy.Dependencies.DependenciesByID[dependencyID].UserID
+		users = append(users, enforcer.next.UserLoader.LoadUserByID(userID))
 	}
 
-	allows, err := usage.Policy.Rules.AllowsIngressAccess(labels, users, cluster)
+	allows, err := enforcer.next.Policy.Rules.AllowsIngressAccess(labels, users, cluster)
 	if err != nil {
 		return nil, err
 	}
 	if !allows && component != nil && component.Code != nil {
-		codeExecutor, err := GetCodeExecutor(component.Code, key, usage.GetResolvedData().ComponentInstanceMap[key].CalculatedCodeParams, usage.Policy.Clusters)
+		codeExecutor, err := GetCodeExecutor(component.Code, key, usageState.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams, enforcer.next.Policy.Clusters)
 		if err != nil {
 			return nil, err
 		}

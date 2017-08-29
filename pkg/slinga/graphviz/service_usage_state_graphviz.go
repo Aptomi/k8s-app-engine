@@ -3,7 +3,8 @@ package graphviz
 import (
 	"bytes"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
@@ -21,11 +22,11 @@ const colorCount = 9
 
 // PolicyVisualization accepts diff and defines additional methods for visualizing the policy
 type PolicyVisualization struct {
-	diff *ServiceUsageStateDiff
+	diff *diff.ServiceUsageStateDiff
 }
 
 // NewPolicyVisualization creates new policy visualization object, given a usage state difference
-func NewPolicyVisualization(diff *ServiceUsageStateDiff) PolicyVisualization {
+func NewPolicyVisualization(diff *diff.ServiceUsageStateDiff) PolicyVisualization {
 	return PolicyVisualization{diff: diff}
 }
 
@@ -46,7 +47,7 @@ func (vis PolicyVisualization) DrawAndStore() {
 
 // Delta calculates difference between two graphs and returns it as a graph (it also modifies <next> to represent that difference)
 func (vis PolicyVisualization) Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
-	// TODO: deal with escape bulshit
+	// TODO: deal with escape bullshit
 	// TODO: we are modifying next while iterating. can this cause any issues?
 	// New nodes, edges, subgraphs must be highlighted
 	{
@@ -134,7 +135,7 @@ func shorten(s string) string {
 }
 
 // DrawVisualAndStore writes usage state visual into a file
-func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suffix string) *gographviz.Graph {
+func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.ResolvedState, suffix string) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -154,8 +155,8 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	if state.Policy.Dependencies != nil {
-		for service, dependencies := range state.Policy.Dependencies.DependenciesByService {
+	if resolvedState.Policy.Dependencies != nil {
+		for service, dependencies := range resolvedState.Policy.Dependencies.DependenciesByService {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
@@ -164,7 +165,7 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := state.GetUserLoader().LoadUserByID(d.UserID)
+				user := resolvedState.UserLoader.LoadUserByID(d.UserID)
 				label := "Name: " + user.Name + " (" + user.ID + ")"
 				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {
@@ -179,7 +180,7 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 	}
 
 	// Second, visualize evaluated links
-	for _, instance := range state.GetResolvedData().ComponentInstanceMap {
+	for _, instance := range resolvedState.State.ResolvedData.ComponentInstanceMap {
 		key := instance.Key
 
 		// only add edges to "root" components (i.e. services)
@@ -201,15 +202,15 @@ func (vis PolicyVisualization) DrawVisualAndStore(state *ServiceUsageState, suff
 
 		// Add an edge from service to service instances box
 		for dependencyID := range instance.DependencyIds {
-			userID := state.Policy.Dependencies.DependenciesByID[dependencyID].UserID
+			userID := resolvedState.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, key.ServiceName, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 
 	// Third, show cross-service dependencies
-	if state.Policy != nil {
-		for serviceName1, service1 := range state.Policy.Services {
+	if resolvedState.Policy != nil {
+		for serviceName1, service1 := range resolvedState.Policy.Services {
 			// Resolve every component
 			for _, component := range service1.Components {
 				serviceName2 := component.Service

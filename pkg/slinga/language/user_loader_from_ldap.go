@@ -2,10 +2,10 @@ package language
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/ldap.v2"
@@ -23,8 +23,8 @@ type LDAPConfig struct {
 
 // Loads LDAP configuration
 func loadLDAPConfig(baseDir string) *LDAPConfig {
-	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeUsersLDAP))
-	fileName, err := EnsureSingleFile(files)
+	files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(baseDir, db.TypeUsersLDAP))
+	fileName, err := util.EnsureSingleFile(files)
 	if err != nil {
 		Debug.WithFields(log.Fields{
 			"error": err,

@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
+	. "github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
+	. "github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/graphviz"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
@@ -37,17 +40,15 @@ var policyCmdApply = &cobra.Command{
 		// Empty current run directory
 		CleanCurrentRunDirectory(GetAptomiBaseDir())
 
-		// User loader
+		// Get loader for external users
 		userLoader := NewAptomiUserLoader()
 
 		// Load the previous usage state
-		prevUsageState := LoadServiceUsageState(userLoader)
+		prevState := resolve.LoadResolvedState()
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
-
 		store := NewFileLoader(policyDir)
-
 		policy := NewPolicyNamespace()
 
 		objects, err := store.LoadObjects()
@@ -63,29 +64,32 @@ var policyCmdApply = &cobra.Command{
 			log.Panicf("Cannot load policy from %s with error: %v", policyDir, err)
 		}
 
-		nextUsageState := NewServiceUsageState(policy, userLoader)
-		err = nextUsageState.ResolveAllDependencies()
+		resolver := resolve.NewPolicyResolver(policy, userLoader)
+		nextState, err := resolver.ResolveAllDependencies()
 		if err != nil {
-			log.Panicf("Cannot resolve usage: %v", err)
+			log.Panicf("Cannot resolve policy: %v", err)
 		}
 
 		// Process differences
-		diff := nextUsageState.CalculateDifference(&prevUsageState)
+		diff := NewServiceUsageStateDiff(nextState, prevState, plugin.AllPlugins())
 		diff.AlterDifference(full)
 		diff.StoreDiffAsText(verbose)
 
 		// Print on screen
-		fmt.Print(diff.Next.DiffAsText)
+		fmt.Print(diff.DiffAsText)
 
 		// Generate pictures
 		visual := NewPolicyVisualization(diff)
 		visual.DrawAndStore()
 
 		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
-		diff.Apply(noop || emulateDeployment)
+		apply := NewEngineApply(diff)
+		if !(noop || emulateDeployment) {
+			apply.Apply()
+		}
 
-		// Save new state in the last run directory
-		diff.Next.SaveServiceUsageState()
+		// Save new resolved state in the last run directory
+		resolver.SaveResolutionData()
 
 		// If everything is successful, then increment revision and save run
 		// if emulateDeployment == true --> we set noop to false to write state on disk)

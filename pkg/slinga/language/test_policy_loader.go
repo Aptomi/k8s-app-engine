@@ -12,13 +12,13 @@ import (
 	"strings"
 )
 
-func LoadUnitTestsPolicy() *PolicyNamespace {
-	loader := NewFileLoader("../testdata/unittests")
+func LoadUnitTestsPolicy(storeDir string) *PolicyNamespace {
+	loader := NewFileLoader(storeDir)
 
 	policy := NewPolicyNamespace()
 	objects, err := loader.LoadObjects()
 	if err != nil {
-		panic("Error while loading test Policy")
+		panic("Error while loading test policy: " + err.Error())
 	}
 
 	for _, object := range objects {

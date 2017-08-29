@@ -2,7 +2,7 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"html"
@@ -13,11 +13,11 @@ type serviceInstanceNode struct {
 	service         *Service
 	context         string
 	contextWithKeys string
-	instance        *engine.ComponentInstance
+	instance        *resolve.ComponentInstance
 	primary         bool
 }
 
-func newServiceInstanceNode(key string, service *Service, context string, contextWithKeys string, instance *engine.ComponentInstance, primary bool) graphNode {
+func newServiceInstanceNode(key string, service *Service, context string, contextWithKeys string, instance *resolve.ComponentInstance, primary bool) graphNode {
 	return serviceInstanceNode{
 		key:             key,
 		service:         service,
@@ -92,10 +92,10 @@ func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceInstanceNode) getDetails(id string, state engine.ServiceUsageState) interface{} {
-	result := state.ResolvedData.ComponentInstanceMap[id]
+func (n serviceInstanceNode) getDetails(id string, state *resolve.ResolvedState) interface{} {
+	result := state.State.ResolvedData.ComponentInstanceMap[id]
 	if result == nil {
-		result = state.UnresolvedData.ComponentInstanceMap[id]
+		result = state.State.UnresolvedData.ComponentInstanceMap[id]
 	}
 	return result
 }

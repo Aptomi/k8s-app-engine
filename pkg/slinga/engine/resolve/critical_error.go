@@ -1,4 +1,4 @@
-package engine
+package resolve
 
 import "github.com/Aptomi/aptomi/pkg/slinga/errors"
 
@@ -21,6 +21,7 @@ func (err *CriticalError) SetLoggedFlag() {
 	err.logged = true
 }
 
+// IsLogged returns if an error has been already processed and logged
 func (err *CriticalError) IsLogged() bool {
 	return err.logged
 }

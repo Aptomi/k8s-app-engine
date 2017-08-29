@@ -1,45 +1,93 @@
-package engine
+package resolve
 
 import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
+	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 /*
-	Core engine for Slinga processing and evaluation
+	Core engine for policy resolution
+	- takes policy an an input
+	- calculates ServiceUsageState as an output
 */
 
+type PolicyResolver struct {
+	/*
+		Input objects
+	*/
+
+	// Policy
+	policy *PolicyNamespace
+
+	// User loader
+	userLoader UserLoader
+
+	/*
+		Cache
+	*/
+
+	// Expression cache
+	expressionCache expression.ExpressionCache
+
+	// Template cache
+	templateCache template.TemplateCache
+
+	/*
+		Calculated objects
+	*/
+
+	// Reference to the calculated ServiceUsageState
+	state *ServiceUsageState
+
+	// Buffered event log - gets populated during policy resolution
+	eventLog *EventLog
+}
+
+// NewPolicyResolver creates a new policy resolver
+func NewPolicyResolver(policy *PolicyNamespace, userLoader UserLoader) *PolicyResolver {
+	return &PolicyResolver{
+		policy:          policy,
+		userLoader:      userLoader,
+		expressionCache: expression.NewExpressionCache(),
+		templateCache:   template.NewTemplateCache(),
+		state:           NewServiceUsageState(),
+		eventLog:        NewEventLog(),
+	}
+}
+
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (state *ServiceUsageState) ResolveAllDependencies() error {
-
-	// Create cache
-	cache := NewEngineCache()
-
+func (resolver *PolicyResolver) ResolveAllDependencies() (*ResolvedState, error) {
 	// Run every declared dependency via policy and resolve it
-	for _, dependencies := range state.Policy.Dependencies.DependenciesByService {
+	for _, dependencies := range resolver.policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
 			// resolve usage via applying policy
-			err := state.resolveDependency(d, cache)
+			err := resolver.resolveDependency(d)
 
 			// see if there is an error
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
-	return nil
+
+	return NewResolvedState(resolver.policy, resolver.state, resolver.userLoader), nil
 }
 
 // Resolves a single dependency and puts resolution data into the overall state of the world
-func (state *ServiceUsageState) resolveDependency(d *language.Dependency, cache *EngineCache) error {
+func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error {
+
 	// create resolution node
-	node := state.newResolutionNode(d, cache)
+	node := resolver.newResolutionNode(d)
 
 	// aggregate logs in the end
-	defer state.policyResolutionEventLog.Append(node.eventLog)
+	defer resolver.eventLog.Append(node.eventLog)
 
 	// recursively resolve everything
-	err := state.resolveNode(node)
+	err := resolver.resolveNode(node)
 	if err != nil {
 		return err
 	}
@@ -50,12 +98,12 @@ func (state *ServiceUsageState) resolveDependency(d *language.Dependency, cache 
 
 	var data *ServiceUsageData
 	if node.resolved {
-		data = state.ResolvedData
+		data = resolver.state.ResolvedData
 	} else {
-		data = state.UnresolvedData
+		data = resolver.state.UnresolvedData
 	}
 
-	err = data.appendData(node.data)
+	err = data.AppendData(node.data)
 	if err != nil {
 		node.logError(err)
 		return err
@@ -68,7 +116,7 @@ func (state *ServiceUsageState) resolveDependency(d *language.Dependency, cache 
 // Returns error only if there is an issue with the policy (e.g. it's malformed)
 // Returns nil if there is no error (it may be that nothing was still matched though)
 // If you want to check for successful resolution, use node.resolved flag
-func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
+func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Error variable that we will be reusing
 	var err error
 
@@ -85,7 +133,7 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 	node.objectResolved(node.user)
 
 	// Locate the service
-	node.service, err = node.getMatchedService(state.Policy)
+	node.service, err = node.getMatchedService(resolver.policy)
 	if err != nil {
 		// Return a policy processing error in case service is not present in policy
 		return node.cannotResolveInstance(err)
@@ -96,7 +144,7 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 	node.labels = node.transformLabels(node.labels, node.service.ChangeLabels)
 
 	// Match the context
-	node.context, err = node.getMatchedContext(state.Policy)
+	node.context, err = node.getMatchedContext(resolver.policy)
 	if err != nil {
 		// Return a policy processing error in case of context resolution failure
 		return node.cannotResolveInstance(err)
@@ -113,7 +161,7 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
 
 	// Resolve allocation keys for the context
-	node.allocationKeysResolved, err = node.resolveAllocationKeys(state.Policy)
+	node.allocationKeysResolved, err = node.resolveAllocationKeys(resolver.policy)
 	if err != nil {
 		// Return an error in case of malformed policy or policy processing error
 		return node.cannotResolveInstance(err)
@@ -124,10 +172,10 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 	node.objectResolved(node.serviceKey)
 
 	// Store labels for service
-	node.recordLabels(node.serviceKey, node.labels)
+	node.data.RecordLabels(node.serviceKey, node.labels)
 
 	// Store edge (last component instance -> service instance)
-	node.data.storeEdge(node.arrivalKey, node.serviceKey)
+	node.data.StoreEdge(node.arrivalKey, node.serviceKey)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.sortServiceComponents()
@@ -143,11 +191,11 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 		node.componentKey = node.createComponentKey(node.component)
 
 		// Store edge (service instance -> component instance)
-		node.data.storeEdge(node.serviceKey, node.componentKey)
+		node.data.StoreEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
 		node.componentLabels = node.transformLabels(node.labels, node.component.ChangeLabels)
-		node.recordLabels(node.componentKey, node.componentLabels)
+		node.data.RecordLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component
 		node.discoveryTreeNode[node.component.Name] = NestedParameterMap{}
@@ -172,7 +220,7 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 			nodeNext := node.createChildNode()
 
 			// Resolve dependency on another service recursively
-			err := state.resolveNode(nodeNext)
+			err := resolver.resolveNode(nodeNext)
 			if err != nil {
 				return node.cannotResolveInstance(err)
 			}
@@ -185,12 +233,24 @@ func (state *ServiceUsageState) resolveNode(node *resolutionNode) error {
 		}
 
 		// Record usage of a given component instance
-		node.recordResolved(node.componentKey, node.dependency)
+		node.logInstanceSuccessfullyResolved(node.componentKey)
+		node.data.RecordResolved(node.componentKey, node.dependency)
 	}
 
 	// Mark note as resolved and record usage of a given service instance
 	node.resolved = true
-	node.recordResolved(node.serviceKey, node.dependency)
+	node.logInstanceSuccessfullyResolved(node.serviceKey)
+	node.data.RecordResolved(node.serviceKey, node.dependency)
 
 	return nil
+}
+
+// SaveServiceUsageState saves usage state in a file under Aptomi DB
+func (resolver *PolicyResolver) SaveResolutionData() {
+	resolvedState := NewResolvedState(resolver.policy, resolver.state, resolver.userLoader)
+	resolvedState.Save()
+
+	// Save log
+	hook := &HookBoltDB{}
+	resolver.eventLog.Save(hook)
 }

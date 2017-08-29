@@ -1,21 +1,21 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"sort"
 )
 
 // SummaryView represents summary view that we show on the home page
 type SummaryView struct {
 	userID string
-	state  engine.ServiceUsageState
+	state  *resolve.ResolvedState
 }
 
 // NewSummaryView creates a new SummaryView
-func NewSummaryView(userID string, state engine.ServiceUsageState) SummaryView {
+func NewSummaryView(userID string) SummaryView {
 	return SummaryView{
 		userID: userID,
-		state:  state,
+		state:  resolve.LoadResolvedState(),
 	}
 }
 
@@ -32,19 +32,19 @@ func (view SummaryView) GetData() interface{} {
 func (view SummaryView) getGlobalDependenciesData() interface{} {
 	// table only exists for global ops people
 	result := lineEntryList{}
-	if !view.state.GetUserLoader().LoadUserByID(view.userID).IsGlobalOps() {
+	if !view.state.UserLoader.LoadUserByID(view.userID).IsGlobalOps() {
 		return result
 	}
 	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		entry := lineEntry{
 			"resolved":        dependency.Resolved,
-			"userName":        view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name,
+			"userName":        view.state.UserLoader.LoadUserByID(dependency.UserID).Name,
 			"serviceName":     dependency.Service,
 			"contextWithKeys": view.getResolvedContextNameByDep(dependency),
 			"cluster":         view.getResolvedClusterNameByDep(dependency),
 			"stats":           view.getDependencyStats(dependency),
 			"dependencyId":    dependency.GetID(),
-			"id":              view.state.GetUserLoader().LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
+			"id":              view.state.UserLoader.LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
 		}
 		result = append(result, entry)
 	}
@@ -55,7 +55,7 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 func (view SummaryView) getGlobalRulesData() interface{} {
 	// table only exists for global ops people
 	result := lineEntryList{}
-	if !view.state.GetUserLoader().LoadUserByID(view.userID).IsGlobalOps() {
+	if !view.state.UserLoader.LoadUserByID(view.userID).IsGlobalOps() {
 		return result
 	}
 	for _, ruleList := range view.state.Policy.Rules.Rules {
@@ -83,7 +83,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 		if service.Owner == view.userID {
 			// if I own this service, let's find all its instances
 			instanceMap := make(map[string]bool)
-			for key, instance := range view.state.ResolvedData.ComponentInstanceMap {
+			for key, instance := range view.state.State.ResolvedData.ComponentInstanceMap {
 				if instance.Resolved {
 					if instance.Key.ServiceName == service.Name && instance.Key.IsService() {
 						instanceMap[key] = true
@@ -93,7 +93,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 
 			// Add info about every allocated instance
 			for key := range instanceMap {
-				instance := view.state.ResolvedData.ComponentInstanceMap[key]
+				instance := view.state.State.ResolvedData.ComponentInstanceMap[key]
 				entry := lineEntry{
 					"serviceName":     service.Name,
 					"contextWithKeys": view.getResolvedContextNameByInst(instance),

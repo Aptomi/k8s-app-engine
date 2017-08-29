@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"sort"
 )
@@ -29,8 +29,9 @@ type endpointsView struct {
 }
 
 // Endpoints returns a view with all endpoints
-func Endpoints(currentUserID string, state engine.ServiceUsageState) endpointsView {
-	users := state.GetUserLoader().LoadUsersAll().Users
+func Endpoints(currentUserID string) endpointsView {
+	state := resolve.LoadResolvedState()
+	users := state.UserLoader.LoadUsersAll().Users
 
 	uR := endpointsView{make([]userEndpoints, 0)}
 
@@ -55,10 +56,10 @@ func Endpoints(currentUserID string, state engine.ServiceUsageState) endpointsVi
 	for _, userID := range userIds {
 		r := make([]rEndpoint, 0)
 
-		endpoints := state.Endpoints(userID)
+		endpoints := resolve.Endpoints(state.Policy, state.State, userID)
 
 		for key, links := range endpoints {
-			instance := state.ResolvedData.ComponentInstanceMap[key]
+			instance := state.State.ResolvedData.ComponentInstanceMap[key]
 			rLinks := make([]rLink, 0)
 
 			for linkName, link := range links {

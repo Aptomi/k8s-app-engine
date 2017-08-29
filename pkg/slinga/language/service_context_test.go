@@ -44,7 +44,7 @@ func evalKeys(t *testing.T, context *Context, params *template.TemplateParameter
 }
 
 func TestServiceContextMatching(t *testing.T) {
-	policy := LoadUnitTestsPolicy()
+	policy := LoadUnitTestsPolicy("../testdata/unittests")
 
 	// Test prod-high context
 	context := policy.Contexts["prod-high"]
@@ -95,7 +95,7 @@ func TestServiceContextMatching(t *testing.T) {
 }
 
 func TestServiceContextRequireAnyFails(t *testing.T) {
-	policy := LoadUnitTestsPolicy()
+	policy := LoadUnitTestsPolicy("../testdata/unittests")
 	context := policy.Contexts["special-not-matched"]
 	paramsMatch := []*expression.ExpressionParameters{}
 	paramsDoesntMatch := []*expression.ExpressionParameters{
@@ -112,7 +112,7 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 }
 
 func TestServiceContextRequireAnyEmpty(t *testing.T) {
-	policy := LoadUnitTestsPolicy()
+	policy := LoadUnitTestsPolicy("../testdata/unittests")
 	context := policy.Contexts["special-matched"]
 	paramsMatch := []*expression.ExpressionParameters{
 		expression.NewExpressionParams(
@@ -128,7 +128,7 @@ func TestServiceContextRequireAnyEmpty(t *testing.T) {
 }
 
 func TestServiceContextKeyResolution(t *testing.T) {
-	policy := LoadUnitTestsPolicy()
+	policy := LoadUnitTestsPolicy("../testdata/unittests")
 
 	// Test prod-high context
 	context := policy.Contexts["prod-high"]

@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 )
 
 // ConsumerView represents a view from a particular consumer(s) (service consumer point of view)
@@ -9,16 +9,16 @@ import (
 type ConsumerView struct {
 	userId       string
 	dependencyId string
-	state        engine.ServiceUsageState
+	state        *resolve.ResolvedState
 	g            *graph
 }
 
 // NewConsumerView creates a new ConsumerView
-func NewConsumerView(userID string, dependencyID string, state engine.ServiceUsageState) ConsumerView {
+func NewConsumerView(userID string, dependencyID string) ConsumerView {
 	return ConsumerView{
 		userId:       userID,
 		dependencyId: dependencyID,
-		state:        state,
+		state:        resolve.LoadResolvedState(),
 		g:            newGraph(),
 	}
 }
@@ -29,7 +29,7 @@ func (view ConsumerView) GetData() interface{} {
 	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
 		if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.GetID(), view.dependencyId) {
 			// Step 1 - add a node for every matching dependency found
-			dependencyNode := newDependencyNode(dependency, false, view.state.GetUserLoader())
+			dependencyNode := newDependencyNode(dependency, false, view.state.UserLoader)
 			view.g.addNode(dependencyNode, 0)
 
 			// Step 2 - process subgraph (doesn't matter whether it's resolved successfully or not)
@@ -48,11 +48,11 @@ func filterMatches(value string, filterValue string) bool {
 // Adds to the graph nodes/edges which are triggered by usage of a given dependency
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
 	// try to get this component instance from resolved data
-	v := view.state.GetResolvedData().ComponentInstanceMap[key]
+	v := view.state.State.ResolvedData.ComponentInstanceMap[key]
 
 	// okay, this component likely failed to resolved, so let's look it up from unresolved pool
 	if v == nil {
-		v = view.state.UnresolvedData.ComponentInstanceMap[key]
+		v = view.state.State.UnresolvedData.ComponentInstanceMap[key]
 	}
 
 	// if it's a service, add node and connect with previous

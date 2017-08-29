@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // LastRevisionAbsentValue represents initial state ("zero revision")
@@ -17,7 +17,7 @@ type AptomiRun struct {
 	Revision AptomiRevision
 
 	// Metadata of the run (e.g. commit id, start time, end time, etc)
-	Metadata NestedParameterMap
+	Metadata util.NestedParameterMap
 }
 
 // Increment increments the revision

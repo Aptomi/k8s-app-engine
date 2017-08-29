@@ -2,7 +2,7 @@ package visibility
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"sort"
 	"strconv"
 )
@@ -10,14 +10,14 @@ import (
 // TimelineView represents timeline view
 type TimelineView struct {
 	userID string
-	states map[int]engine.ServiceUsageState
+	states map[int]*resolve.ResolvedState
 }
 
 // NewTimelineView creates a new TimelineView
-func NewTimelineView(userID string, states map[int]engine.ServiceUsageState) TimelineView {
+func NewTimelineView(userID string) TimelineView {
 	return TimelineView{
 		userID: userID,
-		states: states,
+		states: resolve.LoadResolvedStatesAll(),
 	}
 }
 
@@ -35,8 +35,8 @@ func (view TimelineView) GetData() interface{} {
 			"id":             rev.GetRunDirectory(),
 			"revisionNumber": strconv.Itoa(revisionNumber),
 			"dir":            rev.GetRunDirectory(),
-			"createdOn":      state.CreatedOn,
-			"diff":           state.DiffAsText,
+			"createdOn":      state.State.CreatedOn,
+			"diff":           "WE NEED TO THINK WHERE TO STORE PLAIN-TEXT-DIFF (IT USED TO BE STORED IN A WRONG PLACE)",
 		}
 		result = append(result, entry)
 	}

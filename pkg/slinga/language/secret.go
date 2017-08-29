@@ -1,7 +1,7 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/mattn/go-zglob"
 	"sort"
@@ -20,7 +20,7 @@ type UserSecrets struct {
 }
 
 func loadUserSecretsFromDir(baseDir string) []*UserSecrets {
-	files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(baseDir, TypeSecrets))
+	files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(baseDir, db.TypeSecrets))
 	sort.Strings(files)
 	t := []*UserSecrets{}
 	for _, f := range files {

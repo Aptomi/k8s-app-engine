@@ -44,6 +44,7 @@ Items to complete:
 3. Error handing in engine & improved engine unit test coverage for corner cases
 
 4. Separate apply() from diff calculation
+   - Deal with component create/update times (calculated in diff)
 
 5. Plugins: engine -> ComponentInstancePlugin() -> istio
 

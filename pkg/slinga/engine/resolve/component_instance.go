@@ -1,4 +1,4 @@
-package engine
+package resolve
 
 import (
 	"fmt"
@@ -116,7 +116,7 @@ func (instance *ComponentInstance) addEdgeOut(dstKey string) {
 	instance.EdgesOut[dstKey] = true
 }
 
-func (instance *ComponentInstance) updateTimes(createdOn time.Time, updatedOn time.Time) {
+func (instance *ComponentInstance) UpdateTimes(createdOn time.Time, updatedOn time.Time) {
 	if time.Time.IsZero(instance.CreatedOn) || (!time.Time.IsZero(createdOn) && createdOn.Before(instance.CreatedOn)) {
 		instance.CreatedOn = createdOn
 	}

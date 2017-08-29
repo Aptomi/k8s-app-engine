@@ -1,7 +1,8 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"sort"
 )
 
@@ -18,12 +19,13 @@ type detail struct {
 	Dependencies    []*item
 	AllDependencies []*item
 	Views           []*item
-	Summary         engine.ServiceUsageStateSummary
+	Summary         diff.ServiceUsageStateSummary
 }
 
 // NewDetails returns detail object
-func NewDetails(userID string, state engine.ServiceUsageState) detail {
-	summary := state.GetSummary()
+func NewDetails(userID string) detail {
+	state := resolve.LoadResolvedState()
+	summary := diff.GetSummary(state)
 	r := detail{
 		userID,
 		make([]*item, 0),
@@ -36,7 +38,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 
 	// Users
 	userIds := make([]string, 0)
-	for userID := range state.GetUserLoader().LoadUsersAll().Users {
+	for userID := range state.UserLoader.LoadUsersAll().Users {
 		userIds = append(userIds, userID)
 	}
 
@@ -46,7 +48,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 		r.Users = append([]*item{{"all", "All"}}, r.Users...)
 	}
 	for _, userID := range userIds {
-		r.Users = append(r.Users, &item{userID, state.GetUserLoader().LoadUserByID(userID).Name})
+		r.Users = append(r.Users, &item{userID, state.UserLoader.LoadUserByID(userID).Name})
 	}
 
 	// Dependencies
@@ -106,7 +108,7 @@ func NewDetails(userID string, state engine.ServiceUsageState) detail {
 	}
 
 	// TODO: this will have to be changed when we implement roles & ACLs
-	if state.GetUserLoader().LoadUserByID(userID).Labels["global_ops"] == "true" {
+	if state.UserLoader.LoadUserByID(userID).Labels["global_ops"] == "true" {
 		r.Views = append(r.Views, &item{"globalops", "Global IT/Ops"})
 	}
 

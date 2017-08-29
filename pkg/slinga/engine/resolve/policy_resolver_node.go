@@ -1,6 +1,7 @@
-package engine
+package resolve
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/util"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -12,13 +13,10 @@ type resolutionNode struct {
 	// whether we successfully resolved this node or not
 	resolved bool
 
-	// reference to a cache
-	cache *EngineCache
+	// pointer to the policy resolver
+	resolver *PolicyResolver
 
-	// pointer to ServiceUsageState
-	state *ServiceUsageState
-
-	// pointer to event log
+	// pointer to event log (local to the node)
 	eventLog *EventLog
 
 	// combined event logs from all resolution nodes in the subtree
@@ -70,27 +68,25 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (state *ServiceUsageState) newResolutionNode(dependency *Dependency, cache *EngineCache) *resolutionNode {
+func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resolutionNode {
 
 	// combining user labels and dependency labels
-	user := state.userLoader.LoadUserByID(dependency.UserID)
+	user := resolver.userLoader.LoadUserByID(dependency.UserID)
 	labels := dependency.GetLabelSet()
 	if user != nil {
 		labels = labels.AddLabels(user.GetLabelSet())
 		labels = labels.AddLabels(user.GetSecretSet())
 	}
 
-	data := newServiceUsageData()
 	eventLog := NewEventLog()
 	return &resolutionNode{
 		resolved: false,
 
-		state:             state,
-		cache:             cache,
+		resolver:          resolver,
 		eventLog:          eventLog,
 		eventLogsCombined: []*EventLog{eventLog},
 
-		data: data,
+		data: NewServiceUsageData(),
 
 		depth:      0,
 		dependency: dependency,
@@ -114,8 +110,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 	return &resolutionNode{
 		resolved: false,
 
-		state:    node.state,
-		cache:    node.cache,
+		resolver: node.resolver,
 		eventLog: eventLog,
 
 		data: node.data,
@@ -218,7 +213,7 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 	for _, context := range policy.Contexts {
 
 		// Check if context matches (based on criteria)
-		matched, err := context.Matches(node.getContextualDataForExpression(), node.cache.expressionCache)
+		matched, err := context.Matches(node.getContextualDataForExpression(), node.resolver.expressionCache)
 		if err != nil {
 			// Propagate error up
 			return nil, node.errorWhenTestingContext(context, err)
@@ -231,7 +226,7 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 			labels := node.transformLabels(node.labels, context.ChangeLabels)
 
 			// Lookup cluster from a label
-			cluster, err := getCluster(policy, labels)
+			cluster, err := util.GetCluster(policy, labels)
 			if err != nil {
 				// Propagate error up
 				return nil, node.errorGettingClusterForGlobalRules(context, labels, err)
@@ -269,7 +264,7 @@ func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]st
 	}
 
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
-	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.cache.templateCache)
+	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.resolver.templateCache)
 	if err != nil {
 		return nil, node.errorWhenResolvingAllocationKeys(err)
 	}
@@ -308,7 +303,7 @@ func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, con
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {
-			matched, err := rule.FilterServices.Match(labels, node.user, cluster, node.cache.expressionCache)
+			matched, err := rule.FilterServices.Match(labels, node.user, cluster, node.resolver.expressionCache)
 			if err != nil {
 				return true, node.errorWhenTestingGlobalRule(context, rule, labels, err)
 			}
@@ -329,12 +324,12 @@ func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, con
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
+	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.resolver.templateCache)
 	if err != nil {
 		return node.errorWhenProcessingCodeParams(err)
 	}
 
-	err = node.data.recordCodeParams(node.componentKey, componentCodeParams)
+	err = node.data.RecordCodeParams(node.componentKey, componentCodeParams)
 	if err != nil {
 		return node.errorWhenProcessingCodeParams(err)
 	}
@@ -345,12 +340,12 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.cache.templateCache)
+	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.resolver.templateCache)
 	if err != nil {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}
 
-	err = node.data.recordDiscoveryParams(node.componentKey, componentDiscoveryParams)
+	err = node.data.RecordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 	if err != nil {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}
@@ -364,15 +359,4 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	}
 
 	return nil
-}
-
-// Stores calculated labels for component instance
-func (node *resolutionNode) recordLabels(cik *ComponentInstanceKey, labels LabelSet) {
-	node.data.recordLabels(cik, labels)
-}
-
-// Mark instance as resolved and save dependency that triggered its instantiation
-func (node *resolutionNode) recordResolved(cik *ComponentInstanceKey, dependency *Dependency) {
-	node.logInstanceSuccessfullyResolved(cik)
-	node.data.recordResolved(cik, dependency)
 }

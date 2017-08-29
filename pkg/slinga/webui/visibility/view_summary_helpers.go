@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"strings"
@@ -11,21 +11,21 @@ func (view SummaryView) getDependencyStats(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	return NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
+	return NewTimeDiff(view.state.State.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
 }
 
 func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	return view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels["cluster"]
+	return view.state.State.ResolvedData.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels["cluster"]
 }
 
 func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) string {
 	if !dependency.Resolved {
 		return "N/A"
 	}
-	instance := view.state.ResolvedData.ComponentInstanceMap[dependency.ServiceKey]
+	instance := view.state.State.ResolvedData.ComponentInstanceMap[dependency.ServiceKey]
 	return view.getResolvedContextNameByInst(instance)
 }
 
@@ -37,7 +37,7 @@ func (view SummaryView) getRuleAppliedTo(rule *Rule) string {
 func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 	matchedUsers := make([]*User, 0)
 
-	for _, user := range view.state.GetUserLoader().LoadUsersAll().Users {
+	for _, user := range view.state.UserLoader.LoadUsersAll().Users {
 		match, err := rule.MatchUser(user)
 		if err != nil {
 			// TODO: we probably need to handle this error better here
@@ -51,15 +51,15 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 	return matchedUsers
 }
 
-func (view SummaryView) getInstanceStats(instance *engine.ComponentInstance) string {
-	return NewTimeDiff(view.state.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].GetRunningTime()).Humanize()
+func (view SummaryView) getInstanceStats(instance *resolve.ComponentInstance) string {
+	return NewTimeDiff(view.state.State.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].GetRunningTime()).Humanize()
 }
 
-func (view SummaryView) getResolvedClusterNameByInst(instance *engine.ComponentInstance) string {
-	return view.state.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels["cluster"]
+func (view SummaryView) getResolvedClusterNameByInst(instance *resolve.ComponentInstance) string {
+	return view.state.State.ResolvedData.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels["cluster"]
 }
 
-func (view SummaryView) getResolvedContextNameByInst(instance *engine.ComponentInstance) string {
+func (view SummaryView) getResolvedContextNameByInst(instance *resolve.ComponentInstance) string {
 	return instance.Key.ContextNameWithKeys
 }
 

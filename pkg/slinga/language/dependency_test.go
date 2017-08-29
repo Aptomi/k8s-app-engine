@@ -7,7 +7,7 @@ import (
 )
 
 func TestLoadDependencies(t *testing.T) {
-	dependencies := LoadUnitTestsPolicy().Dependencies
+	dependencies := LoadUnitTestsPolicy("../testdata/unittests").Dependencies
 
 	// look at kafka dependencies
 	kafkaDeps := dependencies.DependenciesByService["kafka"]
@@ -28,7 +28,7 @@ func TestLoadDependencies(t *testing.T) {
 }
 
 func TestAddDependency(t *testing.T) {
-	dependencies := LoadUnitTestsPolicy().Dependencies
+	dependencies := LoadUnitTestsPolicy("../testdata/unittests").Dependencies
 
 	// create new dependency
 	depAdd := &Dependency{

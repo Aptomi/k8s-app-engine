@@ -1,7 +1,7 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/mattn/go-zglob"
 	"strconv"
@@ -21,7 +21,7 @@ func NewUserLoaderFromDir(baseDir string) UserLoader {
 // LoadUsersAll loads all users
 func (loader *UserLoaderFromDir) LoadUsersAll() GlobalUsers {
 	if loader.cachedUsers == nil {
-		files, _ := zglob.Glob(GetAptomiObjectFilePatternYaml(loader.baseDir, TypeUsersFile))
+		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeUsersFile))
 		loader.cachedUsers = &GlobalUsers{Users: make(map[string]*User)}
 		for _, fileName := range files {
 			t := loadUsersFromFile(fileName)
