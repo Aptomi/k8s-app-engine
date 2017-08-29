@@ -48,11 +48,22 @@ func (store *FileLoader) LoadObjects() ([]BaseObject, error) {
 		if !strings.Contains(f, "external") {
 			objects, err := store.loadObjectsFromFile(f)
 			if err != nil {
-				return nil, fmt.Errorf("Error while loading objects from file %store: %store", f, err)
+				return nil, fmt.Errorf("Error while loading objects from file %s: %s", f, err)
 			}
 
 			result = append(result, objects...)
 		}
+	}
+
+	// This hack is needed to make sure that we'll get test data in the same way like after marshaling objects
+	// and storing them in DB. Example: empty fields will be stored anyway, while we omitting them in test data.
+	data, err := store.codec.MarshalMany(result)
+	if err != nil {
+		return nil, fmt.Errorf("Error marshaling loaded objects: %s", err)
+	}
+	result, err = store.codec.UnmarshalOneOrMany(data)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshaling loaded objects: %s", err)
 	}
 
 	return result, nil
