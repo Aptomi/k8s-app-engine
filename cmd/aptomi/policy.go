@@ -6,9 +6,6 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine"
 	. "github.com/Aptomi/aptomi/pkg/slinga/graphviz"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
-	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object/store/file"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -49,18 +46,7 @@ var policyCmdApply = &cobra.Command{
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
 
-		//policy, err := registry.NewDefaultRegistry(policyDir).LoadPolicy(0)
-		catalog := NewObjectCatalog()
-		catalog.Add(ServiceObject)
-		catalog.Add(ContextObject)
-		catalog.Add(ClusterObject)
-		catalog.Add(RuleObject)
-		catalog.Add(DependencyObject)
-
-		store := FileStore{}
-		store.Codec = &yaml.YamlCodec{}
-		store.Codec.SetObjectCatalog(catalog)
-		store.Open(policyDir)
+		store := NewFileLoader(policyDir)
 
 		policy := NewPolicyNamespace()
 
