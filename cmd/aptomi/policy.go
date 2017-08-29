@@ -5,7 +5,6 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/graphviz"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
@@ -71,7 +70,7 @@ var policyCmdApply = &cobra.Command{
 		}
 
 		// Process differences
-		diff := NewServiceUsageStateDiff(nextState, prevState, plugin.AllPlugins())
+		diff := NewServiceUsageStateDiff(nextState, prevState)
 		diff.AlterDifference(full)
 		diff.StoreDiffAsText(verbose)
 
@@ -85,7 +84,10 @@ var policyCmdApply = &cobra.Command{
 		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
 		apply := NewEngineApply(diff)
 		if !(noop || emulateDeployment) {
-			apply.Apply()
+			err := apply.Apply()
+			if err != nil {
+				log.Panicf("Cannot apply policy: %v", err)
+			}
 		}
 
 		// Save new resolved state in the last run directory

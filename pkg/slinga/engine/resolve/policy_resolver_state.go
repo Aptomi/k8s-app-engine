@@ -15,7 +15,7 @@ type ResolvedState struct {
 	State *ServiceUsageState
 
 	// External data
-	UserLoader language.UserLoader
+	UserLoader language.UserLoader `yaml:"-"`
 }
 
 // NewResolvedState creates a new revision state

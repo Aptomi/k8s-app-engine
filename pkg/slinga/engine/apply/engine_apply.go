@@ -3,15 +3,16 @@ package apply
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
-	log "github.com/Sirupsen/logrus"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 )
 
 type EngineApply struct {
 	// Diff to be applied
 	diff *diff.ServiceUsageStateDiff
+
+	// Buffered event log - gets populated while applying changes
+	eventLog *eventlog.EventLog
 
 	// Progress indicator
 	progress progress.ProgressIndicator
@@ -20,6 +21,7 @@ type EngineApply struct {
 func NewEngineApply(diff *diff.ServiceUsageStateDiff) *EngineApply {
 	return &EngineApply{
 		diff:     diff,
+		eventLog: eventlog.NewEventLog(),
 		progress: progress.NewProgressConsole(),
 	}
 }
@@ -29,24 +31,34 @@ func (apply *EngineApply) Apply() error {
 	// initialize progress indicator
 	apply.progress.SetTotal(apply.diff.GetApplyProgressLength())
 
+	// call plugins to perform their actions
+	for _, plugin := range apply.diff.Plugins {
+		err := plugin.OnApplyStart(apply.eventLog)
+		if err != nil {
+			return fmt.Errorf("Error while calling OnApplyStart() on a plugin: " + err.Error())
+		}
+	}
+
 	// process all actions
 	err := apply.processDestructions()
 	if err != nil {
-		return fmt.Errorf("Error while destructing components")
+		return fmt.Errorf("Error while destructing components: " + err.Error())
 	}
 	err = apply.processUpdates()
 	if err != nil {
-		return fmt.Errorf("Error while updating components")
+		return fmt.Errorf("Error while updating components: " + err.Error())
 	}
 	err = apply.processInstantiations()
 	if err != nil {
-		return fmt.Errorf("Error while instantiating components")
+		return fmt.Errorf("Error while instantiating components: " + err.Error())
 	}
 
 	// call plugins to perform their actions
-	// TODO: error handling from plugins
 	for _, plugin := range apply.diff.Plugins {
-		plugin.Apply(apply.progress)
+		err := plugin.OnApplyCustom(apply.progress)
+		if err != nil {
+			return fmt.Errorf("Error while calling OnApplyCustom() on a plugin: " + err.Error())
+		}
 	}
 
 	// Finalize progress indicator
@@ -62,38 +74,11 @@ func (apply *EngineApply) processInstantiations() error {
 			// Advance progress indicator
 			apply.progress.Advance("Create")
 
-			instance := apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key]
-			component := apply.diff.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
-
-			if component == nil {
-				Debug.WithFields(log.Fields{
-					"serviceKey": key,
-					"service":    instance.Key.ServiceName,
-				}).Info("Instantiating service")
-
-				// TODO: add processing code
-			} else {
-				Debug.WithFields(log.Fields{
-					"componentKey": key,
-					"component":    component.Name,
-					"code":         component.Code,
-				}).Info("Instantiating component")
-
-				if component.Code != nil {
-					codeExecutor, err := deployment.GetCodeExecutor(
-						component.Code,
-						key,
-						apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams,
-						apply.diff.Next.Policy.Clusters,
-					)
-					if err != nil {
-						return err
-					}
-
-					err = codeExecutor.Install()
-					if err != nil {
-						return err
-					}
+			// call plugins to perform their actions
+			for _, plugin := range apply.diff.Plugins {
+				err := plugin.OnApplyComponentInstanceCreate(apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key])
+				if err != nil {
+					return fmt.Errorf("Error while calling OnApplyComponentInstanceCreate() on a plugin: " + err.Error())
 				}
 			}
 		}
@@ -109,37 +94,11 @@ func (apply *EngineApply) processUpdates() error {
 			// Advance progress indicator
 			apply.progress.Advance("Update")
 
-			instance := apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key]
-			component := apply.diff.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
-			if component == nil {
-				Debug.WithFields(log.Fields{
-					"serviceKey": key,
-					"service":    instance.Key.ServiceName,
-				}).Info("Updating service")
-
-				// TODO: add processing code
-			} else {
-				Debug.WithFields(log.Fields{
-					"componentKey": key,
-					"component":    component.Name,
-					"code":         component.Code,
-				}).Info("Updating component")
-
-				if component.Code != nil {
-					codeExecutor, err := deployment.GetCodeExecutor(
-						component.Code,
-						key,
-						apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams,
-						apply.diff.Next.Policy.Clusters,
-					)
-					if err != nil {
-						return err
-					}
-					err = codeExecutor.Update()
-					if err != nil {
-						return err
-					}
-
+			// call plugins to perform their actions
+			for _, plugin := range apply.diff.Plugins {
+				err := plugin.OnApplyComponentInstanceUpdate(apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key])
+				if err != nil {
+					return fmt.Errorf("Error while calling OnApplyComponentInstanceUpdate() on a plugin: " + err.Error())
 				}
 			}
 		}
@@ -155,36 +114,11 @@ func (apply *EngineApply) processDestructions() error {
 			// Advance progress indicator
 			apply.progress.Advance("Delete")
 
-			instance := apply.diff.Prev.State.ResolvedData.ComponentInstanceMap[key]
-			component := apply.diff.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
-			if component == nil {
-				Debug.WithFields(log.Fields{
-					"serviceKey": key,
-					"service":    instance.Key.ServiceName,
-				}).Info("Destructing service")
-
-				// TODO: add processing code
-			} else {
-				Debug.WithFields(log.Fields{
-					"componentKey": key,
-					"component":    component.Name,
-					"code":         component.Code,
-				}).Info("Destructing component")
-
-				if component.Code != nil {
-					codeExecutor, err := deployment.GetCodeExecutor(
-						component.Code,
-						key,
-						apply.diff.Prev.State.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams,
-						apply.diff.Prev.Policy.Clusters,
-					)
-					if err != nil {
-						return err
-					}
-					err = codeExecutor.Destroy()
-					if err != nil {
-						return err
-					}
+			// call plugins to perform their actions
+			for _, plugin := range apply.diff.Plugins {
+				err := plugin.OnApplyComponentInstanceDelete(apply.diff.Prev.State.ResolvedData.ComponentInstanceMap[key])
+				if err != nil {
+					return fmt.Errorf("Error while calling OnApplyComponentInstanceDelete() on a plugin: " + err.Error())
 				}
 			}
 		}

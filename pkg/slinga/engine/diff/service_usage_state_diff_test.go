@@ -1,7 +1,6 @@
 package diff
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
@@ -25,7 +24,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	resolvedNext := loadPolicyAndResolve(t)
 
 	// Calculate and verify difference
-	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev, plugin.AllPlugins())
+	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, false, 0, 0, 0, 0, 0)
 }
 
@@ -48,7 +47,7 @@ func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
 	resolvedNext := resolvePolicy(t, nextPolicy)
 
 	// Calculate difference
-	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev, plugin.AllPlugins())
+	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, true, 8, 0, 0, 8, 0)
 }
 
@@ -66,7 +65,7 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	resolvedInitial := loadPolicyAndResolve(t)
 
 	// Calculate difference against empty state to update times, emulate save/load
-	diff := NewServiceUsageStateDiff(resolvedInitial, uEmpty, plugin.AllPlugins())
+	diff := NewServiceUsageStateDiff(resolvedInitial, uEmpty)
 	resolvedInitial = emulateSaveAndLoadState(resolvedInitial)
 
 	// Check creation/update times
@@ -91,7 +90,7 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 		},
 	)
 	resolvedNew := resolvePolicy(t, policyNext)
-	_ = NewServiceUsageStateDiff(resolvedNew, resolvedInitial, plugin.AllPlugins())
+	_ = NewServiceUsageStateDiff(resolvedNew, resolvedInitial)
 
 	// Check creation/update times
 	pInit := getTimes(t, key, resolvedInitial.State, resolvedNew.State)
@@ -107,7 +106,7 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	resolvedDependencyUpdate := resolvePolicyInternal(t, resolvedNew.Policy, userLoader)
 
 	// Get the diff
-	diff = NewServiceUsageStateDiff(resolvedDependencyUpdate, resolvedNew, plugin.AllPlugins())
+	diff = NewServiceUsageStateDiff(resolvedDependencyUpdate, resolvedNew)
 
 	// Check that update has been performed
 	verifyDiff(t, diff, true, 0, 0, 1, 0, 0)

@@ -39,7 +39,7 @@ type ServiceUsageStateDiff struct {
 }
 
 // CalculateDifference calculates difference between two given usage states
-func NewServiceUsageStateDiff(next *resolve.ResolvedState, prev *resolve.ResolvedState, plugins []plugin.EnginePlugin) *ServiceUsageStateDiff {
+func NewServiceUsageStateDiff(next *resolve.ResolvedState, prev *resolve.ResolvedState) *ServiceUsageStateDiff {
 	// resulting difference
 	result := &ServiceUsageStateDiff{
 		Prev:                 prev,
@@ -47,7 +47,7 @@ func NewServiceUsageStateDiff(next *resolve.ResolvedState, prev *resolve.Resolve
 		ComponentInstantiate: make(map[string]bool),
 		ComponentDestruct:    make(map[string]bool),
 		ComponentUpdate:      make(map[string]bool),
-		Plugins:              plugins,
+		Plugins:              plugin.AllPlugins(),
 	}
 
 	result.calculateDifference()
@@ -180,9 +180,9 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool,
 	log.Println("[Components]")
 
 	// Print
-	printed := diff.GetApplyProgressLength() > 0
+	changes := diff.GetApplyProgressLength() > 0
 
-	if printed {
+	if changes {
 		log.Printf("  New instances:     %d", len(diff.ComponentInstantiate))
 		log.Printf("  Deleted instances: %d", len(diff.ComponentDestruct))
 		log.Printf("  Updated instances: %d", len(diff.ComponentUpdate))
@@ -214,7 +214,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool,
 		}
 	}
 
-	if !printed {
+	if !changes {
 		log.Println("  [*] No changes")
 	}
 

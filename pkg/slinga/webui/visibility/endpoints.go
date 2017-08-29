@@ -1,6 +1,7 @@
 package visibility
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"sort"
@@ -56,7 +57,7 @@ func Endpoints(currentUserID string) endpointsView {
 	for _, userID := range userIds {
 		r := make([]rEndpoint, 0)
 
-		endpoints := resolve.Endpoints(state.Policy, state.State, userID)
+		endpoints := deployment.Endpoints(state.Policy, state.State, userID)
 
 		for key, links := range endpoints {
 			instance := state.State.ResolvedData.ComponentInstanceMap[key]

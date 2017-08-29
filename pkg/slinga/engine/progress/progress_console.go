@@ -17,17 +17,20 @@ type ProgressConsole struct {
 
 func NewProgressConsole() *ProgressConsole {
 	progress := uiprogress.New()
-	progress.Out = os.Stdout
 	progress.RefreshInterval = time.Second
 	progress.Start()
-	return &ProgressConsole{progressCount: &progressCount{}, progress: progress}
+	return &ProgressConsole{
+		progressCount: &progressCount{},
+		progress:      progress,
+		out:           os.Stdout,
+	}
 }
 
 func (progressConsole *ProgressConsole) createProgressBar() {
+	progressConsole.progress.SetOut(progressConsole.out)
 	if progressConsole.getTotalInternal() > 0 {
 		fmt.Fprintln(progressConsole.out, "[Applying changes]")
 	}
-	progressConsole.progress.SetOut(progressConsole.out)
 	progressConsole.progressBar = progressConsole.progress.AddBar(progressConsole.getTotalInternal())
 	progressConsole.progressBar.PrependFunc(func(b *uiprogress.Bar) string {
 		return fmt.Sprintf("  [%s: %d/%d]", progressConsole.getStageInternal(), b.Current(), b.Total)

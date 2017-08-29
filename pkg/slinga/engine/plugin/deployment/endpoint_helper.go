@@ -1,14 +1,14 @@
-package resolve
+package deployment
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	log "github.com/Sirupsen/logrus"
 )
 
 // Endpoints returns map from key to map from port type to url for all services
-func Endpoints(policy *language.PolicyNamespace, state *ServiceUsageState, filterUserID string) map[string]map[string]string {
+func Endpoints(policy *language.PolicyNamespace, state *resolve.ServiceUsageState, filterUserID string) map[string]map[string]string {
 	result := make(map[string]map[string]string)
 
 	for _, key := range state.ResolvedData.ComponentProcessingOrder {
@@ -31,7 +31,7 @@ func Endpoints(policy *language.PolicyNamespace, state *ServiceUsageState, filte
 
 		component := policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 		if component != nil && component.Code != nil {
-			codeExecutor, err := deployment.GetCodeExecutor(component.Code, key, state.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams, policy.Clusters)
+			codeExecutor, err := GetCodeExecutor(component.Code, key, state.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams, policy.Clusters)
 			if err != nil {
 				Debug.WithFields(log.Fields{
 					"key":   key,
