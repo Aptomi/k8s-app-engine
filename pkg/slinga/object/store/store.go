@@ -6,10 +6,8 @@ import (
 )
 
 type ObjectStore interface {
-	//TODO pass some config
 	Open(connection string) error
 	Close() error
-	SetCodec(codec codec.MarshalUnmarshaler)
 	//GetOne(namespace string, kind Kind, name string, generation Generation) (BaseObject, error)
 	//GetOneByKey(key Key) (BaseObject, error)
 	GetNewestOne(namespace string, kind string, name string) (BaseObject, error)
