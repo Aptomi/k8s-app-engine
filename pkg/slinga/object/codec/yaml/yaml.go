@@ -7,26 +7,30 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type YamlCodec struct {
-	codec.BaseMarshalUnmarshaler
+func NewCodec(catalog *ObjectCatalog) codec.MarshalUnmarshaler {
+	return &yamlCodec{catalog}
+}
+
+type yamlCodec struct {
+	catalog *ObjectCatalog
 }
 
 // YamlCodecName is the name of Yaml MarshalUnmarshaler implementation
 const YamlCodecName = "yaml"
 
-func (c *YamlCodec) GetName() string {
+func (c *yamlCodec) GetName() string {
 	return YamlCodecName
 }
 
-func (c *YamlCodec) MarshalOne(object BaseObject) ([]byte, error) {
+func (c *yamlCodec) MarshalOne(object BaseObject) ([]byte, error) {
 	return yaml.Marshal(&object)
 }
 
-func (c *YamlCodec) MarshalMany(objects []BaseObject) ([]byte, error) {
+func (c *yamlCodec) MarshalMany(objects []BaseObject) ([]byte, error) {
 	return yaml.Marshal(&objects)
 }
 
-func (c *YamlCodec) UnmarshalOne(data []byte) (BaseObject, error) {
+func (c *yamlCodec) UnmarshalOne(data []byte) (BaseObject, error) {
 	objects, err := c.unmarshalOneOrMany(data, true)
 	if err != nil {
 		return nil, err
@@ -35,11 +39,11 @@ func (c *YamlCodec) UnmarshalOne(data []byte) (BaseObject, error) {
 	return objects[0], nil
 }
 
-func (c *YamlCodec) UnmarshalOneOrMany(data []byte) ([]BaseObject, error) {
+func (c *yamlCodec) UnmarshalOneOrMany(data []byte) ([]BaseObject, error) {
 	return c.unmarshalOneOrMany(data, false)
 }
 
-func (c *YamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]BaseObject, error) {
+func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]BaseObject, error) {
 	raw := new(interface{})
 	err := yaml.Unmarshal(data, raw)
 	if err != nil {
@@ -83,7 +87,7 @@ func (c *YamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]BaseObjec
 	return result, nil
 }
 
-func (c *YamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte) (BaseObject, error) {
+func (c *yamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte) (BaseObject, error) {
 	metaField, ok := single["metadata"]
 	if !ok {
 		return nil, fmt.Errorf("Can't find metadata field inside object: %v", single)
@@ -104,7 +108,7 @@ func (c *YamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte
 		return nil, fmt.Errorf("Kind field in metadata isn't a string: %v", single)
 	}
 
-	objectInfo := c.Catalog.Get(kind)
+	objectInfo := c.catalog.Get(kind)
 	if objectInfo == nil {
 		return nil, fmt.Errorf("Unknown kind: %s", kind)
 	}

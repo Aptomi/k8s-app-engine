@@ -11,16 +11,14 @@ type ObjectInfo struct {
 	Constructor Constructor
 }
 
-func NewObjectCatalog() *ObjectCatalog {
-	return &ObjectCatalog{
+func NewObjectCatalog(infos ...*ObjectInfo) *ObjectCatalog {
+	catalog := &ObjectCatalog{
 		make(map[string]*ObjectInfo),
 	}
-}
-
-func (catalog *ObjectCatalog) Add(infos ...*ObjectInfo) {
 	for _, info := range infos {
 		catalog.Kinds[info.Kind] = info
 	}
+	return catalog
 }
 
 func (catalog *ObjectCatalog) Get(kind string) *ObjectInfo { // todo return error if not found?
