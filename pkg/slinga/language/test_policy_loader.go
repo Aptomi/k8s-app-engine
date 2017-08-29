@@ -18,7 +18,7 @@ func LoadUnitTestsPolicy(storeDir string) *PolicyNamespace {
 	policy := NewPolicyNamespace()
 	objects, err := loader.LoadObjects()
 	if err != nil {
-		panic("Error while loading test policy: " + err.Error())
+		panic(fmt.Sprintf("Error while loading test policy: %s", err))
 	}
 
 	for _, object := range objects {
