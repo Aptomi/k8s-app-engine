@@ -17,8 +17,10 @@ func NewObjectCatalog() *ObjectCatalog {
 	}
 }
 
-func (catalog *ObjectCatalog) Add(info *ObjectInfo) {
-	catalog.Kinds[info.Kind] = info
+func (catalog *ObjectCatalog) Add(infos ...*ObjectInfo) {
+	for _, info := range infos {
+		catalog.Kinds[info.Kind] = info
+	}
 }
 
 func (catalog *ObjectCatalog) Get(kind string) *ObjectInfo { // todo return error if not found?

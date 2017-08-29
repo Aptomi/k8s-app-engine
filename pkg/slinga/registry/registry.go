@@ -15,8 +15,8 @@ type Registry struct {
 	catalog *ObjectCatalog
 }
 
-func (reg *Registry) AddKind(info *ObjectInfo) {
-	reg.catalog.Add(info)
+func (reg *Registry) AddKind(infos ...*ObjectInfo) {
+	reg.catalog.Add(infos...)
 }
 
 func (reg *Registry) LoadPolicy(gen Generation) (*PolicyNamespace, error) {
@@ -50,15 +50,13 @@ func (reg *Registry) LoadPolicy(gen Generation) (*PolicyNamespace, error) {
 	return policy, nil
 }
 
+var PolicyObjects = []*ObjectInfo{ServiceObject, ContextObject, ClusterObject, RuleObject, DependencyObject}
+
 func NewDefaultRegistry() *Registry {
 	reg := &Registry{
 		catalog: NewObjectCatalog(),
 	}
-	reg.AddKind(ServiceObject)
-	reg.AddKind(ContextObject)
-	reg.AddKind(ClusterObject)
-	reg.AddKind(RuleObject)
-	reg.AddKind(DependencyObject)
+	reg.AddKind(PolicyObjects...)
 
 	//reg.store = &file.FileStore{}
 	//reg.store.SetObjectCatalog()
