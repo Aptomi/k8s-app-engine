@@ -11,9 +11,9 @@ type EngineDiffPlugin interface {
 	// Init will be called by the engine after diff is calculated and populated with data
 	Init(next *resolve.ResolvedState, prev *resolve.ResolvedState)
 
-	// GetApplyProgressLength should return the number of times a plugin
+	// GetCustomApplyProgressLength should return the number of times a plugin
 	// will increment progress indicator during OnApplyCustom() phase
-	GetApplyProgressLength() int
+	GetCustomApplyProgressLength() int
 }
 
 // EngineApplyPlugin contains methods which will be called by the engine during diff calculation
@@ -31,7 +31,7 @@ type EngineApplyPlugin interface {
 	OnApplyComponentInstanceDelete(*resolve.ComponentInstance) error
 
 	// OnApplyCustom method will be called after engine is done with processing all component instances
-	// It will pass progress indicator as a parameter. Plugin should advance it by GetApplyProgressLength() steps throughout
+	// It will pass progress indicator as a parameter. Plugin should advance it by GetCustomApplyProgressLength() steps throughout
 	// execution of OnApplyCustom method
 	OnApplyCustom(progress.ProgressIndicator) error
 }

@@ -169,7 +169,7 @@ func (diff *ServiceUsageStateDiff) GetApplyProgressLength() int {
 		len(diff.ComponentUpdate)
 
 	for _, pluginInstance := range diff.Plugins {
-		result += pluginInstance.GetApplyProgressLength()
+		result += pluginInstance.GetCustomApplyProgressLength()
 	}
 
 	return result

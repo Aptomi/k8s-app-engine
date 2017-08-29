@@ -11,7 +11,7 @@ type DeployerPlugin struct {
 	*base.BasePlugin
 }
 
-func (deployer *DeployerPlugin) GetApplyProgressLength() int {
+func (deployer *DeployerPlugin) GetCustomApplyProgressLength() int {
 	return 0
 }
 

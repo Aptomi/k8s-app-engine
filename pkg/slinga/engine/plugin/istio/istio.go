@@ -28,7 +28,7 @@ type RuleEnforcerPlugin struct {
 }
 
 // Returns difference length (used for progress indicator)
-func (enforcer *RuleEnforcerPlugin) GetApplyProgressLength() int {
+func (enforcer *RuleEnforcerPlugin) GetCustomApplyProgressLength() int {
 	result := 0
 
 	// Get istio rules for each cluster
