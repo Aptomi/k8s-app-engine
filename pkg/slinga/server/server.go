@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/api"
 	"github.com/Aptomi/aptomi/pkg/slinga/controller"
+	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/store/bolt"
 	"github.com/Aptomi/aptomi/pkg/slinga/version"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
@@ -38,13 +42,14 @@ func Start(config *viper.Viper) {
 }
 
 func initStore(config *viper.Viper) store.ObjectStore {
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+
 	//todo(slukjanov): init bolt store, take file path from config
-	return nil
+	return bolt.NewBoltStore(catalog, yaml.NewCodec(catalog))
 }
 
 func initRevisionController(config *viper.Viper, store store.ObjectStore) controller.RevisionController {
-	//todo(slukjanov): use store
-	return controller.NewRevisionController()
+	return controller.NewRevisionController(store)
 }
 
 func initHTTPServer(config *viper.Viper, revCtl controller.RevisionController) *http.Server {

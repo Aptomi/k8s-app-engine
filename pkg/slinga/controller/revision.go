@@ -1,26 +1,30 @@
 package controller
 
-//import (
-//	"github.com/Aptomi/aptomi/pkg/slinga/object"
-//)
+import (
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
+)
 
 type RevisionController interface {
-	/*
-		router.GET("/api/v1/revision/:rev/policy", h.handleGetPolicy)               // get full policy from specific revision
-		router.GET("/api/v1/revision/:rev/policy/key/:key", h.handleGetPolicy)      // get by key from specific revision
-		router.GET("/api/v1/revision/:rev/policy/namespace/:ns", h.handleGetPolicy) // get policy for namespace from specific revision
+	GetRevision(object.Generation) (*language.PolicyNamespace, error)
+	NewRevision([]object.Base) error
+}
 
-		router.POST("/api/v1/revision", h.handleNewRevision)
-	*/
-
-	//GetRevision(generation Generation)
+func NewRevisionController(store store.ObjectStore) RevisionController {
+	return &RevisionControllerImpl{store}
 }
 
 type RevisionControllerImpl struct {
+	store store.ObjectStore
 }
 
-func NewRevisionController() RevisionController {
-	return &RevisionControllerImpl{}
+func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*language.PolicyNamespace, error) {
+	return nil, nil
+}
+
+func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
+	return nil
 }
 
 /*
