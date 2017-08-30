@@ -2,17 +2,17 @@ package yaml
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"gopkg.in/yaml.v2"
 )
 
-func NewCodec(catalog *ObjectCatalog) codec.MarshalUnmarshaler {
+func NewCodec(catalog *object.ObjectCatalog) codec.MarshalUnmarshaler {
 	return &yamlCodec{catalog}
 }
 
 type yamlCodec struct {
-	catalog *ObjectCatalog
+	catalog *object.ObjectCatalog
 }
 
 // YamlCodecName is the name of Yaml MarshalUnmarshaler implementation
@@ -22,15 +22,15 @@ func (c *yamlCodec) GetName() string {
 	return YamlCodecName
 }
 
-func (c *yamlCodec) MarshalOne(object BaseObject) ([]byte, error) {
+func (c *yamlCodec) MarshalOne(object object.BaseObject) ([]byte, error) {
 	return yaml.Marshal(&object)
 }
 
-func (c *yamlCodec) MarshalMany(objects []BaseObject) ([]byte, error) {
+func (c *yamlCodec) MarshalMany(objects []object.BaseObject) ([]byte, error) {
 	return yaml.Marshal(&objects)
 }
 
-func (c *yamlCodec) UnmarshalOne(data []byte) (BaseObject, error) {
+func (c *yamlCodec) UnmarshalOne(data []byte) (object.BaseObject, error) {
 	objects, err := c.unmarshalOneOrMany(data, true)
 	if err != nil {
 		return nil, err
@@ -39,18 +39,18 @@ func (c *yamlCodec) UnmarshalOne(data []byte) (BaseObject, error) {
 	return objects[0], nil
 }
 
-func (c *yamlCodec) UnmarshalOneOrMany(data []byte) ([]BaseObject, error) {
+func (c *yamlCodec) UnmarshalOneOrMany(data []byte) ([]object.BaseObject, error) {
 	return c.unmarshalOneOrMany(data, false)
 }
 
-func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]BaseObject, error) {
+func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.BaseObject, error) {
 	raw := new(interface{})
 	err := yaml.Unmarshal(data, raw)
 	if err != nil {
 		return nil, fmt.Errorf("Error while unmarshaling data to raw interface{}: %s", err)
 	}
 
-	result := make([]BaseObject, 0)
+	result := make([]object.BaseObject, 0)
 
 	if elem, ok := (*raw).(map[interface{}]interface{}); ok { // if it's a single object (map)
 		obj, err := c.unmarshalRaw(elem, data)
@@ -87,7 +87,7 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]BaseObjec
 	return result, nil
 }
 
-func (c *yamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte) (BaseObject, error) {
+func (c *yamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte) (object.BaseObject, error) {
 	metaField, ok := single["metadata"]
 	if !ok {
 		return nil, fmt.Errorf("Can't find metadata field inside object: %v", single)

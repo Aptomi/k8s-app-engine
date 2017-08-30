@@ -1,7 +1,7 @@
 package controller
 
 //import (
-//	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+//	"github.com/Aptomi/aptomi/pkg/slinga/object"
 //)
 
 type RevisionController interface {

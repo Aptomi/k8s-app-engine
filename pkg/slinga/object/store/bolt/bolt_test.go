@@ -1,8 +1,8 @@
 package bolt
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestBoltStore(t *testing.T) {
-	catalog := NewObjectCatalog(ServiceObject, ContextObject, ClusterObject, RuleObject, DependencyObject)
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
 	db := NewBoltStore(catalog, yaml.NewCodec(catalog))
 
 	f, err := ioutil.TempFile("", t.Name())
@@ -23,9 +23,9 @@ func TestBoltStore(t *testing.T) {
 		panic(err)
 	}
 
-	policy := LoadUnitTestsPolicy("../../../testdata/unittests")
+	policy := lang.LoadUnitTestsPolicy("../../../testdata/unittests")
 
-	services := make([]BaseObject, 0, len(policy.Services))
+	services := make([]object.BaseObject, 0, len(policy.Services))
 
 	for _, service := range policy.Services {
 		err = db.Save(service)
