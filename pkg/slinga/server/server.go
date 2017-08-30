@@ -67,6 +67,7 @@ func initHTTPServer(config *viper.Viper, revCtl controller.RevisionController) *
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
 	handler = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to run behind the nginx or any other proxy
+	// todo(slukjanov): add compression handler and compress by default in client
 
 	return &http.Server{
 		Handler:      handler,
