@@ -6,9 +6,9 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-var ContextObject = &ObjectInfo{
+var ContextObject = &Info{
 	Kind:        "context",
-	Constructor: func() BaseObject { return &Context{} },
+	Constructor: func() Base { return &Context{} },
 }
 
 // Context for a given service

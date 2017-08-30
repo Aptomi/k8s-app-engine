@@ -2,7 +2,7 @@
 package object
 
 // Metadata represents standard metadata for unified objects.
-// It implements BaseObject interface and it's enough to include it into any struct to make object DB and API
+// It implements Base interface and it's enough to include it into any struct to make object DB and API
 // layers compatible.
 type Metadata struct {
 	Namespace  string

@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func NewBoltStore(catalog *object.ObjectCatalog, codec codec.MarshalUnmarshaler) store.ObjectStore {
+func NewBoltStore(catalog *object.Catalog, codec codec.MarshalUnmarshaler) store.ObjectStore {
 	return &boltStore{catalog: catalog, codec: codec}
 }
 
 type boltStore struct {
-	catalog *object.ObjectCatalog
+	catalog *object.Catalog
 	codec   codec.MarshalUnmarshaler
 	db      *bolt.DB
 }
@@ -46,7 +46,7 @@ func (b *boltStore) Close() error {
 	return err
 }
 
-func (b *boltStore) Save(object object.BaseObject) error {
+func (b *boltStore) Save(object object.Base) error {
 	err := b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
@@ -69,8 +69,8 @@ func (b *boltStore) Save(object object.BaseObject) error {
 	return err
 }
 
-func (b *boltStore) GetByKey(key object.Key) (object.BaseObject, error) {
-	var result object.BaseObject
+func (b *boltStore) GetByKey(key object.Key) (object.Base, error) {
+	var result object.Base
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {

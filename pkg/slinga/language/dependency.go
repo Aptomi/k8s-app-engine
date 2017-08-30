@@ -10,9 +10,9 @@ import (
 	This file declares all the necessary structures for Dependencies (User "wants" Service)
 */
 
-var DependencyObject = &ObjectInfo{
+var DependencyObject = &Info{
 	Kind:        "dependency",
-	Constructor: func() BaseObject { return &Dependency{} },
+	Constructor: func() Base { return &Dependency{} },
 }
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)

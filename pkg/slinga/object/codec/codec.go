@@ -6,8 +6,8 @@ import (
 
 type MarshalUnmarshaler interface {
 	GetName() string
-	MarshalOne(object object.BaseObject) ([]byte, error)
-	MarshalMany(objects []object.BaseObject) ([]byte, error)
-	UnmarshalOne(data []byte) (object.BaseObject, error)
-	UnmarshalOneOrMany(data []byte) ([]object.BaseObject, error)
+	MarshalOne(object object.Base) ([]byte, error)
+	MarshalMany(objects []object.Base) ([]byte, error)
+	UnmarshalOne(data []byte) (object.Base, error)
+	UnmarshalOneOrMany(data []byte) ([]object.Base, error)
 }

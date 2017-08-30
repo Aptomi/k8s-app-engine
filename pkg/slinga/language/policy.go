@@ -9,9 +9,9 @@ import (
 	This file declares all the necessary structures for Slinga
 */
 
-var PolicyNamespaceDataObject = &ObjectInfo{
+var PolicyNamespaceDataObject = &Info{
 	Kind:        "policy",
-	Constructor: func() BaseObject { return &PolicyNamespaceData{} },
+	Constructor: func() Base { return &PolicyNamespaceData{} },
 }
 
 type PolicyNamespaceData struct {
@@ -40,7 +40,7 @@ func NewPolicyNamespace() *PolicyNamespace {
 }
 
 // TODO: deal with namespaces
-func (policy *PolicyNamespace) AddObject(object BaseObject) {
+func (policy *PolicyNamespace) AddObject(object Base) {
 	switch kind := object.GetKind(); kind {
 	case ServiceObject.Kind:
 		policy.Services[object.GetName()] = object.(*Service)

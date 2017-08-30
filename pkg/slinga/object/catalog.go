@@ -1,19 +1,19 @@
 package object
 
-type ObjectCatalog struct {
-	Kinds map[string]*ObjectInfo
+type Catalog struct {
+	Kinds map[string]*Info
 }
 
-type Constructor func() BaseObject
+type Constructor func() Base
 
-type ObjectInfo struct {
+type Info struct {
 	Kind        string
 	Constructor Constructor
 }
 
-func NewObjectCatalog(infos ...*ObjectInfo) *ObjectCatalog {
-	catalog := &ObjectCatalog{
-		make(map[string]*ObjectInfo),
+func NewObjectCatalog(infos ...*Info) *Catalog {
+	catalog := &Catalog{
+		make(map[string]*Info),
 	}
 	for _, info := range infos {
 		catalog.Kinds[info.Kind] = info
@@ -21,11 +21,11 @@ func NewObjectCatalog(infos ...*ObjectInfo) *ObjectCatalog {
 	return catalog
 }
 
-func (catalog *ObjectCatalog) Get(kind string) *ObjectInfo { // todo return error if not found?
+func (catalog *Catalog) Get(kind string) *Info { // todo return error if not found?
 	// todo support default Kind?
 	return catalog.Kinds[kind]
 }
 
-func (info *ObjectInfo) New() BaseObject {
+func (info *Info) New() Base {
 	return info.Constructor()
 }

@@ -25,7 +25,7 @@ func TestBoltStore(t *testing.T) {
 
 	policy := lang.LoadUnitTestsPolicy("../../../testdata/unittests")
 
-	services := make([]object.BaseObject, 0, len(policy.Services))
+	services := make([]object.Base, 0, len(policy.Services))
 
 	for _, service := range policy.Services {
 		err = db.Save(service)

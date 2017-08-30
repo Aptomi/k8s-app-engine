@@ -6,9 +6,9 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
-var ServiceObject = &ObjectInfo{
+var ServiceObject = &Info{
 	Kind:        "service",
-	Constructor: func() BaseObject { return &Service{} },
+	Constructor: func() Base { return &Service{} },
 }
 
 // Service defines individual service

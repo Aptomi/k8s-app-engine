@@ -75,8 +75,8 @@ func KeyFromParts(domain string, namespace string, kind string, name string, ran
 	return Key(fmt.Sprintf("%s:%s:%s:%s:%s", namespace, kind, name, randAddon, generation))
 }
 
-// BaseObject interface represents unified object that could be stored in DB, accessed through API, etc.
-type BaseObject interface {
+// Base interface represents unified object that could be stored in DB, accessed through API, etc.
+type Base interface {
 	GetKey() Key
 	GetNamespace() string
 	GetKind() string

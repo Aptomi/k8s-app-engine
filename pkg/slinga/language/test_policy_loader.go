@@ -39,11 +39,11 @@ type FileLoader struct {
 	path  string
 }
 
-func (store *FileLoader) LoadObjects() ([]BaseObject, error) {
+func (store *FileLoader) LoadObjects() ([]Base, error) {
 	files, _ := zglob.Glob(filepath.Join(store.path, "**", "*.yaml"))
 	sort.Strings(files)
 
-	result := make([]BaseObject, 0)
+	result := make([]Base, 0)
 	for _, f := range files {
 		if !strings.Contains(f, "external") {
 			objects, err := store.loadObjectsFromFile(f)
@@ -69,7 +69,7 @@ func (store *FileLoader) LoadObjects() ([]BaseObject, error) {
 	return result, nil
 }
 
-func (store *FileLoader) loadObjectsFromFile(path string) ([]BaseObject, error) {
+func (store *FileLoader) loadObjectsFromFile(path string) ([]Base, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("Error while reading file %store: %store", path, err)
