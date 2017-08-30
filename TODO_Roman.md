@@ -22,6 +22,10 @@ Items to complete:
   - If multiple contexts match a dependency, then the behavior will not be deterministic
   - Policy evaluation, when ran multiple times, can result in different outcomes
 
+6. I, as an operator, can accidentally add a context (or rule), which can easily
+   break all services or move them to another cluster, etc
+  - Need to figure out how to prevent this
+
 Minor issues:
 - Check component create/update times (calculated in diff). Is there an issue?
 - Where/how to store text-based diff for revisions?
