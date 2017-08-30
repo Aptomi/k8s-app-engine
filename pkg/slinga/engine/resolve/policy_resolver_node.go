@@ -238,7 +238,7 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 
 		// If criteria matches, then check global rules as well
 		if matched {
-			// Match is only valid if there are no global rule voilations for the current context
+			// Match is only valid if there are no global rule violations for the current context
 			labels := node.transformLabels(node.labels, context.ChangeLabels)
 
 			// Lookup cluster from a label

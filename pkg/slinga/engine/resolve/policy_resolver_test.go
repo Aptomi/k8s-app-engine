@@ -625,3 +625,136 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	// policy with cycle should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "cycle detected")
 }
+
+func TestPolicyResolverComponentLoop(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	serviceA := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "serviceA",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component1",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
+				Dependencies: []string{
+					"component2",
+				},
+			},
+			{
+				Name: "component2",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
+				Dependencies: []string{
+					"component3",
+				},
+			},
+			{
+				Name: "component3",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
+				Dependencies: []string{
+					"component1",
+				},
+			},
+		},
+	}
+	policy.AddObject(serviceA)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "a-context",
+		},
+		Criteria: &Criteria{
+			RequireAny: []string{
+				"service.Name=='serviceA'",
+			},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "serviceA",
+	}
+	policy.AddObject(dependency)
+
+	// policy with cycle should not be resolved successfully
+	resolvePolicy(t, policy, ResError, "Component cycle detected")
+}
+
+func TestPolicyResolverUnknownComponentType(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	serviceA := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "serviceA",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component-unknown",
+			},
+			{
+				Name: "component1",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
+				Dependencies: []string{
+					"component2",
+				},
+			},
+			{
+				Name: "component2",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
+			},
+		},
+	}
+	policy.AddObject(serviceA)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "a-context",
+		},
+		Criteria: &Criteria{
+			RequireAny: []string{
+				"service.Name=='serviceA'",
+			},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "serviceA",
+	}
+	policy.AddObject(dependency)
+
+	// policy with cycle should not be resolved successfully
+	resolvePolicy(t, policy, ResSuccess, "")
+}
