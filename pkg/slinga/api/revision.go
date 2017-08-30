@@ -47,10 +47,12 @@ func (h *RevisionAPI) handleNewRevision(w http.ResponseWriter, r *http.Request, 
 	}
 
 	fmt.Println(string(body))
-	fmt.Fprint(w, "Okay!\n")
 
 	// objects, err := h.registry.Codec.UnmarshalOneOrMany(body)
 	// initialize and resolve new revision here from current policy + objects
+
+	// temp send back received data (to impl some table output on client side)
+	fmt.Fprint(w, string(body))
 }
 
 func Serve(router *httprouter.Router, ctl controller.RevisionController) {

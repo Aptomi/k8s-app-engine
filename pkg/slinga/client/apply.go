@@ -7,7 +7,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
+	"github.com/gosuri/uitable"
 	"github.com/mattn/go-zglob"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -16,7 +18,9 @@ import (
 	"time"
 )
 
-func Apply(policyPaths []string) error {
+func Apply(config *viper.Viper) error {
+	policyPaths := config.GetStringSlice("apply.policyPaths")
+
 	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
 	cod := yaml.NewCodec(catalog)
 
@@ -32,17 +36,21 @@ func Apply(policyPaths []string) error {
 		return fmt.Errorf("Error while marshaling data for sending to API: %s", err)
 	}
 
-	// todo(slukjanov): get address from CLI/config and configurable timeout
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
 
-	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:8080/api/v1/revision", bytes.NewBuffer(data))
+	host := config.GetString("server.host")
+	port := config.GetInt("server.port")
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v1/revision", host, port), bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/yaml")
 	req.Header.Set("User-Agent", "aptomictl")
+
+	fmt.Println("Request:", req)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -51,7 +59,27 @@ func Apply(policyPaths []string) error {
 	defer resp.Body.Close()
 
 	// todo(slujanov): process response - check status and print returned data
-	fmt.Println(resp)
+	fmt.Println("Response:", resp)
+
+	respData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(fmt.Sprintf("Error while reading bytes from response Body: %s", err))
+	}
+
+	objects, err := cod.UnmarshalOneOrMany(respData)
+	if err != nil {
+		panic(fmt.Sprintf("Error while unmarshaling response: %s", err))
+	}
+
+	// todo(slukjanov): pretty print response
+	table := uitable.New()
+	table.MaxColWidth = 50
+
+	table.AddRow("#", "Namespace", "Kind", "Name", "Rand", "Generation", "Object")
+	for idx, obj := range objects {
+		table.AddRow(idx, obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetRandAddon(), obj.GetGeneration(), obj)
+	}
+	fmt.Println(table)
 
 	return nil
 }

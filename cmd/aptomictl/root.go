@@ -10,9 +10,11 @@ import (
 	"path/filepath"
 )
 
-var (
-	configPath string // path to the configPath dir or specific configPath file
+const (
+	envPrefix = "APTOMI"
+)
 
+var (
 	AptomiCtlCmd = &cobra.Command{
 		Use:   "aptomictl", // todo(slukjanov)
 		Short: "",          // todo(slukjanov)
@@ -20,7 +22,10 @@ var (
 
 		// parse the configPath if one is provided, or use the defaults
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			readConfig(configPath)
+			readConfig(viper.GetString("config"))
+
+			// todo(slukjanov): pretty print all final configs
+			fmt.Println(viper.AllSettings())
 		},
 
 		Run: func(cmd *cobra.Command, args []string) {
@@ -31,7 +36,17 @@ var (
 )
 
 func init() {
-	AptomiCtlCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "Config file or dir path")
+	viper.SetEnvPrefix(envPrefix)
+
+	AptomiCtlCmd.PersistentFlags().StringP("config", "c", "", "Config file or dir path")
+
+	AptomiCtlCmd.PersistentFlags().String("host", "127.0.0.1", "Server API host")
+	viper.BindPFlag("server.host", AptomiCtlCmd.PersistentFlags().Lookup("host"))
+	viper.BindEnv("server.host", envPrefix+"_HOST")
+
+	AptomiCtlCmd.PersistentFlags().Uint16P("port", "p", 27866, "Server API port")
+	viper.BindPFlag("server.port", AptomiCtlCmd.PersistentFlags().Lookup("port"))
+	viper.BindEnv("server.port", envPrefix+"_PORT")
 }
 
 func readConfig(configFilePath string) {
@@ -85,6 +100,4 @@ func readConfig(configFilePath string) {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Sprintf("Can't read config: %s", err))
 	}
-
-	// todo(slukjanov): print provided config from viper
 }
