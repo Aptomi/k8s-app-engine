@@ -9,62 +9,25 @@ Items to complete:
   - rules in namespaces? global rules in system namespace?
   - rules to reference namespaces?
 
-2. Improve debugging of the policy (for successful & unsuccessful processing)
+2. Implement LDAP sync as an external service
+  - Generic system for aggregating and storing labels from different data sources
+  - Log: gets tied to a separate revision of users, and the service keeps N last revisions)
 
-  - Which event logs can we store
-      -> policy evaluation log
-           * successful == gets tied to a revision
-           * error = stays in the journal orphan (not tied to a revision)
-      -> policy apply log
-           * gets tied to a revision
-      -> external services, e.g. LDAP sync service (gets tied to a separate revision of users, and the service keeps N last revisions)
+3. Figure out a good model to fit services like istio into the engine
+  - without having user to create contexts for them
 
-  - Journal ID
-    - event log gets written to a generic event log store and gets tied to a "Journal ID"
-    - for successful policy execution, a revision will be associated with "Journal ID"
-    - if error happened during policy execution, no revision will be associated with "Journal ID" (but you can still pull log and look at what happened)
-
-  - Index/Filter
-    - namespace (e.g. show only logs for namespaces user has access to based on ACL)
-    - dependency
-    - component instance key
-
-  - Params
-    - map of freeform params (e.g. for policy evaluation - things we show on UI)
-
-  - Misc
-    - rule log must be replaced with event log, filtered by componentKey
-    - all Debug.* calls must be removed. Likely, create a logger in engine
-    - all panic() calls must be removed. E.g. getCluster
-    - all engine events should be propagated to a user
-      - notices: e.g. context match
-      - errors: if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string)
-    - if possible, attach event by context (not by passing a bunch of variables)
-
-3. Error handing in engine & improved engine unit test coverage for corner cases
-
-4. Separate apply() from diff calculation
-   - Deal with component create/update times (calculated in diff)
-
-5. Plugins: engine -> ComponentInstancePlugin() -> istio
-
-6. Get rid of dependency ID
-
-7. Do we need to move Dependency.Resolved into resolved usage state?
-
-8. Get rid of service.Metadata.Name == 'istio'
-
-9. Reformat, deal with code style and missing comments
-
-10. Implement polling for external entities & storing objects in DB
-
-11. Cross-service cycle in engine
-
-12. Secrets being printed to event log left and right. Who should be able to see them, if anyone?
+4. Improved engine unit test coverage for corner cases
 
 
-Questions:
-1. Shall we consider renaming .User -> .Consumer?
+Minor issues:
+- Check component create/update times (calculated in diff). Is there an issue?
+- Where/how to store text-based diff for revisions?
+- Get rid of dependency ID
+- Do we need to move Dependency.Resolved into resolved usage state?
+- Deal with code style and missing comments
+- Detect cross-service cycle in engine to prevent infinite loops
+- Figure out a better way to deal with secrets in LabelSets. Check again how they are behing printed into event logs
+- Shall we consider renaming .User -> .Consumer?
 
 
 Done:
@@ -110,3 +73,43 @@ Done:
   - So if we have 'language' pkg at 50% and the other half is covered by tests from 'engine', it will be impossible to calculate
   - We need to have packages completely independent. With their own independent code coverage. Can't rely on cross-package tests
   - Also see https://github.com/pierrre/gotestcover
+
+* Improve debugging of the policy (for successful & unsuccessful processing)
+
+  - Which event logs can we store
+      -> policy evaluation log
+           * successful == gets tied to a revision
+           * error = stays in the journal orphan (not tied to a revision)
+      -> policy apply log
+           * gets tied to a revision
+
+  - Journal ID
+    - event log gets written to a generic event log store and gets tied to a "Journal ID"
+    - for successful policy execution, a revision will be associated with "Journal ID"
+    - if error happened during policy execution, no revision will be associated with "Journal ID" (but you can still pull log and look at what happened)
+
+  - Index/Filter
+    - namespace (e.g. show only logs for namespaces user has access to based on ACL)
+    - dependency
+    - component instance key
+
+  - Params
+    - map of freeform params (e.g. for policy evaluation - things we show on UI)
+
+  - Misc
+    - rule log must be replaced with event log, filtered by componentKey
+    - all Debug.* calls must be removed. Likely, create a logger in engine
+    - all panic() calls must be removed. E.g. getCluster
+    - all engine events should be propagated to a user
+      - notices: e.g. context match
+      - errors: if criteria expression failed to compile, or evaluation fails (we are comparing integer to a string)
+    - if possible, attach event by context (not by passing a bunch of variables)
+
+  - Error handling in the engine
+
+* Separate apply() from diff() and resolve() in the engine
+  - Outstanding big chunk of work
+
+* Introduce engine plugins
+
+
