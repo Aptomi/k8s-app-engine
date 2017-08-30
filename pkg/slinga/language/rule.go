@@ -3,9 +3,7 @@ package language
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/object"
-	log "github.com/Sirupsen/logrus"
 )
 
 // LabelsFilter is a labels filter
@@ -161,9 +159,7 @@ func NewGlobalRules() *GlobalRules {
 
 func (globalRules *GlobalRules) addRule(rule *Rule) {
 	if rule.FilterServices == nil {
-		Debug.WithFields(log.Fields{
-			"rule": rule,
-		}).Panic("Only service filters currently supported in rules")
+		panic(fmt.Sprintf("Only service filters currently supported in rules: %+v", rule))
 	}
 	for _, action := range rule.Actions {
 		if rulesList, ok := globalRules.Rules[action.Type]; ok {

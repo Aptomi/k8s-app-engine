@@ -5,7 +5,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	log "github.com/Sirupsen/logrus"
 	"time"
 )
@@ -222,7 +222,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool,
 
 // StoreDiffAsText method prints changes onto the screen (i.e. delta - what got added/removed)
 func (diff *ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
-	memLog := NewPlainMemoryLogger(verbose)
+	memLog := eventlog.NewPlainMemoryLogger(verbose)
 	diff.writeSummary(memLog.GetLogger())
 	diff.writeDifferenceOnServicesLevel(memLog.GetLogger())
 	diff.writeDifferenceOnComponentLevel(verbose, memLog.GetLogger())

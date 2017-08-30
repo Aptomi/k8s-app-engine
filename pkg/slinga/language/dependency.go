@@ -1,9 +1,8 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
+	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/object"
-	log "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -54,9 +53,7 @@ func (dependency *Dependency) GetLabelSet() LabelSet {
 // AddDependency appends a single dependency to an existing object
 func (src GlobalDependencies) AddDependency(dependency *Dependency) {
 	if len(dependency.GetID()) <= 0 {
-		Debug.WithFields(log.Fields{
-			"dependency": dependency,
-		}).Panic("Empty dependency ID")
+		panic(fmt.Sprintf("Empty dependency ID: %+v", dependency))
 	}
 	src.DependenciesByService[dependency.Service] = append(src.DependenciesByService[dependency.Service], dependency)
 	src.DependenciesByID[dependency.GetID()] = dependency

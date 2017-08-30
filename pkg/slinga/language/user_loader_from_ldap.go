@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/ldap.v2"
 	"strconv"
@@ -26,16 +24,9 @@ func loadLDAPConfig(baseDir string) *LDAPConfig {
 	files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(baseDir, db.TypeUsersLDAP))
 	fileName, err := util.EnsureSingleFile(files)
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"error": err,
-		}).Panicf("LDAP config lookup error. Directory '%s'", baseDir)
+		panic(fmt.Sprintf("LDAP config lookup error in directory '%s': %s", baseDir, err.Error()))
 	}
 	result := yaml.LoadObjectFromFile(fileName, &LDAPConfig{}).(*LDAPConfig)
-
-	Debug.WithFields(log.Fields{
-		"config": fmt.Sprintf("%v", result),
-	}).Info("Loaded LDAP config and mappings")
-
 	return result
 }
 
@@ -89,11 +80,6 @@ func (loader *UserLoaderFromLDAP) Summary() string {
 
 // Does search on LDAP and returns entries
 func (loader *UserLoaderFromLDAP) ldapSearch() []*User {
-	Debug.WithFields(log.Fields{
-		"host": loader.config.Host,
-		"post": loader.config.Port,
-	}).Info("Opening connection to LDAP")
-
 	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", loader.config.Host, loader.config.Port))
 	if err != nil {
 		panic(err)
@@ -108,20 +94,10 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*User {
 		nil,
 	)
 
-	Debug.WithFields(log.Fields{
-		"baseDN":     loader.config.BaseDN,
-		"filter":     loader.config.Filter,
-		"attributes": loader.config.getAttributes(),
-	}).Info("Making search request to LDAP")
-
 	searchResult, err := l.Search(searchRequest)
 	if err != nil {
 		panic(err)
 	}
-
-	Debug.WithFields(log.Fields{
-		"count": len(searchResult.Entries),
-	}).Info("Found entries")
 
 	result := []*User{}
 	for _, entry := range searchResult.Entries {

@@ -2,12 +2,11 @@ package graphviz
 
 import (
 	"bytes"
+	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	log "github.com/Sirupsen/logrus"
 	"github.com/awalterschulze/gographviz"
 	"io/ioutil"
 	"os/exec"
@@ -237,13 +236,10 @@ func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.Resolve
 func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph) {
 	fileNameDot := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_"+suffix+"_full.dot")
 	fileNameDotFlat := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_"+suffix+"_flat.dot")
-	e := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
+	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
 
-	if e != nil {
-		Debug.WithFields(log.Fields{
-			"file":  fileNameDot,
-			"error": e,
-		}).Panic("Unable to write to a file")
+	if err != nil {
+		panic(fmt.Sprintf("Unable to write to a file '%s': %s", fileNameDot, err.Error()))
 	}
 
 	// Call graphviz to flatten an image
@@ -255,20 +251,8 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			Debug.WithFields(log.Fields{
-				"cmd":    cmd,
-				"args":   args,
-				"stdout": outb.String(),
-				"stderr": errb.String(),
-				"error":  err,
-			}).Panic("Unable to execute graphviz")
+			panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s", cmd, args, outb.String(), errb.String(), err.Error()))
 		}
-		Debug.WithFields(log.Fields{
-			"cmd":    cmd,
-			"args":   args,
-			"stdout": outb.String(),
-			"stderr": errb.String(),
-		}).Info("Successfully called graphviz command")
 	}
 	// Call graphviz to generate an image
 	{
@@ -280,20 +264,8 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			Debug.WithFields(log.Fields{
-				"cmd":    cmd,
-				"stdout": outb.String(),
-				"stderr": errb.String(),
-				"error":  err,
-			}).Panic("Unable to execute graphviz")
+			panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s", cmd, args, outb.String(), errb.String(), err.Error()))
 		}
-
-		Debug.WithFields(log.Fields{
-			"cmd":    cmd,
-			"args":   args,
-			"stdout": outb.String(),
-			"stderr": errb.String(),
-		}).Info("Successfully called graphviz command")
 	}
 }
 
