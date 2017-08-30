@@ -1,5 +1,5 @@
-hash: b2a62eb934bb33241b6046e34093003a3bdba95b1a61aabf32079bfe085085bf
-updated: 2017-08-30T14:06:05.847013249-07:00
+hash: c095b1b0d54ad5ca1a344a780ceef40b4a83c1fe38128b4e0043e7eb3bc4bf36
+updated: 2017-08-30T15:15:55.50906385-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -178,6 +178,9 @@ imports:
   - util/strutil
 - name: github.com/gosuri/uitable
   version: 36ee7e946282a3fb1cfecd476ddc9b35d8847e42
+  subpackages:
+  - util/strutil
+  - util/wordwrap
 - name: github.com/hashicorp/hcl
   version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
   subpackages:
@@ -215,6 +218,8 @@ imports:
   version: 3f0ab6d4ab4bed1c61caf056b63a6e62190c7801
 - name: github.com/mattn/go-isatty
   version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: github.com/mattn/go-runewidth
+  version: 9e777a8366cce605130a531d2cd6363d07ad7317
 - name: github.com/mattn/go-zglob
   version: 95345c4e1c0ebc9d16a3284177f09360f4d20fab
   subpackages:

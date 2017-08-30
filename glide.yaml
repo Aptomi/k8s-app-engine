@@ -37,6 +37,8 @@ import:
 - package: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - package: github.com/gosuri/uitable
+- package: github.com/mattn/go-runewidth
+  version: ^0.0.2
 testImport:
 - package: github.com/stretchr/testify
   subpackages:
