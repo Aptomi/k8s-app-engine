@@ -47,6 +47,7 @@ func (h *RevisionAPI) handleNewRevision(w http.ResponseWriter, r *http.Request, 
 	}
 
 	fmt.Println(string(body))
+	fmt.Fprint(w, "Okay!\n")
 
 	// objects, err := h.registry.Codec.UnmarshalOneOrMany(body)
 	// initialize and resolve new revision here from current policy + objects
