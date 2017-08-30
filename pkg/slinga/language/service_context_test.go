@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -143,13 +144,40 @@ func TestServiceContextEmptyCriteria(t *testing.T) {
 	matchContext(t, context, paramsMatch, nil, nil)
 }
 
-func TestServiceContextInvalidCriteria(t *testing.T) {
-	policy := LoadUnitTestsPolicy("../testdata/unittests")
-	contexts := []*Context{
-		policy.Contexts["special-invalid-require-all"],
-		policy.Contexts["special-invalid-require-any"],
-		policy.Contexts["special-invalid-require-none"],
+func makeInvalidContexts() []*Context {
+	return []*Context{
+		{
+			Metadata: Metadata{
+				Namespace: "main",
+				Name:      "special-invalid-context-require-all",
+			},
+			Criteria: &Criteria{
+				RequireAll: []string{"specialname + '123')((("},
+			},
+		},
+		{
+			Metadata: Metadata{
+				Namespace: "main",
+				Name:      "special-invalid-context-require-any",
+			},
+			Criteria: &Criteria{
+				RequireAny: []string{"specialname + '456')((("},
+			},
+		},
+		{
+			Metadata: Metadata{
+				Namespace: "main",
+				Name:      "special-invalid-context-require-none",
+			},
+			Criteria: &Criteria{
+				RequireNone: []string{"specialname + '789')((("},
+			},
+		},
 	}
+}
+
+func TestServiceContextInvalidCriteria(t *testing.T) {
+	contexts := makeInvalidContexts()
 	paramsError := []*expression.ExpressionParameters{
 		expression.NewExpressionParams(
 			map[string]string{
