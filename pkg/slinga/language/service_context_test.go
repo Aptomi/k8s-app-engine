@@ -22,7 +22,7 @@ func match(t *testing.T, context *Context, params *expression.ExpressionParamete
 	}
 }
 
-func matchContext(t *testing.T, context *Context, paramsMatch []*expression.ExpressionParameters, paramsDoesntMatch []*expression.ExpressionParameters) {
+func matchContext(t *testing.T, context *Context, paramsMatch []*expression.ExpressionParameters, paramsDoesntMatch []*expression.ExpressionParameters, paramsError []*expression.ExpressionParameters) {
 	// Evaluate with and without cache
 	cache := expression.NewExpressionCache()
 	for _, params := range paramsMatch {
@@ -32,6 +32,10 @@ func matchContext(t *testing.T, context *Context, paramsMatch []*expression.Expr
 	for _, params := range paramsDoesntMatch {
 		match(t, context, params, ResFalse, nil)
 		match(t, context, params, ResFalse, cache)
+	}
+	for _, params := range paramsError {
+		match(t, context, params, ResError, nil)
+		match(t, context, params, ResError, cache)
 	}
 }
 
@@ -91,13 +95,12 @@ func TestServiceContextMatching(t *testing.T) {
 		),
 	}
 
-	matchContext(t, context, paramsMatch, paramsDoesntMatch)
+	matchContext(t, context, paramsMatch, paramsDoesntMatch, nil)
 }
 
 func TestServiceContextRequireAnyFails(t *testing.T) {
 	policy := LoadUnitTestsPolicy("../testdata/unittests")
 	context := policy.Contexts["special-not-matched"]
-	paramsMatch := []*expression.ExpressionParameters{}
 	paramsDoesntMatch := []*expression.ExpressionParameters{
 		expression.NewExpressionParams(
 			map[string]string{
@@ -108,7 +111,7 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 			nil,
 		),
 	}
-	matchContext(t, context, paramsMatch, paramsDoesntMatch)
+	matchContext(t, context, nil, paramsDoesntMatch, nil)
 }
 
 func TestServiceContextRequireAnyEmpty(t *testing.T) {
@@ -123,8 +126,42 @@ func TestServiceContextRequireAnyEmpty(t *testing.T) {
 			nil,
 		),
 	}
-	paramsDoesntMatch := []*expression.ExpressionParameters{}
-	matchContext(t, context, paramsMatch, paramsDoesntMatch)
+	matchContext(t, context, paramsMatch, nil, nil)
+}
+
+func TestServiceContextEmptyCriteria(t *testing.T) {
+	context := &Context{}
+	paramsMatch := []*expression.ExpressionParameters{
+		expression.NewExpressionParams(
+			map[string]string{
+				"somename": "somevalue",
+			},
+
+			nil,
+		),
+	}
+	matchContext(t, context, paramsMatch, nil, nil)
+}
+
+func TestServiceContextInvalidCriteria(t *testing.T) {
+	policy := LoadUnitTestsPolicy("../testdata/unittests")
+	contexts := []*Context{
+		policy.Contexts["special-invalid-require-all"],
+		policy.Contexts["special-invalid-require-any"],
+		policy.Contexts["special-invalid-require-none"],
+	}
+	paramsError := []*expression.ExpressionParameters{
+		expression.NewExpressionParams(
+			map[string]string{
+				"specialname": "specialvalue",
+			},
+
+			nil,
+		),
+	}
+	for _, context := range contexts {
+		matchContext(t, context, nil, nil, paramsError)
+	}
 }
 
 func TestServiceContextKeyResolution(t *testing.T) {
