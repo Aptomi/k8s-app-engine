@@ -60,7 +60,11 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, ex
 		// check for error message
 		verifier := NewUnitTestLogVerifier(expectedErrorMessage)
 		resolver.eventLog.Save(verifier)
-		assert.True(t, verifier.present, "Event log should have an error message containing words: "+expectedErrorMessage)
+		if !assert.True(t, verifier.present, "Event log should have an error message containing words: "+expectedErrorMessage) {
+			hook := &eventlog.HookStdout{}
+			resolver.eventLog.Save(hook)
+			t.FailNow()
+		}
 		return nil
 	}
 

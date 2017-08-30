@@ -84,7 +84,11 @@ func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error 
 	node := resolver.newResolutionNode(d)
 
 	// aggregate logs in the end
-	defer resolver.eventLog.Append(node.eventLog)
+	defer func() {
+		for _, eventLog := range node.eventLogsCombined {
+			resolver.eventLog.Append(eventLog)
+		}
+	}()
 
 	// recursively resolve everything
 	err := resolver.resolveNode(node)
@@ -221,6 +225,10 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 
 			// Resolve dependency on another service recursively
 			err := resolver.resolveNode(nodeNext)
+
+			// Combine event logs
+			node.eventLogsCombined = append(node.eventLogsCombined, nodeNext.eventLogsCombined...)
+
 			if err != nil {
 				return node.cannotResolveInstance(err)
 			}

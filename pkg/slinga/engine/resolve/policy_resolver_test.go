@@ -352,6 +352,9 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 				Discovery: util.NestedParameterMap{
 					"address": "{{ .Labels.deplabel }}",
 				},
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
 			},
 		},
 	}
@@ -399,4 +402,144 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Conflicting discovery parameters")
+}
+
+func TestPolicyResolverInvalidCodeParams(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	serviceA := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "serviceA",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name:    "component",
+				Service: "serviceB",
+			},
+		},
+	}
+	policy.AddObject(serviceA)
+
+	serviceB := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "serviceB",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+					Params: util.NestedParameterMap{
+						"address": "{{ ..... invalid",
+					},
+				},
+			},
+		},
+	}
+	policy.AddObject(serviceB)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "a-b-context",
+		},
+		Criteria: &Criteria{
+			RequireAny: []string{
+				"service.Name=='serviceA'",
+				"service.Name=='serviceB'",
+			},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "serviceA",
+	}
+	policy.AddObject(dependency)
+
+	// policy with invalid context allocation keys should not be resolved successfully
+	resolvePolicy(t, policy, ResError, "Error when processing code params")
+}
+
+func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	serviceA := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "serviceA",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name:    "component",
+				Service: "serviceB",
+			},
+		},
+	}
+	policy.AddObject(serviceA)
+
+	serviceB := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "serviceB",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component",
+				Discovery: util.NestedParameterMap{
+					"address": "{{ .... invalid",
+				},
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+				},
+			},
+		},
+	}
+	policy.AddObject(serviceB)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "a-b-context",
+		},
+		Criteria: &Criteria{
+			RequireAny: []string{
+				"service.Name=='serviceA'",
+				"service.Name=='serviceB'",
+			},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "serviceA",
+	}
+	policy.AddObject(dependency)
+
+	// policy with invalid context allocation keys should not be resolved successfully
+	resolvePolicy(t, policy, ResError, "Error when processing discovery params")
 }

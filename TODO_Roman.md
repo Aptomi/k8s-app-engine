@@ -26,6 +26,10 @@ Items to complete:
    break all services or move them to another cluster, etc
   - Need to figure out how to prevent this
 
+7. Plugins should support noop mode (if at all possible)
+  - I.e. noop should log Helm commands, but don't run them
+
+
 Minor issues:
 - Check component create/update times (calculated in diff). Is there an issue?
 - Where/how to store text-based diff for revisions?

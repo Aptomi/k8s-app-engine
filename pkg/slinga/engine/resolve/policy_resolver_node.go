@@ -106,12 +106,12 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
 	eventLog := NewEventLog()
-	node.eventLogsCombined = append(node.eventLogsCombined, eventLog)
 	return &resolutionNode{
 		resolved: false,
 
-		resolver: node.resolver,
-		eventLog: eventLog,
+		resolver:          node.resolver,
+		eventLog:          eventLog,
+		eventLogsCombined: []*EventLog{eventLog},
 
 		data: node.data,
 
