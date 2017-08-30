@@ -16,8 +16,6 @@ Items to complete:
 3. Figure out a good model to fit services like istio into the engine
   - without having user to create contexts for them
 
-4. Improved engine unit test coverage for corner cases
-
 5. Contexts (and possibly other objects, such as rules) are evaluated in random order
   - If multiple contexts match a dependency, then the behavior will not be deterministic
   - Policy evaluation, when ran multiple times, can result in different outcomes
@@ -38,6 +36,7 @@ Minor issues:
 - Deal with code style and missing comments
 - Figure out a better way to deal with secrets in LabelSets. Check again how they are behing printed into event logs
 - Shall we consider renaming .User -> .Consumer?
+- Unit tests are 50% using "testdata" and 50% using hand-created objects. Might make sense to use the latter everywhere
 
 
 Done:
@@ -123,3 +122,5 @@ Done:
 * Introduce engine plugins
 
 * Detect cross-service cycle in engine to prevent infinite loops
+
+* Improved engine unit test coverage for corner cases
