@@ -2,7 +2,6 @@ package deployment
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"google.golang.org/grpc/grpclog"
 	"gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
@@ -19,39 +18,46 @@ import (
 
 	"errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 )
 
 // HelmCodeExecutor is an executor that uses Helm for deployment of apps on kubernetes
 type HelmCodeExecutor struct {
-	Code    *Code
-	Cluster *Cluster
-	Key     string
-	Params  NestedParameterMap
+	Code     *Code
+	Cluster  *Cluster
+	Key      string
+	Params   NestedParameterMap
+	eventLog *EventLog
 }
 
 // NewHelmCodeExecutor constructs HelmCodeExecutor from given *Code
-func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
-	// First of all, redirect Helm/grpc logging to our own debug stream
+func NewHelmCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster, eventLog *EventLog) (CodeExecutor, error) {
+	// First of all, redirect Helm/grpc logging to our event log
 	// We don't want these messages to be printed to Stdout/Stderr
-	grpclog.SetLogger(Debug)
+	grpclog.SetLogger(eventLog)
 
-	// todo: should we check key existence first?
-	if clusterName, ok := codeParams["cluster"].(string); !ok {
-		return nil, errors.New("Cluster param should be defined")
-	} else if cluster, ok := clusters[clusterName]; ok {
-		exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Params: codeParams}
-		err := exec.setupTillerConnection()
-		if err != nil {
-			return nil, err
-		}
-		return exec, nil
-	} else {
-		return nil, errors.New("Specified cluster is undefined")
+	// Get cluster name from code params
+	clusterName, ok := codeParams["cluster"].(string)
+	if !ok {
+		return nil, errors.New("Cluster name not found in code params")
 	}
+
+	// Get cluster itself
+	cluster, ok := clusters[clusterName]
+	if !ok {
+		return nil, errors.New("Cluster not found in policy: " + clusterName)
+	}
+
+	// Create code executor
+	exec := HelmCodeExecutor{Code: code, Cluster: cluster, Key: key, Params: codeParams, eventLog: eventLog}
+	err := exec.setupTillerConnection()
+	if err != nil {
+		return nil, err
+	}
+	return exec, nil
 }
 
 func NewKubeClient(cluster *Cluster) (*restclient.Config, *internalclientset.Clientset, error) {
@@ -77,7 +83,10 @@ func (exec HelmCodeExecutor) HttpServices() ([]string, error) {
 	coreClient := clientset.Core()
 
 	releaseName := releaseName(exec.Key)
-	chartName := exec.chartName()
+	chartName, err := exec.chartName()
+	if err != nil {
+		return nil, err
+	}
 
 	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
 	options := api.ListOptions{LabelSelector: selector}
@@ -128,9 +137,7 @@ func (exec *HelmCodeExecutor) setupTillerConnection() error {
 
 	exec.Cluster.SetTillerHost(fmt.Sprintf("localhost:%d", tunnel.Local))
 
-	Debug.WithFields(log.Fields{
-		"port": tunnel.Local,
-	}).Info("Created k8s tunnel using local port")
+	exec.eventLog.WithFields(Fields{}).Debugf("Created k8s tunnel using local port: %s", tunnel.Local)
 
 	return nil
 }
@@ -158,55 +165,53 @@ func releaseName(key string) string {
 	return strings.ToLower(EscapeName(key))
 }
 
-func (exec *HelmCodeExecutor) chartName() string {
+func (exec *HelmCodeExecutor) chartName() (string, error) {
 	if chartName, ok := exec.Params["chartName"].(string); ok {
-		return chartName
+		return chartName, nil
 	}
 
-	Debug.WithFields(log.Fields{
-		"exec_key": exec.Key,
-		"params":   exec.Params,
-	}).Panic("Params doesn't contain chartName")
-	return ""
+	return "", fmt.Errorf("Executor params don't contain chartName: key='%s', params='%s'", exec.Key, exec.Params)
 }
 
 // Install for HelmCodeExecutor runs "helm install" for the corresponding helm chart
 func (exec HelmCodeExecutor) Install() error {
 	releaseName := releaseName(exec.Key)
-	chartName := exec.chartName()
+	chartName, err := exec.chartName()
+	if err != nil {
+		return err
+	}
 
 	helmClient := exec.newHelmClient()
 
 	exists, err := findHelmRelease(helmClient, releaseName)
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"releaseName": releaseName,
-			"error":       err,
-		}).Panic("Error while looking for release")
+		return fmt.Errorf("Error while looking for Helm release '%s': %s", releaseName, err.Error())
 	}
 
 	if exists {
 		// If a release already exists, let's just go ahead and update it
-		Debug.WithFields(log.Fields{
-			"releaseName": releaseName,
-		}).Info("Found that release already exists. Calling an update on it")
+		exec.eventLog.WithFields(Fields{}).Infof("Release '%s' already exists. Updating it", releaseName)
 		return exec.Update()
 	}
 
-	chartPath := getValidChartPath(chartName)
+	chartPath, err := getValidChartPath(chartName)
+	if err != nil {
+		return err
+	}
 
 	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
 		return err
 	}
 
-	Debug.WithFields(log.Fields{
+	exec.eventLog.WithFields(Fields{
 		"release": releaseName,
 		"chart":   chartName,
 		"path":    chartPath,
 		"params":  string(vals),
-	}).Info("Installing Helm release")
+	}).Infof("Installing Helm release '%s', chart '%s'", releaseName, chartName)
 
+	// TODO: why is it always installing into a "demo" namespace?
 	_, err = helmClient.InstallRelease(chartPath, "demo", helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
 	return err
 }
@@ -214,38 +219,41 @@ func (exec HelmCodeExecutor) Install() error {
 // Update for HelmCodeExecutor runs "helm update" for the corresponding helm chart
 func (exec HelmCodeExecutor) Update() error {
 	releaseName := releaseName(exec.Key)
-	chartName := exec.chartName()
+	chartName, err := exec.chartName()
+	if err != nil {
+		return err
+	}
 
 	helmClient := exec.newHelmClient()
 
-	chartPath := getValidChartPath(chartName)
+	chartPath, err := getValidChartPath(chartName)
+	if err != nil {
+		return err
+	}
 
 	vals, err := yaml.Marshal(exec.Params)
 	if err != nil {
 		return err
 	}
 
-	Debug.WithFields(log.Fields{
+	exec.eventLog.WithFields(Fields{
 		"release": releaseName,
 		"chart":   chartName,
 		"path":    chartPath,
 		"params":  string(vals),
-	}).Info("Updating Helm release")
+	}).Infof("Updating Helm release '%s', chart '%s'", releaseName, chartName)
 
 	_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
 	return err
 }
 
-func getValidChartPath(chartName string) string {
+func getValidChartPath(chartName string) (string, error) {
 	files, _ := zglob.Glob(GetAptomiObjectFilePatternTgz(GetAptomiBaseDir(), TypeCharts, chartName))
 	fileName, err := EnsureSingleFile(files)
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"chartName": chartName,
-			"error":     err,
-		}).Panic("Chart lookup error")
+		return "", fmt.Errorf("Error while doing chart '%s' lookup: %s", chartName, err.Error())
 	}
-	return fileName
+	return fileName, nil
 }
 
 // Destroy for HelmCodeExecutor runs "helm delete" for the corresponding helm chart
@@ -254,9 +262,9 @@ func (exec HelmCodeExecutor) Destroy() error {
 
 	helmClient := exec.newHelmClient()
 
-	Debug.WithFields(log.Fields{
+	exec.eventLog.WithFields(Fields{
 		"release": releaseName,
-	}).Info("Deleting Helm release")
+	}).Infof("Deleting Helm release '%s'", releaseName)
 
 	_, err := helmClient.DeleteRelease(releaseName, helm.DeletePurge(true))
 	return err
@@ -272,7 +280,10 @@ func (exec HelmCodeExecutor) Endpoints() (map[string]string, error) {
 	coreClient := clientset.Core()
 
 	releaseName := releaseName(exec.Key)
-	chartName := exec.chartName()
+	chartName, err := exec.chartName()
+	if err != nil {
+		return nil, err
+	}
 
 	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
 	options := api.ListOptions{LabelSelector: selector}

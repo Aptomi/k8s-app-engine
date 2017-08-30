@@ -57,7 +57,10 @@ func Endpoints(currentUserID string) endpointsView {
 	for _, userID := range userIds {
 		r := make([]rEndpoint, 0)
 
-		endpoints := deployment.Endpoints(state.Policy, state.State, userID)
+		endpoints, err := deployment.Endpoints(state.Policy, state.State, userID)
+		if err != nil {
+			panic(err)
+		}
 
 		for key, links := range endpoints {
 			instance := state.State.ResolvedData.ComponentInstanceMap[key]

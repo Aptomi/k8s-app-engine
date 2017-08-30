@@ -2,6 +2,7 @@ package deployment
 
 import (
 	"errors"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"time"
@@ -16,10 +17,10 @@ type CodeExecutor interface {
 }
 
 // GetCodeExecutor returns an executor based on code.Type
-func GetCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster) (CodeExecutor, error) {
+func GetCodeExecutor(code *Code, key string, codeParams NestedParameterMap, clusters map[string]*Cluster, eventlog *eventlog.EventLog) (CodeExecutor, error) {
 	switch code.Type {
 	case "aptomi/code/kubernetes-helm", "kubernetes-helm":
-		return NewHelmCodeExecutor(code, key, codeParams, clusters)
+		return NewHelmCodeExecutor(code, key, codeParams, clusters, eventlog)
 	case "aptomi/code/unittests", "unittests":
 		return NewFakeCodeExecutor(code, key, codeParams, clusters), nil
 	case "aptomi/code/withdelay", "delay":

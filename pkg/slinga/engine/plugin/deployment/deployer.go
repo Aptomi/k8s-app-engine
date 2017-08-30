@@ -28,7 +28,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(instance *resolve
 		"componentKey": instance.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
-	}).Info("[Deployer] Launching component instance: " + instance.Key.GetKey())
+	}).Info("Deploying new component instance: " + instance.Key.GetKey())
 
 	if component.Code != nil {
 		codeExecutor, err := GetCodeExecutor(
@@ -36,6 +36,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(instance *resolve
 			instance.Key.GetKey(),
 			instance.CalculatedCodeParams,
 			deployer.Next.Policy.Clusters,
+			deployer.EventLog,
 		)
 		if err != nil {
 			return err
@@ -63,7 +64,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(instance *resolve
 		"componentKey": instance.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
-	}).Info("[Deployer] Updating a running component instance: " + instance.Key.GetKey())
+	}).Info("Updating a running component instance: " + instance.Key.GetKey())
 
 	if component.Code != nil {
 		codeExecutor, err := GetCodeExecutor(
@@ -71,6 +72,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(instance *resolve
 			instance.Key.GetKey(),
 			instance.CalculatedCodeParams,
 			deployer.Next.Policy.Clusters,
+			deployer.EventLog,
 		)
 		if err != nil {
 			return err
@@ -96,7 +98,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(instance *resolve
 		"componentKey": instance.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
-	}).Info("[Deployer] Destructing a running component instance: " + instance.Key.GetKey())
+	}).Info("Destructing a running component instance: " + instance.Key.GetKey())
 
 	if component.Code != nil {
 		codeExecutor, err := GetCodeExecutor(
@@ -104,6 +106,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(instance *resolve
 			instance.Key.GetKey(),
 			instance.CalculatedCodeParams,
 			deployer.Prev.Policy.Clusters,
+			deployer.EventLog,
 		)
 		if err != nil {
 			return err

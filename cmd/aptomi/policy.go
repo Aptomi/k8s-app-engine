@@ -85,6 +85,7 @@ var policyCmdApply = &cobra.Command{
 		apply := NewEngineApply(diff)
 		if !(noop || emulateDeployment) {
 			err := apply.Apply()
+			apply.SaveLog()
 			if err != nil {
 				log.Panicf("Cannot apply policy: %v", err)
 			}

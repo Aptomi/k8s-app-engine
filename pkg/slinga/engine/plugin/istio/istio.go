@@ -7,10 +7,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/util"
+	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/log"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	log "github.com/Sirupsen/logrus"
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"strings"
@@ -52,10 +51,16 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 		return nil
 	}
 
+	enforcer.EventLog.WithFields(Fields{}).Info("Figuring out which Istio rules have to be added/deleted")
+
 	existingRules := make([]*IstioRouteRule, 0)
 
 	for _, cluster := range enforcer.Next.Policy.Clusters {
-		existingRules = append(existingRules, getIstioRouteRules(cluster)...)
+		rules, err := getIstioRouteRules(cluster)
+		if err != nil {
+			return err
+		}
+		existingRules = append(existingRules, rules...)
 		progress.Advance("Istio")
 	}
 
@@ -64,10 +69,7 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 	for _, key := range enforcer.Next.State.ResolvedData.ComponentProcessingOrder {
 		rules, err := enforcer.processComponent(key)
 		if err != nil {
-			Debug.WithFields(log.Fields{
-				"key":   key,
-				"error": err,
-			}).Panic("Unable to process Istio Ingress for component")
+			return fmt.Errorf("Error while processing Istio Ingress for component '%s': %s", key, err.Error())
 		}
 		desiredRules[key] = rules
 		progress.Advance("Istio")
@@ -113,7 +115,11 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 	changed := false
 	for _, createRulesForComponent := range createRules {
 		for _, rule := range createRulesForComponent {
-			rule.create()
+			enforcer.EventLog.WithFields(Fields{}).Infof("Creating Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
+			err := rule.create()
+			if err != nil {
+				return err
+			}
 			changed = true
 		}
 		progress.Advance("Istio")
@@ -121,22 +127,19 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 
 	// process deletions all at once
 	for _, rule := range deleteRules {
-		rule.delete()
+		enforcer.EventLog.WithFields(Fields{}).Infof("Deleting Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
+		err := rule.delete()
+		if err != nil {
+			return err
+		}
 		changed = true
 	}
 	progress.Advance("Istio")
 
 	if changed {
-		for _, createRulesForComponent := range createRules {
-			for _, rule := range createRulesForComponent {
-				fmt.Println("  [+] " + rule.Service)
-			}
-		}
-		for _, rule := range deleteRules {
-			fmt.Println("  [-] " + rule.Service)
-		}
+		enforcer.EventLog.WithFields(Fields{}).Infof("Successfully processed Istio rules")
 	} else {
-		fmt.Println("  [*] No changes")
+		enforcer.EventLog.WithFields(Fields{}).Infof("No changes in Istio rules")
 	}
 
 	return nil
@@ -169,7 +172,7 @@ func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteR
 		return nil, err
 	}
 	if !allows && component != nil && component.Code != nil {
-		codeExecutor, err := GetCodeExecutor(component.Code, key, usageState.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams, enforcer.Next.Policy.Clusters)
+		codeExecutor, err := GetCodeExecutor(component.Code, key, usageState.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams, enforcer.Next.Policy.Clusters, enforcer.EventLog)
 		if err != nil {
 			return nil, err
 		}
@@ -193,15 +196,11 @@ func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteR
 	return nil, nil
 }
 
-func getIstioRouteRules(cluster *Cluster) []*IstioRouteRule {
+func getIstioRouteRules(cluster *Cluster) ([]*IstioRouteRule, error) {
 	cmd := "get route-rules"
 	rulesStr, err := runIstioCmd(cluster, cmd)
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"cluster": cluster.Name,
-			"cmd":     cmd,
-			"error":   err,
-		}).Panic("Failed to get route-rules by running bash cmd")
+		return nil, fmt.Errorf("Failed to get route-rules in cluster '%s' by running '%s': %s", cluster.Name, cmd, err.Error())
 	}
 
 	rules := make([]*IstioRouteRule, 0)
@@ -213,10 +212,10 @@ func getIstioRouteRules(cluster *Cluster) []*IstioRouteRule {
 		rules = append(rules, &IstioRouteRule{ruleName, cluster})
 	}
 
-	return rules
+	return rules, nil
 }
 
-func (rule *IstioRouteRule) create() {
+func (rule *IstioRouteRule) create() error {
 	content := "type: route-rule\n"
 	content += "name: " + rule.Service + "\n"
 	content += "spec:\n"
@@ -229,24 +228,17 @@ func (rule *IstioRouteRule) create() {
 
 	out, err := runIstioCmd(rule.Cluster, "create -f "+ruleFile.Name())
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"cluster": rule.Cluster.Name,
-			"content": content,
-			"out":     out,
-			"error":   err,
-		}).Panic("Failed to create istio rule by running bash script")
+		return fmt.Errorf("Failed to create istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err.Error())
 	}
+	return nil
 }
 
-func (rule *IstioRouteRule) delete() {
+func (rule *IstioRouteRule) delete() error {
 	out, err := runIstioCmd(rule.Cluster, "delete route-rule "+rule.Service)
 	if err != nil {
-		Debug.WithFields(log.Fields{
-			"cluster": rule.Cluster.Name,
-			"out":     out,
-			"error":   err,
-		}).Panic("Failed to delete istio rule by running bash script")
+		return fmt.Errorf("Failed to delete istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err.Error())
 	}
+	return nil
 }
 
 func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
