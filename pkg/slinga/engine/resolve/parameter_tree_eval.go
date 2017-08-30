@@ -37,7 +37,7 @@ func processParameterTreeNode(node interface{}, parameters *template.TemplatePar
 	}
 
 	// Unknown type, return an error
-	return fmt.Errorf("There should a string or NestedParameterMap, but found %v", node)
+	return fmt.Errorf("There should be a string or NestedParameterMap, but found %v", node)
 }
 
 // evaluateParameterTree processes code or discovery params and calculates the whole tree
