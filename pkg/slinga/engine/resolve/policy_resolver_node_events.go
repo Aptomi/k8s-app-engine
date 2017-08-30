@@ -33,6 +33,14 @@ func (node *resolutionNode) errorServiceDoesNotExist() error {
 	return NewCriticalError(err)
 }
 
+func (node *resolutionNode) errorServiceOwnerDoesNotExist() error {
+	err := errors.NewErrorWithDetails(
+		fmt.Sprintf("Unable to find service owner for service '%s': %s", node.serviceName, node.resolver.policy.Services[node.serviceName].Owner),
+		errors.Details{},
+	)
+	return NewCriticalError(err)
+}
+
 func (node *resolutionNode) errorWhenTestingContext(context *Context, cause error) error {
 	err := errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while trying to match context '%s' for service '%s': %s", context.Name, node.service.Name, cause.Error()),

@@ -60,3 +60,7 @@
     is_operator: true
     global_ops: true
     team: global-ops-team
+
+# Special user without any labels
+- id: 7
+  name: Noname

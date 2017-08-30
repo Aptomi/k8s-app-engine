@@ -69,13 +69,14 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 
 	dependency := &Dependency{
 		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
 		UserID:  "non-existing-user-123456789",
 		Service: "newservice",
 	}
-	policy.Dependencies.AddDependency(dependency)
+	policy.AddObject(dependency)
 
 	// policy with missing user should be resolved successfully
 	resolvePolicy(t, policy, ResSuccess)
@@ -89,13 +90,14 @@ func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {
 
 	dependency := &Dependency{
 		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
 		UserID:  "4",
 		Service: "non-existing-service-123456789",
 	}
-	policy.Dependencies.AddDependency(dependency)
+	policy.AddObject(dependency)
 
 	// policy with missing service should not be resolved successfully
 	resolvePolicy(t, policy, ResError)
@@ -117,6 +119,99 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	policy.AddObject(context)
 
 	// policy with invalid context should not be resolved successfully
+	resolvePolicy(t, policy, ResError)
+}
+
+func TestPolicyResolverInvalidContextKeys(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	service := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "xyz",
+		},
+		Owner: "1",
+	}
+	policy.AddObject(service)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "special-invalid-context-keys",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name=='xyz'"},
+		},
+		Allocation: &struct {
+			Keys []string
+		}{
+			Keys: []string{
+				"wowowow {{{{.......",
+			},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "xyz",
+	}
+	policy.AddObject(dependency)
+
+	// policy with invalid context allocation keys should not be resolved successfully
+	resolvePolicy(t, policy, ResError)
+}
+
+func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	service := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "xyz",
+		},
+	}
+	policy.AddObject(service)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "special-invalid-context-keys",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name=='xyz'"},
+		},
+		Allocation: &struct {
+			Keys []string
+		}{
+			Keys: []string{
+				"wowowow {{{{.......",
+			},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "xyz",
+	}
+	policy.AddObject(dependency)
+
+	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError)
 }
 

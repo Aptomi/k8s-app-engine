@@ -199,6 +199,13 @@ func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) (*Service
 		// This is considered a malformed policy, so let's return an error
 		return nil, node.errorServiceDoesNotExist()
 	}
+
+	serviceOwner := node.resolver.userLoader.LoadUserByID(service.Owner)
+	if serviceOwner == nil {
+		// This is considered a malformed policy, so let's return an error
+		return nil, node.errorServiceOwnerDoesNotExist()
+	}
+
 	node.logServiceFound(service)
 	return service, nil
 }

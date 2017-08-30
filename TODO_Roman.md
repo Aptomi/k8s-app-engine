@@ -18,6 +18,9 @@ Items to complete:
 
 4. Improved engine unit test coverage for corner cases
 
+5. Contexts (and possibly other objects, such as rules) are evaluated in random order
+  - If multiple contexts match a dependency, then the behavior will not be deterministic
+  - Policy evaluation, when ran multiple times, can result in different outcomes
 
 Minor issues:
 - Check component create/update times (calculated in diff). Is there an issue?
