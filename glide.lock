@@ -1,5 +1,5 @@
-hash: ecb701e86011d962bdd14db3685acc6594ee916c265d50b661f6ccc5f11cbacd
-updated: 2017-08-28T14:28:34.949690258-07:00
+hash: b2a62eb934bb33241b6046e34093003a3bdba95b1a61aabf32079bfe085085bf
+updated: 2017-08-30T14:06:05.847013249-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -43,7 +43,7 @@ imports:
 - name: github.com/d4l3k/messagediff
   version: 7b706999d935b04cf2dbc71a5a5afcbd288aeb48
 - name: github.com/davecgh/go-spew
-  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
 - name: github.com/dgrijalva/jwt-go
@@ -161,9 +161,8 @@ imports:
   subpackages:
   - lru
 - name: github.com/golang/protobuf
-  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  version: df1d3ca07d2d07bba352d5b73c4313b4e2a6203e
   subpackages:
-  - jsonpb
   - proto
   - ptypes/any
   - ptypes/timestamp
@@ -177,6 +176,8 @@ imports:
   version: d0567a9d84a1c40dd7568115ea66f4887bf57b33
   subpackages:
   - util/strutil
+- name: github.com/gosuri/uitable
+  version: 36ee7e946282a3fb1cfecd476ddc9b35d8847e42
 - name: github.com/hashicorp/hcl
   version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
   subpackages:
@@ -240,10 +241,6 @@ imports:
   version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/sftp
   version: 4d0e916071f68db74f8a73926335f809396d6b42
-- name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
-  subpackages:
-  - difflib
 - name: github.com/PuerkitoBio/purell
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
@@ -269,10 +266,6 @@ imports:
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
-- name: github.com/stretchr/testify
-  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
-  subpackages:
-  - assert
 - name: github.com/ugorji/go
   version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
   subpackages:
@@ -293,14 +286,11 @@ imports:
   subpackages:
   - context
   - context/ctxhttp
-  - html
-  - html/atom
   - http2
   - http2/hpack
   - idna
   - internal/timeseries
   - lex/httplex
-  - proxy
   - trace
   - websocket
 - name: golang.org/x/oauth2
@@ -340,7 +330,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/grpc
-  version: 231b4cfea0e79843053a33f5fe90bd4d84b23cd3
+  version: b7f1379d3cbbbeb2ca3405852012e237aa05459e
   subpackages:
   - codes
   - credentials
@@ -549,4 +539,12 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
   - third_party/forked/golang/template
-testImports: []
+testImports:
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - assert
