@@ -25,7 +25,7 @@ profile-engine:
 .PHONY: coverage
 coverage:
 	@echo "Calculating code coverage"
-	echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c '${GO} test -short -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
+	touch coverage.tmp && echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c '${GO} test -short -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
 	${GO} tool cover -html=coverage.out -o coverage.html
 
 .PHONY: test
