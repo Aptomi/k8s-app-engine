@@ -12,11 +12,11 @@ import (
 func BenchmarkEngine(b *testing.B) {
 	t := &testing.T{}
 	for i := 0; i < b.N; i++ {
-		TestEngineComponentUpdateAndTimes(t)
+		TestDiffHasUpdatedComponentsAndCheckTimes(t)
 	}
 }
 
-func TestPolicyResolveEmptyDiff(t *testing.T) {
+func TestEmptyDiff(t *testing.T) {
 	resolvedPrev := loadPolicyAndResolve(t)
 	resolvedPrev = emulateSaveAndLoadState(resolvedPrev)
 
@@ -28,7 +28,7 @@ func TestPolicyResolveEmptyDiff(t *testing.T) {
 	verifyDiff(t, diff, false, 0, 0, 0, 0, 0)
 }
 
-func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
+func TestDiffHasCreatedComponents(t *testing.T) {
 	resolvedPrev := loadPolicyAndResolve(t)
 	resolvedPrev = emulateSaveAndLoadState(resolvedPrev)
 
@@ -51,7 +51,7 @@ func TestEngineNonEmptyDiffAndApplyNoop(t *testing.T) {
 	verifyDiff(t, diff, true, 8, 0, 0, 8, 0)
 }
 
-func TestEngineComponentUpdateAndTimes(t *testing.T) {
+func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	var key string
 
 	// Create initial empty state (do not resolve any dependencies)
@@ -122,4 +122,18 @@ func TestEngineComponentUpdateAndTimes(t *testing.T) {
 	pUpdateSvc := getTimes(t, key, resolvedNew.State, resolvedDependencyUpdate.State)
 	assert.Equal(t, pUpdateSvc.timePrevCreated, pUpdateSvc.timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, pUpdateSvc.timeNextUpdated.After(pUpdateSvc.timePrevUpdated), "Update time should be changed for service")
+}
+
+func TestDiffHasDestructedComponents(t *testing.T) {
+	// Resolve unit test policy
+	resolvedPrev := loadPolicyAndResolve(t)
+	resolvedPrev = emulateSaveAndLoadState(resolvedPrev)
+
+	// Now resolve empty policy
+	nextPolicy := language.NewPolicyNamespace()
+	resolvedNext := resolvePolicy(t, nextPolicy)
+
+	// Calculate difference
+	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev)
+	verifyDiff(t, diff, true, 0, 16, 0, 0, 16)
 }
