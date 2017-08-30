@@ -100,3 +100,52 @@ func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {
 	// policy with missing service should not be resolved successfully
 	resolvePolicy(t, policy, ResError)
 }
+
+func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "special-invalid-context-require-all",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"specialname + '123')((("},
+		},
+	}
+	policy.AddObject(context)
+
+	// policy with invalid context should not be resolved successfully
+	resolvePolicy(t, policy, ResError)
+}
+
+func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	rule := &Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "special-invalid-rule-require-all",
+		},
+		FilterServices: &ServiceFilter{
+			Cluster: &Criteria{
+				RequireAll: []string{"specialname + '123')((("},
+			},
+			Labels: &Criteria{
+				RequireAll: []string{"specialname + '123')((("},
+			},
+			User: &Criteria{
+				RequireAll: []string{"specialname + '123')((("},
+			},
+		},
+		Actions: []*Action{
+			{"dependency", "forbid"},
+		},
+	}
+	policy.AddObject(rule)
+
+	// policy with invalid rule should not be resolved successfully
+	resolvePolicy(t, policy, ResError)
+}
