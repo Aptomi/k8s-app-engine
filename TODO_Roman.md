@@ -36,7 +36,6 @@ Minor issues:
 - Get rid of dependency ID
 - Do we need to move Dependency.Resolved into resolved usage state?
 - Deal with code style and missing comments
-- Detect cross-service cycle in engine to prevent infinite loops
 - Figure out a better way to deal with secrets in LabelSets. Check again how they are behing printed into event logs
 - Shall we consider renaming .User -> .Consumer?
 
@@ -123,4 +122,4 @@ Done:
 
 * Introduce engine plugins
 
-
+* Detect cross-service cycle in engine to prevent infinite loops

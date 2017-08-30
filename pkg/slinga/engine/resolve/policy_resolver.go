@@ -175,6 +175,14 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	node.serviceKey = node.createComponentKey(nil)
 	node.objectResolved(node.serviceKey)
 
+	// Check if we've been there already
+	cycle := ContainsString(node.path, node.serviceKey.GetKey())
+	node.path = append(node.path, node.serviceKey.GetKey())
+	if cycle {
+		err = node.errorServiceCycleDetected()
+		return node.cannotResolveInstance(err)
+	}
+
 	// Store labels for service
 	node.data.RecordLabels(node.serviceKey, node.labels)
 

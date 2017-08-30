@@ -65,6 +65,9 @@ type resolutionNode struct {
 
 	// reference to the last key we arrived with, so we can reconstruct graph edges between keys
 	arrivalKey *ComponentInstanceKey
+
+	// path that we traveled so far (to detect cycles)
+	path []string
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
@@ -100,6 +103,9 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 
 		// empty discovery tree
 		discoveryTreeNode: NestedParameterMap{},
+
+		// empty path
+		path: []string{},
 	}
 }
 
@@ -130,6 +136,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 
 		// remember the last arrival key
 		arrivalKey: node.componentKey,
+
+		// copy path
+		path: CopySliceOfStrings(node.path),
 	}
 }
 

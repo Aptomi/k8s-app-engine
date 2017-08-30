@@ -126,6 +126,16 @@ func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) erro
 	return NewCriticalError(err)
 }
 
+func (node *resolutionNode) errorServiceCycleDetected() error {
+	err := errors.NewErrorWithDetails(
+		fmt.Sprintf("Error when processing policy, cycle detected: %s", node.path),
+		errors.Details{
+			"path": node.path,
+		},
+	)
+	return NewCriticalError(err)
+}
+
 /*
 	Event log - report error
 */
