@@ -3,6 +3,7 @@ package resolve
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
@@ -79,7 +80,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	policy.AddObject(dependency)
 
 	// policy with missing user should be resolved successfully
-	resolvePolicy(t, policy, ResSuccess)
+	resolvePolicy(t, policy, ResSuccess, "")
 
 	// dependency should be just skipped
 	assert.False(t, dependency.Resolved, "Dependency should not be resolved")
@@ -100,26 +101,48 @@ func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {
 	policy.AddObject(dependency)
 
 	// policy with missing service should not be resolved successfully
-	resolvePolicy(t, policy, ResError)
+	resolvePolicy(t, policy, ResError, "Unable to find service definition")
 }
 
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
+	service := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "xyz",
+		},
+		Owner: "1",
+	}
+	policy.AddObject(service)
+
 	context := &Context{
 		Metadata: Metadata{
 			Kind:      ContextObject.Kind,
 			Namespace: "main",
-			Name:      "special-invalid-context-require-all",
+			Name:      "special-invalid-context-require-any",
 		},
 		Criteria: &Criteria{
-			RequireAll: []string{"specialname + '123')((("},
+			RequireAll: []string{"service.Name=='xyz'"},
+			RequireAny: []string{"specialname + '123')((("},
 		},
 	}
 	policy.AddObject(context)
 
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "7",
+		Service: "xyz",
+	}
+	policy.AddObject(dependency)
+
 	// policy with invalid context should not be resolved successfully
-	resolvePolicy(t, policy, ResError)
+	resolvePolicy(t, policy, ResError, "Unable to compile expression")
 }
 
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
@@ -166,7 +189,7 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	policy.AddObject(dependency)
 
 	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError)
+	resolvePolicy(t, policy, ResError, "Error while resolving allocation keys")
 }
 
 func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
@@ -212,7 +235,7 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 	policy.AddObject(dependency)
 
 	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError)
+	resolvePolicy(t, policy, ResError, "Unable to find service owner")
 }
 
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
@@ -242,5 +265,138 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 	policy.AddObject(rule)
 
 	// policy with invalid rule should not be resolved successfully
-	resolvePolicy(t, policy, ResError)
+	resolvePolicy(t, policy, ResError, "Unable to compile expression")
+}
+
+func TestPolicyResolverConflictingCodeParams(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	service := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "xyz",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+					Params: util.NestedParameterMap{
+						"address": "{{ .Labels.deplabel }}",
+					},
+				},
+			},
+		},
+	}
+	policy.AddObject(service)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "xyz-context",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name=='xyz'"},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency1 := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new_1",
+		},
+		UserID:  "7",
+		Service: "xyz",
+		Labels: map[string]string{
+			"deplabel": "1",
+		},
+	}
+	policy.AddObject(dependency1)
+
+	dependency2 := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new_2",
+		},
+		UserID:  "7",
+		Service: "xyz",
+		Labels: map[string]string{
+			"deplabel": "2",
+		},
+	}
+	policy.AddObject(dependency2)
+
+	// policy with invalid context allocation keys should not be resolved successfully
+	resolvePolicy(t, policy, ResError, "Conflicting code parameters")
+}
+
+func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	service := &Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "xyz",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component",
+				Discovery: util.NestedParameterMap{
+					"address": "{{ .Labels.deplabel }}",
+				},
+			},
+		},
+	}
+	policy.AddObject(service)
+
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "xyz-context",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name=='xyz'"},
+		},
+	}
+	policy.AddObject(context)
+
+	dependency1 := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new_1",
+		},
+		UserID:  "7",
+		Service: "xyz",
+		Labels: map[string]string{
+			"deplabel": "1",
+		},
+	}
+	policy.AddObject(dependency1)
+
+	dependency2 := &Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_id_new_2",
+		},
+		UserID:  "7",
+		Service: "xyz",
+		Labels: map[string]string{
+			"deplabel": "2",
+		},
+	}
+	policy.AddObject(dependency2)
+
+	// policy with invalid context allocation keys should not be resolved successfully
+	resolvePolicy(t, policy, ResError, "Conflicting discovery parameters")
 }
