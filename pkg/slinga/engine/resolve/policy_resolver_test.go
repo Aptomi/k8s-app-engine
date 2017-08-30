@@ -1,12 +1,14 @@
 package resolve
 
 import (
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
 )
 
-func TestEnginePolicyResolutionAndResolvedData(t *testing.T) {
+func TestPolicyResolverAndResolvedData(t *testing.T) {
 	policy, usageState := loadPolicyAndResolve(t)
 	resolvedData := usageState.ResolvedData
 
@@ -24,7 +26,7 @@ func TestEnginePolicyResolutionAndResolvedData(t *testing.T) {
 	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 }
 
-func TestEnginePolicyResolutionAndUnresolvedData(t *testing.T) {
+func TestPolicyResolverAndUnresolvedData(t *testing.T) {
 	policy, _ := loadPolicyAndResolve(t)
 
 	// Dave dependency on kafka should not be resolved
@@ -32,7 +34,7 @@ func TestEnginePolicyResolutionAndUnresolvedData(t *testing.T) {
 	assert.False(t, daveOnKafkaDependency.Resolved, "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
 }
 
-func TestEngineLabelProcessing(t *testing.T) {
+func TestPolicyResolverLabelProcessing(t *testing.T) {
 	policy, usageState := loadPolicyAndResolve(t)
 
 	// Check labels for Bob's dependency
@@ -45,7 +47,7 @@ func TestEngineLabelProcessing(t *testing.T) {
 	assert.Equal(t, "true", labels["prod-low-alloc"], "Label 'prod-low-alloc=true' should be added on allocation match")
 }
 
-func TestEngineCodeAndDiscoveryParamsEval(t *testing.T) {
+func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 	policy, usageState := loadPolicyAndResolve(t)
 
 	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, usageState)
@@ -60,4 +62,41 @@ func TestEngineCodeAndDiscoveryParamsEval(t *testing.T) {
 	for i := 1; i <= 5; i++ {
 		assert.Equal(t, "value"+strconv.Itoa(i), kafkaTest.CalculatedCodeParams.GetNestedMap("data" + strconv.Itoa(i)).GetNestedMap("param")["name"], "Nested code parameters should be calculated correctly")
 	}
+}
+
+func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "non-existing-user-123456789",
+		Service: "newservice",
+	}
+	policy.Dependencies.AddDependency(dependency)
+
+	// policy with missing user should be resolved successfully
+	resolvePolicy(t, policy, ResSuccess)
+
+	// dependency should be just skipped
+	assert.False(t, dependency.Resolved, "Dependency should not be resolved")
+}
+
+func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	dependency := &Dependency{
+		Metadata: Metadata{
+			Namespace: "main",
+			Name:      "dep_id_new",
+		},
+		UserID:  "4",
+		Service: "non-existing-service-123456789",
+	}
+	policy.Dependencies.AddDependency(dependency)
+
+	// policy with missing service should not be resolved successfully
+	resolvePolicy(t, policy, ResError)
 }

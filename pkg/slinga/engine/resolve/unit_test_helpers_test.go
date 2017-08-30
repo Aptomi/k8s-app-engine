@@ -6,21 +6,26 @@ import (
 	"testing"
 )
 
+const (
+	ResSuccess = iota
+	ResError   = iota
+)
+
+func loadUnitTestsPolicy() *PolicyNamespace {
+	return LoadUnitTestsPolicy("../../testdata/unittests")
+}
+
 func loadPolicyAndResolve(t *testing.T) (*PolicyNamespace, *ServiceUsageState) {
-	policy := LoadUnitTestsPolicy("../../testdata/unittests")
-	return policy, resolvePolicy(t, policy)
+	policy := loadUnitTestsPolicy()
+	return policy, resolvePolicy(t, policy, ResSuccess)
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace) *ServiceUsageState {
+func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int) *ServiceUsageState {
 	userLoader := NewUserLoaderFromDir("../../testdata/unittests")
-	return resolvePolicyInternal(t, policy, userLoader)
-}
-
-func resolvePolicyInternal(t *testing.T, policy *PolicyNamespace, userLoader UserLoader) *ServiceUsageState {
 	resolver := NewPolicyResolver(policy, userLoader)
 	result, err := resolver.ResolveAllDependencies()
-	if !assert.Nil(t, err, "PolicyNamespace usage should be resolved without errors") {
-		t.FailNow()
+	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") || expectedResult == ResError {
+		return nil
 	}
 	return result.State
 }

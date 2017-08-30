@@ -136,12 +136,16 @@ func (node *resolutionNode) logError(err error) {
 */
 
 func (node *resolutionNode) logStartResolvingDependency() {
+	userName := node.dependency.UserID
+	if node.user != nil {
+		userName = node.user.Name
+	}
 	if node.depth == 0 {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", node.user.Name, node.dependency.Service)
+		node.eventLog.WithFields(Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", userName, node.dependency.Service)
 	} else {
 		// recursively processing sub-dependencies
-		node.eventLog.WithFields(Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.user.Name, node.dependency.Service, node.serviceName, node.depth)
+		node.eventLog.WithFields(Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Service, node.serviceName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
