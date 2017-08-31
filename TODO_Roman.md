@@ -16,16 +16,30 @@ Items to complete:
 3. Figure out a good model to fit services like istio into the engine
   - without having user to create contexts for them
 
-5. Contexts (and possibly other objects, such as rules) are evaluated in random order
+4. Contexts (and possibly other objects, such as rules) are evaluated in random order
   - If multiple contexts match a dependency, then the behavior will not be deterministic
   - Policy evaluation, when ran multiple times, can result in different outcomes
 
-6. I, as an operator, can accidentally add a context (or rule), which can easily
+5. I, as an operator, can accidentally add a context (or rule), which can easily
    break all services or move them to another cluster, etc
   - Need to figure out how to prevent this
 
-7. Plugins should support noop mode (if at all possible)
+6. Plugins should support noop mode (if at all possible)
   - I.e. noop should log Helm commands, but don't run them
+
+7. Implement policy validation
+  - e.g. compile all expressions, templates, etc
+
+8. RevisionSummary (moving away from files to boltdb)
+  - Implement RevisionSummary object (wraps Revision and stores summary)
+      - Implement diff inside RevisionSummary
+          - structured (for all objects)
+          - summary (as text/numbers)
+      - Implement bool Changed() inside RevisionSummary
+  - Modify code around charts to save them into tmp files
+      - Add charts to revision summary
+
+9. Attach apply log to component instances
 
 
 Minor issues:
