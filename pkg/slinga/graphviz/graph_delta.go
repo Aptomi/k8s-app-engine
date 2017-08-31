@@ -67,13 +67,3 @@ func Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
 
 	return next
 }
-
-// Finds subgraph name from relations
-func findSubraphName(prev *gographviz.Graph, nName string) string {
-	for gName := range prev.Relations.ParentToChildren {
-		if prev.Relations.ParentToChildren[gName][nName] {
-			return gName
-		}
-	}
-	return prev.Name
-}
