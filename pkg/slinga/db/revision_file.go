@@ -44,15 +44,6 @@ func (revision AptomiRevision) SaveCurrentRun() {
 	if err != nil {
 		panic(err)
 	}
-
-	// copy over logs directory
-	logsDir := filepath.Join(GetAptomiBaseDir(), string(TypeLogs))
-	err = CopyDirectory(logsDir, filepath.Join(savedRunDir, string(TypeLogs)))
-	if err != nil {
-		panic(err)
-	}
-
-	// TODO: save metadata about the run
 }
 
 // GetRunDirectory returns run directory, formatted as string

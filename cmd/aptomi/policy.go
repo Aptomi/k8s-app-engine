@@ -79,7 +79,9 @@ var policyCmdApply = &cobra.Command{
 
 		// Generate pictures
 		visual := NewPolicyVisualization(diff)
-		visual.DrawAndStore()
+		visual.GetImageForRevisionPrev() // just call and don't save
+		visual.GetImageForRevisionNext() // just call and don't save
+		visual.GetImageForRevisionDiff() // just call and don't save
 
 		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
 		apply := NewEngineApply(diff)

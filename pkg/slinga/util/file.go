@@ -115,9 +115,11 @@ func DeleteDirectoryContents(dir string) error {
 	return nil
 }
 
-// WriteTempFile creates a temporary file
-func WriteTempFile(prefix string, content string) *os.File {
+// WriteTempFile creates a temporary file and returns its name
+func WriteTempFile(prefix string, content string) string {
 	tmpFile, err := ioutil.TempFile("", "aptomi-"+prefix)
+	defer tmpFile.Close()
+
 	if err != nil {
 		panic("Failed to create temp file")
 	}
@@ -127,7 +129,7 @@ func WriteTempFile(prefix string, content string) *os.File {
 		panic("Failed to write to temp file")
 	}
 
-	return tmpFile
+	return tmpFile.Name()
 }
 
 // EnsureSingleFile ensures that only one file matches the list of files

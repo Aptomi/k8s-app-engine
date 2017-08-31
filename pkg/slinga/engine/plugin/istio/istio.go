@@ -13,6 +13,7 @@ import (
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"strings"
+	"os"
 )
 
 // IstioRouteRule is istio route rule
@@ -224,9 +225,10 @@ func (rule *IstioRouteRule) create() error {
 	content += "    simpleTimeout:\n"
 	content += "      timeout: 1ms\n"
 
-	ruleFile := WriteTempFile("istio-rule", content)
+	ruleFileName := WriteTempFile("istio-rule", content)
+	defer os.Remove(ruleFileName)
 
-	out, err := runIstioCmd(rule.Cluster, "create -f "+ruleFile.Name())
+	out, err := runIstioCmd(rule.Cluster, "create -f "+ruleFileName)
 	if err != nil {
 		return fmt.Errorf("Failed to create istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err.Error())
 	}
@@ -311,9 +313,10 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 	content += "istioctl --configAPIService " + cluster.GetIstioSvc() + " --namespace " + cluster.Namespace + " "
 	content += cmd + "\n"
 
-	cmdFile := WriteTempFile("istioctl-cmd", content)
+	cmdFileName := WriteTempFile("istioctl-cmd", content)
+	defer os.Remove(cmdFileName)
 
-	out, err := RunCmd("bash", cmdFile.Name())
+	out, err := RunCmd("bash", cmdFileName)
 	if err != nil {
 		return "", err
 	}

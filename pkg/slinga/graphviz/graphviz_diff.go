@@ -3,15 +3,15 @@ package graphviz
 import (
 	"bytes"
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/awalterschulze/gographviz"
-	"io/ioutil"
+	"image"
+	"image/png"
+	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 )
 
 // See http://www.graphviz.org/doc/info/colors.html
@@ -29,99 +29,21 @@ func NewPolicyVisualization(diff *diff.RevisionDiff) PolicyVisualization {
 	return PolicyVisualization{diff: diff}
 }
 
-// DrawAndStore draws and stores several pictures (current, prev, and delta)
-func (vis PolicyVisualization) DrawAndStore() {
-	// Draw & save resulting graph
-	nextGraph := vis.DrawVisualAndStore(vis.diff.Next, "complete")
-	vis.saveGraph("complete", nextGraph)
-
-	// Draw previous graph
-	prevGraph := vis.DrawVisualAndStore(vis.diff.Prev, "prev")
-	vis.saveGraph("prev", prevGraph)
-
-	// Draw delta (i.e. difference between resulting graph and previous graph)
-	deltaGraph := vis.Delta(prevGraph, nextGraph)
-	vis.saveGraph("delta", deltaGraph)
+func (vis PolicyVisualization) GetImageForRevisionNext() (image.Image, error) {
+	nextGraph := makeGraph(vis.diff.Next)
+	return vis.getGraphImage(nextGraph)
 }
 
-// Delta calculates difference between two graphs and returns it as a graph (it also modifies <next> to represent that difference)
-func (vis PolicyVisualization) Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
-	// TODO: deal with escape bullshit
-	// TODO: we are modifying next while iterating. can this cause any issues?
-	// New nodes, edges, subgraphs must be highlighted
-	{
-		for _, s := range next.SubGraphs.SubGraphs {
-			if _, inPrev := prev.SubGraphs.SubGraphs[s.Name]; !inPrev {
-				// New subgraph -> no special treatment needed
-				// s.Attrs.Add("style", "filled")
-			}
-		}
-		for _, n := range next.Nodes.Nodes {
-			if _, inPrev := prev.Nodes.Lookup[n.Name]; !inPrev {
-				// New node -> filled green
-				n.Attrs.Add("style", "filled")
-				n.Attrs.Add("color", "green2")
-			}
-		}
-		for _, e := range next.Edges.Edges {
-			if _, inPrev := prev.Edges.SrcToDsts[e.Src][e.Dst]; !inPrev {
-				// New edge -> bold, same color
-				e.Attrs.Add("penwidth", "4")
-			}
-		}
-	}
-
-	// Removed nodes, edges, subgraphs must be highlighted
-	{
-		for _, s := range prev.SubGraphs.SubGraphs {
-			if _, inNext := next.SubGraphs.SubGraphs[s.Name]; !inNext {
-				// Removed subgraph -> add a sugraph filled red
-				next.AddSubGraph(next.Name, s.Name, map[string]string{"style": "filled", "fillcolor": "gray18", "fontcolor": "white", "label": s.Attrs["label"]})
-			}
-		}
-
-		for _, n := range prev.Nodes.Nodes {
-			if _, inNext := next.Nodes.Lookup[n.Name]; !inNext {
-
-				// if the previous graph was empty and contained just one "empty" node, don't show it on delta
-				if !strings.Contains(n.Name, noEntriesNodeName) {
-					// Removed node -> add a node filled red
-					n.Attrs.Add("style", "filled")
-					n.Attrs.Add("color", "red")
-
-					// Find previous subgraph & put it into the same subgraph
-					subgraphName := vis.findSubraphName(prev, n.Name)
-					next.Relations.Add(subgraphName, n.Name)
-
-					next.Nodes.Add(n)
-				}
-			}
-		}
-		for _, e := range prev.Edges.Edges {
-			if _, inNext := next.Edges.SrcToDsts[e.Src][e.Dst]; !inNext {
-				// Removed edge -> add an edge, dashed
-				e.Attrs.Add("style", "dashed")
-				next.Edges.Add(e)
-			}
-		}
-	}
-
-	return next
+func (vis PolicyVisualization) GetImageForRevisionPrev() (image.Image, error) {
+	prevGraph := makeGraph(vis.diff.Prev)
+	return vis.getGraphImage(prevGraph)
 }
 
-// Finds subgraph name from relations
-func (vis PolicyVisualization) findSubraphName(prev *gographviz.Graph, nName string) string {
-	for gName := range prev.Relations.ParentToChildren {
-		if prev.Relations.ParentToChildren[gName][nName] {
-			return gName
-		}
-	}
-	return prev.Name
-}
-
-// Returns name of the file where visual is stored
-func (vis PolicyVisualization) getVisualFileNamePNG(suffix string) string {
-	return GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_"+suffix+".png")
+func (vis PolicyVisualization) GetImageForRevisionDiff() (image.Image, error) {
+	nextGraph := makeGraph(vis.diff.Next)
+	prevGraph := makeGraph(vis.diff.Prev)
+	deltaGraph := Delta(prevGraph, nextGraph)
+	return vis.getGraphImage(deltaGraph)
 }
 
 // Returns a short version of the string
@@ -133,8 +55,7 @@ func shorten(s string) string {
 	return s
 }
 
-// DrawVisualAndStore writes revision visual into a file
-func (vis PolicyVisualization) DrawVisualAndStore(revision *resolve.Revision, suffix string) *gographviz.Graph {
+func makeGraph(revision *resolve.Revision) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -233,16 +154,20 @@ func (vis PolicyVisualization) DrawVisualAndStore(revision *resolve.Revision, su
 }
 
 // Saves graph into a file
-func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph) {
-	fileNameDot := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_"+suffix+"_full.dot")
-	fileNameDotFlat := GetAptomiObjectWriteFileCurrentRun(GetAptomiBaseDir(), TypeGraphics, "graph_"+suffix+"_flat.dot")
-	err := ioutil.WriteFile(fileNameDot, []byte(graph.String()), 0644)
+func (vis PolicyVisualization) getGraphImage(graph *gographviz.Graph) (image.Image, error) {
+	// Original graph in .dot
+	fileNameDot := WriteTempFile("graphviz", graph.String())
+	defer os.Remove(fileNameDot)
 
-	if err != nil {
-		panic(fmt.Sprintf("Unable to write to a file '%s': %s", fileNameDot, err.Error()))
-	}
+	// Graph with improved layout in .dot
+	fileNameDotFlat := fileNameDot + ".flat.dot"
+	defer os.Remove(fileNameDotFlat)
 
-	// Call graphviz to flatten an image
+	// Graph in .png
+	fileNamePng := fileNameDot + ".png"
+	defer os.Remove(fileNamePng)
+
+	// Call graphviz to unflatten an image and get a better layout
 	{
 		cmd := "unflatten"
 		args := []string{"-f", "-l", "4", "-o" + fileNameDotFlat, fileNameDot}
@@ -254,11 +179,12 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 			panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s", cmd, args, outb.String(), errb.String(), err.Error()))
 		}
 	}
+
 	// Call graphviz to generate an image
 	{
 		cmd := "dot"
-		args := []string{"-Tpng", "-o" + vis.getVisualFileNamePNG(suffix), fileNameDotFlat}
-		// args := []string{"-Tpng", "-Kfdp", "-o" + vis.getVisualFileNamePNG(suffix), fileNameDotFlat}
+		args := []string{"-Tpng", "-o" + fileNamePng, fileNameDotFlat}
+		// args := []string{"-Tpng", "-Kfdp", "-o" + fileNamePng, fileNameDotFlat}
 		command := exec.Command(cmd, args...)
 		var outb, errb bytes.Buffer
 		command.Stdout = &outb
@@ -267,6 +193,14 @@ func (vis PolicyVisualization) saveGraph(suffix string, graph *gographviz.Graph)
 			panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s", cmd, args, outb.String(), errb.String(), err.Error()))
 		}
 	}
+
+	// Read image and return
+	filePng, err := os.Open(fileNamePng)
+	if err != nil {
+		panic(fmt.Sprintf("Unable to load PNG generated by graphviz '%s': %s", fileNamePng, err.Error()))
+	}
+	defer filePng.Close()
+	return png.Decode(filePng)
 }
 
 // Returns a color for the given user
