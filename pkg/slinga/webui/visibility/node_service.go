@@ -41,6 +41,6 @@ func (n serviceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceNode) getDetails(id string, state *resolve.ResolvedState) interface{} {
-	return state.Policy.Services[id]
+func (n serviceNode) getDetails(id string, revision *resolve.Revision) interface{} {
+	return revision.Policy.Services[id]
 }

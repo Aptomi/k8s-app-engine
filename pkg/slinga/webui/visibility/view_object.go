@@ -7,15 +7,15 @@ import (
 
 // ObjectView represents an in-depth view for a particular object
 type ObjectView struct {
-	id    string
-	state *resolve.ResolvedState
+	id       string
+	revision *resolve.Revision
 }
 
 // NewObjectView creates a new ObjectView
 func NewObjectView(id string) ObjectView {
 	return ObjectView{
-		id:    id,
-		state: resolve.LoadResolvedState(),
+		id:       id,
+		revision: resolve.LoadRevision(),
 	}
 }
 
@@ -29,5 +29,5 @@ func (ov ObjectView) GetData() interface{} {
 		return nil
 	}
 
-	return obj.getDetails(obj.isItMyID(ov.id), ov.state)
+	return obj.getDetails(obj.isItMyID(ov.id), ov.revision)
 }

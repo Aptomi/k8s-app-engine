@@ -10,26 +10,26 @@ import (
 	"time"
 )
 
-// ServiceUsageDependencyAction is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
-type ServiceUsageDependencyAction struct {
+// ComponentDependencyEvent is a <ComponentKey, DependencyID> object. It holds data for attach/detach operations for component instance <-> dependency
+type ComponentDependencyEvent struct {
 	ComponentKey string
 	DependencyID string
 }
 
-// ServiceUsageStateDiff represents a difference between two calculated usage states
-type ServiceUsageStateDiff struct {
-	// Previous resolved state (policy, resolved policy, external objects)
-	Prev *resolve.ResolvedState
+// RevisionDiff represents a difference between two revisions
+type RevisionDiff struct {
+	// Previous revision (policy, resolved policy, external objects)
+	Prev *resolve.Revision
 
-	// Next resolved state (policy, resolved policy, external objects)
-	Next *resolve.ResolvedState
+	// Next revision (policy, resolved policy, external objects)
+	Next *resolve.Revision
 
 	// Actions that need to be taken
 	ComponentInstantiate      map[string]bool
 	ComponentDestruct         map[string]bool
 	ComponentUpdate           map[string]bool
-	ComponentAttachDependency []ServiceUsageDependencyAction
-	ComponentDetachDependency []ServiceUsageDependencyAction
+	ComponentAttachDependency []ComponentDependencyEvent
+	ComponentDetachDependency []ComponentDependencyEvent
 
 	// Plugins (will be called during diff processing)
 	Plugins []plugin.EnginePlugin
@@ -38,10 +38,10 @@ type ServiceUsageStateDiff struct {
 	DiffAsText string
 }
 
-// CalculateDifference calculates difference between two given usage states
-func NewServiceUsageStateDiff(next *resolve.ResolvedState, prev *resolve.ResolvedState) *ServiceUsageStateDiff {
+// NewRevisionDiff calculates difference between two given revisions
+func NewRevisionDiff(next *resolve.Revision, prev *resolve.Revision) *RevisionDiff {
 	// resulting difference
-	result := &ServiceUsageStateDiff{
+	result := &RevisionDiff{
 		Prev:                 prev,
 		Next:                 next,
 		ComponentInstantiate: make(map[string]bool),
@@ -55,7 +55,7 @@ func NewServiceUsageStateDiff(next *resolve.ResolvedState, prev *resolve.Resolve
 }
 
 // ProcessSuccessfulExecution increments revision and saves results of the current run when policy processing executed successfully
-func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRevision, newrevision bool, noop bool) {
+func (diff *RevisionDiff) ProcessSuccessfulExecution(revision AptomiRevision, newrevision bool, noop bool) {
 	fmt.Println("[Revision]")
 	if newrevision || (!noop && diff.ShouldGenerateNewRevision()) {
 		// Increment a revision
@@ -76,21 +76,21 @@ func (diff *ServiceUsageStateDiff) ProcessSuccessfulExecution(revision AptomiRev
 }
 
 // On a component level -- see which component instance keys appear and disappear
-func (diff *ServiceUsageStateDiff) calculateDifference() {
+func (diff *RevisionDiff) calculateDifference() {
 	// map of all instances
 	allKeys := make(map[string]bool)
 
 	// merge all the keys
-	for k := range diff.Prev.State.ResolvedData.ComponentInstanceMap {
+	for k := range diff.Prev.Resolution.Resolved.ComponentInstanceMap {
 		allKeys[k] = true
 	}
-	for k := range diff.Next.State.ResolvedData.ComponentInstanceMap {
+	for k := range diff.Next.Resolution.Resolved.ComponentInstanceMap {
 		allKeys[k] = true
 	}
 	// Go over all the keys and see which one appear and which one disappear
 	for k := range allKeys {
-		uPrev := diff.Prev.State.ResolvedData.ComponentInstanceMap[k]
-		uNext := diff.Next.State.ResolvedData.ComponentInstanceMap[k]
+		uPrev := diff.Prev.Resolution.Resolved.ComponentInstanceMap[k]
+		uNext := diff.Next.Resolution.Resolved.ComponentInstanceMap[k]
 
 		var depIdsPrev map[string]bool
 		if uPrev != nil {
@@ -128,14 +128,14 @@ func (diff *ServiceUsageStateDiff) calculateDifference() {
 		// see if a user needs to be detached from a component
 		for dependencyID := range depIdsPrev {
 			if !depIdsNext[dependencyID] {
-				diff.ComponentDetachDependency = append(diff.ComponentDetachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyID})
+				diff.ComponentDetachDependency = append(diff.ComponentDetachDependency, ComponentDependencyEvent{ComponentKey: k, DependencyID: dependencyID})
 			}
 		}
 
 		// see if a user needs to be attached to a component
 		for dependencyID := range depIdsNext {
 			if !depIdsPrev[dependencyID] {
-				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ServiceUsageDependencyAction{ComponentKey: k, DependencyID: dependencyID})
+				diff.ComponentAttachDependency = append(diff.ComponentAttachDependency, ComponentDependencyEvent{ComponentKey: k, DependencyID: dependencyID})
 			}
 		}
 	}
@@ -147,9 +147,9 @@ func (diff *ServiceUsageStateDiff) calculateDifference() {
 }
 
 // updated timestamps for component (and root service, if/as needed)
-func (diff *ServiceUsageStateDiff) updateTimes(cik *resolve.ComponentInstanceKey, createdOn time.Time, updatedOn time.Time) {
+func (diff *RevisionDiff) updateTimes(cik *resolve.ComponentInstanceKey, createdOn time.Time, updatedOn time.Time) {
 	// update for a given node
-	instance := diff.Next.State.ResolvedData.ComponentInstanceMap[cik.GetKey()]
+	instance := diff.Next.Resolution.Resolved.ComponentInstanceMap[cik.GetKey()]
 	if instance == nil {
 		// likely this component has been deleted as a part of the diff
 		return
@@ -163,7 +163,7 @@ func (diff *ServiceUsageStateDiff) updateTimes(cik *resolve.ComponentInstanceKey
 }
 
 // Returns difference length (used for progress indicator)
-func (diff *ServiceUsageStateDiff) GetApplyProgressLength() int {
+func (diff *RevisionDiff) GetApplyProgressLength() int {
 	result := len(diff.ComponentInstantiate) +
 		len(diff.ComponentDestruct) +
 		len(diff.ComponentUpdate)
@@ -176,7 +176,7 @@ func (diff *ServiceUsageStateDiff) GetApplyProgressLength() int {
 }
 
 // On a component level -- see which keys appear and disappear
-func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool, log *log.Logger) {
+func (diff *RevisionDiff) writeDifferenceOnComponentLevel(verbose bool, log *log.Logger) {
 	log.Println("[Components]")
 
 	// Print
@@ -221,7 +221,7 @@ func (diff *ServiceUsageStateDiff) writeDifferenceOnComponentLevel(verbose bool,
 }
 
 // StoreDiffAsText method prints changes onto the screen (i.e. delta - what got added/removed)
-func (diff *ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
+func (diff *RevisionDiff) StoreDiffAsText(verbose bool) {
 	memLog := eventlog.NewPlainMemoryLogger(verbose)
 	diff.writeSummary(memLog.GetLogger())
 	diff.writeDifferenceOnServicesLevel(memLog.GetLogger())
@@ -230,10 +230,10 @@ func (diff *ServiceUsageStateDiff) StoreDiffAsText(verbose bool) {
 }
 
 // AlterDifference basically marks all objects in diff for recreation/update if full update is requested. This is useful to re-create missing objects if they got deleted externally after deployment
-func (diff *ServiceUsageStateDiff) AlterDifference(full bool) {
+func (diff *RevisionDiff) AlterDifference(full bool) {
 	// If we are requesting full policy processing, then we will need to re-create all objects
 	if full {
-		for key, instance := range diff.Next.State.ResolvedData.ComponentInstanceMap {
+		for key, instance := range diff.Next.Resolution.Resolved.ComponentInstanceMap {
 			diff.ComponentInstantiate[key] = true
 			diff.updateTimes(instance.Key, instance.CreatedOn, time.Now())
 		}

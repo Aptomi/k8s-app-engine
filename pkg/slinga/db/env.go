@@ -36,7 +36,7 @@ const (
 	// TypeRevision holds revision number for the last successful aptomi run
 	TypeRevision AptomiOject = "revision"
 
-	// TypePolicyResolution holds usage data for components/dependencies
+	// TypePolicyResolution holds resolution data for components/dependencies
 	TypePolicyResolution AptomiOject = "db"
 
 	// TypeLogs contains debug logs

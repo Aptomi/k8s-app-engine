@@ -56,6 +56,6 @@ func (n dependencyNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n dependencyNode) getDetails(id string, state *resolve.ResolvedState) interface{} {
-	return state.Policy.Dependencies.DependenciesByID[id]
+func (n dependencyNode) getDetails(id string, revision *resolve.Revision) interface{} {
+	return revision.Policy.Dependencies.DependenciesByID[id]
 }

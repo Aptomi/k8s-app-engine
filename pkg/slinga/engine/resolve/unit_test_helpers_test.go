@@ -38,12 +38,12 @@ func loadUnitTestsPolicy() *PolicyNamespace {
 	return LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
-func loadPolicyAndResolve(t *testing.T) (*PolicyNamespace, *ServiceUsageState) {
+func loadPolicyAndResolve(t *testing.T) (*PolicyNamespace, *PolicyResolution) {
 	policy := loadUnitTestsPolicy()
 	return policy, resolvePolicy(t, policy, ResSuccess, "")
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, expectedErrorMessage string) *ServiceUsageState {
+func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, expectedErrorMessage string) *PolicyResolution {
 	userLoader := NewUserLoaderFromDir("../../testdata/unittests")
 	resolver := NewPolicyResolver(policy, userLoader)
 	result, err := resolver.ResolveAllDependencies()
@@ -68,18 +68,18 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, ex
 		return nil
 	}
 
-	return result.State
+	return result.Resolution
 }
 
-func getInstanceInternal(t *testing.T, key string, usageData *ServiceUsageData) *ComponentInstance {
-	instance, ok := usageData.ComponentInstanceMap[key]
-	if !assert.True(t, ok, "Component instance in usage data: "+key) {
+func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionData) *ComponentInstance {
+	instance, ok := resolutionData.ComponentInstanceMap[key]
+	if !assert.True(t, ok, "Component instance in resolution data: "+key) {
 		t.FailNow()
 	}
 	return instance
 }
 
-func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, state *ServiceUsageState) *ComponentInstance {
+func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, resolution *PolicyResolution) *ComponentInstance {
 	key := NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName])
-	return getInstanceInternal(t, key.GetKey(), state.ResolvedData)
+	return getInstanceInternal(t, key.GetKey(), resolution.Resolved)
 }

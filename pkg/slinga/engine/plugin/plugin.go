@@ -9,7 +9,7 @@ import (
 // EngineDiffPlugin contains methods which will be called by the engine during diff calculation
 type EngineDiffPlugin interface {
 	// Init will be called by the engine after diff is calculated and populated with data
-	Init(next *resolve.ResolvedState, prev *resolve.ResolvedState)
+	Init(next *resolve.Revision, prev *resolve.Revision)
 
 	// GetCustomApplyProgressLength should return the number of times a plugin
 	// will increment progress indicator during OnApplyCustom() phase

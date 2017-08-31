@@ -18,21 +18,20 @@ func BenchmarkEngine(b *testing.B) {
 
 func TestEmptyDiff(t *testing.T) {
 	resolvedPrev := loadPolicyAndResolve(t)
-	resolvedPrev = emulateSaveAndLoadState(resolvedPrev)
+	resolvedPrev = emulateSaveAndLoadRevision(resolvedPrev)
 
-	// Get usage state next
 	resolvedNext := loadPolicyAndResolve(t)
 
 	// Calculate and verify difference
-	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev)
+	diff := NewRevisionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, false, 0, 0, 0, 0, 0)
 }
 
 func TestDiffHasCreatedComponents(t *testing.T) {
 	resolvedPrev := loadPolicyAndResolve(t)
-	resolvedPrev = emulateSaveAndLoadState(resolvedPrev)
+	resolvedPrev = emulateSaveAndLoadRevision(resolvedPrev)
 
-	// Add another dependency and resolve usage state next
+	// Add another dependency and resolve policy
 	nextPolicy := language.LoadUnitTestsPolicy("../../testdata/unittests")
 	nextPolicy.Dependencies.AddDependency(
 		&language.Dependency{
@@ -47,37 +46,37 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 	resolvedNext := resolvePolicy(t, nextPolicy)
 
 	// Calculate difference
-	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev)
+	diff := NewRevisionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, true, 8, 0, 0, 8, 0)
 }
 
 func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	var key string
 
-	// Create initial empty state (do not resolve any dependencies)
-	uEmpty := resolve.NewResolvedState(
+	// Create initial empty revision (do not resolve any dependencies)
+	uEmpty := resolve.NewRevision(
 		language.NewPolicyNamespace(),
-		resolve.NewServiceUsageState(),
+		resolve.NewPolicyResolution(),
 		getUserLoader(),
 	)
 
 	// Resolve all dependencies in policy
 	resolvedInitial := loadPolicyAndResolve(t)
 
-	// Calculate difference against empty state to update times, emulate save/load
-	diff := NewServiceUsageStateDiff(resolvedInitial, uEmpty)
-	resolvedInitial = emulateSaveAndLoadState(resolvedInitial)
+	// Calculate difference against empty revision to update times, emulate save/load
+	diff := NewRevisionDiff(resolvedInitial, uEmpty)
+	resolvedInitial = emulateSaveAndLoadRevision(resolvedInitial)
 
 	// Check creation/update times
-	key = getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", resolvedInitial.Policy, resolvedInitial.State).Key.GetKey()
-	p := getTimesNext(t, key, resolvedInitial.State)
+	key = getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", resolvedInitial.Policy, resolvedInitial.Resolution).Key.GetKey()
+	p := getTimesNext(t, key, resolvedInitial.Resolution)
 	assert.WithinDuration(t, time.Now(), p.timeNextCreated, time.Second, "Creation time should be initialized correctly for kafka")
 	assert.Equal(t, p.timeNextUpdated, p.timeNextUpdated, "Update time should be equal to creation time")
 
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
 
-	// Add another dependency, resolve, calculate difference against prev state, emulate save/load
+	// Add another dependency, resolve, calculate difference against prev revision, emulate save/load
 	policyNext := language.LoadUnitTestsPolicy("../../testdata/unittests")
 	policyNext.Dependencies.AddDependency(
 		&language.Dependency{
@@ -90,10 +89,10 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		},
 	)
 	resolvedNew := resolvePolicy(t, policyNext)
-	_ = NewServiceUsageStateDiff(resolvedNew, resolvedInitial)
+	_ = NewRevisionDiff(resolvedNew, resolvedInitial)
 
 	// Check creation/update times
-	pInit := getTimes(t, key, resolvedInitial.State, resolvedNew.State)
+	pInit := getTimes(t, key, resolvedInitial.Resolution, resolvedNew.Resolution)
 	assert.Equal(t, pInit.timePrevCreated, pInit.timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.Equal(t, pInit.timePrevUpdated, pInit.timeNextUpdated, "Update time should be carried over to remain the same")
 
@@ -106,20 +105,20 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	resolvedDependencyUpdate := resolvePolicyInternal(t, resolvedNew.Policy, userLoader)
 
 	// Get the diff
-	diff = NewServiceUsageStateDiff(resolvedDependencyUpdate, resolvedNew)
+	diff = NewRevisionDiff(resolvedDependencyUpdate, resolvedNew)
 
 	// Check that update has been performed
 	verifyDiff(t, diff, true, 0, 0, 1, 0, 0)
 
 	// Check creation/update times for component
-	key = getInstanceByParams(t, "kafka", "prod-high", []string{"Elena"}, "component2", resolvedNew.Policy, resolvedNew.State).Key.GetKey()
-	pUpdate := getTimes(t, key, resolvedNew.State, resolvedDependencyUpdate.State)
+	key = getInstanceByParams(t, "kafka", "prod-high", []string{"Elena"}, "component2", resolvedNew.Policy, resolvedNew.Resolution).Key.GetKey()
+	pUpdate := getTimes(t, key, resolvedNew.Resolution, resolvedDependencyUpdate.Resolution)
 	assert.Equal(t, pUpdate.timePrevCreated, pUpdate.timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, pUpdate.timeNextUpdated.After(pUpdate.timePrevUpdated), "Update time should be changed")
 
 	// Check creation/update times for service
-	key = getInstanceByParams(t, "kafka", "prod-high", []string{"Elena"}, "root", resolvedNew.Policy, resolvedNew.State).Key.GetKey()
-	pUpdateSvc := getTimes(t, key, resolvedNew.State, resolvedDependencyUpdate.State)
+	key = getInstanceByParams(t, "kafka", "prod-high", []string{"Elena"}, "root", resolvedNew.Policy, resolvedNew.Resolution).Key.GetKey()
+	pUpdateSvc := getTimes(t, key, resolvedNew.Resolution, resolvedDependencyUpdate.Resolution)
 	assert.Equal(t, pUpdateSvc.timePrevCreated, pUpdateSvc.timeNextCreated, "Creation time should be carried over to remain the same")
 	assert.True(t, pUpdateSvc.timeNextUpdated.After(pUpdateSvc.timePrevUpdated), "Update time should be changed for service")
 }
@@ -127,13 +126,13 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 func TestDiffHasDestructedComponents(t *testing.T) {
 	// Resolve unit test policy
 	resolvedPrev := loadPolicyAndResolve(t)
-	resolvedPrev = emulateSaveAndLoadState(resolvedPrev)
+	resolvedPrev = emulateSaveAndLoadRevision(resolvedPrev)
 
 	// Now resolve empty policy
 	nextPolicy := language.NewPolicyNamespace()
 	resolvedNext := resolvePolicy(t, nextPolicy)
 
 	// Calculate difference
-	diff := NewServiceUsageStateDiff(resolvedNext, resolvedPrev)
+	diff := NewRevisionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, true, 0, 16, 0, 0, 16)
 }

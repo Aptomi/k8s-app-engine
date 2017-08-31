@@ -6,12 +6,12 @@ import (
 )
 
 type BasePlugin struct {
-	Next     *resolve.ResolvedState
-	Prev     *resolve.ResolvedState
+	Next     *resolve.Revision
+	Prev     *resolve.Revision
 	EventLog *eventlog.EventLog
 }
 
-func (basePlugin *BasePlugin) Init(next *resolve.ResolvedState, prev *resolve.ResolvedState) {
+func (basePlugin *BasePlugin) Init(next *resolve.Revision, prev *resolve.Revision) {
 	basePlugin.Next = next
 	basePlugin.Prev = prev
 }

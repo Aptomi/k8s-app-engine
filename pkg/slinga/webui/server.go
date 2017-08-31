@@ -12,7 +12,6 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func endpointsHandler(w http.ResponseWriter, r *http.Request) {
-	// Load the previous usage state
 	endpoints := visibility.Endpoints(getLoggedInUserID(r))
 	writeJSON(w, endpoints)
 }

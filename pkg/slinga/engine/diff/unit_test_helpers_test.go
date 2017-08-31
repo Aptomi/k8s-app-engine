@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func loadPolicyAndResolve(t *testing.T) *ResolvedState {
+func loadPolicyAndResolve(t *testing.T) *Revision {
 	policy := LoadUnitTestsPolicy("../../testdata/unittests")
 	return resolvePolicy(t, policy)
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace) *ResolvedState {
+func resolvePolicy(t *testing.T, policy *PolicyNamespace) *Revision {
 	userLoader := getUserLoader()
 	return resolvePolicyInternal(t, policy, userLoader)
 }
@@ -22,42 +22,40 @@ func getUserLoader() UserLoader {
 	return NewUserLoaderFromDir("../../testdata/unittests")
 }
 
-func resolvePolicyInternal(t *testing.T, policy *PolicyNamespace, userLoader UserLoader) *ResolvedState {
+func resolvePolicyInternal(t *testing.T, policy *PolicyNamespace, userLoader UserLoader) *Revision {
 	resolver := NewPolicyResolver(policy, userLoader)
 	result, err := resolver.ResolveAllDependencies()
-	if !assert.Nil(t, err, "PolicyNamespace usage should be resolved without errors") {
+	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
 	}
 	return result
 }
 
 // TODO: this has to be changed to use the new serialization code instead of serializing to YAML
-func emulateSaveAndLoadState(resolvedState *ResolvedState) *ResolvedState {
-	// Save and load policy
+func emulateSaveAndLoadRevision(revision *Revision) *Revision {
 	policyNew := PolicyNamespace{}
-	yaml.DeserializeObject(yaml.SerializeObject(resolvedState.Policy), &policyNew)
+	yaml.DeserializeObject(yaml.SerializeObject(revision.Policy), &policyNew)
 
-	// Save and load state
-	stateNew := ServiceUsageState{}
-	yaml.DeserializeObject(yaml.SerializeObject(resolvedState.State), &stateNew)
+	resolutionNew := PolicyResolution{}
+	yaml.DeserializeObject(yaml.SerializeObject(revision.Resolution), &resolutionNew)
 
-	return NewResolvedState(&policyNew, &stateNew, resolvedState.UserLoader)
+	return NewRevision(&policyNew, &resolutionNew, revision.UserLoader)
 }
 
-func getInstanceInternal(t *testing.T, key string, usageData *ServiceUsageData) *ComponentInstance {
-	instance, ok := usageData.ComponentInstanceMap[key]
-	if !assert.True(t, ok, "Component instance in usage data: "+key) {
+func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionData) *ComponentInstance {
+	instance, ok := resolutionData.ComponentInstanceMap[key]
+	if !assert.True(t, ok, "Component instance exists in resolution data: "+key) {
 		t.FailNow()
 	}
 	return instance
 }
 
-func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, state *ServiceUsageState) *ComponentInstance {
+func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, resolution *PolicyResolution) *ComponentInstance {
 	key := NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName])
-	return getInstanceInternal(t, key.GetKey(), state.ResolvedData)
+	return getInstanceInternal(t, key.GetKey(), resolution.Resolved)
 }
 
-func verifyDiff(t *testing.T, diff *ServiceUsageStateDiff, newRevision bool, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
+func verifyDiff(t *testing.T, diff *RevisionDiff, newRevision bool, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
 	assert.Equal(t, newRevision, diff.ShouldGenerateNewRevision(), "Diff: should generate new revision")
 	assert.Equal(t, componentInstantiate, len(diff.ComponentInstantiate), "Diff: component instantiations")
 	assert.Equal(t, componentDestruct, len(diff.ComponentDestruct), "Diff: component destructions")
@@ -73,18 +71,18 @@ type componentTimes struct {
 	timeNextUpdated time.Time
 }
 
-func getTimes(t *testing.T, key string, u1 *ServiceUsageState, u2 *ServiceUsageState) componentTimes {
+func getTimes(t *testing.T, key string, u1 *PolicyResolution, u2 *PolicyResolution) componentTimes {
 	return componentTimes{
-		timePrevCreated: getInstanceInternal(t, key, u1.ResolvedData).CreatedOn,
-		timePrevUpdated: getInstanceInternal(t, key, u1.ResolvedData).UpdatedOn,
-		timeNextCreated: getInstanceInternal(t, key, u2.ResolvedData).CreatedOn,
-		timeNextUpdated: getInstanceInternal(t, key, u2.ResolvedData).UpdatedOn,
+		timePrevCreated: getInstanceInternal(t, key, u1.Resolved).CreatedOn,
+		timePrevUpdated: getInstanceInternal(t, key, u1.Resolved).UpdatedOn,
+		timeNextCreated: getInstanceInternal(t, key, u2.Resolved).CreatedOn,
+		timeNextUpdated: getInstanceInternal(t, key, u2.Resolved).UpdatedOn,
 	}
 }
 
-func getTimesNext(t *testing.T, key string, u2 *ServiceUsageState) componentTimes {
+func getTimesNext(t *testing.T, key string, u2 *PolicyResolution) componentTimes {
 	return componentTimes{
-		timeNextCreated: getInstanceInternal(t, key, u2.ResolvedData).CreatedOn,
-		timeNextUpdated: getInstanceInternal(t, key, u2.ResolvedData).UpdatedOn,
+		timeNextCreated: getInstanceInternal(t, key, u2.Resolved).CreatedOn,
+		timeNextUpdated: getInstanceInternal(t, key, u2.Resolved).UpdatedOn,
 	}
 }

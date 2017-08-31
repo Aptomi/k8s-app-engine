@@ -10,7 +10,7 @@ import (
 
 type EngineApply struct {
 	// Diff to be applied
-	diff *diff.ServiceUsageStateDiff
+	diff *diff.RevisionDiff
 
 	// Buffered event log - gets populated while applying changes
 	eventLog *EventLog
@@ -19,7 +19,7 @@ type EngineApply struct {
 	progress progress.ProgressIndicator
 }
 
-func NewEngineApply(diff *diff.ServiceUsageStateDiff) *EngineApply {
+func NewEngineApply(diff *diff.RevisionDiff) *EngineApply {
 	return &EngineApply{
 		diff:     diff,
 		eventLog: NewEventLog(),
@@ -36,7 +36,7 @@ func (apply *EngineApply) logError(err error) {
 	}
 }
 
-// Apply method applies all changes via executors, saves usage state in Aptomi DB
+// Apply method applies all changes via plugins
 func (apply *EngineApply) Apply() error {
 	// initialize progress indicator
 	apply.progress.SetTotal(apply.diff.GetApplyProgressLength())
@@ -93,7 +93,7 @@ func (apply *EngineApply) Apply() error {
 func (apply *EngineApply) processInstantiations() error {
 	// Process instantiations in the right order
 	foundErrors := false
-	for _, key := range apply.diff.Next.State.ResolvedData.ComponentProcessingOrder {
+	for _, key := range apply.diff.Next.Resolution.Resolved.ComponentProcessingOrder {
 		// Does it need to be instantiated?
 		if _, ok := apply.diff.ComponentInstantiate[key]; ok {
 			// Advance progress indicator
@@ -101,7 +101,7 @@ func (apply *EngineApply) processInstantiations() error {
 
 			// call plugins to perform their actions
 			for _, plugin := range apply.diff.Plugins {
-				err := plugin.OnApplyComponentInstanceCreate(apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key])
+				err := plugin.OnApplyComponentInstanceCreate(apply.diff.Next.Resolution.Resolved.ComponentInstanceMap[key])
 				if err != nil {
 					apply.logError(err)
 					foundErrors = true
@@ -119,7 +119,7 @@ func (apply *EngineApply) processInstantiations() error {
 func (apply *EngineApply) processUpdates() error {
 	// Process updates in the right order
 	foundErrors := false
-	for _, key := range apply.diff.Next.State.ResolvedData.ComponentProcessingOrder {
+	for _, key := range apply.diff.Next.Resolution.Resolved.ComponentProcessingOrder {
 		// Does it need to be updated?
 		if _, ok := apply.diff.ComponentUpdate[key]; ok {
 			// Advance progress indicator
@@ -127,7 +127,7 @@ func (apply *EngineApply) processUpdates() error {
 
 			// call plugins to perform their actions
 			for _, plugin := range apply.diff.Plugins {
-				err := plugin.OnApplyComponentInstanceUpdate(apply.diff.Next.State.ResolvedData.ComponentInstanceMap[key])
+				err := plugin.OnApplyComponentInstanceUpdate(apply.diff.Next.Resolution.Resolved.ComponentInstanceMap[key])
 				if err != nil {
 					apply.logError(err)
 					foundErrors = true
@@ -144,7 +144,7 @@ func (apply *EngineApply) processUpdates() error {
 func (apply *EngineApply) processDestructions() error {
 	// Process destructions in the right order
 	foundErrors := false
-	for _, key := range apply.diff.Prev.State.ResolvedData.ComponentProcessingOrder {
+	for _, key := range apply.diff.Prev.Resolution.Resolved.ComponentProcessingOrder {
 		// Does it need to be destructed?
 		if _, ok := apply.diff.ComponentDestruct[key]; ok {
 			// Advance progress indicator
@@ -152,7 +152,7 @@ func (apply *EngineApply) processDestructions() error {
 
 			// call plugins to perform their actions
 			for _, plugin := range apply.diff.Plugins {
-				err := plugin.OnApplyComponentInstanceDelete(apply.diff.Prev.State.ResolvedData.ComponentInstanceMap[key])
+				err := plugin.OnApplyComponentInstanceDelete(apply.diff.Prev.Resolution.Resolved.ComponentInstanceMap[key])
 				if err != nil {
 					apply.logError(err)
 					foundErrors = true

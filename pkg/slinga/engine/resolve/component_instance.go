@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// ComponentInstance is a usage data for a given component instance, containing list of user IDs and calculated labels
+// ComponentInstance is a struct that holds data for a given component instance, containing list of user IDs and calculated labels
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
 type ComponentInstance struct {
 	// Whether or not component instance has been resolved

@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
-// LastRevisionAbsentValue represents initial state ("zero revision")
+// LastRevisionAbsentValue represents initial revision ("zero revision")
 const LastRevisionAbsentValue = 0
 
 // AptomiRevision represents revision

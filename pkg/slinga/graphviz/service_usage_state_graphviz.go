@@ -21,25 +21,25 @@ const colorCount = 9
 
 // PolicyVisualization accepts diff and defines additional methods for visualizing the policy
 type PolicyVisualization struct {
-	diff *diff.ServiceUsageStateDiff
+	diff *diff.RevisionDiff
 }
 
-// NewPolicyVisualization creates new policy visualization object, given a usage state difference
-func NewPolicyVisualization(diff *diff.ServiceUsageStateDiff) PolicyVisualization {
+// NewPolicyVisualization creates new policy visualization object, given a revision difference
+func NewPolicyVisualization(diff *diff.RevisionDiff) PolicyVisualization {
 	return PolicyVisualization{diff: diff}
 }
 
 // DrawAndStore draws and stores several pictures (current, prev, and delta)
 func (vis PolicyVisualization) DrawAndStore() {
-	// Draw & save resulting state
+	// Draw & save resulting graph
 	nextGraph := vis.DrawVisualAndStore(vis.diff.Next, "complete")
 	vis.saveGraph("complete", nextGraph)
 
-	// Draw previous state
+	// Draw previous graph
 	prevGraph := vis.DrawVisualAndStore(vis.diff.Prev, "prev")
 	vis.saveGraph("prev", prevGraph)
 
-	// Draw delta (i.e. difference between resulting state and previous state)
+	// Draw delta (i.e. difference between resulting graph and previous graph)
 	deltaGraph := vis.Delta(prevGraph, nextGraph)
 	vis.saveGraph("delta", deltaGraph)
 }
@@ -133,8 +133,8 @@ func shorten(s string) string {
 	return s
 }
 
-// DrawVisualAndStore writes usage state visual into a file
-func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.ResolvedState, suffix string) *gographviz.Graph {
+// DrawVisualAndStore writes revision visual into a file
+func (vis PolicyVisualization) DrawVisualAndStore(revision *resolve.Revision, suffix string) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -154,8 +154,8 @@ func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.Resolve
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	if resolvedState.Policy.Dependencies != nil {
-		for service, dependencies := range resolvedState.Policy.Dependencies.DependenciesByService {
+	if revision.Policy.Dependencies != nil {
+		for service, dependencies := range revision.Policy.Dependencies.DependenciesByService {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
@@ -164,7 +164,7 @@ func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.Resolve
 				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := resolvedState.UserLoader.LoadUserByID(d.UserID)
+				user := revision.UserLoader.LoadUserByID(d.UserID)
 				label := "Name: " + user.Name + " (" + user.ID + ")"
 				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {
@@ -179,7 +179,7 @@ func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.Resolve
 	}
 
 	// Second, visualize evaluated links
-	for _, instance := range resolvedState.State.ResolvedData.ComponentInstanceMap {
+	for _, instance := range revision.Resolution.Resolved.ComponentInstanceMap {
 		key := instance.Key
 
 		// only add edges to "root" components (i.e. services)
@@ -201,15 +201,15 @@ func (vis PolicyVisualization) DrawVisualAndStore(resolvedState *resolve.Resolve
 
 		// Add an edge from service to service instances box
 		for dependencyID := range instance.DependencyIds {
-			userID := resolvedState.Policy.Dependencies.DependenciesByID[dependencyID].UserID
+			userID := revision.Policy.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, key.ServiceName, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 
 	// Third, show cross-service dependencies
-	if resolvedState.Policy != nil {
-		for serviceName1, service1 := range resolvedState.Policy.Services {
+	if revision.Policy != nil {
+		for serviceName1, service1 := range revision.Policy.Services {
 			// Resolve every component
 			for _, component := range service1.Components {
 				serviceName2 := component.Service

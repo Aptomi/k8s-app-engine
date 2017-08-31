@@ -9,15 +9,15 @@ import (
 
 // TimelineView represents timeline view
 type TimelineView struct {
-	userID string
-	states map[int]*resolve.ResolvedState
+	userID    string
+	revisions map[int]*resolve.Revision
 }
 
 // NewTimelineView creates a new TimelineView
 func NewTimelineView(userID string) TimelineView {
 	return TimelineView{
-		userID: userID,
-		states: resolve.LoadResolvedStatesAll(),
+		userID:    userID,
+		revisions: resolve.LoadRevisionsAll(),
 	}
 }
 
@@ -29,14 +29,14 @@ func (view TimelineView) GetData() interface{} {
 			return result
 		}
 	*/
-	for revisionNumber, state := range view.states {
+	for revisionNumber, revision := range view.revisions {
 		rev := AptomiRevision(revisionNumber)
 		entry := lineEntry{
 			"id":             rev.GetRunDirectory(),
 			"revisionNumber": strconv.Itoa(revisionNumber),
 			"dir":            rev.GetRunDirectory(),
-			"createdOn":      state.State.CreatedOn,
-			"diff":           "WE NEED TO THINK WHERE TO STORE PLAIN-TEXT-DIFF (IT USED TO BE STORED IN A WRONG PLACE)",
+			"createdOn":      revision.Resolution.CreatedOn,
+			"diff":           "todo: WE NEED TO THINK WHERE TO STORE PLAIN-TEXT-DIFF (IT USED TO BE STORED IN A WRONG PLACE)",
 		}
 		result = append(result, entry)
 	}

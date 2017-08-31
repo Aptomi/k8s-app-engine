@@ -10,19 +10,19 @@ import (
 )
 
 func TestPolicyResolverAndResolvedData(t *testing.T) {
-	policy, usageState := loadPolicyAndResolve(t)
-	resolvedData := usageState.ResolvedData
+	policy, resolution := loadPolicyAndResolve(t)
+	data := resolution.Resolved
 
 	// Check that policy resolution finished correctly
-	assert.Equal(t, 16, len(resolvedData.ComponentProcessingOrder), "Policy usage should have correct number of entries")
+	assert.Equal(t, 16, len(data.ComponentProcessingOrder), "Policy resolution data should have correct number of entries")
 
 	// Resolution for test context
-	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, usageState)
+	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
 	assert.True(t, policy.Dependencies.DependenciesByID["dep_id_1"].Resolved, "Only Alice should have access to test")
 
 	// Resolution for prod context
-	kafkaProd := getInstanceByParams(t, "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, usageState)
+	kafkaProd := getInstanceByParams(t, "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
 	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 }
@@ -36,11 +36,11 @@ func TestPolicyResolverAndUnresolvedData(t *testing.T) {
 }
 
 func TestPolicyResolverLabelProcessing(t *testing.T) {
-	policy, usageState := loadPolicyAndResolve(t)
+	policy, resolution := loadPolicyAndResolve(t)
 
 	// Check labels for Bob's dependency
 	key := policy.Dependencies.DependenciesByID["dep_id_2"].ServiceKey
-	serviceInstance := getInstanceInternal(t, key, usageState.ResolvedData)
+	serviceInstance := getInstanceInternal(t, key, resolution.Resolved)
 	labels := serviceInstance.CalculatedLabels.Labels
 	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
 	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")
@@ -49,9 +49,9 @@ func TestPolicyResolverLabelProcessing(t *testing.T) {
 }
 
 func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
-	policy, usageState := loadPolicyAndResolve(t)
+	policy, resolution := loadPolicyAndResolve(t)
 
-	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, usageState)
+	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
 
 	// Check that code parameters evaluate correctly
 	assert.Equal(t, "zookeeper-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")

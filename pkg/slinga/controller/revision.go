@@ -24,6 +24,7 @@ func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*language.P
 }
 
 func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
+
 	return nil
 }
 

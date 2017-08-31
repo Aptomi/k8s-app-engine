@@ -43,7 +43,7 @@ var policyCmdApply = &cobra.Command{
 		userLoader := NewAptomiUserLoader()
 
 		// Load the previous usage state
-		prevState := resolve.LoadResolvedState()
+		prevState := resolve.LoadRevision()
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
@@ -70,7 +70,7 @@ var policyCmdApply = &cobra.Command{
 		}
 
 		// Process differences
-		diff := NewServiceUsageStateDiff(nextState, prevState)
+		diff := NewRevisionDiff(nextState, prevState)
 		diff.AlterDifference(full)
 		diff.StoreDiffAsText(verbose)
 

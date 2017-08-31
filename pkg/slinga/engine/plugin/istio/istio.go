@@ -34,20 +34,20 @@ func (enforcer *RuleEnforcerPlugin) GetCustomApplyProgressLength() int {
 	result += len(enforcer.Next.Policy.Clusters)
 
 	// Call processComponent() for each component
-	result += len(enforcer.Next.State.ResolvedData.ComponentProcessingOrder)
+	result += len(enforcer.Next.Resolution.Resolved.ComponentProcessingOrder)
 
 	// Create rules for each component
-	result += len(enforcer.Next.State.ResolvedData.ComponentProcessingOrder)
+	result += len(enforcer.Next.Resolution.Resolved.ComponentProcessingOrder)
 
 	// Delete rules (all at once)
-	result += len(enforcer.Next.State.ResolvedData.ComponentProcessingOrder)
+	result += len(enforcer.Next.Resolution.Resolved.ComponentProcessingOrder)
 
 	return result
 }
 
 // Apply processes global rules and applies Istio routing rules for ingresses
 func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndicator) error {
-	if len(enforcer.Next.State.ResolvedData.ComponentProcessingOrder) == 0 {
+	if len(enforcer.Next.Resolution.Resolved.ComponentProcessingOrder) == 0 {
 		return nil
 	}
 
@@ -66,7 +66,7 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 
 	// Process in the right order
 	desiredRules := make(map[string][]*IstioRouteRule)
-	for _, key := range enforcer.Next.State.ResolvedData.ComponentProcessingOrder {
+	for _, key := range enforcer.Next.Resolution.Resolved.ComponentProcessingOrder {
 		rules, err := enforcer.processComponent(key)
 		if err != nil {
 			return fmt.Errorf("Error while processing Istio Ingress for component '%s': %s", key, err.Error())
@@ -79,7 +79,7 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 	createRules := make(map[string][]*IstioRouteRule)
 
 	// populate createRules, to make sure we will get correct number of entries for progress indicator
-	for _, key := range enforcer.Next.State.ResolvedData.ComponentProcessingOrder {
+	for _, key := range enforcer.Next.Resolution.Resolved.ComponentProcessingOrder {
 		createRules[key] = make([]*IstioRouteRule, 0)
 	}
 
@@ -146,12 +146,12 @@ func (enforcer *RuleEnforcerPlugin) OnApplyCustom(progress progress.ProgressIndi
 }
 
 func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteRule, error) {
-	usageState := enforcer.Next.State
+	resolution := enforcer.Next.Resolution
 
-	instance := usageState.ResolvedData.ComponentInstanceMap[key]
+	instance := resolution.Resolved.ComponentInstanceMap[key]
 	component := enforcer.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
-	labels := usageState.ResolvedData.ComponentInstanceMap[key].CalculatedLabels
+	labels := resolution.Resolved.ComponentInstanceMap[key].CalculatedLabels
 
 	cluster, err := util.GetCluster(enforcer.Next.Policy, labels)
 	if err != nil {
@@ -159,7 +159,7 @@ func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteR
 	}
 
 	// get all users who're using service
-	dependencyIds := usageState.ResolvedData.ComponentInstanceMap[key].DependencyIds
+	dependencyIds := resolution.Resolved.ComponentInstanceMap[key].DependencyIds
 	users := make([]*User, 0)
 	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exist
@@ -172,7 +172,7 @@ func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteR
 		return nil, err
 	}
 	if !allows && component != nil && component.Code != nil {
-		codeExecutor, err := GetCodeExecutor(component.Code, key, usageState.ResolvedData.ComponentInstanceMap[key].CalculatedCodeParams, enforcer.Next.Policy.Clusters, enforcer.EventLog)
+		codeExecutor, err := GetCodeExecutor(component.Code, key, resolution.Resolved.ComponentInstanceMap[key].CalculatedCodeParams, enforcer.Next.Policy.Clusters, enforcer.EventLog)
 		if err != nil {
 			return nil, err
 		}

@@ -9,7 +9,7 @@ import (
 type ConsumerView struct {
 	userId       string
 	dependencyId string
-	state        *resolve.ResolvedState
+	revision     *resolve.Revision
 	g            *graph
 }
 
@@ -18,7 +18,7 @@ func NewConsumerView(userID string, dependencyID string) ConsumerView {
 	return ConsumerView{
 		userId:       userID,
 		dependencyId: dependencyID,
-		state:        resolve.LoadResolvedState(),
+		revision:     resolve.LoadRevision(),
 		g:            newGraph(),
 	}
 }
@@ -26,10 +26,10 @@ func NewConsumerView(userID string, dependencyID string) ConsumerView {
 // GetData returns graph for a given view
 func (view ConsumerView) GetData() interface{} {
 	// go over all dependencies of a given user
-	for _, dependency := range view.state.Policy.Dependencies.DependenciesByID {
+	for _, dependency := range view.revision.Policy.Dependencies.DependenciesByID {
 		if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.GetID(), view.dependencyId) {
 			// Step 1 - add a node for every matching dependency found
-			dependencyNode := newDependencyNode(dependency, false, view.state.UserLoader)
+			dependencyNode := newDependencyNode(dependency, false, view.revision.UserLoader)
 			view.g.addNode(dependencyNode, 0)
 
 			// Step 2 - process subgraph (doesn't matter whether it's resolved successfully or not)
@@ -48,17 +48,17 @@ func filterMatches(value string, filterValue string) bool {
 // Adds to the graph nodes/edges which are triggered by usage of a given dependency
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
 	// try to get this component instance from resolved data
-	v := view.state.State.ResolvedData.ComponentInstanceMap[key]
+	v := view.revision.Resolution.Resolved.ComponentInstanceMap[key]
 
 	// okay, this component likely failed to resolved, so let's look it up from unresolved pool
 	if v == nil {
-		v = view.state.State.UnresolvedData.ComponentInstanceMap[key]
+		v = view.revision.Resolution.Unresolved.ComponentInstanceMap[key]
 	}
 
 	// if it's a service, add node and connect with previous
 	if v.Key.IsService() {
 		// add service instance node
-		svcInstanceNode := newServiceInstanceNode(key, view.state.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, nextLevel <= 1)
+		svcInstanceNode := newServiceInstanceNode(key, view.revision.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, nextLevel <= 1)
 		view.g.addNode(svcInstanceNode, nextLevel)
 
 		// connect service instance nodes

@@ -8,7 +8,7 @@ import (
 
 type loadableObject interface {
 	isItMyID(string) string
-	getDetails(string, *resolve.ResolvedState) interface{}
+	getDetails(string, *resolve.Revision) interface{}
 }
 
 func getLoadableObject(id string) loadableObject {

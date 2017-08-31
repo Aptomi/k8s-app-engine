@@ -22,8 +22,8 @@ type resolutionNode struct {
 	// combined event logs from all resolution nodes in the subtree
 	eventLogsCombined []*EventLog
 
-	// new instance of ServiceUsageData, where resolution data will be stored
-	data *ServiceUsageData
+	// new instance of ResolutionData, where resolution data will be stored
+	data *ResolutionData
 
 	// depth we are currently on (as we are traversing policy graph), with initial dependency being on depth 0
 	depth int
@@ -89,7 +89,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 		eventLog:          eventLog,
 		eventLogsCombined: []*EventLog{eventLog},
 
-		data: NewServiceUsageData(),
+		data: NewResolutionData(),
 
 		depth:      0,
 		dependency: dependency,

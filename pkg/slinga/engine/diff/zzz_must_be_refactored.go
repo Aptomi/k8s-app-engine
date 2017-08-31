@@ -7,8 +7,8 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-// ServiceUsageStateSummary returns integer counts for all policy objects
-type ServiceUsageStateSummary struct {
+// RevisionSummary returns integer counts for all policy objects
+type RevisionSummary struct {
 	Services     int
 	Contexts     int
 	Clusters     int
@@ -18,7 +18,7 @@ type ServiceUsageStateSummary struct {
 }
 
 // compare everything, but not users. users are external to us
-func (summary ServiceUsageStateSummary) equal(that ServiceUsageStateSummary) bool {
+func (summary RevisionSummary) equal(that RevisionSummary) bool {
 	if summary.Services != that.Services {
 		return false
 	}
@@ -38,22 +38,22 @@ func (summary ServiceUsageStateSummary) equal(that ServiceUsageStateSummary) boo
 }
 
 // GetSummary returns summary object for the policy
-func GetSummary(state *resolve.ResolvedState) ServiceUsageStateSummary {
-	if state.Policy == nil {
-		return ServiceUsageStateSummary{}
+func GetSummary(revision *resolve.Revision) RevisionSummary {
+	if revision.Policy == nil {
+		return RevisionSummary{}
 	}
-	return ServiceUsageStateSummary{
-		util.CountElements(state.Policy.Services),
-		util.CountElements(state.Policy.Contexts),
-		util.CountElements(state.Policy.Clusters),
-		util.CountElements(state.Policy.Rules.Rules),
-		state.UserLoader.Summary(),
-		util.CountElements(state.Policy.Dependencies.DependenciesByID),
+	return RevisionSummary{
+		util.CountElements(revision.Policy.Services),
+		util.CountElements(revision.Policy.Contexts),
+		util.CountElements(revision.Policy.Clusters),
+		util.CountElements(revision.Policy.Rules.Rules),
+		revision.UserLoader.Summary(),
+		util.CountElements(revision.Policy.Dependencies.DependenciesByID),
 	}
 }
 
 // On a service level -- see which keys appear and disappear
-func (diff *ServiceUsageStateDiff) writeDifferenceOnServicesLevel(log *logrus.Logger) {
+func (diff *RevisionDiff) writeDifferenceOnServicesLevel(log *logrus.Logger) {
 
 	log.Println("[Services]")
 
@@ -188,7 +188,7 @@ func getSummaryLineAsText(name string, prevStr string, nextStr string) string {
 }
 
 // PrintSummary prints policy object counts to the screen
-func (diff ServiceUsageStateDiff) writeSummary(log *logrus.Logger) {
+func (diff RevisionDiff) writeSummary(log *logrus.Logger) {
 	prev := GetSummary(diff.Prev)
 	next := GetSummary(diff.Next)
 	log.Println("[Policy]")
@@ -202,7 +202,7 @@ func (diff ServiceUsageStateDiff) writeSummary(log *logrus.Logger) {
 
 // ShouldGenerateNewRevision became one of the key methods.
 // If it returns false, then new run and new revision will not be generated
-func (diff *ServiceUsageStateDiff) ShouldGenerateNewRevision() bool {
+func (diff *RevisionDiff) ShouldGenerateNewRevision() bool {
 	// TODO: this method should take into account:
 	// - policy (input objects)
 	// - resolution data (output objects)

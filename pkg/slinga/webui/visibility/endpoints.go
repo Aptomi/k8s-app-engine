@@ -31,8 +31,8 @@ type endpointsView struct {
 
 // Endpoints returns a view with all endpoints
 func Endpoints(currentUserID string) endpointsView {
-	state := resolve.LoadResolvedState()
-	users := state.UserLoader.LoadUsersAll().Users
+	revision := resolve.LoadRevision()
+	users := revision.UserLoader.LoadUsersAll().Users
 
 	uR := endpointsView{make([]userEndpoints, 0)}
 
@@ -57,13 +57,13 @@ func Endpoints(currentUserID string) endpointsView {
 	for _, userID := range userIds {
 		r := make([]rEndpoint, 0)
 
-		endpoints, err := deployment.Endpoints(state.Policy, state.State, userID)
+		endpoints, err := deployment.Endpoints(revision.Policy, revision.Resolution, userID)
 		if err != nil {
 			panic(err)
 		}
 
 		for key, links := range endpoints {
-			instance := state.State.ResolvedData.ComponentInstanceMap[key]
+			instance := revision.Resolution.Resolved.ComponentInstanceMap[key]
 			rLinks := make([]rLink, 0)
 
 			for linkName, link := range links {

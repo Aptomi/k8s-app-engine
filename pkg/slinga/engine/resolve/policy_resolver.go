@@ -12,7 +12,7 @@ import (
 /*
 	Core engine for policy resolution
 	- takes policy an an input
-	- calculates ServiceUsageState as an output
+	- calculates PolicyResolution as an output
 */
 
 type PolicyResolver struct {
@@ -40,8 +40,8 @@ type PolicyResolver struct {
 		Calculated objects
 	*/
 
-	// Reference to the calculated ServiceUsageState
-	state *ServiceUsageState
+	// Reference to the calculated PolicyResolution
+	resolution *PolicyResolution
 
 	// Buffered event log - gets populated during policy resolution
 	eventLog *EventLog
@@ -54,17 +54,17 @@ func NewPolicyResolver(policy *PolicyNamespace, userLoader UserLoader) *PolicyRe
 		userLoader:      userLoader,
 		expressionCache: expression.NewExpressionCache(),
 		templateCache:   template.NewTemplateCache(),
-		state:           NewServiceUsageState(),
+		resolution:      NewPolicyResolution(),
 		eventLog:        NewEventLog(),
 	}
 }
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (resolver *PolicyResolver) ResolveAllDependencies() (*ResolvedState, error) {
+func (resolver *PolicyResolver) ResolveAllDependencies() (*Revision, error) {
 	// Run every declared dependency via policy and resolve it
 	for _, dependencies := range resolver.policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
-			// resolve usage via applying policy
+			// resolve dependency via applying policy
 			err := resolver.resolveDependency(d)
 
 			// see if there is an error
@@ -74,7 +74,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*ResolvedState, error)
 		}
 	}
 
-	return NewResolvedState(resolver.policy, resolver.state, resolver.userLoader), nil
+	return NewRevision(resolver.policy, resolver.resolution, resolver.userLoader), nil
 }
 
 // Resolves a single dependency and puts resolution data into the overall state of the world
@@ -100,11 +100,11 @@ func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error 
 	d.Resolved = node.resolved
 	d.ServiceKey = node.serviceKey.GetKey()
 
-	var data *ServiceUsageData
+	var data *ResolutionData
 	if node.resolved {
-		data = resolver.state.ResolvedData
+		data = resolver.resolution.Resolved
 	} else {
-		data = resolver.state.UnresolvedData
+		data = resolver.resolution.Unresolved
 	}
 
 	err = data.AppendData(node.data)
@@ -261,10 +261,10 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	return nil
 }
 
-// SaveServiceUsageState saves usage state in a file under Aptomi DB
+// SaveResolutionData saves revision in a file under Aptomi DB
 func (resolver *PolicyResolver) SaveResolutionData() {
-	resolvedState := NewResolvedState(resolver.policy, resolver.state, resolver.userLoader)
-	resolvedState.Save()
+	revision := NewRevision(resolver.policy, resolver.resolution, resolver.userLoader)
+	revision.Save()
 
 	// Save log
 	hook := &HookBoltDB{}
