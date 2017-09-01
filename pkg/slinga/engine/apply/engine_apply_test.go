@@ -44,7 +44,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.Resolved.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	applyAndCheck(t, apply, ResSuccess, 0, "")
+	actualState, _ = applyAndCheck(t, apply, ResSuccess, 0, "")
 
 	// check that actual state got updated
 	assert.Equal(t, 16, len(actualState.Resolved.ComponentInstanceMap), "Actual state should be empty")
@@ -81,7 +81,7 @@ func TestApplyCreateFailure(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.Resolved.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	applyAndCheck(t, apply, ResError, 4, "Apply failed for component")
+	actualState, _ = applyAndCheck(t, apply, ResError, 4, "Apply failed for component")
 
 	// check that actual state got updated
 	assert.Equal(t, 12, len(actualState.Resolved.ComponentInstanceMap), "Actual state should be empty")

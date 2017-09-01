@@ -28,25 +28,26 @@ func resolvePolicy(t *testing.T, policy *language.PolicyNamespace, userLoader la
 	return result
 }
 
-func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) {
-	err := apply.Apply()
+func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) (*resolve.PolicyResolution, error) {
+	actualState, eventLog, err := apply.Apply()
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
 		// print log into stdout and exit
 		hook := &eventlog.HookStdout{}
-		apply.eventLog.Save(hook)
+		eventLog.Save(hook)
 		t.FailNow()
 	}
 
 	if expectedResult == ResError {
 		// check for error messages
 		verifier := eventlog.NewUnitTestLogVerifier(errorMsg)
-		apply.eventLog.Save(verifier)
+		eventLog.Save(verifier)
 		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of error messages containing words: "+errorMsg) {
 			hook := &eventlog.HookStdout{}
-			apply.eventLog.Save(hook)
+			eventLog.Save(hook)
 			t.FailNow()
 		}
 	}
+	return actualState, err
 }
 
 type EnginePluginImpl struct {

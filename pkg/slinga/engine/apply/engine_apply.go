@@ -55,7 +55,7 @@ func (apply *EngineApply) getApplyProgressLength() int {
 }
 
 // Apply method applies all changes via plugins, updates actual state, returns the updated actual state and event log
-func (apply *EngineApply) Apply() error {
+func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) {
 	// initialize all plugins
 	for _, pluginInstance := range apply.plugins {
 		pluginInstance.Init(
@@ -95,12 +95,15 @@ func (apply *EngineApply) Apply() error {
 	// Finalize progress indicator
 	apply.progress.Done()
 
+	// Return error if there's been at least one error
 	if foundErrors {
 		err := fmt.Errorf("One or more errors occured while applying policy")
 		apply.eventLog.LogError(err)
-		return err
+		return apply.actualState, apply.eventLog, err
 	}
-	return nil
+
+	// No errors occurred
+	return apply.actualState, apply.eventLog, nil
 }
 
 func (apply *EngineApply) SaveLog() {
