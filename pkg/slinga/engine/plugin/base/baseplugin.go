@@ -7,11 +7,11 @@ import (
 )
 
 type BasePlugin struct {
-	Next *struct {
+	Desired *struct {
 		Policy     *language.PolicyNamespace
 		Resolution *resolve.PolicyResolution
 	}
-	Prev *struct {
+	Actual *struct {
 		Policy     *language.PolicyNamespace
 		Resolution *resolve.PolicyResolution
 	}
@@ -20,21 +20,21 @@ type BasePlugin struct {
 	EventLog *eventlog.EventLog
 }
 
-func (basePlugin *BasePlugin) Init(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, userLoader language.UserLoader, log *eventlog.EventLog) {
-	basePlugin.Next = &struct {
+func (basePlugin *BasePlugin) Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, log *eventlog.EventLog) {
+	basePlugin.Desired = &struct {
 		Policy     *language.PolicyNamespace
 		Resolution *resolve.PolicyResolution
 	}{
-		Policy:     nextPolicy,
-		Resolution: nextResolution,
+		Policy:     desiredPolicy,
+		Resolution: desiredState,
 	}
 
-	basePlugin.Prev = &struct {
+	basePlugin.Actual = &struct {
 		Policy     *language.PolicyNamespace
 		Resolution *resolve.PolicyResolution
 	}{
-		Policy:     prevPolicy,
-		Resolution: prevResolution,
+		Policy:     actualPolicy,
+		Resolution: actualState,
 	}
 
 	basePlugin.EventLog = log

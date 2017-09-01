@@ -2,73 +2,80 @@ package apply
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
 type EngineApply struct {
-	// Diff to be applied (as well as next/prev policy & user loader)
-	diff       *diff.PolicyResolutionDiff
-	nextPolicy *language.PolicyNamespace
-	prevPolicy *language.PolicyNamespace
-	userLoader language.UserLoader
+	// References to desired/actual objects
+	desiredPolicy *language.PolicyNamespace
+	desiredState  *resolve.PolicyResolution
+	actualPolicy  *language.PolicyNamespace
+	actualState   *resolve.PolicyResolution
+	userLoader    language.UserLoader
 
-	// Buffered event log - gets populated while applying changes
-	eventLog *EventLog
+	// Actions to be applied
+	actions []actions.Action
 
 	// Plugins to execute
 	plugins []plugin.EnginePlugin
+
+	// Buffered event log - gets populated while applying changes
+	eventLog *EventLog
 
 	// Progress indicator
 	progress progress.ProgressIndicator
 }
 
-func NewEngineApply(diff *diff.PolicyResolutionDiff, nextPolicy *language.PolicyNamespace, prevPolicy *language.PolicyNamespace, userLoader language.UserLoader) *EngineApply {
+func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, actions []actions.Action, plugins []plugin.EnginePlugin) *EngineApply {
 	return &EngineApply{
-		diff:       diff,
-		nextPolicy: nextPolicy,
-		prevPolicy: prevPolicy,
-		userLoader: userLoader,
-		eventLog:   NewEventLog(),
-		plugins:    plugin.AllPlugins(),
-		progress:   progress.NewProgressConsole(),
+		desiredPolicy: desiredPolicy,
+		desiredState:  desiredState,
+		actualPolicy:  actualPolicy,
+		actualState:   actualState,
+		userLoader:    userLoader,
+		actions:       actions,
+		plugins:       plugins,
+		eventLog:      NewEventLog(),
+		progress:      progress.NewProgressConsole(),
 	}
 }
 
 // Returns difference length (used for progress indicator)
-func (apply *EngineApply) GetApplyProgressLength() int {
-	result := len(apply.diff.Actions)
+func (apply *EngineApply) getApplyProgressLength() int {
+	result := len(apply.actions)
 	for _, pluginInstance := range apply.plugins {
 		result += pluginInstance.GetCustomApplyProgressLength()
 	}
 	return result
 }
 
-// Apply method applies all changes via plugins
+// Apply method applies all changes via plugins, updates actual state, returns the updated actual state and event log
 func (apply *EngineApply) Apply() error {
 	// initialize all plugins
 	for _, pluginInstance := range apply.plugins {
 		pluginInstance.Init(
-			apply.nextPolicy,
-			apply.diff.Next,
-			apply.prevPolicy,
-			apply.diff.Prev,
+			apply.desiredPolicy,
+			apply.desiredState,
+			apply.actualPolicy,
+			apply.actualState,
 			apply.userLoader,
 			apply.eventLog,
 		)
 	}
 
 	// initialize progress indicator
-	apply.progress.SetTotal(apply.GetApplyProgressLength())
+	apply.progress.SetTotal(apply.getApplyProgressLength())
 
 	// error count while applying changes
 	foundErrors := false
 
 	// process all actions
-	for _, action := range apply.diff.Actions {
+	for _, action := range apply.actions {
 		apply.progress.Advance("Action")
 		err := action.Apply(apply.plugins, apply.eventLog)
 		if err != nil {

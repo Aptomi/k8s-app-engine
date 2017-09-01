@@ -15,8 +15,8 @@ func (deployer *DeployerPlugin) GetCustomApplyProgressLength() int {
 }
 
 func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(key string) error {
-	instance := deployer.Next.Resolution.Resolved.ComponentInstanceMap[key]
-	component := deployer.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+	instance := deployer.Desired.Resolution.Resolved.ComponentInstanceMap[key]
+	component := deployer.Desired.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
 		// This is a service instance. Do nothing
@@ -35,7 +35,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(key string) error
 			component.Code,
 			instance.Key.GetKey(),
 			instance.CalculatedCodeParams,
-			deployer.Next.Policy.Clusters,
+			deployer.Desired.Policy.Clusters,
 			deployer.EventLog,
 		)
 		if err != nil {
@@ -52,8 +52,8 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(key string) error
 }
 
 func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(key string) error {
-	instance := deployer.Next.Resolution.Resolved.ComponentInstanceMap[key]
-	component := deployer.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+	instance := deployer.Desired.Resolution.Resolved.ComponentInstanceMap[key]
+	component := deployer.Desired.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
 		// This is a service instance. Do nothing
@@ -72,7 +72,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(key string) error
 			component.Code,
 			instance.Key.GetKey(),
 			instance.CalculatedCodeParams,
-			deployer.Next.Policy.Clusters,
+			deployer.Desired.Policy.Clusters,
 			deployer.EventLog,
 		)
 		if err != nil {
@@ -88,8 +88,8 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(key string) error
 }
 
 func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(key string) error {
-	instance := deployer.Prev.Resolution.Resolved.ComponentInstanceMap[key]
-	component := deployer.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+	instance := deployer.Actual.Resolution.Resolved.ComponentInstanceMap[key]
+	component := deployer.Actual.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 	if component == nil {
 		// This is a service instance. Do nothing
 		return nil
@@ -107,7 +107,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(key string) error
 			component.Code,
 			instance.Key.GetKey(),
 			instance.CalculatedCodeParams,
-			deployer.Prev.Policy.Clusters,
+			deployer.Actual.Policy.Clusters,
 			deployer.EventLog,
 		)
 		if err != nil {

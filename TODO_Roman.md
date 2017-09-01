@@ -37,13 +37,13 @@ Items to complete:
           - summary (as text/numbers)
       - Implement bool Changed() inside RevisionSummary
 
-9. Deal with update times
+9. Deal with component create/update times (calculated in diff)
+   - This logic should likely be moved to state reconciliation (updating component update/create times in Apply)
 
 10. Attach apply log to component instances
 
 
 Minor issues:
-- Check component create/update times (calculated in diff). Is there an issue?
 - Where/how to store text-based diff for revisions?
 - Get rid of dependency ID
 - Do we need to move Dependency.Resolved into resolved usage state?
@@ -140,3 +140,7 @@ Done:
 * Improved engine unit test coverage for corner cases
 
 * Modify code around charts to save them into tmp files
+
+* Rename actions/plugins to desired & actual
+
+* Actions must update actual state

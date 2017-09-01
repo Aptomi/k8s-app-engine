@@ -14,7 +14,7 @@ type EngineDiffPlugin interface {
 // EngineApplyPlugin contains methods which will be called by the engine during apply phase
 type EngineApplyPlugin interface {
 	// Init will be called by the engine when apply starts
-	Init(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, userLoader language.UserLoader, eventLog *eventlog.EventLog)
+	Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, eventLog *eventlog.EventLog)
 
 	// OnApplyComponentInstanceCreate will be called by the engine when a new component instance has to be instantiated
 	OnApplyComponentInstanceCreate(string) error

@@ -59,13 +59,13 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 
 		// see if a component needs to be instantiated
 		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
-			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentCreateAction(key))
+			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentCreateAction(key, diff.Next, diff.Prev))
 			diff.updateTimes(uNext.Key, time.Now(), time.Now())
 		}
 
 		// see if a component needs to be destructed
 		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
-			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDeleteAction(key))
+			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDeleteAction(key, diff.Next, diff.Prev))
 			diff.updateTimes(uPrev.Key, uPrev.CreatedOn, time.Now())
 		}
 
@@ -73,7 +73,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		if len(depIdsPrev) > 0 && len(depIdsNext) > 0 {
 			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentUpdateAction(key))
+				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentUpdateAction(key, diff.Next, diff.Prev))
 				diff.updateTimes(uNext.Key, uPrev.CreatedOn, time.Now())
 			} else {
 				diff.updateTimes(uNext.Key, uPrev.CreatedOn, uPrev.UpdatedOn)
@@ -83,14 +83,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		// see if a user needs to be detached from a component
 		for dependencyID := range depIdsPrev {
 			if !depIdsNext[dependencyID] {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDetachDependencyAction(key, dependencyID))
+				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDetachDependencyAction(key, dependencyID, diff.Next, diff.Prev))
 			}
 		}
 
 		// see if a user needs to be attached to a component
 		for dependencyID := range depIdsNext {
 			if !depIdsPrev[dependencyID] {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentAttachDependencyAction(key, dependencyID))
+				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentAttachDependencyAction(key, dependencyID, diff.Next, diff.Prev))
 			}
 		}
 	}
