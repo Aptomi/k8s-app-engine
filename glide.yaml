@@ -39,6 +39,10 @@ import:
 - package: github.com/gosuri/uitable
 - package: github.com/mattn/go-runewidth
   version: ^0.0.2
+- package: github.com/google/go-cmp
+  version: ^0.1.0
+  subpackages:
+  - cmp
 testImport:
 - package: github.com/stretchr/testify
   subpackages:

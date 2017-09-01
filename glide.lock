@@ -1,5 +1,5 @@
-hash: c095b1b0d54ad5ca1a344a780ceef40b4a83c1fe38128b4e0043e7eb3bc4bf36
-updated: 2017-08-30T15:15:55.50906385-07:00
+hash: 0067a309a3725b2d95e7ab70c1160074c8b40219a509238f6a9900a9d93a8660
+updated: 2017-09-01T00:54:31.202906957-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -166,6 +166,10 @@ imports:
   - proto
   - ptypes/any
   - ptypes/timestamp
+- name: github.com/google/go-cmp
+  version: 8099a9787ce5dc5984ed879a3bda47dc730a8e97
+  subpackages:
+  - cmp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/gorilla/handlers
