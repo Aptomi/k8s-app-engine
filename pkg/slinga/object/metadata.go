@@ -19,6 +19,10 @@ func (meta *Metadata) GetKey() Key {
 	return KeyFromParts("", meta.Namespace, meta.Kind, meta.Name, meta.RandAddon, meta.Generation)
 }
 
+func (meta *Metadata) GetRef() string {
+	return meta.Namespace + KeySeparator + meta.Kind + KeySeparator + meta.Name
+}
+
 // GetNamespace returns object's Namespace
 func (meta *Metadata) GetNamespace() string {
 	return meta.Namespace
