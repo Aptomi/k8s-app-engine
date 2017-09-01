@@ -3,20 +3,39 @@ package base
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
 type BasePlugin struct {
-	Next     *resolve.Revision
-	Prev     *resolve.Revision
+	Next *struct {
+		Policy     *language.PolicyNamespace
+		Resolution *resolve.PolicyResolution
+	}
+	Prev *struct {
+		Policy     *language.PolicyNamespace
+		Resolution *resolve.PolicyResolution
+	}
+	UserLoader language.UserLoader
+
 	EventLog *eventlog.EventLog
 }
 
-func (basePlugin *BasePlugin) Init(next *resolve.Revision, prev *resolve.Revision) {
-	basePlugin.Next = next
-	basePlugin.Prev = prev
-}
+func (basePlugin *BasePlugin) Init(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, userLoader language.UserLoader, log *eventlog.EventLog) {
+	basePlugin.Next = &struct {
+		Policy     *language.PolicyNamespace
+		Resolution *resolve.PolicyResolution
+	}{
+		Policy:     nextPolicy,
+		Resolution: nextResolution,
+	}
 
-func (basePlugin *BasePlugin) OnApplyStart(eventLog *eventlog.EventLog) error {
-	basePlugin.EventLog = eventLog
-	return nil
+	basePlugin.Prev = &struct {
+		Policy     *language.PolicyNamespace
+		Resolution *resolve.PolicyResolution
+	}{
+		Policy:     prevPolicy,
+		Resolution: prevResolution,
+	}
+
+	basePlugin.EventLog = log
 }

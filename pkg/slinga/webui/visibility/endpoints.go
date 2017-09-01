@@ -1,10 +1,7 @@
 package visibility
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	"sort"
 )
 
 type rLink struct {
@@ -31,6 +28,7 @@ type endpointsView struct {
 
 // Endpoints returns a view with all endpoints
 func Endpoints(currentUserID string) endpointsView {
+	/*
 	revision := resolve.LoadRevision()
 	users := revision.UserLoader.LoadUsersAll().Users
 
@@ -77,4 +75,6 @@ func Endpoints(currentUserID string) endpointsView {
 	}
 
 	return uR
+	*/
+	return endpointsView{make([]userEndpoints, 0)}
 }

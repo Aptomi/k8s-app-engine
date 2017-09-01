@@ -137,19 +137,6 @@ func (node *resolutionNode) errorServiceCycleDetected() error {
 }
 
 /*
-	Event log - report error
-*/
-
-func (node *resolutionNode) logError(err error) {
-	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
-	if isErrorWithDetails {
-		node.eventLog.WithFields(Fields(errWithDetails.Details())).Errorf(err.Error())
-	} else {
-		node.eventLog.WithFields(Fields{}).Errorf(err.Error())
-	}
-}
-
-/*
 	Event log - report debug/info/warning messages
 */
 

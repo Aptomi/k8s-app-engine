@@ -2,7 +2,6 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 )
 
 type serviceNode struct {
@@ -41,6 +40,6 @@ func (n serviceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceNode) getDetails(id string, revision *resolve.Revision) interface{} {
-	return revision.Policy.Services[id]
+func (n serviceNode) getDetails(id string /*, revision *resolve.Revision*/) interface{} {
+	return nil // revision.Policy.Services[id]
 }

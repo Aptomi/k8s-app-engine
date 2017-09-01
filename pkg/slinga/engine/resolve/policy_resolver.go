@@ -60,7 +60,7 @@ func NewPolicyResolver(policy *PolicyNamespace, userLoader UserLoader) *PolicyRe
 }
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (resolver *PolicyResolver) ResolveAllDependencies() (*Revision, error) {
+func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, error) {
 	// Run every declared dependency via policy and resolve it
 	for _, dependencies := range resolver.policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
@@ -73,8 +73,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*Revision, error) {
 			}
 		}
 	}
-
-	return NewRevision(resolver.policy, resolver.resolution, resolver.userLoader), nil
+	return resolver.resolution, nil
 }
 
 // Resolves a single dependency and puts resolution data into the overall state of the world
@@ -109,7 +108,7 @@ func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error 
 
 	err = data.AppendData(node.data)
 	if err != nil {
-		node.logError(err)
+		node.eventLog.LogError(err)
 		return err
 	}
 
@@ -259,14 +258,4 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	node.data.RecordResolved(node.serviceKey, node.dependency)
 
 	return nil
-}
-
-// SaveResolutionData saves revision in a file under Aptomi DB
-func (resolver *PolicyResolver) SaveResolutionData() {
-	revision := NewRevision(resolver.policy, resolver.resolution, resolver.userLoader)
-	revision.Save()
-
-	// Save log
-	hook := &HookBoltDB{}
-	resolver.eventLog.Save(hook)
 }

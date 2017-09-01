@@ -3,78 +3,84 @@ package apply
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
-	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
 type EngineApply struct {
-	// Diff to be applied
-	diff *diff.RevisionDiff
+	// Diff to be applied (as well as next/prev policy & user loader)
+	diff       *diff.PolicyResolutionDiff
+	nextPolicy *language.PolicyNamespace
+	prevPolicy *language.PolicyNamespace
+	userLoader language.UserLoader
 
 	// Buffered event log - gets populated while applying changes
 	eventLog *EventLog
+
+	// Plugins to execute
+	plugins []plugin.EnginePlugin
 
 	// Progress indicator
 	progress progress.ProgressIndicator
 }
 
-func NewEngineApply(diff *diff.RevisionDiff) *EngineApply {
+func NewEngineApply(diff *diff.PolicyResolutionDiff, nextPolicy *language.PolicyNamespace, prevPolicy *language.PolicyNamespace, userLoader language.UserLoader) *EngineApply {
 	return &EngineApply{
-		diff:     diff,
-		eventLog: NewEventLog(),
-		progress: progress.NewProgressConsole(),
+		diff:       diff,
+		nextPolicy: nextPolicy,
+		prevPolicy: prevPolicy,
+		userLoader: userLoader,
+		eventLog:   NewEventLog(),
+		plugins:    plugin.AllPlugins(),
+		progress:   progress.NewProgressConsole(),
 	}
 }
 
-func (apply *EngineApply) logError(err error) {
-	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
-	if isErrorWithDetails {
-		apply.eventLog.WithFields(Fields(errWithDetails.Details())).Errorf(err.Error())
-	} else {
-		apply.eventLog.WithFields(Fields{}).Errorf(err.Error())
+// Returns difference length (used for progress indicator)
+func (apply *EngineApply) GetApplyProgressLength() int {
+	result := len(apply.diff.Actions)
+	for _, pluginInstance := range apply.plugins {
+		result += pluginInstance.GetCustomApplyProgressLength()
 	}
+	return result
 }
 
 // Apply method applies all changes via plugins
 func (apply *EngineApply) Apply() error {
+	// initialize all plugins
+	for _, pluginInstance := range apply.plugins {
+		pluginInstance.Init(
+			apply.nextPolicy,
+			apply.diff.Next,
+			apply.prevPolicy,
+			apply.diff.Prev,
+			apply.userLoader,
+			apply.eventLog,
+		)
+	}
+
 	// initialize progress indicator
-	apply.progress.SetTotal(apply.diff.GetApplyProgressLength())
+	apply.progress.SetTotal(apply.GetApplyProgressLength())
 
 	// error count while applying changes
 	foundErrors := false
 
-	// call plugins to perform their actions
-	for _, plugin := range apply.diff.Plugins {
-		err := plugin.OnApplyStart(apply.eventLog)
+	// process all actions
+	for _, action := range apply.diff.Actions {
+		apply.progress.Advance("Action")
+		err := action.Apply(apply.plugins, apply.eventLog)
 		if err != nil {
-			apply.logError(fmt.Errorf("Error while calling OnApplyStart() on a plugin: " + err.Error()))
 			foundErrors = true
 		}
 	}
 
-	// process all actions
-	err := apply.processDestructions()
-	if err != nil {
-		apply.logError(err)
-		foundErrors = true
-	}
-	err = apply.processUpdates()
-	if err != nil {
-		apply.logError(err)
-		foundErrors = true
-	}
-	err = apply.processInstantiations()
-	if err != nil {
-		apply.logError(err)
-		foundErrors = true
-	}
-
-	// call plugins to perform their actions
-	for _, plugin := range apply.diff.Plugins {
-		err := plugin.OnApplyCustom(apply.progress)
+	// call plugins to perform their custom apply actions
+	for _, pluginInstance := range apply.plugins {
+		err := pluginInstance.OnApplyCustom(apply.progress)
 		if err != nil {
-			apply.logError(fmt.Errorf("Error while calling OnApplyCustom() on a plugin: " + err.Error()))
+			apply.eventLog.LogError(fmt.Errorf("Error while calling OnApplyCustom() on a plugin: " + err.Error()))
 			foundErrors = true
 		}
 	}
@@ -84,84 +90,8 @@ func (apply *EngineApply) Apply() error {
 
 	if foundErrors {
 		err := fmt.Errorf("One or more errors occured while applying policy")
-		apply.logError(err)
+		apply.eventLog.LogError(err)
 		return err
-	}
-	return nil
-}
-
-func (apply *EngineApply) processInstantiations() error {
-	// Process instantiations in the right order
-	foundErrors := false
-	for _, key := range apply.diff.Next.Resolution.Resolved.ComponentProcessingOrder {
-		// Does it need to be instantiated?
-		if _, ok := apply.diff.ComponentInstantiate[key]; ok {
-			// Advance progress indicator
-			apply.progress.Advance("Create")
-
-			// call plugins to perform their actions
-			for _, plugin := range apply.diff.Plugins {
-				err := plugin.OnApplyComponentInstanceCreate(apply.diff.Next.Resolution.Resolved.ComponentInstanceMap[key])
-				if err != nil {
-					apply.logError(err)
-					foundErrors = true
-				}
-			}
-		}
-	}
-
-	if foundErrors {
-		return fmt.Errorf("One or more errors while applying changes (creating new components)")
-	}
-	return nil
-}
-
-func (apply *EngineApply) processUpdates() error {
-	// Process updates in the right order
-	foundErrors := false
-	for _, key := range apply.diff.Next.Resolution.Resolved.ComponentProcessingOrder {
-		// Does it need to be updated?
-		if _, ok := apply.diff.ComponentUpdate[key]; ok {
-			// Advance progress indicator
-			apply.progress.Advance("Update")
-
-			// call plugins to perform their actions
-			for _, plugin := range apply.diff.Plugins {
-				err := plugin.OnApplyComponentInstanceUpdate(apply.diff.Next.Resolution.Resolved.ComponentInstanceMap[key])
-				if err != nil {
-					apply.logError(err)
-					foundErrors = true
-				}
-			}
-		}
-	}
-	if foundErrors {
-		return fmt.Errorf("One or more errors while applying changes (updating running components)")
-	}
-	return nil
-}
-
-func (apply *EngineApply) processDestructions() error {
-	// Process destructions in the right order
-	foundErrors := false
-	for _, key := range apply.diff.Prev.Resolution.Resolved.ComponentProcessingOrder {
-		// Does it need to be destructed?
-		if _, ok := apply.diff.ComponentDestruct[key]; ok {
-			// Advance progress indicator
-			apply.progress.Advance("Delete")
-
-			// call plugins to perform their actions
-			for _, plugin := range apply.diff.Plugins {
-				err := plugin.OnApplyComponentInstanceDelete(apply.diff.Prev.Resolution.Resolved.ComponentInstanceMap[key])
-				if err != nil {
-					apply.logError(err)
-					foundErrors = true
-				}
-			}
-		}
-	}
-	if foundErrors {
-		return fmt.Errorf("One or more errors while applying changes (deleting running components)")
 	}
 	return nil
 }

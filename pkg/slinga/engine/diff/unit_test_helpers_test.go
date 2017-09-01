@@ -1,6 +1,7 @@
 package diff
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
@@ -9,20 +10,15 @@ import (
 	"time"
 )
 
-func loadPolicyAndResolve(t *testing.T) *Revision {
-	policy := LoadUnitTestsPolicy("../../testdata/unittests")
-	return resolvePolicy(t, policy)
+func getPolicy() *PolicyNamespace {
+	return LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace) *Revision {
-	userLoader := getUserLoader()
-	return resolvePolicyInternal(t, policy, userLoader)
-}
 func getUserLoader() UserLoader {
 	return NewUserLoaderFromDir("../../testdata/unittests")
 }
 
-func resolvePolicyInternal(t *testing.T, policy *PolicyNamespace, userLoader UserLoader) *Revision {
+func resolvePolicy(t *testing.T, policy *PolicyNamespace, userLoader UserLoader) *PolicyResolution {
 	resolver := NewPolicyResolver(policy, userLoader)
 	result, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
@@ -32,14 +28,14 @@ func resolvePolicyInternal(t *testing.T, policy *PolicyNamespace, userLoader Use
 }
 
 // TODO: this has to be changed to use the new serialization code instead of serializing to YAML
-func emulateSaveAndLoadRevision(revision *Revision) *Revision {
+func emulateSaveAndLoadResolution(resolution *PolicyResolution) *PolicyResolution {
 	policyNew := PolicyNamespace{}
-	yaml.DeserializeObject(yaml.SerializeObject(revision.Policy), &policyNew)
+	yaml.DeserializeObject(yaml.SerializeObject(resolution), &policyNew)
 
 	resolutionNew := PolicyResolution{}
-	yaml.DeserializeObject(yaml.SerializeObject(revision.Resolution), &resolutionNew)
+	yaml.DeserializeObject(yaml.SerializeObject(resolution), &resolutionNew)
 
-	return NewRevision(&policyNew, &resolutionNew, revision.UserLoader)
+	return &resolutionNew
 }
 
 func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionData) *ComponentInstance {
@@ -55,13 +51,36 @@ func getInstanceByParams(t *testing.T, serviceName string, contextName string, a
 	return getInstanceInternal(t, key.GetKey(), resolution.Resolved)
 }
 
-func verifyDiff(t *testing.T, diff *RevisionDiff, newRevision bool, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
-	assert.Equal(t, newRevision, diff.ShouldGenerateNewRevision(), "Diff: should generate new revision")
-	assert.Equal(t, componentInstantiate, len(diff.ComponentInstantiate), "Diff: component instantiations")
-	assert.Equal(t, componentDestruct, len(diff.ComponentDestruct), "Diff: component destructions")
-	assert.Equal(t, componentUpdate, len(diff.ComponentUpdate), "Diff: component updates")
-	assert.Equal(t, componentAttachDependency, len(diff.ComponentAttachDependency), "Diff: dependencies attached to components")
-	assert.Equal(t, componentDetachDependency, len(diff.ComponentDetachDependency), "Diff: dependencies removed from components")
+func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
+	cnt := struct {
+		create int
+		update int
+		delete int
+		attach int
+		detach int
+	}{}
+	for _, action := range diff.Actions {
+		switch action.(type) {
+		case *actions.ComponentCreate:
+			cnt.create++
+		case *actions.ComponentDelete:
+			cnt.delete++
+		case *actions.ComponentUpdate:
+			cnt.update++
+		case *actions.ComponentAttachDependency:
+			cnt.attach++
+		case *actions.ComponentDetachDependency:
+			cnt.detach++
+		default:
+			t.FailNow()
+		}
+	}
+
+	assert.Equal(t, componentInstantiate, cnt.create, "Diff: component instantiations")
+	assert.Equal(t, componentDestruct, cnt.delete, "Diff: component destructions")
+	assert.Equal(t, componentUpdate, cnt.update, "Diff: component updates")
+	assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
+	assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
 }
 
 type componentTimes struct {

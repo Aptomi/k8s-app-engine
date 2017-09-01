@@ -3,6 +3,7 @@ package graphviz
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/awalterschulze/gographviz"
 	"image"
@@ -16,32 +17,24 @@ const colorCount = 9
 
 // PolicyVisualization accepts diff and defines additional methods for visualizing the policy
 type PolicyVisualization struct {
-	diff *diff.RevisionDiff
+	diff *diff.PolicyResolutionDiff
 }
 
-// NewPolicyVisualization creates new policy visualization object, given a revision difference
-func NewPolicyVisualization(diff *diff.RevisionDiff) PolicyVisualization {
-	return PolicyVisualization{diff: diff}
+// NewPolicyVisualizationImage returns an image with policy/resolution information
+func NewPolicyVisualizationImage(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, userLoader language.UserLoader) (image.Image, error) {
+	graph := makeGraph(policy, resolution, userLoader)
+	return getGraphImage(graph)
 }
 
-func (vis PolicyVisualization) GetImageForRevisionNext() (image.Image, error) {
-	nextGraph := makeGraph(vis.diff.Next)
-	return vis.getGraphImage(nextGraph)
-}
-
-func (vis PolicyVisualization) GetImageForRevisionPrev() (image.Image, error) {
-	prevGraph := makeGraph(vis.diff.Prev)
-	return vis.getGraphImage(prevGraph)
-}
-
-func (vis PolicyVisualization) GetImageForRevisionDiff() (image.Image, error) {
-	nextGraph := makeGraph(vis.diff.Next)
-	prevGraph := makeGraph(vis.diff.Prev)
+// NewPolicyVisualizationDeltaImage returns an image with policy/resolution information
+func NewPolicyVisualizationDeltaImage(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, userLoader language.UserLoader) (image.Image, error) {
+	nextGraph := makeGraph(nextPolicy, nextResolution, userLoader)
+	prevGraph := makeGraph(prevPolicy, prevResolution, userLoader)
 	deltaGraph := Delta(prevGraph, nextGraph)
-	return vis.getGraphImage(deltaGraph)
+	return getGraphImage(deltaGraph)
 }
 
-func makeGraph(revision *resolve.Revision) *gographviz.Graph {
+func makeGraph(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, userLoader language.UserLoader) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -61,8 +54,8 @@ func makeGraph(revision *resolve.Revision) *gographviz.Graph {
 	colorForUser := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	if revision.Policy.Dependencies != nil {
-		for service, dependencies := range revision.Policy.Dependencies.DependenciesByService {
+	if policy.Dependencies != nil {
+		for service, dependencies := range policy.Dependencies.DependenciesByService {
 			// Add a node with service
 			addNodeOnce(graph, "cluster_Services", service, nil, was)
 
@@ -71,7 +64,7 @@ func makeGraph(revision *resolve.Revision) *gographviz.Graph {
 				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := revision.UserLoader.LoadUserByID(d.UserID)
+				user := userLoader.LoadUserByID(d.UserID)
 				label := "Name: " + user.Name + " (" + user.ID + ")"
 				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {
@@ -86,7 +79,7 @@ func makeGraph(revision *resolve.Revision) *gographviz.Graph {
 	}
 
 	// Second, visualize evaluated links
-	for _, instance := range revision.Resolution.Resolved.ComponentInstanceMap {
+	for _, instance := range resolution.Resolved.ComponentInstanceMap {
 		key := instance.Key
 
 		// only add edges to "root" components (i.e. services)
@@ -108,15 +101,15 @@ func makeGraph(revision *resolve.Revision) *gographviz.Graph {
 
 		// Add an edge from service to service instances box
 		for dependencyID := range instance.DependencyIds {
-			userID := revision.Policy.Dependencies.DependenciesByID[dependencyID].UserID
+			userID := policy.Dependencies.DependenciesByID[dependencyID].UserID
 			color := getUserColor(userID, colorForUser, &usedColors)
 			addEdge(graph, key.ServiceName, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 
 	// Third, show cross-service dependencies
-	if revision.Policy != nil {
-		for serviceName1, service1 := range revision.Policy.Services {
+	if policy != nil {
+		for serviceName1, service1 := range policy.Services {
 			// Resolve every component
 			for _, component := range service1.Components {
 				serviceName2 := component.Service

@@ -12,7 +12,7 @@ import (
 )
 
 // Saves graph into a file
-func (vis PolicyVisualization) getGraphImage(graph *gographviz.Graph) (image.Image, error) {
+func getGraphImage(graph *gographviz.Graph) (image.Image, error) {
 	// Original graph in .dot
 	fileNameDot := WriteTempFile("graphviz", graph.String())
 	defer os.Remove(fileNameDot)

@@ -68,7 +68,7 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, ex
 		return nil
 	}
 
-	return result.Resolution
+	return result
 }
 
 func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionData) *ComponentInstance {

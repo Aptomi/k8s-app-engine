@@ -2,7 +2,6 @@ package visibility
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
@@ -56,6 +55,6 @@ func (n dependencyNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n dependencyNode) getDetails(id string, revision *resolve.Revision) interface{} {
-	return revision.Policy.Dependencies.DependenciesByID[id]
+func (n dependencyNode) getDetails(id string /*, revision *resolve.Revision*/) interface{} {
+	return nil //revision.Policy.Dependencies.DependenciesByID[id]
 }

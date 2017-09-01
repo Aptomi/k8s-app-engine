@@ -5,15 +5,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/base"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/util"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"k8s.io/kubernetes/pkg/api"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
-	"strings"
 	"os"
+	"strings"
 )
 
 // IstioRouteRule is istio route rule
@@ -165,7 +164,7 @@ func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteR
 	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exist
 		userID := enforcer.Next.Policy.Dependencies.DependenciesByID[dependencyID].UserID
-		users = append(users, enforcer.Next.UserLoader.LoadUserByID(userID))
+		users = append(users, enforcer.UserLoader.LoadUserByID(userID))
 	}
 
 	allows, err := enforcer.Next.Policy.Rules.AllowsIngressAccess(labels, users, cluster)
@@ -324,14 +323,14 @@ func runIstioCmd(cluster *Cluster, cmd string) (string, error) {
 	return out, nil
 }
 
-func (enforcer *RuleEnforcerPlugin) OnApplyComponentInstanceCreate(instance *resolve.ComponentInstance) error {
+func (enforcer *RuleEnforcerPlugin) OnApplyComponentInstanceCreate(key string) error {
 	return nil
 }
 
-func (enforcer *RuleEnforcerPlugin) OnApplyComponentInstanceUpdate(instance *resolve.ComponentInstance) error {
+func (enforcer *RuleEnforcerPlugin) OnApplyComponentInstanceUpdate(key string) error {
 	return nil
 }
 
-func (enforcer *RuleEnforcerPlugin) OnApplyComponentInstanceDelete(instance *resolve.ComponentInstance) error {
+func (enforcer *RuleEnforcerPlugin) OnApplyComponentInstanceDelete(key string) error {
 	return nil
 }

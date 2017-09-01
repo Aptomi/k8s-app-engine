@@ -1,16 +1,12 @@
 package visibility
 
-import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-)
-
 // ConsumerView represents a view from a particular consumer(s) (service consumer point of view)
 // TODO: userId and dependencyId must be userID and dependencyID (but it kinda breaks UI...)
 type ConsumerView struct {
 	userId       string
 	dependencyId string
-	revision     *resolve.Revision
-	g            *graph
+	//	revision     *resolve.Revision
+	g *graph
 }
 
 // NewConsumerView creates a new ConsumerView
@@ -18,24 +14,26 @@ func NewConsumerView(userID string, dependencyID string) ConsumerView {
 	return ConsumerView{
 		userId:       userID,
 		dependencyId: dependencyID,
-		revision:     resolve.LoadRevision(),
-		g:            newGraph(),
+		//		revision:     resolve.LoadRevision(),
+		g: newGraph(),
 	}
 }
 
 // GetData returns graph for a given view
 func (view ConsumerView) GetData() interface{} {
-	// go over all dependencies of a given user
-	for _, dependency := range view.revision.Policy.Dependencies.DependenciesByID {
-		if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.GetID(), view.dependencyId) {
-			// Step 1 - add a node for every matching dependency found
-			dependencyNode := newDependencyNode(dependency, false, view.revision.UserLoader)
-			view.g.addNode(dependencyNode, 0)
+	/*
+		// go over all dependencies of a given user
+		for _, dependency := range view.revision.Policy.Dependencies.DependenciesByID {
+			if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.GetID(), view.dependencyId) {
+				// Step 1 - add a node for every matching dependency found
+				dependencyNode := newDependencyNode(dependency, false, view.revision.UserLoader)
+				view.g.addNode(dependencyNode, 0)
 
-			// Step 2 - process subgraph (doesn't matter whether it's resolved successfully or not)
-			view.addResolvedDependencies(dependency.ServiceKey, dependencyNode, 1)
+				// Step 2 - process subgraph (doesn't matter whether it's resolved successfully or not)
+				view.addResolvedDependencies(dependency.ServiceKey, dependencyNode, 1)
+			}
 		}
-	}
+	*/
 
 	return view.g.GetData()
 }
@@ -47,30 +45,32 @@ func filterMatches(value string, filterValue string) bool {
 
 // Adds to the graph nodes/edges which are triggered by usage of a given dependency
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
-	// try to get this component instance from resolved data
-	v := view.revision.Resolution.Resolved.ComponentInstanceMap[key]
+	/*
+		// try to get this component instance from resolved data
+		v := view.revision.Resolution.Resolved.ComponentInstanceMap[key]
 
-	// okay, this component likely failed to resolved, so let's look it up from unresolved pool
-	if v == nil {
-		v = view.revision.Resolution.Unresolved.ComponentInstanceMap[key]
-	}
+		// okay, this component likely failed to resolved, so let's look it up from unresolved pool
+		if v == nil {
+			v = view.revision.Resolution.Unresolved.ComponentInstanceMap[key]
+		}
 
-	// if it's a service, add node and connect with previous
-	if v.Key.IsService() {
-		// add service instance node
-		svcInstanceNode := newServiceInstanceNode(key, view.revision.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, nextLevel <= 1)
-		view.g.addNode(svcInstanceNode, nextLevel)
+		// if it's a service, add node and connect with previous
+		if v.Key.IsService() {
+			// add service instance node
+			svcInstanceNode := newServiceInstanceNode(key, view.revision.Policy.Services[v.Key.ServiceName], v.Key.ContextName, v.Key.ContextNameWithKeys, v, nextLevel <= 1)
+			view.g.addNode(svcInstanceNode, nextLevel)
 
-		// connect service instance nodes
-		view.g.addEdge(nodePrev, svcInstanceNode)
+			// connect service instance nodes
+			view.g.addEdge(nodePrev, svcInstanceNode)
 
-		// update prev
-		nodePrev = svcInstanceNode
-	}
+			// update prev
+			nodePrev = svcInstanceNode
+		}
 
-	// go over all outgoing edges
-	for k := range v.EdgesOut {
-		// proceed further with updated service instance node
-		view.addResolvedDependencies(k, nodePrev, nextLevel+1)
-	}
+		// go over all outgoing edges
+		for k := range v.EdgesOut {
+			// proceed further with updated service instance node
+			view.addResolvedDependencies(k, nodePrev, nextLevel+1)
+		}
+	*/
 }

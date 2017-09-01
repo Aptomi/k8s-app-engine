@@ -3,10 +3,7 @@ package main
 import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/graphviz"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -36,14 +33,11 @@ var policyCmdApply = &cobra.Command{
 	Short: "Process policy and apply changes (supports noop mode)",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Empty current run directory
-		CleanCurrentRunDirectory(GetAptomiBaseDir())
-
 		// Get loader for external users
 		userLoader := NewAptomiUserLoader()
 
-		// Load the previous usage state
-		prevState := resolve.LoadRevision()
+		// Load the previous usage state (for now it's just empty)
+		prevState := resolve.NewPolicyResolution()
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
@@ -66,40 +60,46 @@ var policyCmdApply = &cobra.Command{
 		resolver := resolve.NewPolicyResolver(policy, userLoader)
 		nextState, err := resolver.ResolveAllDependencies()
 		if err != nil {
-			log.Panicf("Cannot resolve policy: %v", err)
+			log.Panicf("Cannot resolve policy: %v %v %v", err, nextState, prevState)
 		}
 
 		// Process differences
-		diff := NewRevisionDiff(nextState, prevState)
-		diff.AlterDifference(full)
-		diff.StoreDiffAsText(verbose)
+		// diff := NewRevisionDiff(nextState, prevState)
+		// diff.AlterDifference(full)
+		// diff.StoreDiffAsText(verbose)
 
 		// Print on screen
-		fmt.Print(diff.DiffAsText)
+		// fmt.Print(diff.DiffAsText)
 
 		// Generate pictures
-		visual := NewPolicyVisualization(diff)
-		visual.GetImageForRevisionPrev() // just call and don't save
-		visual.GetImageForRevisionNext() // just call and don't save
-		visual.GetImageForRevisionDiff() // just call and don't save
+		// visual := NewPolicyVisualizationImage(diff)
+		// visual.GetImageForRevisionPrev() // just call and don't save
+		// visual.GetImageForRevisionNext() // just call and don't save
+		// visual.GetImageForRevisionDiff() // just call and don't save
 
 		// Apply changes (if emulateDeployment == true --> we set noop to skip deployment part)
-		apply := NewEngineApply(diff)
-		if !(noop || emulateDeployment) {
-			err := apply.Apply()
-			apply.SaveLog()
-			if err != nil {
-				log.Panicf("Cannot apply policy: %v", err)
-			}
-		}
 
+		/*
+			apply := NewEngineApply(diff)
+			if !(noop || emulateDeployment) {
+				err := apply.Apply()
+				apply.SaveLog()
+				if err != nil {
+					log.Panicf("Cannot apply policy: %v", err)
+				}
+			}
+		*/
 		// Save new resolved state in the last run directory
-		resolver.SaveResolutionData()
+		// resolver.SaveResolutionData()
 
 		// If everything is successful, then increment revision and save run
 		// if emulateDeployment == true --> we set noop to false to write state on disk)
-		revision := GetLastRevision(GetAptomiBaseDir())
-		diff.ProcessSuccessfulExecution(revision, newrevision, noop && !emulateDeployment)
+		// revision := GetLastRevision(GetAptomiBaseDir())
+		// diff.ProcessSuccessfulExecution(revision, newrevision, noop && !emulateDeployment)
+		fmt.Println("******************")
+		fmt.Println("* The end!       *")
+		fmt.Println("* of old CLI     *")
+		fmt.Println("******************")
 	},
 }
 

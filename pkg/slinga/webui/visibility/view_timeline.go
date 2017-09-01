@@ -1,23 +1,20 @@
 package visibility
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"sort"
-	"strconv"
 )
 
 // TimelineView represents timeline view
 type TimelineView struct {
-	userID    string
-	revisions map[int]*resolve.Revision
+	userID string
+	// revisions map[int]*resolve.Revision
 }
 
 // NewTimelineView creates a new TimelineView
 func NewTimelineView(userID string) TimelineView {
 	return TimelineView{
-		userID:    userID,
-		revisions: resolve.LoadRevisionsAll(),
+		userID: userID,
+		// revisions: resolve.LoadRevisionsAll(),
 	}
 }
 
@@ -29,17 +26,19 @@ func (view TimelineView) GetData() interface{} {
 			return result
 		}
 	*/
-	for revisionNumber, revision := range view.revisions {
-		rev := AptomiRevision(revisionNumber)
-		entry := lineEntry{
-			"id":             rev.GetRunDirectory(),
-			"revisionNumber": strconv.Itoa(revisionNumber),
-			"dir":            rev.GetRunDirectory(),
-			"createdOn":      revision.Resolution.CreatedOn,
-			"diff":           "todo: WE NEED TO THINK WHERE TO STORE PLAIN-TEXT-DIFF (IT USED TO BE STORED IN A WRONG PLACE)",
+	/*
+		for revisionNumber, revision := range view.revisions {
+			rev := AptomiRevision(revisionNumber)
+			entry := lineEntry{
+				"id":             rev.GetRunDirectory(),
+				"revisionNumber": strconv.Itoa(revisionNumber),
+				"dir":            rev.GetRunDirectory(),
+				"createdOn":      revision.Resolution.CreatedOn,
+				"diff":           "todo: WE NEED TO THINK WHERE TO STORE PLAIN-TEXT-DIFF (IT USED TO BE STORED IN A WRONG PLACE)",
+			}
+			result = append(result, entry)
 		}
-		result = append(result, entry)
-	}
+	*/
 	sort.Sort(sort.Reverse(result))
 	return result
 }

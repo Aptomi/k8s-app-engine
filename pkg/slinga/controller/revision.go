@@ -24,21 +24,47 @@ func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*language.P
 }
 
 func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
-	// 1. acquire global lock for revision creation
-	// 1. Load last revision
-	// 1. Add / match "update" objects => new policy (check in prev revision, map[ns+kind+name]=>object, use deriveEquals?)
-	// 1. policyChanged bool
-	// 1. run resolver // resolver.ResolveAllDependencies()
-	// 1. calculate diff - resolutionChanged bool
-	// 1. if policyChanged || resolutionChanged => new Revision, else return no new revision needed
-	// 1. RevisionSummary object wraps Revision and stores summary
-	// 1. process text policy diff, add to RevisionSummary
-	// 1. generate new charts - NewPolicyVisualization, add to RevisionSummary
-	// 1. save text diff for component instances into RevisionSummary
-	// 1. save new revision
-	// 1. always save resolution (event) log even if no new revision created, return event log id to user
-	// 1. attach resolution event log id to revision, add to RevisionSummary
-	// 1. release global lock for revision creation
+	// When user submits a change
+	// [1] Acquire global lock for policy version creation
+	//   1. defer release lock
+	//
+	// [2] Create new version of policy, if needed
+	//   1. add / match "update" objects => new policy (check in prev revision, map[ns+kind+name]=>object, use deriveEquals?)
+	//   1. policyChanged bool = calculate if policy changed
+	//   1. if policyChanged =>
+	// 				save new version of policy
+	//				attach resolution event log to the new version of policy
+	//      else return "no changes in policy"
+	//
+	// [3] Show user what changes will be triggered by his changes to the policy
+	//   1. load previous desired state (from last revision)
+	//   1. calculate new desired state (run resolver // resolver.ResolveAllDependencies())
+	//   1. compare and return changes to the user [without saving to db]
+
+	// Background applier
+	// [1] Calculate current desired state (run resolver // resolver.ResolveAllDependencies())
+	// 	 1. Use latest policy version and latest external data
+	// [2] Load current actual state
+	// [3] Compare actual and desired state, calculate diff and actions
+	//   1. Note(!): actual state will not have an associated policy
+	//               do not use Prev.Policy in diff or apply
+	// [4] If hasChanges =>
+	// 				new Revision,
+	//				attach resolution event log to the revision (may be attach to RevisionSummary)
+	// 		else return no new revision needed
+	// [5] Applies executes all actions and updates actual state, if/as needed
+	//   1. Once action has been executed, save its status and event log to DB
+	// [6] Mark revision as "OK" if all actions were completed without errors
+	// [7] Keep RevisionSummary
+	// 	 1. process text policy diff, add to RevisionSummary
+	// 	 1. generate new charts - NewPolicyVisualization, add to RevisionSummary
+	// 	 1. save text diff for component instances into RevisionSummary
+
+	/*
+		PolicyResolver should return PolicyResolution
+		Remove revision from the engine
+		Revision in controller package (created by Sergey) = policyResolution + actions
+	*/
 
 	/*
 				// Get loader for external users
@@ -63,12 +89,18 @@ func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
 				// Print on screen
 				fmt.Print(diff.DiffAsText)
 
-				// Generate pictures
-				visual := NewPolicyVisualization(diff)
-				visual.DrawAndStore()
+				// Generate pictures (see new API :)
 
 				// Save new resolved state in the last run directory
-				resolver.SaveResolutionData()
+				resolver.SaveResolutionData() -> this called before:
+
+						revision := NewRevision(resolver.policy, resolver.resolution, resolver.userLoader)
+						revision.Save()
+
+						// Save log
+						hook := &HookBoltDB{}
+						resolver.eventLog.Save(hook)
+
 
 		/*
 				///////////////////// APPLY

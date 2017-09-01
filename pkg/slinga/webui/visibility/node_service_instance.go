@@ -92,10 +92,13 @@ func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceInstanceNode) getDetails(id string, revision *resolve.Revision) interface{} {
+func (n serviceInstanceNode) getDetails(id string/*, revision *resolve.Revision*/) interface{} {
+	/*
 	result := revision.Resolution.Resolved.ComponentInstanceMap[id]
 	if result == nil {
 		result = revision.Resolution.Unresolved.ComponentInstanceMap[id]
 	}
 	return result
+	*/
+	return nil
 }

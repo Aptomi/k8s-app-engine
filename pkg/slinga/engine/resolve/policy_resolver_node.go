@@ -154,7 +154,7 @@ func (node *resolutionNode) cannotResolveInstance(err error) error {
 		criticalError, isCriticalError = err.(*CriticalError)
 		if isCriticalError && !criticalError.IsLogged() {
 			// Log it
-			node.logError(err)
+			node.eventLog.LogError(err)
 
 			// Mark this error as processed. So that when we go up the recursion stack, we don't log it multiple times
 			criticalError.SetLoggedFlag()

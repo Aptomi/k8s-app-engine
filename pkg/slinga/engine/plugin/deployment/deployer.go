@@ -3,7 +3,6 @@ package deployment
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/base"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 )
 
@@ -15,7 +14,8 @@ func (deployer *DeployerPlugin) GetCustomApplyProgressLength() int {
 	return 0
 }
 
-func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(instance *resolve.ComponentInstance) error {
+func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(key string) error {
+	instance := deployer.Next.Resolution.Resolved.ComponentInstanceMap[key]
 	component := deployer.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
@@ -51,7 +51,8 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(instance *resolve
 	return nil
 }
 
-func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(instance *resolve.ComponentInstance) error {
+func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(key string) error {
+	instance := deployer.Next.Resolution.Resolved.ComponentInstanceMap[key]
 	component := deployer.Next.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
@@ -86,7 +87,8 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(instance *resolve
 	return nil
 }
 
-func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(instance *resolve.ComponentInstance) error {
+func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(key string) error {
+	instance := deployer.Prev.Resolution.Resolved.ComponentInstanceMap[key]
 	component := deployer.Prev.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 	if component == nil {
 		// This is a service instance. Do nothing

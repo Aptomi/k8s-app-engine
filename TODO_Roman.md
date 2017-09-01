@@ -36,10 +36,10 @@ Items to complete:
           - structured (for all objects)
           - summary (as text/numbers)
       - Implement bool Changed() inside RevisionSummary
-  - Modify code around charts to save them into tmp files
-      - Add charts to revision summary
 
-9. Attach apply log to component instances
+9. Deal with update times
+
+10. Attach apply log to component instances
 
 
 Minor issues:
@@ -138,3 +138,5 @@ Done:
 * Detect cross-service cycle in engine to prevent infinite loops
 
 * Improved engine unit test coverage for corner cases
+
+* Modify code around charts to save them into tmp files

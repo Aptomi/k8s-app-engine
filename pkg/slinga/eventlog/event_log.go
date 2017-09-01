@@ -62,6 +62,15 @@ func (log *EventLog) Append(that *EventLog) {
 	log.hook.entries = append(log.hook.entries, that.hook.entries...)
 }
 
+func (log *EventLog) LogError(err error) {
+	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
+	if isErrorWithDetails {
+		log.WithFields(Fields(errWithDetails.Details())).Errorf(err.Error())
+	} else {
+		log.WithFields(Fields{}).Errorf(err.Error())
+	}
+}
+
 // Save takes all buffered entries and saves them
 func (eventLog *EventLog) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hook.entries {
