@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 )
 
-// AptomiOject represents an aptomi entity, which gets stored in aptomi DB
-type AptomiOject string
+// AptomiObject represents an aptomi entity, which gets stored in aptomi DB
+type AptomiObject string
 
 const (
 	/*
@@ -14,16 +14,16 @@ const (
 	*/
 
 	// TypeUsersFile is where users are stored (this is for file-based storage)
-	TypeUsersFile AptomiOject = "users"
+	TypeUsersFile AptomiObject = "users"
 
 	// TypeUsersLDAP is where ldap configuration is stored
-	TypeUsersLDAP AptomiOject = "ldap"
+	TypeUsersLDAP AptomiObject = "ldap"
 
 	// TypeSecrets is where secret tokens are stored (later in Hashicorp Vault)
-	TypeSecrets AptomiOject = "secrets"
+	TypeSecrets AptomiObject = "secrets"
 
 	// TypeCharts is where binary charts/images are stored (later in external repo)
-	TypeCharts AptomiOject = "charts"
+	TypeCharts AptomiObject = "charts"
 )
 
 // Return aptomi DB directory
@@ -49,11 +49,11 @@ func GetAptomiPolicyDir() string {
 }
 
 // GetAptomiObjectFilePatternYaml returns file pattern for aptomi objects (so they can be loaded from those files)
-func GetAptomiObjectFilePatternYaml(baseDir string, aptomiObject AptomiOject) string {
+func GetAptomiObjectFilePatternYaml(baseDir string, aptomiObject AptomiObject) string {
 	return filepath.Join(baseDir, "**", string(aptomiObject)+"*.yaml")
 }
 
 // GetAptomiObjectFilePatternTgz returns file pattern for tgz objects (so they can be loaded from those files)
-func GetAptomiObjectFilePatternTgz(baseDir string, aptomiObject AptomiOject, chartName string) string {
+func GetAptomiObjectFilePatternTgz(baseDir string, aptomiObject AptomiObject, chartName string) string {
 	return filepath.Join(baseDir, "**", chartName+".tgz")
 }
