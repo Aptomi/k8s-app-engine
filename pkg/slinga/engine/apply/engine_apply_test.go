@@ -147,7 +147,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	}
 	desiredPolicyNext.Dependencies.AddDependency(dependencyNew)
 	desiredStateNext := resolvePolicy(t, desiredPolicyNext, externalData)
-	assert.True(t, dependencyNew.Resolved, "New dependency should be resolved")
+	assert.NotEmpty(t, desiredStateNext.DependencyInstanceMap["dep_id_5"], "New dependency should be resolved")
 
 	// Apply to update component times in actual state
 	apply = NewEngineApply(

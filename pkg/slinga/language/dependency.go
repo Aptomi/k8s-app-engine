@@ -21,14 +21,9 @@ type Dependency struct {
 	UserID  string
 	Service string
 	Labels  map[string]string
-
-	// This fields are populated when dependency gets resolved
-	Resolved   bool
-	ServiceKey string
 }
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)
-// TODO: during serialization there is data duplication (as both fields get serialized). should prob avoid this
 type GlobalDependencies struct {
 	// dependencies <service> -> list of dependencies
 	DependenciesByService map[string][]*Dependency
@@ -59,7 +54,7 @@ func (src GlobalDependencies) AddDependency(dependency *Dependency) {
 	src.DependenciesByID[dependency.GetID()] = dependency
 }
 
-// TODO: added temporary method to deal with existing dependency IDs. Once we implement namespaces, may be this has to be re-thinked
 func (dependency *Dependency) GetID() string {
+	// TODO: switch to Ref later
 	return dependency.Name
 }

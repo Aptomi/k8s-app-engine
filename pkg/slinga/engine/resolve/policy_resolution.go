@@ -11,6 +11,9 @@ type PolicyResolution struct {
 	// resolved component instances: componentKey -> componentInstance
 	ComponentInstanceMap map[string]*ComponentInstance
 
+	// resolved dependencies: dependencyID -> serviceKey
+	DependencyInstanceMap map[string]string
+
 	// resolved component processing order in which components/services have to be processed
 	componentProcessingOrderHas map[string]bool
 	ComponentProcessingOrder    []string
@@ -20,6 +23,7 @@ type PolicyResolution struct {
 func NewPolicyResolution() *PolicyResolution {
 	return &PolicyResolution{
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
+		DependencyInstanceMap:       make(map[string]string),
 		componentProcessingOrderHas: make(map[string]bool),
 		ComponentProcessingOrder:    []string{},
 	}

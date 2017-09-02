@@ -7,26 +7,32 @@ import (
 )
 
 func (view SummaryView) getDependencyStats(dependency *Dependency) string {
-	if !dependency.Resolved {
-		return "N/A"
-	}
+	/*
+		if !dependency.Resolved {
+			return "N/A"
+		}
+	*/
 	return "" //NewTimeDiff(view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
 }
 
 func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) string {
-	if !dependency.Resolved {
-		return "N/A"
-	}
+	/*
+		if !dependency.Resolved {
+			return "N/A"
+		}
+	*/
 	return "" //view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels["cluster"]
 }
 
 func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) string {
-	if !dependency.Resolved {
-		return "N/A"
-	}
+	/*
+		if !dependency.Resolved {
+			return "N/A"
+		}
+	*/
 	return "" /*
-	instance := view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey]
-	return view.getResolvedContextNameByInst(instance)
+		instance := view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey]
+		return view.getResolvedContextNameByInst(instance)
 	*/
 }
 
@@ -39,16 +45,16 @@ func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
 	matchedUsers := make([]*User, 0)
 
 	/*
-	for _, user := range view.revision.UserLoader.LoadUsersAll().Users {
-		match, err := rule.MatchUser(user)
-		if err != nil {
-			// TODO: we probably need to handle this error better here
-			panic(err)
+		for _, user := range view.revision.UserLoader.LoadUsersAll().Users {
+			match, err := rule.MatchUser(user)
+			if err != nil {
+				// TODO: we probably need to handle this error better here
+				panic(err)
+			}
+			if match {
+				matchedUsers = append(matchedUsers, user)
+			}
 		}
-		if match {
-			matchedUsers = append(matchedUsers, user)
-		}
-	}
 	*/
 
 	return matchedUsers

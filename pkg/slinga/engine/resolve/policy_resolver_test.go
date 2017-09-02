@@ -11,15 +11,14 @@ import (
 
 func TestPolicyResolverAndResolvedData(t *testing.T) {
 	policy, resolution := loadPolicyAndResolve(t)
-	data := resolution
 
 	// Check that policy resolution finished correctly
-	assert.Equal(t, 16, len(data.ComponentProcessingOrder), "Policy resolution data should have correct number of entries")
+	assert.Equal(t, 16, len(resolution.ComponentProcessingOrder), "Policy resolution data should have correct number of entries")
 
 	// Resolution for test context
 	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
-	assert.True(t, policy.Dependencies.DependenciesByID["dep_id_1"].Resolved, "Only Alice should have access to test")
+	assert.NotEmpty(t, resolution.DependencyInstanceMap["dep_id_1"], "Only Alice should have access to test")
 
 	// Resolution for prod context
 	kafkaProd := getInstanceByParams(t, "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
@@ -28,18 +27,17 @@ func TestPolicyResolverAndResolvedData(t *testing.T) {
 }
 
 func TestPolicyResolverAndUnresolvedData(t *testing.T) {
-	policy, _ := loadPolicyAndResolve(t)
+	_, resolution := loadPolicyAndResolve(t)
 
 	// Dave dependency on kafka should not be resolved
-	daveOnKafkaDependency := policy.Dependencies.DependenciesByID["dep_id_4"]
-	assert.False(t, daveOnKafkaDependency.Resolved, "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
+	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_4"], "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
 }
 
 func TestPolicyResolverLabelProcessing(t *testing.T) {
-	policy, resolution := loadPolicyAndResolve(t)
+	_, resolution := loadPolicyAndResolve(t)
 
 	// Check labels for Bob's dependency
-	key := policy.Dependencies.DependenciesByID["dep_id_2"].ServiceKey
+	key := resolution.DependencyInstanceMap["dep_id_2"]
 	serviceInstance := getInstanceInternal(t, key, resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
@@ -80,10 +78,10 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	policy.AddObject(dependency)
 
 	// policy with missing user should be resolved successfully
-	resolvePolicy(t, policy, ResSuccess, "")
+	resolution := resolvePolicy(t, policy, ResSuccess, "")
 
 	// dependency should be just skipped
-	assert.False(t, dependency.Resolved, "Dependency should not be resolved")
+	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should not be resolved")
 }
 
 func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {

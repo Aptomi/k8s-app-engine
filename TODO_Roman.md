@@ -31,10 +31,8 @@ Implementation:
 9. Speed up policy resolution process / use benchmarking
 
 Minor issues:
-- Do we even need Unresolved, given that we changed the way how logs are stored?
 - Where/how to store text-based diff for revisions?
 - Get rid of dependency ID
-- Do we need to move Dependency.Resolved into resolved usage state?
 - Deal with code style and missing comments
 - Shall we consider renaming .User -> .Consumer?
 - Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
@@ -139,3 +137,7 @@ Done:
 * Wrap all external data into a single struct
   - decouple secrets from users/labels
   - load secrets normally, not in LDAPUserLoader
+
+* Do we need to move Dependency.Resolved into resolved usage state?
+
+* Do we even need Unresolved, given that we changed the way how logs are stored?

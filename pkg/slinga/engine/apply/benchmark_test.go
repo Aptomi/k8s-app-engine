@@ -329,14 +329,7 @@ func RunEngine(t *testing.T, desiredPolicy *language.PolicyNamespace, externalDa
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)
 
-	dResolved := 0
-	for _, d := range desiredPolicy.Dependencies.DependenciesByID {
-		if d.Resolved {
-			dResolved++
-		}
-	}
-
-	fmt.Printf("Resolved (dependencies): %d\n", dResolved)
+	fmt.Printf("Resolved (dependencies): %d\n", len(desiredState.DependencyInstanceMap))
 	fmt.Printf("Resolved (components): %d\n", len(actualState.ComponentInstanceMap))
 	fmt.Printf("Time: %s\n", timeDiff.String())
 }

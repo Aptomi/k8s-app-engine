@@ -96,14 +96,15 @@ func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error 
 		return err
 	}
 
-	// add dependency resolution resolution to the rest of the records
-	d.Resolved = node.resolved
-	d.ServiceKey = node.serviceKey.GetKey()
-
+	// exit if dependency not fulfilled
 	if !node.resolved {
 		return nil
 	}
 
+	// add a record for dependency resolution
+	resolver.resolution.DependencyInstanceMap[d.GetID()] = node.serviceKey.GetKey()
+
+	// append component instance data
 	err = resolver.resolution.AppendData(node.resolution)
 	if err != nil {
 		node.eventLog.LogError(err)
