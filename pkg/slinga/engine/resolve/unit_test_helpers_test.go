@@ -2,6 +2,8 @@ package resolve
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -22,8 +24,10 @@ func loadPolicyAndResolve(t *testing.T) (*PolicyNamespace, *PolicyResolution) {
 }
 
 func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, expectedErrorMessage string) *PolicyResolution {
-	userLoader := NewUserLoaderFromDir("../../testdata/unittests")
-	resolver := NewPolicyResolver(policy, userLoader)
+	externalData := external.NewData(
+		users.NewUserLoaderFromDir("../../testdata/unittests"),
+	)
+	resolver := NewPolicyResolver(policy, externalData)
 	result, err := resolver.ResolveAllDependencies()
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {

@@ -74,7 +74,7 @@ type resolutionNode struct {
 func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resolutionNode {
 
 	// combining user labels and dependency labels
-	user := resolver.userLoader.LoadUserByID(dependency.UserID)
+	user := resolver.externalData.UserLoader.LoadUserByID(dependency.UserID)
 	labels := dependency.GetLabelSet()
 	if user != nil {
 		labels = labels.AddLabels(user.GetLabelSet())
@@ -209,7 +209,7 @@ func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) (*Service
 		return nil, node.errorServiceDoesNotExist()
 	}
 
-	serviceOwner := node.resolver.userLoader.LoadUserByID(service.Owner)
+	serviceOwner := node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)
 	if serviceOwner == nil {
 		// This is considered a malformed policy, so let's return an error
 		return nil, node.errorServiceOwnerDoesNotExist()

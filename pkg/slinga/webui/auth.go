@@ -2,7 +2,7 @@ package webui
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"net/http"
 	"time"
 )
@@ -13,6 +13,10 @@ func getLoggedInUserID(r *http.Request) string {
 		userID = cookie.Value
 	}
 	return userID
+}
+
+func NewAptomiUserLoader() users.UserLoader {
+	return nil
 }
 
 func isUnauthorized(r *http.Request) bool {

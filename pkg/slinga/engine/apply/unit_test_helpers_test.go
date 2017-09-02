@@ -5,6 +5,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
 	"strings"
@@ -16,12 +18,14 @@ func getPolicy() *language.PolicyNamespace {
 	return language.LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
-func getUserLoader() language.UserLoader {
-	return language.NewUserLoaderFromDir("../../testdata/unittests")
+func getExternalData() *external.Data {
+	return external.NewData(
+		users.NewUserLoaderFromDir("../../testdata/unittests"),
+	)
 }
 
-func resolvePolicy(t *testing.T, policy *language.PolicyNamespace, userLoader language.UserLoader) *resolve.PolicyResolution {
-	resolver := resolve.NewPolicyResolver(policy, userLoader)
+func resolvePolicy(t *testing.T, policy *language.PolicyNamespace, externalData *external.Data) *resolve.PolicyResolution {
+	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
@@ -84,7 +88,7 @@ func NewEnginePluginImpl(failComponents []string) *EnginePluginImpl {
 	return &EnginePluginImpl{failComponents: failComponents}
 }
 
-func (p *EnginePluginImpl) Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, eventLog *eventlog.EventLog) {
+func (p *EnginePluginImpl) Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) {
 	p.eventLog = eventLog
 }
 

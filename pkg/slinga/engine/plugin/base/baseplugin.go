@@ -3,6 +3,7 @@ package base
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
@@ -15,12 +16,12 @@ type BasePlugin struct {
 		Policy     *language.PolicyNamespace
 		Resolution *resolve.PolicyResolution
 	}
-	UserLoader language.UserLoader
+	ExternalData *external.Data
 
 	EventLog *eventlog.EventLog
 }
 
-func (basePlugin *BasePlugin) Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, log *eventlog.EventLog) {
+func (basePlugin *BasePlugin) Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, log *eventlog.EventLog) {
 	basePlugin.Desired = &struct {
 		Policy     *language.PolicyNamespace
 		Resolution *resolve.PolicyResolution
@@ -36,6 +37,8 @@ func (basePlugin *BasePlugin) Init(desiredPolicy *language.PolicyNamespace, desi
 		Policy:     actualPolicy,
 		Resolution: actualState,
 	}
+
+	basePlugin.ExternalData = externalData
 
 	basePlugin.EventLog = log
 }

@@ -7,11 +7,11 @@ import (
 )
 
 func TestEmptyDiff(t *testing.T) {
-	userLoader := getUserLoader()
-	resolvedPrev := resolvePolicy(t, getPolicy(), userLoader)
+	externalData := getExternalData()
+	resolvedPrev := resolvePolicy(t, getPolicy(), externalData)
 	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
-	resolvedNext := resolvePolicy(t, getPolicy(), userLoader)
+	resolvedNext := resolvePolicy(t, getPolicy(), externalData)
 
 	// Calculate and verify difference
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
@@ -19,9 +19,9 @@ func TestEmptyDiff(t *testing.T) {
 }
 
 func TestDiffHasCreatedComponents(t *testing.T) {
-	userLoader := getUserLoader()
+	externalData := getExternalData()
 
-	resolvedPrev := resolvePolicy(t, getPolicy(), userLoader)
+	resolvedPrev := resolvePolicy(t, getPolicy(), externalData)
 	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Add another dependency and resolve policy
@@ -36,7 +36,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 			Service: "kafka",
 		},
 	)
-	resolvedNext := resolvePolicy(t, nextPolicy, userLoader)
+	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
 
 	// Calculate difference
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
@@ -44,7 +44,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 }
 
 func TestDiffHasUpdatedComponents(t *testing.T) {
-	userLoader := getUserLoader()
+	externalData := getExternalData()
 
 	// Add dependency, resolve policy
 	policyNext := language.LoadUnitTestsPolicy("../../testdata/unittests")
@@ -58,12 +58,11 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 			Service: "kafka",
 		},
 	)
-	resolvedNew := resolvePolicy(t, policyNext, userLoader)
+	resolvedNew := resolvePolicy(t, policyNext, externalData)
 
 	// Update user label, re-evaluate and see that component instance has changed
-	userLoader = language.NewUserLoaderFromDir("../../testdata/unittests")
-	userLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
-	resolvedDependencyUpdate := resolvePolicy(t, policyNext, userLoader)
+	externalData.UserLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
+	resolvedDependencyUpdate := resolvePolicy(t, policyNext, externalData)
 
 	// Get the diff
 	diff := NewPolicyResolutionDiff(resolvedDependencyUpdate, resolvedNew)
@@ -74,13 +73,13 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 
 func TestDiffHasDestructedComponents(t *testing.T) {
 	// Resolve unit test policy
-	userLoader := getUserLoader()
-	resolvedPrev := resolvePolicy(t, getPolicy(), userLoader)
+	externalData := getExternalData()
+	resolvedPrev := resolvePolicy(t, getPolicy(), externalData)
 	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Now resolve empty policy
 	nextPolicy := language.NewPolicyNamespace()
-	resolvedNext := resolvePolicy(t, nextPolicy, userLoader)
+	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
 
 	// Calculate difference
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)

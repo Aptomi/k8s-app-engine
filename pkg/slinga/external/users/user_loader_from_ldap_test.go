@@ -1,7 +1,8 @@
-package language
+package users
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -10,8 +11,8 @@ func TestLoadUsersFromLDAP(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromDir("../testdata/integrationtests")
-	userLoaderLDAP := NewUserLoaderFromLDAP("../testdata/integrationtests")
+	userLoaderDir := NewUserLoaderFromDir("../../testdata/integrationtests")
+	userLoaderLDAP := NewUserLoaderFromLDAP("../../testdata/integrationtests")
 
 	usersDir := userLoaderDir.LoadUsersAll()
 	usersLDAP := userLoaderLDAP.LoadUsersAll()
@@ -38,8 +39,8 @@ func TestLoadUsersFromLDAPIndividually(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromDir("../testdata/integrationtests")
-	userLoaderLDAP := NewUserLoaderFromLDAP("../testdata/integrationtests")
+	userLoaderDir := NewUserLoaderFromDir("../../testdata/integrationtests")
+	userLoaderLDAP := NewUserLoaderFromLDAP("../../testdata/integrationtests")
 
 	usersDir := userLoaderDir.LoadUsersAll()
 
@@ -57,7 +58,7 @@ func TestLoadUsersFromLDAPIndividually(t *testing.T) {
 	}
 }
 
-func compareUsers(t *testing.T, uDir *User, uLDAP *User) {
+func compareUsers(t *testing.T, uDir *language.User, uLDAP *language.User) {
 	// check that name matches
 	assert.Equal(t, uDir.Name, uLDAP.Name, "User LDAP name should match")
 	// check that labels are mapped correctly

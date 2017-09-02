@@ -2,6 +2,8 @@ package graphviz
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -12,7 +14,9 @@ func TestPolicyVisualization(t *testing.T) {
 		t.SkipNow()
 	}
 
-	userLoader := language.NewUserLoaderFromDir("../testdata/unittests")
+	externalData := external.NewData(
+		users.NewUserLoaderFromDir("../testdata/unittests"),
+	)
 
 	// empty policy and empty resolution result
 	policyEmpty := language.NewPolicyNamespace()
@@ -20,7 +24,7 @@ func TestPolicyVisualization(t *testing.T) {
 
 	// unit test policy resolved revision
 	policy := language.LoadUnitTestsPolicy("../testdata/unittests")
-	resolver := resolve.NewPolicyResolver(policy, userLoader)
+	resolver := resolve.NewPolicyResolver(policy, externalData)
 	resolutionNew, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
@@ -28,7 +32,7 @@ func TestPolicyVisualization(t *testing.T) {
 
 	// generate images
 	{
-		imagePrev, err := NewPolicyVisualizationImage(policyEmpty, resolutionEmpty, userLoader)
+		imagePrev, err := NewPolicyVisualizationImage(policyEmpty, resolutionEmpty, externalData)
 		assert.Nil(t, err, "Image should be generated")
 		assert.True(t, imagePrev.Bounds().Dx() < 20, "Image for empty policy resolution should be empty")
 		assert.True(t, imagePrev.Bounds().Dy() < 20, "Image for empty policy resolution should be empty")
@@ -37,7 +41,7 @@ func TestPolicyVisualization(t *testing.T) {
 	}
 
 	{
-		imageNext, err := NewPolicyVisualizationImage(policy, resolutionNew, userLoader)
+		imageNext, err := NewPolicyVisualizationImage(policy, resolutionNew, externalData)
 		assert.Nil(t, err, "Image should be generated")
 		assert.True(t, imageNext.Bounds().Dx() > 800, "Image for unit test resolved policy should be big enough")
 		assert.True(t, imageNext.Bounds().Dy() > 800, "Image for unit test resolved policy should be big enough")
@@ -47,7 +51,7 @@ func TestPolicyVisualization(t *testing.T) {
 
 	{
 		// delta (empty) -> (non-empty)
-		imageDiff, err := NewPolicyVisualizationDeltaImage(policy, resolutionNew, policyEmpty, resolutionEmpty, userLoader)
+		imageDiff, err := NewPolicyVisualizationDeltaImage(policy, resolutionNew, policyEmpty, resolutionEmpty, externalData)
 		assert.Nil(t, err, "Image should be generated")
 		assert.True(t, imageDiff.Bounds().Dx() > 800, "Image for unit test resolved policy diff against empty (all additions) should be big enough")
 		assert.True(t, imageDiff.Bounds().Dy() > 800, "Image for unit test resolved policy diff against empty (all additions) should be big enough")
@@ -57,7 +61,7 @@ func TestPolicyVisualization(t *testing.T) {
 
 	{
 		// delta (non-empty) -> (empty)
-		imageDiff, err := NewPolicyVisualizationDeltaImage(policyEmpty, resolutionEmpty, policy, resolutionNew, userLoader)
+		imageDiff, err := NewPolicyVisualizationDeltaImage(policyEmpty, resolutionEmpty, policy, resolutionNew, externalData)
 		assert.Nil(t, err, "Image should be generated")
 		assert.True(t, imageDiff.Bounds().Dx() > 800, "Image for unit test resolved policy diff against empty (all deletions) should be big enough")
 		assert.True(t, imageDiff.Bounds().Dy() > 800, "Image for unit test resolved policy diff against empty (all deletions) should be big enough")

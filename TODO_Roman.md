@@ -27,14 +27,11 @@ Items to complete:
 7. Implement policy validation
   - e.g. compile all expressions, templates, etc
 
-8. RevisionSummary (moving away from files to boltdb)
-  - Implement RevisionSummary object (wraps Revision and stores summary)
-      - Implement diff inside RevisionSummary
-          - structured (for all objects)
-          - summary (as text/numbers)
-      - Implement bool Changed() inside RevisionSummary
+8. Attach apply log to component instances
 
-9. Attach apply log to component instances
+9. Wrap all external data into a single struct
+  - decouple secrets from users/labels
+  - load secrets normally, not in LDAPUserLoader
 
 
 Minor issues:

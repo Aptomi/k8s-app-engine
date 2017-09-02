@@ -164,7 +164,7 @@ func (enforcer *RuleEnforcerPlugin) processComponent(key string) ([]*IstioRouteR
 	for dependencyID := range dependencyIds {
 		// todo check if user doesn't exist
 		userID := enforcer.Desired.Policy.Dependencies.DependenciesByID[dependencyID].UserID
-		users = append(users, enforcer.UserLoader.LoadUserByID(userID))
+		users = append(users, enforcer.ExternalData.UserLoader.LoadUserByID(userID))
 	}
 
 	allows, err := enforcer.Desired.Policy.Rules.AllowsIngressAccess(labels, users, cluster)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -33,9 +35,6 @@ var policyCmdApply = &cobra.Command{
 	Short: "Process policy and apply changes (supports noop mode)",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get loader for external users
-		userLoader := NewAptomiUserLoader()
-
 		// Load the previous usage state (for now it's just empty)
 		prevState := resolve.NewPolicyResolution()
 
@@ -57,7 +56,10 @@ var policyCmdApply = &cobra.Command{
 			log.Panicf("Cannot load policy from %s with error: %v", policyDir, err)
 		}
 
-		resolver := resolve.NewPolicyResolver(policy, userLoader)
+		externalData := external.NewData(
+			users.NewUserLoaderFromLDAP(GetAptomiPolicyDir()),
+		)
+		resolver := resolve.NewPolicyResolver(policy, externalData)
 		nextState, err := resolver.ResolveAllDependencies()
 		if err != nil {
 			log.Panicf("Cannot resolve policy: %v %v %v", err, nextState, prevState)

@@ -2,6 +2,7 @@ package resolve
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
@@ -23,8 +24,8 @@ type PolicyResolver struct {
 	// Policy
 	policy *PolicyNamespace
 
-	// User loader
-	userLoader UserLoader
+	// External data
+	externalData *external.Data
 
 	/*
 		Cache
@@ -48,10 +49,10 @@ type PolicyResolver struct {
 }
 
 // NewPolicyResolver creates a new policy resolver
-func NewPolicyResolver(policy *PolicyNamespace, userLoader UserLoader) *PolicyResolver {
+func NewPolicyResolver(policy *PolicyNamespace, externalData *external.Data) *PolicyResolver {
 	return &PolicyResolver{
 		policy:          policy,
-		userLoader:      userLoader,
+		externalData:    externalData,
 		expressionCache: expression.NewExpressionCache(),
 		templateCache:   template.NewTemplateCache(),
 		resolution:      NewPolicyResolution(),

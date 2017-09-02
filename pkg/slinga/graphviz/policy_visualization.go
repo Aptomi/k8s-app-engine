@@ -3,6 +3,7 @@ package graphviz
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/awalterschulze/gographviz"
@@ -21,20 +22,20 @@ type PolicyVisualization struct {
 }
 
 // NewPolicyVisualizationImage returns an image with policy/resolution information
-func NewPolicyVisualizationImage(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, userLoader language.UserLoader) (image.Image, error) {
-	graph := makeGraph(policy, resolution, userLoader)
+func NewPolicyVisualizationImage(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
+	graph := makeGraph(policy, resolution, externalData)
 	return getGraphImage(graph)
 }
 
 // NewPolicyVisualizationDeltaImage returns an image with policy/resolution information
-func NewPolicyVisualizationDeltaImage(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, userLoader language.UserLoader) (image.Image, error) {
-	nextGraph := makeGraph(nextPolicy, nextResolution, userLoader)
-	prevGraph := makeGraph(prevPolicy, prevResolution, userLoader)
+func NewPolicyVisualizationDeltaImage(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
+	nextGraph := makeGraph(nextPolicy, nextResolution, externalData)
+	prevGraph := makeGraph(prevPolicy, prevResolution, externalData)
 	deltaGraph := Delta(prevGraph, nextGraph)
 	return getGraphImage(deltaGraph)
 }
 
-func makeGraph(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, userLoader language.UserLoader) *gographviz.Graph {
+func makeGraph(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")
@@ -64,7 +65,7 @@ func makeGraph(policy *language.PolicyNamespace, resolution *resolve.PolicyResol
 				color := getUserColor(d.UserID, colorForUser, &usedColors)
 
 				// Add a node with user
-				user := userLoader.LoadUserByID(d.UserID)
+				user := externalData.UserLoader.LoadUserByID(d.UserID)
 				label := "Name: " + user.Name + " (" + user.ID + ")"
 				keys := GetSortedStringKeys(user.Labels)
 				for _, k := range keys {

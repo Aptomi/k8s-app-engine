@@ -68,7 +68,7 @@ func (node *resolutionNode) proxyService(service *language.Service) interface{} 
 		Owner interface{}
 	}{
 		Metadata: service.Metadata,
-		Owner:    node.proxyUser(node.resolver.userLoader.LoadUserByID(service.Owner)),
+		Owner:    node.proxyUser(node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)),
 	}
 }
 

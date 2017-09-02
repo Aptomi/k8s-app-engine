@@ -3,15 +3,16 @@ package visibility
 import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 )
 
 type dependencyNode struct {
 	dependency *Dependency
 	short      bool
-	userLoader UserLoader
+	userLoader users.UserLoader
 }
 
-func newDependencyNode(dependency *Dependency, short bool, userLoader UserLoader) graphNode {
+func newDependencyNode(dependency *Dependency, short bool, userLoader users.UserLoader) graphNode {
 	return dependencyNode{
 		dependency: dependency,
 		short:      short,

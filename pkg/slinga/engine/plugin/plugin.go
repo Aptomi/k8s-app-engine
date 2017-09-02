@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
@@ -14,7 +15,7 @@ type EngineDiffPlugin interface {
 // EngineApplyPlugin contains methods which will be called by the engine during apply phase
 type EngineApplyPlugin interface {
 	// Init will be called by the engine when apply starts
-	Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, eventLog *eventlog.EventLog)
+	Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog)
 
 	// OnApplyComponentInstanceCreate will be called by the engine when a new component instance has to be instantiated
 	OnApplyComponentInstanceCreate(string) error

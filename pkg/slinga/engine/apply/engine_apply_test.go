@@ -23,15 +23,15 @@ func BenchmarkEngine(b *testing.B) {
 }
 
 func TestApplyCreateSuccess(t *testing.T) {
-	userLoader := getUserLoader()
+	externalData := getExternalData()
 
 	// resolve empty policy
 	actualPolicy := language.NewPolicyNamespace()
-	actualState := resolvePolicy(t, actualPolicy, userLoader)
+	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// resolve full policy
 	desiredPolicy := getPolicy()
-	desiredState := resolvePolicy(t, desiredPolicy, userLoader)
+	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
 	// make plugin to successfully process all components
 	pluginApply := NewEnginePluginImpl([]string{})
@@ -44,7 +44,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 		desiredState,
 		actualPolicy,
 		actualState,
-		userLoader,
+		externalData,
 		actions,
 		plugins,
 	)
@@ -60,15 +60,15 @@ func TestApplyCreateSuccess(t *testing.T) {
 }
 
 func TestApplyCreateFailure(t *testing.T) {
-	userLoader := getUserLoader()
+	externalData := getExternalData()
 
 	// resolve empty policy
 	actualPolicy := language.NewPolicyNamespace()
-	actualState := resolvePolicy(t, actualPolicy, userLoader)
+	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// resolve full policy
 	desiredPolicy := getPolicy()
-	desiredState := resolvePolicy(t, desiredPolicy, userLoader)
+	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
 	// make plugin to successfully process all components, while failing all instances of component2
 	pluginApplyFailComponent2 := NewEnginePluginImpl([]string{"component2"})
@@ -81,7 +81,7 @@ func TestApplyCreateFailure(t *testing.T) {
 		desiredState,
 		actualPolicy,
 		actualState,
-		userLoader,
+		externalData,
 		actions,
 		plugins,
 	)
@@ -98,7 +98,7 @@ func TestApplyCreateFailure(t *testing.T) {
 
 func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	var key string
-	userLoader := getUserLoader()
+	externalData := getExternalData()
 
 	/*
 		Step 1: actual = empty, desired = unit test policy, check = kafka update/create times
@@ -106,11 +106,11 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 
 	// Create initial empty resolution data (do not resolve any dependencies)
 	actualPolicy := language.NewPolicyNamespace()
-	actualState := resolvePolicy(t, actualPolicy, userLoader)
+	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// Resolve all dependencies in policy
 	desiredPolicy := getPolicy()
-	desiredState := resolvePolicy(t, desiredPolicy, userLoader)
+	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
 	// Apply to update component times in actual state
 	apply := NewEngineApply(
@@ -118,7 +118,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		desiredState,
 		actualPolicy,
 		actualState,
-		userLoader,
+		externalData,
 		diff.NewPolicyResolutionDiff(desiredState, actualState).Actions,
 		[]plugin.EnginePlugin{},
 	)
@@ -153,7 +153,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		Service: "kafka",
 	}
 	desiredPolicyNext.Dependencies.AddDependency(dependencyNew)
-	desiredStateNext := resolvePolicy(t, desiredPolicyNext, userLoader)
+	desiredStateNext := resolvePolicy(t, desiredPolicyNext, externalData)
 	assert.True(t, dependencyNew.Resolved, "New dependency should be resolved")
 
 	// Apply to update component times in actual state
@@ -162,7 +162,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		desiredStateNext,
 		actualPolicy,
 		actualState,
-		userLoader,
+		externalData,
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState).Actions,
 		[]plugin.EnginePlugin{},
 	)
@@ -191,8 +191,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	time.Sleep(25 * time.Millisecond)
 
 	// Update user label, re-evaluate and see that component instance has changed
-	userLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
-	desiredStateAfterUpdate := resolvePolicy(t, desiredPolicyNext, userLoader)
+	externalData.UserLoader.LoadUserByID("5").Labels["changinglabel"] = "newvalue"
+	desiredStateAfterUpdate := resolvePolicy(t, desiredPolicyNext, externalData)
 
 	// Apply to update component times in actual state
 	apply = NewEngineApply(
@@ -200,7 +200,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		desiredStateAfterUpdate,
 		actualPolicy,
 		actualState,
-		userLoader,
+		externalData,
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState).Actions,
 		[]plugin.EnginePlugin{},
 	)

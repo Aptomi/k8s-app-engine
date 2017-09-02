@@ -3,6 +3,8 @@ package diff
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
@@ -13,12 +15,14 @@ func getPolicy() *PolicyNamespace {
 	return LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
-func getUserLoader() UserLoader {
-	return NewUserLoaderFromDir("../../testdata/unittests")
+func getExternalData() *external.Data {
+	return external.NewData(
+		users.NewUserLoaderFromDir("../../testdata/unittests"),
+	)
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace, userLoader UserLoader) *PolicyResolution {
-	resolver := NewPolicyResolver(policy, userLoader)
+func resolvePolicy(t *testing.T, policy *PolicyNamespace, externalData *external.Data) *PolicyResolution {
+	resolver := NewPolicyResolver(policy, externalData)
 	result, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		t.FailNow()

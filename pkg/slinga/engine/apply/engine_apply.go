@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
@@ -16,7 +17,7 @@ type EngineApply struct {
 	desiredState  *resolve.PolicyResolution
 	actualPolicy  *language.PolicyNamespace
 	actualState   *resolve.PolicyResolution
-	userLoader    language.UserLoader
+	externalData  *external.Data
 
 	// Actions to be applied
 	actions []actions.Action
@@ -31,13 +32,13 @@ type EngineApply struct {
 	progress progress.ProgressIndicator
 }
 
-func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, userLoader language.UserLoader, actions []actions.Action, plugins []plugin.EnginePlugin) *EngineApply {
+func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, actions []actions.Action, plugins []plugin.EnginePlugin) *EngineApply {
 	return &EngineApply{
 		desiredPolicy: desiredPolicy,
 		desiredState:  desiredState,
 		actualPolicy:  actualPolicy,
 		actualState:   actualState,
-		userLoader:    userLoader,
+		externalData:  externalData,
 		actions:       actions,
 		plugins:       plugins,
 		eventLog:      NewEventLog(),
@@ -63,7 +64,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) 
 			apply.desiredState,
 			apply.actualPolicy,
 			apply.actualState,
-			apply.userLoader,
+			apply.externalData,
 			apply.eventLog,
 		)
 	}

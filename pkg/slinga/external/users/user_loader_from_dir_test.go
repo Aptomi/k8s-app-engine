@@ -1,4 +1,4 @@
-package language
+package users
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoadUsersFromDir(t *testing.T) {
-	userLoader := NewUserLoaderFromDir("../testdata/unittests")
+	userLoader := NewUserLoaderFromDir("../../testdata/unittests")
 
 	users := userLoader.LoadUsersAll()
 

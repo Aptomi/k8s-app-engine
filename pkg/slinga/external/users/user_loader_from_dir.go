@@ -1,7 +1,8 @@
-package language
+package users
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/mattn/go-zglob"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 // UserLoaderFromDir allows aptomi to load users from files in a given directory
 type UserLoaderFromDir struct {
 	baseDir     string
-	cachedUsers *GlobalUsers
+	cachedUsers *language.GlobalUsers
 }
 
 // NewUserLoaderFromDir returns new UserLoaderFromDir, given a directory where files should be read from
@@ -19,15 +20,15 @@ func NewUserLoaderFromDir(baseDir string) UserLoader {
 }
 
 // LoadUsersAll loads all users
-func (loader *UserLoaderFromDir) LoadUsersAll() GlobalUsers {
+func (loader *UserLoaderFromDir) LoadUsersAll() language.GlobalUsers {
 	if loader.cachedUsers == nil {
 		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeUsersFile))
-		loader.cachedUsers = &GlobalUsers{Users: make(map[string]*User)}
+		loader.cachedUsers = &language.GlobalUsers{Users: make(map[string]*language.User)}
 		for _, fileName := range files {
 			t := loadUsersFromFile(fileName)
 			for _, u := range t {
 				// load secrets
-				u.Secrets = LoadUserSecretsByIDFromDir(loader.baseDir, u.ID)
+				u.Secrets = language.LoadUserSecretsByIDFromDir(loader.baseDir, u.ID)
 
 				// add user
 				loader.cachedUsers.Users[u.ID] = u
@@ -38,7 +39,7 @@ func (loader *UserLoaderFromDir) LoadUsersAll() GlobalUsers {
 }
 
 // LoadUserByID loads a single user by ID
-func (loader *UserLoaderFromDir) LoadUserByID(id string) *User {
+func (loader *UserLoaderFromDir) LoadUserByID(id string) *language.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
@@ -48,6 +49,6 @@ func (loader *UserLoaderFromDir) Summary() string {
 }
 
 // Loads users from file
-func loadUsersFromFile(fileName string) []*User {
-	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*User{}).(*[]*User)
+func loadUsersFromFile(fileName string) []*language.User {
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*language.User{}).(*[]*language.User)
 }
