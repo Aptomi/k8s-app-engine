@@ -5,27 +5,16 @@ import "reflect"
 // LabelSet defines the set of labels that will be manipulated
 type LabelSet struct {
 	Labels map[string]string
-	// TODO: secrets probably need to be moved out into a separate map[string]string
-	IsSecret map[string]bool
 }
 
 // NewLabelSetEmpty creates a new empty LabelSet
 func NewLabelSetEmpty() LabelSet {
-	return LabelSet{Labels: make(map[string]string), IsSecret: make(map[string]bool)}
+	return LabelSet{Labels: make(map[string]string)}
 }
 
 // NewLabelSet creates a new LabelSet from a given set of labels
 func NewLabelSet(labels map[string]string) LabelSet {
-	return LabelSet{Labels: labels, IsSecret: make(map[string]bool)}
-}
-
-// NewLabelSet creates a new LabelSet from a given set of secret labels
-func NewLabelSetSecret(labels map[string]string) LabelSet {
-	isSecret := make(map[string]bool)
-	for k, _ := range labels {
-		isSecret[k] = true
-	}
-	return LabelSet{Labels: labels, IsSecret: isSecret}
+	return LabelSet{Labels: labels}
 }
 
 // NewLabelSet creates a new LabelSet from a given set of labels
@@ -46,13 +35,11 @@ func (src LabelSet) ApplyTransform(ops LabelOperations) LabelSet {
 		// set labels
 		for k, v := range ops["set"] {
 			result.Labels[k] = v
-			result.IsSecret[k] = false
 		}
 
 		// remove labels
 		for k := range ops["remove"] {
 			delete(result.Labels, k)
-			delete(result.IsSecret, k)
 		}
 	}
 
@@ -63,7 +50,6 @@ func (src LabelSet) ApplyTransform(ops LabelOperations) LabelSet {
 func (src LabelSet) addToCurrent(addSet LabelSet) LabelSet {
 	for k, v := range addSet.Labels {
 		src.Labels[k] = v
-		src.IsSecret[k] = addSet.IsSecret[k]
 	}
 	return src
 }

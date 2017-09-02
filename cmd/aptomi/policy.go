@@ -5,6 +5,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
@@ -58,6 +59,7 @@ var policyCmdApply = &cobra.Command{
 
 		externalData := external.NewData(
 			users.NewUserLoaderFromLDAP(GetAptomiPolicyDir()),
+			secrets.NewSecretLoaderFromDir(GetAptomiPolicyDir()),
 		)
 		resolver := resolve.NewPolicyResolver(policy, externalData)
 		nextState, err := resolver.ResolveAllDependencies()

@@ -1,17 +1,21 @@
 package external
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 )
 
 // Data represents all data which is external to Aptomi, including
 // - users
+// - secrets
 type Data struct {
-	UserLoader users.UserLoader
+	UserLoader   users.UserLoader
+	SecretLoader secrets.SecretLoader
 }
 
-func NewData(userLoader users.UserLoader) *Data {
+func NewData(userLoader users.UserLoader, secretLoader secrets.SecretLoader) *Data {
 	return &Data{
-		UserLoader: userLoader,
+		UserLoader:   userLoader,
+		SecretLoader: secretLoader,
 	}
 }

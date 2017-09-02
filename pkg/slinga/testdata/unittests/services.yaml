@@ -72,6 +72,7 @@
           address: "{{ .Discovery.component1.component2.instance }}"
           queue: "{{ .User.Labels.changinglabel }}"
           someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"
+          secretparam: "{{ .User.Secrets.bigsecret }}"
           data1:
             param:
               name: value1

@@ -3,6 +3,7 @@ package resolve
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,7 @@ func loadPolicyAndResolve(t *testing.T) (*PolicyNamespace, *PolicyResolution) {
 func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, expectedErrorMessage string) *PolicyResolution {
 	externalData := external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
+		secrets.NewSecretLoaderFromDir("../../testdata/unittests"),
 	)
 	resolver := NewPolicyResolver(policy, externalData)
 	result, err := resolver.ResolveAllDependencies()

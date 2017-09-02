@@ -3,6 +3,7 @@ package graphviz
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
@@ -16,6 +17,7 @@ func TestPolicyVisualization(t *testing.T) {
 
 	externalData := external.NewData(
 		users.NewUserLoaderFromDir("../testdata/unittests"),
+		secrets.NewSecretLoaderFromDir("../testdata/unittests"),
 	)
 
 	// empty policy and empty resolution result

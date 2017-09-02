@@ -75,13 +75,15 @@ func (node *resolutionNode) proxyService(service *language.Service) interface{} 
 // How user is visible from the policy language
 func (node *resolutionNode) proxyUser(user *language.User) interface{} {
 	return struct {
-		ID     interface{}
-		Name   interface{}
-		Labels interface{}
+		ID      interface{}
+		Name    interface{}
+		Labels  interface{}
+		Secrets interface{}
 	}{
-		ID:     user.ID,
-		Name:   user.Name,
-		Labels: user.Labels,
+		ID:      user.ID,
+		Name:    user.Name,
+		Labels:  user.Labels,
+		Secrets: node.resolver.externalData.SecretLoader.LoadSecretsByUserID(user.ID).Labels,
 	}
 }
 

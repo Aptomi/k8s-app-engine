@@ -24,10 +24,10 @@
 
           # Pass labels to publisher application
           twitter:
-            appKey: "{{ .Labels.appKey }}"
-            appSecret: "{{ .Labels.appSecret }}"
-            tokenKey: "{{ .Labels.tokenKey }}"
-            tokenSecret: "{{ .Labels.tokenSecret }}"
+            appKey: "{{ .User.Secrets.appKey }}"
+            appSecret: "{{ .User.Secrets.appSecret }}"
+            tokenKey: "{{ .User.Secrets.tokenKey }}"
+            tokenSecret: "{{ .User.Secrets.tokenSecret }}"
             locations: "{{ .Labels.locations }}"
 
           # Tell publisher where to put messages (kafka connection url & topic)

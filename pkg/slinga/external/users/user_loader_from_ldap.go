@@ -58,9 +58,6 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() language.GlobalUsers {
 		loader.cachedUsers = &language.GlobalUsers{Users: make(map[string]*language.User)}
 		t := loader.ldapSearch()
 		for _, u := range t {
-			// load secrets
-			u.Secrets = language.LoadUserSecretsByIDFromDir(loader.baseDir, u.ID)
-
 			// add user
 			loader.cachedUsers.Users[u.ID] = u
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,7 @@ func getPolicy() *language.PolicyNamespace {
 func getExternalData() *external.Data {
 	return external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
+		secrets.NewSecretLoaderFromDir("../../testdata/unittests"),
 	)
 }
 

@@ -27,9 +27,6 @@ func (loader *UserLoaderFromDir) LoadUsersAll() language.GlobalUsers {
 		for _, fileName := range files {
 			t := loadUsersFromFile(fileName)
 			for _, u := range t {
-				// load secrets
-				u.Secrets = language.LoadUserSecretsByIDFromDir(loader.baseDir, u.ID)
-
 				// add user
 				loader.cachedUsers.Users[u.ID] = u
 			}

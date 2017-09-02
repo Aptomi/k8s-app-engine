@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 )
 
 func getPolicy() *PolicyNamespace {
@@ -18,6 +19,7 @@ func getPolicy() *PolicyNamespace {
 func getExternalData() *external.Data {
 	return external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
+		secrets.NewSecretLoaderFromDir("../../testdata/unittests"),
 	)
 }
 

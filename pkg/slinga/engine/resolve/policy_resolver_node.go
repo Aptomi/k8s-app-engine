@@ -78,7 +78,6 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 	labels := dependency.GetLabelSet()
 	if user != nil {
 		labels = labels.AddLabels(user.GetLabelSet())
-		labels = labels.AddLabels(user.GetSecretSet())
 	}
 
 	eventLog := NewEventLog()

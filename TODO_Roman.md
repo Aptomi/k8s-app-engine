@@ -29,10 +29,6 @@ Items to complete:
 
 8. Attach apply log to component instances
 
-9. Wrap all external data into a single struct
-  - decouple secrets from users/labels
-  - load secrets normally, not in LDAPUserLoader
-
 
 Minor issues:
 - Where/how to store text-based diff for revisions?
@@ -140,3 +136,6 @@ Done:
 * Deal with component create/update times (calculated in diff)
   - This logic should likely be moved to state reconciliation (updating component update/create times in Apply)
 
+* Wrap all external data into a single struct
+  - decouple secrets from users/labels
+  - load secrets normally, not in LDAPUserLoader

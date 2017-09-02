@@ -158,18 +158,12 @@ func (node *resolutionNode) logStartResolvingDependency() {
 
 func (node *resolutionNode) logLabels(labelSet LabelSet, scope string) {
 	secretCnt := 0
-	labelsMap := make(map[string]string)
-	for k, v := range labelSet.Labels {
-		if labelSet.IsSecret[k] {
-			secretCnt++
-		} else {
-			labelsMap[k] = v
-		}
+	if node.user != nil {
+		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserID(node.user.ID).Labels)
 	}
-
 	node.eventLog.WithFields(Fields{
 		"labels": labelSet.Labels,
-	}).Infof("Labels (%s): %s and %d secrets", scope, labelsMap, secretCnt)
+	}).Infof("Labels (%s): %s and %d secrets", scope, labelSet.Labels, secretCnt)
 }
 
 func (node *resolutionNode) logServiceFound(service *Service) {

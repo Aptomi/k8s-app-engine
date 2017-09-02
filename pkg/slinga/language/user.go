@@ -1,17 +1,15 @@
 package language
 
 /*
-	This file declares all the necessary structures for Users to be retrieved
-	For now it loads users with labels from a YAML file
-	Later this will be replaced with LDAP integration
+	This file declares all the necessary structures for representing
+	a User in Aptomi
 */
 
 // User represents a user (ID, Name, set of labels)
 type User struct {
-	ID      string
-	Name    string
-	Labels  map[string]string
-	Secrets map[string]string
+	ID     string
+	Name   string
+	Labels map[string]string
 }
 
 // GlobalUsers contains the global list of users
@@ -28,9 +26,4 @@ func (user *User) IsGlobalOps() bool {
 // GetLabelSet returns a set of user labels
 func (user *User) GetLabelSet() LabelSet {
 	return NewLabelSet(user.Labels)
-}
-
-// GetSecretSet returns a set of user secrets
-func (user *User) GetSecretSet() LabelSet {
-	return NewLabelSetSecret(user.Secrets)
 }
