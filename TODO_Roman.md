@@ -3,7 +3,7 @@ Items to complete:
 1. Support for namespaces
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
-  - add references must include "namespace/"
+  - add references to support "namespace/"
   - inheritance / make sure we are looking for contexts in the right namespace
   - move istio into a 'system' namespace
   - rules in namespaces? global rules in system namespace?
@@ -24,9 +24,6 @@ Items to complete:
    break all services or move them to another cluster, etc
   - Need to figure out how to prevent this
 
-6. Plugins should support noop mode (if at all possible)
-  - I.e. noop should log Helm commands, but don't run them
-
 7. Implement policy validation
   - e.g. compile all expressions, templates, etc
 
@@ -37,10 +34,7 @@ Items to complete:
           - summary (as text/numbers)
       - Implement bool Changed() inside RevisionSummary
 
-9. Deal with component create/update times (calculated in diff)
-   - This logic should likely be moved to state reconciliation (updating component update/create times in Apply)
-
-10. Attach apply log to component instances
+9. Attach apply log to component instances
 
 
 Minor issues:
@@ -50,6 +44,7 @@ Minor issues:
 - Deal with code style and missing comments
 - Figure out a better way to deal with secrets in LabelSets. Check again how they are behing printed into event logs
 - Shall we consider renaming .User -> .Consumer?
+- Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
 - Unit tests are 50% using "testdata" and 50% using hand-created objects. Might make sense to use the latter everywhere
 
 
@@ -144,3 +139,7 @@ Done:
 * Rename actions/plugins to desired & actual
 
 * Actions must update actual state
+
+* Deal with component create/update times (calculated in diff)
+  - This logic should likely be moved to state reconciliation (updating component update/create times in Apply)
+

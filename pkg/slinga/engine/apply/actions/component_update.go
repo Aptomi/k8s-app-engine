@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"time"
 )
 
 type ComponentUpdate struct {
@@ -31,8 +32,14 @@ func (componentUpdate *ComponentUpdate) Apply(plugins []plugin.EnginePlugin, eve
 		return fmt.Errorf("One or more errors while applying changes (updating component '%s')", componentUpdate.key)
 	}
 
-	// update actual state
-	componentUpdate.actualState.Resolved.ComponentInstanceMap[componentUpdate.key] = componentUpdate.desiredState.Resolved.ComponentInstanceMap[componentUpdate.key]
+	componentUpdate.updateActualState()
 
 	return nil
+}
+func (componentUpdate *ComponentUpdate) updateActualState() {
+	// preserve previous creation date before overwriting
+	prevCreatedOn := componentUpdate.actualState.Resolved.ComponentInstanceMap[componentUpdate.key].CreatedOn
+	instance := componentUpdate.desiredState.Resolved.ComponentInstanceMap[componentUpdate.key]
+	componentUpdate.actualState.Resolved.ComponentInstanceMap[componentUpdate.key] = instance
+	instance.UpdateTimes(prevCreatedOn, time.Now())
 }

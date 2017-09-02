@@ -11,15 +11,15 @@ import (
 // ComponentInstance is a struct that holds data for a given component instance, containing list of user IDs and calculated labels
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
 type ComponentInstance struct {
+	/*
+		These fields get populated during policy resolution
+	*/
+
 	// Whether or not component instance has been resolved
 	Resolved bool
 
 	// Key
 	Key *ComponentInstanceKey
-
-	// When this instance was created & last updated on
-	CreatedOn time.Time
-	UpdatedOn time.Time
 
 	// List of dependencies which are keeping this component instantiated
 	DependencyIds map[string]bool
@@ -32,6 +32,14 @@ type ComponentInstance struct {
 	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
 	EdgesIn  map[string]bool
 	EdgesOut map[string]bool
+
+	/*
+		These fields get populated during apply and desired -> actual state reconciliation
+	*/
+
+	// When this instance was created & last updated on
+	CreatedOn time.Time
+	UpdatedOn time.Time
 }
 
 // Creates a new component instance
@@ -125,19 +133,9 @@ func (instance *ComponentInstance) UpdateTimes(createdOn time.Time, updatedOn ti
 	}
 }
 
-func (instance *ComponentInstance) checkTimesAreEmpty() {
-	if !time.Time.IsZero(instance.CreatedOn) || !time.Time.IsZero(instance.UpdatedOn) {
-		// This should never get executed
-		panic("Expected zero times in newly created component instance, but found non-zero times")
-	}
-}
-
 func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	// Resolution flag
 	instance.setResolved(ops.Resolved)
-
-	// Times should not be initialized yet
-	instance.checkTimesAreEmpty()
 
 	// List of dependencies which are keeping this component instantiated
 	for dependencyID := range ops.DependencyIds {

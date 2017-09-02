@@ -46,8 +46,9 @@ func (progressConsole *ProgressConsole) SetOut(out io.Writer) {
 }
 
 func (progressConsole *ProgressConsole) SetTotal(total int) {
-	progressConsole.setTotalInternal(total)
+	progressConsole.setTotalInternal(total + 1)
 	progressConsole.createProgressBar()
+	progressConsole.Advance("Init")
 }
 
 func (progressConsole *ProgressConsole) Advance(stage string) {

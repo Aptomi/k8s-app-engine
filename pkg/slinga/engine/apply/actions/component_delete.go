@@ -31,8 +31,12 @@ func (componentDelete *ComponentDelete) Apply(plugins []plugin.EnginePlugin, eve
 		return fmt.Errorf("One or more errors while applying changes (deleting component '%s')", componentDelete.key)
 	}
 
-	// update actual state
-	delete(componentDelete.actualState.Resolved.ComponentInstanceMap, componentDelete.key)
+	componentDelete.updateActualState()
 
 	return nil
+}
+
+func (componentDelete *ComponentDelete) updateActualState() {
+	// delete component from the actual state
+	delete(componentDelete.actualState.Resolved.ComponentInstanceMap, componentDelete.key)
 }

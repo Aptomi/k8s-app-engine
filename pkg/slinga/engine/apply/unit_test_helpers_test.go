@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+	"time"
 )
 
 func getPolicy() *language.PolicyNamespace {
@@ -28,7 +29,7 @@ func resolvePolicy(t *testing.T, policy *language.PolicyNamespace, userLoader la
 	return result
 }
 
-func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) (*resolve.PolicyResolution, error) {
+func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) *resolve.PolicyResolution {
 	actualState, eventLog, err := apply.Apply()
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
 		// print log into stdout and exit
@@ -47,7 +48,31 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCn
 			t.FailNow()
 		}
 	}
-	return actualState, err
+	return actualState
+}
+
+type componentTimes struct {
+	created time.Time
+	updated time.Time
+}
+
+func getTimes(t *testing.T, key string, u2 *resolve.PolicyResolution) componentTimes {
+	return componentTimes{
+		created: getInstanceInternal(t, key, u2.Resolved).CreatedOn,
+		updated: getInstanceInternal(t, key, u2.Resolved).UpdatedOn,
+	}
+}
+
+func getInstanceInternal(t *testing.T, key string, resolutionData *resolve.ResolutionData) *resolve.ComponentInstance {
+	instance, ok := resolutionData.ComponentInstanceMap[key]
+	if !assert.True(t, ok, "Component instance exists in resolution data: "+key) {
+		t.FailNow()
+	}
+	return instance
+}
+
+func getInstanceKey(serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.PolicyNamespace) string {
+	return resolve.NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName]).GetKey()
 }
 
 type EnginePluginImpl struct {

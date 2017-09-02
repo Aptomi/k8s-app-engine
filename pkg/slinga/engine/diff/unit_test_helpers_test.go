@@ -7,7 +7,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
 func getPolicy() *PolicyNamespace {
@@ -36,19 +35,6 @@ func emulateSaveAndLoadResolution(resolution *PolicyResolution) *PolicyResolutio
 	yaml.DeserializeObject(yaml.SerializeObject(resolution), &resolutionNew)
 
 	return &resolutionNew
-}
-
-func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionData) *ComponentInstance {
-	instance, ok := resolutionData.ComponentInstanceMap[key]
-	if !assert.True(t, ok, "Component instance exists in resolution data: "+key) {
-		t.FailNow()
-	}
-	return instance
-}
-
-func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, resolution *PolicyResolution) *ComponentInstance {
-	key := NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName])
-	return getInstanceInternal(t, key.GetKey(), resolution.Resolved)
 }
 
 func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
@@ -81,27 +67,4 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 	assert.Equal(t, componentUpdate, cnt.update, "Diff: component updates")
 	assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
 	assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
-}
-
-type componentTimes struct {
-	timePrevCreated time.Time
-	timePrevUpdated time.Time
-	timeNextCreated time.Time
-	timeNextUpdated time.Time
-}
-
-func getTimes(t *testing.T, key string, u1 *PolicyResolution, u2 *PolicyResolution) componentTimes {
-	return componentTimes{
-		timePrevCreated: getInstanceInternal(t, key, u1.Resolved).CreatedOn,
-		timePrevUpdated: getInstanceInternal(t, key, u1.Resolved).UpdatedOn,
-		timeNextCreated: getInstanceInternal(t, key, u2.Resolved).CreatedOn,
-		timeNextUpdated: getInstanceInternal(t, key, u2.Resolved).UpdatedOn,
-	}
-}
-
-func getTimesNext(t *testing.T, key string, u2 *PolicyResolution) componentTimes {
-	return componentTimes{
-		timeNextCreated: getInstanceInternal(t, key, u2.Resolved).CreatedOn,
-		timeNextUpdated: getInstanceInternal(t, key, u2.Resolved).UpdatedOn,
-	}
 }

@@ -3,7 +3,6 @@ package diff
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"time"
 )
 
 // PolicyResolutionDiff represents a difference between two policy resolution data structs
@@ -60,13 +59,11 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		// see if a component needs to be instantiated
 		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
 			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentCreateAction(key, diff.Next, diff.Prev))
-			diff.updateTimes(uNext.Key, time.Now(), time.Now())
 		}
 
 		// see if a component needs to be destructed
 		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
 			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDeleteAction(key, diff.Next, diff.Prev))
-			diff.updateTimes(uPrev.Key, uPrev.CreatedOn, time.Now())
 		}
 
 		// see if a component needs to be updated
@@ -74,9 +71,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentUpdateAction(key, diff.Next, diff.Prev))
-				diff.updateTimes(uNext.Key, uPrev.CreatedOn, time.Now())
-			} else {
-				diff.updateTimes(uNext.Key, uPrev.CreatedOn, uPrev.UpdatedOn)
+
+				// if it has a parent service, indicate that it basically gets updated as well
+				// this is required for adjusting update/creation times of a service with changed component
+				// this may produce duplicate "update" actions for the parent service
+				if uNext.Key.IsComponent() {
+					serviceKey := uNext.Key.GetParentServiceKey().GetKey()
+					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], actions.NewComponentUpdateAction(serviceKey, diff.Next, diff.Prev))
+				}
 			}
 		}
 
@@ -99,31 +101,34 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	for _, key := range diff.Next.Resolved.ComponentProcessingOrder {
 		actionList, found := actionsByKey[key]
 		if found {
-			diff.Actions = append(diff.Actions, actionList...)
+			diff.Actions = append(diff.Actions, normalize(actionList)...)
 			delete(actionsByKey, key)
 		}
 	}
 	for _, key := range diff.Prev.Resolved.ComponentProcessingOrder {
 		actionList, found := actionsByKey[key]
 		if found {
-			diff.Actions = append(diff.Actions, actionList...)
+			diff.Actions = append(diff.Actions, normalize(actionList)...)
 			delete(actionsByKey, key)
 		}
 	}
 }
 
-// updated timestamps for component (and root service, if/as needed)
-func (diff *PolicyResolutionDiff) updateTimes(cik *resolve.ComponentInstanceKey, createdOn time.Time, updatedOn time.Time) {
-	// update for a given node
-	instance := diff.Next.Resolved.ComponentInstanceMap[cik.GetKey()]
-	if instance == nil {
-		// likely this component has been deleted as a part of the diff
-		return
+// Due to the nature of action list generation above, certain actions can be added more than once
+// This will ensure that the list is normalized and there will be only one update action for each service instance
+func normalize(list []actions.Action) []actions.Action {
+	result := []actions.Action{}
+	updateCnt := 0
+	for _, action := range list {
+		_, isUpdate := action.(*actions.ComponentUpdate)
+		if isUpdate {
+			if updateCnt == 0 {
+				result = append(result, action)
+			}
+			updateCnt++
+		} else {
+			result = append(result, action)
+		}
 	}
-	instance.UpdateTimes(createdOn, updatedOn)
-
-	// if it's a component instance, then update for its parent service instance as well
-	if cik.IsComponent() {
-		diff.updateTimes(cik.GetParentServiceKey(), createdOn, updatedOn)
-	}
+	return result
 }
