@@ -11,7 +11,7 @@ import (
 func Endpoints(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, filterUserID string) (map[string]map[string]string, error) {
 	result := make(map[string]map[string]string)
 
-	for _, key := range resolution.ComponentProcessingOrder {
+	for key := range resolution.ComponentInstanceMap {
 		if _, ok := result[key]; ok {
 			continue
 		}

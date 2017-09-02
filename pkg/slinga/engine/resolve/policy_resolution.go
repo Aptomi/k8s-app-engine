@@ -86,7 +86,7 @@ func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
 			return err
 		}
 	}
-	for _, key := range ops.ComponentProcessingOrder {
+	for key := range ops.ComponentInstanceMap {
 		resolution.recordProcessingOrder(ops.ComponentInstanceMap[key].Key)
 	}
 	return nil

@@ -13,7 +13,7 @@ func TestPolicyResolverAndResolvedData(t *testing.T) {
 	policy, resolution := loadPolicyAndResolve(t)
 
 	// Check that policy resolution finished correctly
-	assert.Equal(t, 16, len(resolution.ComponentProcessingOrder), "Policy resolution data should have correct number of entries")
+	assert.Equal(t, 16, len(resolution.ComponentInstanceMap), "Policy resolution data should have correct number of entries")
 
 	// Resolution for test context
 	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
