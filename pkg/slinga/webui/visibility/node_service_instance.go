@@ -49,21 +49,23 @@ func (n serviceInstanceNode) isItMyID(id string) string {
 
 func (n serviceInstanceNode) getLabel() string {
 	// for not resolved instances
-	if !n.instance.Resolved {
-		if n.service == nil {
+	/*
+		if !n.instance.Resolved {
+			if n.service == nil {
+				return fmt.Sprintf(
+					`<b>%s</b>
+						ERROR`,
+					html.EscapeString(n.instance.Key.ServiceName),
+				)
+			}
+
 			return fmt.Sprintf(
 				`<b>%s</b>
 					ERROR`,
-				html.EscapeString(n.instance.Key.ServiceName),
+				html.EscapeString(n.service.Name),
 			)
 		}
-
-		return fmt.Sprintf(
-			`<b>%s</b>
-				ERROR`,
-			html.EscapeString(n.service.Name),
-		)
-	}
+	*/
 
 	// for successfully resolved instances (primary & not primary)
 	if n.primary {
@@ -92,13 +94,13 @@ func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 	return ""
 }
 
-func (n serviceInstanceNode) getDetails(id string/*, revision *resolve.Revision*/) interface{} {
+func (n serviceInstanceNode) getDetails(id string /*, revision *resolve.Revision*/) interface{} {
 	/*
-	result := revision.Resolution.ComponentInstanceMap[id]
-	if result == nil {
-		result = revision.Resolution.Unresolved.ComponentInstanceMap[id]
-	}
-	return result
+		result := revision.Resolution.ComponentInstanceMap[id]
+		if result == nil {
+			result = revision.Resolution.Unresolved.ComponentInstanceMap[id]
+		}
+		return result
 	*/
 	return nil
 }

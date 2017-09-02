@@ -37,7 +37,6 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 // Record dependency for component instance
 func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *Dependency) {
 	instance := resolution.GetComponentInstanceEntry(cik)
-	instance.setResolved(true)
 	instance.addDependency(dependency.GetID())
 	resolution.recordProcessingOrder(cik)
 }

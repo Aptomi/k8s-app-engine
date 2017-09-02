@@ -15,9 +15,6 @@ type ComponentInstance struct {
 		These fields get populated during policy resolution
 	*/
 
-	// Whether or not component instance has been resolved
-	Resolved bool
-
 	// Key
 	Key *ComponentInstanceKey
 
@@ -58,15 +55,6 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 // GetRunningTime returns the time for long component has been running
 func (instance *ComponentInstance) GetRunningTime() time.Duration {
 	return time.Since(instance.CreatedOn)
-}
-
-func (instance *ComponentInstance) setResolved(resolved bool) {
-	if !instance.Resolved {
-		instance.Resolved = resolved
-	} else if !resolved {
-		// This should never ever get executed
-		panic("Trying to unset 'resolved' flag for component instance: " + instance.Key.GetKey())
-	}
 }
 
 func (instance *ComponentInstance) addDependency(dependencyID string) {
@@ -134,9 +122,6 @@ func (instance *ComponentInstance) UpdateTimes(createdOn time.Time, updatedOn ti
 }
 
 func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
-	// Resolution flag
-	instance.setResolved(ops.Resolved)
-
 	// List of dependencies which are keeping this component instantiated
 	for dependencyID := range ops.DependencyIds {
 		instance.addDependency(dependencyID)
