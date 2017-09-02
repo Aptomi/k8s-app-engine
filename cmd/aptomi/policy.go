@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
@@ -62,10 +63,11 @@ var policyCmdApply = &cobra.Command{
 			secrets.NewSecretLoaderFromDir(GetAptomiPolicyDir()),
 		)
 		resolver := resolve.NewPolicyResolver(policy, externalData)
-		nextState, err := resolver.ResolveAllDependencies()
+		nextState, eventLog, err := resolver.ResolveAllDependencies()
 		if err != nil {
 			log.Panicf("Cannot resolve policy: %v %v %v", err, nextState, prevState)
 		}
+		eventLog.Save(&eventlog.HookStdout{})
 
 		// Process differences
 		// diff := NewRevisionDiff(nextState, prevState)
