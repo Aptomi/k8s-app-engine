@@ -94,7 +94,7 @@ func (n serviceInstanceNode) getEdgeLabel(dst graphNode) string {
 
 func (n serviceInstanceNode) getDetails(id string/*, revision *resolve.Revision*/) interface{} {
 	/*
-	result := revision.Resolution.Resolved.ComponentInstanceMap[id]
+	result := revision.Resolution.ComponentInstanceMap[id]
 	if result == nil {
 		result = revision.Resolution.Unresolved.ComponentInstanceMap[id]
 	}

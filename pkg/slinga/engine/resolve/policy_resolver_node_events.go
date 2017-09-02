@@ -235,7 +235,7 @@ func (node *resolutionNode) logResolvingDependencyOnComponent() {
 
 func (node *resolutionNode) logComponentCodeParams() {
 	paramsTemplate := node.component.Code.Params
-	params := node.data.GetComponentInstanceEntry(node.componentKey).CalculatedCodeParams
+	params := node.resolution.GetComponentInstanceEntry(node.componentKey).CalculatedCodeParams
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {
 		node.eventLog.WithFields(Fields{
@@ -246,7 +246,7 @@ func (node *resolutionNode) logComponentCodeParams() {
 
 func (node *resolutionNode) logComponentDiscoveryParams() {
 	paramsTemplate := node.component.Discovery
-	params := node.data.GetComponentInstanceEntry(node.componentKey).CalculatedDiscovery
+	params := node.resolution.GetComponentInstanceEntry(node.componentKey).CalculatedDiscovery
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {
 		node.eventLog.WithFields(Fields{

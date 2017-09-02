@@ -47,7 +47,7 @@ func filterMatches(value string, filterValue string) bool {
 func (view ConsumerView) addResolvedDependencies(key string, nodePrev graphNode, nextLevel int) {
 	/*
 		// try to get this component instance from resolved data
-		v := view.revision.Resolution.Resolved.ComponentInstanceMap[key]
+		v := view.revision.Resolution.ComponentInstanceMap[key]
 
 		// okay, this component likely failed to resolved, so let's look it up from unresolved pool
 		if v == nil {

@@ -55,8 +55,8 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, ex
 	return result
 }
 
-func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionData) *ComponentInstance {
-	instance, ok := resolutionData.ComponentInstanceMap[key]
+func getInstanceInternal(t *testing.T, key string, resolution *PolicyResolution) *ComponentInstance {
+	instance, ok := resolution.ComponentInstanceMap[key]
 	if !assert.True(t, ok, "Component instance in resolution data: "+key) {
 		t.FailNow()
 	}
@@ -65,5 +65,5 @@ func getInstanceInternal(t *testing.T, key string, resolutionData *ResolutionDat
 
 func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, resolution *PolicyResolution) *ComponentInstance {
 	key := NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName])
-	return getInstanceInternal(t, key.GetKey(), resolution.Resolved)
+	return getInstanceInternal(t, key.GetKey(), resolution)
 }

@@ -92,7 +92,7 @@ func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
 				// Generate pictures (see new API :)
 
 				// Save new resolved state in the last run directory
-				resolver.SaveResolutionData() -> this called before:
+				resolver.SavePolicyResolution() -> this called before:
 
 						revision := NewRevision(resolver.policy, resolver.resolution, resolver.userLoader)
 						revision.Save()

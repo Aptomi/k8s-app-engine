@@ -96,7 +96,7 @@ var policyCmdApply = &cobra.Command{
 			}
 		*/
 		// Save new resolved state in the last run directory
-		// resolver.SaveResolutionData()
+		// resolver.SavePolicyResolution()
 
 		// If everything is successful, then increment revision and save run
 		// if emulateDeployment == true --> we set noop to false to write state on disk)

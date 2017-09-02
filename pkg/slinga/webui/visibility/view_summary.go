@@ -83,8 +83,8 @@ func (view SummaryView) getServicesOwned() interface{} {
 			if service.Owner == view.userID {
 				// if I own this service, let's find all its instances
 				instanceMap := make(map[string]bool)
-				for key, instance := range view.revision.Resolution.Resolved.ComponentInstanceMap {
-					if instance.Resolved {
+				for key, instance := range view.revision.Resolution.ComponentInstanceMap {
+					if instance {
 						if instance.Key.ServiceName == service.Name && instance.Key.IsService() {
 							instanceMap[key] = true
 						}
@@ -93,7 +93,7 @@ func (view SummaryView) getServicesOwned() interface{} {
 
 				// Add info about every allocated instance
 				for key := range instanceMap {
-					instance := view.revision.Resolution.Resolved.ComponentInstanceMap[key]
+					instance := view.revision.Resolution.ComponentInstanceMap[key]
 					entry := lineEntry{
 						"serviceName":     service.Name,
 						"contextWithKeys": view.getResolvedContextNameByInst(instance),

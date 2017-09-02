@@ -11,12 +11,12 @@ import (
 func Endpoints(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, filterUserID string) (map[string]map[string]string, error) {
 	result := make(map[string]map[string]string)
 
-	for _, key := range resolution.Resolved.ComponentProcessingOrder {
+	for _, key := range resolution.ComponentProcessingOrder {
 		if _, ok := result[key]; ok {
 			continue
 		}
 
-		instance := resolution.Resolved.ComponentInstanceMap[key]
+		instance := resolution.ComponentInstanceMap[key]
 		used := filterUserID == ""
 		for dependencyID := range instance.DependencyIds {
 			userID := policy.Dependencies.DependenciesByID[dependencyID].UserID
@@ -31,7 +31,7 @@ func Endpoints(policy *language.PolicyNamespace, resolution *resolve.PolicyResol
 
 		component := policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 		if component != nil && component.Code != nil {
-			codeExecutor, err := GetCodeExecutor(component.Code, key, resolution.Resolved.ComponentInstanceMap[key].CalculatedCodeParams, policy.Clusters, eventlog.NewEventLog())
+			codeExecutor, err := GetCodeExecutor(component.Code, key, resolution.ComponentInstanceMap[key].CalculatedCodeParams, policy.Clusters, eventlog.NewEventLog())
 			if err != nil {
 				return nil, fmt.Errorf("Unable to get CodeExecutor for '%s': %s", key, err.Error())
 			}

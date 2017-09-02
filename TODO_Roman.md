@@ -28,8 +28,10 @@ Implementation:
 
 8. Attach apply log to component instances
 
+9. Speed up policy resolution process / use benchmarking
 
 Minor issues:
+- Do we even need Unresolved, given that we changed the way how logs are stored?
 - Where/how to store text-based diff for revisions?
 - Get rid of dependency ID
 - Do we need to move Dependency.Resolved into resolved usage state?

@@ -96,18 +96,15 @@ func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error 
 		return err
 	}
 
-	// add dependency resolution data to the rest of the records
+	// add dependency resolution resolution to the rest of the records
 	d.Resolved = node.resolved
 	d.ServiceKey = node.serviceKey.GetKey()
 
-	var data *ResolutionData
-	if node.resolved {
-		data = resolver.resolution.Resolved
-	} else {
-		data = resolver.resolution.Unresolved
+	if !node.resolved {
+		return nil
 	}
 
-	err = data.AppendData(node.data)
+	err = resolver.resolution.AppendData(node.resolution)
 	if err != nil {
 		node.eventLog.LogError(err)
 		return err
@@ -184,10 +181,10 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	}
 
 	// Store labels for service
-	node.data.RecordLabels(node.serviceKey, node.labels)
+	node.resolution.RecordLabels(node.serviceKey, node.labels)
 
 	// Store edge (last component instance -> service instance)
-	node.data.StoreEdge(node.arrivalKey, node.serviceKey)
+	node.resolution.StoreEdge(node.arrivalKey, node.serviceKey)
 
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.sortServiceComponents()
@@ -203,11 +200,11 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		node.componentKey = node.createComponentKey(node.component)
 
 		// Store edge (service instance -> component instance)
-		node.data.StoreEdge(node.serviceKey, node.componentKey)
+		node.resolution.StoreEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
 		node.componentLabels = node.transformLabels(node.labels, node.component.ChangeLabels)
-		node.data.RecordLabels(node.componentKey, node.componentLabels)
+		node.resolution.RecordLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component
 		node.discoveryTreeNode[node.component.Name] = NestedParameterMap{}
@@ -250,13 +247,13 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 
 		// Record usage of a given component instance
 		node.logInstanceSuccessfullyResolved(node.componentKey)
-		node.data.RecordResolved(node.componentKey, node.dependency)
+		node.resolution.RecordResolved(node.componentKey, node.dependency)
 	}
 
 	// Mark note as resolved and record usage of a given service instance
 	node.resolved = true
 	node.logInstanceSuccessfullyResolved(node.serviceKey)
-	node.data.RecordResolved(node.serviceKey, node.dependency)
+	node.resolution.RecordResolved(node.serviceKey, node.dependency)
 
 	return nil
 }

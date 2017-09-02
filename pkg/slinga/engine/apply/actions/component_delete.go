@@ -38,5 +38,5 @@ func (componentDelete *ComponentDelete) Apply(plugins []plugin.EnginePlugin, eve
 
 func (componentDelete *ComponentDelete) updateActualState() {
 	// delete component from the actual state
-	delete(componentDelete.actualState.Resolved.ComponentInstanceMap, componentDelete.key)
+	delete(componentDelete.actualState.ComponentInstanceMap, componentDelete.key)
 }

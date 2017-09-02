@@ -337,7 +337,6 @@ func RunEngine(t *testing.T, desiredPolicy *language.PolicyNamespace, externalDa
 	}
 
 	fmt.Printf("Resolved (dependencies): %d\n", dResolved)
-	fmt.Printf("Resolved (components): %d\n", len(actualState.Resolved.ComponentInstanceMap))
-	fmt.Printf("Unresolved (components): %d\n", len(actualState.Unresolved.ComponentInstanceMap))
+	fmt.Printf("Resolved (components): %d\n", len(actualState.ComponentInstanceMap))
 	fmt.Printf("Time: %s\n", timeDiff.String())
 }

@@ -68,13 +68,13 @@ type componentTimes struct {
 
 func getTimes(t *testing.T, key string, u2 *resolve.PolicyResolution) componentTimes {
 	return componentTimes{
-		created: getInstanceInternal(t, key, u2.Resolved).CreatedOn,
-		updated: getInstanceInternal(t, key, u2.Resolved).UpdatedOn,
+		created: getInstanceInternal(t, key, u2).CreatedOn,
+		updated: getInstanceInternal(t, key, u2).UpdatedOn,
 	}
 }
 
-func getInstanceInternal(t *testing.T, key string, resolutionData *resolve.ResolutionData) *resolve.ComponentInstance {
-	instance, ok := resolutionData.ComponentInstanceMap[key]
+func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyResolution) *resolve.ComponentInstance {
+	instance, ok := resolution.ComponentInstanceMap[key]
 	if !assert.True(t, ok, "Component instance exists in resolution data: "+key) {
 		t.FailNow()
 	}

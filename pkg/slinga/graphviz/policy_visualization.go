@@ -80,7 +80,7 @@ func makeGraph(policy *language.PolicyNamespace, resolution *resolve.PolicyResol
 	}
 
 	// Second, visualize evaluated links
-	for _, instance := range resolution.Resolved.ComponentInstanceMap {
+	for _, instance := range resolution.ComponentInstanceMap {
 		key := instance.Key
 
 		// only add edges to "root" components (i.e. services)

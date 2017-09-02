@@ -38,8 +38,8 @@ func (componentUpdate *ComponentUpdate) Apply(plugins []plugin.EnginePlugin, eve
 }
 func (componentUpdate *ComponentUpdate) updateActualState() {
 	// preserve previous creation date before overwriting
-	prevCreatedOn := componentUpdate.actualState.Resolved.ComponentInstanceMap[componentUpdate.key].CreatedOn
-	instance := componentUpdate.desiredState.Resolved.ComponentInstanceMap[componentUpdate.key]
-	componentUpdate.actualState.Resolved.ComponentInstanceMap[componentUpdate.key] = instance
+	prevCreatedOn := componentUpdate.actualState.ComponentInstanceMap[componentUpdate.key].CreatedOn
+	instance := componentUpdate.desiredState.ComponentInstanceMap[componentUpdate.key]
+	componentUpdate.actualState.ComponentInstanceMap[componentUpdate.key] = instance
 	instance.UpdateTimes(prevCreatedOn, time.Now())
 }

@@ -22,8 +22,8 @@ type resolutionNode struct {
 	// combined event logs from all resolution nodes in the subtree
 	eventLogsCombined []*EventLog
 
-	// new instance of ResolutionData, where resolution data will be stored
-	data *ResolutionData
+	// new instance of PolicyResolution, where resolution resolution will be stored
+	resolution *PolicyResolution
 
 	// depth we are currently on (as we are traversing policy graph), with initial dependency being on depth 0
 	depth int
@@ -88,7 +88,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 		eventLog:          eventLog,
 		eventLogsCombined: []*EventLog{eventLog},
 
-		data: NewResolutionData(),
+		resolution: NewPolicyResolution(),
 
 		depth:      0,
 		dependency: dependency,
@@ -118,7 +118,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		eventLog:          eventLog,
 		eventLogsCombined: []*EventLog{eventLog},
 
-		data: node.data,
+		resolution: node.resolution,
 
 		depth:      node.depth + 1,
 		dependency: node.dependency,
@@ -350,7 +350,7 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 		return node.errorWhenProcessingCodeParams(err)
 	}
 
-	err = node.data.RecordCodeParams(node.componentKey, componentCodeParams)
+	err = node.resolution.RecordCodeParams(node.componentKey, componentCodeParams)
 	if err != nil {
 		return node.errorWhenProcessingCodeParams(err)
 	}
@@ -366,7 +366,7 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}
 
-	err = node.data.RecordDiscoveryParams(node.componentKey, componentDiscoveryParams)
+	err = node.resolution.RecordDiscoveryParams(node.componentKey, componentDiscoveryParams)
 	if err != nil {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}

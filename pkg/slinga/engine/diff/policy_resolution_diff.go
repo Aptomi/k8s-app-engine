@@ -34,17 +34,17 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 
 	// merge all instance keys from prev and next
 	allKeys := make(map[string]bool)
-	for key := range diff.Prev.Resolved.ComponentInstanceMap {
+	for key := range diff.Prev.ComponentInstanceMap {
 		allKeys[key] = true
 	}
-	for key := range diff.Next.Resolved.ComponentInstanceMap {
+	for key := range diff.Next.ComponentInstanceMap {
 		allKeys[key] = true
 	}
 
 	// go over all the keys and see which one appear and which one disappear
 	for key := range allKeys {
-		uPrev := diff.Prev.Resolved.ComponentInstanceMap[key]
-		uNext := diff.Next.Resolved.ComponentInstanceMap[key]
+		uPrev := diff.Prev.ComponentInstanceMap[key]
+		uNext := diff.Next.ComponentInstanceMap[key]
 
 		var depIdsPrev map[string]bool
 		if uPrev != nil {
@@ -98,14 +98,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	}
 
 	// Generation actions in the right order
-	for _, key := range diff.Next.Resolved.ComponentProcessingOrder {
+	for _, key := range diff.Next.ComponentProcessingOrder {
 		actionList, found := actionsByKey[key]
 		if found {
 			diff.Actions = append(diff.Actions, normalize(actionList)...)
 			delete(actionsByKey, key)
 		}
 	}
-	for _, key := range diff.Prev.Resolved.ComponentProcessingOrder {
+	for _, key := range diff.Prev.ComponentProcessingOrder {
 		actionList, found := actionsByKey[key]
 		if found {
 			diff.Actions = append(diff.Actions, normalize(actionList)...)

@@ -15,7 +15,7 @@ func (deployer *DeployerPlugin) GetCustomApplyProgressLength() int {
 }
 
 func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(key string) error {
-	instance := deployer.Desired.Resolution.Resolved.ComponentInstanceMap[key]
+	instance := deployer.Desired.Resolution.ComponentInstanceMap[key]
 	component := deployer.Desired.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
@@ -52,7 +52,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceCreate(key string) error
 }
 
 func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(key string) error {
-	instance := deployer.Desired.Resolution.Resolved.ComponentInstanceMap[key]
+	instance := deployer.Desired.Resolution.ComponentInstanceMap[key]
 	component := deployer.Desired.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
@@ -88,7 +88,7 @@ func (deployer *DeployerPlugin) OnApplyComponentInstanceUpdate(key string) error
 }
 
 func (deployer *DeployerPlugin) OnApplyComponentInstanceDelete(key string) error {
-	instance := deployer.Actual.Resolution.Resolved.ComponentInstanceMap[key]
+	instance := deployer.Actual.Resolution.ComponentInstanceMap[key]
 	component := deployer.Actual.Policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 	if component == nil {
 		// This is a service instance. Do nothing

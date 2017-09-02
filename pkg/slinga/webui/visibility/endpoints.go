@@ -61,7 +61,7 @@ func Endpoints(currentUserID string) endpointsView {
 		}
 
 		for key, links := range endpoints {
-			instance := revision.Resolution.Resolved.ComponentInstanceMap[key]
+			instance := revision.Resolution.ComponentInstanceMap[key]
 			rLinks := make([]rLink, 0)
 
 			for linkName, link := range links {

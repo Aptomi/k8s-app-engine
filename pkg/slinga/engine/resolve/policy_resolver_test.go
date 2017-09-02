@@ -11,7 +11,7 @@ import (
 
 func TestPolicyResolverAndResolvedData(t *testing.T) {
 	policy, resolution := loadPolicyAndResolve(t)
-	data := resolution.Resolved
+	data := resolution
 
 	// Check that policy resolution finished correctly
 	assert.Equal(t, 16, len(data.ComponentProcessingOrder), "Policy resolution data should have correct number of entries")
@@ -40,7 +40,7 @@ func TestPolicyResolverLabelProcessing(t *testing.T) {
 
 	// Check labels for Bob's dependency
 	key := policy.Dependencies.DependenciesByID["dep_id_2"].ServiceKey
-	serviceInstance := getInstanceInternal(t, key, resolution.Resolved)
+	serviceInstance := getInstanceInternal(t, key, resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
 	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")

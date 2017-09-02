@@ -3,24 +3,11 @@ package resolve
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
-	"time"
 )
 
-// PolicyResolution contains resolution data for services - who is using what, as well as contains processing order and additional data
-type PolicyResolution struct {
-	// Date when it was created
-	CreatedOn time.Time
-
-	// Resolved data - stores full information about dependencies which have been successfully resolved
-	Resolved *ResolutionData
-
-	// Unresolved data - stores full information about dependencies which were not resolved
-	Unresolved *ResolutionData
-}
-
-// ResolutionData contains all the data that gets resolved for one or more dependencies
+// PolicyResolution contains resolution data for the policy
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
-type ResolutionData struct {
+type PolicyResolution struct {
 	// resolved component instances: componentKey -> componentInstance
 	ComponentInstanceMap map[string]*ComponentInstance
 
@@ -29,84 +16,75 @@ type ResolutionData struct {
 	ComponentProcessingOrder    []string
 }
 
-// NewResolutionData creates new empty ResolutionData
-func NewResolutionData() *ResolutionData {
-	return &ResolutionData{
+// NewPolicyResolution creates new empty PolicyResolution
+func NewPolicyResolution() *PolicyResolution {
+	return &PolicyResolution{
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
 		componentProcessingOrderHas: make(map[string]bool),
 		ComponentProcessingOrder:    []string{},
 	}
 }
 
-// NewPolicyResolution creates new empty PolicyResolution
-func NewPolicyResolution() *PolicyResolution {
-	return &PolicyResolution{
-		CreatedOn:  time.Now(),
-		Resolved:   NewResolutionData(),
-		Unresolved: NewResolutionData(),
-	}
-}
-
 // Gets a component instance entry or creates an new entry if it doesn't exist
-func (data *ResolutionData) GetComponentInstanceEntry(cik *ComponentInstanceKey) *ComponentInstance {
+func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInstanceKey) *ComponentInstance {
 	key := cik.GetKey()
-	if _, ok := data.ComponentInstanceMap[key]; !ok {
-		data.ComponentInstanceMap[key] = newComponentInstance(cik)
+	if _, ok := resolution.ComponentInstanceMap[key]; !ok {
+		resolution.ComponentInstanceMap[key] = newComponentInstance(cik)
 	}
-	return data.ComponentInstanceMap[key]
+	return resolution.ComponentInstanceMap[key]
 }
 
 // Record dependency for component instance
-func (data *ResolutionData) RecordResolved(cik *ComponentInstanceKey, dependency *Dependency) {
-	instance := data.GetComponentInstanceEntry(cik)
+func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *Dependency) {
+	instance := resolution.GetComponentInstanceEntry(cik)
 	instance.setResolved(true)
 	instance.addDependency(dependency.GetID())
-	data.recordProcessingOrder(cik)
+	resolution.recordProcessingOrder(cik)
 }
 
 // Record processing order for component instance
-func (data *ResolutionData) recordProcessingOrder(cik *ComponentInstanceKey) {
+func (resolution *PolicyResolution) recordProcessingOrder(cik *ComponentInstanceKey) {
 	key := cik.GetKey()
-	if !data.componentProcessingOrderHas[key] {
-		data.componentProcessingOrderHas[key] = true
-		data.ComponentProcessingOrder = append(data.ComponentProcessingOrder, key)
+	if !resolution.componentProcessingOrderHas[key] {
+		resolution.componentProcessingOrderHas[key] = true
+		resolution.ComponentProcessingOrder = append(resolution.ComponentProcessingOrder, key)
 	}
 }
 
 // Stores calculated discovery params for component instance
-func (data *ResolutionData) RecordCodeParams(cik *ComponentInstanceKey, codeParams NestedParameterMap) error {
-	return data.GetComponentInstanceEntry(cik).addCodeParams(codeParams)
+func (resolution *PolicyResolution) RecordCodeParams(cik *ComponentInstanceKey, codeParams NestedParameterMap) error {
+	return resolution.GetComponentInstanceEntry(cik).addCodeParams(codeParams)
 }
 
 // Stores calculated discovery params for component instance
-func (data *ResolutionData) RecordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams NestedParameterMap) error {
-	return data.GetComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
+func (resolution *PolicyResolution) RecordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams NestedParameterMap) error {
+	return resolution.GetComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
 }
 
 // Stores calculated labels for component instance
-func (data *ResolutionData) RecordLabels(cik *ComponentInstanceKey, labels LabelSet) {
-	data.GetComponentInstanceEntry(cik).addLabels(labels)
+func (resolution *PolicyResolution) RecordLabels(cik *ComponentInstanceKey, labels LabelSet) {
+	resolution.GetComponentInstanceEntry(cik).addLabels(labels)
 }
 
 // Stores an outgoing edge for component instance as we are traversing the graph
-func (data *ResolutionData) StoreEdge(src *ComponentInstanceKey, dst *ComponentInstanceKey) {
+func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *ComponentInstanceKey) {
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that
 	if src != nil && dst != nil {
-		data.GetComponentInstanceEntry(src).addEdgeOut(dst.GetKey())
-		data.GetComponentInstanceEntry(dst).addEdgeIn(src.GetKey())
+		resolution.GetComponentInstanceEntry(src).addEdgeOut(dst.GetKey())
+		resolution.GetComponentInstanceEntry(dst).addEdgeIn(src.GetKey())
 	}
 }
 
-// Appends data to the current ResolutionData
-func (data *ResolutionData) AppendData(ops *ResolutionData) error {
+// Appends data to the current PolicyResolution
+func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
 	for _, instance := range ops.ComponentInstanceMap {
-		err := data.GetComponentInstanceEntry(instance.Key).appendData(instance)
+		err := resolution.GetComponentInstanceEntry(instance.Key).appendData(instance)
 		if err != nil {
 			return err
 		}
 	}
 	for _, key := range ops.ComponentProcessingOrder {
-		data.recordProcessingOrder(ops.ComponentInstanceMap[key].Key)
+		resolution.recordProcessingOrder(ops.ComponentInstanceMap[key].Key)
 	}
 	return nil
 }

@@ -39,10 +39,10 @@ func (componentCreate *ComponentCreate) Apply(plugins []plugin.EnginePlugin, eve
 
 func (componentCreate *ComponentCreate) updateActualState() {
 	// get instance from desired state
-	instance := componentCreate.desiredState.Resolved.ComponentInstanceMap[componentCreate.key]
+	instance := componentCreate.desiredState.ComponentInstanceMap[componentCreate.key]
 
 	// copy it over to the actual state
-	componentCreate.actualState.Resolved.ComponentInstanceMap[componentCreate.key] = instance
+	componentCreate.actualState.ComponentInstanceMap[componentCreate.key] = instance
 
 	// update creation and update times
 	instance.UpdateTimes(time.Now(), time.Now())
