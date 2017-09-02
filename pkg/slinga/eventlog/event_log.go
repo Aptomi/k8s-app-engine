@@ -65,9 +65,18 @@ func (log *EventLog) Append(that *EventLog) {
 func (log *EventLog) LogError(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
-		log.WithFields(Fields(errWithDetails.Details())).Errorf(err.Error())
+		log.WithFields(Fields(errWithDetails.Details())).Error(err.Error())
 	} else {
-		log.WithFields(Fields{}).Errorf(err.Error())
+		log.WithFields(Fields{}).Error(err.Error())
+	}
+}
+
+func (log *EventLog) LogErrorAsWarning(err error) {
+	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
+	if isErrorWithDetails {
+		log.WithFields(Fields(errWithDetails.Details())).Warning(err.Error())
+	} else {
+		log.WithFields(Fields{}).Warning(err.Error())
 	}
 }
 

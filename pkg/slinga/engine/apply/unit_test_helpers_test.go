@@ -28,15 +28,19 @@ func getExternalData() *external.Data {
 
 func resolvePolicy(t *testing.T, policy *language.PolicyNamespace, externalData *external.Data) *resolve.PolicyResolution {
 	resolver := resolve.NewPolicyResolver(policy, externalData)
-	result, err := resolver.ResolveAllDependencies()
+	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
+		hook := &eventlog.HookStdout{}
+		eventLog.Save(hook)
 		t.FailNow()
 	}
+
 	return result
 }
 
 func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) *resolve.PolicyResolution {
 	actualState, eventLog, err := apply.Apply()
+
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
 		// print log into stdout and exit
 		hook := &eventlog.HookStdout{}

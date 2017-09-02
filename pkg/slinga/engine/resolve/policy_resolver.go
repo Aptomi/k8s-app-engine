@@ -61,7 +61,7 @@ func NewPolicyResolver(policy *PolicyNamespace, externalData *external.Data) *Po
 }
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, error) {
+func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *EventLog, error) {
 	// Run every declared dependency via policy and resolve it
 	for _, dependencies := range resolver.policy.Dependencies.DependenciesByService {
 		for _, d := range dependencies {
@@ -70,11 +70,11 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, err
 
 			// see if there is an error
 			if err != nil {
-				return nil, err
+				return nil, resolver.eventLog, err
 			}
 		}
 	}
-	return resolver.resolution, nil
+	return resolver.resolution, resolver.eventLog, nil
 }
 
 // Resolves a single dependency and puts resolution data into the overall state of the world

@@ -15,13 +15,6 @@ const (
 	ResError   = iota
 )
 
-func BenchmarkEngine(b *testing.B) {
-	t := &testing.T{}
-	for i := 0; i < b.N; i++ {
-		TestDiffHasUpdatedComponentsAndCheckTimes(t)
-	}
-}
-
 func TestApplyCreateSuccess(t *testing.T) {
 	externalData := getExternalData()
 

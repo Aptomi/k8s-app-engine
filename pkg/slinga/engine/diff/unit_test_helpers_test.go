@@ -25,7 +25,7 @@ func getExternalData() *external.Data {
 
 func resolvePolicy(t *testing.T, policy *PolicyNamespace, externalData *external.Data) *PolicyResolution {
 	resolver := NewPolicyResolver(policy, externalData)
-	result, err := resolver.ResolveAllDependencies()
+	result, _, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
 	}

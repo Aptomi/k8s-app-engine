@@ -151,12 +151,17 @@ func (node *resolutionNode) cannotResolveInstance(err error) error {
 	// Log critical error as error in the event log
 	if err != nil {
 		criticalError, isCriticalError = err.(*CriticalError)
-		if isCriticalError && !criticalError.IsLogged() {
-			// Log it
-			node.eventLog.LogError(err)
+		if isCriticalError {
+			if !criticalError.IsLogged() {
+				// Log it
+				node.eventLog.LogError(err)
 
-			// Mark this error as processed. So that when we go up the recursion stack, we don't log it multiple times
-			criticalError.SetLoggedFlag()
+				// Mark this error as processed. So that when we go up the recursion stack, we don't log it multiple times
+				criticalError.SetLoggedFlag()
+			}
+		} else {
+			// Log it
+			node.eventLog.LogErrorAsWarning(err)
 		}
 	}
 
@@ -224,11 +229,12 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 	node.logStartMatchingContexts()
 
 	// Find matching context
+	contextualDataForExpression := node.getContextualDataForExpression()
 	var contextMatched *Context
 	for _, context := range policy.Contexts {
 
 		// Check if context matches (based on criteria)
-		matched, err := context.Matches(node.getContextualDataForExpression(), node.resolver.expressionCache)
+		matched, err := context.Matches(contextualDataForExpression, node.resolver.expressionCache)
 		if err != nil {
 			// Propagate error up
 			return nil, node.errorWhenTestingContext(context, err)

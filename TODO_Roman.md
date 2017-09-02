@@ -1,4 +1,4 @@
-Items to complete:
+Implementation:
 
 1. Support for namespaces
   - we need to make sure everything that calls getName() is within a namespace
@@ -20,8 +20,7 @@ Items to complete:
   - If multiple contexts match a dependency, then the behavior will not be deterministic
   - Policy evaluation, when ran multiple times, can result in different outcomes
 
-5. I, as an operator, can accidentally add a context (or rule), which can easily
-   break all services or move them to another cluster, etc
+5. I, as an operator, can accidentally add a context (or rule), which can easily break all services or move them to another cluster, etc
   - Need to figure out how to prevent this
 
 7. Implement policy validation
@@ -35,7 +34,6 @@ Minor issues:
 - Get rid of dependency ID
 - Do we need to move Dependency.Resolved into resolved usage state?
 - Deal with code style and missing comments
-- Figure out a better way to deal with secrets in LabelSets. Check again how they are behing printed into event logs
 - Shall we consider renaming .User -> .Consumer?
 - Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
 - Unit tests are 50% using "testdata" and 50% using hand-created objects. Might make sense to use the latter everywhere

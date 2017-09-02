@@ -30,7 +30,7 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, ex
 		secrets.NewSecretLoaderFromDir("../../testdata/unittests"),
 	)
 	resolver := NewPolicyResolver(policy, externalData)
-	result, err := resolver.ResolveAllDependencies()
+	result, _, err := resolver.ResolveAllDependencies()
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {
 		// print log into stdout and exit

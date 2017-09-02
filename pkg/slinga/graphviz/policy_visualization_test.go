@@ -27,7 +27,7 @@ func TestPolicyVisualization(t *testing.T) {
 	// unit test policy resolved revision
 	policy := language.LoadUnitTestsPolicy("../testdata/unittests")
 	resolver := resolve.NewPolicyResolver(policy, externalData)
-	resolutionNew, err := resolver.ResolveAllDependencies()
+	resolutionNew, _, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
 	}
