@@ -9,7 +9,7 @@ import (
 )
 
 type clusterCache struct {
-	lock                *sync.Mutex  // all caching ops should use this lock
+	lock                sync.Mutex   // all caching ops should use this lock
 	tillerTunnel        *kube.Tunnel // tunnel for accessing tiller
 	tillerHost          string       // local proxy address when connection established
 	kubeExternalAddress string       // kube external address
