@@ -159,7 +159,7 @@ func (node *resolutionNode) logStartResolvingDependency() {
 func (node *resolutionNode) logLabels(labelSet LabelSet, scope string) {
 	secretCnt := 0
 	if node.user != nil {
-		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserID(node.user.ID).Labels)
+		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserID(node.user.ID))
 	}
 	node.eventLog.WithFields(Fields{
 		"labels": labelSet.Labels,

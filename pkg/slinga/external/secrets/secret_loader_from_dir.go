@@ -2,7 +2,6 @@ package secrets
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/mattn/go-zglob"
 	"sort"
@@ -43,8 +42,8 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 }
 
 // LoadSecretsByUserID loads secrets for a single user
-func (loader *SecretLoaderFromDir) LoadSecretsByUserID(userID string) language.LabelSet {
-	return language.NewLabelSet(loader.LoadSecretsAll()[userID])
+func (loader *SecretLoaderFromDir) LoadSecretsByUserID(userID string) map[string]string {
+	return loader.LoadSecretsAll()[userID]
 }
 
 // Loads secrets from file

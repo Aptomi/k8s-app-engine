@@ -71,12 +71,11 @@ type resolutionNode struct {
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
 func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resolutionNode {
-
 	// combining user labels and dependency labels
 	user := resolver.externalData.UserLoader.LoadUserByID(dependency.UserID)
-	labels := dependency.GetLabelSet()
+	labels := NewLabelSet(dependency.Labels)
 	if user != nil {
-		labels = labels.AddLabels(user.GetLabelSet())
+		labels = labels.AddLabels(NewLabelSet(user.Labels))
 	}
 
 	eventLog := NewEventLog()

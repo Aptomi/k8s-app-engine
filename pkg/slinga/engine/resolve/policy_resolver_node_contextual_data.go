@@ -83,7 +83,7 @@ func (node *resolutionNode) proxyUser(user *language.User) interface{} {
 		ID:      user.ID,
 		Name:    user.Name,
 		Labels:  user.Labels,
-		Secrets: node.resolver.externalData.SecretLoader.LoadSecretsByUserID(user.ID).Labels,
+		Secrets: node.resolver.externalData.SecretLoader.LoadSecretsByUserID(user.ID),
 	}
 }
 

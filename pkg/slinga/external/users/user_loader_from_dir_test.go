@@ -24,16 +24,12 @@ func TestLoadUsersFromDir(t *testing.T) {
 	userSam := userLoader.LoadUserByID("6")
 
 	// check user labels
+	assert.Equal(t, 6, len(userAlice.Labels), "Alice's labelset should have correct length")
 	assert.Equal(t, "Alice", userAlice.Name, "Should load Alice user by ID")
 	assert.Equal(t, "yes", userAlice.Labels["dev"], "Alice should have dev='yes' label")
 	assert.Equal(t, "no", userAlice.Labels["prod"], "Alice should have prod='no' label")
 	assert.False(t, userAlice.IsGlobalOps(), "Alice should not be a global ops")
 	assert.True(t, userSam.IsGlobalOps(), "Sam should be a global ops")
-
-	// check user labels through a label set
-	assert.Equal(t, 6, len(userAlice.GetLabelSet().Labels), "Alice's labelset should have correct length")
-	assert.Equal(t, "yes", userAlice.GetLabelSet().Labels["dev"], "Alice should have dev='yes' label through a labelset")
-	assert.Equal(t, "no", userAlice.GetLabelSet().Labels["prod"], "Alice should have prod='no' label through a labelset")
 
 	// check that summary is correct
 	assert.Equal(t, "7 (from filesystem)", userLoader.Summary())

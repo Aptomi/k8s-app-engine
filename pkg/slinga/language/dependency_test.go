@@ -11,8 +11,6 @@ func TestLoadDependencies(t *testing.T) {
 
 	// look at kafka dependencies
 	kafkaDeps := dependencies.DependenciesByService["kafka"]
-
-	// check dependency map
 	assert.Equal(t, 4, len(kafkaDeps), "Correct number of dependencies should be loaded")
 	assert.Equal(t, "dep_id_1", kafkaDeps[0].GetID(), "Dependency ID should be correct")
 	assert.Equal(t, 0, len(kafkaDeps[0].Labels), "First dependency should have 0 labels")
@@ -20,11 +18,11 @@ func TestLoadDependencies(t *testing.T) {
 	assert.Equal(t, 0, len(kafkaDeps[2].Labels), "Third dependency should have 0 labels")
 	assert.Equal(t, 0, len(kafkaDeps[3].Labels), "Fourth dependency should have 0 labels")
 
-	// check dependency labels through a label set
+	// look at dependency labels for 'dep_id_2'
 	dep2 := dependencies.DependenciesByID["dep_id_2"]
-	assert.Equal(t, 2, len(dep2.GetLabelSet().Labels), "dep_id_2's labelset should have correct length")
-	assert.Equal(t, "yes", dep2.GetLabelSet().Labels["important"], "dep_id_2's should have important='yes' label through a labelset")
-	assert.Equal(t, "yes", dep2.GetLabelSet().Labels["some-label-to-be-removed"], "dep_id_2's should have some-label-to-be-removed='yes' label through a labelset")
+	assert.Equal(t, 2, len(dep2.Labels), "dep_id_2's labelset should have correct length")
+	assert.Equal(t, "yes", dep2.Labels["important"], "dep_id_2's should have important='yes' label through a labelset")
+	assert.Equal(t, "yes", dep2.Labels["some-label-to-be-removed"], "dep_id_2's should have some-label-to-be-removed='yes' label through a labelset")
 }
 
 func TestAddDependency(t *testing.T) {

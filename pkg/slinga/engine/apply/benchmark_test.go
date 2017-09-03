@@ -311,8 +311,8 @@ func NewSecretLoaderImpl() *SecretLoaderImpl {
 	return &SecretLoaderImpl{}
 }
 
-func (loader *SecretLoaderImpl) LoadSecretsByUserID(string) language.LabelSet {
-	return language.NewLabelSetEmpty()
+func (loader *SecretLoaderImpl) LoadSecretsByUserID(string) map[string]string {
+	return nil
 }
 
 func RunEngine(t *testing.T, desiredPolicy *language.PolicyNamespace, externalData *external.Data) {

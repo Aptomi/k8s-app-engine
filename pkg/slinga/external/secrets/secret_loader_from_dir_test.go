@@ -9,7 +9,7 @@ func TestLoadSecrets(t *testing.T) {
 	secretLoader := NewSecretLoaderFromDir("../../testdata/unittests")
 
 	{
-		secrets := secretLoader.LoadSecretsByUserID("1").Labels
+		secrets := secretLoader.LoadSecretsByUserID("1")
 		assert.Equal(t, 5, len(secrets))
 		assert.Equal(t, "aliceappkey", secrets["twitterAppKey"])
 		assert.Equal(t, "aliceappsecret", secrets["twitterAppSecret"])
@@ -19,7 +19,7 @@ func TestLoadSecrets(t *testing.T) {
 	}
 
 	{
-		secrets := secretLoader.LoadSecretsByUserID("2").Labels
+		secrets := secretLoader.LoadSecretsByUserID("2")
 		assert.Equal(t, 5, len(secrets))
 		assert.Equal(t, "bobappkey", secrets["twitterAppKey"])
 		assert.Equal(t, "bobappsecret", secrets["twitterAppSecret"])
@@ -29,7 +29,7 @@ func TestLoadSecrets(t *testing.T) {
 	}
 
 	{
-		secrets := secretLoader.LoadSecretsByUserID("3").Labels
+		secrets := secretLoader.LoadSecretsByUserID("3")
 		assert.Equal(t, 1, len(secrets))
 		assert.Equal(t, "bigsecretvalue", secrets["bigsecret"])
 	}

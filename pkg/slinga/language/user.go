@@ -22,8 +22,3 @@ func (user *User) IsGlobalOps() bool {
 	// TODO: this will have to be changed when we implement roles & ACLs
 	return user.Labels["global_ops"] == "true"
 }
-
-// GetLabelSet returns a set of user labels
-func (user *User) GetLabelSet() LabelSet {
-	return NewLabelSet(user.Labels)
-}

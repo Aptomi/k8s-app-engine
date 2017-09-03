@@ -136,14 +136,14 @@ func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster
 
 	// check if service filters for another user labels
 	if filter.User != nil {
-		allows, err := filter.User.allows(expression.NewExpressionParams(user.GetLabelSet().Labels, nil), cache)
+		allows, err := filter.User.allows(expression.NewExpressionParams(user.Labels, nil), cache)
 		if !allows || err != nil {
 			return allows, err
 		}
 	}
 
 	if filter.Cluster != nil {
-		allows, err := filter.Cluster.allows(expression.NewExpressionParams(cluster.GetLabelSet().Labels, nil), cache)
+		allows, err := filter.Cluster.allows(expression.NewExpressionParams(cluster.Labels, nil), cache)
 		if !allows || err != nil {
 			return allows, err
 		}

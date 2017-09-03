@@ -21,8 +21,3 @@ type Cluster struct {
 		Namespace       string
 	}
 }
-
-// GetLabelSet returns a set of cluster labels
-func (cluster *Cluster) GetLabelSet() LabelSet {
-	return NewLabelSet(cluster.Labels)
-}
