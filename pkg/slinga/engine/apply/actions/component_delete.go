@@ -2,7 +2,6 @@ package actions
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
@@ -56,18 +55,22 @@ func (componentDelete *ComponentDelete) processDeployment(context *ActionContext
 	}).Info("Destructing a running component instance: " + instance.Key.GetKey())
 
 	if component.Code != nil {
-		codeExecutor, err := deployment.GetCodeExecutor(
-			component.Code,
-			instance.Key.GetKey(),
-			instance.CalculatedCodeParams,
-			context.ActualPolicy.Clusters,
-			context.EventLog,
-		)
+		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
+		if !ok {
+			return fmt.Errorf("No cluster specified in code params, component instance: %v", instance.Key)
+		}
+
+		cluster, ok := context.DesiredPolicy.Clusters[clusterName]
+		if !ok {
+			return fmt.Errorf("No specified cluster in policy: %s", clusterName)
+		}
+
+		plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)
 		if err != nil {
 			return err
 		}
 
-		err = codeExecutor.Destroy()
+		err = plugin.Destroy(cluster, componentDelete.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}
