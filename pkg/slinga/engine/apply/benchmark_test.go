@@ -13,22 +13,45 @@ import (
 	"time"
 )
 
-func BenchmarkEngine(b *testing.B) {
+func BenchmarkEngineSmall(b *testing.B) {
 	t := &testing.T{}
-	gen := NewPolicyGenerator(
+
+	// small policy
+	smallPolicy, smallExternalData := NewPolicyGenerator(
 		239,
 		30,
-		50, // 1000
+		50,
 		6,
 		6,
 		4,
 		2,
 		100,
 		500,
-	)
-	desiredPolicy, externalData := gen.makePolicyAndExternalData()
+	).makePolicyAndExternalData()
+
 	for i := 0; i < b.N; i++ {
-		RunEngine(t, desiredPolicy, externalData)
+		RunEngine(t, "small", smallPolicy, smallExternalData)
+	}
+}
+
+func BenchmarkEngineMedium(b *testing.B) {
+	t := &testing.T{}
+
+	// medium policy
+	mediumPolicy, mediumExternalData := NewPolicyGenerator(
+		239,
+		30,
+		100,
+		6,
+		6,
+		4,
+		2,
+		10000,
+		2000,
+	).makePolicyAndExternalData()
+
+	for i := 0; i < b.N; i++ {
+		RunEngine(t, "medium", mediumPolicy, mediumExternalData)
 	}
 }
 
@@ -69,19 +92,15 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.PolicyNamespace, *external.Data) {
 	// pre-generate the list of labels
 	gen.makeLabels()
-	fmt.Printf("Labels: %d\n", len(gen.generatedLabels))
 
 	// generate services
 	maxChainLen := gen.makeServices()
-	fmt.Printf("Services: %d (max chain length %d)\n", len(gen.policy.Services), maxChainLen)
 
 	// generate contexts
 	gen.makeContexts()
-	fmt.Printf("Contexts: %d\n", len(gen.policy.Contexts))
 
 	// generate dependencies
 	gen.makeDependencies()
-	fmt.Printf("Dependencies: %d\n", len(gen.policy.Dependencies.DependenciesByID))
 
 	// generate cluster
 	gen.makeCluster()
@@ -90,6 +109,14 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.PolicyNamespa
 	gen.externalData = external.NewData(
 		NewUserLoaderImpl(gen.users, gen.generatedLabels),
 		NewSecretLoaderImpl(),
+	)
+
+	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Dependencies = %d, Users = %d\n",
+		len(gen.policy.Services),
+		maxChainLen,
+		len(gen.policy.Contexts),
+		len(gen.policy.Dependencies.DependenciesByID),
+		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
 
 	// there will be one context matching for each service. it will re-define some of those labels
@@ -315,7 +342,9 @@ func (loader *SecretLoaderImpl) LoadSecretsByUserID(string) map[string]string {
 	return nil
 }
 
-func RunEngine(t *testing.T, desiredPolicy *language.PolicyNamespace, externalData *external.Data) {
+func RunEngine(t *testing.T, testName string, desiredPolicy *language.PolicyNamespace, externalData *external.Data) {
+	fmt.Printf("Running engine for '%s'\n", testName)
+
 	timeStart := time.Now()
 
 	actualPolicy := language.NewPolicyNamespace()
@@ -340,7 +369,5 @@ func RunEngine(t *testing.T, desiredPolicy *language.PolicyNamespace, externalDa
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)
 
-	fmt.Printf("Resolved (dependencies): %d\n", len(desiredState.DependencyInstanceMap))
-	fmt.Printf("Resolved (components): %d\n", len(actualState.ComponentInstanceMap))
-	fmt.Printf("Time: %s\n", timeDiff.String())
+	fmt.Printf("[%s] Time = %s, Resolved dependencies = %d, Resolved Components = %d\n", testName, timeDiff.String(), len(desiredState.DependencyInstanceMap), len(actualState.ComponentInstanceMap))
 }
