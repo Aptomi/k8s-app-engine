@@ -14,9 +14,8 @@
     - name: component1
       code:
         type: aptomi/code/unittests
-        metadata:
-          service: zookeeper
-          component: component1
+        params:
+          cluster: cluster-us-west
       change-labels:
         set: # add/modify
           some-test-context-specific-label: some-value
@@ -29,9 +28,8 @@
     - name: component2
       code:
         type: aptomi/code/unittests
-        metadata:
-          service: zookeeper
-          component: component2
+        params:
+          cluster: cluster-us-west
       change-labels:
         set: # add/modify
           some-test-context-specific-label: some-value
@@ -69,6 +67,7 @@
       code:
         type: aptomi/code/unittests
         params:
+          cluster: cluster-us-east
           address: "{{ .Discovery.component1.component2.instance }}"
           queue: "{{ .User.Labels.changinglabel }}"
           someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"
@@ -109,9 +108,8 @@
     - name: component3
       code:
         type: aptomi/code/unittests
-        metadata:
-          service: kafka
-          component: component3
+        params:
+          cluster: cluster-us-east
       change-labels:
         set: # add/modify
           some-test-context-specific-label: some-value
@@ -124,9 +122,8 @@
     - name: component4
       code:
         type: aptomi/code/unittests
-        metadata:
-          service: kafka
-          component: component4
+        params:
+          cluster: cluster-us-east
 
 # Service definition for cyclic service
 - metadata:
