@@ -37,7 +37,7 @@ Minor issues:
 - Shall we consider renaming .User -> .Consumer?
 - Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
 - Unit tests are 50% using "testdata" and 50% using hand-created objects. Might make sense to use the latter everywhere
-
+- Deal with EscapeName (it's Helm plugin specific, should not be present in engine)
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
