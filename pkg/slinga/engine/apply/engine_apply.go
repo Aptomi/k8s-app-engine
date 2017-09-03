@@ -85,9 +85,3 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) 
 	// No errors occurred
 	return apply.actualState, apply.eventLog, nil
 }
-
-func (apply *EngineApply) SaveLog() {
-	// Save log
-	hook := &HookBoltDB{}
-	apply.eventLog.Save(hook)
-}
