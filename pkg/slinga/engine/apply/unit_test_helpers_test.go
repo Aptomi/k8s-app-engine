@@ -2,7 +2,6 @@ package apply
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
@@ -94,10 +93,6 @@ func NewEnginePluginImpl(failComponents []string) *EnginePluginImpl {
 	return &EnginePluginImpl{failComponents: failComponents}
 }
 
-func (p *EnginePluginImpl) Init(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) {
-	p.eventLog = eventLog
-}
-
 func (p *EnginePluginImpl) OnApplyComponentInstanceCreate(key string) error {
 	p.eventLog.Infof("[+] %s", key)
 	for _, s := range p.failComponents {
@@ -125,13 +120,5 @@ func (p *EnginePluginImpl) OnApplyComponentInstanceDelete(key string) error {
 			return fmt.Errorf("Delete failed for component: " + key)
 		}
 	}
-	return nil
-}
-
-func (p *EnginePluginImpl) GetCustomApplyProgressLength() int {
-	return 0
-}
-
-func (p *EnginePluginImpl) OnApplyCustom(progress progress.ProgressIndicator) error {
 	return nil
 }

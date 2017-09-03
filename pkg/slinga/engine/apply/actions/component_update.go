@@ -2,44 +2,80 @@ package actions
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"time"
 )
 
 type ComponentUpdate struct {
-	*ComponentBaseAction
+	object.Metadata
+	*BaseAction
+
+	ComponentKey string
 }
 
-func NewComponentUpdateAction(key string, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution) *ComponentUpdate {
-	return &ComponentUpdate{ComponentBaseAction: NewComponentBaseAction(key, desiredState, actualState)}
+func NewComponentUpdateAction(componentKey string) *ComponentUpdate {
+	return &ComponentUpdate{
+		Metadata:     object.Metadata{}, // TODO: initialize
+		BaseAction:   NewComponentBaseAction(),
+		ComponentKey: componentKey,
+	}
 }
 
-func (componentUpdate *ComponentUpdate) Apply(plugins []plugin.EnginePlugin, eventLog *eventlog.EventLog) error {
-	// Process updates in the right order
-	foundErrors := false
-
-	// call plugins to perform their actions
-	for _, pluginInstance := range plugins {
-		err := pluginInstance.OnApplyComponentInstanceUpdate(componentUpdate.key)
-		if err != nil {
-			eventLog.LogError(err)
-			foundErrors = true
-		}
-	}
-	if foundErrors {
-		return fmt.Errorf("One or more errors while applying changes (updating component '%s')", componentUpdate.key)
+func (componentUpdate *ComponentUpdate) Apply(context *ActionContext) error {
+	// update in the cloud
+	err := componentUpdate.processDeployment(context)
+	if err != nil {
+		return fmt.Errorf("Errors while updating component '%s': %s", componentUpdate.ComponentKey, err)
 	}
 
-	componentUpdate.updateActualState()
-
+	// update actual state
+	componentUpdate.updateActualState(context)
 	return nil
 }
-func (componentUpdate *ComponentUpdate) updateActualState() {
+
+func (componentUpdate *ComponentUpdate) updateActualState(context *ActionContext) {
 	// preserve previous creation date before overwriting
-	prevCreatedOn := componentUpdate.actualState.ComponentInstanceMap[componentUpdate.key].CreatedOn
-	instance := componentUpdate.desiredState.ComponentInstanceMap[componentUpdate.key]
-	componentUpdate.actualState.ComponentInstanceMap[componentUpdate.key] = instance
+	prevCreatedOn := context.ActualState.ComponentInstanceMap[componentUpdate.ComponentKey].CreatedOn
+	instance := context.DesiredState.ComponentInstanceMap[componentUpdate.ComponentKey]
+	context.ActualState.ComponentInstanceMap[componentUpdate.ComponentKey] = instance
 	instance.UpdateTimes(prevCreatedOn, time.Now())
+}
+
+func (componentUpdate *ComponentUpdate) processDeployment(context *ActionContext) error {
+	instance := context.DesiredState.ComponentInstanceMap[componentUpdate.ComponentKey]
+	component := context.DesiredPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+
+	if component == nil {
+		// This is a service instance. Do nothing
+		return nil
+	}
+
+	// Instantiate component
+	context.EventLog.WithFields(eventlog.Fields{
+		"componentKey": instance.Key,
+		"component":    component.Name,
+		"code":         instance.CalculatedCodeParams,
+	}).Info("Updating a running component instance: " + instance.Key.GetKey())
+
+	if component.Code != nil {
+		codeExecutor, err := deployment.GetCodeExecutor(
+			component.Code,
+			instance.Key.GetKey(),
+			instance.CalculatedCodeParams,
+			context.DesiredPolicy.Clusters,
+			context.EventLog,
+		)
+		if err != nil {
+			return err
+		}
+
+		err = codeExecutor.Update()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

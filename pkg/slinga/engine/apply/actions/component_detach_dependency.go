@@ -1,20 +1,26 @@
 package actions
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 type ComponentDetachDependency struct {
-	*ComponentBaseAction
+	object.Metadata
+	*BaseAction
+
+	ComponentKey string
 	DependencyId string
 }
 
-func NewComponentDetachDependencyAction(key string, dependencyId string, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution) *ComponentDetachDependency {
-	return &ComponentDetachDependency{ComponentBaseAction: NewComponentBaseAction(key, desiredState, actualState), DependencyId: dependencyId}
+func NewComponentDetachDependencyAction(componentKey string, dependencyId string) *ComponentDetachDependency {
+	return &ComponentDetachDependency{
+		Metadata:     object.Metadata{}, // TODO: initialize
+		BaseAction:   NewComponentBaseAction(),
+		ComponentKey: componentKey,
+		DependencyId: dependencyId,
+	}
 }
 
-func (detachDependency *ComponentDetachDependency) Apply(plugins []plugin.EnginePlugin, eventLog *eventlog.EventLog) error {
+func (detachDependency *ComponentDetachDependency) Apply(context *ActionContext) error {
 	return nil
 }

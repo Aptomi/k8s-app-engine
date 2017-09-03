@@ -2,48 +2,83 @@ package actions
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin/deployment"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"time"
 )
 
 type ComponentCreate struct {
-	*ComponentBaseAction
+	object.Metadata
+	*BaseAction
+
+	ComponentKey string
 }
 
-func NewComponentCreateAction(key string, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution) *ComponentCreate {
-	return &ComponentCreate{ComponentBaseAction: NewComponentBaseAction(key, desiredState, actualState)}
+func NewComponentCreateAction(componentKey string) *ComponentCreate {
+	return &ComponentCreate{
+		Metadata:     object.Metadata{}, // TODO: initialize
+		BaseAction:   NewComponentBaseAction(),
+		ComponentKey: componentKey,
+	}
 }
 
-func (componentCreate *ComponentCreate) Apply(plugins []plugin.EnginePlugin, eventLog *eventlog.EventLog) error {
-	// Process instantiations in the right order
-	foundErrors := false
-
-	// call plugins to perform their actions
-	for _, pluginInstance := range plugins {
-		err := pluginInstance.OnApplyComponentInstanceCreate(componentCreate.key)
-		if err != nil {
-			eventLog.LogError(err)
-			foundErrors = true
-		}
-	}
-	if foundErrors {
-		return fmt.Errorf("One or more errors while applying changes (creating component '%s')", componentCreate.key)
+func (componentCreate *ComponentCreate) Apply(context *ActionContext) error {
+	// deploy to cloud
+	err := componentCreate.processDeployment(context)
+	if err != nil {
+		return fmt.Errorf("Errors while creating component '%s': %s", componentCreate.ComponentKey, err)
 	}
 
-	componentCreate.updateActualState()
-
+	// update actual state
+	componentCreate.updateActualState(context)
 	return nil
 }
 
-func (componentCreate *ComponentCreate) updateActualState() {
+func (componentCreate *ComponentCreate) updateActualState(context *ActionContext) {
 	// get instance from desired state
-	instance := componentCreate.desiredState.ComponentInstanceMap[componentCreate.key]
+	instance := context.DesiredState.ComponentInstanceMap[componentCreate.ComponentKey]
 
 	// copy it over to the actual state
-	componentCreate.actualState.ComponentInstanceMap[componentCreate.key] = instance
+	context.ActualState.ComponentInstanceMap[componentCreate.ComponentKey] = instance
 
 	// update creation and update times
 	instance.UpdateTimes(time.Now(), time.Now())
+}
+
+func (componentCreate *ComponentCreate) processDeployment(context *ActionContext) error {
+	instance := context.DesiredState.ComponentInstanceMap[componentCreate.ComponentKey]
+	component := context.DesiredPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+
+	if component == nil {
+		// This is a service instance. Do nothing
+		return nil
+	}
+
+	// Instantiate component
+	context.EventLog.WithFields(eventlog.Fields{
+		"componentKey": instance.Key,
+		"component":    component.Name,
+		"code":         instance.CalculatedCodeParams,
+	}).Info("Deploying new component instance: " + instance.Key.GetKey())
+
+	if component.Code != nil {
+		codeExecutor, err := deployment.GetCodeExecutor(
+			component.Code,
+			instance.Key.GetKey(),
+			instance.CalculatedCodeParams,
+			context.DesiredPolicy.Clusters,
+			context.EventLog,
+		)
+		if err != nil {
+			return err
+		}
+
+		err = codeExecutor.Install()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

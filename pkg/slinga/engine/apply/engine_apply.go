@@ -3,7 +3,6 @@ package apply
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
@@ -22,9 +21,6 @@ type EngineApply struct {
 	// Actions to be applied
 	actions []actions.Action
 
-	// Plugins to execute
-	plugins []plugin.EnginePlugin
-
 	// Buffered event log - gets populated while applying changes
 	eventLog *EventLog
 
@@ -32,7 +28,7 @@ type EngineApply struct {
 	progress progress.ProgressIndicator
 }
 
-func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, actions []actions.Action, plugins []plugin.EnginePlugin) *EngineApply {
+func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, actions []actions.Action) *EngineApply {
 	return &EngineApply{
 		desiredPolicy: desiredPolicy,
 		desiredState:  desiredState,
@@ -40,55 +36,32 @@ func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resol
 		actualState:   actualState,
 		externalData:  externalData,
 		actions:       actions,
-		plugins:       plugins,
 		eventLog:      NewEventLog(),
 		progress:      progress.NewProgressConsole(),
 	}
 }
 
-// Returns difference length (used for progress indicator)
-func (apply *EngineApply) getApplyProgressLength() int {
-	result := len(apply.actions)
-	for _, pluginInstance := range apply.plugins {
-		result += pluginInstance.GetCustomApplyProgressLength()
-	}
-	return result
-}
-
 // Apply method applies all changes via plugins, updates actual state, returns the updated actual state and event log
 func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) {
-	// initialize all plugins
-	for _, pluginInstance := range apply.plugins {
-		pluginInstance.Init(
-			apply.desiredPolicy,
-			apply.desiredState,
-			apply.actualPolicy,
-			apply.actualState,
-			apply.externalData,
-			apply.eventLog,
-		)
-	}
-
 	// initialize progress indicator
-	apply.progress.SetTotal(apply.getApplyProgressLength())
+	apply.progress.SetTotal(len(apply.actions))
 
 	// error count while applying changes
 	foundErrors := false
 
 	// process all actions
+	context := actions.NewActionContext(
+		apply.desiredPolicy,
+		apply.desiredState,
+		apply.actualPolicy,
+		apply.actualState,
+		apply.externalData,
+		apply.eventLog,
+	)
 	for _, action := range apply.actions {
 		apply.progress.Advance("Action")
-		err := action.Apply(apply.plugins, apply.eventLog)
+		err := action.Apply(context)
 		if err != nil {
-			foundErrors = true
-		}
-	}
-
-	// call plugins to perform their custom apply actions
-	for _, pluginInstance := range apply.plugins {
-		err := pluginInstance.OnApplyCustom(apply.progress)
-		if err != nil {
-			apply.eventLog.LogError(fmt.Errorf("Error while calling OnApplyCustom() on a plugin: " + err.Error()))
 			foundErrors = true
 		}
 	}
@@ -98,7 +71,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) 
 
 	// Return error if there's been at least one error
 	if foundErrors {
-		err := fmt.Errorf("One or more errors occured while applying policy")
+		err := fmt.Errorf("One or more errors occured while running actions")
 		apply.eventLog.LogError(err)
 		return apply.actualState, apply.eventLog, err
 	}

@@ -58,26 +58,26 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 
 		// see if a component needs to be instantiated
 		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
-			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentCreateAction(key, diff.Next, diff.Prev))
+			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentCreateAction(key))
 		}
 
 		// see if a component needs to be destructed
 		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
-			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDeleteAction(key, diff.Next, diff.Prev))
+			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDeleteAction(key))
 		}
 
 		// see if a component needs to be updated
 		if len(depIdsPrev) > 0 && len(depIdsNext) > 0 {
 			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentUpdateAction(key, diff.Next, diff.Prev))
+				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentUpdateAction(key))
 
 				// if it has a parent service, indicate that it basically gets updated as well
 				// this is required for adjusting update/creation times of a service with changed component
 				// this may produce duplicate "update" actions for the parent service
 				if uNext.Key.IsComponent() {
 					serviceKey := uNext.Key.GetParentServiceKey().GetKey()
-					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], actions.NewComponentUpdateAction(serviceKey, diff.Next, diff.Prev))
+					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], actions.NewComponentUpdateAction(serviceKey))
 				}
 			}
 		}
@@ -85,14 +85,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		// see if a user needs to be detached from a component
 		for dependencyID := range depIdsPrev {
 			if !depIdsNext[dependencyID] {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDetachDependencyAction(key, dependencyID, diff.Next, diff.Prev))
+				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDetachDependencyAction(key, dependencyID))
 			}
 		}
 
 		// see if a user needs to be attached to a component
 		for dependencyID := range depIdsNext {
 			if !depIdsPrev[dependencyID] {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentAttachDependencyAction(key, dependencyID, diff.Next, diff.Prev))
+				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentAttachDependencyAction(key, dependencyID))
 			}
 		}
 	}
@@ -112,8 +112,12 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 			delete(actionsByKey, key)
 		}
 	}
+
+	// Generate action for clusters
+	diff.Actions = append(diff.Actions, actions.NewClustersPostProcessAction())
 }
 
+// TODO: refactor once we introduce Action kind
 // Due to the nature of action list generation above, certain actions can be added more than once
 // This will ensure that the list is normalized and there will be only one update action for each service instance
 func normalize(list []actions.Action) []actions.Action {
