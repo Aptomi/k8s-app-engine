@@ -74,6 +74,15 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *Ev
 			}
 		}
 	}
+
+	// Once all components are resolved, print information about them into event log
+	for _, instance := range resolver.resolution.ComponentInstanceMap {
+		if instance.Key.IsComponent() {
+			resolver.logComponentCodeParams(instance)
+			resolver.logComponentDiscoveryParams(instance)
+		}
+	}
+
 	return resolver.resolution, resolver.eventLog, nil
 }
 

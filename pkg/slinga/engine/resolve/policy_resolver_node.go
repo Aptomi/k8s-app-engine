@@ -353,8 +353,6 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 		return node.errorWhenProcessingCodeParams(err)
 	}
 
-	node.logComponentCodeParams()
-
 	return nil
 }
 
@@ -368,8 +366,6 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	if err != nil {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}
-
-	node.logComponentDiscoveryParams()
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
 	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey.GetKey())

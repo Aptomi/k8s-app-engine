@@ -100,7 +100,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 }
 
 func (instance *ComponentInstance) addLabels(labels *LabelSet) {
-	// Unfortunately it's pretty typical for us to come with different labels to a component instance, let's combine them all
+	// it's pretty typical for us to come with different labels to a component instance, let's combine them all
 	instance.CalculatedLabels.AddLabels(labels.Labels)
 }
 

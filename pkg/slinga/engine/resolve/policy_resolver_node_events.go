@@ -233,28 +233,6 @@ func (node *resolutionNode) logResolvingDependencyOnComponent() {
 	}
 }
 
-func (node *resolutionNode) logComponentCodeParams() {
-	paramsTemplate := node.component.Code.Params
-	params := node.resolution.GetComponentInstanceEntry(node.componentKey).CalculatedCodeParams
-	diff := strings.TrimSpace(paramsTemplate.Diff(params))
-	if len(diff) > 0 {
-		node.eventLog.WithFields(Fields{
-			"params": diff,
-		}).Debugf("Code params resolved for service '%s', context '%s', component '%s'", node.service.Name, node.context.Name, node.component.Name)
-	}
-}
-
-func (node *resolutionNode) logComponentDiscoveryParams() {
-	paramsTemplate := node.component.Discovery
-	params := node.resolution.GetComponentInstanceEntry(node.componentKey).CalculatedDiscovery
-	diff := strings.TrimSpace(paramsTemplate.Diff(params))
-	if len(diff) > 0 {
-		node.eventLog.WithFields(Fields{
-			"params": diff,
-		}).Debugf("Discovery params resolved for service '%s', context '%s', component '%s'", node.service.Name, node.context.Name, node.component.Name)
-	}
-}
-
 func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstanceKey) {
 	fields := Fields{
 		"user":       node.user.Name,
@@ -278,5 +256,30 @@ func (node *resolutionNode) logCannotResolveInstance() {
 		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve service instance: service '%s'", node.serviceName)
 	} else {
 		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve component instance: service '%s', component '%s'", node.serviceName, node.component.Name)
+	}
+}
+
+func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstance) {
+	code := resolver.policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName].Code
+	if code != nil {
+		paramsTemplate := code.Params
+		params := instance.CalculatedCodeParams
+		diff := strings.TrimSpace(paramsTemplate.Diff(params))
+		if len(diff) > 0 {
+			resolver.eventLog.WithFields(Fields{
+				"params": diff,
+			}).Debugf("Calculated code params for component '%s'", instance.Key.GetKey())
+		}
+	}
+}
+
+func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentInstance) {
+	paramsTemplate := resolver.policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName].Discovery
+	params := instance.CalculatedDiscovery
+	diff := strings.TrimSpace(paramsTemplate.Diff(params))
+	if len(diff) > 0 {
+		resolver.eventLog.WithFields(Fields{
+			"params": diff,
+		}).Debugf("Calculated discovery params for component '%s'", instance.Key.GetKey())
 	}
 }
