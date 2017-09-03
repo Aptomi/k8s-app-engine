@@ -65,12 +65,12 @@ func (componentCreate *ComponentCreate) processDeployment(context *ActionContext
 	if component.Code != nil {
 		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
 		if !ok {
-			return fmt.Errorf("No cluster specified in code params, component instance: %v", instance.Key)
+			return fmt.Errorf("No cluster specified in code params, component instance: %v", componentCreate.ComponentKey)
 		}
 
 		cluster, ok := context.DesiredPolicy.Clusters[clusterName]
 		if !ok {
-			return fmt.Errorf("No specified cluster in policy: %s", clusterName)
+			return fmt.Errorf("Can't find cluster in policy: %s", clusterName)
 		}
 
 		plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)
