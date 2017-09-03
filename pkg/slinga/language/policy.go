@@ -56,3 +56,13 @@ func (policy *PolicyNamespace) AddObject(object Base) {
 		panic(fmt.Sprintf("Can't add object to policy: %v", object))
 	}
 }
+
+func (policy *PolicyNamespace) GetClusterByLabels(labels LabelSet) (*Cluster, error) {
+	var cluster *Cluster
+	if clusterName, ok := labels.Labels["cluster"]; ok {
+		if cluster, ok = policy.Clusters[clusterName]; !ok {
+			return nil, fmt.Errorf("Cluster '%s' is not defined in policy", clusterName)
+		}
+	}
+	return cluster, nil
+}
