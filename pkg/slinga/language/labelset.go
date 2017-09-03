@@ -9,7 +9,7 @@ type LabelSet struct {
 
 // NewLabelSet creates a new LabelSet from a given set of labels
 func NewLabelSet(labels map[string]string) *LabelSet {
-	result := &LabelSet{Labels: make(map[string]string)}
+	result := &LabelSet{Labels: make(map[string]string, len(labels))}
 	result.AddLabels(labels)
 	return result
 }
