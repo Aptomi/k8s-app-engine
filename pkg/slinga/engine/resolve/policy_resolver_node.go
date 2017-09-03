@@ -1,7 +1,6 @@
 package resolve
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/util"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -247,7 +246,7 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 			labels := node.transformLabels(node.labels, context.ChangeLabels)
 
 			// Lookup cluster from a label
-			cluster, err := util.GetCluster(policy, labels)
+			cluster, err := policy.GetClusterByLabels(labels)
 			if err != nil {
 				// Propagate error up
 				return nil, node.errorGettingClusterForGlobalRules(context, labels, err)
