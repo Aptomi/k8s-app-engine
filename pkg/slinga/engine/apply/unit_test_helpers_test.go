@@ -8,6 +8,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -84,41 +86,61 @@ func getInstanceKey(serviceName string, contextName string, allocationKeysResolv
 	return resolve.NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName]).GetKey()
 }
 
-type EnginePluginImpl struct {
+func NewTestPluginRegistry(failComponents ...string) plugin.Registry {
+	return &testRegistry{&testPlugin{failComponents}}
+}
+
+type testRegistry struct {
+	*testPlugin
+}
+
+func (reg *testRegistry) GetDeployPlugin(codeType string) (plugin.DeployPlugin, error) {
+	return reg.testPlugin, nil
+}
+
+func (reg *testRegistry) GetClustersPostProcessingPlugins() []plugin.ClustersPostProcessPlugin {
+	return []plugin.ClustersPostProcessPlugin{reg.testPlugin}
+}
+
+type testPlugin struct {
 	failComponents []string
-	eventLog       *eventlog.EventLog
 }
 
-func NewEnginePluginImpl(failComponents []string) *EnginePluginImpl {
-	return &EnginePluginImpl{failComponents: failComponents}
-}
+func (p *testPlugin) GetSupportedCodeTypes() []string {
+	return []string{}
 
-func (p *EnginePluginImpl) OnApplyComponentInstanceCreate(key string) error {
-	p.eventLog.Infof("[+] %s", key)
+}
+func (p *testPlugin) Create(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+	eventLog.Infof("[+] %s", deployName)
 	for _, s := range p.failComponents {
-		if strings.Contains(key, s) {
-			return fmt.Errorf("Apply failed for component: " + key)
+		if strings.Contains(deployName, s) {
+			return fmt.Errorf("Apply failed for component: %s", deployName)
 		}
 	}
 	return nil
 }
-
-func (p *EnginePluginImpl) OnApplyComponentInstanceUpdate(key string) error {
-	p.eventLog.Infof("[*] %s", key)
+func (p *testPlugin) Update(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+	eventLog.Infof("[*] %s", deployName)
 	for _, s := range p.failComponents {
-		if strings.Contains(key, s) {
-			return fmt.Errorf("Update failed for component: " + key)
+		if strings.Contains(deployName, s) {
+			return fmt.Errorf("Update failed for component: %s", deployName)
 		}
 	}
 	return nil
 }
-
-func (p *EnginePluginImpl) OnApplyComponentInstanceDelete(key string) error {
-	p.eventLog.Infof("[-] %s", key)
+func (p *testPlugin) Destroy(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+	eventLog.Infof("[-] %s", deployName)
 	for _, s := range p.failComponents {
-		if strings.Contains(key, s) {
-			return fmt.Errorf("Delete failed for component: " + key)
+		if strings.Contains(deployName, s) {
+			return fmt.Errorf("Delete failed for component: %s", deployName)
 		}
 	}
+	return nil
+}
+func (p *testPlugin) Endpoints(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) (map[string]string, error) {
+	return nil, nil
+}
+
+func (p *testPlugin) Process(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
 	return nil
 }
