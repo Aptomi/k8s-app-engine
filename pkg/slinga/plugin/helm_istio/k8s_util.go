@@ -17,6 +17,7 @@ func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog
 	defer cache.lock.Unlock()
 
 	if len(cache.tillerHost) > 0 {
+		// todo(slukjanov): verify that tunnel is still alive??
 		// connection already set up, skip
 		return nil
 	}
@@ -35,9 +36,7 @@ func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog
 		return err
 	}
 
-	// todo(slukjanov): save tunnel somewhere as well and Close() it when not needed anymore
-	// todo(slukjanov): verify that tunnel is still alive
-
+	cache.tillerTunnel = tunnel
 	cache.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 
 	eventLog.WithFields(eventlog.Fields{}).Debugf("Created k8s tunnel using local port: %s", tunnel.Local)

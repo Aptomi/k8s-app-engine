@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"k8s.io/helm/pkg/kube"
 	"sync"
 )
 
 type clusterCache struct {
-	lock                sync.Mutex // all caching ops should use this lock
-	tillerHost          string     // store local proxy address when connection established
-	kubeExternalAddress string     // store kube external address
-	istioSvc            string     // store istio svc name
+	lock                *sync.Mutex  // all caching ops should use this lock
+	tillerTunnel        *kube.Tunnel // tunnel for accessing tiller
+	tillerHost          string       // local proxy address when connection established
+	kubeExternalAddress string       // kube external address
+	istioSvc            string       // istio svc name
 }
 
 func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *eventlog.EventLog) (*clusterCache, error) {
@@ -25,4 +27,17 @@ func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *eventlog.Eve
 	} else {
 		panic(fmt.Sprintf("clusterCache expected in HelmIstioPlugin cache, but found: %v", c))
 	}
+}
+
+func (p *HelmIstioPlugin) Cleanup() error {
+	var err error
+	p.cache.Range(func(key, value interface{}) bool {
+		if c, ok := value.(*clusterCache); ok {
+			c.tillerTunnel.Close()
+		} else {
+			panic(fmt.Sprintf("clusterCache expected in HelmIstioPlugin cache, but found: %v", c))
+		}
+		return true
+	})
+	return err
 }

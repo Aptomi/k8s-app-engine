@@ -31,6 +31,7 @@ type EngineApply struct {
 }
 
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
+// todo(slukjanov): run cleanup on all plugins after apply done for the revision
 func NewEngineApply(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, actions []actions.Action) *EngineApply {
 	return &EngineApply{
 		desiredPolicy: desiredPolicy,

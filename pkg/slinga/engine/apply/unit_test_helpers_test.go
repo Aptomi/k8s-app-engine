@@ -106,10 +106,15 @@ type testPlugin struct {
 	failComponents []string
 }
 
+func (p *testPlugin) Cleanup() error {
+	return nil
+}
+
 func (p *testPlugin) GetSupportedCodeTypes() []string {
 	return []string{}
 
 }
+
 func (p *testPlugin) Create(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
 	eventLog.Infof("[+] %s", deployName)
 	for _, s := range p.failComponents {
