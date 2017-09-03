@@ -26,6 +26,7 @@ func (componentUpdate *ComponentUpdate) Apply(context *ActionContext) error {
 	// update in the cloud
 	err := componentUpdate.processDeployment(context)
 	if err != nil {
+		context.EventLog.LogError(err)
 		return fmt.Errorf("Errors while updating component '%s': %s", componentUpdate.ComponentKey, err)
 	}
 

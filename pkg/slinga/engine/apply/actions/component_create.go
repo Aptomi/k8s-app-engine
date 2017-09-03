@@ -26,6 +26,7 @@ func (componentCreate *ComponentCreate) Apply(context *ActionContext) error {
 	// deploy to cloud
 	err := componentCreate.processDeployment(context)
 	if err != nil {
+		context.EventLog.LogError(err)
 		return fmt.Errorf("Errors while creating component '%s': %s", componentCreate.ComponentKey, err)
 	}
 

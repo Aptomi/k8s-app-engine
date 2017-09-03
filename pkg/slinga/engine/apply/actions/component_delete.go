@@ -25,6 +25,7 @@ func (componentDelete *ComponentDelete) Apply(context *ActionContext) error {
 	// delete from cloud
 	err := componentDelete.processDeployment(context)
 	if err != nil {
+		context.EventLog.LogError(err)
 		return fmt.Errorf("Errors while deleting component '%s': %s", componentDelete.ComponentKey, err)
 	}
 
