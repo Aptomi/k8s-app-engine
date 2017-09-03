@@ -69,6 +69,8 @@ var policyCmdApply = &cobra.Command{
 		}
 		eventLog.Save(&eventlog.HookStdout{})
 
+		fmt.Println("\n\nComponents:", len(nextState.ComponentInstanceMap))
+
 		// Process differences
 		// diff := NewRevisionDiff(nextState, prevState)
 		// diff.AlterDifference(full)
