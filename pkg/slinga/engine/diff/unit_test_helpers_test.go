@@ -4,12 +4,12 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 )
 
 func getPolicy() *PolicyNamespace {
@@ -45,11 +45,12 @@ func emulateSaveAndLoadResolution(resolution *PolicyResolution) *PolicyResolutio
 
 func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
 	cnt := struct {
-		create int
-		update int
-		delete int
-		attach int
-		detach int
+		create   int
+		update   int
+		delete   int
+		attach   int
+		detach   int
+		clusters int
 	}{}
 	for _, action := range diff.Actions {
 		switch action.(type) {
@@ -63,8 +64,10 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 			cnt.attach++
 		case *actions.ComponentDetachDependency:
 			cnt.detach++
+		case *actions.ClustersPostProcess:
+			cnt.clusters++
 		default:
-			t.FailNow()
+			t.Fatalf("Incorrect action type: %T", action)
 		}
 	}
 
@@ -73,4 +76,5 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 	assert.Equal(t, componentUpdate, cnt.update, "Diff: component updates")
 	assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
 	assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
+	assert.Equal(t, 1, cnt.clusters, "Diff: all clusters post processing")
 }
