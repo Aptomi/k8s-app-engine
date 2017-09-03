@@ -6,22 +6,28 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/mattn/go-zglob"
 	"strconv"
+	"sync"
 )
 
 // UserLoaderFromDir allows aptomi to load users from files in a given directory
 type UserLoaderFromDir struct {
+	once sync.Once
+
 	baseDir     string
 	cachedUsers *language.GlobalUsers
 }
 
 // NewUserLoaderFromDir returns new UserLoaderFromDir, given a directory where files should be read from
 func NewUserLoaderFromDir(baseDir string) UserLoader {
-	return &UserLoaderFromDir{baseDir: baseDir}
+	return &UserLoaderFromDir{
+		baseDir: baseDir,
+	}
 }
 
 // LoadUsersAll loads all users
 func (loader *UserLoaderFromDir) LoadUsersAll() language.GlobalUsers {
-	if loader.cachedUsers == nil {
+	// Right now this can be called concurrently by the engine, so it needs to be thread safe
+	loader.once.Do(func() {
 		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeUsersFile))
 		loader.cachedUsers = &language.GlobalUsers{Users: make(map[string]*language.User)}
 		for _, fileName := range files {
@@ -31,7 +37,7 @@ func (loader *UserLoaderFromDir) LoadUsersAll() language.GlobalUsers {
 				loader.cachedUsers.Users[u.ID] = u
 			}
 		}
-	}
+	})
 	return *loader.cachedUsers
 }
 

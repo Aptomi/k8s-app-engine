@@ -28,6 +28,8 @@ func NewTemplate(templateStr string) (*Template, error) {
 func (template *Template) Evaluate(params *TemplateParameters) (string, error) {
 	// Evaluate
 	var doc bytes.Buffer
+
+	// Multiple executions of the same template can execute safely in parallel
 	err := template.templateCompiled.Execute(&doc, params.params)
 	if err != nil {
 		return "", errors.NewErrorWithDetails(

@@ -29,7 +29,7 @@ func evaluate(t *testing.T, expressionStr string, params *ExpressionParameters, 
 	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: "+expressionStr)
 }
 
-func evaluateWithCache(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int, cache ExpressionCache) {
+func evaluateWithCache(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int, cache *ExpressionCache) {
 	// Check for compilation & evaluation
 	result, err := cache.EvaluateAsBool(expressionStr, params)
 	if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Expression compilation && evaluation (success vs. error): "+expressionStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {

@@ -10,6 +10,7 @@ import (
 	"gopkg.in/ldap.v2"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type LDAPConfig struct {
@@ -42,6 +43,8 @@ func (config *LDAPConfig) getAttributes() []string {
 
 // UserLoaderFromLDAP allows aptomi to load users from LDAP
 type UserLoaderFromLDAP struct {
+	once sync.Once
+
 	baseDir     string
 	config      *LDAPConfig
 	cachedUsers *language.GlobalUsers
@@ -49,20 +52,23 @@ type UserLoaderFromLDAP struct {
 
 // NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
 func NewUserLoaderFromLDAP(baseDir string) UserLoader {
-	return &UserLoaderFromLDAP{baseDir: baseDir, config: loadLDAPConfig(baseDir)}
+	return &UserLoaderFromLDAP{
+		baseDir: baseDir,
+		config:  loadLDAPConfig(baseDir),
+	}
 }
 
 // LoadUsersAll loads all users
 func (loader *UserLoaderFromLDAP) LoadUsersAll() language.GlobalUsers {
-	if loader.cachedUsers == nil {
+	// Right now this can be called concurrently by the engine, so it needs to be thread safe
+	loader.once.Do(func() {
 		loader.cachedUsers = &language.GlobalUsers{Users: make(map[string]*language.User)}
 		t := loader.ldapSearch()
 		for _, u := range t {
 			// add user
 			loader.cachedUsers.Users[u.ID] = u
 		}
-
-	}
+	})
 	return *loader.cachedUsers
 }
 

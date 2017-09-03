@@ -5,10 +5,13 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/mattn/go-zglob"
 	"sort"
+	"sync"
 )
 
 // SecretLoaderFromDir allows to load secrets for users from a given directory
 type SecretLoaderFromDir struct {
+	once sync.Once
+
 	baseDir       string
 	cachedSecrets map[string]map[string]string
 }
@@ -21,12 +24,15 @@ type UserSecrets struct {
 
 // SecretLoaderFromDir returns new UserLoaderFromDir, given a directory where files should be read from
 func NewSecretLoaderFromDir(baseDir string) SecretLoader {
-	return &SecretLoaderFromDir{baseDir: baseDir}
+	return &SecretLoaderFromDir{
+		baseDir: baseDir,
+	}
 }
 
 // LoadSecretsAll loads all secrets
 func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string {
-	if loader.cachedSecrets == nil {
+	// Right now this can be called concurrently by the engine, so it needs to be thread safe
+	loader.once.Do(func() {
 		loader.cachedSecrets = make(map[string]map[string]string)
 
 		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeSecrets))
@@ -37,7 +43,7 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 				loader.cachedSecrets[secret.UserID] = secret.Secrets
 			}
 		}
-	}
+	})
 	return loader.cachedSecrets
 }
 

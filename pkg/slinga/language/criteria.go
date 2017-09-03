@@ -18,7 +18,7 @@ type Criteria struct {
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not
-func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {
+func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache *expression.ExpressionCache) (bool, error) {
 	// Make sure all "require-all" criterias evaluate to true
 	for _, exprShouldBeTrue := range criteria.RequireAll {
 		result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)
@@ -82,7 +82,7 @@ func (criteria *Criteria) allows(params *expression.ExpressionParameters, cache 
 	return true, nil
 }
 
-func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {
+func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.ExpressionParameters, cache *expression.ExpressionCache) (bool, error) {
 	if cache == nil {
 		cache = expression.NewExpressionCache()
 	}

@@ -125,7 +125,7 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels *LabelSet, users []*U
 }
 
 // Match returns if a given parameters match a service filter
-func (filter *ServiceFilter) Match(labels *LabelSet, user *User, cluster *Cluster, cache expression.ExpressionCache) (bool, error) {
+func (filter *ServiceFilter) Match(labels *LabelSet, user *User, cluster *Cluster, cache *expression.ExpressionCache) (bool, error) {
 	// check if service filters for another service labels
 	if filter.Labels != nil {
 		allows, err := filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil), cache)

@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
@@ -8,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"sync"
 )
 
 /*
@@ -15,6 +17,8 @@ import (
 	- takes policy an an input
 	- calculates PolicyResolution as an output
 */
+
+const THREAD_POOL_SIZE = 8
 
 type PolicyResolver struct {
 	/*
@@ -32,14 +36,16 @@ type PolicyResolver struct {
 	*/
 
 	// Expression cache
-	expressionCache expression.ExpressionCache
+	expressionCache *expression.ExpressionCache
 
 	// Template cache
-	templateCache template.TemplateCache
+	templateCache *template.TemplateCache
 
 	/*
-		Calculated objects
+		Calculated objects (aggregated over all dependencies)
 	*/
+
+	combineMutex sync.Mutex
 
 	// Reference to the calculated PolicyResolution
 	resolution *PolicyResolution
@@ -62,17 +68,32 @@ func NewPolicyResolver(policy *PolicyNamespace, externalData *external.Data) *Po
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *EventLog, error) {
-	// Run every declared dependency via policy and resolve it
-	for _, dependencies := range resolver.policy.Dependencies.DependenciesByService {
-		for _, d := range dependencies {
-			// resolve dependency via applying policy
-			err := resolver.resolveDependency(d)
+	var semaphore = make(chan int, THREAD_POOL_SIZE)
+	var errs = make(chan error, len(resolver.policy.Dependencies.DependenciesByID))
 
-			// see if there is an error
-			if err != nil {
-				return nil, resolver.eventLog, err
-			}
+	// Run every declared dependency via policy and resolve it
+	for _, d := range resolver.policy.Dependencies.DependenciesByID {
+		// resolve dependency via applying policy
+		semaphore <- 1
+		go func(d *Dependency) {
+			node, err := resolver.resolveDependency(d)
+			errs <- resolver.combineData(node, err)
+			<-semaphore
+		}(d)
+	}
+
+	// Wait for all go routines to end
+	errFound := 0
+	for i := 0; i < len(resolver.policy.Dependencies.DependenciesByID); i++ {
+		err := <-errs
+		if err != nil {
+			errFound++
 		}
+	}
+
+	// See if there were any errors
+	if errFound > 0 {
+		return nil, resolver.eventLog, fmt.Errorf("Errors during resolving policy: %d", errFound)
 	}
 
 	// Once all components are resolved, print information about them into event log
@@ -86,35 +107,40 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *Ev
 	return resolver.resolution, resolver.eventLog, nil
 }
 
-// Resolves a single dependency and puts resolution data into the overall state of the world
-func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) error {
-
-	// create resolution node
+// Resolves a single dependency
+func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) (*resolutionNode, error) {
+	// create resolution node and resolve it
 	node := resolver.newResolutionNode(d)
+	return node, resolver.resolveNode(node)
+}
+
+// Combines resolution data into the overall state of the world
+func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr error) error {
+	resolver.combineMutex.Lock()
 
 	// aggregate logs in the end
 	defer func() {
 		for _, eventLog := range node.eventLogsCombined {
 			resolver.eventLog.Append(eventLog)
 		}
+		resolver.combineMutex.Unlock()
 	}()
 
-	// recursively resolve everything
-	err := resolver.resolveNode(node)
-	if err != nil {
-		return err
+	// if there was a resolution error, return it
+	if resolutionErr != nil {
+		return resolutionErr
 	}
 
-	// exit if dependency not fulfilled
+	// exit if dependency has not been fulfilled. otherwise, proceed to data aggregation
 	if !node.resolved {
 		return nil
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.DependencyInstanceMap[d.GetID()] = node.serviceKey.GetKey()
+	resolver.resolution.DependencyInstanceMap[node.dependency.GetID()] = node.serviceKey.GetKey()
 
 	// append component instance data
-	err = resolver.resolution.AppendData(node.resolution)
+	err := resolver.resolution.AppendData(node.resolution)
 	if err != nil {
 		node.eventLog.LogError(err)
 		return err

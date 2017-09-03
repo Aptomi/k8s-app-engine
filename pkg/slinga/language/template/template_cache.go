@@ -1,25 +1,33 @@
 package template
 
-type TemplateCache map[string]*Template
+import "sync"
 
-func NewTemplateCache() TemplateCache {
-	return make(map[string]*Template)
+type TemplateCache struct {
+	tCache sync.Map
 }
 
-func (cache TemplateCache) Evaluate(templateStr string, params *TemplateParameters) (string, error) {
-	// Look up Template from cache or compile
-	var templ *Template
-	var ok bool
-	templ, ok = cache[templateStr]
-	if !ok {
+func NewTemplateCache() *TemplateCache {
+	return &TemplateCache{tCache: sync.Map{}}
+}
+
+func (cache *TemplateCache) Evaluate(templateStr string, params *TemplateParameters) (string, error) {
+	// Look up template from the cache
+	var template *Template
+	templateCached, ok := cache.tCache.Load(templateStr)
+	if ok {
+		template = templateCached.(*Template)
+	} else {
+		// Compile template, if not found
+		// This might happen a several times in parallel, that's okay
 		var err error
-		templ, err = NewTemplate(templateStr)
+		template, err = NewTemplate(templateStr)
 		if err != nil {
 			return "", err
 		}
-		cache[templateStr] = templ
+		cache.tCache.Store(templateStr, template)
 	}
 
-	// Evaluate
-	return templ.Evaluate(params)
+	// Evaluate template
+	// This is thread safe. Multiple executions of the same template can execute safely in parallel
+	return template.Evaluate(params)
 }

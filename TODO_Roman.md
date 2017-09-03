@@ -28,7 +28,7 @@ Implementation:
 
 8. Attach apply log to component instances
 
-9. Speed up policy resolution process / use benchmarking
+9. Pre-compile policy to speed up resolution process
 
 Minor issues:
 - Where/how to store text-based diff for revisions?
@@ -138,6 +138,12 @@ Done:
   - decouple secrets from users/labels
   - load secrets normally, not in LDAPUserLoader
 
-* Do we need to move Dependency.Resolved into resolved usage state?
+* Move Dependency.Resolved to policy resolution data
 
-* Do we even need Unresolved, given that we changed the way how logs are stored?
+* Get rid of Resolved flag in component
+
+* Get rid of Resolved/Unresolved in policy resolution, given that we changed the way how logs are stored
+
+* Optimize policy resolution
+
+* Multi-threaded policy resolution

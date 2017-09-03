@@ -23,7 +23,7 @@ type Context struct {
 }
 
 // Matches checks if context criteria is satisfied
-func (context *Context) Matches(params *expression.ExpressionParameters, cache expression.ExpressionCache) (bool, error) {
+func (context *Context) Matches(params *expression.ExpressionParameters, cache *expression.ExpressionCache) (bool, error) {
 	if context.Criteria == nil {
 		return true, nil
 	}
@@ -31,7 +31,7 @@ func (context *Context) Matches(params *expression.ExpressionParameters, cache e
 }
 
 // Resolves dynamic allocation keys
-func (context *Context) ResolveKeys(params *template.TemplateParameters, cache template.TemplateCache) ([]string, error) {
+func (context *Context) ResolveKeys(params *template.TemplateParameters, cache *template.TemplateCache) ([]string, error) {
 	if cache == nil {
 		cache = template.NewTemplateCache()
 	}

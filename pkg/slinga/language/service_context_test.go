@@ -15,7 +15,7 @@ const (
 	ResError = iota
 )
 
-func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected int, cache expression.ExpressionCache) {
+func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected int, cache *expression.ExpressionCache) {
 	result, err := context.Matches(params, cache)
 	assert.Equal(t, expected == ResError, err != nil, "Context matching (success vs. error): "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
 	if err == nil {
@@ -40,7 +40,7 @@ func matchContext(t *testing.T, context *Context, paramsMatch []*expression.Expr
 	}
 }
 
-func evalKeys(t *testing.T, context *Context, params *template.TemplateParameters, expectedError bool, expected []string, cache template.TemplateCache) {
+func evalKeys(t *testing.T, context *Context, params *template.TemplateParameters, expectedError bool, expected []string, cache *template.TemplateCache) {
 	keys, err := context.ResolveKeys(params, cache)
 	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params))
 	if err == nil {

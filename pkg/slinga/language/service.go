@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"sync"
 )
 
 var ServiceObject = &Info{
@@ -19,11 +20,13 @@ type Service struct {
 	ChangeLabels LabelOperations `yaml:"change-labels"`
 	Components   []*ServiceComponent
 
-	// Lazily evaluated field (all components topologically sorted). Use via getter
-	componentsOrdered []*ServiceComponent
+	// Lazily evaluated fields (all components topologically sorted). Use via getter
+	componentsOrderedOnce sync.Once
+	componentsOrderedErr  error
+	componentsOrdered     []*ServiceComponent
 
-	// Lazily evaluated field. Use via getter
-	componentsMap map[string]*ServiceComponent
+	componentsMapOnce sync.Once
+	componentsMap     map[string]*ServiceComponent
 }
 
 // ServiceComponent defines component within a service
@@ -43,14 +46,15 @@ type Code struct {
 }
 
 // GetComponentsMap lazily initializes and returns a map of name -> component
+// This should be thread safe
 func (service *Service) GetComponentsMap() map[string]*ServiceComponent {
-	if service.componentsMap == nil {
+	service.componentsMapOnce.Do(func() {
 		// Put all components into map
 		service.componentsMap = make(map[string]*ServiceComponent)
 		for _, c := range service.Components {
 			service.componentsMap[c.Name] = c
 		}
-	}
+	})
 	return service.componentsMap
 }
 
@@ -79,8 +83,9 @@ func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]
 }
 
 // GetComponentsSortedTopologically returns all components sorted in a topological order
+// This should be thread safe
 func (service *Service) GetComponentsSortedTopologically() ([]*ServiceComponent, error) {
-	if service.componentsOrdered == nil {
+	service.componentsOrderedOnce.Do(func() {
 		// Initiate colors
 		colors := make(map[string]int)
 
@@ -88,11 +93,13 @@ func (service *Service) GetComponentsSortedTopologically() ([]*ServiceComponent,
 		for _, c := range service.Components {
 			if _, ok := colors[c.Name]; !ok {
 				if err := service.dfsComponentSort(c, colors); err != nil {
-					return nil, err
+					service.componentsOrdered = nil
+					service.componentsOrderedErr = err
+					break
 				}
 			}
 		}
-	}
+	})
 
-	return service.componentsOrdered, nil
+	return service.componentsOrdered, service.componentsOrderedErr
 }
