@@ -57,7 +57,7 @@ func (policy *PolicyNamespace) AddObject(object Base) {
 	}
 }
 
-func (policy *PolicyNamespace) GetClusterByLabels(labels LabelSet) (*Cluster, error) {
+func (policy *PolicyNamespace) GetClusterByLabels(labels *LabelSet) (*Cluster, error) {
 	var cluster *Cluster
 	if clusterName, ok := labels.Labels["cluster"]; ok {
 		if cluster, ok = policy.Clusters[clusterName]; !ok {

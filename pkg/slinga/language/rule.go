@@ -83,7 +83,7 @@ func (rule *Rule) DescribeActions() []string {
 // MatchUser returns if a rue matches a user
 func (rule *Rule) MatchUser(user *User) (bool, error) {
 	if rule.FilterServices != nil {
-		match, err := rule.FilterServices.Match(NewLabelSetEmpty(), user, nil, nil)
+		match, err := rule.FilterServices.Match(NewLabelSet(make(map[string]string)), user, nil, nil)
 		if match || err != nil {
 			return match, err
 		}
@@ -98,7 +98,7 @@ type GlobalRules struct {
 }
 
 // AllowsIngressAccess returns true if a rule allows ingress access
-func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*User, cluster *Cluster) (bool, error) {
+func (globalRules *GlobalRules) AllowsIngressAccess(labels *LabelSet, users []*User, cluster *Cluster) (bool, error) {
 	if rules, ok := globalRules.Rules["ingress"]; ok {
 		for _, rule := range rules {
 			// for all users of the service
@@ -125,7 +125,7 @@ func (globalRules *GlobalRules) AllowsIngressAccess(labels LabelSet, users []*Us
 }
 
 // Match returns if a given parameters match a service filter
-func (filter *ServiceFilter) Match(labels LabelSet, user *User, cluster *Cluster, cache expression.ExpressionCache) (bool, error) {
+func (filter *ServiceFilter) Match(labels *LabelSet, user *User, cluster *Cluster, cache expression.ExpressionCache) (bool, error) {
 	// check if service filters for another service labels
 	if filter.Labels != nil {
 		allows, err := filter.Labels.allows(expression.NewExpressionParams(labels.Labels, nil), cache)

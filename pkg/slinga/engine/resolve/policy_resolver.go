@@ -143,7 +143,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	node.objectResolved(node.service)
 
 	// Process service and transform labels
-	node.labels = node.transformLabels(node.labels, node.service.ChangeLabels)
+	node.transformLabels(node.labels, node.service.ChangeLabels)
 
 	// Match the context
 	node.context, err = node.getMatchedContext(resolver.policy)
@@ -160,7 +160,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	node.objectResolved(node.context)
 
 	// Process context and transform labels
-	node.labels = node.transformLabels(node.labels, node.context.ChangeLabels)
+	node.transformLabels(node.labels, node.context.ChangeLabels)
 
 	// Resolve allocation keys for the context
 	node.allocationKeysResolved, err = node.resolveAllocationKeys(resolver.policy)
@@ -204,7 +204,8 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		node.resolution.StoreEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
-		node.componentLabels = node.transformLabels(node.labels, node.component.ChangeLabels)
+		node.componentLabels = NewLabelSet(node.labels.Labels)
+		node.transformLabels(node.componentLabels, node.component.ChangeLabels)
 		node.resolution.RecordLabels(node.componentKey, node.componentLabels)
 
 		// Create new map with resolution keys for component

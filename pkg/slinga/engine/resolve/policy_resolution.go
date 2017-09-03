@@ -65,7 +65,7 @@ func (resolution *PolicyResolution) RecordDiscoveryParams(cik *ComponentInstance
 }
 
 // Stores calculated labels for component instance
-func (resolution *PolicyResolution) RecordLabels(cik *ComponentInstanceKey, labels LabelSet) {
+func (resolution *PolicyResolution) RecordLabels(cik *ComponentInstanceKey, labels *LabelSet) {
 	resolution.GetComponentInstanceEntry(cik).addLabels(labels)
 }
 

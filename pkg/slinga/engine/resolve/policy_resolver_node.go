@@ -38,7 +38,7 @@ type resolutionNode struct {
 	service     *Service
 
 	// reference to the current set of labels
-	labels LabelSet
+	labels *LabelSet
 
 	// reference to the context that was matched
 	context *Context
@@ -57,7 +57,7 @@ type resolutionNode struct {
 	componentKey *ComponentInstanceKey
 
 	// reference to the current labels during component processing
-	componentLabels LabelSet
+	componentLabels *LabelSet
 
 	// reference to the current service key
 	serviceKey *ComponentInstanceKey
@@ -75,7 +75,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 	user := resolver.externalData.UserLoader.LoadUserByID(dependency.UserID)
 	labels := NewLabelSet(dependency.Labels)
 	if user != nil {
-		labels = labels.AddLabels(NewLabelSet(user.Labels))
+		labels.AddLabels(user.Labels)
 	}
 
 	eventLog := NewEventLog()
@@ -242,7 +242,8 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 		// If criteria matches, then check global rules as well
 		if matched {
 			// Match is only valid if there are no global rule violations for the current context
-			labels := node.transformLabels(node.labels, context.ChangeLabels)
+			labels := NewLabelSet(node.labels.Labels)
+			node.transformLabels(labels, context.ChangeLabels)
 
 			// Lookup cluster from a label
 			cluster, err := policy.GetClusterByLabels(labels)
@@ -310,15 +311,14 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) *Com
 	)
 }
 
-func (node *resolutionNode) transformLabels(labels LabelSet, operations LabelOperations) LabelSet {
-	result := labels.ApplyTransform(operations)
-	if !labels.Equal(result) {
-		node.logLabels(result, "after transform")
+func (node *resolutionNode) transformLabels(labels *LabelSet, operations LabelOperations) {
+	changed := labels.ApplyTransform(operations)
+	if changed {
+		node.logLabels(labels, "after transform")
 	}
-	return result
 }
 
-func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, context *Context, labels LabelSet, cluster *Cluster) (bool, error) {
+func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, context *Context, labels *LabelSet, cluster *Cluster) (bool, error) {
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {

@@ -22,7 +22,7 @@ type ComponentInstance struct {
 	DependencyIds map[string]bool
 
 	// Calculated parameters for the component
-	CalculatedLabels     LabelSet
+	CalculatedLabels     *LabelSet
 	CalculatedDiscovery  NestedParameterMap
 	CalculatedCodeParams NestedParameterMap
 
@@ -44,7 +44,7 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
 		Key:                  cik,
 		DependencyIds:        make(map[string]bool),
-		CalculatedLabels:     NewLabelSetEmpty(),
+		CalculatedLabels:     NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  NestedParameterMap{},
 		CalculatedCodeParams: NestedParameterMap{},
 		EdgesIn:              make(map[string]bool),
@@ -99,9 +99,9 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	return nil
 }
 
-func (instance *ComponentInstance) addLabels(labels LabelSet) {
+func (instance *ComponentInstance) addLabels(labels *LabelSet) {
 	// Unfortunately it's pretty typical for us to come with different labels to a component instance, let's combine them all
-	instance.CalculatedLabels = instance.CalculatedLabels.AddLabels(labels)
+	instance.CalculatedLabels.AddLabels(labels.Labels)
 }
 
 func (instance *ComponentInstance) addEdgeIn(srcKey string) {

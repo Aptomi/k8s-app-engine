@@ -52,7 +52,7 @@ func (node *resolutionNode) errorWhenTestingContext(context *Context, cause erro
 	return NewCriticalError(err)
 }
 
-func (node *resolutionNode) errorGettingClusterForGlobalRules(context *Context, labelSet LabelSet, cause error) error {
+func (node *resolutionNode) errorGettingClusterForGlobalRules(context *Context, labelSet *LabelSet, cause error) error {
 	err := errors.NewErrorWithDetails(
 		fmt.Sprintf("Can't evaluate global rules for service '%s', context '%s' due to cluster error: %s", node.service.Name, context.Name, cause.Error()),
 		errors.Details{
@@ -64,7 +64,7 @@ func (node *resolutionNode) errorGettingClusterForGlobalRules(context *Context, 
 	return NewCriticalError(err)
 }
 
-func (node *resolutionNode) errorWhenTestingGlobalRule(context *Context, rule *Rule, labelSet LabelSet, cause error) error {
+func (node *resolutionNode) errorWhenTestingGlobalRule(context *Context, rule *Rule, labelSet *LabelSet, cause error) error {
 	err := errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while testing global rule '%s' on service '%s', context '%s': %s", rule.Name, node.service.Name, context.Name, cause),
 		errors.Details{
@@ -156,7 +156,7 @@ func (node *resolutionNode) logStartResolvingDependency() {
 	node.logLabels(node.labels, "initial")
 }
 
-func (node *resolutionNode) logLabels(labelSet LabelSet, scope string) {
+func (node *resolutionNode) logLabels(labelSet *LabelSet, scope string) {
 	secretCnt := 0
 	if node.user != nil {
 		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserID(node.user.ID))
@@ -194,7 +194,7 @@ func (node *resolutionNode) logTestedContextCriteria(context *Context, matched b
 	}).Debugf("Trying context '%s' for service '%s'. Matched = %t", context.Name, node.service.Name, matched)
 }
 
-func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labelSet LabelSet, noViolations bool) {
+func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labelSet *LabelSet, noViolations bool) {
 	fields := Fields{
 		"context": context,
 	}
@@ -205,7 +205,7 @@ func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labe
 	}
 }
 
-func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rule, labelSet LabelSet, match bool) {
+func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rule, labelSet *LabelSet, match bool) {
 	node.eventLog.WithFields(Fields{
 		"context": context,
 		"rule":    rule,
