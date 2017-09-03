@@ -3,7 +3,6 @@ package apply
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
@@ -83,6 +82,9 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.PolicyNamespa
 	// generate dependencies
 	gen.makeDependencies()
 	fmt.Printf("Dependencies: %d\n", len(gen.policy.Dependencies.DependenciesByID))
+
+	// generate cluster
+	gen.makeCluster()
 
 	// every user will have the same set of labels
 	gen.externalData = external.NewData(
@@ -179,6 +181,7 @@ func (gen *PolicyGenerator) makeService() *language.Service {
 		labelName := gen.generatedLabelKeys[gen.random.Intn(len(gen.generatedLabelKeys))]
 
 		params := util.NestedParameterMap{}
+		params["cluster"] = "cluster-test"
 		for j := 0; j < gen.codeParams; j++ {
 			name := "param-" + strconv.Itoa(j)
 			value := "prefix-{{ .Labels." + labelName + " }}-suffix"
@@ -252,6 +255,17 @@ func (gen *PolicyGenerator) makeDependencies() {
 	}
 }
 
+func (gen *PolicyGenerator) makeCluster() {
+	cluster := &language.Cluster{
+		Metadata: object.Metadata{
+			Kind:      language.ClusterObject.Kind,
+			Namespace: "main",
+			Name:      "cluster-test",
+		},
+	}
+	gen.policy.AddObject(cluster)
+}
+
 type UserLoaderImpl struct {
 	users  int
 	labels map[string]string
@@ -308,20 +322,17 @@ func RunEngine(t *testing.T, desiredPolicy *language.PolicyNamespace, externalDa
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
-	// make plugin to successfully process all components, while failing all instances of component2
-	pluginApplyFailComponent2 := NewEnginePluginImpl([]string{"fail-components-like-these"})
-
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
-	plugins := []plugin.EnginePlugin{pluginApplyFailComponent2}
+
 	apply := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
 		externalData,
+		NewTestPluginRegistry("fail-components-like-these"),
 		actions,
-		plugins,
 	)
 
 	actualState = applyAndCheck(t, apply, ResSuccess, 0, "")
