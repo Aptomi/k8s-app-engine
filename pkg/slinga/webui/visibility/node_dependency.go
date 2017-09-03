@@ -2,8 +2,8 @@ package visibility
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
+	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
 type dependencyNode struct {
@@ -29,9 +29,9 @@ func (n dependencyNode) getGroup() string {
 		return "dependencyShort"
 	}
 	/*
-	if n.dependency.Resolved {
-		return "dependencyLongResolved"
-	}
+		if n.dependency.Resolved {
+			return "dependencyLongResolved"
+		}
 	*/
 	return "dependencyLongNotResolved"
 }
