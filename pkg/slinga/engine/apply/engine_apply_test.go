@@ -2,7 +2,6 @@ package apply
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
@@ -26,20 +25,17 @@ func TestApplyCreateSuccess(t *testing.T) {
 	desiredPolicy := getPolicy()
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
-	// make plugin to successfully process all components
-	pluginApply := NewEnginePluginImpl([]string{})
-
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
-	plugins := []plugin.EnginePlugin{pluginApply}
+
 	apply := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
 		externalData,
+		NewTestPluginRegistry(),
 		actions,
-		plugins,
 	)
 
 	// check actual state
@@ -63,20 +59,16 @@ func TestApplyCreateFailure(t *testing.T) {
 	desiredPolicy := getPolicy()
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
-	// make plugin to successfully process all components, while failing all instances of component2
-	pluginApplyFailComponent2 := NewEnginePluginImpl([]string{"component2"})
-
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
-	plugins := []plugin.EnginePlugin{pluginApplyFailComponent2}
 	apply := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
 		externalData,
+		NewTestPluginRegistry("component2"),
 		actions,
-		plugins,
 	)
 
 	// check actual state
@@ -112,8 +104,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualPolicy,
 		actualState,
 		externalData,
+		NewTestPluginRegistry(),
 		diff.NewPolicyResolutionDiff(desiredState, actualState).Actions,
-		[]plugin.EnginePlugin{},
 	)
 
 	// Check that policy apply finished with expected results
@@ -156,8 +148,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualPolicy,
 		actualState,
 		externalData,
+		NewTestPluginRegistry(),
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState).Actions,
-		[]plugin.EnginePlugin{},
 	)
 
 	// Check that policy apply finished with expected results
@@ -194,8 +186,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualPolicy,
 		actualState,
 		externalData,
+		NewTestPluginRegistry(),
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState).Actions,
-		[]plugin.EnginePlugin{},
 	)
 
 	// Check that policy apply finished with expected results
