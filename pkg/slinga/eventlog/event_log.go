@@ -2,6 +2,7 @@ package eventlog
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 )
@@ -35,15 +36,26 @@ func NewEventLog() *EventLog {
 	}
 }
 
+// Replaces storeable objects with their key/reference value
+func fieldValue(data interface{}) interface{} {
+	if baseObject, ok := data.(object.Base); ok {
+		return baseObject.GetKey()
+	}
+	return data
+}
+
 // WithFields creates a new log entry with a given set of fields
 func (eventLog *EventLog) WithFields(fields Fields) *logrus.Entry {
 	// see if there is any details which have to added to the log from the error
-	for _, value := range fields {
+	for key, value := range fields {
 		if errWithDetails, ok := value.(*errors.ErrorWithDetails); ok {
 			// put details from the error into the same log record
 			for dKey, dValue := range errWithDetails.Details() {
-				fields[dKey] = dValue
+				fields[dKey] = fieldValue(dValue)
 			}
+			fields[key] = errWithDetails.Error()
+		} else {
+			fields[key] = fieldValue(value)
 		}
 	}
 
