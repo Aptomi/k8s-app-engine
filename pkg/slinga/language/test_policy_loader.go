@@ -12,10 +12,10 @@ import (
 	"strings"
 )
 
-func LoadUnitTestsPolicy(storeDir string) *PolicyNamespace {
+func LoadUnitTestsPolicy(storeDir string) *Policy {
 	loader := NewFileLoader(storeDir)
 
-	policy := NewPolicyNamespace()
+	policy := NewPolicy()
 	objects, err := loader.LoadObjects()
 	if err != nil {
 		panic(fmt.Sprintf("Error while loading test policy: %s", err))

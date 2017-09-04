@@ -22,20 +22,20 @@ type PolicyVisualization struct {
 }
 
 // NewPolicyVisualizationImage returns an image with policy/resolution information
-func NewPolicyVisualizationImage(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
+func NewPolicyVisualizationImage(policy *language.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
 	graph := makeGraph(policy, resolution, externalData)
 	return getGraphImage(graph)
 }
 
 // NewPolicyVisualizationDeltaImage returns an image with policy/resolution information
-func NewPolicyVisualizationDeltaImage(nextPolicy *language.PolicyNamespace, nextResolution *resolve.PolicyResolution, prevPolicy *language.PolicyNamespace, prevResolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
+func NewPolicyVisualizationDeltaImage(nextPolicy *language.Policy, nextResolution *resolve.PolicyResolution, prevPolicy *language.Policy, prevResolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
 	nextGraph := makeGraph(nextPolicy, nextResolution, externalData)
 	prevGraph := makeGraph(prevPolicy, prevResolution, externalData)
 	deltaGraph := Delta(prevGraph, nextGraph)
 	return getGraphImage(deltaGraph)
 }
 
-func makeGraph(policy *language.PolicyNamespace, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
+func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")

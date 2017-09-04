@@ -15,16 +15,16 @@ const (
 	ResError   = iota
 )
 
-func loadUnitTestsPolicy() *PolicyNamespace {
+func loadUnitTestsPolicy() *Policy {
 	return LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
-func loadPolicyAndResolve(t *testing.T) (*PolicyNamespace, *PolicyResolution) {
+func loadPolicyAndResolve(t *testing.T) (*Policy, *PolicyResolution) {
 	policy := loadUnitTestsPolicy()
 	return policy, resolvePolicy(t, policy, ResSuccess, "")
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace, expectedResult int, expectedErrorMessage string) *PolicyResolution {
+func resolvePolicy(t *testing.T, policy *Policy, expectedResult int, expectedErrorMessage string) *PolicyResolution {
 	externalData := external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
 		secrets.NewSecretLoaderFromDir("../../testdata/unittests"),
@@ -63,7 +63,7 @@ func getInstanceInternal(t *testing.T, key string, resolution *PolicyResolution)
 	return instance
 }
 
-func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *PolicyNamespace, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
 	key := NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName])
 	return getInstanceInternal(t, key.GetKey(), resolution)
 }

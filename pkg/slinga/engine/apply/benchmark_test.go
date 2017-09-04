@@ -70,7 +70,7 @@ type PolicyGenerator struct {
 	generatedLabelKeys []string
 
 	generatedServices []*language.Service
-	policy            *language.PolicyNamespace
+	policy            *language.Policy
 	externalData      *external.Data
 }
 
@@ -85,11 +85,11 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		contextsPerService:        contextsPerService,
 		users:                     users,
 		dependencies:              dependencies,
-		policy:                    language.NewPolicyNamespace(),
+		policy:                    language.NewPolicy(),
 	}
 }
 
-func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.PolicyNamespace, *external.Data) {
+func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *external.Data) {
 	// pre-generate the list of labels
 	gen.makeLabels()
 
@@ -342,12 +342,12 @@ func (loader *SecretLoaderImpl) LoadSecretsByUserID(string) map[string]string {
 	return nil
 }
 
-func RunEngine(t *testing.T, testName string, desiredPolicy *language.PolicyNamespace, externalData *external.Data) {
+func RunEngine(t *testing.T, testName string, desiredPolicy *language.Policy, externalData *external.Data) {
 	fmt.Printf("Running engine for '%s'\n", testName)
 
 	timeStart := time.Now()
 
-	actualPolicy := language.NewPolicyNamespace()
+	actualPolicy := language.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 

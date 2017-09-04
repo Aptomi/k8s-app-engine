@@ -78,7 +78,7 @@ func TestDiffHasDestructedComponents(t *testing.T) {
 	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Now resolve empty policy
-	nextPolicy := language.NewPolicyNamespace()
+	nextPolicy := language.NewPolicy()
 	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
 
 	// Calculate difference

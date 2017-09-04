@@ -20,7 +20,14 @@ type PolicyNamespaceData struct {
 	Objects map[string]Key
 }
 
-// PolicyNamespace is a global policy object with services and contexts
+// Policy describes the entire policy with all namespaces included
+type Policy = PolicyNamespace
+
+func NewPolicy() *Policy {
+	return NewPolicyNamespace()
+}
+
+// PolicyNamespace describes a specific namespace in a policy (services, contexts, clusters, rules and dependencies, etc)
 type PolicyNamespace struct {
 	Services     map[string]*Service
 	Contexts     map[string]*Context

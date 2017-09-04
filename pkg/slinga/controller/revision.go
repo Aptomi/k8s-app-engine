@@ -7,7 +7,7 @@ import (
 )
 
 type RevisionController interface {
-	GetRevision(object.Generation) (*language.PolicyNamespace, error)
+	GetRevision(object.Generation) (*language.Policy, error)
 	NewRevision([]object.Base) error
 }
 
@@ -19,7 +19,7 @@ type RevisionControllerImpl struct {
 	store store.ObjectStore
 }
 
-func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*language.PolicyNamespace, error) {
+func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*language.Policy, error) {
 	return nil, nil
 }
 
@@ -73,7 +73,7 @@ func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
 				// Load the previous usage state
 				prevState := resolve.LoadRevision()
 
-				policy := ... NewPolicyNamespace()
+				policy := ... NewPolicy()
 
 				resolver := resolve.NewPolicyResolver(policy, userLoader)
 				nextState, err := resolver.ResolveAllDependencies()
@@ -126,17 +126,17 @@ func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
 
 /*
 
-func (reg *Registry) LoadPolicy(gen Generation) (*PolicyNamespace, error) {
+func (reg *Registry) LoadPolicy(gen Generation) (*Policy, error) {
 	policyObj, err := reg.store.GetNewestOne("system", PolicyNamespaceDataObject.Kind, "main")
 	if err != nil {
 		return nil, err
 	}
-	policyData, ok := policyObj.(*PolicyNamespaceData)
+	policyData, ok := policyObj.(*PolicyData)
 	if !ok {
 		return nil, fmt.Errorf("Can't cast object from store to PolicyData: %v", policyObj)
 	}
 
-	policy := NewPolicyNamespace()
+	policy := NewPolicy()
 
 	keys := make([]Key, 0, len(policyData.Objects))
 	for _, key := range policyData.Objects {

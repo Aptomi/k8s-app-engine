@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func getPolicy() *language.PolicyNamespace {
+func getPolicy() *language.Policy {
 	return language.LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
@@ -27,7 +27,7 @@ func getExternalData() *external.Data {
 	)
 }
 
-func resolvePolicy(t *testing.T, policy *language.PolicyNamespace, externalData *external.Data) *resolve.PolicyResolution {
+func resolvePolicy(t *testing.T, policy *language.Policy, externalData *external.Data) *resolve.PolicyResolution {
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
@@ -82,7 +82,7 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func getInstanceKey(serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.PolicyNamespace) string {
+func getInstanceKey(serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
 	return resolve.NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName]).GetKey()
 }
 
@@ -146,6 +146,6 @@ func (p *testPlugin) Endpoints(cluster *language.Cluster, deployName string, par
 	return nil, nil
 }
 
-func (p *testPlugin) Process(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
+func (p *testPlugin) Process(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
 	return nil
 }

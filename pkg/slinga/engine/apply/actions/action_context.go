@@ -9,16 +9,16 @@ import (
 )
 
 type ActionContext struct {
-	DesiredPolicy *language.PolicyNamespace
+	DesiredPolicy *language.Policy
 	DesiredState  *resolve.PolicyResolution
-	ActualPolicy  *language.PolicyNamespace
+	ActualPolicy  *language.Policy
 	ActualState   *resolve.PolicyResolution
 	ExternalData  *external.Data
 	Plugins       plugin.Registry
 	EventLog      *eventlog.EventLog
 }
 
-func NewActionContext(desiredPolicy *language.PolicyNamespace, desiredState *resolve.PolicyResolution, actualPolicy *language.PolicyNamespace, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, eventLog *eventlog.EventLog) *ActionContext {
+func NewActionContext(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, eventLog *eventlog.EventLog) *ActionContext {
 	return &ActionContext{
 		DesiredPolicy: desiredPolicy,
 		DesiredState:  desiredState,

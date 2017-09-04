@@ -26,7 +26,7 @@ type PolicyResolver struct {
 	*/
 
 	// Policy
-	policy *PolicyNamespace
+	policy *Policy
 
 	// External data
 	externalData *external.Data
@@ -55,7 +55,7 @@ type PolicyResolver struct {
 }
 
 // NewPolicyResolver creates a new policy resolver
-func NewPolicyResolver(policy *PolicyNamespace, externalData *external.Data) *PolicyResolver {
+func NewPolicyResolver(policy *Policy, externalData *external.Data) *PolicyResolver {
 	return &PolicyResolver{
 		policy:          policy,
 		externalData:    externalData,

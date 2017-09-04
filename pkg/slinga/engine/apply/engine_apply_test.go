@@ -18,7 +18,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 	externalData := getExternalData()
 
 	// resolve empty policy
-	actualPolicy := language.NewPolicyNamespace()
+	actualPolicy := language.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// resolve full policy
@@ -52,7 +52,7 @@ func TestApplyCreateFailure(t *testing.T) {
 	externalData := getExternalData()
 
 	// resolve empty policy
-	actualPolicy := language.NewPolicyNamespace()
+	actualPolicy := language.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// resolve full policy
@@ -90,7 +90,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	*/
 
 	// Create initial empty resolution data (do not resolve any dependencies)
-	actualPolicy := language.NewPolicyNamespace()
+	actualPolicy := language.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// Resolve all dependencies in policy

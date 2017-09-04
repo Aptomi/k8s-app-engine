@@ -204,7 +204,7 @@ func (node *resolutionNode) checkUserExists() error {
 }
 
 // Helper to get a matched service
-func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) (*Service, error) {
+func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) {
 	service := policy.Services[node.serviceName]
 	if service == nil {
 		// This is considered a malformed policy, so let's return an error
@@ -222,7 +222,7 @@ func (node *resolutionNode) getMatchedService(policy *PolicyNamespace) (*Service
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context, error) {
+func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) {
 	// Locate the list of contexts for service
 	node.logStartMatchingContexts()
 
@@ -277,7 +277,7 @@ func (node *resolutionNode) getMatchedContext(policy *PolicyNamespace) (*Context
 }
 
 // Helper to resolve allocation keys
-func (node *resolutionNode) resolveAllocationKeys(policy *PolicyNamespace) ([]string, error) {
+func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, error) {
 	// If there is no allocation, there are no keys to resolve
 	if node.context.Allocation == nil {
 		return nil, nil
@@ -318,7 +318,7 @@ func (node *resolutionNode) transformLabels(labels *LabelSet, operations LabelOp
 	}
 }
 
-func (node *resolutionNode) hasGlobalRuleViolations(policy *PolicyNamespace, context *Context, labels *LabelSet, cluster *Cluster) (bool, error) {
+func (node *resolutionNode) hasGlobalRuleViolations(policy *Policy, context *Context, labels *LabelSet, cluster *Cluster) (bool, error) {
 	globalRules := policy.Rules
 	if rules, ok := globalRules.Rules["dependency"]; ok {
 		for _, rule := range rules {

@@ -21,7 +21,7 @@ func TestPolicyVisualization(t *testing.T) {
 	)
 
 	// empty policy and empty resolution result
-	policyEmpty := language.NewPolicyNamespace()
+	policyEmpty := language.NewPolicy()
 	resolutionEmpty := resolve.NewPolicyResolution()
 
 	// unit test policy resolved revision

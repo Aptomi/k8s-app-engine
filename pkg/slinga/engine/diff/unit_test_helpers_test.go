@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func getPolicy() *PolicyNamespace {
+func getPolicy() *Policy {
 	return LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
@@ -23,7 +23,7 @@ func getExternalData() *external.Data {
 	)
 }
 
-func resolvePolicy(t *testing.T, policy *PolicyNamespace, externalData *external.Data) *PolicyResolution {
+func resolvePolicy(t *testing.T, policy *Policy, externalData *external.Data) *PolicyResolution {
 	resolver := NewPolicyResolver(policy, externalData)
 	result, _, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
@@ -34,7 +34,7 @@ func resolvePolicy(t *testing.T, policy *PolicyNamespace, externalData *external
 
 // TODO: this has to be changed to use the new serialization code instead of serializing to YAML
 func emulateSaveAndLoadResolution(resolution *PolicyResolution) *PolicyResolution {
-	policyNew := PolicyNamespace{}
+	policyNew := Policy{}
 	yaml.DeserializeObject(yaml.SerializeObject(resolution), &policyNew)
 
 	resolutionNew := PolicyResolution{}

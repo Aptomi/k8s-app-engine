@@ -9,7 +9,7 @@ import (
 	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
 )
 
-func (p *HelmIstioPlugin) Process(policy *lang.PolicyNamespace, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
+func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
 	// todo(slukjanov): do something with progress
 	var prog progress.ProgressIndicator
 
