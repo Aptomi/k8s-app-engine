@@ -33,6 +33,11 @@ test:
 	${GO} test -short -v ./...
 	@echo "\nAll unit tests passed"
 
+.PHONY: test-race
+test-race:
+	CGO_ENABLED=1 go test -race -short -v ./...
+	@echo "\nNo race conditions detected. Unit tests passed"
+
 .PHONY: alltest
 alltest:
 	${GO} test -v ./...
