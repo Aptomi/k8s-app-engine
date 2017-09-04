@@ -14,7 +14,7 @@ type AttachedObjects struct {
 }
 
 type EventLog struct {
-	*logrus.Logger
+	logger     *logrus.Logger
 	attachedTo *AttachedObjects
 	hook       *messageBuffer
 }
@@ -30,7 +30,7 @@ func NewEventLog() *EventLog {
 	hook := &messageBuffer{}
 	logger.Hooks.Add(hook)
 	return &EventLog{
-		Logger:     logger,
+		logger:     logger,
 		attachedTo: &AttachedObjects{},
 		hook:       hook,
 	}
@@ -60,7 +60,7 @@ func (eventLog *EventLog) WithFields(fields Fields) *logrus.Entry {
 	}
 
 	fields["attachedTo"] = eventLog.attachedTo
-	return eventLog.Logger.WithFields(logrus.Fields(fields))
+	return eventLog.logger.WithFields(logrus.Fields(fields))
 }
 
 // AttachTo attaches all entries in this event log to a certain object

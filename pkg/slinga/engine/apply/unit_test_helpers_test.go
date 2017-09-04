@@ -112,11 +112,10 @@ func (p *testPlugin) Cleanup() error {
 
 func (p *testPlugin) GetSupportedCodeTypes() []string {
 	return []string{}
-
 }
 
 func (p *testPlugin) Create(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
-	eventLog.Infof("[+] %s", deployName)
+	eventLog.WithFields(eventlog.Fields{}).Infof("[+] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
 			return fmt.Errorf("Apply failed for component: %s", deployName)
@@ -125,7 +124,7 @@ func (p *testPlugin) Create(cluster *language.Cluster, deployName string, params
 	return nil
 }
 func (p *testPlugin) Update(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
-	eventLog.Infof("[*] %s", deployName)
+	eventLog.WithFields(eventlog.Fields{}).Infof("[*] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
 			return fmt.Errorf("Update failed for component: %s", deployName)
@@ -134,7 +133,7 @@ func (p *testPlugin) Update(cluster *language.Cluster, deployName string, params
 	return nil
 }
 func (p *testPlugin) Destroy(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
-	eventLog.Infof("[-] %s", deployName)
+	eventLog.WithFields(eventlog.Fields{}).Infof("[-] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
 			return fmt.Errorf("Delete failed for component: %s", deployName)
