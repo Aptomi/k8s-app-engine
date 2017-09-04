@@ -29,14 +29,16 @@ func evaluate(t *testing.T, templateStr string, expectedResult int, expectedStr 
 }
 
 func evaluateWithCache(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *TemplateParameters, cache *TemplateCache) {
-	// Check for compilation & evaluation
-	resultStr, err := cache.Evaluate(templateStr, params)
-	if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Template compilation (success vs. error): "+templateStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
-		return
-	}
+	for i := 0; i < 10; i++ {
+		// Check for compilation & evaluation
+		resultStr, err := cache.Evaluate(templateStr, params)
+		if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Template compilation (success vs. error): "+templateStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
+			return
+		}
 
-	// Check for result
-	assert.Equal(t, expectedStr, resultStr, "[Cache] Template evaluation result: "+templateStr)
+		// Check for result
+		assert.Equal(t, expectedStr, resultStr, "[Cache] Template evaluation result: "+templateStr)
+	}
 }
 
 func TestTemplateEvaluation(t *testing.T) {
