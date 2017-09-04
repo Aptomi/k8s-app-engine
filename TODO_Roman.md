@@ -28,7 +28,10 @@ Implementation:
 
 8. Attach apply log to component instances
 
-9. Pre-compile policy to speed up resolution process
+9. Speed up resolution process
+   - introduce CompiledPolicy object.
+   - re-compile Code, Discovery, and Topological Sort
+   - logging is in the hot path. consider switching to Uber zap-like approach
 
 Minor issues:
 - Where/how to store text-based diff for revisions?
