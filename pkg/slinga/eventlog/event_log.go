@@ -59,7 +59,6 @@ func (eventLog *EventLog) WithFields(fields Fields) *logrus.Entry {
 		}
 	}
 
-	fields["attachedTo"] = eventLog.attachedTo
 	return eventLog.logger.WithFields(logrus.Fields(fields))
 }
 
@@ -95,6 +94,7 @@ func (log *EventLog) LogErrorAsWarning(err error) {
 // Save takes all buffered entries and saves them
 func (eventLog *EventLog) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hook.entries {
+		e.Data["attachedTo"] = eventLog.attachedTo
 		hook.Fire(e)
 	}
 }
