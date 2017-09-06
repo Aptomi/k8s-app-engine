@@ -43,7 +43,6 @@ func (a *CreateAction) updateActualState(context *action.Context) {
 	// update creation and update times
 	instance.UpdateTimes(time.Now(), time.Now())
 
-
 	// copy it over to the actual state
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
 	context.ActualStateUpdater.Create(instance)

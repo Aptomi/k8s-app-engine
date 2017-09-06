@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 )
 
