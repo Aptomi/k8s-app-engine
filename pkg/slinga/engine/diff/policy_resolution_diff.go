@@ -1,7 +1,9 @@
 package diff
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/cluster"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 )
 
@@ -14,7 +16,7 @@ type PolicyResolutionDiff struct {
 	Next *resolve.PolicyResolution
 
 	// Actions that need to be taken, in the right order
-	Actions []actions.Action
+	Actions []action.Action
 }
 
 // NewPolicyResolutionDiff calculates difference between two given policy resolution structs
@@ -22,7 +24,7 @@ func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.Polic
 	result := &PolicyResolutionDiff{
 		Prev:    prev,
 		Next:    next,
-		Actions: []actions.Action{},
+		Actions: []action.Action{},
 	}
 	result.compareAndProduceActions()
 	return result
@@ -30,7 +32,7 @@ func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.Polic
 
 // On a component level -- see which component instance keys appear and disappear
 func (diff *PolicyResolutionDiff) compareAndProduceActions() {
-	actionsByKey := make(map[string][]actions.Action)
+	actionsByKey := make(map[string][]action.Action)
 
 	// merge all instance keys from prev and next
 	allKeys := make(map[string]bool)
@@ -58,26 +60,26 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 
 		// see if a component needs to be instantiated
 		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
-			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentCreateAction(key))
+			actionsByKey[key] = append(actionsByKey[key], component.NewCreateAction(key))
 		}
 
 		// see if a component needs to be destructed
 		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
-			actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDeleteAction(key))
+			actionsByKey[key] = append(actionsByKey[key], component.NewDeleteAction(key))
 		}
 
 		// see if a component needs to be updated
 		if len(depIdsPrev) > 0 && len(depIdsNext) > 0 {
 			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentUpdateAction(key))
+				actionsByKey[key] = append(actionsByKey[key], component.NewUpdateAction(key))
 
 				// if it has a parent service, indicate that it basically gets updated as well
 				// this is required for adjusting update/creation times of a service with changed component
 				// this may produce duplicate "update" actions for the parent service
 				if uNext.Key.IsComponent() {
 					serviceKey := uNext.Key.GetParentServiceKey().GetKey()
-					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], actions.NewComponentUpdateAction(serviceKey))
+					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], component.NewUpdateAction(serviceKey))
 				}
 			}
 		}
@@ -85,14 +87,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		// see if a user needs to be detached from a component
 		for dependencyID := range depIdsPrev {
 			if !depIdsNext[dependencyID] {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentDetachDependencyAction(key, dependencyID))
+				actionsByKey[key] = append(actionsByKey[key], component.NewDetachDependencyAction(key, dependencyID))
 			}
 		}
 
 		// see if a user needs to be attached to a component
 		for dependencyID := range depIdsNext {
 			if !depIdsPrev[dependencyID] {
-				actionsByKey[key] = append(actionsByKey[key], actions.NewComponentAttachDependencyAction(key, dependencyID))
+				actionsByKey[key] = append(actionsByKey[key], component.NewAttachDependencyAction(key, dependencyID))
 			}
 		}
 	}
@@ -114,17 +116,17 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	}
 
 	// Generate action for clusters
-	diff.Actions = append(diff.Actions, actions.NewClustersPostProcessAction())
+	diff.Actions = append(diff.Actions, cluster.NewClustersPostProcessAction())
 }
 
 // TODO: refactor once we introduce Action kind
 // Due to the nature of action list generation above, certain actions can be added more than once
 // This will ensure that the list is normalized and there will be only one update action for each service instance
-func normalize(list []actions.Action) []actions.Action {
-	result := []actions.Action{}
+func normalize(list []action.Action) []action.Action {
+	result := []action.Action{}
 	updateCnt := 0
 	for _, action := range list {
-		_, isUpdate := action.(*actions.ComponentUpdate)
+		_, isUpdate := action.(*component.UpdateAction)
 		if isUpdate {
 			if updateCnt == 0 {
 				result = append(result, action)

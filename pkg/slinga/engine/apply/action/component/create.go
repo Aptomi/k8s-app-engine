@@ -1,28 +1,29 @@
-package actions
+package component
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"time"
 )
 
-type ComponentCreate struct {
+type CreateAction struct {
 	object.Metadata
-	*BaseAction
+	*action.Base
 
 	ComponentKey string
 }
 
-func NewComponentCreateAction(componentKey string) *ComponentCreate {
-	return &ComponentCreate{
+func NewCreateAction(componentKey string) *CreateAction {
+	return &CreateAction{
 		Metadata:     object.Metadata{}, // TODO: initialize
-		BaseAction:   NewComponentBaseAction(),
+		Base:         action.NewBase(),
 		ComponentKey: componentKey,
 	}
 }
 
-func (componentCreate *ComponentCreate) Apply(context *ActionContext) error {
+func (componentCreate *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud
 	err := componentCreate.processDeployment(context)
 	if err != nil {
@@ -35,7 +36,7 @@ func (componentCreate *ComponentCreate) Apply(context *ActionContext) error {
 	return nil
 }
 
-func (componentCreate *ComponentCreate) updateActualState(context *ActionContext) {
+func (componentCreate *CreateAction) updateActualState(context *action.Context) {
 	// get instance from desired state
 	instance := context.DesiredState.ComponentInstanceMap[componentCreate.ComponentKey]
 
@@ -46,7 +47,7 @@ func (componentCreate *ComponentCreate) updateActualState(context *ActionContext
 	instance.UpdateTimes(time.Now(), time.Now())
 }
 
-func (componentCreate *ComponentCreate) processDeployment(context *ActionContext) error {
+func (componentCreate *CreateAction) processDeployment(context *action.Context) error {
 	instance := context.DesiredState.ComponentInstanceMap[componentCreate.ComponentKey]
 	component := context.DesiredPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 

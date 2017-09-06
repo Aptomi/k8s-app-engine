@@ -1,4 +1,4 @@
-package actions
+package action
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
@@ -8,7 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 )
 
-type ActionContext struct {
+type Context struct {
 	DesiredPolicy *language.Policy
 	DesiredState  *resolve.PolicyResolution
 	ActualPolicy  *language.Policy
@@ -18,8 +18,8 @@ type ActionContext struct {
 	EventLog      *eventlog.EventLog
 }
 
-func NewActionContext(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, eventLog *eventlog.EventLog) *ActionContext {
-	return &ActionContext{
+func NewContext(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, eventLog *eventlog.EventLog) *Context {
+	return &Context{
 		DesiredPolicy: desiredPolicy,
 		DesiredState:  desiredState,
 		ActualPolicy:  actualPolicy,

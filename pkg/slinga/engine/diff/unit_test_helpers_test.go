@@ -1,7 +1,8 @@
 package diff
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/cluster"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/component"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
@@ -52,22 +53,22 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 		detach   int
 		clusters int
 	}{}
-	for _, action := range diff.Actions {
-		switch action.(type) {
-		case *actions.ComponentCreate:
+	for _, act := range diff.Actions {
+		switch act.(type) {
+		case *component.CreateAction:
 			cnt.create++
-		case *actions.ComponentDelete:
+		case *component.DeleteAction:
 			cnt.delete++
-		case *actions.ComponentUpdate:
+		case *component.UpdateAction:
 			cnt.update++
-		case *actions.ComponentAttachDependency:
+		case *component.AttachDependencyAction:
 			cnt.attach++
-		case *actions.ComponentDetachDependency:
+		case *component.DetachDependencyComponent:
 			cnt.detach++
-		case *actions.ClustersPostProcess:
+		case *cluster.ClustersPostProcessAction:
 			cnt.clusters++
 		default:
-			t.Fatalf("Incorrect action type: %T", action)
+			t.Fatalf("Incorrect action type: %T", act)
 		}
 	}
 

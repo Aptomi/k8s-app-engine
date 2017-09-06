@@ -2,7 +2,7 @@ package apply
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/actions"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
@@ -21,7 +21,7 @@ type EngineApply struct {
 	plugins       plugin.Registry
 
 	// Actions to be applied
-	actions []actions.Action
+	actions []action.Action
 
 	// Buffered event log - gets populated while applying changes
 	eventLog *EventLog
@@ -32,7 +32,7 @@ type EngineApply struct {
 
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, actions []actions.Action) *EngineApply {
+func NewEngineApply(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, actions []action.Action) *EngineApply {
 	return &EngineApply{
 		desiredPolicy: desiredPolicy,
 		desiredState:  desiredState,
@@ -55,7 +55,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) 
 	foundErrors := false
 
 	// process all actions
-	context := actions.NewActionContext(
+	context := action.NewContext(
 		apply.desiredPolicy,
 		apply.desiredState,
 		apply.actualPolicy,
@@ -64,9 +64,9 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) 
 		apply.plugins,
 		apply.eventLog,
 	)
-	for _, action := range apply.actions {
+	for _, act := range apply.actions {
 		apply.progress.Advance("Action")
-		err := action.Apply(context)
+		err := act.Apply(context)
 		if err != nil {
 			foundErrors = true
 		}

@@ -1,4 +1,4 @@
-package actions
+package action
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
@@ -6,5 +6,5 @@ import (
 
 type Action interface {
 	object.Base
-	Apply(*ActionContext) error
+	Apply(*Context) error
 }

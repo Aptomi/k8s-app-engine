@@ -1,27 +1,28 @@
-package actions
+package component
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-type ComponentDelete struct {
+type DeleteAction struct {
 	object.Metadata
-	*BaseAction
+	*action.Base
 
 	ComponentKey string
 }
 
-func NewComponentDeleteAction(componentKey string) *ComponentDelete {
-	return &ComponentDelete{
+func NewDeleteAction(componentKey string) *DeleteAction {
+	return &DeleteAction{
 		Metadata:     object.Metadata{}, // TODO: initialize
-		BaseAction:   NewComponentBaseAction(),
+		Base:         action.NewBase(),
 		ComponentKey: componentKey,
 	}
 }
 
-func (componentDelete *ComponentDelete) Apply(context *ActionContext) error {
+func (componentDelete *DeleteAction) Apply(context *action.Context) error {
 	// delete from cloud
 	err := componentDelete.processDeployment(context)
 	if err != nil {
@@ -34,12 +35,12 @@ func (componentDelete *ComponentDelete) Apply(context *ActionContext) error {
 	return nil
 }
 
-func (componentDelete *ComponentDelete) updateActualState(context *ActionContext) {
+func (componentDelete *DeleteAction) updateActualState(context *action.Context) {
 	// delete component from the actual state
 	delete(context.ActualState.ComponentInstanceMap, componentDelete.ComponentKey)
 }
 
-func (componentDelete *ComponentDelete) processDeployment(context *ActionContext) error {
+func (componentDelete *DeleteAction) processDeployment(context *action.Context) error {
 	instance := context.ActualState.ComponentInstanceMap[componentDelete.ComponentKey]
 	component := context.ActualPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
