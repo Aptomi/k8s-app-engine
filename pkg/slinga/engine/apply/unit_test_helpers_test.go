@@ -2,12 +2,14 @@ package apply
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
@@ -146,5 +148,24 @@ func (p *testPlugin) Endpoints(cluster *language.Cluster, deployName string, par
 }
 
 func (p *testPlugin) Process(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
+	return nil
+}
+
+func NewNoOpActionStateUpdater() actual.StateUpdater {
+	return new(noOpActualStateUpdater)
+}
+
+type noOpActualStateUpdater struct {
+}
+
+func (*noOpActualStateUpdater) Create(obj object.Base) error {
+	return nil
+}
+
+func (*noOpActualStateUpdater) Update(obj object.Base) error {
+	return nil
+}
+
+func (*noOpActualStateUpdater) Delete(string) error {
 	return nil
 }

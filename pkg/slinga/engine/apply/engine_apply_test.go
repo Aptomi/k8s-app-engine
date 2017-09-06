@@ -28,11 +28,12 @@ func TestApplyCreateSuccess(t *testing.T) {
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
 
-	apply := NewEngineApply(
+	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
+		NewNoOpActionStateUpdater(),
 		externalData,
 		NewTestPluginRegistry(),
 		actions,
@@ -42,7 +43,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, apply, ResSuccess, 0, "")
+	actualState = applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	// check that actual state got updated
 	assert.Equal(t, 16, len(actualState.ComponentInstanceMap), "Actual state should be empty")
@@ -61,11 +62,12 @@ func TestApplyCreateFailure(t *testing.T) {
 
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
-	apply := NewEngineApply(
+	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
+		NewNoOpActionStateUpdater(),
 		externalData,
 		NewTestPluginRegistry("component2"),
 		actions,
@@ -75,7 +77,7 @@ func TestApplyCreateFailure(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, apply, ResError, 4, "Apply failed for component")
+	actualState = applyAndCheck(t, applier, ResError, 4, "Apply failed for component")
 
 	// check that actual state got updated
 	assert.Equal(t, 12, len(actualState.ComponentInstanceMap), "Actual state should be empty")
@@ -98,18 +100,19 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
 	// Apply to update component times in actual state
-	apply := NewEngineApply(
+	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
+		NewNoOpActionStateUpdater(),
 		externalData,
 		NewTestPluginRegistry(),
 		diff.NewPolicyResolutionDiff(desiredState, actualState).Actions,
 	)
 
 	// Check that policy apply finished with expected results
-	updatedActualState := applyAndCheck(t, apply, ResSuccess, 0, "")
+	updatedActualState := applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	// Check creation/update times
 	key = getInstanceKey("kafka", "test", []string{"platform_services"}, "component2", desiredPolicy)
@@ -142,18 +145,19 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	assert.NotEmpty(t, desiredStateNext.DependencyInstanceMap["dep_id_5"], "New dependency should be resolved")
 
 	// Apply to update component times in actual state
-	apply = NewEngineApply(
+	applier = NewEngineApply(
 		desiredPolicyNext,
 		desiredStateNext,
 		actualPolicy,
 		actualState,
+		NewNoOpActionStateUpdater(),
 		externalData,
 		NewTestPluginRegistry(),
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState).Actions,
 	)
 
 	// Check that policy apply finished with expected results
-	updatedActualState = applyAndCheck(t, apply, ResSuccess, 0, "")
+	updatedActualState = applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	// Check creation/update times
 	kafkaTimes2 := getTimes(t, key, updatedActualState)
@@ -180,18 +184,19 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	desiredStateAfterUpdate := resolvePolicy(t, desiredPolicyNext, externalData)
 
 	// Apply to update component times in actual state
-	apply = NewEngineApply(
+	applier = NewEngineApply(
 		desiredPolicyNext,
 		desiredStateAfterUpdate,
 		actualPolicy,
 		actualState,
+		NewNoOpActionStateUpdater(),
 		externalData,
 		NewTestPluginRegistry(),
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState).Actions,
 	)
 
 	// Check that policy apply finished with expected results
-	updatedActualState = applyAndCheck(t, apply, ResSuccess, 0, "")
+	updatedActualState = applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	// Check creation/update times for component
 	componentTimesUpdated := getTimes(t, keyComponent, updatedActualState)

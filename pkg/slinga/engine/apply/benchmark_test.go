@@ -354,17 +354,18 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *language.Policy, ex
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
 
-	apply := NewEngineApply(
+	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
 		actualPolicy,
 		actualState,
+		NewNoOpActionStateUpdater(),
 		externalData,
 		NewTestPluginRegistry("fail-components-like-these"),
 		actions,
 	)
 
-	actualState = applyAndCheck(t, apply, ResSuccess, 0, "")
+	actualState = applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)

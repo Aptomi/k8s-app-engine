@@ -2,6 +2,7 @@ package apply
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
@@ -13,12 +14,13 @@ import (
 
 type EngineApply struct {
 	// References to desired/actual objects
-	desiredPolicy *language.Policy
-	desiredState  *resolve.PolicyResolution
-	actualPolicy  *language.Policy
-	actualState   *resolve.PolicyResolution
-	externalData  *external.Data
-	plugins       plugin.Registry
+	desiredPolicy      *language.Policy
+	desiredState       *resolve.PolicyResolution
+	actualPolicy       *language.Policy
+	actualState        *resolve.PolicyResolution
+	actualStateUpdater actual.StateUpdater
+	externalData       *external.Data
+	plugins            plugin.Registry
 
 	// Actions to be applied
 	actions []action.Action
@@ -32,17 +34,18 @@ type EngineApply struct {
 
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, externalData *external.Data, plugins plugin.Registry, actions []action.Action) *EngineApply {
+func NewEngineApply(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Action) *EngineApply {
 	return &EngineApply{
-		desiredPolicy: desiredPolicy,
-		desiredState:  desiredState,
-		actualPolicy:  actualPolicy,
-		actualState:   actualState,
-		externalData:  externalData,
-		plugins:       plugins,
-		actions:       actions,
-		eventLog:      NewEventLog(),
-		progress:      progress.NewProgressConsole(),
+		desiredPolicy:      desiredPolicy,
+		desiredState:       desiredState,
+		actualPolicy:       actualPolicy,
+		actualState:        actualState,
+		actualStateUpdater: actualStateUpdater,
+		externalData:       externalData,
+		plugins:            plugins,
+		actions:            actions,
+		eventLog:           NewEventLog(),
+		progress:           progress.NewProgressConsole(),
 	}
 }
 
@@ -60,6 +63,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) 
 		apply.desiredState,
 		apply.actualPolicy,
 		apply.actualState,
+		apply.actualStateUpdater,
 		apply.externalData,
 		apply.plugins,
 		apply.eventLog,
