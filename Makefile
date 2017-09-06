@@ -76,7 +76,7 @@ vet:
 	${GO} tool vet -all -shadow ./cmd ./pkg || echo "\nSome vet checks failed\n"
 
 .PHONY: lint
-lint:
+lint: prepare_gometalinter
 	${GOENV} gometalinter --deadline=120s ./pkg/... ./cmd/... | grep -v 'should not use dot imports'
 
 .PHONY: validate
@@ -87,3 +87,13 @@ validate: fmt vet lint
 clean:
 	-rm -f aptomi aptomictl
 	${GO} clean -r -i
+
+HAS_GOMETALINTER := $(shell command -v gometalinter)
+
+.PHONY: prepare_gometalinter
+prepare_gometalinter:
+ifndef HAS_GOMETALINTER
+	go get -u -v -d github.com/alecthomas/gometalinter && \
+	go install -v github.com/alecthomas/gometalinter && \
+	gometalinter --install --update
+endif
