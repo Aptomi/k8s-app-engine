@@ -9,7 +9,7 @@ GO=${GOENV} go
 default: clean build test
 
 .PHONY: vendor
-vendor:
+vendor: prepare_glide
 	${GOENV} glide install --strip-vendor
 
 .PHONY: vendor-no-color
@@ -97,3 +97,12 @@ ifndef HAS_GOMETALINTER
 	go install -v github.com/alecthomas/gometalinter && \
 	gometalinter --install --update
 endif
+
+HAS_GLIDE := $(shell command -v glide)
+
+.PHONY: prepare_glide
+prepare_glide:
+ifndef HAS_GLIDE
+	curl https://glide.sh/get | sh
+endif
+
