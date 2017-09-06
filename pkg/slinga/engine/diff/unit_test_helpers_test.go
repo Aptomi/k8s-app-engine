@@ -63,7 +63,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 			cnt.update++
 		case *component.AttachDependencyAction:
 			cnt.attach++
-		case *component.DetachDependencyComponent:
+		case *component.DetachDependencyAction:
 			cnt.detach++
 		case *cluster.ClustersPostProcessAction:
 			cnt.clusters++

@@ -22,6 +22,6 @@ func NewAttachDependencyAction(componentKey string, dependencyId string) *Attach
 	}
 }
 
-func (attachDependency *AttachDependencyAction) Apply(context *action.Context) error {
+func (a *AttachDependencyAction) Apply(context *action.Context) error {
 	return nil
 }

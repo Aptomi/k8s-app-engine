@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-type DetachDependencyComponent struct {
+type DetachDependencyAction struct {
 	object.Metadata
 	*action.Base
 
@@ -13,8 +13,8 @@ type DetachDependencyComponent struct {
 	DependencyId string
 }
 
-func NewDetachDependencyAction(componentKey string, dependencyId string) *DetachDependencyComponent {
-	return &DetachDependencyComponent{
+func NewDetachDependencyAction(componentKey string, dependencyId string) *DetachDependencyAction {
+	return &DetachDependencyAction{
 		Metadata:     object.Metadata{}, // TODO: initialize
 		Base:         action.NewBase(),
 		ComponentKey: componentKey,
@@ -22,6 +22,6 @@ func NewDetachDependencyAction(componentKey string, dependencyId string) *Detach
 	}
 }
 
-func (detachDependency *DetachDependencyComponent) Apply(context *action.Context) error {
+func (a *DetachDependencyAction) Apply(context *action.Context) error {
 	return nil
 }

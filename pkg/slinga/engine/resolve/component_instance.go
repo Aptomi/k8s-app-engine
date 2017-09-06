@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"time"
 )
@@ -14,6 +15,7 @@ type ComponentInstance struct {
 	/*
 		These fields get populated during policy resolution
 	*/
+	object.Metadata // todo it's temporarily
 
 	// Key
 	Key *ComponentInstanceKey

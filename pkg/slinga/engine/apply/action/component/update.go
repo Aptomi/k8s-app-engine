@@ -40,8 +40,10 @@ func (a *UpdateAction) updateActualState(context *action.Context) {
 	// preserve previous creation date before overwriting
 	prevCreatedOn := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedOn
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
 	instance.UpdateTimes(prevCreatedOn, time.Now())
+
+	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
+	context.ActualStateUpdater.Update(instance)
 }
 
 func (a *UpdateAction) processDeployment(context *action.Context) error {

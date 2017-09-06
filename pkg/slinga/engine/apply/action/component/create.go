@@ -23,32 +23,34 @@ func NewCreateAction(componentKey string) *CreateAction {
 	}
 }
 
-func (componentCreate *CreateAction) Apply(context *action.Context) error {
+func (a *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud
-	err := componentCreate.processDeployment(context)
+	err := a.processDeployment(context)
 	if err != nil {
 		context.EventLog.LogError(err)
-		return fmt.Errorf("Errors while creating component '%s': %s", componentCreate.ComponentKey, err)
+		return fmt.Errorf("Errors while creating component '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	componentCreate.updateActualState(context)
+	a.updateActualState(context)
 	return nil
 }
 
-func (componentCreate *CreateAction) updateActualState(context *action.Context) {
+func (a *CreateAction) updateActualState(context *action.Context) {
 	// get instance from desired state
-	instance := context.DesiredState.ComponentInstanceMap[componentCreate.ComponentKey]
-
-	// copy it over to the actual state
-	context.ActualState.ComponentInstanceMap[componentCreate.ComponentKey] = instance
+	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
 
 	// update creation and update times
 	instance.UpdateTimes(time.Now(), time.Now())
+
+
+	// copy it over to the actual state
+	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
+	context.ActualStateUpdater.Create(instance)
 }
 
-func (componentCreate *CreateAction) processDeployment(context *action.Context) error {
-	instance := context.DesiredState.ComponentInstanceMap[componentCreate.ComponentKey]
+func (a *CreateAction) processDeployment(context *action.Context) error {
+	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
 	component := context.DesiredPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
@@ -66,7 +68,7 @@ func (componentCreate *CreateAction) processDeployment(context *action.Context) 
 	if component.Code != nil {
 		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
 		if !ok {
-			return fmt.Errorf("No cluster specified in code params, component instance: %v", componentCreate.ComponentKey)
+			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}
 
 		cluster, ok := context.DesiredPolicy.Clusters[clusterName]
@@ -79,7 +81,7 @@ func (componentCreate *CreateAction) processDeployment(context *action.Context) 
 			return err
 		}
 
-		err = plugin.Create(cluster, componentCreate.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Create(cluster, a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}

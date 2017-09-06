@@ -22,26 +22,27 @@ func NewDeleteAction(componentKey string) *DeleteAction {
 	}
 }
 
-func (componentDelete *DeleteAction) Apply(context *action.Context) error {
+func (a *DeleteAction) Apply(context *action.Context) error {
 	// delete from cloud
-	err := componentDelete.processDeployment(context)
+	err := a.processDeployment(context)
 	if err != nil {
 		context.EventLog.LogError(err)
-		return fmt.Errorf("Errors while deleting component '%s': %s", componentDelete.ComponentKey, err)
+		return fmt.Errorf("Errors while deleting component '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	componentDelete.updateActualState(context)
+	a.updateActualState(context)
 	return nil
 }
 
-func (componentDelete *DeleteAction) updateActualState(context *action.Context) {
+func (a *DeleteAction) updateActualState(context *action.Context) {
 	// delete component from the actual state
-	delete(context.ActualState.ComponentInstanceMap, componentDelete.ComponentKey)
+	delete(context.ActualState.ComponentInstanceMap, a.ComponentKey)
+	context.ActualStateUpdater.Delete(a.ComponentKey)
 }
 
-func (componentDelete *DeleteAction) processDeployment(context *action.Context) error {
-	instance := context.ActualState.ComponentInstanceMap[componentDelete.ComponentKey]
+func (a *DeleteAction) processDeployment(context *action.Context) error {
+	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
 	component := context.ActualPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
 
 	if component == nil {
@@ -59,7 +60,7 @@ func (componentDelete *DeleteAction) processDeployment(context *action.Context) 
 	if component.Code != nil {
 		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
 		if !ok {
-			return fmt.Errorf("No cluster specified in code params, component instance: %v", componentDelete.ComponentKey)
+			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}
 
 		cluster, ok := context.DesiredPolicy.Clusters[clusterName]
@@ -72,7 +73,7 @@ func (componentDelete *DeleteAction) processDeployment(context *action.Context) 
 			return err
 		}
 
-		err = plugin.Destroy(cluster, componentDelete.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Destroy(cluster, a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}
