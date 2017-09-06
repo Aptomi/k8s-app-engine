@@ -12,7 +12,10 @@ func WriteJSON(w io.Writer, obj interface{}) error {
 		return err
 	}
 
-	fmt.Fprint(w, string(res))
+	_, err = fmt.Fprint(w, string(res))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

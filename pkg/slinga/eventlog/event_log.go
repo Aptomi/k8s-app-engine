@@ -95,6 +95,9 @@ func (log *EventLog) LogErrorAsWarning(err error) {
 func (eventLog *EventLog) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hook.entries {
 		e.Data["attachedTo"] = eventLog.attachedTo
-		hook.Fire(e)
+		err := hook.Fire(e)
+		if err != nil {
+			panic(err) // is it ok to panic here?
+		}
 	}
 }

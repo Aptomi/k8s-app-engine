@@ -31,14 +31,17 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 	}
 
 	// update actual state
-	a.updateActualState(context)
-	return nil
+	return a.updateActualState(context)
 }
 
-func (a *DeleteAction) updateActualState(context *action.Context) {
+func (a *DeleteAction) updateActualState(context *action.Context) error {
 	// delete component from the actual state
 	delete(context.ActualState.ComponentInstanceMap, a.ComponentKey)
-	context.ActualStateUpdater.Delete(a.ComponentKey)
+	err := context.ActualStateUpdater.Delete(a.ComponentKey)
+	if err != nil {
+		return fmt.Errorf("error while update actual state: %s", err)
+	}
+	return nil
 }
 
 func (a *DeleteAction) processDeployment(context *action.Context) error {

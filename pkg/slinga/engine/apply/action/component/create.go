@@ -32,11 +32,10 @@ func (a *CreateAction) Apply(context *action.Context) error {
 	}
 
 	// update actual state
-	a.updateActualState(context)
-	return nil
+	return a.updateActualState(context)
 }
 
-func (a *CreateAction) updateActualState(context *action.Context) {
+func (a *CreateAction) updateActualState(context *action.Context) error {
 	// get instance from desired state
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
 
@@ -45,7 +44,11 @@ func (a *CreateAction) updateActualState(context *action.Context) {
 
 	// copy it over to the actual state
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	context.ActualStateUpdater.Create(instance)
+	err := context.ActualStateUpdater.Create(instance)
+	if err != nil {
+		return fmt.Errorf("error while update actual state: %s", err)
+	}
+	return nil
 }
 
 func (a *CreateAction) processDeployment(context *action.Context) error {

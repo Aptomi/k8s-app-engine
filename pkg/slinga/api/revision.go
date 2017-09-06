@@ -52,7 +52,10 @@ func (h *RevisionAPI) handleNewRevision(w http.ResponseWriter, r *http.Request, 
 	// initialize and resolve new revision here from current policy + objects
 
 	// temp send back received data (to impl some table output on client side)
-	fmt.Fprint(w, string(body))
+	_, err = fmt.Fprint(w, string(body))
+	if err != nil {
+		panic(fmt.Sprintf("Error while writing response bytes: %s", err))
+	}
 }
 
 func Serve(router *httprouter.Router, ctl controller.RevisionController) {

@@ -28,7 +28,10 @@ var policyCmd = &cobra.Command{
 	Short: "Process policy and execute an action",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		err := cmd.Help()
+		if err != nil {
+			panic(err)
+		}
 	},
 }
 

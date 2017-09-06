@@ -32,18 +32,21 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 	}
 
 	// update actual state
-	a.updateActualState(context)
-	return nil
+	return a.updateActualState(context)
 }
 
-func (a *UpdateAction) updateActualState(context *action.Context) {
+func (a *UpdateAction) updateActualState(context *action.Context) error {
 	// preserve previous creation date before overwriting
 	prevCreatedOn := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedOn
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
 	instance.UpdateTimes(prevCreatedOn, time.Now())
 
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	context.ActualStateUpdater.Update(instance)
+	err := context.ActualStateUpdater.Update(instance)
+	if err != nil {
+		return fmt.Errorf("error while update actual state: %s", err)
+	}
+	return nil
 }
 
 func (a *UpdateAction) processDeployment(context *action.Context) error {

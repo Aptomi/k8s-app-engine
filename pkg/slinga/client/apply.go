@@ -116,8 +116,8 @@ func readFiles(policyPaths []string, codec codec.MarshalUnmarshaler) ([]object.B
 func findPolicyFiles(policyPaths []string) ([]string, error) {
 	allFiles := make([]string, 0, len(policyPaths))
 
-	for _, policyPath := range policyPaths {
-		policyPath, err := filepath.Abs(policyPath)
+	for _, rawPolicyPath := range policyPaths {
+		policyPath, err := filepath.Abs(rawPolicyPath)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading filepath: %s", err)
 		}

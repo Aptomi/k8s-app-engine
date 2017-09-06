@@ -41,12 +41,24 @@ func init() {
 	AptomiCtlCmd.PersistentFlags().StringP("config", "c", "", "Config file or dir path")
 
 	AptomiCtlCmd.PersistentFlags().String("host", "127.0.0.1", "Server API host")
-	viper.BindPFlag("server.host", AptomiCtlCmd.PersistentFlags().Lookup("host"))
-	viper.BindEnv("server.host", envPrefix+"_HOST")
+	err := viper.BindPFlag("server.host", AptomiCtlCmd.PersistentFlags().Lookup("host"))
+	if err != nil {
+		panic(err) // todo is it ok to panic here?
+	}
+	err = viper.BindEnv("server.host", envPrefix+"_HOST")
+	if err != nil {
+		panic(err) // todo is it ok to panic here?
+	}
 
 	AptomiCtlCmd.PersistentFlags().Uint16P("port", "p", 27866, "Server API port")
-	viper.BindPFlag("server.port", AptomiCtlCmd.PersistentFlags().Lookup("port"))
-	viper.BindEnv("server.port", envPrefix+"_PORT")
+	err = viper.BindPFlag("server.port", AptomiCtlCmd.PersistentFlags().Lookup("port"))
+	if err != nil {
+		panic(err) // todo is it ok to panic here?
+	}
+	err = viper.BindEnv("server.port", envPrefix+"_PORT")
+	if err != nil {
+		panic(err) // todo is it ok to panic here?
+	}
 }
 
 func readConfig(configFilePath string) {

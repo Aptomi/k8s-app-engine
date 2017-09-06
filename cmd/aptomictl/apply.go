@@ -25,7 +25,10 @@ var (
 
 func init() {
 	applyCmd.Flags().StringSliceP("policyPaths", "f", make([]string, 0), "Paths to files, dirs with policy to apply")
-	viper.BindPFlag("apply.policyPaths", applyCmd.Flags().Lookup("policyPaths"))
+	err := viper.BindPFlag("apply.policyPaths", applyCmd.Flags().Lookup("policyPaths"))
+	if err != nil {
+		panic(err) // todo is it ok to panic here?
+	}
 
 	AptomiCtlCmd.AddCommand(applyCmd)
 }

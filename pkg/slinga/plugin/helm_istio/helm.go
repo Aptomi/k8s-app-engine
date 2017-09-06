@@ -46,7 +46,7 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 		return err
 	}
 
-	vals, err := yaml.Marshal(params)
+	helmParams, err := yaml.Marshal(params)
 	if err != nil {
 		return err
 	}
@@ -66,19 +66,19 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 			"release": releaseName,
 			"chart":   chartName,
 			"path":    chartPath,
-			"params":  string(vals),
+			"params":  string(helmParams),
 		}).Infof("Installing Helm release '%s', chart '%s'", releaseName, chartName)
 
-		_, err = helmClient.InstallRelease(chartPath, cluster.Config.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(vals), helm.InstallReuseName(true))
+		_, err = helmClient.InstallRelease(chartPath, cluster.Config.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
 	} else {
 		eventLog.WithFields(eventlog.Fields{
 			"release": releaseName,
 			"chart":   chartName,
 			"path":    chartPath,
-			"params":  string(vals),
+			"params":  string(helmParams),
 		}).Infof("Updating Helm release '%s', chart '%s'", releaseName, chartName)
 
-		_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(vals))
+		_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
 	}
 
 	return err
