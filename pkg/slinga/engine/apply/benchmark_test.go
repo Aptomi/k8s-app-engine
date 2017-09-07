@@ -352,7 +352,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *language.Policy, ex
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 
 	// process all actions
-	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
+	actions := diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions
 
 	applier := NewEngineApply(
 		desiredPolicy,

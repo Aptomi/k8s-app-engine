@@ -8,19 +8,26 @@ import (
 	"time"
 )
 
-type CreateAction struct {
-	object.Metadata
-	*action.Base
+var CreateActionObject = &object.Info{
+	Kind:        "action-component-create",
+	Constructor: func() object.Base { return &CreateAction{} },
+}
 
+type CreateAction struct {
+	// Key is the revision id and action id pair
+	*action.Metadata
 	ComponentKey string
 }
 
-func NewCreateAction(componentKey string) *CreateAction {
+func NewCreateAction(revision object.Generation, componentKey string) *CreateAction {
 	return &CreateAction{
-		Metadata:     object.Metadata{}, // TODO: initialize
-		Base:         action.NewBase(),
+		Metadata:     action.NewMetadata(revision, CreateActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
+}
+
+func (a *CreateAction) GetName() string {
+	return "Create component " + a.ComponentKey
 }
 
 func (a *CreateAction) Apply(context *action.Context) error {

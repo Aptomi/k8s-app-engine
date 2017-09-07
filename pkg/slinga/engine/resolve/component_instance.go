@@ -9,14 +9,17 @@ import (
 	"time"
 )
 
+var ComponentInstanceObject = &object.Info{
+	Kind:        "component-instance",
+	Constructor: func() object.Base { return &ComponentInstance{} },
+}
+
 // ComponentInstance is a struct that holds data for a given component instance, containing list of user IDs and calculated labels
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
 type ComponentInstance struct {
 	/*
 		These fields get populated during policy resolution
 	*/
-	object.Metadata // todo it's temporarily
-
 	// Key
 	Key *ComponentInstanceKey
 
@@ -39,6 +42,27 @@ type ComponentInstance struct {
 	// When this instance was created & last updated on
 	CreatedOn time.Time
 	UpdatedOn time.Time
+}
+
+func (instance *ComponentInstance) GetKey() string {
+	return instance.Key.GetKey()
+}
+
+func (instance *ComponentInstance) GetNamespace() string {
+	return "system" // todo make const somewhere for system namespace
+}
+
+func (instance *ComponentInstance) GetKind() string {
+	return ComponentInstanceObject.Kind
+}
+
+func (instance *ComponentInstance) GetName() string {
+	return "<n/a>" // todo replace with something else?
+}
+
+func (instance *ComponentInstance) GetGeneration() object.Generation {
+	// we aren't storing multiple versions of ComponentInstance
+	return 0
 }
 
 // Creates a new component instance

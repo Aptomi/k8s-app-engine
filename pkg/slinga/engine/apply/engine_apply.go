@@ -23,7 +23,7 @@ type EngineApply struct {
 	plugins            plugin.Registry
 
 	// Actions to be applied
-	actions []action.Action
+	actions []action.Base
 
 	// Buffered event log - gets populated while applying changes
 	eventLog *EventLog
@@ -34,7 +34,7 @@ type EngineApply struct {
 
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Action) *EngineApply {
+func NewEngineApply(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,
 		desiredState:       desiredState,

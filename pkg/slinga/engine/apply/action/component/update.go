@@ -8,17 +8,19 @@ import (
 	"time"
 )
 
-type UpdateAction struct {
-	object.Metadata
-	*action.Base
+var UpdateActionObject = &object.Info{
+	Kind:        "action-component-update",
+	Constructor: func() object.Base { return &DeleteAction{} },
+}
 
+type UpdateAction struct {
+	*action.Metadata
 	ComponentKey string
 }
 
-func NewUpdateAction(componentKey string) *UpdateAction {
+func NewUpdateAction(revision object.Generation, componentKey string) *UpdateAction {
 	return &UpdateAction{
-		Metadata:     object.Metadata{}, // TODO: initialize
-		Base:         action.NewBase(),
+		Metadata:     action.NewMetadata(revision, UpdateActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
 }
@@ -33,6 +35,10 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 
 	// update actual state
 	return a.updateActualState(context)
+}
+
+func (a *UpdateAction) GetName() string {
+	return "Update component " + a.ComponentKey
 }
 
 func (a *UpdateAction) updateActualState(context *action.Context) error {

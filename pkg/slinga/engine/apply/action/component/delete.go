@@ -7,19 +7,25 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-type DeleteAction struct {
-	object.Metadata
-	*action.Base
+var DeleteActionObject = &object.Info{
+	Kind:        "action-component-delete",
+	Constructor: func() object.Base { return &DeleteAction{} },
+}
 
+type DeleteAction struct {
+	*action.Metadata
 	ComponentKey string
 }
 
-func NewDeleteAction(componentKey string) *DeleteAction {
+func NewDeleteAction(revision object.Generation, componentKey string) *DeleteAction {
 	return &DeleteAction{
-		Metadata:     object.Metadata{}, // TODO: initialize
-		Base:         action.NewBase(),
+		Metadata:     action.NewMetadata(revision, DeleteActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
+}
+
+func (a *DeleteAction) GetName() string {
+	return "Delete component " + a.ComponentKey
 }
 
 func (a *DeleteAction) Apply(context *action.Context) error {

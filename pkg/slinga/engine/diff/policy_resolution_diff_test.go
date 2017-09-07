@@ -14,7 +14,7 @@ func TestEmptyDiff(t *testing.T) {
 	resolvedNext := resolvePolicy(t, getPolicy(), externalData)
 
 	// Calculate and verify difference
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
 	verifyDiff(t, diff, 0, 0, 0, 0, 0)
 }
 
@@ -39,7 +39,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
 
 	// Calculate difference
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
 	verifyDiff(t, diff, 8, 0, 0, 8, 0)
 }
 
@@ -65,7 +65,7 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 	resolvedDependencyUpdate := resolvePolicy(t, policyNext, externalData)
 
 	// Get the diff
-	diff := NewPolicyResolutionDiff(resolvedDependencyUpdate, resolvedNew)
+	diff := NewPolicyResolutionDiff(resolvedDependencyUpdate, resolvedNew, 0)
 
 	// Check that update has been performed (on component and on parent service)
 	verifyDiff(t, diff, 0, 0, 2, 0, 0)
@@ -82,6 +82,6 @@ func TestDiffHasDestructedComponents(t *testing.T) {
 	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
 
 	// Calculate difference
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
 	verifyDiff(t, diff, 0, 16, 0, 0, 16)
 }

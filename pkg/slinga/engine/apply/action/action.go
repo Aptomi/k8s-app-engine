@@ -4,7 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-type Action interface {
+type Base interface {
 	object.Base
 	Apply(*Context) error
 }

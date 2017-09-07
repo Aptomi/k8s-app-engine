@@ -65,7 +65,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 			cnt.attach++
 		case *component.DetachDependencyAction:
 			cnt.detach++
-		case *cluster.ClustersPostProcessAction:
+		case *cluster.PostProcessAction:
 			cnt.clusters++
 		default:
 			t.Fatalf("Incorrect action type: %T", act)
