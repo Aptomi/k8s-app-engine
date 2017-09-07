@@ -1,29 +1,18 @@
-// Package object includes all unified Object stuff and ways to persist it
 package object
 
 import "strings"
 
-// Metadata represents standard metadata for unified objects.
-// It implements Base interface and it's enough to include it into any struct to make object DB and API
-// layers compatible.
 type Metadata struct {
 	Namespace  string
 	Kind       string
 	Name       string
-	RandAddon  string
 	Generation Generation
 	// TODO(slukjanov): do we need CreatedAt string? I think yes
 	// TODO(slukjanov): should any object have owner?
 }
 
-// GetKey returns object's Key
 func (meta *Metadata) GetKey() string {
-	// todo fix it!!1 separator and slice creation, cache key?
-	return strings.Join([]string{meta.Namespace, meta.Kind, meta.Name, meta.Generation.String()}, "#")
-}
-
-func (meta *Metadata) GetRef() string {
-	return meta.Namespace + KeySeparator + meta.Kind + KeySeparator + meta.Name
+	return strings.Join([]string{meta.Namespace, meta.Kind, meta.Name}, KeySeparator)
 }
 
 // GetNamespace returns object's Namespace
@@ -39,10 +28,6 @@ func (meta *Metadata) GetKind() string {
 // GetName returns object's Name
 func (meta *Metadata) GetName() string {
 	return meta.Name
-}
-
-func (meta *Metadata) GetRandAddon() string {
-	return meta.RandAddon
 }
 
 // GetGeneration returns object's Generation ("version")
