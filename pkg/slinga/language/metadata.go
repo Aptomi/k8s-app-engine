@@ -13,6 +13,7 @@ type Metadata struct {
 }
 
 func (meta *Metadata) GetKey() string {
+	// todo cache key?
 	return strings.Join([]string{meta.Namespace, meta.Kind, meta.Name}, object.KeySeparator)
 }
 
