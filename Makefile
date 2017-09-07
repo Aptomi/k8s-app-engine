@@ -20,7 +20,7 @@ vendor-no-color:
 profile-engine:
 	@echo "Profiling CPU for 30 seconds"
 	${GO} test -bench . -benchtime 30s ./pkg/slinga/engine/apply -cpuprofile cpu.out
-	${GO} tool pprof -web apply.test cpu.out
+	${GO} tool pprof -svg apply.test cpu.out > profile.svg
 
 .PHONY: coverage
 coverage:
