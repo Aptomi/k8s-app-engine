@@ -77,11 +77,9 @@ func KeyFromParts(domain string, namespace string, kind string, name string, ran
 
 // Base interface represents unified object that could be stored in DB, accessed through API, etc.
 type Base interface {
-	GetKey() Key
-	GetRef() string
+	GetKey() string
 	GetNamespace() string
 	GetKind() string
 	GetName() string
-	GetRandAddon() string
 	GetGeneration() Generation
 }

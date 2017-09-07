@@ -14,5 +14,5 @@ type ObjectStore interface {
 	// + GetManyByKeys
 	// + Find(namespace, kind, name, rand, generation) - if some == "" or 0 don't match by it
 
-	GetByKey(object.Key) (object.Base, error)
+	GetByKey(string) (object.Base, error)
 }

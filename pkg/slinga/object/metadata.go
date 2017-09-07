@@ -1,6 +1,8 @@
 // Package object includes all unified Object stuff and ways to persist it
 package object
 
+import "strings"
+
 // Metadata represents standard metadata for unified objects.
 // It implements Base interface and it's enough to include it into any struct to make object DB and API
 // layers compatible.
@@ -15,8 +17,9 @@ type Metadata struct {
 }
 
 // GetKey returns object's Key
-func (meta *Metadata) GetKey() Key {
-	return KeyFromParts("", meta.Namespace, meta.Kind, meta.Name, meta.RandAddon, meta.Generation)
+func (meta *Metadata) GetKey() string {
+	// todo fix it!!1 separator and slice creation, cache key?
+	return strings.Join([]string{meta.Namespace, meta.Kind, meta.Name, meta.Generation.String()}, "#")
 }
 
 func (meta *Metadata) GetRef() string {

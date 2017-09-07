@@ -69,7 +69,7 @@ func (b *boltStore) Save(object object.Base) error {
 	return err
 }
 
-func (b *boltStore) GetByKey(key object.Key) (object.Base, error) {
+func (b *boltStore) GetByKey(key string) (object.Base, error) {
 	var result object.Base
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)

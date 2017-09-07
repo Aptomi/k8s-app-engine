@@ -75,9 +75,9 @@ func Apply(config *viper.Viper) error {
 	table := uitable.New()
 	table.MaxColWidth = 50
 
-	table.AddRow("#", "Namespace", "Kind", "Name", "Rand", "Generation", "Object")
+	table.AddRow("#", "Namespace", "Kind", "Name", "Generation", "Object")
 	for idx, obj := range objects {
-		table.AddRow(idx, obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetRandAddon(), obj.GetGeneration(), obj)
+		table.AddRow(idx, obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration(), obj)
 	}
 	fmt.Println(table)
 
