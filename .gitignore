@@ -8,6 +8,7 @@ test.go
 debug*.log
 apacheds-*
 coverage*
+profile*
 
 /db
 
