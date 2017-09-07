@@ -2,7 +2,7 @@ package language
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/mattn/go-zglob"
@@ -29,7 +29,7 @@ func LoadUnitTestsPolicy(storeDir string) *Policy {
 }
 
 func NewFileLoader(path string) *FileLoader {
-	catalog := NewObjectCatalog(ServiceObject, ContextObject, ClusterObject, RuleObject, DependencyObject)
+	catalog := object.NewObjectCatalog(ServiceObject, ContextObject, ClusterObject, RuleObject, DependencyObject)
 
 	return &FileLoader{yaml.NewCodec(catalog), path}
 }
@@ -39,11 +39,11 @@ type FileLoader struct {
 	path  string
 }
 
-func (store *FileLoader) LoadObjects() ([]Base, error) {
+func (store *FileLoader) LoadObjects() ([]object.Base, error) {
 	files, _ := zglob.Glob(filepath.Join(store.path, "**", "*.yaml"))
 	sort.Strings(files)
 
-	result := make([]Base, 0)
+	result := make([]object.Base, 0)
 	for _, f := range files {
 		if !strings.Contains(f, "external") {
 			objects, err := store.loadObjectsFromFile(f)
@@ -69,7 +69,7 @@ func (store *FileLoader) LoadObjects() ([]Base, error) {
 	return result, nil
 }
 
-func (store *FileLoader) loadObjectsFromFile(path string) ([]Base, error) {
+func (store *FileLoader) loadObjectsFromFile(path string) ([]object.Base, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("Error while reading file %store: %store", path, err)

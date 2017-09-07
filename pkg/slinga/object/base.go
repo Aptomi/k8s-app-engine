@@ -1,9 +1,7 @@
 package object
 
 import (
-	"fmt"
 	"strconv"
-	"strings"
 )
 
 // Generation represents object's "version" and starts from 0
@@ -17,6 +15,7 @@ func (generation Generation) String() string {
 // KeySeparator used to separate parts of the Key
 const KeySeparator = ":"
 
+/*
 // Key represents human-readable unified object's key that can always identify any object in Aptomi.
 // It consists of several parts - [<domain>:]<namespace>:<kind>:<name>:<rand_addon>:<generation>, where:
 // * domain - Aptomi deployment name, optional
@@ -74,6 +73,7 @@ func KeyFromParts(domain string, namespace string, kind string, name string, ran
 	}
 	return Key(fmt.Sprintf("%s:%s:%s:%s:%s", namespace, kind, name, randAddon, generation))
 }
+*/
 
 // Base interface represents unified object that could be stored in DB, accessed through API, etc.
 type Base interface {

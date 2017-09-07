@@ -2,22 +2,22 @@ package language
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 /*
 	This file declares all the necessary structures for Slinga
 */
 
-var PolicyNamespaceDataObject = &Info{
+var PolicyNamespaceDataObject = &object.Info{
 	Kind:        "policy",
-	Constructor: func() Base { return &PolicyNamespaceData{} },
+	Constructor: func() object.Base { return &PolicyNamespaceData{} },
 }
 
 type PolicyNamespaceData struct {
 	Metadata
 
-	Objects map[string]Key
+	Objects map[string]string
 }
 
 // Policy describes the entire policy with all namespaces included
@@ -47,7 +47,7 @@ func NewPolicyNamespace() *PolicyNamespace {
 }
 
 // TODO: deal with namespaces
-func (policy *PolicyNamespace) AddObject(object Base) {
+func (policy *PolicyNamespace) AddObject(object object.Base) {
 	switch kind := object.GetKind(); kind {
 	case ServiceObject.Kind:
 		policy.Services[object.GetName()] = object.(*Service)

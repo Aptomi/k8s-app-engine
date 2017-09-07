@@ -1,12 +1,12 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-var ClusterObject = &Info{
+var ClusterObject = &object.Info{
 	Kind:        "cluster",
-	Constructor: func() Base { return &Cluster{} },
+	Constructor: func() object.Base { return &Cluster{} },
 }
 
 // Cluster defines individual K8s cluster and way to access it

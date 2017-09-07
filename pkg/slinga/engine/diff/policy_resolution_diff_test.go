@@ -2,7 +2,6 @@ package diff
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"testing"
 )
 
@@ -28,7 +27,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 	nextPolicy := language.LoadUnitTestsPolicy("../../testdata/unittests")
 	nextPolicy.Dependencies.AddDependency(
 		&language.Dependency{
-			Metadata: object.Metadata{
+			Metadata: language.Metadata{
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},
@@ -50,7 +49,7 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 	policyNext := language.LoadUnitTestsPolicy("../../testdata/unittests")
 	policyNext.Dependencies.AddDependency(
 		&language.Dependency{
-			Metadata: object.Metadata{
+			Metadata: language.Metadata{
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},

@@ -2,16 +2,16 @@ package language
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 /*
 	This file declares all the necessary structures for Dependencies (User "wants" Service)
 */
 
-var DependencyObject = &Info{
+var DependencyObject = &object.Info{
 	Kind:        "dependency",
-	Constructor: func() Base { return &Dependency{} },
+	Constructor: func() object.Base { return &Dependency{} },
 }
 
 // Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)

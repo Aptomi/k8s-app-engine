@@ -2,14 +2,14 @@ package language
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"sync"
 )
 
-var ServiceObject = &Info{
+var ServiceObject = &object.Info{
 	Kind:        "service",
-	Constructor: func() Base { return &Service{} },
+	Constructor: func() object.Base { return &Service{} },
 }
 
 // Service defines individual service

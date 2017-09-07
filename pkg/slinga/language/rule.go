@@ -3,7 +3,7 @@ package language
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 // LabelsFilter is a labels filter
@@ -22,9 +22,9 @@ type Action struct {
 	Content string
 }
 
-var RuleObject = &Info{
+var RuleObject = &object.Info{
 	Kind:        "rule",
-	Constructor: func() Base { return &Rule{} },
+	Constructor: func() object.Base { return &Rule{} },
 }
 
 // Rule is a global rule

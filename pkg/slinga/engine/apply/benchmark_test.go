@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"math/rand"
 	"strconv"
@@ -195,7 +194,7 @@ func (gen *PolicyGenerator) makeService() *language.Service {
 	id := len(gen.policy.Services)
 
 	service := &language.Service{
-		Metadata: object.Metadata{
+		Metadata: language.Metadata{
 			Kind:      language.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "service-" + strconv.Itoa(id),
@@ -234,7 +233,7 @@ func (gen *PolicyGenerator) makeContexts() {
 		// generate non-matching contexts
 		for i := 0; i < gen.contextsPerService-1; i++ {
 			context := &language.Context{
-				Metadata: object.Metadata{
+				Metadata: language.Metadata{
 					Kind:      language.ContextObject.Kind,
 					Namespace: "main",
 					Name:      "context-" + gen.randomString(20),
@@ -253,7 +252,7 @@ func (gen *PolicyGenerator) makeContexts() {
 
 		// generate matching context
 		context := &language.Context{
-			Metadata: object.Metadata{
+			Metadata: language.Metadata{
 				Kind:      language.ContextObject.Kind,
 				Namespace: "main",
 				Name:      "context-" + gen.randomString(20),
@@ -270,7 +269,7 @@ func (gen *PolicyGenerator) makeContexts() {
 func (gen *PolicyGenerator) makeDependencies() {
 	for i := 0; i < gen.dependencies; i++ {
 		dependency := &language.Dependency{
-			Metadata: object.Metadata{
+			Metadata: language.Metadata{
 				Kind:      language.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dependency-" + strconv.Itoa(i),
@@ -284,7 +283,7 @@ func (gen *PolicyGenerator) makeDependencies() {
 
 func (gen *PolicyGenerator) makeCluster() {
 	cluster := &language.Cluster{
-		Metadata: object.Metadata{
+		Metadata: language.Metadata{
 			Kind:      language.ClusterObject.Kind,
 			Namespace: "main",
 			Name:      "cluster-test",

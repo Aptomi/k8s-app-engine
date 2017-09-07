@@ -3,12 +3,12 @@ package language
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-var ContextObject = &Info{
+var ContextObject = &object.Info{
 	Kind:        "context",
-	Constructor: func() Base { return &Context{} },
+	Constructor: func() object.Base { return &Context{} },
 }
 
 // Context for a given service

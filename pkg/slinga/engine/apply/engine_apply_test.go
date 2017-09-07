@@ -3,7 +3,6 @@ package apply
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -133,7 +132,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Add another dependency, resolve, calculate difference against prev resolution data, emulate save/load
 	desiredPolicyNext := getPolicy()
 	dependencyNew := &language.Dependency{
-		Metadata: object.Metadata{
+		Metadata: language.Metadata{
 			Namespace: "main",
 			Name:      "dep_id_5",
 		},

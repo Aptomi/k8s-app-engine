@@ -4,7 +4,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
@@ -64,7 +63,7 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 // How service is visible from the policy language
 func (node *resolutionNode) proxyService(service *language.Service) interface{} {
 	return struct {
-		object.Metadata
+		language.Metadata
 		Owner interface{}
 	}{
 		Metadata: service.Metadata,

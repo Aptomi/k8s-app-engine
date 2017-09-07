@@ -2,7 +2,6 @@ package resolve
 
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"strconv"

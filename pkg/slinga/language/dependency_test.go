@@ -1,7 +1,6 @@
 package language
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
