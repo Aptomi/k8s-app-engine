@@ -100,7 +100,7 @@ func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.Polic
 	// process deletions all at once
 	for _, rule := range deleteRules {
 		eventLog.WithFields(eventlog.Fields{}).Infof("Deleting Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
-		err := rule.delete()
+		err := rule.destroy()
 		if err != nil {
 			return err
 		}

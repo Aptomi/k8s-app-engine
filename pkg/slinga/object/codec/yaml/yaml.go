@@ -63,17 +63,17 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 		return nil, fmt.Errorf("Single object expected")
 	} else if slice, ok := (*raw).([]interface{}); ok { // if it's an object slice
 		for idx, rawElem := range slice {
-			elem, ok := rawElem.(map[interface{}]interface{}) // each slice elem should be map
+			sliceElem, ok := rawElem.(map[interface{}]interface{}) // each slice elem should be map
 			if !ok {
 				return nil, fmt.Errorf("Element #%d isn't an object", idx)
 			}
 
-			elemData, err := yaml.Marshal(elem) // get []byte for current elem only
+			elemData, err := yaml.Marshal(sliceElem) // get []byte for current elem only
 			if err != nil {
 				return nil, fmt.Errorf("Error while unmarshaling element #%d (marshal step): %s", idx, err)
 			}
 
-			obj, err := c.unmarshalRaw(elem, elemData) // unmarshal to kind type
+			obj, err := c.unmarshalRaw(sliceElem, elemData) // unmarshal to kind type
 			if err != nil {
 				return nil, fmt.Errorf("Error while unmarshaling element #%d (final step): %s", idx, err)
 			}

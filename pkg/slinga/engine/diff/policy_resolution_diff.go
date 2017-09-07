@@ -122,18 +122,18 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 // TODO: refactor once we introduce Action kind
 // Due to the nature of action list generation above, certain actions can be added more than once
 // This will ensure that the list is normalized and there will be only one update action for each service instance
-func normalize(list []action.Action) []action.Action {
+func normalize(actions []action.Action) []action.Action {
 	result := []action.Action{}
 	updateCnt := 0
-	for _, action := range list {
-		_, isUpdate := action.(*component.UpdateAction)
+	for _, act := range actions {
+		_, isUpdate := act.(*component.UpdateAction)
 		if isUpdate {
 			if updateCnt == 0 {
-				result = append(result, action)
+				result = append(result, act)
 			}
 			updateCnt++
 		} else {
-			result = append(result, action)
+			result = append(result, act)
 		}
 	}
 	return result

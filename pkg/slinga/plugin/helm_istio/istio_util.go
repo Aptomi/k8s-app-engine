@@ -146,7 +146,7 @@ func (rule *istioRouteRule) create() error {
 	return nil
 }
 
-func (rule *istioRouteRule) delete() error {
+func (rule *istioRouteRule) destroy() error {
 	out, err := rule.cache.runIstioCmd("delete route-rule "+rule.Service, rule.Cluster)
 	if err != nil {
 		return fmt.Errorf("Failed to delete istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err)

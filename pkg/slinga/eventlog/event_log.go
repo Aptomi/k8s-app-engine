@@ -69,25 +69,25 @@ func (eventLog *EventLog) AttachTo(object interface{}) {
 }
 
 // Append adds entries to the event logs
-func (log *EventLog) Append(that *EventLog) {
-	log.hook.entries = append(log.hook.entries, that.hook.entries...)
+func (eventLog *EventLog) Append(that *EventLog) {
+	eventLog.hook.entries = append(eventLog.hook.entries, that.hook.entries...)
 }
 
-func (log *EventLog) LogError(err error) {
+func (eventLog *EventLog) LogError(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
-		log.WithFields(Fields(errWithDetails.Details())).Error(err.Error())
+		eventLog.WithFields(Fields(errWithDetails.Details())).Error(err.Error())
 	} else {
-		log.WithFields(Fields{}).Error(err.Error())
+		eventLog.WithFields(Fields{}).Error(err.Error())
 	}
 }
 
-func (log *EventLog) LogErrorAsWarning(err error) {
+func (eventLog *EventLog) LogErrorAsWarning(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
-		log.WithFields(Fields(errWithDetails.Details())).Warning(err.Error())
+		eventLog.WithFields(Fields(errWithDetails.Details())).Warning(err.Error())
 	} else {
-		log.WithFields(Fields{}).Warning(err.Error())
+		eventLog.WithFields(Fields{}).Warning(err.Error())
 	}
 }
 

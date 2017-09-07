@@ -88,7 +88,7 @@ func isNumber(s string) bool {
 			return false
 		}
 	}
-	return (state == 2)
+	return state == 2
 }
 
 func isStringLit(s string) bool {

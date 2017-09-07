@@ -148,7 +148,7 @@ func (gen *PolicyGenerator) makeLabels() {
 	}
 
 	gen.generatedLabelKeys = []string{}
-	for key, _ := range gen.generatedLabels {
+	for key := range gen.generatedLabels {
 		gen.generatedLabelKeys = append(gen.generatedLabelKeys, key)
 	}
 }

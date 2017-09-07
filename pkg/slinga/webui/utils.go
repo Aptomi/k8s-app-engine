@@ -26,8 +26,8 @@ import (
 //	return requireMethod(http.MethodPost, handler)
 //}
 
-func stringHasAnyPrefix(str string, prefix ...string) bool {
-	for _, prefix := range prefix {
+func stringHasAnyPrefix(str string, prefixes ...string) bool {
+	for _, prefix := range prefixes {
 		if strings.HasPrefix(str, prefix) {
 			return true
 		}
