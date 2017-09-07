@@ -57,7 +57,7 @@ func (a *UpdateAction) updateActualState(context *action.Context) error {
 
 func (a *UpdateAction) processDeployment(context *action.Context) error {
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	serviceComponent := context.DesiredPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+	serviceComponent := context.DesiredPolicy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if serviceComponent == nil {
 		// This is a service instance. Do nothing
@@ -66,10 +66,10 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 
 	// Instantiate component
 	context.EventLog.WithFields(eventlog.Fields{
-		"componentKey": instance.Key,
+		"componentKey": instance.Metadata.Key,
 		"component":    serviceComponent.Name,
 		"code":         instance.CalculatedCodeParams,
-	}).Info("Updating a running component instance: " + instance.Key.GetKey())
+	}).Info("Updating a running component instance: " + instance.GetKey())
 
 	if serviceComponent.Code != nil {
 		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)

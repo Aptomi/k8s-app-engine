@@ -260,7 +260,7 @@ func (node *resolutionNode) logCannotResolveInstance() {
 }
 
 func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstance) {
-	code := resolver.policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName].Code
+	code := resolver.policy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
 	if code != nil {
 		paramsTemplate := code.Params
 		params := instance.CalculatedCodeParams
@@ -268,18 +268,18 @@ func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstan
 		if len(diff) > 0 {
 			resolver.eventLog.WithFields(Fields{
 				"params": diff,
-			}).Debugf("Calculated code params for component '%s'", instance.Key.GetKey())
+			}).Debugf("Calculated code params for component '%s'", instance.Metadata.Key.GetKey())
 		}
 	}
 }
 
 func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentInstance) {
-	paramsTemplate := resolver.policy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName].Discovery
+	paramsTemplate := resolver.policy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName].Discovery
 	params := instance.CalculatedDiscovery
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {
 		resolver.eventLog.WithFields(Fields{
 			"params": diff,
-		}).Debugf("Calculated discovery params for component '%s'", instance.Key.GetKey())
+		}).Debugf("Calculated discovery params for component '%s'", instance.Metadata.Key.GetKey())
 	}
 }

@@ -81,13 +81,13 @@ func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *Co
 // Appends data to the current PolicyResolution
 func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
 	for _, instance := range ops.ComponentInstanceMap {
-		err := resolution.GetComponentInstanceEntry(instance.Key).appendData(instance)
+		err := resolution.GetComponentInstanceEntry(instance.Metadata.Key).appendData(instance)
 		if err != nil {
 			return err
 		}
 	}
 	for key := range ops.ComponentInstanceMap {
-		resolution.recordProcessingOrder(ops.ComponentInstanceMap[key].Key)
+		resolution.recordProcessingOrder(ops.ComponentInstanceMap[key].Metadata.Key)
 	}
 	return nil
 }

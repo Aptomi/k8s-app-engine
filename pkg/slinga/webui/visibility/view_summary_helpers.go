@@ -69,7 +69,7 @@ func (view SummaryView) getResolvedClusterNameByInst(instance *resolve.Component
 }
 
 func (view SummaryView) getResolvedContextNameByInst(instance *resolve.ComponentInstance) string {
-	return instance.Key.ContextNameWithKeys
+	return instance.Metadata.Key.ContextNameWithKeys
 }
 
 func getWebIDByComponentKey(key string) string {

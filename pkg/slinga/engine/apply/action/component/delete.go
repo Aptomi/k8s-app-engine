@@ -52,7 +52,7 @@ func (a *DeleteAction) updateActualState(context *action.Context) error {
 
 func (a *DeleteAction) processDeployment(context *action.Context) error {
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	component := context.ActualPolicy.Services[instance.Key.ServiceName].GetComponentsMap()[instance.Key.ComponentName]
+	component := context.ActualPolicy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
 		// This is a service instance. Do nothing
@@ -61,10 +61,10 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 
 	// Instantiate component
 	context.EventLog.WithFields(eventlog.Fields{
-		"componentKey": instance.Key,
+		"componentKey": instance.Metadata.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
-	}).Info("Destructing a running component instance: " + instance.Key.GetKey())
+	}).Info("Destructing a running component instance: " + instance.GetKey())
 
 	if component.Code != nil {
 		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)

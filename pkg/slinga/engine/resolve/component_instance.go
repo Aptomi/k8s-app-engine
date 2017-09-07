@@ -14,14 +14,18 @@ var ComponentInstanceObject = &object.Info{
 	Constructor: func() object.Base { return &ComponentInstance{} },
 }
 
+type ComponentInstanceMetadata struct {
+	Key  *ComponentInstanceKey
+	Kind string
+}
+
 // ComponentInstance is a struct that holds data for a given component instance, containing list of user IDs and calculated labels
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
 type ComponentInstance struct {
 	/*
 		These fields get populated during policy resolution
 	*/
-	// Key
-	Key *ComponentInstanceKey
+	Metadata *ComponentInstanceMetadata
 
 	// List of dependencies which are keeping this component instantiated
 	DependencyIds map[string]bool
@@ -44,8 +48,21 @@ type ComponentInstance struct {
 	UpdatedOn time.Time
 }
 
+// Creates a new component instance
+func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
+	return &ComponentInstance{
+		Metadata:             &ComponentInstanceMetadata{cik, ComponentInstanceObject.Kind},
+		DependencyIds:        make(map[string]bool),
+		CalculatedLabels:     NewLabelSet(make(map[string]string)),
+		CalculatedDiscovery:  NestedParameterMap{},
+		CalculatedCodeParams: NestedParameterMap{},
+		EdgesIn:              make(map[string]bool),
+		EdgesOut:             make(map[string]bool),
+	}
+}
+
 func (instance *ComponentInstance) GetKey() string {
-	return instance.Key.GetKey()
+	return instance.Metadata.Key.GetKey()
 }
 
 func (instance *ComponentInstance) GetNamespace() string {
@@ -65,19 +82,6 @@ func (instance *ComponentInstance) GetGeneration() object.Generation {
 	return 0
 }
 
-// Creates a new component instance
-func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
-	return &ComponentInstance{
-		Key:                  cik,
-		DependencyIds:        make(map[string]bool),
-		CalculatedLabels:     NewLabelSet(make(map[string]string)),
-		CalculatedDiscovery:  NestedParameterMap{},
-		CalculatedCodeParams: NestedParameterMap{},
-		EdgesIn:              make(map[string]bool),
-		EdgesOut:             make(map[string]bool),
-	}
-}
-
 // GetRunningTime returns the time for long component has been running
 func (instance *ComponentInstance) GetRunningTime() time.Duration {
 	return time.Since(instance.CreatedOn)
@@ -94,9 +98,9 @@ func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) 
 	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
 		return errors.NewErrorWithDetails(
-			fmt.Sprintf("Invalid policy. Conflicting code parameters for component instance: %s", instance.Key.GetKey()),
+			fmt.Sprintf("Invalid policy. Conflicting code parameters for component instance: %s", instance.GetKey()),
 			errors.Details{
-				"instance":             instance.Key,
+				"instance":             instance.Metadata.Key,
 				"code_params_existing": instance.CalculatedCodeParams,
 				"code_params_new":      codeParams,
 				"diff":                 instance.CalculatedCodeParams.Diff(codeParams),
@@ -113,9 +117,9 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		return errors.NewErrorWithDetails(
-			fmt.Sprintf("Invalid policy. Conflicting discovery parameters for component instance: %s", instance.Key.GetKey()),
+			fmt.Sprintf("Invalid policy. Conflicting discovery parameters for component instance: %s", instance.GetKey()),
 			errors.Details{
-				"instance":                  instance.Key,
+				"instance":                  instance.Metadata.Key,
 				"discovery_params_existing": instance.CalculatedDiscovery,
 				"discovery_params_new":      discoveryParams,
 				"diff":                      instance.CalculatedDiscovery.Diff(discoveryParams),

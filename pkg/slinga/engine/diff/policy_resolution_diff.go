@@ -81,8 +81,8 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 				// if it has a parent service, indicate that it basically gets updated as well
 				// this is required for adjusting update/creation times of a service with changed component
 				// this may produce duplicate "update" actions for the parent service
-				if uNext.Key.IsComponent() {
-					serviceKey := uNext.Key.GetParentServiceKey().GetKey()
+				if uNext.Metadata.Key.IsComponent() {
+					serviceKey := uNext.Metadata.Key.GetParentServiceKey().GetKey()
 					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], component.NewUpdateAction(diff.Revision, serviceKey))
 				}
 			}
