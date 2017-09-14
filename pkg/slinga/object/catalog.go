@@ -8,6 +8,7 @@ type Constructor func() Base
 
 type Info struct {
 	Kind        string
+	Versioned   bool
 	Constructor Constructor
 }
 

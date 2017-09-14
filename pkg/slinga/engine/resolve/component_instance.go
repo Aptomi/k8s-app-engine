@@ -66,7 +66,7 @@ func (instance *ComponentInstance) GetKey() string {
 }
 
 func (instance *ComponentInstance) GetNamespace() string {
-	return "system" // todo make const somewhere for system namespace
+	return object.SystemNS
 }
 
 func (instance *ComponentInstance) GetKind() string {
@@ -74,12 +74,16 @@ func (instance *ComponentInstance) GetKind() string {
 }
 
 func (instance *ComponentInstance) GetName() string {
-	return "<n/a>" // todo replace with something else?
+	return instance.GetKey()
 }
 
 func (instance *ComponentInstance) GetGeneration() object.Generation {
 	// we aren't storing multiple versions of ComponentInstance
 	return 0
+}
+
+func (instance *ComponentInstance) SetGeneration(generation object.Generation) {
+	panic("ComponentInstance isn't a versioned object")
 }
 
 // GetRunningTime returns the time for long component has been running

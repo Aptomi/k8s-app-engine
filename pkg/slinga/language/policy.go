@@ -9,17 +9,6 @@ import (
 	This file declares all the necessary structures for Slinga
 */
 
-var PolicyNamespaceDataObject = &object.Info{
-	Kind:        "policy",
-	Constructor: func() object.Base { return &PolicyNamespaceData{} },
-}
-
-type PolicyNamespaceData struct {
-	Metadata
-
-	Objects map[string]string
-}
-
 // Policy describes the entire policy with all namespaces included
 type Policy = PolicyNamespace
 

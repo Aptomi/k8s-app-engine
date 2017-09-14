@@ -12,6 +12,10 @@ func (generation Generation) String() string {
 	return strconv.FormatUint(uint64(generation), 10)
 }
 
+func (generation Generation) Next() Generation {
+	return generation + 1
+}
+
 // KeySeparator used to separate parts of the Key
 const KeySeparator = ":"
 
@@ -82,4 +86,5 @@ type Base interface {
 	GetKind() string
 	GetName() string
 	GetGeneration() Generation
+	SetGeneration(Generation)
 }

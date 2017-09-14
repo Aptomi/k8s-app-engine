@@ -28,17 +28,18 @@ func TestBoltStore(t *testing.T) {
 	services := make([]object.Base, 0, len(policy.Services))
 
 	for _, service := range policy.Services {
-		err = db.Save(service)
+		updated, err := db.Save(service)
 		if err != nil {
 			panic(err)
 		}
 		services = append(services, service)
+		assert.False(t, updated, "Object saved for the first time")
 	}
 
 	assert.Equal(t, 4, len(services), "Len!")
 
 	for _, service := range services {
-		obj, err := db.GetByKey(service.GetKey())
+		obj, err := db.GetByKey(service.GetNamespace(), service.GetKind(), service.GetKey(), service.GetGeneration())
 		if err != nil {
 			panic(err)
 		}

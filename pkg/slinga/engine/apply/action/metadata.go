@@ -25,7 +25,7 @@ func (meta *Metadata) GetKey() string {
 }
 
 func (meta *Metadata) GetNamespace() string {
-	return "system" // todo make const for system namespace somewhere
+	return object.SystemNS
 }
 
 func (meta *Metadata) GetKind() string {
@@ -35,4 +35,8 @@ func (meta *Metadata) GetKind() string {
 func (meta *Metadata) GetGeneration() object.Generation {
 	// we aren't storing action versions
 	return 0
+}
+
+func (meta *Metadata) SetGeneration(generation object.Generation) {
+	panic("ComponentInstance isn't a versioned object")
 }

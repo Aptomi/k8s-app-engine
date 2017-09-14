@@ -127,7 +127,7 @@ func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
 /*
 
 func (reg *Registry) LoadPolicy(gen Generation) (*Policy, error) {
-	policyObj, err := reg.store.GetNewestOne("system", PolicyNamespaceDataObject.Kind, "main")
+	policyObj, err := reg.store.GetNewestOne(namespace.System, PolicyNamespaceDataObject.Kind, "main")
 	if err != nil {
 		return nil, err
 	}

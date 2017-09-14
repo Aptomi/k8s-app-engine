@@ -34,9 +34,9 @@ import (
 
 func Start(config *viper.Viper) {
 	db := initStore(config)
-	revCtl := initRevisionController(config, db)
+	policyCtl := initPolicyController(config, db)
 
-	srv := initHTTPServer(config, revCtl)
+	srv := initHTTPServer(config, policyCtl)
 
 	panic(srv.ListenAndServe())
 }
@@ -48,18 +48,18 @@ func initStore(config *viper.Viper) store.ObjectStore {
 	return bolt.NewBoltStore(catalog, yaml.NewCodec(catalog))
 }
 
-func initRevisionController(config *viper.Viper, store store.ObjectStore) controller.RevisionController {
-	return controller.NewRevisionController(store)
+func initPolicyController(config *viper.Viper, store store.ObjectStore) controller.PolicyController {
+	return controller.NewPolicyController(store)
 }
 
-func initHTTPServer(config *viper.Viper, revCtl controller.RevisionController) *http.Server {
+func initHTTPServer(config *viper.Viper, policyCtl controller.PolicyController) *http.Server {
 	host, port := "", 8080 // todo(slukjanov): load this properties from config
 	listenAddr := fmt.Sprintf("%s:%d", host, port)
 
 	router := httprouter.New()
 
 	version.Serve(router)
-	api.Serve(router, revCtl)
+	api.Serve(router, policyCtl)
 	webui.Serve(router)
 
 	var handler http.Handler = router

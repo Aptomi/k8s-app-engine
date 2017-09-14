@@ -8,11 +8,11 @@ import (
 	"net/http"
 )
 
-type RevisionAPI struct {
-	ctl controller.RevisionController
+type PolicyAPI struct {
+	ctl controller.PolicyController
 }
 
-func (h *RevisionAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	rev, key, ns := p.ByName("rev"), p.ByName("key"), p.ByName("ns")
 
 	fmt.Printf("[handleGetPolicy] rev: %s, key: %s, ns: %s\n", rev, key, ns)
@@ -40,7 +40,7 @@ func (h *RevisionAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p 
 	}
 }
 
-func (h *RevisionAPI) handleNewRevision(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(fmt.Sprintf("Error while reading bytes from request Body: %s", err))
@@ -58,12 +58,12 @@ func (h *RevisionAPI) handleNewRevision(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
-func Serve(router *httprouter.Router, ctl controller.RevisionController) {
-	h := RevisionAPI{ctl}
+func Serve(router *httprouter.Router, ctl controller.PolicyController) {
+	h := PolicyAPI{ctl}
 
 	router.GET("/api/v1/revision/:rev/policy", h.handleGetPolicy)               // get full policy from specific revision
 	router.GET("/api/v1/revision/:rev/policy/key/:key", h.handleGetPolicy)      // get by key from specific revision
 	router.GET("/api/v1/revision/:rev/policy/namespace/:ns", h.handleGetPolicy) // get policy for namespace from specific revision
 
-	router.POST("/api/v1/revision", h.handleNewRevision)
+	router.POST("/api/v1/revision", h.handlePolicyUpdate)
 }

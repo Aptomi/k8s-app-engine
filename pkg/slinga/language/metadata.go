@@ -32,3 +32,7 @@ func (meta *Metadata) GetName() string {
 func (meta *Metadata) GetGeneration() object.Generation {
 	return meta.Generation
 }
+
+func (meta *Metadata) SetGeneration(generation object.Generation) {
+	meta.Generation = generation
+}
