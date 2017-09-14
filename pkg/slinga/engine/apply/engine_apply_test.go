@@ -45,7 +45,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 	actualState = applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	// check that actual state got updated
-	assert.Equal(t, 16, len(actualState.ComponentInstanceMap), "Actual state should be empty")
+	assert.Equal(t, 12, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 }
 
 func TestApplyCreateFailure(t *testing.T) {
@@ -79,7 +79,7 @@ func TestApplyCreateFailure(t *testing.T) {
 	actualState = applyAndCheck(t, applier, ResError, 4, "Apply failed for component")
 
 	// check that actual state got updated
-	assert.Equal(t, 12, len(actualState.ComponentInstanceMap), "Actual state should be empty")
+	assert.Equal(t, 8, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 }
 
 func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {

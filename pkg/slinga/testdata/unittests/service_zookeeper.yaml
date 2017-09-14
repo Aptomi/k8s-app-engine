@@ -1,0 +1,38 @@
+# Service definition for Zookeeper
+- metadata:
+    kind: service
+    namespace: main
+    name: zookeeper
+
+  owner: 1
+
+  change-labels:
+    set:
+      a: b
+
+  components:
+    - name: component1
+      code:
+        type: aptomi/code/unittests
+        params:
+          cluster: cluster-us-west
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+      dependencies:
+        - component2
+
+    - name: component2
+      code:
+        type: aptomi/code/unittests
+        params:
+          cluster: cluster-us-west
+      change-labels:
+        set: # add/modify
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:

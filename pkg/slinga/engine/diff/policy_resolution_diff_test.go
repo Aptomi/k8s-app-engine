@@ -39,7 +39,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 
 	// Calculate difference
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
-	verifyDiff(t, diff, 8, 0, 0, 8, 0)
+	verifyDiff(t, diff, 6, 0, 0, 6, 0)
 }
 
 func TestDiffHasUpdatedComponents(t *testing.T) {
@@ -82,5 +82,5 @@ func TestDiffHasDestructedComponents(t *testing.T) {
 
 	// Calculate difference
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
-	verifyDiff(t, diff, 0, 16, 0, 0, 16)
+	verifyDiff(t, diff, 0, 12, 0, 0, 12)
 }

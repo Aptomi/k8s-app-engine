@@ -11,7 +11,7 @@ func TestLoadPolicy(t *testing.T) {
 	// Check services
 	assert.Equal(t, 2, len(policy.Services), "Two services should be loaded")
 	assert.Equal(t, "kafka", policy.Services["kafka"].Name, "Service name should be correct")
-	assert.Equal(t, 4, len(policy.Services["kafka"].Components), "Service should have components")
+	assert.Equal(t, 2, len(policy.Services["kafka"].Components), "Service should have components")
 
 	// Check clusters
 	assert.Equal(t, 2, len(policy.Clusters), "Two clusters should be loaded")
@@ -29,5 +29,4 @@ func TestLoadPolicy(t *testing.T) {
 	assert.Nil(t, policy.Services["kafka"].Components[0].Code, "Kafka's first component should be service")
 	assert.Equal(t, "zookeeper", policy.Services["kafka"].Components[0].Service, "Kafka's first component should be service")
 	assert.Equal(t, "aptomi/code/unittests", policy.Services["kafka"].Components[1].Code.Type, "Kafka's second component should be unittests code")
-	assert.Equal(t, "aptomi/code/unittests", policy.Services["kafka"].Components[2].Code.Type, "Kafka's third component should be unittests code")
 }
