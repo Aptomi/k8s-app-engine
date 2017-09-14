@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/api"
 	"github.com/Aptomi/aptomi/pkg/slinga/controller"
 	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
@@ -10,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store/bolt"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/api"
 	"github.com/Aptomi/aptomi/pkg/slinga/version"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
