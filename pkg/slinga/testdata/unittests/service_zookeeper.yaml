@@ -36,3 +36,82 @@
         remove:
           a:
           b:
+
+# Contract
+- metadata:
+    kind: contract
+    namespace: main
+    name: zookeeper
+
+  contexts:
+    # Context definition for prod (high priority)
+    - name: prod-high
+
+      criteria:
+        require-all:
+          - dev == "no" && prod == "yes" && priority >= 200
+        require-any:
+          - dev == "no"
+          - prod == "yes"
+          - priority >= 200
+        require-none:
+          - nozookeeper
+
+      change-labels:
+        set:
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+
+      allocation:
+        service: kafka
+        keys:
+          - "{{.User.Name}}"
+
+    # Context definition for prod (low priority)
+    - name: prod-low
+
+      criteria:
+        require-any:
+          - dev == "no" && prod == "yes" && priority < 200
+        require-none:
+          - nozookeeper
+
+      change-labels:
+        set:
+          prod-low-ctx: true
+          prod-low-alloc: true
+        remove:
+          some-label-to-be-removed:
+
+      allocation:
+        service: kafka
+        keys:
+          - "team-{{.User.Labels.team}}"
+          - "{{index .Labels \"prod-low-ctx\"}}"
+
+    # Context definition for test
+    - name: test
+
+      criteria:
+        require-all:
+          - 10 > 5
+          - 20 > 10
+          - 100 > 50
+        require-any:
+          - dev == "yes" && prod == "no"
+        require-none:
+          - nozookeeper
+
+      change-labels:
+        set:
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+
+      allocation:
+        service: kafka
+        keys:
+          - "{{.User.Labels.team}}"

@@ -1,3 +1,4 @@
+# Kafka
 - metadata:
     kind: service
     namespace: main
@@ -5,19 +6,9 @@
 
   owner: 1
 
-  change-labels:
-    set:
-      a: b
-
   components:
     - name: component1
       service: zookeeper
-      change-labels:
-        set: # add/modify
-          some-test-context-specific-label: some-value
-        remove:
-          a:
-          b:
 
     - name: component2
       discovery:
@@ -54,11 +45,78 @@
           data8:
             param:
               name: false
+      dependencies:
+        - component1
+
+# Contract
+- metadata:
+    kind: contract
+    namespace: main
+    name: kafka
+
+  contexts:
+    # Context definition for prod (high priority)
+    - name: prod-high
+
+      criteria:
+        require-all:
+          - dev == "no" && prod == "yes" && priority >= 200
+        require-any:
+          - dev == "no"
+          - prod == "yes"
+          - priority >= 200
+
       change-labels:
-        set: # add/modify
+        set:
           some-test-context-specific-label: some-value
         remove:
           a:
           b:
-      dependencies:
-        - component1
+
+      allocation:
+        service: kafka
+        keys:
+          - "{{.User.Name}}"
+
+    # Context definition for prod (low priority)
+    - name: prod-low
+
+      criteria:
+        require-any:
+          - dev == "no" && prod == "yes" && priority < 200
+
+      change-labels:
+        set:
+          prod-low-ctx: true
+          prod-low-alloc: true
+        remove:
+          some-label-to-be-removed:
+
+      allocation:
+        service: kafka
+        keys:
+          - "team-{{.User.Labels.team}}"
+          - "{{index .Labels \"prod-low-ctx\"}}"
+
+    # Context definition for test
+    - name: test
+
+      criteria:
+        require-all:
+          - 10 > 5
+          - 20 > 10
+          - 100 > 50
+        require-any:
+          - dev == "yes" && prod == "no"
+
+      change-labels:
+        set:
+          some-test-context-specific-label: some-value
+        remove:
+          a:
+          b:
+
+      allocation:
+        service: kafka
+        keys:
+          - "{{.User.Labels.team}}"

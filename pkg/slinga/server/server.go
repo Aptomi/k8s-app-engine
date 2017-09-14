@@ -34,7 +34,7 @@ import (
 // * in dev mode serve webui files from specified directory, otherwise serve from inside of binary
 
 func Start(config *viper.Viper) {
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
 	cod := yaml.NewCodec(catalog)
 
 	db := initStore(config, catalog, cod)

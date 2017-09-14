@@ -10,23 +10,22 @@ func TestLoadPolicy(t *testing.T) {
 
 	// Check services
 	assert.Equal(t, 2, len(policy.Services), "Two services should be loaded")
-	assert.Equal(t, "kafka", policy.Services["kafka"].Name, "Service name should be correct")
-	assert.Equal(t, 2, len(policy.Services["kafka"].Components), "Service should have components")
+	assert.NotNil(t, policy.Services["kafka"], "Kafka service should be loaded")
+	assert.NotNil(t, policy.Services["zookeeper"], "Zookeeper service should be loaded")
+
+	// Check contracts
+	assert.Equal(t, 2, len(policy.Contracts), "Two contracts should be loaded")
+	assert.NotNil(t, policy.Contracts["kafka"], "Kafka contract should be loaded")
+	assert.Equal(t, 3, len(policy.Contracts["kafka"].Contexts), "Kafka contract should have contexts")
+	assert.NotNil(t, policy.Contracts["zookeeper"], "Zookeeper contract should be loaded")
+	assert.Equal(t, 3, len(policy.Contracts["zookeeper"].Contexts), "Zookeeper contract should have contexts")
 
 	// Check clusters
 	assert.Equal(t, 2, len(policy.Clusters), "Two clusters should be loaded")
 
-	// Check contexts
-	assert.Equal(t, 5, len(policy.Contexts), "Five contexts should be loaded")
-	assert.Equal(t, "test", policy.Contexts["test"].Name, "Context name should be correct")
-	assert.NotNil(t, policy.Contexts["prod-high"].Allocation, "Context should have allocations")
-	assert.NotNil(t, policy.Contexts["prod-low"].Allocation, "Context should have allocations")
-	assert.NotNil(t, policy.Contexts["test"].Allocation, "Context should have allocations")
+	// Check rules
+	assert.Equal(t, 2, len(policy.Rules.Rules), "Correct number of rule action types should be loaded")
 
-	assert.Equal(t, "aptomi/code/unittests", policy.Services["zookeeper"].Components[0].Code.Type, "ZooKeeper's first component should be unittests code")
-	assert.Equal(t, "aptomi/code/unittests", policy.Services["zookeeper"].Components[1].Code.Type, "ZooKeeper's second component should be unittests code")
-
-	assert.Nil(t, policy.Services["kafka"].Components[0].Code, "Kafka's first component should be service")
-	assert.Equal(t, "zookeeper", policy.Services["kafka"].Components[0].Service, "Kafka's first component should be service")
-	assert.Equal(t, "aptomi/code/unittests", policy.Services["kafka"].Components[1].Code.Type, "Kafka's second component should be unittests code")
+	// Check dependencies
+	assert.Equal(t, 4, len(policy.Dependencies.DependenciesByService["kafka"]), "Dependencies on kafka should be declared")
 }

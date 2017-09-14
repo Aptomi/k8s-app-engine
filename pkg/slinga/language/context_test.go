@@ -15,6 +15,7 @@ const (
 )
 
 func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected int, cache *expression.ExpressionCache) {
+	t.Helper()
 	result, err := context.Matches(params, cache)
 	assert.Equal(t, expected == ResError, err != nil, "Context matching (success vs. error): "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
 	if err == nil {
@@ -24,6 +25,7 @@ func match(t *testing.T, context *Context, params *expression.ExpressionParamete
 
 func matchContext(t *testing.T, context *Context, paramsMatch []*expression.ExpressionParameters, paramsDoesntMatch []*expression.ExpressionParameters, paramsError []*expression.ExpressionParameters) {
 	// Evaluate with and without cache
+	t.Helper()
 	cache := expression.NewExpressionCache()
 	for _, params := range paramsMatch {
 		match(t, context, params, ResTrue, nil)
@@ -40,6 +42,7 @@ func matchContext(t *testing.T, context *Context, paramsMatch []*expression.Expr
 }
 
 func evalKeys(t *testing.T, context *Context, params *template.TemplateParameters, expectedError bool, expected []string, cache *template.TemplateCache) {
+	t.Helper()
 	keys, err := context.ResolveKeys(params, cache)
 	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params))
 	if err == nil {
@@ -48,10 +51,21 @@ func evalKeys(t *testing.T, context *Context, params *template.TemplateParameter
 }
 
 func TestServiceContextMatching(t *testing.T) {
-	policy := LoadUnitTestsPolicy("../testdata/unittests")
-
-	// Test prod-high context
-	context := policy.Contexts["prod-high"]
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "context",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"dev == 'no' && prod == 'yes' && priority >= 200"},
+			RequireAny: []string{
+				"priority > 0",
+				"prod == 'yes'",
+				"dev == 'no'",
+			},
+		},
+	}
 
 	// Params which result in matching
 	paramsMatch := []*expression.ExpressionParameters{
@@ -69,17 +83,16 @@ func TestServiceContextMatching(t *testing.T) {
 	paramsDoesntMatch := []*expression.ExpressionParameters{
 		expression.NewExpressionParams(
 			map[string]string{
-				"dev":         "no",
-				"prod":        "yes",
-				"priority":    "200",
-				"nozookeeper": "true",
+				"dev":      "yes",
+				"prod":     "no",
+				"priority": "500",
 			},
 
 			map[string]interface{}{
-				"service": struct {
+				"pname": struct {
 					Name string
 				}{
-					Name: "zookeeper",
+					Name: "pvalue",
 				},
 			},
 		),
@@ -99,8 +112,22 @@ func TestServiceContextMatching(t *testing.T) {
 }
 
 func TestServiceContextRequireAnyFails(t *testing.T) {
-	policy := LoadUnitTestsPolicy("../testdata/unittests")
-	context := policy.Contexts["special-not-matched"]
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "special-not-matched",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"true"},
+			RequireAny: []string{
+				"never1 == 'unbeliveable_value_1'",
+				"never2 == 'unbeliveable_value_2'",
+				"never3 == 'unbeliveable_value_3'",
+			},
+			RequireNone: []string{"false"},
+		},
+	}
 	paramsDoesntMatch := []*expression.ExpressionParameters{
 		expression.NewExpressionParams(
 			map[string]string{
@@ -115,8 +142,17 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 }
 
 func TestServiceContextRequireAnyEmpty(t *testing.T) {
-	policy := LoadUnitTestsPolicy("../testdata/unittests")
-	context := policy.Contexts["special-matched"]
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "special-matched",
+		},
+		Criteria: &Criteria{
+			RequireAll:  []string{"specialname == 'specialvalue'"},
+			RequireNone: []string{"false"},
+		},
+	}
 	paramsMatch := []*expression.ExpressionParameters{
 		expression.NewExpressionParams(
 			map[string]string{
@@ -192,10 +228,25 @@ func TestServiceContextInvalidCriteria(t *testing.T) {
 }
 
 func TestServiceContextKeyResolution(t *testing.T) {
-	policy := LoadUnitTestsPolicy("../testdata/unittests")
-
-	// Test prod-high context
-	context := policy.Contexts["prod-high"]
+	context := &Context{
+		Metadata: Metadata{
+			Kind:      ContextObject.Kind,
+			Namespace: "main",
+			Name:      "context",
+		},
+		Criteria: &Criteria{
+			RequireAll: []string{"true"},
+		},
+		Allocation: &struct {
+			Service string
+			Keys    []string
+		}{
+			Service: "test",
+			Keys: []string{
+				"{{.User.Name}}",
+			},
+		},
+	}
 
 	// Params which result in successful key evaluation
 	paramSuccess := template.NewTemplateParams(

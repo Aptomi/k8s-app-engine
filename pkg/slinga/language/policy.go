@@ -16,9 +16,10 @@ func NewPolicy() *Policy {
 	return NewPolicyNamespace()
 }
 
-// PolicyNamespace describes a specific namespace in a policy (services, contexts, clusters, rules and dependencies, etc)
+// PolicyNamespace describes a specific namespace in a policy (services, contracts, clusters, rules and dependencies, etc)
 type PolicyNamespace struct {
 	Services     map[string]*Service
+	Contracts    map[string]*Contract
 	Contexts     map[string]*Context
 	Clusters     map[string]*Cluster
 	Rules        *GlobalRules
@@ -28,6 +29,7 @@ type PolicyNamespace struct {
 func NewPolicyNamespace() *PolicyNamespace {
 	return &PolicyNamespace{
 		Services:     make(map[string]*Service),
+		Contracts:    make(map[string]*Contract),
 		Contexts:     make(map[string]*Context),
 		Clusters:     make(map[string]*Cluster),
 		Rules:        NewGlobalRules(),
@@ -40,6 +42,8 @@ func (policy *PolicyNamespace) AddObject(object object.Base) {
 	switch kind := object.GetKind(); kind {
 	case ServiceObject.Kind:
 		policy.Services[object.GetName()] = object.(*Service)
+	case ContractObject.Kind:
+		policy.Contracts[object.GetName()] = object.(*Contract)
 	case ContextObject.Kind:
 		policy.Contexts[object.GetName()] = object.(*Context)
 	case ClusterObject.Kind:

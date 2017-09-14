@@ -11,7 +11,7 @@ import (
 )
 
 func TestBoltStore(t *testing.T) {
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
 	db := NewBoltStore(catalog, yaml.NewCodec(catalog))
 
 	f, err := ioutil.TempFile("", t.Name())

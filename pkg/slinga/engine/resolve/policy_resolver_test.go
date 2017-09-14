@@ -165,8 +165,10 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 			RequireAll: []string{"service.Name=='xyz'"},
 		},
 		Allocation: &struct {
-			Keys []string
+			Service string
+			Keys    []string
 		}{
+			Service: "test",
 			Keys: []string{
 				"wowowow {{{{.......",
 			},
@@ -211,8 +213,10 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 			RequireAll: []string{"service.Name=='xyz'"},
 		},
 		Allocation: &struct {
-			Keys []string
+			Service string
+			Keys    []string
 		}{
+			Service: "test",
 			Keys: []string{
 				"wowowow {{{{.......",
 			},

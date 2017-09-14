@@ -21,15 +21,15 @@ func LoadUnitTestsPolicy(storeDir string) *Policy {
 		panic(fmt.Sprintf("Error while loading test policy: %s", err))
 	}
 
-	for _, object := range objects {
-		policy.AddObject(object)
+	for _, obj := range objects {
+		policy.AddObject(obj)
 	}
 
 	return policy
 }
 
 func NewFileLoader(path string) *FileLoader {
-	catalog := object.NewObjectCatalog(ServiceObject, ContextObject, ClusterObject, RuleObject, DependencyObject)
+	catalog := object.NewObjectCatalog(ServiceObject, ContractObject, ContextObject, ClusterObject, RuleObject, DependencyObject)
 
 	return &FileLoader{yaml.NewCodec(catalog), path}
 }

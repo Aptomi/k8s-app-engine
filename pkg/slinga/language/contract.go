@@ -9,13 +9,10 @@ var ContractObject = &object.Info{
 	Constructor: func() object.Base { return &Contract{} },
 }
 
-// Contract defines a collection of individual service
+// Contract defines a contract for service usage
 type Contract struct {
 	Metadata
 
-	Owner        string
-	ChangeLabels LabelOperations `yaml:"change-labels"`
-	Components   []*ServiceComponent
+	// List of contexts
+	Contexts []*Context
 }
-
-// list of contexts[] -> each gets implemented via specific service
