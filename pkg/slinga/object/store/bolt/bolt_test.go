@@ -36,7 +36,7 @@ func TestBoltStore(t *testing.T) {
 		assert.False(t, updated, "Object saved for the first time")
 	}
 
-	assert.Equal(t, 4, len(services), "Len!")
+	assert.Equal(t, 2, len(services), "Len!")
 
 	for _, service := range services {
 		obj, err := db.GetByKey(service.GetNamespace(), service.GetKind(), service.GetKey(), service.GetGeneration())
