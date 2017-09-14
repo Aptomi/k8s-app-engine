@@ -47,6 +47,9 @@ func (c *PolicyControllerImpl) getPolicyData(gen object.Generation) (*PolicyData
 	if err != nil {
 		return nil, err
 	}
+	if dataObj == nil {
+		return nil, nil
+	}
 	data, ok := dataObj.(*PolicyData)
 	if !ok {
 		return nil, fmt.Errorf("Unexpected type while getting PolicyData from DB")
@@ -56,13 +59,17 @@ func (c *PolicyControllerImpl) getPolicyData(gen object.Generation) (*PolicyData
 
 func (c *PolicyControllerImpl) getPolicyFromData(policyData *PolicyData) (*language.Policy, error) {
 	policy := language.NewPolicy()
-	for kind, keyAndGen := range policyData.Objects {
-		for key, gen := range keyAndGen {
-			obj, err := c.store.GetByKey(object.DefaultNS, kind, key, gen)
-			if err != nil {
-				return nil, err
+
+	// in case of first version of policy, we just need to have empty policy
+	if policyData != nil && policyData.Objects != nil {
+		for kind, keyAndGen := range policyData.Objects {
+			for key, gen := range keyAndGen {
+				obj, err := c.store.GetByKey(object.DefaultNS, kind, key, gen)
+				if err != nil {
+					return nil, err
+				}
+				policy.AddObject(obj)
 			}
-			policy.AddObject(obj)
 		}
 	}
 	return policy, nil

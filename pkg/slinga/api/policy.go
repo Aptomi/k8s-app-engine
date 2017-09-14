@@ -3,13 +3,15 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/controller"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"net/http"
 )
 
 type PolicyAPI struct {
-	ctl controller.PolicyController
+	ctl   controller.PolicyController
+	codec codec.MarshalUnmarshaler
 }
 
 func (h *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -46,10 +48,20 @@ func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 		panic(fmt.Sprintf("Error while reading bytes from request Body: %s", err))
 	}
 
+	// todo remove bad logging
 	fmt.Println(string(body))
 
-	// objects, err := h.registry.Codec.UnmarshalOneOrMany(body)
-	// initialize and resolve new revision here from current policy + objects
+	objects, err := h.codec.UnmarshalOneOrMany(body)
+	if err != nil {
+		panic(fmt.Sprintf("Error unmarshaling policy update request: %s", err))
+	}
+	policy, err := h.ctl.UpdatePolicy(objects)
+	if err != nil {
+		panic(fmt.Sprintf("Error while updating policy: %s", err))
+	}
+
+	// todo remove bad logging
+	fmt.Println(policy)
 
 	// temp send back received data (to impl some table output on client side)
 	_, err = fmt.Fprint(w, string(body))
@@ -58,8 +70,8 @@ func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 	}
 }
 
-func Serve(router *httprouter.Router, ctl controller.PolicyController) {
-	h := PolicyAPI{ctl}
+func Serve(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshalUnmarshaler) {
+	h := PolicyAPI{ctl, cod}
 
 	router.GET("/api/v1/revision/:rev/policy", h.handleGetPolicy)               // get full policy from specific revision
 	router.GET("/api/v1/revision/:rev/policy/key/:key", h.handleGetPolicy)      // get by key from specific revision

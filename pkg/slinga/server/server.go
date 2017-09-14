@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/controller"
 	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
+	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store/bolt"
@@ -33,33 +34,40 @@ import (
 // * in dev mode serve webui files from specified directory, otherwise serve from inside of binary
 
 func Start(config *viper.Viper) {
-	db := initStore(config)
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	cod := yaml.NewCodec(catalog)
+
+	db := initStore(config, catalog, cod)
 	policyCtl := initPolicyController(config, db)
 
-	srv := initHTTPServer(config, policyCtl)
+	srv := initHTTPServer(config, policyCtl, cod)
 
 	panic(srv.ListenAndServe())
 }
 
-func initStore(config *viper.Viper) store.ObjectStore {
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
-
+func initStore(config *viper.Viper, catalog *object.Catalog, cod codec.MarshalUnmarshaler) store.ObjectStore {
 	//todo(slukjanov): init bolt store, take file path from config
-	return bolt.NewBoltStore(catalog, yaml.NewCodec(catalog))
+	b := bolt.NewBoltStore(catalog, cod)
+	//todo load from config
+	err := b.Open("/tmp/aptomi.bolt")
+	if err != nil {
+		panic(fmt.Sprintf("Can't open object store: %s", err))
+	}
+	return b
 }
 
 func initPolicyController(config *viper.Viper, store store.ObjectStore) controller.PolicyController {
 	return controller.NewPolicyController(store)
 }
 
-func initHTTPServer(config *viper.Viper, policyCtl controller.PolicyController) *http.Server {
+func initHTTPServer(config *viper.Viper, policyCtl controller.PolicyController, cod codec.MarshalUnmarshaler) *http.Server {
 	host, port := "", 8080 // todo(slukjanov): load this properties from config
 	listenAddr := fmt.Sprintf("%s:%d", host, port)
 
 	router := httprouter.New()
 
 	version.Serve(router)
-	api.Serve(router, policyCtl)
+	api.Serve(router, policyCtl, cod)
 	webui.Serve(router)
 
 	var handler http.Handler = router
