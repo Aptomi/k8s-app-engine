@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/controller"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
 	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"

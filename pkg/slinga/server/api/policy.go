@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/controller"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
