@@ -68,6 +68,7 @@ var policyCmdApply = &cobra.Command{
 		resolver := resolve.NewPolicyResolver(policy, externalData)
 		nextState, eventLog, err := resolver.ResolveAllDependencies()
 		if err != nil {
+			eventLog.Save(&eventlog.HookStdout{})
 			log.Panicf("Cannot resolve policy: %v %v %v", err, nextState, prevState)
 		}
 		eventLog.Save(&eventlog.HookStdout{})
