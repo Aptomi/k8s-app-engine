@@ -18,7 +18,7 @@ import (
 	- calculates PolicyResolution as an output
 */
 
-const THREAD_POOL_SIZE = 1
+const THREAD_POOL_SIZE = 8
 
 type PolicyResolver struct {
 	/*

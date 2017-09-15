@@ -61,7 +61,7 @@ type PolicyGenerator struct {
 	serviceCodeComponents     int
 	codeParams                int
 	serviceDependencyMaxChain int
-	contextsPerService        int
+	contextsPerContract       int
 	users                     int
 	dependencies              int
 
@@ -73,7 +73,7 @@ type PolicyGenerator struct {
 	externalData      *external.Data
 }
 
-func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceDependencyMaxChain, contextsPerService, users int, dependencies int) *PolicyGenerator {
+func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceDependencyMaxChain, contextsPerContract, users, dependencies int) *PolicyGenerator {
 	return &PolicyGenerator{
 		random:                    rand.New(rand.NewSource(randSeed)),
 		labels:                    labels,
@@ -81,7 +81,7 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		serviceCodeComponents:     serviceCodeComponents,
 		codeParams:                codeParams,
 		serviceDependencyMaxChain: serviceDependencyMaxChain,
-		contextsPerService:        contextsPerService,
+		contextsPerContract:       contextsPerContract,
 		users:                     users,
 		dependencies:              dependencies,
 		policy:                    language.NewPolicy(),
@@ -95,8 +95,8 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *exte
 	// generate services
 	maxChainLen := gen.makeServices()
 
-	// generate contexts
-	gen.makeContexts()
+	// generate contracts
+	gen.makeContracts()
 
 	// generate dependencies
 	gen.makeDependencies()
@@ -113,7 +113,7 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *exte
 	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Dependencies = %d, Users = %d\n",
 		len(gen.policy.Services),
 		maxChainLen,
-		len(gen.policy.Contexts),
+		len(gen.policy.Contracts)*gen.contextsPerContract,
 		len(gen.policy.Dependencies.DependenciesByID),
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
@@ -182,8 +182,8 @@ func (gen *PolicyGenerator) makeServices() int {
 		}
 
 		component := &language.ServiceComponent{
-			Name:    "dep-" + strconv.Itoa(i),
-			Service: "service-" + strconv.Itoa(j),
+			Name:     "dep-" + strconv.Itoa(i),
+			Contract: "contract-" + strconv.Itoa(j),
 		}
 		gen.generatedServices[i].Components = append(gen.generatedServices[i].Components, component)
 	}
@@ -228,16 +228,21 @@ func (gen *PolicyGenerator) makeService() *language.Service {
 	return service
 }
 
-func (gen *PolicyGenerator) makeContexts() {
+func (gen *PolicyGenerator) makeContracts() {
 	for i := 0; i < gen.services; i++ {
+		contract := &language.Contract{
+			Metadata: language.Metadata{
+				Kind:      language.ContractObject.Kind,
+				Namespace: "main",
+				Name:      "contract-" + strconv.Itoa(i),
+			},
+			Contexts: []*language.Context{},
+		}
+
 		// generate non-matching contexts
-		for i := 0; i < gen.contextsPerService-1; i++ {
+		for i := 0; i < gen.contextsPerContract-1; i++ {
 			context := &language.Context{
-				Metadata: language.Metadata{
-					Kind:      language.ContextObject.Kind,
-					Namespace: "main",
-					Name:      "context-" + gen.randomString(20),
-				},
+				Name: "context-" + gen.randomString(20),
 				Criteria: &language.Criteria{
 					RequireAll: []string{"true"},
 					RequireAny: []string{
@@ -246,23 +251,27 @@ func (gen *PolicyGenerator) makeContexts() {
 						gen.randomString(20) + "=='" + gen.randomString(20) + "'",
 					},
 				},
+				Allocation: &language.Allocation{
+					Service: "service-" + strconv.Itoa(i),
+				},
 			}
-			gen.policy.AddObject(context)
+			contract.Contexts = append(contract.Contexts, context)
 		}
 
 		// generate matching context
 		context := &language.Context{
-			Metadata: language.Metadata{
-				Kind:      language.ContextObject.Kind,
-				Namespace: "main",
-				Name:      "context-" + gen.randomString(20),
-			},
+			Name: "context-" + gen.randomString(20),
 			Criteria: &language.Criteria{
 				RequireAll: []string{"true"},
-				RequireAny: []string{"service.Name == '" + ("service-" + strconv.Itoa(i)) + "'"},
+			},
+			Allocation: &language.Allocation{
+				Service: "service-" + strconv.Itoa(i),
 			},
 		}
-		gen.policy.AddObject(context)
+		contract.Contexts = append(contract.Contexts, context)
+
+		// add service contract to the policy
+		gen.policy.AddObject(contract)
 	}
 }
 
@@ -274,8 +283,8 @@ func (gen *PolicyGenerator) makeDependencies() {
 				Namespace: "main",
 				Name:      "dependency-" + strconv.Itoa(i),
 			},
-			UserID:  "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
-			Service: "service-" + strconv.Itoa(gen.random.Intn(gen.services)),
+			UserID:   "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
+			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.services)),
 		}
 		gen.policy.AddObject(dependency)
 	}
