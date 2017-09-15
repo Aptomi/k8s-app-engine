@@ -1,6 +1,12 @@
 Implementation:
 
-1. Support for namespaces
+1. Rules [ARCH DISCUSSION NEEDED]
+  - Global-, namespace- and contract-level rules
+  - Ability to set cluster via rules vs in context
+  - Reject everything by default
+  - Have strict evaluation order
+
+2. Support for namespaces [ARCH DISCUSSION NEEDED]
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
   - add references to support "namespace/"
@@ -9,38 +15,35 @@ Implementation:
   - rules in namespaces? global rules in system namespace?
   - rules to reference namespaces?
 
-2. Implement LDAP sync as an external service
+3. ACL [ARCH DISCUSSION NEEDED]
+
+4. Istio [ARCH DISCUSSION NEEDED]
+  - Figure out a good model to fit services like istio into the engine
+  - Without having user to create contexts for them
+
+5. Implement LDAP sync as an external service
   - Generic system for aggregating and storing labels from different data sources
   - Log: gets tied to a separate revision of users, and the service keeps N last revisions)
 
-3. Figure out a good model to fit services like istio into the engine
-  - without having user to create contexts for them
-
-4. Contexts (and possibly other objects, such as rules) are evaluated in random order
-  - If multiple contexts match a dependency, then the behavior will not be deterministic
-  - Policy evaluation, when ran multiple times, can result in different outcomes
-
-5. I, as an operator, can accidentally add a context (or rule), which can easily break all services or move them to another cluster, etc
-  - Need to figure out how to prevent this
-
-7. Implement policy validation
+6. Implement policy validation
   - e.g. compile all expressions, templates, etc
 
-8. Attach apply log to component instances
+7. Attach policy apply log to component instances
 
-9. Speed up resolution process
-   - introduce CompiledPolicy object.
-   - re-compile Code, Discovery, and Topological Sort
-   - logging is in the hot path. consider switching to Uber zap-like approach
+8. Labels for services (to use in expressions)
+
+9. Versions for services
+   - Version is a special label, which can be compared
+
 
 Minor issues:
-- Where/how to store text-based diff for revisions?
 - Get rid of dependency ID
 - Deal with code style and missing comments
 - Shall we consider renaming .User -> .Consumer?
 - Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
 - Unit tests are 50% using "testdata" and 50% using hand-created objects. Might make sense to use the latter everywhere
 - Deal with EscapeName (it's Helm plugin specific, should not be present in engine)
+
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
@@ -150,3 +153,8 @@ Done:
 * Optimize policy resolution
 
 * Multi-threaded policy resolution
+
+* Implemented contracts
+  * contexts are now local to contracts
+  * contexts are evaluated in the order specified in the contract
+  * removed change-labels from services and components
