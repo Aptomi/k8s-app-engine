@@ -63,7 +63,7 @@ build:
 	${GO} build ${GOFLAGS} -v -i -o aptomictl github.com/Aptomi/aptomi/cmd/aptomictl
 
 .PHONY: install
-install:
+install: build
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomi
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomictl
 
