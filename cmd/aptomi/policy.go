@@ -8,6 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
+	"github.com/Aptomi/aptomi/pkg/slinga/graphviz"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -66,15 +67,18 @@ var policyCmdApply = &cobra.Command{
 			secrets.NewSecretLoaderFromDir(GetAptomiPolicyDir()),
 		)
 		resolver := resolve.NewPolicyResolver(policy, externalData)
-		nextState, eventLog, err := resolver.ResolveAllDependencies()
+		resolution, eventLog, err := resolver.ResolveAllDependencies()
 		if err != nil {
 			eventLog.Save(&eventlog.HookStdout{})
-			log.Panicf("Cannot resolve policy: %v %v %v", err, nextState, prevState)
+			log.Panicf("Cannot resolve policy: %v %v %v", err, resolution, prevState)
 		}
 		eventLog.Save(&eventlog.HookStdout{})
 
 		fmt.Println("Success")
-		fmt.Println("Components:", len(nextState.ComponentInstanceMap))
+		fmt.Println("Components:", len(resolution.ComponentInstanceMap))
+
+		// image, _ := graphviz.NewPolicyVisualizationImage(policy, resolution, externalData)
+		// graphviz.OpenImage(image)
 
 		// Process differences
 		// diff := NewRevisionDiff(nextState, prevState)
