@@ -248,7 +248,7 @@ func (node *resolutionNode) logResolvingDependencyOnComponent() {
 	} else if node.component.Contract != "" {
 		node.eventLog.WithFields(Fields{}).Infof("Processing dependency on another contract: %s", node.component.Contract)
 	} else {
-		node.eventLog.WithFields(Fields{}).Warningf("Skipping unknown component (not code and not service): %s", node.component.Name)
+		node.eventLog.WithFields(Fields{}).Warningf("Skipping unknown component (not code and not contract): %s", node.component.Name)
 	}
 }
 
