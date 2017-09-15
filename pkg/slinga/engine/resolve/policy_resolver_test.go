@@ -849,6 +849,6 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	}
 	policy.AddObject(dependency)
 
-	// policy with cycle should not be resolved successfully
+	// unknown component type should not result in critical error
 	resolvePolicy(t, policy, ResSuccess, "")
 }
