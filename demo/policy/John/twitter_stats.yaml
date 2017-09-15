@@ -74,7 +74,7 @@
             name: tweeviz
             tag: "{{ .Labels.tsvisimage }}"
 
-  #        topListSize: 25
+          topListSize: "{{ .Labels.display_top_hashtags }}"
 
           header: Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})
 
@@ -98,6 +98,7 @@
           - org == 'it' && is_operator
       change-labels:
         set:
+          display_top_hashtags: 10
           cluster: cluster-us-east
       allocation:
         service: twitter_stats
@@ -109,6 +110,7 @@
           - org == 'dev'
       change-labels:
         set:
+          display_top_hashtags: 100
           cluster: cluster-us-west
       allocation:
         service: twitter_stats
