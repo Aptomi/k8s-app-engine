@@ -20,22 +20,24 @@ func loadUnitTestsPolicy() *Policy {
 }
 
 func loadPolicyAndResolve(t *testing.T) (*Policy, *PolicyResolution) {
+	t.Helper()
 	policy := loadUnitTestsPolicy()
 	return policy, resolvePolicy(t, policy, ResSuccess, "")
 }
 
 func resolvePolicy(t *testing.T, policy *Policy, expectedResult int, expectedErrorMessage string) *PolicyResolution {
+	t.Helper()
 	externalData := external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
 		secrets.NewSecretLoaderFromDir("../../testdata/unittests"),
 	)
 	resolver := NewPolicyResolver(policy, externalData)
-	result, _, err := resolver.ResolveAllDependencies()
+	result, eventLog, err := resolver.ResolveAllDependencies()
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {
 		// print log into stdout and exit
 		hook := &eventlog.HookStdout{}
-		resolver.eventLog.Save(hook)
+		eventLog.Save(hook)
 		t.FailNow()
 		return nil
 	}
@@ -56,6 +58,7 @@ func resolvePolicy(t *testing.T, policy *Policy, expectedResult int, expectedErr
 }
 
 func getInstanceInternal(t *testing.T, key string, resolution *PolicyResolution) *ComponentInstance {
+	t.Helper()
 	instance, ok := resolution.ComponentInstanceMap[key]
 	if !assert.True(t, ok, "Component instance in resolution data: "+key) {
 		t.FailNow()
@@ -63,7 +66,11 @@ func getInstanceInternal(t *testing.T, key string, resolution *PolicyResolution)
 	return instance
 }
 
-func getInstanceByParams(t *testing.T, serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
-	key := NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName])
+func getInstanceByParams(t *testing.T, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
+	t.Helper()
+	contract := policy.Contracts[contractName]
+	context := contract.FindContextByName(contextName)
+	service := policy.Services[context.Allocation.Service]
+	key := NewComponentInstanceKey(contract, context, allocationKeysResolved, service, service.GetComponentsMap()[componentName])
 	return getInstanceInternal(t, key.GetKey(), resolution)
 }

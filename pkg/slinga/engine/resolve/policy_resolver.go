@@ -18,7 +18,7 @@ import (
 	- calculates PolicyResolution as an output
 */
 
-const THREAD_POOL_SIZE = 8
+const THREAD_POOL_SIZE = 1
 
 type PolicyResolver struct {
 	/*
@@ -169,16 +169,16 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	}
 	node.objectResolved(node.user)
 
-	// Locate the service
-	node.service, err = node.getMatchedService(resolver.policy)
+	// Locate the contract
+	node.contract, err = node.getContract(resolver.policy)
 	if err != nil {
 		// Return a policy processing error in case service is not present in policy
 		return node.cannotResolveInstance(err)
 	}
-	node.objectResolved(node.service)
+	node.objectResolved(node.contract)
 
 	// Process service and transform labels
-	node.transformLabels(node.labels, node.service.ChangeLabels)
+	node.transformLabels(node.labels, node.contract.ChangeLabels)
 
 	// Match the context
 	node.context, err = node.getMatchedContext(resolver.policy)
@@ -193,6 +193,14 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		return node.cannotResolveInstance(nil)
 	}
 	node.objectResolved(node.context)
+
+	// Check that service, which current context is implemented with, exists
+	node.service, err = node.getMatchedService(resolver.policy)
+	if err != nil {
+		// Return a policy processing error in case of context resolution failure
+		return node.cannotResolveInstance(err)
+	}
+	node.objectResolved(node.service)
 
 	// Process context and transform labels
 	node.transformLabels(node.labels, node.context.ChangeLabels)
@@ -239,9 +247,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		node.resolution.StoreEdge(node.serviceKey, node.componentKey)
 
 		// Calculate and store labels for component
-		node.componentLabels = NewLabelSet(node.labels.Labels)
-		node.transformLabels(node.componentLabels, node.component.ChangeLabels)
-		node.resolution.RecordLabels(node.componentKey, node.componentLabels)
+		node.resolution.RecordLabels(node.componentKey, node.labels)
 
 		// Create new map with resolution keys for component
 		node.discoveryTreeNode[node.component.Name] = NestedParameterMap{}
@@ -261,11 +267,11 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 			if err != nil {
 				return node.cannotResolveInstance(err)
 			}
-		} else if node.component.Service != "" {
+		} else if node.component.Contract != "" {
 			// Create a child node for dependency resolution
 			nodeNext := node.createChildNode()
 
-			// Resolve dependency on another service recursively
+			// Resolve dependency on another contract recursively
 			err := resolver.resolveNode(nodeNext)
 
 			// Combine event logs

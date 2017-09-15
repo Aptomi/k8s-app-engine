@@ -30,6 +30,7 @@ func getExternalData() *external.Data {
 }
 
 func resolvePolicy(t *testing.T, policy *language.Policy, externalData *external.Data) *resolve.PolicyResolution {
+	t.Helper()
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
@@ -42,6 +43,7 @@ func resolvePolicy(t *testing.T, policy *language.Policy, externalData *external
 }
 
 func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) *resolve.PolicyResolution {
+	t.Helper()
 	actualState, eventLog, err := apply.Apply()
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
@@ -70,6 +72,7 @@ type componentTimes struct {
 }
 
 func getTimes(t *testing.T, key string, u2 *resolve.PolicyResolution) componentTimes {
+	t.Helper()
 	return componentTimes{
 		created: getInstanceInternal(t, key, u2).CreatedOn,
 		updated: getInstanceInternal(t, key, u2).UpdatedOn,
@@ -77,6 +80,7 @@ func getTimes(t *testing.T, key string, u2 *resolve.PolicyResolution) componentT
 }
 
 func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyResolution) *resolve.ComponentInstance {
+	t.Helper()
 	instance, ok := resolution.ComponentInstanceMap[key]
 	if !assert.True(t, ok, "Component instance exists in resolution data: "+key) {
 		t.FailNow()
@@ -84,8 +88,11 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func getInstanceKey(serviceName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
-	return resolve.NewComponentInstanceKey(serviceName, policy.Contexts[contextName], allocationKeysResolved, policy.Services[serviceName].GetComponentsMap()[componentName]).GetKey()
+func getInstanceKey(contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
+	contract := policy.Contracts[contractName]
+	context := contract.FindContextByName(contextName)
+	service := policy.Services[context.Allocation.Service]
+	return resolve.NewComponentInstanceKey(contract, context, allocationKeysResolved, service, service.GetComponentsMap()[componentName]).GetKey()
 }
 
 func NewTestPluginRegistry(failComponents ...string) plugin.Registry {

@@ -6,22 +6,12 @@
 
   owner: 1
 
-  change-labels:
-    set:
-      a: b
-
   components:
     - name: component1
       code:
         type: aptomi/code/unittests
         params:
           cluster: cluster-us-west
-      change-labels:
-        set: # add/modify
-          some-test-context-specific-label: some-value
-        remove:
-          a:
-          b:
       dependencies:
         - component2
 
@@ -30,18 +20,18 @@
         type: aptomi/code/unittests
         params:
           cluster: cluster-us-west
-      change-labels:
-        set: # add/modify
-          some-test-context-specific-label: some-value
-        remove:
-          a:
-          b:
 
 # Contract
 - metadata:
     kind: contract
     namespace: main
     name: zookeeper
+
+  change-labels:
+    set:
+      x: y
+    remove:
+      z:
 
   contexts:
     # Context definition for prod (high priority)
@@ -65,7 +55,7 @@
           b:
 
       allocation:
-        service: kafka
+        service: zookeeper
         keys:
           - "{{.User.Name}}"
 
@@ -86,7 +76,7 @@
           some-label-to-be-removed:
 
       allocation:
-        service: kafka
+        service: zookeeper
         keys:
           - "team-{{.User.Labels.team}}"
           - "{{index .Labels \"prod-low-ctx\"}}"
@@ -112,6 +102,6 @@
           b:
 
       allocation:
-        service: kafka
+        service: zookeeper
         keys:
           - "{{.User.Labels.team}}"

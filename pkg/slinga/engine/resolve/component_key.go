@@ -20,36 +20,37 @@ type ComponentInstanceKey struct {
 	key string
 
 	// required fields
-	ServiceName         string
-	ContextName         string
+	ContractName        string // mandatory
+	ContextName         string // mandatory
 	ContextNameWithKeys string // calculated
-	ComponentName       string
+	ServiceName         string // determined from the context (included into key for readability)
+	ComponentName       string // component name
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(serviceName string, context *Context, allocationsKeysResolved []string, component *ServiceComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(contract *Contract, context *Context, allocationsKeysResolved []string, service *Service, component *ServiceComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
-	componentName := getComponentNameUnsafe(component)
 	contextNameWithKeys := getContextNameWithKeys(contextName, allocationsKeysResolved)
 	return &ComponentInstanceKey{
-		ServiceName:         serviceName,
+		ContractName:        getContractNameUnsafe(contract),
 		ContextName:         contextName,
 		ContextNameWithKeys: contextNameWithKeys,
-		ComponentName:       componentName,
+		ServiceName:         getServiceNameUnsafe(service),
+		ComponentName:       getComponentNameUnsafe(component),
 	}
 }
 
 // MakeCopy creates a copy of ComponentInstanceKey
 func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	return &ComponentInstanceKey{
-		ServiceName:         cik.ServiceName,
+		ContractName:        cik.ContractName,
 		ContextName:         cik.ContextName,
 		ContextNameWithKeys: cik.ContextNameWithKeys,
 		ComponentName:       cik.ComponentName,
 	}
 }
 
-// IsService returns 'true' if it's a service instance key and we can't go up anymore. And it will return 'false' if it's a component instance key
+// IsService returns 'true' if it's a contract instance key and we can't go up anymore. And it will return 'false' if it's a component instance key
 func (cik *ComponentInstanceKey) IsService() bool {
 	return cik.ComponentName == componentRootName
 }
@@ -74,7 +75,7 @@ func (cik ComponentInstanceKey) GetKey() string {
 	if cik.key == "" {
 		cik.key = strings.Join(
 			[]string{
-				cik.ServiceName,
+				cik.ContractName,
 				cik.ContextNameWithKeys,
 				cik.ComponentName,
 			}, componentInstanceKeySeparator)
@@ -82,7 +83,17 @@ func (cik ComponentInstanceKey) GetKey() string {
 	return cik.key
 }
 
-// If context has not been resolved and we need a key, generate one
+// If contract has not been resolved yet and we need a key, generate one
+// Otherwise use contract name
+func getContractNameUnsafe(contract *Contract) string {
+	if contract == nil {
+		return componentUnresolvedName
+	}
+	return contract.Name
+}
+
+// If context has not been resolved yet and we need a key, generate one
+// Otherwise use context name
 func getContextNameUnsafe(context *Context) string {
 	if context == nil {
 		return componentUnresolvedName
@@ -90,7 +101,17 @@ func getContextNameUnsafe(context *Context) string {
 	return context.Name
 }
 
-// If component has not been resolved and we need a key, generate one
+// If service has not been resolved yet and we need a key, generate one
+// Otherwise use service name
+func getServiceNameUnsafe(service *Service) string {
+	if service == nil {
+		return componentUnresolvedName
+	}
+	return service.Name
+}
+
+// If component has not been resolved yet and we need a key, generate one
+// Otherwise use component name
 func getComponentNameUnsafe(component *ServiceComponent) string {
 	if component == nil {
 		return componentRootName

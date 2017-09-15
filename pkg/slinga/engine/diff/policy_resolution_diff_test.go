@@ -32,7 +32,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 				Name:      "dep_id_5",
 			},
 			UserID:  "5",
-			Service: "kafka",
+			Contract: "kafka",
 		},
 	)
 	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
@@ -54,7 +54,7 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 				Name:      "dep_id_5",
 			},
 			UserID:  "5",
-			Service: "kafka",
+			Contract: "kafka",
 		},
 	)
 	resolvedNew := resolvePolicy(t, policyNext, externalData)

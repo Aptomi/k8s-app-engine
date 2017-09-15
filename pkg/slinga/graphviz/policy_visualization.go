@@ -47,6 +47,9 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 	// Add box/subgraph for users
 	addSubgraphOnce(graph, "Main", "cluster_Users", map[string]string{"label": "Users"}, was)
 
+	// Add box/subgraph for contracts
+	addSubgraphOnce(graph, "Main", "cluster_Contracts", map[string]string{"label": "Contracts"}, was)
+
 	// Add box/subgraph for services
 	addSubgraphOnce(graph, "Main", "cluster_Services", map[string]string{"label": "Services"}, was)
 
@@ -56,9 +59,9 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 
 	// First of all, let's show all dependencies (who requested what)
 	if policy.Dependencies != nil {
-		for service, dependencies := range policy.Dependencies.DependenciesByService {
-			// Add a node with service
-			addNodeOnce(graph, "cluster_Services", service, nil, was)
+		for contractName, dependencies := range policy.Dependencies.DependenciesByContract {
+			// Add a node with contract
+			addNodeOnce(graph, "cluster_Contracts", contractName, nil, was)
 
 			// For every user who has a dependency on this service
 			for _, d := range dependencies {
@@ -73,8 +76,8 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 				}
 				addNodeOnce(graph, "cluster_Users", d.UserID, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
 
-				// Add an edge from user to a service
-				addEdge(graph, d.UserID, service, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
+				// Add an edge from user to a contract
+				addEdge(graph, d.UserID, contractName, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 			}
 		}
 	}
@@ -108,21 +111,21 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 		}
 	}
 
-	// Third, show cross-service dependencies
+	// Third, show service-contract dependencies
 	if policy != nil {
 		for serviceName1, service1 := range policy.Services {
 			// Resolve every component
 			for _, component := range service1.Components {
-				serviceName2 := component.Service
-				if serviceName2 != "" {
+				contractName2 := component.Contract
+				if contractName2 != "" {
 					// Add a node with service1
 					addNodeOnce(graph, "cluster_Services", serviceName1, nil, was)
 
 					// Add a node with service2
-					addNodeOnce(graph, "cluster_Services", serviceName2, nil, was)
+					addNodeOnce(graph, "cluster_Contracts", contractName2, nil, was)
 
 					// Show dependency
-					addEdge(graph, serviceName1, serviceName2, map[string]string{"color": "gray60"})
+					addEdge(graph, serviceName1, contractName2, map[string]string{"color": "gray60"})
 				}
 			}
 		}

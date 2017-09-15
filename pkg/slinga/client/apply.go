@@ -21,7 +21,7 @@ import (
 func Apply(config *viper.Viper) error {
 	policyPaths := config.GetStringSlice("apply.policyPaths")
 
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
 	cod := yaml.NewCodec(catalog)
 
 	allObjects, err := readFiles(policyPaths, cod)

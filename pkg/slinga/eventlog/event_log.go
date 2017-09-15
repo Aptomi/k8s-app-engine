@@ -63,7 +63,7 @@ func (eventLog *EventLog) WithFields(fields Fields) *logrus.Entry {
 }
 
 // AttachTo attaches all entries in this event log to a certain object
-// E.g. dependency, user, service, context, serviceKey
+// E.g. dependency, user, contract, context, serviceKey
 func (eventLog *EventLog) AttachTo(object interface{}) {
 	eventLog.attachedTo.objects = append(eventLog.attachedTo.objects, object)
 }

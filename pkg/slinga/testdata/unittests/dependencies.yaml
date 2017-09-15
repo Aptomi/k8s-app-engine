@@ -3,14 +3,14 @@
     namespace: main
     name: dep_id_1
   userid: 1
-  service: kafka
+  contract: kafka
 
 - metadata:
     kind: dependency
     namespace: main
     name: dep_id_2
   userid: 2
-  service: kafka
+  contract: kafka
   labels:
     important: "yes"
     some-label-to-be-removed: "yes"
@@ -20,11 +20,11 @@
     namespace: main
     name: dep_id_3
   userid: 3
-  service: kafka
+  contract: kafka
 
 - metadata:
     kind: dependency
     namespace: main
     name: dep_id_4
   userid: 4
-  service: kafka
+  contract: kafka

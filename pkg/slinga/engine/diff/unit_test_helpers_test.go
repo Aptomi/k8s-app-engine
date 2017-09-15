@@ -11,6 +11,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 )
 
 func getPolicy() *Policy {
@@ -25,9 +26,12 @@ func getExternalData() *external.Data {
 }
 
 func resolvePolicy(t *testing.T, policy *Policy, externalData *external.Data) *PolicyResolution {
+	t.Helper()
 	resolver := NewPolicyResolver(policy, externalData)
-	result, _, err := resolver.ResolveAllDependencies()
+	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
+		hook := &eventlog.HookStdout{}
+		eventLog.Save(hook)
 		t.FailNow()
 	}
 	return result
@@ -45,6 +49,7 @@ func emulateSaveAndLoadResolution(resolution *PolicyResolution) *PolicyResolutio
 }
 
 func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
+	t.Helper()
 	cnt := struct {
 		create   int
 		update   int

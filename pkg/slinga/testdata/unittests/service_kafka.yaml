@@ -8,7 +8,7 @@
 
   components:
     - name: component1
-      service: zookeeper
+      contract: zookeeper
 
     - name: component2
       discovery:
@@ -53,6 +53,12 @@
     kind: contract
     namespace: main
     name: kafka
+
+  change-labels:
+    set:
+      x: y
+    remove:
+      z:
 
   contexts:
     # Context definition for prod (high priority)

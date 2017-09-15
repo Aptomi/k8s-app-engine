@@ -52,11 +52,7 @@ func evalKeys(t *testing.T, context *Context, params *template.TemplateParameter
 
 func TestServiceContextMatching(t *testing.T) {
 	context := &Context{
-		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
-			Namespace: "main",
-			Name:      "context",
-		},
+		Name: "context",
 		Criteria: &Criteria{
 			RequireAll: []string{"dev == 'no' && prod == 'yes' && priority >= 200"},
 			RequireAny: []string{
@@ -113,11 +109,7 @@ func TestServiceContextMatching(t *testing.T) {
 
 func TestServiceContextRequireAnyFails(t *testing.T) {
 	context := &Context{
-		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
-			Namespace: "main",
-			Name:      "special-not-matched",
-		},
+		Name: "special-not-matched",
 		Criteria: &Criteria{
 			RequireAll: []string{"true"},
 			RequireAny: []string{
@@ -143,11 +135,7 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 
 func TestServiceContextRequireAnyEmpty(t *testing.T) {
 	context := &Context{
-		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
-			Namespace: "main",
-			Name:      "special-matched",
-		},
+		Name: "special-matched",
 		Criteria: &Criteria{
 			RequireAll:  []string{"specialname == 'specialvalue'"},
 			RequireNone: []string{"false"},
@@ -182,28 +170,20 @@ func TestServiceContextEmptyCriteria(t *testing.T) {
 func makeInvalidContexts() []*Context {
 	return []*Context{
 		{
-			Metadata: Metadata{
-				Namespace: "main",
-				Name:      "special-invalid-context-require-all",
-			},
+			Name: "special-invalid-context-require-all",
 			Criteria: &Criteria{
 				RequireAll: []string{"specialname + '123')((("},
 			},
 		},
 		{
-			Metadata: Metadata{
-				Namespace: "main",
-				Name:      "special-invalid-context-require-any",
-			},
+
+			Name: "special-invalid-context-require-any",
 			Criteria: &Criteria{
 				RequireAny: []string{"specialname + '456')((("},
 			},
 		},
 		{
-			Metadata: Metadata{
-				Namespace: "main",
-				Name:      "special-invalid-context-require-none",
-			},
+			Name: "special-invalid-context-require-none",
 			Criteria: &Criteria{
 				RequireNone: []string{"specialname + '789')((("},
 			},
@@ -229,18 +209,11 @@ func TestServiceContextInvalidCriteria(t *testing.T) {
 
 func TestServiceContextKeyResolution(t *testing.T) {
 	context := &Context{
-		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
-			Namespace: "main",
-			Name:      "context",
-		},
+		Name: "context",
 		Criteria: &Criteria{
 			RequireAll: []string{"true"},
 		},
-		Allocation: &struct {
-			Service string
-			Keys    []string
-		}{
+		Allocation: &Allocation {
 			Service: "test",
 			Keys: []string{
 				"{{.User.Name}}",

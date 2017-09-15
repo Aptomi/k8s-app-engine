@@ -71,19 +71,19 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "non-existing-user-123456789",
-		Service: "newservice",
+		UserID:   "non-existing-user-123456789",
+		Contract: "newcontract",
 	}
 	policy.AddObject(dependency)
 
-	// policy with missing user should be resolved successfully
+	// dependency referring to non-existing user should not trigger a critical error
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
 
 	// dependency should be just skipped
 	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should not be resolved")
 }
 
-func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {
+func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
 	dependency := &Dependency{
@@ -92,13 +92,16 @@ func TestPolicyResolverDependencyWithNonExistingService(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "4",
-		Service: "non-existing-service-123456789",
+		UserID:   "4",
+		Contract: "non-existing-contract-123456789",
 	}
 	policy.AddObject(dependency)
 
-	// policy with missing service should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Unable to find service definition")
+	// dependency referring to non-existing contract should not trigger a critical error
+	resolution := resolvePolicy(t, policy, ResSuccess, "")
+
+	// dependency should be just skipped
+	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should not be resolved")
 }
 
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
@@ -114,18 +117,24 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	}
 	policy.AddObject(service)
 
-	context := &Context{
+	contract := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "special-invalid-context-require-any",
+			Name:      "xyz",
 		},
-		Criteria: &Criteria{
-			RequireAll: []string{"service.Name=='xyz'"},
-			RequireAny: []string{"specialname + '123')((("},
-		},
+		Contexts: []*Context{{
+			Name: "special-invalid-context-require-any",
+			Criteria: &Criteria{
+				RequireAll: []string{"true"},
+				RequireAny: []string{"specialname + '123')((("},
+			},
+			Allocation: &Allocation{
+				Service: "xyz",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contract)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -133,8 +142,8 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 	}
 	policy.AddObject(dependency)
 
@@ -155,26 +164,23 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	}
 	policy.AddObject(service)
 
-	context := &Context{
+	contract := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "special-invalid-context-keys",
+			Name:      "xyz",
 		},
-		Criteria: &Criteria{
-			RequireAll: []string{"service.Name=='xyz'"},
-		},
-		Allocation: &struct {
-			Service string
-			Keys    []string
-		}{
-			Service: "test",
-			Keys: []string{
-				"wowowow {{{{.......",
+		Contexts: []*Context{{
+			Name: "special-invalid-context-keys",
+			Allocation: &Allocation{
+				Service: "xyz",
+				Keys: []string{
+					"wowowow {{{{.......",
+				},
 			},
-		},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contract)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -182,8 +188,8 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 	}
 	policy.AddObject(dependency)
 
@@ -203,26 +209,23 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 	}
 	policy.AddObject(service)
 
-	context := &Context{
+	contract := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "special-invalid-context-keys",
+			Name:      "xyz",
 		},
-		Criteria: &Criteria{
-			RequireAll: []string{"service.Name=='xyz'"},
-		},
-		Allocation: &struct {
-			Service string
-			Keys    []string
-		}{
-			Service: "test",
-			Keys: []string{
-				"wowowow {{{{.......",
+		Contexts: []*Context{{
+			Name: "special-invalid-context-keys",
+			Allocation: &Allocation{
+				Service: "xyz",
+				Keys: []string{
+					"wowowow {{{{.......",
+				},
 			},
-		},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contract)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -230,13 +233,13 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 	}
 	policy.AddObject(dependency)
 
 	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Unable to find service owner")
+	resolvePolicy(t, policy, ResError, "Owner doesn't exist")
 }
 
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
@@ -293,17 +296,20 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	}
 	policy.AddObject(service)
 
-	context := &Context{
+	contract := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "xyz-context",
+			Name:      "xyz",
 		},
-		Criteria: &Criteria{
-			RequireAll: []string{"service.Name=='xyz'"},
-		},
+		Contexts: []*Context{{
+			Name: "context",
+			Allocation: &Allocation{
+				Service: "xyz",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contract)
 
 	dependency1 := &Dependency{
 		Metadata: Metadata{
@@ -311,8 +317,8 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new_1",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 		Labels: map[string]string{
 			"deplabel": "1",
 		},
@@ -325,8 +331,8 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new_2",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 		Labels: map[string]string{
 			"deplabel": "2",
 		},
@@ -361,17 +367,20 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	}
 	policy.AddObject(service)
 
-	context := &Context{
+	contract := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "xyz-context",
+			Name:      "xyz",
 		},
-		Criteria: &Criteria{
-			RequireAll: []string{"service.Name=='xyz'"},
-		},
+		Contexts: []*Context{{
+			Name: "context",
+			Allocation: &Allocation{
+				Service: "xyz",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contract)
 
 	dependency1 := &Dependency{
 		Metadata: Metadata{
@@ -379,8 +388,8 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new_1",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 		Labels: map[string]string{
 			"deplabel": "1",
 		},
@@ -393,8 +402,8 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new_2",
 		},
-		UserID:  "7",
-		Service: "xyz",
+		UserID:   "7",
+		Contract: "xyz",
 		Labels: map[string]string{
 			"deplabel": "2",
 		},
@@ -417,8 +426,8 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 		Owner: "1",
 		Components: []*ServiceComponent{
 			{
-				Name:    "component",
-				Service: "serviceB",
+				Name:     "component",
+				Contract: "contractB",
 			},
 		},
 	}
@@ -445,20 +454,40 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 	}
 	policy.AddObject(serviceB)
 
-	context := &Context{
+	contractA := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "a-b-context",
+			Name:      "contractA",
 		},
-		Criteria: &Criteria{
-			RequireAny: []string{
-				"service.Name=='serviceA'",
-				"service.Name=='serviceB'",
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
 			},
-		},
+			Allocation: &Allocation{
+				Service: "serviceA",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	contractB := &Contract{
+		Metadata: Metadata{
+			Kind:      ContractObject.Kind,
+			Namespace: "main",
+			Name:      "contractB",
+		},
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
+			},
+			Allocation: &Allocation{
+				Service: "serviceB",
+			},
+		}},
+	}
+	policy.AddObject(contractA)
+	policy.AddObject(contractB)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -466,8 +495,8 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "serviceA",
+		UserID:   "7",
+		Contract: "contractA",
 	}
 	policy.AddObject(dependency)
 
@@ -487,8 +516,8 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 		Owner: "1",
 		Components: []*ServiceComponent{
 			{
-				Name:    "component",
-				Service: "serviceB",
+				Name:     "component",
+				Contract: "contractB",
 			},
 		},
 	}
@@ -515,20 +544,40 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 	}
 	policy.AddObject(serviceB)
 
-	context := &Context{
+	contractA := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "a-b-context",
+			Name:      "contractA",
 		},
-		Criteria: &Criteria{
-			RequireAny: []string{
-				"service.Name=='serviceA'",
-				"service.Name=='serviceB'",
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
 			},
-		},
+			Allocation: &Allocation{
+				Service: "serviceA",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	contractB := &Contract{
+		Metadata: Metadata{
+			Kind:      ContractObject.Kind,
+			Namespace: "main",
+			Name:      "contractB",
+		},
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
+			},
+			Allocation: &Allocation{
+				Service: "serviceB",
+			},
+		}},
+	}
+	policy.AddObject(contractA)
+	policy.AddObject(contractB)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -536,8 +585,8 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "serviceA",
+		UserID:   "7",
+		Contract: "contractA",
 	}
 	policy.AddObject(dependency)
 
@@ -557,8 +606,8 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		Owner: "1",
 		Components: []*ServiceComponent{
 			{
-				Name:    "component",
-				Service: "serviceB",
+				Name:     "component",
+				Contract: "contractB",
 			},
 		},
 	}
@@ -573,8 +622,8 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		Owner: "1",
 		Components: []*ServiceComponent{
 			{
-				Name:    "component",
-				Service: "serviceC",
+				Name:     "component",
+				Contract: "contractC",
 			},
 		},
 	}
@@ -589,28 +638,64 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		Owner: "1",
 		Components: []*ServiceComponent{
 			{
-				Name:    "component",
-				Service: "serviceA",
+				Name:     "component",
+				Contract: "contractA",
 			},
 		},
 	}
 	policy.AddObject(serviceC)
 
-	context := &Context{
+	contractA := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "a-b-c-context",
+			Name:      "contractA",
 		},
-		Criteria: &Criteria{
-			RequireAny: []string{
-				"service.Name=='serviceA'",
-				"service.Name=='serviceB'",
-				"service.Name=='serviceC'",
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
 			},
-		},
+			Allocation: &Allocation{
+				Service: "serviceA",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	contractB := &Contract{
+		Metadata: Metadata{
+			Kind:      ContractObject.Kind,
+			Namespace: "main",
+			Name:      "contractB",
+		},
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
+			},
+			Allocation: &Allocation{
+				Service: "serviceB",
+			},
+		}},
+	}
+	contractC := &Contract{
+		Metadata: Metadata{
+			Kind:      ContractObject.Kind,
+			Namespace: "main",
+			Name:      "contractC",
+		},
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
+			},
+			Allocation: &Allocation{
+				Service: "serviceC",
+			},
+		}},
+	}
+	policy.AddObject(contractA)
+	policy.AddObject(contractB)
+	policy.AddObject(contractC)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -618,8 +703,8 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "serviceA",
+		UserID:   "7",
+		Contract: "contractA",
 	}
 	policy.AddObject(dependency)
 
@@ -669,19 +754,23 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 	}
 	policy.AddObject(serviceA)
 
-	context := &Context{
+	contractA := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "a-context",
+			Name:      "contractA",
 		},
-		Criteria: &Criteria{
-			RequireAny: []string{
-				"service.Name=='serviceA'",
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
 			},
-		},
+			Allocation: &Allocation{
+				Service: "serviceA",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contractA)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -689,12 +778,12 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "serviceA",
+		UserID:   "7",
+		Contract: "contractA",
 	}
 	policy.AddObject(dependency)
 
-	// policy with cycle should not be resolved successfully
+	// policy with component cycle should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Component cycle detected")
 }
 
@@ -731,19 +820,23 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	}
 	policy.AddObject(serviceA)
 
-	context := &Context{
+	contractA := &Contract{
 		Metadata: Metadata{
-			Kind:      ContextObject.Kind,
+			Kind:      ContractObject.Kind,
 			Namespace: "main",
-			Name:      "a-context",
+			Name:      "contractA",
 		},
-		Criteria: &Criteria{
-			RequireAny: []string{
-				"service.Name=='serviceA'",
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
 			},
-		},
+			Allocation: &Allocation{
+				Service: "serviceA",
+			},
+		}},
 	}
-	policy.AddObject(context)
+	policy.AddObject(contractA)
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -751,8 +844,8 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:  "7",
-		Service: "serviceA",
+		UserID:   "7",
+		Contract: "contractA",
 	}
 	policy.AddObject(dependency)
 

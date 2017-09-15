@@ -50,8 +50,8 @@ func (n dependencyNode) getLabel() string {
 		// for service owner view, don't display much other than a user name
 		return userName
 	}
-	// for consumer view - display full dependency info "user name -> service"
-	return fmt.Sprintf("%s \u2192 %s", userName, n.dependency.Service)
+	// for consumer view - display full dependency info "user name -> contract"
+	return fmt.Sprintf("%s \u2192 %s", userName, n.dependency.Contract)
 }
 
 func (n dependencyNode) getEdgeLabel(dst graphNode) string {

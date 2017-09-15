@@ -29,7 +29,7 @@ func LoadUnitTestsPolicy(storeDir string) *Policy {
 }
 
 func NewFileLoader(path string) *FileLoader {
-	catalog := object.NewObjectCatalog(ServiceObject, ContractObject, ContextObject, ClusterObject, RuleObject, DependencyObject)
+	catalog := object.NewObjectCatalog(ServiceObject, ContractObject, ClusterObject, RuleObject, DependencyObject)
 
 	return &FileLoader{yaml.NewCodec(catalog), path}
 }

@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
 	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
@@ -10,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store/bolt"
 	"github.com/Aptomi/aptomi/pkg/slinga/server/api"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
 	"github.com/Aptomi/aptomi/pkg/slinga/version"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
@@ -34,7 +34,7 @@ import (
 // * in dev mode serve webui files from specified directory, otherwise serve from inside of binary
 
 func Start(config *viper.Viper) {
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ContextObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
 	cod := yaml.NewCodec(catalog)
 
 	db := initStore(config, catalog, cod)

@@ -33,15 +33,16 @@ type resolutionNode struct {
 	// reference to user who requested this dependency
 	user *User
 
-	// reference to the service we are currently resolving
-	serviceName string
-	service     *Service
+	// reference to the contract we are currently resolving
+	contractName string
+	contract     *Contract
 
 	// reference to the current set of labels
 	labels *LabelSet
 
-	// reference to the context that was matched
+	// reference to the context & the corresponding service that were matched
 	context *Context
+	service *Service
 
 	// reference to the allocation keys that were resolved
 	allocationKeysResolved []string
@@ -55,9 +56,6 @@ type resolutionNode struct {
 
 	// reference to the current component key
 	componentKey *ComponentInstanceKey
-
-	// reference to the current labels during component processing
-	componentLabels *LabelSet
 
 	// reference to the current service key
 	serviceKey *ComponentInstanceKey
@@ -93,9 +91,9 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 		user:       user,
 
 		// we start with the service specified in the dependency
-		serviceName: dependency.Service,
+		contractName: dependency.Contract,
 
-		// combining user labels and dependency labels
+		// start with the generated set of labels
 		labels: labels,
 
 		// empty discovery tree
@@ -122,11 +120,11 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		dependency: node.dependency,
 		user:       node.user,
 
-		// we take the current component we are iterating over, and get its service name
-		serviceName: node.component.Service,
+		// we take the current component we are iterating over, and get its contract name
+		contractName: node.component.Contract,
 
-		// we take current processed labels for the component
-		labels: node.componentLabels,
+		// proceed with the current set of labels
+		labels: NewLabelSet(node.labels.Labels),
 
 		// move further by the discovery tree via component name link
 		discoveryTreeNode: node.discoveryTreeNode.GetNestedMap(node.component.Name),
@@ -188,7 +186,7 @@ func (node *resolutionNode) cannotResolveInstance(err error) error {
 // Right now it gets called for as the following get resolved:
 // - dependency
 // - user
-// - service
+// - contract
 // - context
 // - serviceKey
 func (node *resolutionNode) objectResolved(object interface{}) {
@@ -203,22 +201,14 @@ func (node *resolutionNode) checkUserExists() error {
 	return nil
 }
 
-// Helper to get a matched service
-func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) {
-	service := policy.Services[node.serviceName]
-	if service == nil {
-		// This is considered a malformed policy, so let's return an error
-		return nil, node.errorServiceDoesNotExist()
+// Helper to get a contract
+func (node *resolutionNode) getContract(policy *Policy) (*Contract, error) {
+	contract := policy.Contracts[node.contractName]
+	if contract == nil {
+		return nil, node.errorContractDoesNotExist()
 	}
-
-	serviceOwner := node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)
-	if serviceOwner == nil {
-		// This is considered a malformed policy, so let's return an error
-		return nil, node.errorServiceOwnerDoesNotExist()
-	}
-
-	node.logServiceFound(service)
-	return service, nil
+	node.logContractFound(contract)
+	return contract, nil
 }
 
 // Helper to get a matched context
@@ -229,7 +219,7 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	// Find matching context
 	contextualDataForExpression := node.getContextualDataForExpression()
 	var contextMatched *Context
-	for _, context := range policy.Contexts {
+	for _, context := range node.contract.Contexts {
 
 		// Check if context matches (based on criteria)
 		matched, err := context.Matches(contextualDataForExpression, node.resolver.expressionCache)
@@ -276,6 +266,27 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	return contextMatched, nil
 }
 
+// Helper to get a matched service
+func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) {
+	if node.context.Allocation == nil {
+		return nil, node.errorServiceDoesNotExist()
+	}
+
+	service := policy.Services[node.context.Allocation.Service]
+	if service == nil {
+		return nil, node.errorServiceDoesNotExist()
+	}
+
+	serviceOwner := node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)
+	if serviceOwner == nil {
+		// This is considered a malformed policy, so let's return an error
+		return nil, node.errorServiceOwnerDoesNotExist()
+	}
+
+	node.logServiceFound(service)
+	return service, nil
+}
+
 // Helper to resolve allocation keys
 func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, error) {
 	// If there is no allocation, there are no keys to resolve
@@ -304,9 +315,10 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *ServiceComponent) *ComponentInstanceKey {
 	return NewComponentInstanceKey(
-		node.serviceName,
+		node.contract,
 		node.context,
 		node.allocationKeysResolved,
+		node.service,
 		component,
 	)
 }

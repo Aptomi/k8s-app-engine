@@ -16,9 +16,7 @@ import (
 func (node *resolutionNode) getContextualDataForExpression() *expression.ExpressionParameters {
 	return expression.NewExpressionParams(
 		node.labels.Labels,
-		map[string]interface{}{
-			"service": node.proxyService(node.service),
-		},
+		map[string]interface{}{},
 	)
 }
 
@@ -50,7 +48,7 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 			Discovery interface{}
 		}{
 			User:      node.proxyUser(node.user),
-			Labels:    node.componentLabels.Labels,
+			Labels:    node.labels.Labels,
 			Discovery: node.proxyDiscovery(node.discoveryTreeNode, node.componentKey),
 		},
 	)

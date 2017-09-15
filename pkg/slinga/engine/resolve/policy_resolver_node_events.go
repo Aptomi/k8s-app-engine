@@ -9,7 +9,7 @@ import (
 )
 
 /*
-	Non-critical errors. If one of them occurs, the corresponding dependency will not be fulfilled
+	Non-critical errors. If any of them occur, the corresponding dependency will not be fulfilled
 	and engine will move on to processing other dependencies
 */
 
@@ -20,14 +20,27 @@ func (node *resolutionNode) errorUserDoesNotExist() error {
 	)
 }
 
+func (node *resolutionNode) errorContractDoesNotExist() error {
+	return errors.NewErrorWithDetails(
+		fmt.Sprintf("Dependency refers to non-existing contract: "+node.dependency.Contract),
+		errors.Details{},
+	)
+}
+
 /*
 	Critical errors. If one of them occurs, engine will report an error and fail policy processing
 	all together
 */
 
 func (node *resolutionNode) errorServiceDoesNotExist() error {
+	var name string
+	if node.context.Allocation != nil {
+		name = node.context.Allocation.Service
+	} else {
+		name = "allocation block is empty"
+	}
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Unable to find service definition: %s", node.serviceName),
+		fmt.Sprintf("Unable to find service definition: %s", name),
 		errors.Details{},
 	)
 	return NewCriticalError(err)
@@ -35,7 +48,7 @@ func (node *resolutionNode) errorServiceDoesNotExist() error {
 
 func (node *resolutionNode) errorServiceOwnerDoesNotExist() error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Unable to find service owner for service '%s': %s", node.serviceName, node.resolver.policy.Services[node.serviceName].Owner),
+		fmt.Sprintf("Owner doesn't exist for service '%s': %s", node.context.Allocation.Service, node.resolver.policy.Services[node.context.Allocation.Service].Owner),
 		errors.Details{},
 	)
 	return NewCriticalError(err)
@@ -43,7 +56,7 @@ func (node *resolutionNode) errorServiceOwnerDoesNotExist() error {
 
 func (node *resolutionNode) errorWhenTestingContext(context *Context, cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error while trying to match context '%s' for service '%s': %s", context.Name, node.service.Name, cause.Error()),
+		fmt.Sprintf("Error while trying to match context '%s' for contract '%s': %s", context.Name, node.contract.Name, cause.Error()),
 		errors.Details{
 			"context": context,
 			"cause":   cause,
@@ -54,7 +67,7 @@ func (node *resolutionNode) errorWhenTestingContext(context *Context, cause erro
 
 func (node *resolutionNode) errorGettingClusterForGlobalRules(context *Context, labelSet *LabelSet, cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Can't evaluate global rules for service '%s', context '%s' due to cluster error: %s", node.service.Name, context.Name, cause.Error()),
+		fmt.Sprintf("Can't evaluate global rules for contract '%s', context '%s' due to cluster error: %s", node.contract.Name, context.Name, cause.Error()),
 		errors.Details{
 			"context": context,
 			"labels":  labelSet,
@@ -66,7 +79,7 @@ func (node *resolutionNode) errorGettingClusterForGlobalRules(context *Context, 
 
 func (node *resolutionNode) errorWhenTestingGlobalRule(context *Context, rule *Rule, labelSet *LabelSet, cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error while testing global rule '%s' on service '%s', context '%s': %s", rule.Name, node.service.Name, context.Name, cause),
+		fmt.Sprintf("Error while testing global rule '%s' on contract '%s', context '%s': %s", rule.Name, node.contract.Name, context.Name, cause),
 		errors.Details{
 			"context": context,
 			"rule":    rule,
@@ -79,7 +92,7 @@ func (node *resolutionNode) errorWhenTestingGlobalRule(context *Context, rule *R
 
 func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error while resolving allocation keys for service '%s', context '%s': %s", node.service.Name, node.context.Name, cause.Error()),
+		fmt.Sprintf("Error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, cause.Error()),
 		errors.Details{
 			"cause": cause,
 		},
@@ -104,7 +117,7 @@ func (node *resolutionNode) errorWhenDoingTopologicalSort(cause error) error {
 
 func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error when processing code params for service '%s', context '%s', component '%s': %s", node.service.Name, node.context.Name, node.component.Name, cause.Error()),
+		fmt.Sprintf("Error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause.Error()),
 		errors.Details{
 			"component":       node.component,
 			"contextual_data": node.getContextualDataForCodeDiscoveryTemplate(),
@@ -116,7 +129,7 @@ func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
 
 func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error when processing discovery params for service '%s', context '%s', component '%s': %s", node.service.Name, node.context.Name, node.component.Name, cause.Error()),
+		fmt.Sprintf("Error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause.Error()),
 		errors.Details{
 			"component":       node.component,
 			"contextual_data": node.getContextualDataForCodeDiscoveryTemplate(),
@@ -147,10 +160,10 @@ func (node *resolutionNode) logStartResolvingDependency() {
 	}
 	if node.depth == 0 {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", userName, node.dependency.Service)
+		node.eventLog.WithFields(Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", userName, node.dependency.Contract)
 	} else {
 		// recursively processing sub-dependencies
-		node.eventLog.WithFields(Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Service, node.serviceName, node.depth)
+		node.eventLog.WithFields(Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Contract, node.contractName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
@@ -166,6 +179,12 @@ func (node *resolutionNode) logLabels(labelSet *LabelSet, scope string) {
 	}).Infof("Labels (%s): %s and %d secrets", scope, labelSet.Labels, secretCnt)
 }
 
+func (node *resolutionNode) logContractFound(contract *Contract) {
+	node.eventLog.WithFields(Fields{
+		"contract": contract,
+	}).Debugf("Contract found in policy: '%s'", contract.Name)
+}
+
 func (node *resolutionNode) logServiceFound(service *Service) {
 	node.eventLog.WithFields(Fields{
 		"service": service,
@@ -174,24 +193,24 @@ func (node *resolutionNode) logServiceFound(service *Service) {
 
 func (node *resolutionNode) logStartMatchingContexts() {
 	contextNames := []string{}
-	for _, context := range node.resolver.policy.Contexts {
+	for _, context := range node.contract.Contexts {
 		contextNames = append(contextNames, context.Name)
 	}
-	node.eventLog.WithFields(Fields{}).Infof("Resolving context for service '%s'. Trying contexts: %s", node.service.Name, contextNames)
+	node.eventLog.WithFields(Fields{}).Infof("Picking context within contract '%s'. Trying contexts: %s", node.contract.Name, contextNames)
 }
 
 func (node *resolutionNode) logContextMatched(contextMatched *Context) {
-	node.eventLog.WithFields(Fields{}).Infof("Found matching context for service '%s': %s", node.service.Name, contextMatched.Name)
+	node.eventLog.WithFields(Fields{}).Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
 }
 
 func (node *resolutionNode) logContextNotMatched() {
-	node.eventLog.WithFields(Fields{}).Warningf("Unable to find matching context for service: '%s'", node.service.Name)
+	node.eventLog.WithFields(Fields{}).Warningf("Unable to find matching context within contract: '%s'", node.contract.Name)
 }
 
 func (node *resolutionNode) logTestedContextCriteria(context *Context, matched bool) {
 	node.eventLog.WithFields(Fields{
 		"context": context,
-	}).Debugf("Trying context '%s' for service '%s'. Matched = %t", context.Name, node.service.Name, matched)
+	}).Debugf("Trying context '%s' within contract '%s'. Matched = %t", context.Name, node.contract.Name, matched)
 }
 
 func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labelSet *LabelSet, noViolations bool) {
@@ -199,9 +218,9 @@ func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labe
 		"context": context,
 	}
 	if noViolations {
-		node.eventLog.WithFields(fields).Debugf("No global rule violations found for service: '%s', context: %s", node.service.Name, context.Name)
+		node.eventLog.WithFields(fields).Debugf("No global rule violations found for context '%s' within contract '%s'", context.Name, node.contract.Name)
 	} else {
-		node.eventLog.WithFields(fields).Debugf("Detected global rule violation for service: '%s', context: %s", node.service.Name, context.Name)
+		node.eventLog.WithFields(fields).Debugf("Detected global rule violation for context '%s' within contract '%s'", context.Name, node.contract.Name)
 	}
 }
 
@@ -211,7 +230,7 @@ func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rul
 		"rule":    rule,
 		"labels":  labelSet,
 		"match":   match,
-	}).Debugf("Testing if global rule '%s' applies to service '%s', context '%s'. Result: %t", rule.Name, node.service.Name, context.Name, match)
+	}).Debugf("Testing if global rule '%s' applies to context '%s' within contract '%s'. Result: %t", rule.Name, context.Name, node.contract.Name, match)
 }
 
 func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys []string) {
@@ -219,15 +238,15 @@ func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys [
 		node.eventLog.WithFields(Fields{
 			"keys":         node.context.Allocation.Keys,
 			"keysResolved": resolvedKeys,
-		}).Infof("Allocation keys successfully resolved for service '%s', context '%s': %s", node.service.Name, node.context.Name, resolvedKeys)
+		}).Infof("Allocation keys successfully resolved for context '%s' within contract '%s': %s", node.context.Name, node.contract.Name, resolvedKeys)
 	}
 }
 
 func (node *resolutionNode) logResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
 		node.eventLog.WithFields(Fields{}).Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
-	} else if node.component.Service != "" {
-		node.eventLog.WithFields(Fields{}).Infof("Processing dependency on another service: %s", node.component.Service)
+	} else if node.component.Contract != "" {
+		node.eventLog.WithFields(Fields{}).Infof("Processing dependency on another contract: %s", node.component.Contract)
 	} else {
 		node.eventLog.WithFields(Fields{}).Warningf("Skipping unknown component (not code and not service): %s", node.component.Name)
 	}
@@ -241,21 +260,23 @@ func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstan
 	}
 	if node.depth == 0 && cik.IsService() {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(fields).Infof("Successfully resolved dependency '%s' -> '%s': %s", node.user.Name, node.dependency.Service, cik.GetKey())
+		node.eventLog.WithFields(fields).Infof("Successfully resolved dependency '%s' -> '%s': %s", node.user.Name, node.dependency.Contract, cik.GetKey())
 	} else if cik.IsService() {
 		// resolved service instance
-		node.eventLog.WithFields(fields).Infof("Successfully resolved service instance '%s' -> '%s': %s", node.user.Name, node.service.Name, cik.GetKey())
+		node.eventLog.WithFields(fields).Infof("Successfully resolved service instance '%s' -> '%s': %s", node.user.Name, node.contract.Name, cik.GetKey())
 	} else {
 		// resolved component instance
-		node.eventLog.WithFields(fields).Infof("Successfully resolved component instance '%s' -> '%s' (component '%s'): %s", node.user.Name, node.service.Name, node.component.Name, cik.GetKey())
+		node.eventLog.WithFields(fields).Infof("Successfully resolved component instance '%s' -> '%s' (component '%s'): %s", node.user.Name, node.contract.Name, node.component.Name, cik.GetKey())
 	}
 }
 
 func (node *resolutionNode) logCannotResolveInstance() {
-	if node.component == nil {
-		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve service instance: service '%s'", node.serviceName)
+	if node.service == nil {
+		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve instance: contract '%s'", node.contractName)
+	} else if node.component == nil {
+		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s'", node.contractName, node.service.Name)
 	} else {
-		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve component instance: service '%s', component '%s'", node.serviceName, node.component.Name)
+		node.eventLog.WithFields(Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s', component '%s'", node.contractName, node.service.Name, node.component.Name)
 	}
 }
 

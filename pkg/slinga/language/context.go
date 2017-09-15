@@ -3,24 +3,20 @@ package language
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-var ContextObject = &object.Info{
-	Kind:        "context",
-	Constructor: func() object.Base { return &Context{} },
+// Allocation
+type Allocation struct {
+	Service string
+	Keys    []string
 }
 
-// Context for a given service
+// Context
 type Context struct {
-	Metadata
-
+	Name         string
 	Criteria     *Criteria
 	ChangeLabels LabelOperations `yaml:"change-labels"`
-	Allocation   *struct {
-		Service string
-		Keys    []string
-	}
+	Allocation   *Allocation
 }
 
 // Matches checks if context criteria is satisfied

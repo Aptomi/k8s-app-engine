@@ -27,5 +27,5 @@ func TestLoadPolicy(t *testing.T) {
 	assert.Equal(t, 2, len(policy.Rules.Rules), "Correct number of rule action types should be loaded")
 
 	// Check dependencies
-	assert.Equal(t, 4, len(policy.Dependencies.DependenciesByService["kafka"]), "Dependencies on kafka should be declared")
+	assert.Equal(t, 4, len(policy.Dependencies.DependenciesByContract["kafka"]), "Dependencies on kafka should be declared")
 }

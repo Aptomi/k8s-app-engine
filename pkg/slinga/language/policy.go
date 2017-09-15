@@ -20,7 +20,6 @@ func NewPolicy() *Policy {
 type PolicyNamespace struct {
 	Services     map[string]*Service
 	Contracts    map[string]*Contract
-	Contexts     map[string]*Context
 	Clusters     map[string]*Cluster
 	Rules        *GlobalRules
 	Dependencies *GlobalDependencies
@@ -30,7 +29,6 @@ func NewPolicyNamespace() *PolicyNamespace {
 	return &PolicyNamespace{
 		Services:     make(map[string]*Service),
 		Contracts:    make(map[string]*Contract),
-		Contexts:     make(map[string]*Context),
 		Clusters:     make(map[string]*Cluster),
 		Rules:        NewGlobalRules(),
 		Dependencies: NewGlobalDependencies(),
@@ -44,8 +42,6 @@ func (policy *PolicyNamespace) AddObject(object object.Base) {
 		policy.Services[object.GetName()] = object.(*Service)
 	case ContractObject.Kind:
 		policy.Contracts[object.GetName()] = object.(*Contract)
-	case ContextObject.Kind:
-		policy.Contexts[object.GetName()] = object.(*Context)
 	case ClusterObject.Kind:
 		policy.Clusters[object.GetName()] = object.(*Cluster)
 	case RuleObject.Kind:

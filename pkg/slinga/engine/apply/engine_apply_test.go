@@ -137,7 +137,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 			Name:      "dep_id_5",
 		},
 		UserID:  "5",
-		Service: "kafka",
+		Contract: "kafka",
 	}
 	desiredPolicyNext.Dependencies.AddDependency(dependencyNew)
 	desiredStateNext := resolvePolicy(t, desiredPolicyNext, externalData)

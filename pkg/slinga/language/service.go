@@ -16,9 +16,8 @@ var ServiceObject = &object.Info{
 type Service struct {
 	Metadata
 
-	Owner        string
-	ChangeLabels LabelOperations `yaml:"change-labels"`
-	Components   []*ServiceComponent
+	Owner      string
+	Components []*ServiceComponent
 
 	// Lazily evaluated fields (all components topologically sorted). Use via getter
 	componentsOrderedOnce sync.Once
@@ -31,12 +30,15 @@ type Service struct {
 
 // ServiceComponent defines component within a service
 type ServiceComponent struct {
-	Name         string
-	Service      string
+	Name string
+
+	// Component can point to a contract as a dependency
+	Contract string
+
+	// Otherwise it's a code component
 	Code         *Code
 	Discovery    NestedParameterMap
 	Dependencies []string
-	ChangeLabels LabelOperations `yaml:"change-labels"`
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances
