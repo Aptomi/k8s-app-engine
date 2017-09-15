@@ -9,7 +9,7 @@
   components:
 
     - name: zookeeper
-      service: zookeeper
+      contract: zookeeper
 
     - name: kafka
       discovery:
@@ -28,3 +28,32 @@
 
       dependencies:
         - zookeeper
+
+# Contract for Kafka
+- metadata:
+    kind: contract
+    namespace: main
+    name: kafka
+
+  contexts:
+    # Production instance of the service (operated by ops/IT)
+    - name: prod
+      criteria:
+        require-all:
+          - org == 'it' && is_operator
+      change-labels:
+        set:
+          cluster: cluster-us-east
+      allocation:
+        service: kafka
+
+    # Staging instance of the service (for developers)
+    - name: stage
+      criteria:
+        require-all:
+          - org == 'dev'
+      change-labels:
+        set:
+          cluster: cluster-us-west
+      allocation:
+        service: kafka

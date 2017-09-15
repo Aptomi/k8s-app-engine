@@ -9,10 +9,10 @@
   components:
 
     - name: analytics_pipeline
-      service: analytics_pipeline
+      contract: analytics_pipeline
 
     - name: istio
-      service: istio
+      contract: istio
 
     # Publisher (Twitter Streaming API -> kafka)
     - name: tweepub
@@ -83,3 +83,34 @@
             path: "/twitter-{{ .Discovery.service.instanceId }}"
       dependencies:
         - analytics_pipeline
+
+# Contract for Twitter stats
+- metadata:
+    kind: contract
+    namespace: main
+    name: twitter_stats
+
+  contexts:
+    # Production instance of the service (operated by ops/IT)
+    - name: prod
+      criteria:
+        require-all:
+          - org == 'it' && is_operator
+      change-labels:
+        set:
+          cluster: cluster-us-east
+      allocation:
+        service: twitter_stats
+
+    # Staging instance of the service (for developers - individual instances)
+    - name: stage
+      criteria:
+        require-all:
+          - org == 'dev'
+      change-labels:
+        set:
+          cluster: cluster-us-west
+      allocation:
+        service: twitter_stats
+        keys:
+          - "{{ .User.Name }}"

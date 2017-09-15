@@ -9,7 +9,7 @@
   components:
 
     - name: zookeeper
-      service: zookeeper
+      contract: zookeeper
 
     - name: spark
       discovery:
@@ -33,3 +33,32 @@
             path: "/{{ .Discovery.service.instanceId }}"
       dependencies:
         - zookeeper
+
+# Contract for Spark
+- metadata:
+    kind: contract
+    namespace: main
+    name: spark
+
+  contexts:
+    # Production instance of the service (operated by ops/IT)
+    - name: prod
+      criteria:
+        require-all:
+          - org == 'it' && is_operator
+      change-labels:
+        set:
+          cluster: cluster-us-east
+      allocation:
+        service: spark
+
+    # Staging instance of the service (for developers)
+    - name: stage
+      criteria:
+        require-all:
+          - org == 'dev'
+      change-labels:
+        set:
+          cluster: cluster-us-west
+      allocation:
+        service: spark

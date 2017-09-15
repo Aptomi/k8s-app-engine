@@ -9,10 +9,39 @@
   components:
 
     - name: kafka
-      service: kafka
+      contract: kafka
 
     - name: spark
-      service: spark
+      contract: spark
 
     - name: hdfs
-      service: hdfs
+      contract: hdfs
+
+# Contract for Analytics Pipeline
+- metadata:
+    kind: contract
+    namespace: main
+    name: analytics_pipeline
+
+  contexts:
+    # Production instance of the service (operated by ops/IT)
+    - name: prod
+      criteria:
+        require-all:
+          - org == 'it' && is_operator
+      change-labels:
+        set:
+          cluster: cluster-us-east
+      allocation:
+        service: analytics_pipeline
+
+    # Staging instance of the service (for developers)
+    - name: stage
+      criteria:
+        require-all:
+          - org == 'dev'
+      change-labels:
+        set:
+          cluster: cluster-us-west
+      allocation:
+        service: analytics_pipeline

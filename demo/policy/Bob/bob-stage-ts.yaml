@@ -3,7 +3,7 @@
     namespace: main
     name: bob_tests_twitter_stats_vis_in_stage
   userid: cn=Bob,ou=people,o=aptomiOrg
-  service: twitter_stats
+  contract: twitter_stats
   labels:
       tsvisimage: demo-v61
       # Mexico

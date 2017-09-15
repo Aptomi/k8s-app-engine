@@ -98,3 +98,32 @@
                 imagePullPolicy: Always
                 replicas: 1
                 resources: {}
+
+# Contract for Istio
+- metadata:
+    kind: contract
+    namespace: main
+    name: istio
+
+  contexts:
+    # Production instance of the service (operated by ops/IT)
+    - name: prod
+      criteria:
+        require-all:
+          - org == 'it' && is_operator
+      change-labels:
+        set:
+          cluster: cluster-us-east
+      allocation:
+        service: istio
+
+    # Staging instance of the service (for developers - individual instances)
+    - name: stage
+      criteria:
+        require-all:
+          - org == 'dev'
+      change-labels:
+        set:
+          cluster: cluster-us-west
+      allocation:
+        service: istio

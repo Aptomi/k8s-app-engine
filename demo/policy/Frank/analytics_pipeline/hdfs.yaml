@@ -20,3 +20,32 @@
           datanode:
             replicas: 1
             antiAffinity: "soft"
+
+# Contract for HDFS
+- metadata:
+    kind: contract
+    namespace: main
+    name: hdfs
+
+  contexts:
+    # Production instance of the service (operated by ops/IT)
+    - name: prod
+      criteria:
+        require-all:
+          - org == 'it' && is_operator
+      change-labels:
+        set:
+          cluster: cluster-us-east
+      allocation:
+        service: hdfs
+
+    # Staging instance of the service (for developers)
+    - name: stage
+      criteria:
+        require-all:
+          - org == 'dev'
+      change-labels:
+        set:
+          cluster: cluster-us-west
+      allocation:
+        service: hdfs
