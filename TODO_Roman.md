@@ -1,6 +1,6 @@
 Implementation:
 
-2. Support for namespaces [ARCH DISCUSSION NEEDED]
+1. Support for namespaces [ARCH DISCUSSION NEEDED]
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
   - add references to support "namespace/"
@@ -9,30 +9,32 @@ Implementation:
   - rules in namespaces? global rules in system namespace?
   - rules to reference namespaces?
 
-3. ACL [ARCH DISCUSSION NEEDED]
+2. ACL [ARCH DISCUSSION NEEDED]
 
-4. Istio [ARCH DISCUSSION NEEDED]
+3. Istio [ARCH DISCUSSION NEEDED]
   - Figure out a good model to fit services like istio into the engine
   - Without having user to create contexts for them
 
-5. Implement LDAP sync as an external service
+4. Implement LDAP sync as an external service
   - Generic system for aggregating and storing labels from different data sources
   - Log: gets tied to a separate revision of users, and the service keeps N last revisions)
 
-6. Implement policy validation
+5. Implement policy validation
   - e.g. compile all expressions, templates, etc
 
-7. Attach policy apply log to component instances
+6. Attach policy apply log to component instances
 
-8. Labels for services (to use in expressions)
+7. Labels for services (to use in expressions)
 
-9. Versions for services
+8. Versions for services
    - Version is a special label, which can be compared
 
-10. Aptomi quickstart
+9. Aptomi quickstart
    - with sample app
 
-11. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
+10. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
+
+11. Cluster should be in component key
 
 
 Minor issues:
@@ -158,7 +160,6 @@ Done:
   * contexts are evaluated in the order specified in the contract
   * removed change-labels from services and components
 
-
 * Implemented rules
   * Ability to set cluster via rules vs in context
   * Reject everything by default
@@ -170,6 +171,4 @@ Done:
     - expression (user/service/etc labels) => set labels (e.g. cluster)
   * Ability to do blacklist and whitelist rules
     - stop right away if encountered reject
-
-  cluster should be in the key
-  IN() function
+  * in() function
