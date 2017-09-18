@@ -1,57 +1,30 @@
 - metadata:
     kind: rule
     namespace: main
-    name: compromised_cluster_block_sensitive_services
-  filterservices:
-    cluster:
-      require-any:
-        - compromised
-    labels:
-      require-any:
-        - sensitive
+    name: compromised_users_cannot_instantiate_services
+  weight: 1000
+  criteria:
+    require-all:
+      - compromised
   actions:
-    - type: ingress
-      content: block
+    dependency: reject
 
 - metadata:
     kind: rule
     namespace: main
-    name: compromised_users_forbid_all_services
-  filterservices:
-    user:
-      require-any:
-        - compromised
-    labels:
+    name: low_priority_users_cannot_instantiate_sensitive_services
+  weight: 2000
+  criteria:
+    require-all:
+      - priority < 100
+      - sensitive
   actions:
-    - type: dependency
-      content: forbid
+    dependency: reject
 
 - metadata:
     kind: rule
     namespace: main
-    name: low_prio_users_forbid_sensitive_services
-  filterservices:
-    user:
-      require-any:
-        - priority < 100
-    labels:
-      require-any:
-        - sensitive
+    name: allow-all-other
+  weight: 100000
   actions:
-    - type: dependency
-      content: forbid
-
-- metadata:
-    kind: rule
-    namespace: main
-    name: dev_cluster_forbid_sensitive_service
-  filterservices:
-    cluster:
-      require-any:
-        - dev
-    labels:
-      require-any:
-        - sensitive
-  actions:
-    - type: dependency
-      content: forbid
+    dependency: allow

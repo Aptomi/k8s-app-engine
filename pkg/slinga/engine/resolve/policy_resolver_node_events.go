@@ -27,6 +27,17 @@ func (node *resolutionNode) errorContractDoesNotExist() error {
 	)
 }
 
+func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
+	userName := node.dependency.UserID
+	if node.user != nil {
+		userName = node.user.Name
+	}
+	return errors.NewErrorWithDetails(
+		fmt.Sprintf("Rules do not allow dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Contract, node.contractName, node.depth),
+		errors.Details{},
+	)
+}
+
 /*
 	Critical errors. If one of them occurs, engine will report an error and fail policy processing
 	all together
@@ -65,25 +76,13 @@ func (node *resolutionNode) errorWhenTestingContext(context *Context, cause erro
 	return NewCriticalError(err)
 }
 
-func (node *resolutionNode) errorGettingClusterForGlobalRules(context *Context, labelSet *LabelSet, cause error) error {
+func (node *resolutionNode) errorWhenProcessingRule(rule *Rule, cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Can't evaluate global rules for contract '%s', context '%s' due to cluster error: %s", node.contract.Name, context.Name, cause.Error()),
+		fmt.Sprintf("Error while processing rule '%s' on contract '%s', context '%s', service '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.service.Name, cause),
 		errors.Details{
-			"context": context,
-			"labels":  labelSet,
-			"cause":   cause,
-		},
-	)
-	return NewCriticalError(err)
-}
-
-func (node *resolutionNode) errorWhenTestingGlobalRule(context *Context, rule *Rule, labelSet *LabelSet, cause error) error {
-	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error while testing global rule '%s' on contract '%s', context '%s': %s", rule.Name, node.contract.Name, context.Name, cause),
-		errors.Details{
-			"context": context,
+			"context": node.context,
 			"rule":    rule,
-			"labels":  labelSet,
+			"labels":  node.labels.Labels,
 			"cause":   cause,
 		},
 	)
@@ -213,24 +212,17 @@ func (node *resolutionNode) logTestedContextCriteria(context *Context, matched b
 	}).Debugf("Trying context '%s' within contract '%s'. Matched = %t", context.Name, node.contract.Name, matched)
 }
 
-func (node *resolutionNode) logTestedGlobalRuleViolations(context *Context, labelSet *LabelSet, noViolations bool) {
-	fields := Fields{
-		"context": context,
-	}
-	if noViolations {
-		node.eventLog.WithFields(fields).Debugf("No global rule violations found for context '%s' within contract '%s'", context.Name, node.contract.Name)
-	} else {
-		node.eventLog.WithFields(fields).Debugf("Detected global rule violation for context '%s' within contract '%s'", context.Name, node.contract.Name)
-	}
+func (node *resolutionNode) logRulesProcessingResult(result *RuleActionResult) {
+	node.eventLog.WithFields(Fields{
+		"result": result,
+	}).Debugf("Rules processed for context '%s' within contract '%s'. Dependency allowed", node.context.Name, node.contract.Name)
 }
 
-func (node *resolutionNode) logTestedGlobalRuleMatch(context *Context, rule *Rule, labelSet *LabelSet, match bool) {
+func (node *resolutionNode) logTestedRuleMatch(rule *Rule, match bool) {
 	node.eventLog.WithFields(Fields{
-		"context": context,
-		"rule":    rule,
-		"labels":  labelSet,
-		"match":   match,
-	}).Debugf("Testing if global rule '%s' applies to context '%s' within contract '%s'. Result: %t", rule.Name, context.Name, node.contract.Name, match)
+		"rule":  rule,
+		"match": match,
+	}).Debugf("Testing if rule '%s' applies in context '%s' within contract '%s'. Result: %t", rule.Name, node.context.Name, node.contract.Name, match)
 }
 
 func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys []string) {

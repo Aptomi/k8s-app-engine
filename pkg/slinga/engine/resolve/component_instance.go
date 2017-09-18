@@ -6,6 +6,7 @@ import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"strconv"
 	"time"
 )
 
@@ -18,6 +19,8 @@ type ComponentInstanceMetadata struct {
 	Key  *ComponentInstanceKey
 	Kind string
 }
+
+const ALLOW_INGRESS = "allow_ingress"
 
 // ComponentInstance is a struct that holds data for a given component instance, containing list of user IDs and calculated labels
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
@@ -39,6 +42,9 @@ type ComponentInstance struct {
 	EdgesIn  map[string]bool
 	EdgesOut map[string]bool
 
+	// Additional data recorded for use in plugins
+	DataForPlugins map[string]string
+
 	/*
 		These fields get populated during apply and desired -> actual state reconciliation
 	*/
@@ -58,6 +64,7 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 		CalculatedCodeParams: NestedParameterMap{},
 		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
+		DataForPlugins:       make(map[string]string),
 	}
 }
 
@@ -93,6 +100,10 @@ func (instance *ComponentInstance) GetRunningTime() time.Duration {
 
 func (instance *ComponentInstance) addDependency(dependencyID string) {
 	instance.DependencyIds[dependencyID] = true
+}
+
+func (instance *ComponentInstance) addRuleInformation(result *RuleActionResult) {
+	instance.DataForPlugins[ALLOW_INGRESS] = strconv.FormatBool(result.AllowIngress)
 }
 
 func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) error {
@@ -181,6 +192,11 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	}
 	for keyDst := range ops.EdgesOut {
 		instance.addEdgeOut(keyDst)
+	}
+
+	// Data for plugins
+	for k, v := range ops.DataForPlugins {
+		instance.DataForPlugins[k] = v
 	}
 
 	return nil

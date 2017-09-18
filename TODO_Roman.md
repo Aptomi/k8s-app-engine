@@ -1,11 +1,5 @@
 Implementation:
 
-1. Rules [ARCH DISCUSSION NEEDED]
-  - Global-, namespace- and contract-level rules
-  - Ability to set cluster via rules vs in context
-  - Reject everything by default
-  - Have strict evaluation order
-
 2. Support for namespaces [ARCH DISCUSSION NEEDED]
   - we need to make sure everything that calls getName() is within a namespace
   - add checks for duplicate names in the same NS
@@ -34,6 +28,11 @@ Implementation:
 
 9. Versions for services
    - Version is a special label, which can be compared
+
+10. Aptomi quickstart
+   - with sample app
+
+11. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
 
 
 Minor issues:
@@ -158,3 +157,19 @@ Done:
   * contexts are now local to contracts
   * contexts are evaluated in the order specified in the contract
   * removed change-labels from services and components
+
+
+* Implemented rules
+  * Ability to set cluster via rules vs in context
+  * Reject everything by default
+  * Have strict evaluation order
+    - ordered by weight
+  * Types of rules to support
+    - expression (user/service/etc labels) => allow dependency
+    - expression (user/service/etc labels) => reject dependency
+    - expression (user/service/etc labels) => set labels (e.g. cluster)
+  * Ability to do blacklist and whitelist rules
+    - stop right away if encountered reject
+
+  cluster should be in the key
+  IN() function

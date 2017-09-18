@@ -16,6 +16,7 @@ var ServiceObject = &object.Info{
 type Service struct {
 	Metadata
 
+	Labels     map[string]string
 	Owner      string
 	Components []*ServiceComponent
 

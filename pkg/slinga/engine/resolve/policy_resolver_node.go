@@ -217,10 +217,9 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 	node.logStartMatchingContexts()
 
 	// Find matching context
-	contextualDataForExpression := node.getContextualDataForExpression()
+	contextualDataForExpression := node.getContextualDataForContextExpression()
 	var contextMatched *Context
 	for _, context := range node.contract.Contexts {
-
 		// Check if context matches (based on criteria)
 		matched, err := context.Matches(contextualDataForExpression, node.resolver.expressionCache)
 		if err != nil {
@@ -228,32 +227,9 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 			return nil, node.errorWhenTestingContext(context, err)
 		}
 		node.logTestedContextCriteria(context, matched)
-
-		// If criteria matches, then check global rules as well
 		if matched {
-			// Match is only valid if there are no global rule violations for the current context
-			labels := NewLabelSet(node.labels.Labels)
-			node.transformLabels(labels, context.ChangeLabels)
-
-			// Lookup cluster from a label
-			cluster, err := policy.GetClusterByLabels(labels)
-			if err != nil {
-				// Propagate error up
-				return nil, node.errorGettingClusterForGlobalRules(context, labels, err)
-			}
-
-			// Check for rule violations
-			hasViolations, err := node.hasGlobalRuleViolations(policy, context, labels, cluster)
-			if err != nil {
-				// Propagate error up. Don't wrap this error into anything else. It's already good
-				return nil, err
-			}
-			node.logTestedGlobalRuleViolations(context, labels, !hasViolations)
-
-			if !hasViolations {
-				contextMatched = context
-				break
-			}
+			contextMatched = context
+			break
 		}
 	}
 
@@ -295,7 +271,7 @@ func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, err
 	}
 
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
-	result, err := node.context.ResolveKeys(node.getContextualDataForAllocationTemplate(), node.resolver.templateCache)
+	result, err := node.context.ResolveKeys(node.getContextualDataForContextAllocationTemplate(), node.resolver.templateCache)
 	if err != nil {
 		return nil, node.errorWhenResolvingAllocationKeys(err)
 	}
@@ -324,34 +300,37 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) *Com
 }
 
 func (node *resolutionNode) transformLabels(labels *LabelSet, operations LabelOperations) {
-	changed := labels.ApplyTransform(operations)
-	if changed {
+	changedLabels := labels.ApplyTransform(operations)
+	if changedLabels {
 		node.logLabels(labels, "after transform")
 	}
 }
 
-func (node *resolutionNode) hasGlobalRuleViolations(policy *Policy, context *Context, labels *LabelSet, cluster *Cluster) (bool, error) {
-	globalRules := policy.Rules
-	if rules, ok := globalRules.Rules["dependency"]; ok {
-		for _, rule := range rules {
-			matched, err := rule.FilterServices.Match(labels, node.user, cluster, node.resolver.expressionCache)
-			if err != nil {
-				return true, node.errorWhenTestingGlobalRule(context, rule, labels, err)
+func (node *resolutionNode) processRules(policy *Policy) (*RuleActionResult, error) {
+	rules := policy.Rules.GetRulesSortedByWeight()
+	contextualDataForRule := node.getContextualDataForRuleExpression()
+	result := NewRuleActionResult(node.labels)
+	for _, rule := range rules {
+		matched, err := rule.Matches(contextualDataForRule, node.resolver.expressionCache)
+		if err != nil {
+			return nil, node.errorWhenProcessingRule(rule, err)
+		}
+		node.logTestedRuleMatch(rule, matched)
+		if matched {
+			rule.ApplyActions(result)
+
+			// if a dependency has been rejected, handle it right away and return that we cannot resolve it
+			if !result.AllowDependency {
+				return nil, node.errorDependencyNotAllowedByRules()
 			}
-
-			node.logTestedGlobalRuleMatch(context, rule, labels, matched)
-
-			if matched {
-				for _, action := range rule.Actions {
-					if action.Type == "dependency" && action.Content == "forbid" {
-						return true, nil
-					}
-				}
+			if result.ChangedLabelsOnLastApply {
+				node.logLabels(result.Labels, "after transform")
 			}
 		}
 	}
 
-	return false, nil
+	node.logRulesProcessingResult(result)
+	return result, nil
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {

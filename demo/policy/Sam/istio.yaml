@@ -6,6 +6,9 @@
 
   owner: cn=Sam,ou=people,o=aptomiOrg
 
+  labels:
+    type: service-mesh
+
   components:
     - name: istio
       code:
@@ -111,9 +114,6 @@
       criteria:
         require-all:
           - org == 'it' && is_operator
-      change-labels:
-        set:
-          cluster: cluster-us-east
       allocation:
         service: istio
 
@@ -122,8 +122,5 @@
       criteria:
         require-all:
           - org == 'dev'
-      change-labels:
-        set:
-          cluster: cluster-us-west
       allocation:
         service: istio

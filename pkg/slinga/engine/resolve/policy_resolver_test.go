@@ -21,7 +21,7 @@ func TestPolicyResolverAndResolvedData(t *testing.T) {
 
 	// Resolution for prod context
 	kafkaProd := getInstanceByParams(t, "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
-	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod")
+	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod, but found %v", kafkaProd.DependencyIds)
 	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 }
 
@@ -251,20 +251,10 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 			Namespace: "main",
 			Name:      "special-invalid-rule-require-all",
 		},
-		FilterServices: &ServiceFilter{
-			Cluster: &Criteria{
-				RequireAll: []string{"specialname + '123')((("},
-			},
-			Labels: &Criteria{
-				RequireAll: []string{"specialname + '123')((("},
-			},
-			User: &Criteria{
-				RequireAll: []string{"specialname + '123')((("},
-			},
+		Criteria: &Criteria{
+			RequireAll: []string{"specialname + '123')((("},
 		},
-		Actions: []*Action{
-			{"dependency", "forbid"},
-		},
+		Actions: &RuleActions{},
 	}
 	policy.AddObject(rule)
 

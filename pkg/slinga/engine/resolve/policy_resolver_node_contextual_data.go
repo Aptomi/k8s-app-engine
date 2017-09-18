@@ -8,15 +8,30 @@ import (
 )
 
 /*
-	Data exposed to expressions defined in policy
+	Data exposed to context expressions/criterias defined in policy
 */
 
-// This method defines which contextual information will be exposed to the expression engine (e.g. for evaluating criterias)
+// This method defines which contextual information will be exposed to the expression engine (for evaluating criterias)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
-func (node *resolutionNode) getContextualDataForExpression() *expression.ExpressionParameters {
+func (node *resolutionNode) getContextualDataForContextExpression() *expression.ExpressionParameters {
 	return expression.NewExpressionParams(
 		node.labels.Labels,
 		map[string]interface{}{},
+	)
+}
+
+/*
+	Data exposed to rules defined
+*/
+
+// This method defines which contextual information will be exposed to the expression engine (for evaluating rules)
+// Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
+func (node *resolutionNode) getContextualDataForRuleExpression() *expression.ExpressionParameters {
+	return expression.NewExpressionParams(
+		node.labels.Labels,
+		map[string]interface{}{
+			"service": node.proxyService(node.service),
+		},
 	)
 }
 
@@ -26,7 +41,7 @@ func (node *resolutionNode) getContextualDataForExpression() *expression.Express
 
 // This method defines which contextual information will be exposed to the template engine (for evaluating all templates - discovery, code params, etc)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
-func (node *resolutionNode) getContextualDataForAllocationTemplate() *template.TemplateParameters {
+func (node *resolutionNode) getContextualDataForContextAllocationTemplate() *template.TemplateParameters {
 	return template.NewTemplateParams(
 		struct {
 			User   interface{}
@@ -62,9 +77,11 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 func (node *resolutionNode) proxyService(service *language.Service) interface{} {
 	return struct {
 		language.Metadata
-		Owner interface{}
+		Labels interface{}
+		Owner  interface{}
 	}{
 		Metadata: service.Metadata,
+		Labels:   service.Labels,
 		Owner:    node.proxyUser(node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)),
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"k8s.io/kubernetes/pkg/labels"
 	k8slabels "k8s.io/kubernetes/pkg/labels"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -73,7 +74,7 @@ func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey str
 		users = append(users, externalData.UserLoader.LoadUserByID(userID))
 	}
 
-	allows, err := policy.Rules.AllowsIngressAccess(calcLabels, users, cluster)
+	allows, err := strconv.ParseBool(instance.DataForPlugins[resolve.ALLOW_INGRESS])
 	if err != nil {
 		return nil, err
 	}

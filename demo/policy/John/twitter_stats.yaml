@@ -6,6 +6,9 @@
 
   owner: cn=John,ou=people,o=aptomiOrg
 
+  labels:
+    type: dev-apps
+
   components:
 
     - name: analytics_pipeline
@@ -99,7 +102,6 @@
       change-labels:
         set:
           display_top_hashtags: 10
-          cluster: cluster-us-east
       allocation:
         service: twitter_stats
 
@@ -111,7 +113,6 @@
       change-labels:
         set:
           display_top_hashtags: 100
-          cluster: cluster-us-west
       allocation:
         service: twitter_stats
         keys:

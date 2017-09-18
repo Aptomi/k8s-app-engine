@@ -230,6 +230,13 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Store edge (last component instance -> service instance)
 	node.resolution.StoreEdge(node.arrivalKey, node.serviceKey)
 
+	// Process global rules before processing components
+	ruleResult, err := node.processRules(resolver.policy)
+	if err != nil {
+		// Return an error in case of rule processing error
+		return node.cannotResolveInstance(err)
+	}
+
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.sortServiceComponents()
 	if err != nil {
@@ -290,13 +297,13 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 
 		// Record usage of a given component instance
 		node.logInstanceSuccessfullyResolved(node.componentKey)
-		node.resolution.RecordResolved(node.componentKey, node.dependency)
+		node.resolution.RecordResolved(node.componentKey, node.dependency, ruleResult)
 	}
 
 	// Mark note as resolved and record usage of a given service instance
 	node.resolved = true
 	node.logInstanceSuccessfullyResolved(node.serviceKey)
-	node.resolution.RecordResolved(node.serviceKey, node.dependency)
+	node.resolution.RecordResolved(node.serviceKey, node.dependency, ruleResult)
 
 	return nil
 }

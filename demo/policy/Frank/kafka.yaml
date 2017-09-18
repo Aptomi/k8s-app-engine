@@ -6,6 +6,9 @@
 
   owner: cn=Frank,ou=people,o=aptomiOrg
 
+  labels:
+    type: analytics
+
   components:
 
     - name: zookeeper
@@ -41,9 +44,6 @@
       criteria:
         require-all:
           - org == 'it' && is_operator
-      change-labels:
-        set:
-          cluster: cluster-us-east
       allocation:
         service: kafka
 
@@ -52,8 +52,5 @@
       criteria:
         require-all:
           - org == 'dev'
-      change-labels:
-        set:
-          cluster: cluster-us-west
       allocation:
         service: kafka

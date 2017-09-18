@@ -1,38 +1,50 @@
 - metadata:
     kind: rule
     namespace: main
-    name: dev_cannot_deploy_to_prod_cluster
-  filterservices:
-    user:
-      require-any:
-        - org == 'dev'
-    cluster:
-      require-any:
-        - prod
+    name: analytics_prod_goes_to_us_east
+  weight: 1000
+  criteria:
+    require-all:
+      - org == 'it' && is_operator
+    require-any:
+      - service.Labels.type == 'analytics'
+      - service.Labels.type == 'dev-apps'
+      - service.Labels.type == 'service-mesh'
+    require-none:
+      - team == 'mobile-dev'
   actions:
-    - type: dependency
-      content: forbid
+    change-labels:
+      set:
+        cluster: cluster-us-east
+    dependency: allow
 
 - metadata:
     kind: rule
     namespace: main
-    name: deactivated_users_lose_access
-  filterservices:
-    user:
-      require-any:
-        - deactivated
+    name: analytics_stage_goes_to_us_west
+  weight: 2000
+  criteria:
+    require-all:
+      - org == 'dev'
+    require-any:
+      - service.Labels.type == 'analytics'
+      - service.Labels.type == 'dev-apps'
+      - service.Labels.type == 'service-mesh'
+    require-none:
+      - team == 'mobile-dev'
   actions:
-    - type: ingress
-      content: block
+    change-labels:
+      set:
+        cluster: cluster-us-west
+    dependency: allow
 
 - metadata:
     kind: rule
     namespace: main
-    name: mobile_devs_are_blocked
-  filterservices:
-    user:
-      require-any:
-        - team == 'mobile-dev'
+    name: allow_all_traffic_except_for_deactivated_users
+  weight: 3000
+  criteria:
+    require-none:
+      - deactivated
   actions:
-    - type: dependency
-      content: forbid
+    ingress: allow
