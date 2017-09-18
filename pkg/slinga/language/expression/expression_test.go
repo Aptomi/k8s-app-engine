@@ -78,6 +78,11 @@ func TestExpressions(t *testing.T) {
 		{"a == 'valueOfA'", ResTrue},
 		{"foo > 5 && a == 'valueOfA'", ResTrue},
 
+		// true (IN function)
+		{"in(a, 'valueOfC', 'valueOfB', 'valueOfA')", ResTrue},
+		{"in(foo, 10, 20, 30)", ResTrue},
+		{"in(a, 'valueOfX', 'valueOfY', 'valueOfZ')", ResFalse},
+
 		// false
 		{"anotherbar == 'p'", ResFalse},
 		{"'A' + 'B' == 5", ResFalse},

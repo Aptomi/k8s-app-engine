@@ -12,7 +12,22 @@ type Expression struct {
 }
 
 func NewExpression(expressionStr string) (*Expression, error) {
-	expressionCompiled, err := govaluate.NewEvaluableExpression(expressionStr)
+	functions := map[string]govaluate.ExpressionFunction{
+		"in": func(args ...interface{}) (interface{}, error) {
+			if len(args) == 0 {
+				return nil, fmt.Errorf("Can't evaluate in() function when zero arguments supplied")
+			}
+			v := args[0]
+			for i := 1; i < len(args); i++ {
+				if v == args[i] {
+					return true, nil
+				}
+			}
+			return false, nil
+		},
+	}
+
+	expressionCompiled, err := govaluate.NewEvaluableExpressionWithFunctions(expressionStr, functions)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to compile expression '%s': %s", expressionStr, err.Error())
 	}

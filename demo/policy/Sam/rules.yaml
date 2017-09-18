@@ -6,10 +6,7 @@
   criteria:
     require-all:
       - org == 'it' && is_operator
-    require-any:
-      - service.Labels.type == 'analytics'
-      - service.Labels.type == 'dev-apps'
-      - service.Labels.type == 'service-mesh'
+      - in(service.Labels.type, 'analytics', 'dev-apps', 'service-mesh')
     require-none:
       - team == 'mobile-dev'
   actions:
@@ -26,10 +23,7 @@
   criteria:
     require-all:
       - org == 'dev'
-    require-any:
-      - service.Labels.type == 'analytics'
-      - service.Labels.type == 'dev-apps'
-      - service.Labels.type == 'service-mesh'
+      - in(service.Labels.type, 'analytics', 'dev-apps', 'service-mesh')
     require-none:
       - team == 'mobile-dev'
   actions:
