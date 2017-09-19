@@ -15,12 +15,12 @@ func TestPolicyResolverAndResolvedData(t *testing.T) {
 	assert.Equal(t, 12, len(resolution.ComponentInstanceMap), "Policy resolution data should have correct number of entries")
 
 	// Resolution for test context
-	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
+	kafkaTest := getInstanceByParams(t, "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
 	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
 	assert.NotEmpty(t, resolution.DependencyInstanceMap["dep_id_1"], "Only Alice should have access to test")
 
 	// Resolution for prod context
-	kafkaProd := getInstanceByParams(t, "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
+	kafkaProd := getInstanceByParams(t, "cluster-us-east", "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
 	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod, but found %v", kafkaProd.DependencyIds)
 	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
 }
@@ -36,8 +36,7 @@ func TestPolicyResolverLabelProcessing(t *testing.T) {
 	_, resolution := loadPolicyAndResolve(t)
 
 	// Check labels for Bob's dependency
-	key := resolution.DependencyInstanceMap["dep_id_2"]
-	serviceInstance := getInstanceInternal(t, key, resolution)
+	serviceInstance := getInstanceByDependencyId(t, "dep_id_2", resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
 	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")
@@ -48,13 +47,13 @@ func TestPolicyResolverLabelProcessing(t *testing.T) {
 func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 	policy, resolution := loadPolicyAndResolve(t)
 
-	kafkaTest := getInstanceByParams(t, "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
+	kafkaTest := getInstanceByParams(t, "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
 
 	// Check that code parameters evaluate correctly
-	assert.Equal(t, "zookeeper-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
+	assert.Equal(t, "cluster-us-west-zookeeper-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
 
 	// Check that discovery parameters evaluate correctly
-	assert.Equal(t, "kafka-kafka-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+	assert.Equal(t, "kafka-cluster-us-east-kafka-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// Check that nested parameters evaluate correctly
 	for i := 1; i <= 5; i++ {
@@ -65,7 +64,7 @@ func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	dependency := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -73,8 +72,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 		},
 		UserID:   "non-existing-user-123456789",
 		Contract: "newcontract",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// dependency referring to non-existing user should not trigger a critical error
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
@@ -86,7 +84,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	dependency := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -94,8 +92,7 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 		},
 		UserID:   "4",
 		Contract: "non-existing-contract-123456789",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// dependency referring to non-existing contract should not trigger a critical error
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
@@ -107,17 +104,16 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	service := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 		Owner: "1",
-	}
-	policy.AddObject(service)
+	})
 
-	contract := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -133,10 +129,9 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 				Service: "xyz",
 			},
 		}},
-	}
-	policy.AddObject(contract)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -144,8 +139,7 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "xyz",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// policy with invalid context should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Unable to compile expression")
@@ -154,17 +148,16 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	service := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 		Owner: "1",
-	}
-	policy.AddObject(service)
+	})
 
-	contract := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -179,10 +172,9 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 				},
 			},
 		}},
-	}
-	policy.AddObject(contract)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -190,8 +182,7 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "xyz",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Error while resolving allocation keys")
@@ -200,16 +191,15 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	service := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
-	}
-	policy.AddObject(service)
+	})
 
-	contract := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -224,10 +214,9 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 				},
 			},
 		}},
-	}
-	policy.AddObject(contract)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -235,8 +224,7 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "xyz",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Owner doesn't exist")
@@ -245,7 +233,7 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	rule := &Rule{
+	policy.AddObject(&Rule{
 		Metadata: Metadata{
 			Kind:      RuleObject.Kind,
 			Namespace: "main",
@@ -255,8 +243,7 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 			RequireAll: []string{"specialname + '123')((("},
 		},
 		Actions: &RuleActions{},
-	}
-	policy.AddObject(rule)
+	})
 
 	// policy with invalid rule should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Unable to compile expression")
@@ -265,7 +252,7 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	service := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -283,10 +270,9 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 				},
 			},
 		},
-	}
-	policy.AddObject(service)
+	})
 
-	contract := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -298,10 +284,25 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 				Service: "xyz",
 			},
 		}},
-	}
-	policy.AddObject(contract)
+	})
 
-	dependency1 := &Dependency{
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name == 'xyz'"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -312,10 +313,9 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 		Labels: map[string]string{
 			"deplabel": "1",
 		},
-	}
-	policy.AddObject(dependency1)
+	})
 
-	dependency2 := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -326,8 +326,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 		Labels: map[string]string{
 			"deplabel": "2",
 		},
-	}
-	policy.AddObject(dependency2)
+	})
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Conflicting code parameters")
@@ -336,7 +335,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	service := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -354,10 +353,9 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 				},
 			},
 		},
-	}
-	policy.AddObject(service)
+	})
 
-	contract := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -369,10 +367,25 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 				Service: "xyz",
 			},
 		}},
-	}
-	policy.AddObject(contract)
+	})
 
-	dependency1 := &Dependency{
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name == 'xyz'"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -383,10 +396,9 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 		Labels: map[string]string{
 			"deplabel": "1",
 		},
-	}
-	policy.AddObject(dependency1)
+	})
 
-	dependency2 := &Dependency{
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -397,8 +409,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 		Labels: map[string]string{
 			"deplabel": "2",
 		},
-	}
-	policy.AddObject(dependency2)
+	})
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Conflicting discovery parameters")
@@ -407,7 +418,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	serviceA := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -420,10 +431,9 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 				Contract: "contractB",
 			},
 		},
-	}
-	policy.AddObject(serviceA)
+	})
 
-	serviceB := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -441,10 +451,9 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 				},
 			},
 		},
-	}
-	policy.AddObject(serviceB)
+	})
 
-	contractA := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -459,8 +468,9 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 				Service: "serviceA",
 			},
 		}},
-	}
-	contractB := &Contract{
+	})
+
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -475,11 +485,25 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 				Service: "serviceB",
 			},
 		}},
-	}
-	policy.AddObject(contractA)
-	policy.AddObject(contractB)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB')"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -487,8 +511,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "contractA",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Error when processing code params")
@@ -497,7 +520,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	serviceA := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -510,10 +533,9 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 				Contract: "contractB",
 			},
 		},
-	}
-	policy.AddObject(serviceA)
+	})
 
-	serviceB := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -531,10 +553,9 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 				},
 			},
 		},
-	}
-	policy.AddObject(serviceB)
+	})
 
-	contractA := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -549,8 +570,8 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 				Service: "serviceA",
 			},
 		}},
-	}
-	contractB := &Contract{
+	})
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -565,11 +586,25 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 				Service: "serviceB",
 			},
 		}},
-	}
-	policy.AddObject(contractA)
-	policy.AddObject(contractB)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB')"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -577,8 +612,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "contractA",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// policy with invalid context allocation keys should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Error when processing discovery params")
@@ -587,7 +621,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 func TestPolicyResolverServiceLoop(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	serviceA := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -600,10 +634,9 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 				Contract: "contractB",
 			},
 		},
-	}
-	policy.AddObject(serviceA)
+	})
 
-	serviceB := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -616,10 +649,9 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 				Contract: "contractC",
 			},
 		},
-	}
-	policy.AddObject(serviceB)
+	})
 
-	serviceC := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -632,10 +664,9 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 				Contract: "contractA",
 			},
 		},
-	}
-	policy.AddObject(serviceC)
+	})
 
-	contractA := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -650,8 +681,8 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 				Service: "serviceA",
 			},
 		}},
-	}
-	contractB := &Contract{
+	})
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -666,8 +697,8 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 				Service: "serviceB",
 			},
 		}},
-	}
-	contractC := &Contract{
+	})
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -682,10 +713,23 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 				Service: "serviceC",
 			},
 		}},
-	}
-	policy.AddObject(contractA)
-	policy.AddObject(contractB)
-	policy.AddObject(contractC)
+	})
+
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB', 'serviceC')"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
 
 	dependency := &Dependency{
 		Metadata: Metadata{
@@ -705,7 +749,7 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 func TestPolicyResolverComponentLoop(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	serviceA := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -741,10 +785,9 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 				},
 			},
 		},
-	}
-	policy.AddObject(serviceA)
+	})
 
-	contractA := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -759,10 +802,25 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 				Service: "serviceA",
 			},
 		}},
-	}
-	policy.AddObject(contractA)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name == 'serviceA'"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -770,8 +828,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "contractA",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// policy with component cycle should not be resolved successfully
 	resolvePolicy(t, policy, ResError, "Component cycle detected")
@@ -780,7 +837,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	serviceA := &Service{
+	policy.AddObject(&Service{
 		Metadata: Metadata{
 			Kind:      ServiceObject.Kind,
 			Namespace: "main",
@@ -807,10 +864,9 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 				},
 			},
 		},
-	}
-	policy.AddObject(serviceA)
+	})
 
-	contractA := &Contract{
+	policy.AddObject(&Contract{
 		Metadata: Metadata{
 			Kind:      ContractObject.Kind,
 			Namespace: "main",
@@ -825,10 +881,25 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 				Service: "serviceA",
 			},
 		}},
-	}
-	policy.AddObject(contractA)
+	})
 
-	dependency := &Dependency{
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: 1,
+		Criteria: &Criteria{
+			RequireAll: []string{"service.Name == 'serviceA'"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -836,9 +907,119 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "contractA",
-	}
-	policy.AddObject(dependency)
+	})
 
 	// unknown component type should not result in critical error
-	resolvePolicy(t, policy, ResSuccess, "")
+	resolution := resolvePolicy(t, policy, ResSuccess, "")
+
+	// check that both dependencies got resolved
+	assert.NotEmpty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should be resolved")
+}
+
+func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
+	policy := loadUnitTestsPolicy()
+
+	policy.AddObject(&Service{
+		Metadata: Metadata{
+			Kind:      ServiceObject.Kind,
+			Namespace: "main",
+			Name:      "service",
+		},
+		Owner: "1",
+		Components: []*ServiceComponent{
+			{
+				Name: "component",
+				Code: &Code{
+					Type: "aptomi/code/unittests",
+					Params: util.NestedParameterMap{
+						"cluster": "{{ .Labels.cluster }}",
+					},
+				},
+			},
+		},
+	})
+
+	policy.AddObject(&Contract{
+		Metadata: Metadata{
+			Kind:      ContractObject.Kind,
+			Namespace: "main",
+			Name:      "contract",
+		},
+		Contexts: []*Context{{
+			Name: "context",
+			Criteria: &Criteria{
+				RequireAny: []string{"true"},
+			},
+			Allocation: &Allocation{
+				Service: "service",
+			},
+		}},
+	})
+
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule1",
+		},
+		Weight: 100,
+		Criteria: &Criteria{
+			RequireAll: []string{"label1 == 'value1'"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-east")),
+		},
+	})
+
+	policy.AddObject(&Rule{
+		Metadata: Metadata{
+			Kind:      RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule2",
+		},
+		Weight: 200,
+		Criteria: &Criteria{
+			RequireAll: []string{"label2 == 'value2'"},
+		},
+		Actions: &RuleActions{
+			Dependency:   DependencyAction("allow"),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+		},
+	})
+
+	policy.AddObject(&Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_1",
+		},
+		UserID: "7",
+		Labels: map[string]string{
+			"label1": "value1",
+		},
+		Contract: "contract",
+	})
+
+	policy.AddObject(&Dependency{
+		Metadata: Metadata{
+			Kind:      DependencyObject.Kind,
+			Namespace: "main",
+			Name:      "dep_2",
+		},
+		UserID: "7",
+		Labels: map[string]string{
+			"label2": "value2",
+		},
+		Contract: "contract",
+	})
+
+	// unknown component type should not result in critical error
+	resolution := resolvePolicy(t, policy, ResSuccess, "")
+
+	// check that both dependencies got resolved
+	instance1 := getInstanceByDependencyId(t, "dep_1", resolution)
+	instance2 := getInstanceByDependencyId(t, "dep_2", resolution)
+	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels["cluster"], "Cluster should be set correctly via rules")
+	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels["cluster"], "Cluster should be set correctly via rules")
 }

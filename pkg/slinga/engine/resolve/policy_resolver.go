@@ -212,8 +212,18 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		return node.cannotResolveInstance(err)
 	}
 
+	// Process global rules before processing service key and dependent component keys
+	ruleResult, err := node.processRules(resolver.policy)
+	if err != nil {
+		// Return an error in case of rule processing error
+		return node.cannotResolveInstance(err)
+	}
 	// Create service key
-	node.serviceKey = node.createComponentKey(nil)
+	node.serviceKey, err = node.createComponentKey(nil)
+	if err != nil {
+		// Return an error in case of malformed policy or policy processing error
+		return node.cannotResolveInstance(err)
+	}
 	node.objectResolved(node.serviceKey)
 
 	// Check if we've been there already
@@ -230,13 +240,6 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Store edge (last component instance -> service instance)
 	node.resolution.StoreEdge(node.arrivalKey, node.serviceKey)
 
-	// Process global rules before processing components
-	ruleResult, err := node.processRules(resolver.policy)
-	if err != nil {
-		// Return an error in case of rule processing error
-		return node.cannotResolveInstance(err)
-	}
-
 	// Now, sort all components in topological order
 	componentsOrdered, err := node.sortServiceComponents()
 	if err != nil {
@@ -248,7 +251,11 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Note that discovery variables can refer to other variables announced by dependents in the discovery tree
 	for _, node.component = range componentsOrdered {
 		// Create key
-		node.componentKey = node.createComponentKey(node.component)
+		node.componentKey, err = node.createComponentKey(node.component)
+		if err != nil {
+			// Return an error in case of malformed policy or policy processing error
+			return node.cannotResolveInstance(err)
+		}
 
 		// Store edge (service instance -> component instance)
 		node.resolution.StoreEdge(node.serviceKey, node.componentKey)

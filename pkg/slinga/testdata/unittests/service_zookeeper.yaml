@@ -11,7 +11,7 @@
       code:
         type: aptomi/code/unittests
         params:
-          cluster: cluster-us-west
+          cluster: "{{ .Labels.cluster }}"
       dependencies:
         - component2
 
@@ -19,7 +19,7 @@
       code:
         type: aptomi/code/unittests
         params:
-          cluster: cluster-us-west
+          cluster: "{{ .Labels.cluster }}"
 
 # Contract
 - metadata:

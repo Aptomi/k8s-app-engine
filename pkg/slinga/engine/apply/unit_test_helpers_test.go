@@ -88,11 +88,12 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func getInstanceKey(contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
+func getInstanceKey(clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
+	cluster := policy.Clusters[clusterName]
 	contract := policy.Contracts[contractName]
 	context := contract.FindContextByName(contextName)
 	service := policy.Services[context.Allocation.Service]
-	return resolve.NewComponentInstanceKey(contract, context, allocationKeysResolved, service, service.GetComponentsMap()[componentName]).GetKey()
+	return resolve.NewComponentInstanceKey(cluster, contract, context, allocationKeysResolved, service, service.GetComponentsMap()[componentName]).GetKey()
 }
 
 func NewTestPluginRegistry(failComponents ...string) plugin.Registry {

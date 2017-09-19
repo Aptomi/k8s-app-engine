@@ -1,9 +1,11 @@
 package diff
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/cluster"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/component"
 	. "github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
@@ -11,7 +13,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 )
 
 func getPolicy() *Policy {
@@ -58,6 +59,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 		detach   int
 		clusters int
 	}{}
+	s := []string{}
 	for _, act := range diff.Actions {
 		switch act.(type) {
 		case *component.CreateAction:
@@ -75,12 +77,18 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 		default:
 			t.Fatalf("Incorrect action type: %T", act)
 		}
+		s = append(s, fmt.Sprintf("%+v", act))
 	}
 
-	assert.Equal(t, componentInstantiate, cnt.create, "Diff: component instantiations")
-	assert.Equal(t, componentDestruct, cnt.delete, "Diff: component destructions")
-	assert.Equal(t, componentUpdate, cnt.update, "Diff: component updates")
-	assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
-	assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
-	assert.Equal(t, 1, cnt.clusters, "Diff: all clusters post processing")
+	ok := assert.Equal(t, componentInstantiate, cnt.create, "Diff: component instantiations")
+	ok = ok && assert.Equal(t, componentDestruct, cnt.delete, "Diff: component destructions")
+	ok = ok && assert.Equal(t, componentUpdate, cnt.update, "Diff: component updates")
+	ok = ok && assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
+	ok = ok && assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
+	ok = ok && assert.Equal(t, 1, cnt.clusters, "Diff: all clusters post processing")
+
+	if !ok {
+		t.Logf("Log of diff actions: %s", s)
+		t.FailNow()
+	}
 }

@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -167,7 +168,10 @@ func (node *resolutionNode) cannotResolveInstance(err error) error {
 	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach event log to
 	if node.serviceKey == nil {
 		// Create service key
-		node.serviceKey = node.createComponentKey(nil)
+		node.serviceKey, err = node.createComponentKey(nil)
+		if err != nil {
+
+		}
 
 		// Once instance is figured out, make sure to attach event logs to that instance
 		node.objectResolved(node.serviceKey)
@@ -289,14 +293,19 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 }
 
 // createComponentKey creates a component key
-func (node *resolutionNode) createComponentKey(component *ServiceComponent) *ComponentInstanceKey {
+func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*ComponentInstanceKey, error) {
+	cluster, err := node.resolver.policy.GetClusterByLabels(node.labels)
+	if err != nil {
+		return nil, NewCriticalError(errors.NewErrorWithDetails(err.Error(), errors.Details{}))
+	}
 	return NewComponentInstanceKey(
+		cluster,
 		node.contract,
 		node.context,
 		node.allocationKeysResolved,
 		node.service,
 		component,
-	)
+	), nil
 }
 
 func (node *resolutionNode) transformLabels(labels *LabelSet, operations LabelOperations) {
@@ -320,13 +329,19 @@ func (node *resolutionNode) processRules(policy *Policy) (*RuleActionResult, err
 			rule.ApplyActions(result)
 
 			// if a dependency has been rejected, handle it right away and return that we cannot resolve it
-			if !result.AllowDependency {
-				return nil, node.errorDependencyNotAllowedByRules()
+			if len(rule.Actions.Dependency) > 0 {
+				if !result.AllowDependency {
+					return nil, node.errorDependencyNotAllowedByRules()
+				}
 			}
 			if result.ChangedLabelsOnLastApply {
 				node.logLabels(result.Labels, "after transform")
 			}
 		}
+	}
+
+	if !result.AllowDependency {
+		return nil, node.errorDependencyNotAllowedByRules()
 	}
 
 	node.logRulesProcessingResult(result)

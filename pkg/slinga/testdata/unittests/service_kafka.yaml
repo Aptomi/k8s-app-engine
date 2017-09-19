@@ -16,7 +16,7 @@
       code:
         type: aptomi/code/unittests
         params:
-          cluster: cluster-us-east
+          cluster: "{{ .Labels.cluster }}"
           address: "{{ .Discovery.component1.component2.instance }}"
           queue: "{{ .User.Labels.changinglabel }}"
           someparam: "{{ index .Labels \"some-test-context-specific-label\" }}"

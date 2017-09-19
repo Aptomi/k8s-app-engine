@@ -114,7 +114,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	updatedActualState := applyAndCheck(t, applier, ResSuccess, 0, "")
 
 	// Check creation/update times
-	key = getInstanceKey("kafka", "test", []string{"platform_services"}, "component2", desiredPolicy)
+	key = getInstanceKey("cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", desiredPolicy)
 	kafkaTimes1 := getTimes(t, key, updatedActualState)
 	assert.WithinDuration(t, time.Now(), kafkaTimes1.created, time.Second, "Creation time should be initialized correctly for kafka")
 	assert.Equal(t, kafkaTimes1.updated, kafkaTimes1.updated, "Update time should be equal to creation time")
@@ -136,7 +136,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_5",
 		},
-		UserID:  "5",
+		UserID:   "5",
 		Contract: "kafka",
 	}
 	desiredPolicyNext.Dependencies.AddDependency(dependencyNew)
@@ -170,9 +170,9 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		Step 3: desired = update user label, check = component update time changed
 	*/
 
-	keyComponent := getInstanceKey("kafka", "prod-high", []string{"Elena"}, "component2", desiredPolicyNext)
+	keyComponent := getInstanceKey("cluster-us-east", "kafka", "prod-high", []string{"Elena"}, "component2", desiredPolicyNext)
 	componentTimes := getTimes(t, keyComponent, actualState)
-	keyService := getInstanceKey("kafka", "prod-high", []string{"Elena"}, "root", desiredPolicyNext)
+	keyService := getInstanceKey("cluster-us-east", "kafka", "prod-high", []string{"Elena"}, "root", desiredPolicyNext)
 	serviceTimes := getTimes(t, keyService, actualState)
 
 	// Sleep a little bit to introduce time delay

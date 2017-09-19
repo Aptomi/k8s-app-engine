@@ -24,17 +24,13 @@ Implementation:
 
 6. Attach policy apply log to component instances
 
-7. Labels for services (to use in expressions)
-
-8. Versions for services
+7. Versions for services
    - Version is a special label, which can be compared
 
-9. Aptomi quickstart
+8. Aptomi quickstart
    - with sample app
 
-10. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
-
-11. Cluster should be in component key
+9. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
 
 
 Minor issues:
@@ -172,3 +168,9 @@ Done:
   * Ability to do blacklist and whitelist rules
     - stop right away if encountered reject
   * in() function
+
+* Added labels for services
+  * for expressions
+
+* Included cluster into component key
+  * added unit tests

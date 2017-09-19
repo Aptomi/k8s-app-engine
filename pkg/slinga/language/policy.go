@@ -56,9 +56,11 @@ func (policy *PolicyNamespace) AddObject(object object.Base) {
 func (policy *PolicyNamespace) GetClusterByLabels(labels *LabelSet) (*Cluster, error) {
 	var cluster *Cluster
 	if clusterName, ok := labels.Labels["cluster"]; ok {
-		if cluster, ok = policy.Clusters[clusterName]; !ok {
-			return nil, fmt.Errorf("Cluster '%s' is not defined in policy", clusterName)
+		if cluster, ok = policy.Clusters[clusterName]; !ok || cluster == nil {
+			return nil, fmt.Errorf("Cluster '%s' not found in the policy", clusterName)
 		}
+	} else {
+		return nil, fmt.Errorf("Label with name 'cluster' is not present, but required by the engine")
 	}
 	return cluster, nil
 }

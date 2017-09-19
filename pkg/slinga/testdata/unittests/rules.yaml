@@ -24,7 +24,27 @@
 - metadata:
     kind: rule
     namespace: main
-    name: allow-all-other
+    name: allow-kafka
   weight: 100000
+  criteria:
+    require-all:
+      - service.Name == 'kafka'
   actions:
     dependency: allow
+    change-labels:
+      set:
+        cluster: cluster-us-east
+
+- metadata:
+    kind: rule
+    namespace: main
+    name: allow-zookeeper
+  weight: 200000
+  criteria:
+    require-all:
+      - service.Name == 'zookeeper'
+  actions:
+    dependency: allow
+    change-labels:
+      set:
+        cluster: cluster-us-west

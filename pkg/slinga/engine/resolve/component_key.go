@@ -15,11 +15,13 @@ const componentUnresolvedName = "unknown"
 const componentRootName = "root"
 
 // ComponentInstanceKey is a struct representing a key for the component instance and the fields it consists of
+// When adding keys to this method, don't forget to modify the constructor and copy routines
 type ComponentInstanceKey struct {
 	// cached version of component key
 	key string
 
 	// required fields
+	ClusterName         string // mandatory
 	ContractName        string // mandatory
 	ContextName         string // mandatory
 	ContextNameWithKeys string // calculated
@@ -28,10 +30,11 @@ type ComponentInstanceKey struct {
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(contract *Contract, context *Context, allocationsKeysResolved []string, service *Service, component *ServiceComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(cluster *Cluster, contract *Contract, context *Context, allocationsKeysResolved []string, service *Service, component *ServiceComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
 	contextNameWithKeys := getContextNameWithKeys(contextName, allocationsKeysResolved)
 	return &ComponentInstanceKey{
+		ClusterName:         getClusterNameUnsafe(cluster),
 		ContractName:        getContractNameUnsafe(contract),
 		ContextName:         contextName,
 		ContextNameWithKeys: contextNameWithKeys,
@@ -43,6 +46,7 @@ func NewComponentInstanceKey(contract *Contract, context *Context, allocationsKe
 // MakeCopy creates a copy of ComponentInstanceKey
 func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	return &ComponentInstanceKey{
+		ClusterName:         cik.ClusterName,
 		ContractName:        cik.ContractName,
 		ContextName:         cik.ContextName,
 		ContextNameWithKeys: cik.ContextNameWithKeys,
@@ -75,12 +79,22 @@ func (cik ComponentInstanceKey) GetKey() string {
 	if cik.key == "" {
 		cik.key = strings.Join(
 			[]string{
+				cik.ClusterName,
 				cik.ContractName,
 				cik.ContextNameWithKeys,
 				cik.ComponentName,
 			}, componentInstanceKeySeparator)
 	}
 	return cik.key
+}
+
+// If cluster has not been resolved yet and we need a key, generate one
+// Otherwise use cluster name
+func getClusterNameUnsafe(cluster *Cluster) string {
+	if cluster == nil {
+		return componentUnresolvedName
+	}
+	return cluster.Name
 }
 
 // If contract has not been resolved yet and we need a key, generate one
