@@ -1,5 +1,5 @@
 hash: 0067a309a3725b2d95e7ab70c1160074c8b40219a509238f6a9900a9d93a8660
-updated: 2017-09-01T00:54:31.202906957-07:00
+updated: 2017-09-20T10:35:23.235902824-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -105,7 +105,7 @@ imports:
 - name: github.com/facebookgo/symwalk
   version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/fsnotify/fsnotify
-  version: f12c6236fe7b5cf6bcf30e5935d08cb079d78334
+  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-openapi/jsonpointer
@@ -211,7 +211,7 @@ imports:
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/magiconair/properties
-  version: 61b492c03cf472e0c6419be5899b8e0dc28b1b88
+  version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -225,7 +225,7 @@ imports:
 - name: github.com/mattn/go-runewidth
   version: 9e777a8366cce605130a531d2cd6363d07ad7317
 - name: github.com/mattn/go-zglob
-  version: 95345c4e1c0ebc9d16a3284177f09360f4d20fab
+  version: 4ecb59231939b2e499b1f2fd8f075565977d2452
   subpackages:
   - fastwalk
 - name: github.com/mitchellh/go-homedir
@@ -242,10 +242,8 @@ imports:
   - ast
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
-- name: github.com/pelletier/go-buffruneio
-  version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml
-  version: 0049ab3dc4c4c70a9eee23087437b69c0dde2130
+  version: 1d6b12b7cb290426e27e6b4e38b89fcda3aeef03
 - name: github.com/pkg/errors
   version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/sftp
@@ -266,11 +264,11 @@ imports:
   - mem
   - sftp
 - name: github.com/spf13/cast
-  version: e31f36ffc91a2ba9ddb72a4b6a607ff9b3d3cb63
+  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
   version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/jwalterweatherman
-  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+  version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
@@ -310,7 +308,7 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sys
-  version: 43e60d72a8e2bd92ee98319ba9a384a0e9837c08
+  version: b6e1ae21643682ce023deb8d152024597b0e9bb4
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -554,6 +552,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  version: 890a5c3458b43e6104ff5da8dfa139d013d77544
   subpackages:
   - assert
