@@ -24,6 +24,7 @@ func BenchmarkEngineSmall(b *testing.B) {
 		6,
 		4,
 		2,
+		25,
 		100,
 		500,
 	).makePolicyAndExternalData()
@@ -45,6 +46,7 @@ func BenchmarkEngineMedium(b *testing.B) {
 		6,
 		4,
 		2,
+		25,
 		10000,
 		2000,
 	).makePolicyAndExternalData()
@@ -62,6 +64,7 @@ type PolicyGenerator struct {
 	codeParams                int
 	serviceDependencyMaxChain int
 	contextsPerContract       int
+	rules                     int
 	users                     int
 	dependencies              int
 
@@ -73,7 +76,7 @@ type PolicyGenerator struct {
 	externalData      *external.Data
 }
 
-func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceDependencyMaxChain, contextsPerContract, users, dependencies int) *PolicyGenerator {
+func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceDependencyMaxChain, contextsPerContract, rules, users, dependencies int) *PolicyGenerator {
 	return &PolicyGenerator{
 		random:                    rand.New(rand.NewSource(randSeed)),
 		labels:                    labels,
@@ -82,6 +85,7 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		codeParams:                codeParams,
 		serviceDependencyMaxChain: serviceDependencyMaxChain,
 		contextsPerContract:       contextsPerContract,
+		rules:                     rules,
 		users:                     users,
 		dependencies:              dependencies,
 		policy:                    language.NewPolicy(),
@@ -97,6 +101,9 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *exte
 
 	// generate contracts
 	gen.makeContracts()
+
+	// generate rules
+	gen.makeRules()
 
 	// generate dependencies
 	gen.makeDependencies()
@@ -226,6 +233,43 @@ func (gen *PolicyGenerator) makeService() *language.Service {
 
 	gen.policy.AddObject(service)
 	return service
+}
+
+func (gen *PolicyGenerator) makeRules() {
+	// generate non-matching rules
+	for i := 0; i < gen.rules-1; i++ {
+		gen.policy.AddObject(&language.Rule{
+			Metadata: language.Metadata{
+				Kind:      language.RuleObject.Kind,
+				Namespace: "main",
+				Name:      "rule",
+			},
+			Weight: i,
+			Criteria: &language.Criteria{
+				RequireAll: []string{"service.Name == 'some-name-" + strconv.Itoa(i) + "'"},
+			},
+			Actions: &language.RuleActions{
+				Dependency: language.DependencyAction("reject"),
+			},
+		})
+	}
+
+	// generate rule which allows all dependencies
+	gen.policy.AddObject(&language.Rule{
+		Metadata: language.Metadata{
+			Kind:      language.RuleObject.Kind,
+			Namespace: "main",
+			Name:      "rule",
+		},
+		Weight: gen.rules,
+		Criteria: &language.Criteria{
+			RequireAll: []string{"true"},
+		},
+		Actions: &language.RuleActions{
+			Dependency:   language.DependencyAction("allow"),
+			ChangeLabels: language.ChangeLabelsAction(language.NewLabelOperationsSetSingleLabel("cluster", "cluster-test")),
+		},
+	})
 }
 
 func (gen *PolicyGenerator) makeContracts() {
@@ -378,5 +422,9 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *language.Policy, ex
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)
 
-	fmt.Printf("[%s] Time = %s, Resolved dependencies = %d, Resolved Components = %d\n", testName, timeDiff.String(), len(desiredState.DependencyInstanceMap), len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), len(desiredState.DependencyInstanceMap), len(actualState.ComponentInstanceMap))
+
+	if len(desiredState.DependencyInstanceMap) <= 0 {
+		panic("No dependencies resolved")
+	}
 }
