@@ -31,7 +31,7 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},
-			UserID:  "5",
+			UserID:   "5",
 			Contract: "kafka",
 		},
 	)
@@ -53,7 +53,7 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},
-			UserID:  "5",
+			UserID:   "5",
 			Contract: "kafka",
 		},
 	)

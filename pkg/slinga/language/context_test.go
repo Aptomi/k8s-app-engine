@@ -213,7 +213,7 @@ func TestServiceContextKeyResolution(t *testing.T) {
 		Criteria: &Criteria{
 			RequireAll: []string{"true"},
 		},
-		Allocation: &Allocation {
+		Allocation: &Allocation{
 			Service: "test",
 			Keys: []string{
 				"{{.User.Name}}",
