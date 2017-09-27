@@ -43,7 +43,7 @@ func Apply(config *viper.Viper) error {
 	host := config.GetString("server.host")
 	port := config.GetInt("server.port")
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v1/revision", host, port), bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v1/policy", host, port), bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
