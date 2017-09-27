@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"net/http"
@@ -64,6 +64,7 @@ func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 	fmt.Println(policy)
 
 	// temp send back received data (to impl some table output on client side)
+	// todo send full updated policy
 	_, err = fmt.Fprint(w, string(body))
 	if err != nil {
 		panic(fmt.Sprintf("Error while writing response bytes: %s", err))
