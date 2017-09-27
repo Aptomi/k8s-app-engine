@@ -149,10 +149,3 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 
 	return allFiles, nil
 }
-
-/*
-c := &http.Client{
-Timeout: 15 * time.Second,
-}
-resp, err := c.Get("https://blog.filippo.io/")
-*/
