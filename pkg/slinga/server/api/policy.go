@@ -14,35 +14,21 @@ type PolicyAPI struct {
 	codec codec.MarshalUnmarshaler
 }
 
-func (h *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	rev, key, ns := p.ByName("rev"), p.ByName("key"), p.ByName("ns")
-
-	fmt.Printf("[handleGetPolicy] rev: %s, key: %s, ns: %s\n", rev, key, ns)
+func (a *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	rev, ns := p.ByName("rev"), p.ByName("ns")
 
 	if len(rev) == 0 {
-		// todo(slukjanov): fail better
-		panic("Revision should be specified (0 for current)")
+		rev = "0" // latest revision
 	}
 
-	if (len(key) == 0) && (len(ns) == 0) {
-		// get full policy from specific revision
-	}
-
-	if (len(key) > 0) && (len(ns) > 0) {
-		// todo(slukjanov): unreachable, better failing
-		panic("Only one of key or namespace could specified")
-	}
-
-	if len(key) != 0 {
-		// get by key from specific revision
-	}
+	fmt.Printf("[handleGetPolicy] rev: %s, ns: %s\n", rev, ns)
 
 	if len(ns) != 0 {
 		// get all by ns from specific revision
 	}
 }
 
-func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (a *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(fmt.Sprintf("Error while reading bytes from request Body: %s", err))
@@ -51,11 +37,11 @@ func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 	// todo remove bad logging
 	fmt.Println(string(body))
 
-	objects, err := h.codec.UnmarshalOneOrMany(body)
+	objects, err := a.codec.UnmarshalOneOrMany(body)
 	if err != nil {
 		panic(fmt.Sprintf("Error unmarshaling policy update request: %s", err))
 	}
-	policy, err := h.ctl.UpdatePolicy(objects)
+	policy, err := a.ctl.UpdatePolicy(objects)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}
@@ -74,9 +60,9 @@ func (h *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 func Serve(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshalUnmarshaler) {
 	h := PolicyAPI{ctl, cod}
 
-	router.GET("/api/v1/revision/:rev/policy", h.handleGetPolicy)               // get full policy from specific revision
-	router.GET("/api/v1/revision/:rev/policy/key/:key", h.handleGetPolicy)      // get by key from specific revision
-	router.GET("/api/v1/revision/:rev/policy/namespace/:ns", h.handleGetPolicy) // get policy for namespace from specific revision
+	router.GET("/api/v1/policy", h.handleGetPolicy)
+	router.GET("/api/v1/policy/:rev", h.handleGetPolicy)
+	router.GET("/api/v1/policy/:rev/namespace/:ns", h.handleGetPolicy)
 
-	router.POST("/api/v1/revision", h.handlePolicyUpdate)
+	router.POST("/api/v1/policy", h.handlePolicyUpdate)
 }
