@@ -33,51 +33,74 @@ import (
 // Some notes
 // * in dev mode serve webui files from specified directory, otherwise serve from inside of binary
 
-func Start(config *viper.Viper) {
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
-	cod := yaml.NewCodec(catalog)
+type Server struct {
+	config           *viper.Viper
+	backgroundErrors chan string
+	catalog          *object.Catalog
+	codec            codec.MarshalUnmarshaler
 
-	db := initStore(config, catalog, cod)
-	policyCtl := initPolicyController(config, db)
-
-	srv := initHTTPServer(config, policyCtl, cod)
-
-	panic(srv.ListenAndServe())
+	store      store.ObjectStore
+	policyCtl  controller.PolicyController
+	httpServer *http.Server
 }
 
-func initStore(config *viper.Viper, catalog *object.Catalog, cod codec.MarshalUnmarshaler) store.ObjectStore {
+func New(config *viper.Viper) *Server {
+	s := &Server{
+		config:           config,
+		backgroundErrors: make(chan string),
+	}
+
+	s.catalog = object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	s.codec = yaml.NewCodec(s.catalog)
+
+	return s
+}
+
+func (s *Server) Start() {
+	s.initStore()
+	s.initPolicyController()
+	s.initHTTPServer()
+
+	s.runInBackground("HTTP Server", true, func() {
+		panic(s.httpServer.ListenAndServe())
+	})
+
+	s.wait()
+}
+
+func (s *Server) initStore() {
 	//todo(slukjanov): init bolt store, take file path from config
-	b := bolt.NewBoltStore(catalog, cod)
+	b := bolt.NewBoltStore(s.catalog, s.codec)
 	//todo load from config
 	err := b.Open("/tmp/aptomi.bolt")
 	if err != nil {
 		panic(fmt.Sprintf("Can't open object store: %s", err))
 	}
-	return b
+	s.store = b
 }
 
-func initPolicyController(config *viper.Viper, store store.ObjectStore) controller.PolicyController {
-	return controller.NewPolicyController(store)
+func (s *Server) initPolicyController() {
+	s.policyCtl = controller.NewPolicyController(s.store)
 }
 
-func initHTTPServer(config *viper.Viper, policyCtl controller.PolicyController, cod codec.MarshalUnmarshaler) *http.Server {
+func (s *Server) initHTTPServer() {
 	host, port := "", 8080 // todo(slukjanov): load this properties from config
 	listenAddr := fmt.Sprintf("%s:%d", host, port)
 
 	router := httprouter.New()
 
 	version.Serve(router)
-	api.Serve(router, policyCtl, cod)
+	api.Serve(router, s.policyCtl, s.codec)
 	webui.Serve(router)
 
 	var handler http.Handler = router
 
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
 	handler = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler)
-	// todo(slukjanov): add configurable handlers.ProxyHeaders to run behind the nginx or any other proxy
+	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
 
-	return &http.Server{
+	s.httpServer = &http.Server{
 		Handler:      handler,
 		Addr:         listenAddr,
 		WriteTimeout: 5 * time.Second,
