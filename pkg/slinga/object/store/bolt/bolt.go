@@ -1,6 +1,7 @@
 package bolt
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
@@ -54,7 +55,7 @@ func (b *boltStore) setNextGeneration(obj object.Base) error {
 	if !info.Versioned {
 		return fmt.Errorf("Kind %s isn't versioned", obj.GetKind())
 	}
-	last, err := b.GetByKey(obj.GetNamespace(), obj.GetKind(), obj.GetKey(), object.LastGen)
+	last, err := b.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), object.LastGen)
 	if err != nil {
 		return err
 	}
@@ -68,14 +69,20 @@ func (b *boltStore) setNextGeneration(obj object.Base) error {
 
 func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
 	info := b.catalog.Get(obj.GetKind())
+	if info == nil {
+		return false, fmt.Errorf("Unknown kind: %s", obj.GetKind())
+	}
 	if info.Versioned {
-		existingObj, err := b.GetByKey(obj.GetNamespace(), obj.GetKind(), obj.GetKey(), obj.GetGeneration())
+		existingObj, err := b.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration())
 		if err != nil {
 			return false, err
 		}
-		if !reflect.DeepEqual(obj, existingObj) {
-			b.setNextGeneration(obj)
-			updated = true
+		if existingObj != nil {
+			obj.SetGeneration(existingObj.GetGeneration())
+			if !reflect.DeepEqual(obj, existingObj) {
+				b.setNextGeneration(obj)
+				updated = true
+			}
 		}
 	}
 
@@ -90,7 +97,7 @@ func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
 			return err
 		}
 
-		err = bucket.Put([]byte(strings.Join([]string{obj.GetNamespace(), obj.GetKind(), obj.GetKey()}, "_")), data)
+		err = bucket.Put([]byte(strings.Join([]string{obj.GetKey(), obj.GetGeneration().String()}, object.KeySeparator)), data)
 		if err != nil {
 			return err
 		}
@@ -101,9 +108,8 @@ func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
 	return updated, err
 }
 
-func (b *boltStore) GetByKey(namespace string, kind string, key string, gen object.Generation) (object.Base, error) {
+func (b *boltStore) GetByName(namespace string, kind string, name string, gen object.Generation) (object.Base, error) {
 	// todo support namespaces and kind in different buckets
-	// todo support generations
 	var result object.Base
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
@@ -111,7 +117,17 @@ func (b *boltStore) GetByKey(namespace string, kind string, key string, gen obje
 			return fmt.Errorf("Bucket not found: %s", objectsBucket)
 		}
 
-		data := bucket.Get([]byte(strings.Join([]string{namespace, kind, key}, "_")))
+		var data []byte
+		if gen == object.LastGen {
+			c := bucket.Cursor()
+			prefix := []byte(strings.Join([]string{namespace, kind, name}, object.KeySeparator))
+			for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+				data = v
+			}
+		} else {
+			data = bucket.Get([]byte(strings.Join([]string{namespace, kind, name, gen.String()}, object.KeySeparator)))
+		}
+
 		if data != nil {
 			obj, err := b.codec.UnmarshalOne(data)
 			if err != nil {
