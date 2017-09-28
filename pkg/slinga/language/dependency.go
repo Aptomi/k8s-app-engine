@@ -11,6 +11,7 @@ import (
 
 var DependencyObject = &object.Info{
 	Kind:        "dependency",
+	Versioned: true,
 	Constructor: func() object.Base { return &Dependency{} },
 }
 

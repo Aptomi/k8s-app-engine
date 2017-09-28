@@ -9,6 +9,7 @@ import (
 
 var RuleObject = &object.Info{
 	Kind:        "rule",
+	Versioned: true,
 	Constructor: func() object.Base { return &Rule{} },
 }
 

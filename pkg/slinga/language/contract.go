@@ -6,6 +6,7 @@ import (
 
 var ContractObject = &object.Info{
 	Kind:        "contract",
+	Versioned: true,
 	Constructor: func() object.Base { return &Contract{} },
 }
 

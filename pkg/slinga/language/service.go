@@ -9,6 +9,7 @@ import (
 
 var ServiceObject = &object.Info{
 	Kind:        "service",
+	Versioned: true,
 	Constructor: func() object.Base { return &Service{} },
 }
 
