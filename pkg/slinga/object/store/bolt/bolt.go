@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 	"github.com/boltdb/bolt"
+	"io"
 	"reflect"
 	"strings"
 	"time"
@@ -83,7 +84,12 @@ func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
 				b.setNextGeneration(obj)
 				updated = true
 			}
+		} else {
+			obj.SetGeneration(object.FirstGen)
+			updated = true
 		}
+	} else {
+		obj.SetGeneration(object.LastGen)
 	}
 
 	err = b.db.Update(func(tx *bolt.Tx) error {
@@ -140,4 +146,24 @@ func (b *boltStore) GetByName(namespace string, kind string, name string, gen ob
 	})
 
 	return result, err
+}
+
+func (b *boltStore) Dump(w io.Writer) error {
+	return b.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(objectsBucket)
+		if bucket == nil {
+			return fmt.Errorf("Bucket not found: %s", objectsBucket)
+		}
+
+		c := bucket.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			_, err := w.Write(v)
+			if err != nil {
+				return err
+			}
+			fmt.Fprint(w, "\n====================\n")
+		}
+
+		return nil
+	})
 }
