@@ -6,7 +6,7 @@ import (
 
 var ClusterObject = &object.Info{
 	Kind:        "cluster",
-	Versioned: true,
+	Versioned:   true,
 	Constructor: func() object.Base { return &Cluster{} },
 }
 
