@@ -66,6 +66,9 @@ func Apply(config *viper.Viper) error {
 		panic(fmt.Sprintf("Error while reading bytes from response Body: %s", err))
 	}
 
+	// todo bad logging
+	fmt.Println("Response data: " + string(respData))
+
 	objects, err := cod.UnmarshalOneOrMany(respData)
 	if err != nil {
 		panic(fmt.Sprintf("Error while unmarshaling response: %s", err))
