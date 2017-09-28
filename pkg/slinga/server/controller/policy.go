@@ -5,28 +5,32 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
+	"sync"
 )
 
-const PolicyKey = "policy"
+const PolicyName = "policy"
 
 type PolicyController interface {
 	GetPolicy(object.Generation) (*language.Policy, error)
-	UpdatePolicy([]object.Base) (*language.Policy, error)
+	GetPolicyData(object.Generation) (*PolicyData, error)
+	GetPolicyFromData(policyData *PolicyData) (*language.Policy, error)
+	UpdatePolicy([]object.Base) (bool, *PolicyData, error)
 }
 
 func NewPolicyController(store store.ObjectStore) PolicyController {
-	return &PolicyControllerImpl{store}
+	return &PolicyControllerImpl{sync.Mutex{}, store}
 }
 
 var PolicyDataObject = &object.Info{
 	Kind:        "policy",
+	Versioned:   true,
 	Constructor: func() object.Base { return &PolicyData{} },
 }
 
 type PolicyData struct {
 	language.Metadata
 
-	Objects map[string]map[string]object.Generation // kind -> key -> generation
+	Objects map[string]map[string]object.Generation // kind -> name -> generation
 }
 
 func (p *PolicyData) Add(obj object.Base) {
@@ -35,15 +39,16 @@ func (p *PolicyData) Add(obj object.Base) {
 		byKind = make(map[string]object.Generation)
 		p.Objects[obj.GetKind()] = byKind
 	}
-	byKind[obj.GetKey()] = obj.GetGeneration()
+	byKind[obj.GetName()] = obj.GetGeneration()
 }
 
 type PolicyControllerImpl struct {
-	store store.ObjectStore
+	update sync.Mutex
+	store  store.ObjectStore
 }
 
-func (c *PolicyControllerImpl) getPolicyData(gen object.Generation) (*PolicyData, error) {
-	dataObj, err := c.store.GetByKey(object.SystemNS, PolicyDataObject.Kind, PolicyKey, gen)
+func (ctl *PolicyControllerImpl) GetPolicyData(gen object.Generation) (*PolicyData, error) {
+	dataObj, err := ctl.store.GetByName(object.SystemNS, PolicyDataObject.Kind, PolicyName, gen)
 	if err != nil {
 		return nil, err
 	}
@@ -57,14 +62,14 @@ func (c *PolicyControllerImpl) getPolicyData(gen object.Generation) (*PolicyData
 	return data, nil
 }
 
-func (c *PolicyControllerImpl) getPolicyFromData(policyData *PolicyData) (*language.Policy, error) {
+func (ctl *PolicyControllerImpl) GetPolicyFromData(policyData *PolicyData) (*language.Policy, error) {
 	policy := language.NewPolicy()
 
 	// in case of first version of policy, we just need to have empty policy
 	if policyData != nil && policyData.Objects != nil {
-		for kind, keyAndGen := range policyData.Objects {
-			for key, gen := range keyAndGen {
-				obj, err := c.store.GetByKey(object.DefaultNS, kind, key, gen)
+		for kind, nameGen := range policyData.Objects {
+			for name, gen := range nameGen {
+				obj, err := ctl.store.GetByName(object.SystemNS, kind, name, gen)
 				if err != nil {
 					return nil, err
 				}
@@ -75,25 +80,43 @@ func (c *PolicyControllerImpl) getPolicyFromData(policyData *PolicyData) (*langu
 	return policy, nil
 }
 
-func (c *PolicyControllerImpl) GetPolicy(policyGen object.Generation) (*language.Policy, error) {
-	policyData, err := c.getPolicyData(policyGen)
+func (ctl *PolicyControllerImpl) GetPolicy(policyGen object.Generation) (*language.Policy, error) {
+	policyData, err := ctl.GetPolicyData(policyGen)
 	if err != nil {
 		return nil, err
 	}
-	return c.getPolicyFromData(policyData)
+	return ctl.GetPolicyFromData(policyData)
 }
 
-func (c *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (*language.Policy, error) {
-	policyData, err := c.getPolicyData(object.LastGen)
+func (ctl *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (bool, *PolicyData, error) {
+	// we should process only a single policy update request at once
+	ctl.update.Lock()
+	defer ctl.update.Unlock()
+
+	policyData, err := ctl.GetPolicyData(object.LastGen)
 	if err != nil {
-		return nil, err
+		return false, nil, err
 	}
 
 	changed := false
+
+	// it could happen only for the fist time
+	if policyData == nil {
+		policyData = &PolicyData{
+			Metadata: language.Metadata{
+				Namespace: object.SystemNS,
+				Kind:      PolicyDataObject.Kind,
+				Name:      "policy",
+			},
+			Objects: make(map[string]map[string]object.Generation),
+		}
+		changed = true
+	}
+
 	for _, updatedObj := range updatedObjects {
-		updated, err := c.store.Save(updatedObj)
+		updated, err := ctl.store.Save(updatedObj)
 		if err != nil {
-			return nil, err
+			return false, nil, err
 		}
 		if updated {
 			policyData.Add(updatedObj)
@@ -102,14 +125,13 @@ func (c *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (*lang
 	}
 
 	if changed {
-		updated, err := c.store.Save(policyData)
+		_, err = ctl.store.Save(policyData)
 		if err != nil {
-			return nil, err
-		}
-		if !updated {
-			return nil, fmt.Errorf("Policy was changed but save returned 'not updated'")
+			return false, nil, err
 		}
 	}
 
-	return c.getPolicyFromData(policyData)
+	// policy, err := ctl.getPolicyFromData(policyData)
+
+	return changed, policyData, err
 }

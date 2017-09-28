@@ -50,7 +50,7 @@ func New(config *viper.Viper) *Server {
 		backgroundErrors: make(chan string),
 	}
 
-	s.catalog = object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	s.catalog = object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
 	s.codec = yaml.NewCodec(s.catalog)
 
 	return s
@@ -90,7 +90,8 @@ func (s *Server) initHTTPServer() {
 	router := httprouter.New()
 
 	version.Serve(router)
-	api.Serve(router, s.policyCtl, s.codec)
+	api.ServePolicy(router, s.policyCtl, s.codec)
+	api.ServeAdminStore(router, s.store)
 	webui.Serve(router)
 
 	var handler http.Handler = router

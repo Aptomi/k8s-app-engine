@@ -39,25 +39,35 @@ func (a *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 
 	objects, err := a.codec.UnmarshalOneOrMany(body)
 	if err != nil {
+		// todo it should be badrequest
 		panic(fmt.Sprintf("Error unmarshaling policy update request: %s", err))
 	}
-	policy, err := a.ctl.UpdatePolicy(objects)
+
+	_, policyData, err := a.ctl.UpdatePolicy(objects)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}
 
-	// todo remove bad logging
-	fmt.Println(policy)
+	//if updated {
+	data, err := a.codec.MarshalOne(policyData)
+	if err != nil {
+		panic(fmt.Sprintf("Error marshaling updated policy: %s", err))
+	}
 
-	// temp send back received data (to impl some table output on client side)
-	// todo send full updated policy
-	_, err = fmt.Fprint(w, string(body))
+	// todo bad logging
+	fmt.Println("Response: " + string(data))
+
+	_, err = fmt.Fprint(w, string(data))
 	if err != nil {
 		panic(fmt.Sprintf("Error while writing response bytes: %s", err))
 	}
+	//} else { // nothing changed
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	 todo write some error back to client
+	//}
 }
 
-func Serve(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshalUnmarshaler) {
+func ServePolicy(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshalUnmarshaler) {
 	h := PolicyAPI{ctl, cod}
 
 	router.GET("/api/v1/policy", h.handleGetPolicy)
