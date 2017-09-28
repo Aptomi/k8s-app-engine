@@ -1,7 +1,7 @@
 # Context definition for us-east
 - metadata:
     kind: cluster
-    namespace: main
+    namespace: system
     name: cluster-us-east
   type: kubernetes
   config:
@@ -11,7 +11,7 @@
 # Context definition for us-west
 - metadata:
     kind: cluster
-    namespace: main
+    namespace: system
     name: cluster-us-west
   type: kubernetes
   config:

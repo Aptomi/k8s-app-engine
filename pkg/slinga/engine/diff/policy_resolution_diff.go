@@ -52,28 +52,28 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		uPrev := diff.Prev.ComponentInstanceMap[componentKey]
 		uNext := diff.Next.ComponentInstanceMap[componentKey]
 
-		var depIdsPrev map[string]bool
+		var depKeysPrev map[string]bool
 		if uPrev != nil {
-			depIdsPrev = uPrev.DependencyIds
+			depKeysPrev = uPrev.DependencyKeys
 		}
 
-		var depIdsNext map[string]bool
+		var depKeysNext map[string]bool
 		if uNext != nil {
-			depIdsNext = uNext.DependencyIds
+			depKeysNext = uNext.DependencyKeys
 		}
 
 		// see if a component needs to be instantiated
-		if len(depIdsPrev) <= 0 && len(depIdsNext) > 0 {
+		if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
 			actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewCreateAction(diff.Revision, componentKey))
 		}
 
 		// see if a component needs to be destructed
-		if len(depIdsPrev) > 0 && len(depIdsNext) <= 0 {
+		if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
 			actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewDeleteAction(diff.Revision, componentKey))
 		}
 
 		// see if a component needs to be updated
-		if len(depIdsPrev) > 0 && len(depIdsNext) > 0 {
+		if len(depKeysPrev) > 0 && len(depKeysNext) > 0 {
 			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
 			if !sameParams {
 				actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewUpdateAction(diff.Revision, componentKey))
@@ -89,15 +89,15 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		}
 
 		// see if a user needs to be detached from a component
-		for dependencyID := range depIdsPrev {
-			if !depIdsNext[dependencyID] {
+		for dependencyID := range depKeysPrev {
+			if !depKeysNext[dependencyID] {
 				actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewDetachDependencyAction(diff.Revision, componentKey, dependencyID))
 			}
 		}
 
 		// see if a user needs to be attached to a component
-		for dependencyID := range depIdsNext {
-			if !depIdsPrev[dependencyID] {
+		for dependencyID := range depKeysNext {
+			if !depKeysPrev[dependencyID] {
 				actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewAttachDependencyAction(diff.Revision, componentKey, dependencyID))
 			}
 		}

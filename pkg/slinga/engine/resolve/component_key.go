@@ -14,6 +14,8 @@ const componentUnresolvedName = "unknown"
 // componentRootName is a name of component for service entry (which in turn consists of components)
 const componentRootName = "root"
 
+// TODO: what about namespaces?!
+
 // ComponentInstanceKey is a struct representing a key for the component instance and the fields it consists of
 // When adding keys to this method, don't forget to modify the constructor and copy routines
 type ComponentInstanceKey struct {
@@ -22,6 +24,7 @@ type ComponentInstanceKey struct {
 
 	// required fields
 	ClusterName         string // mandatory
+	Namespace           string // determined from the contract
 	ContractName        string // mandatory
 	ContextName         string // mandatory
 	ContextNameWithKeys string // calculated
@@ -35,6 +38,7 @@ func NewComponentInstanceKey(cluster *Cluster, contract *Contract, context *Cont
 	contextNameWithKeys := getContextNameWithKeys(contextName, allocationsKeysResolved)
 	return &ComponentInstanceKey{
 		ClusterName:         getClusterNameUnsafe(cluster),
+		Namespace:           getContractNamespaceUnsafe(contract),
 		ContractName:        getContractNameUnsafe(contract),
 		ContextName:         contextName,
 		ContextNameWithKeys: contextNameWithKeys,
@@ -47,6 +51,7 @@ func NewComponentInstanceKey(cluster *Cluster, contract *Contract, context *Cont
 func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	return &ComponentInstanceKey{
 		ClusterName:         cik.ClusterName,
+		Namespace:           cik.Namespace,
 		ContractName:        cik.ContractName,
 		ContextName:         cik.ContextName,
 		ContextNameWithKeys: cik.ContextNameWithKeys,
@@ -80,6 +85,7 @@ func (cik ComponentInstanceKey) GetKey() string {
 		cik.key = strings.Join(
 			[]string{
 				cik.ClusterName,
+				cik.Namespace,
 				cik.ContractName,
 				cik.ContextNameWithKeys,
 				cik.ComponentName,
@@ -104,6 +110,15 @@ func getContractNameUnsafe(contract *Contract) string {
 		return componentUnresolvedName
 	}
 	return contract.Name
+}
+
+// If contract has not been resolved yet and we need a key, generate one
+// Otherwise use contract namespace
+func getContractNamespaceUnsafe(contract *Contract) string {
+	if contract == nil {
+		return componentUnresolvedName
+	}
+	return contract.Namespace
 }
 
 // If context has not been resolved yet and we need a key, generate one

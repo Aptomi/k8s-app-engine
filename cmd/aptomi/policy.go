@@ -46,7 +46,7 @@ var policyCmdApply = &cobra.Command{
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
 		store := NewFileLoader(policyDir)
-		policy := NewPolicyNamespace()
+		policy := NewPolicy()
 
 		objects, err := store.LoadObjects()
 		if err != nil {

@@ -57,10 +57,11 @@ func resolvePolicy(t *testing.T, policy *Policy, expectedResult int, expectedErr
 	return result
 }
 
-func getInstanceByDependencyId(t *testing.T, dependencyId string, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByDependencyKey(t *testing.T, dependencyId string, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
 	key := resolution.DependencyInstanceMap[dependencyId]
 	if !assert.NotZero(t, len(key), "Dependency %s should be resolved", dependencyId) {
+		t.Log(resolution.DependencyInstanceMap)
 		t.FailNow()
 	}
 	instance, ok := resolution.ComponentInstanceMap[key]
@@ -70,12 +71,12 @@ func getInstanceByDependencyId(t *testing.T, dependencyId string, resolution *Po
 	return instance
 }
 
-func getInstanceByParams(t *testing.T, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByParams(t *testing.T, namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
-	cluster := policy.Clusters[clusterName]
-	contract := policy.Contracts[contractName]
+	cluster := policy.Namespace[SystemNamespace].Clusters[clusterName]
+	contract := policy.Namespace[namespace].Contracts[contractName]
 	context := contract.FindContextByName(contextName)
-	service := policy.Services[context.Allocation.Service]
+	service := policy.Namespace[namespace].Services[context.Allocation.Service]
 	key := NewComponentInstanceKey(cluster, contract, context, allocationKeysResolved, service, service.GetComponentsMap()[componentName])
 	instance, ok := resolution.ComponentInstanceMap[key.GetKey()]
 	if !assert.True(t, ok, "Component instance '%s' should be present in resolution data", key.GetKey()) {

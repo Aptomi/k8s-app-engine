@@ -1,7 +1,6 @@
 package language
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
@@ -28,29 +27,16 @@ type Dependency struct {
 type GlobalDependencies struct {
 	// dependencies <service> -> list of dependencies
 	DependenciesByContract map[string][]*Dependency
-
-	// dependencies <id> -> dependency
-	DependenciesByID map[string]*Dependency
 }
 
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
 func NewGlobalDependencies() *GlobalDependencies {
 	return &GlobalDependencies{
 		DependenciesByContract: make(map[string][]*Dependency),
-		DependenciesByID:       make(map[string]*Dependency),
 	}
 }
 
 // AddDependency appends a single dependency to an existing object
 func (src GlobalDependencies) AddDependency(dependency *Dependency) {
-	if len(dependency.GetID()) <= 0 {
-		panic(fmt.Sprintf("Empty dependency ID: %+v", dependency))
-	}
 	src.DependenciesByContract[dependency.Contract] = append(src.DependenciesByContract[dependency.Contract], dependency)
-	src.DependenciesByID[dependency.GetID()] = dependency
-}
-
-func (dependency *Dependency) GetID() string {
-	// TODO: switch to Ref later
-	return dependency.Name
 }

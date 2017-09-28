@@ -23,11 +23,10 @@ func TestBoltStore(t *testing.T) {
 		panic(err)
 	}
 
-	policy := lang.LoadUnitTestsPolicy("../../../testdata/unittests")
+	policyNS := lang.LoadUnitTestsPolicy("../../../testdata/unittests").Namespace["main"]
 
-	services := make([]object.Base, 0, len(policy.Services))
-
-	for _, service := range policy.Services {
+	services := []object.Base{}
+	for _, service := range policyNS.Services {
 		updated, err := db.Save(service)
 		if err != nil {
 			panic(err)

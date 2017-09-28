@@ -30,8 +30,8 @@ type ComponentInstance struct {
 	*/
 	Metadata *ComponentInstanceMetadata
 
-	// List of dependencies which are keeping this component instantiated
-	DependencyIds map[string]bool
+	// List of dependency keys which are keeping this component instantiated
+	DependencyKeys map[string]bool
 
 	// Calculated parameters for the component
 	CalculatedLabels     *LabelSet
@@ -58,7 +58,7 @@ type ComponentInstance struct {
 func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
 		Metadata:             &ComponentInstanceMetadata{cik, ComponentInstanceObject.Kind},
-		DependencyIds:        make(map[string]bool),
+		DependencyKeys:       make(map[string]bool),
 		CalculatedLabels:     NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  NestedParameterMap{},
 		CalculatedCodeParams: NestedParameterMap{},
@@ -98,8 +98,8 @@ func (instance *ComponentInstance) GetRunningTime() time.Duration {
 	return time.Since(instance.CreatedOn)
 }
 
-func (instance *ComponentInstance) addDependency(dependencyID string) {
-	instance.DependencyIds[dependencyID] = true
+func (instance *ComponentInstance) addDependency(dependencyKey string) {
+	instance.DependencyKeys[dependencyKey] = true
 }
 
 func (instance *ComponentInstance) addRuleInformation(result *RuleActionResult) {
@@ -168,8 +168,8 @@ func (instance *ComponentInstance) UpdateTimes(createdOn time.Time, updatedOn ti
 
 func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	// List of dependencies which are keeping this component instantiated
-	for dependencyID := range ops.DependencyIds {
-		instance.addDependency(dependencyID)
+	for dependencyKey := range ops.DependencyKeys {
+		instance.addDependency(dependencyKey)
 	}
 
 	// Combine labels

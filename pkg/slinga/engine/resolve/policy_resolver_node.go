@@ -1,7 +1,6 @@
 package resolve
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -34,7 +33,8 @@ type resolutionNode struct {
 	// reference to user who requested this dependency
 	user *User
 
-	// reference to the contract we are currently resolving
+	// reference to the namespace & contract we are currently resolving
+	namespace    string
 	contractName string
 	contract     *Contract
 
@@ -91,7 +91,8 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 		dependency: dependency,
 		user:       user,
 
-		// we start with the service specified in the dependency
+		// we start with the namespace & contract specified in the dependency
+		namespace:    dependency.Namespace,
 		contractName: dependency.Contract,
 
 		// start with the generated set of labels
@@ -122,6 +123,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		user:       node.user,
 
 		// we take the current component we are iterating over, and get its contract name
+		namespace:    node.namespace,
 		contractName: node.component.Contract,
 
 		// proceed with the current set of labels
@@ -165,18 +167,6 @@ func (node *resolutionNode) cannotResolveInstance(err error) error {
 	// Log that service or component instance cannot be resolved
 	node.logCannotResolveInstance()
 
-	// There may be a situation when service key has not been resolved yet. If so, we should create a fake one to attach event log to
-	if node.serviceKey == nil {
-		// Create service key
-		node.serviceKey, err = node.createComponentKey(nil)
-		if err != nil {
-
-		}
-
-		// Once instance is figured out, make sure to attach event logs to that instance
-		node.objectResolved(node.serviceKey)
-	}
-
 	// If it's a critical error, return it
 	if isCriticalError {
 		return err
@@ -207,10 +197,14 @@ func (node *resolutionNode) checkUserExists() error {
 
 // Helper to get a contract
 func (node *resolutionNode) getContract(policy *Policy) (*Contract, error) {
-	contract := policy.Contracts[node.contractName]
-	if contract == nil {
+	contractObj, err := policy.GetObject(ContractObject.Kind, node.contractName, node.namespace)
+	if err != nil {
 		return nil, node.errorContractDoesNotExist()
 	}
+	if contractObj == nil {
+		return nil, node.errorContractDoesNotExist()
+	}
+	contract := contractObj.(*Contract)
 	node.logContractFound(contract)
 	return contract, nil
 }
@@ -252,15 +246,25 @@ func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) 
 		return nil, node.errorServiceDoesNotExist()
 	}
 
-	service := policy.Services[node.context.Allocation.Service]
-	if service == nil {
+	serviceObj, err := policy.GetObject(ServiceObject.Kind, node.context.Allocation.Service, node.namespace)
+	if err != nil {
+		return nil, node.errorServiceDoesNotExist()
+	}
+	if serviceObj == nil {
 		return nil, node.errorServiceDoesNotExist()
 	}
 
+	service := serviceObj.(*Service)
 	serviceOwner := node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)
+
+	// If a service has no owner, it is considered a malformed policy, so let's return an error
 	if serviceOwner == nil {
-		// This is considered a malformed policy, so let's return an error
-		return nil, node.errorServiceOwnerDoesNotExist()
+		return nil, node.errorServiceOwnerDoesNotExist(service)
+	}
+
+	// Service should be located in the same namespace as contract
+	if service.Namespace != node.contract.Namespace {
+		return nil, node.errorServiceIsNotInSameNamespaceAsContract(service)
 	}
 
 	node.logServiceFound(service)
@@ -294,12 +298,16 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*ComponentInstanceKey, error) {
-	cluster, err := node.resolver.policy.GetClusterByLabels(node.labels)
+	clusterObj, err := node.resolver.policy.GetObject(ClusterObject.Kind, node.labels.Labels["cluster"], SystemNamespace)
 	if err != nil {
-		return nil, NewCriticalError(errors.NewErrorWithDetails(err.Error(), errors.Details{}))
+		return nil, node.errorClusterDoesNotExist()
 	}
+	if clusterObj == nil {
+		return nil, node.errorClusterDoesNotExist()
+	}
+
 	return NewComponentInstanceKey(
-		cluster,
+		clusterObj.(*Cluster),
 		node.contract,
 		node.context,
 		node.allocationKeysResolved,
@@ -315,14 +323,17 @@ func (node *resolutionNode) transformLabels(labels *LabelSet, operations LabelOp
 	}
 }
 
-func (node *resolutionNode) processRules(policy *Policy) (*RuleActionResult, error) {
-	rules := policy.Rules.GetRulesSortedByWeight()
+func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *PolicyNamespace, result *RuleActionResult) error {
+	if policyNamespace == nil {
+		return nil
+	}
+
+	rules := policyNamespace.Rules.GetRulesSortedByWeight()
 	contextualDataForRule := node.getContextualDataForRuleExpression()
-	result := NewRuleActionResult(node.labels)
 	for _, rule := range rules {
 		matched, err := rule.Matches(contextualDataForRule, node.resolver.expressionCache)
 		if err != nil {
-			return nil, node.errorWhenProcessingRule(rule, err)
+			return node.errorWhenProcessingRule(rule, err)
 		}
 		node.logTestedRuleMatch(rule, matched)
 		if matched {
@@ -331,7 +342,7 @@ func (node *resolutionNode) processRules(policy *Policy) (*RuleActionResult, err
 			// if a dependency has been rejected, handle it right away and return that we cannot resolve it
 			if len(rule.Actions.Dependency) > 0 {
 				if !result.AllowDependency {
-					return nil, node.errorDependencyNotAllowedByRules()
+					return node.errorDependencyNotAllowedByRules()
 				}
 			}
 			if result.ChangedLabelsOnLastApply {
@@ -341,10 +352,28 @@ func (node *resolutionNode) processRules(policy *Policy) (*RuleActionResult, err
 	}
 
 	if !result.AllowDependency {
-		return nil, node.errorDependencyNotAllowedByRules()
+		return node.errorDependencyNotAllowedByRules()
 	}
 
-	node.logRulesProcessingResult(result)
+	node.logRulesProcessingResult(policyNamespace, result)
+	return nil
+}
+
+func (node *resolutionNode) processRules() (*RuleActionResult, error) {
+	result := NewRuleActionResult(node.labels)
+	var err error
+
+	// process rules within the current namespace
+	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[node.namespace], result)
+	if err != nil {
+		return nil, err
+	}
+
+	// process rules globally (within system namespace)
+	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[SystemNamespace], result)
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 

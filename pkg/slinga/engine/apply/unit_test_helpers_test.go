@@ -88,11 +88,11 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func getInstanceKey(clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
-	cluster := policy.Clusters[clusterName]
-	contract := policy.Contracts[contractName]
+func getInstanceKey(namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
+	cluster := policy.Namespace[language.SystemNamespace].Clusters[clusterName]
+	contract := policy.Namespace[namespace].Contracts[contractName]
 	context := contract.FindContextByName(contextName)
-	service := policy.Services[context.Allocation.Service]
+	service := policy.Namespace[namespace].Services[context.Allocation.Service]
 	return resolve.NewComponentInstanceKey(cluster, contract, context, allocationKeysResolved, service, service.GetComponentsMap()[componentName]).GetKey()
 }
 

@@ -118,10 +118,10 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *exte
 	)
 
 	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Dependencies = %d, Users = %d\n",
-		len(gen.policy.Services),
+		len(gen.policy.GetObjectsByKind(language.ServiceObject.Kind)),
 		maxChainLen,
-		len(gen.policy.Contracts)*gen.contextsPerContract,
-		len(gen.policy.Dependencies.DependenciesByID),
+		len(gen.policy.GetObjectsByKind(language.ContractObject.Kind))*gen.contextsPerContract,
+		len(gen.policy.GetObjectsByKind(language.DependencyObject.Kind)),
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
 
@@ -198,7 +198,7 @@ func (gen *PolicyGenerator) makeServices() int {
 }
 
 func (gen *PolicyGenerator) makeService() *language.Service {
-	id := len(gen.policy.Services)
+	id := len(gen.policy.GetObjectsByKind(language.ServiceObject.Kind))
 
 	service := &language.Service{
 		Metadata: language.Metadata{
@@ -338,7 +338,7 @@ func (gen *PolicyGenerator) makeCluster() {
 	cluster := &language.Cluster{
 		Metadata: language.Metadata{
 			Kind:      language.ClusterObject.Kind,
-			Namespace: "main",
+			Namespace: "system",
 			Name:      "cluster-test",
 		},
 	}

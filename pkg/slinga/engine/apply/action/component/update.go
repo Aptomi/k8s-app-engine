@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/language"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"time"
 )
@@ -57,9 +58,13 @@ func (a *UpdateAction) updateActualState(context *action.Context) error {
 
 func (a *UpdateAction) processDeployment(context *action.Context) error {
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	serviceComponent := context.DesiredPolicy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName]
+	serviceObj, err := context.DesiredPolicy.GetObject(language.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	if err != nil {
+		return err
+	}
+	component := serviceObj.(*language.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
-	if serviceComponent == nil {
+	if component == nil {
 		// This is a service instance. Do nothing
 		return nil
 	}
@@ -67,27 +72,30 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 	// Instantiate component
 	context.EventLog.WithFields(eventlog.Fields{
 		"componentKey": instance.Metadata.Key,
-		"component":    serviceComponent.Name,
+		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
 	}).Info("Updating a running component instance: " + instance.GetKey())
 
-	if serviceComponent.Code != nil {
+	if component.Code != nil {
 		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
 		if !ok {
 			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}
 
-		cluster, ok := context.DesiredPolicy.Clusters[clusterName]
-		if !ok {
+		clusterObj, err := context.DesiredPolicy.GetObject(language.ClusterObject.Kind, clusterName, language.SystemNamespace)
+		if err != nil {
+			return err
+		}
+		if clusterObj == nil {
 			return fmt.Errorf("Can't find cluster in policy: %s", clusterName)
 		}
 
-		plugin, err := context.Plugins.GetDeployPlugin(serviceComponent.Code.Type)
+		plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)
 		if err != nil {
 			return err
 		}
 
-		err = plugin.Update(cluster, a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Update(clusterObj.(*language.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}

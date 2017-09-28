@@ -55,29 +55,31 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 
 	// How many colors have been used
 	usedColors := 0
-	colorForUser := make(map[string]int)
+	colorMap := make(map[string]int)
 
 	// First of all, let's show all dependencies (who requested what)
-	if policy.Dependencies != nil {
-		for contractName, dependencies := range policy.Dependencies.DependenciesByContract {
-			// Add a node with contract
-			addNodeOnce(graph, "cluster_Contracts", contractName, nil, was)
+	for _, policyNS := range policy.Namespace {
+		if policyNS.Dependencies != nil {
+			for contractName, dependencies := range policyNS.Dependencies.DependenciesByContract {
+				// Add a node with contract
+				addNodeOnce(graph, "cluster_Contracts", contractName, nil, was)
 
-			// For every user who has a dependency on this service
-			for _, d := range dependencies {
-				color := getUserColor(d.UserID, colorForUser, &usedColors)
+				// For every user who has a dependency on this service
+				for _, d := range dependencies {
+					color := getColor(d.GetKey(), colorMap, &usedColors)
 
-				// Add a node with user
-				user := externalData.UserLoader.LoadUserByID(d.UserID)
-				label := "Name: " + user.Name + " (" + user.ID + ")"
-				keys := GetSortedStringKeys(user.Labels)
-				for _, k := range keys {
-					label += "\n" + k + " = " + shorten(user.Labels[k])
+					// Add a node with user
+					user := externalData.UserLoader.LoadUserByID(d.UserID)
+					label := "Name: " + user.Name + " (" + user.ID + ")"
+					keys := GetSortedStringKeys(user.Labels)
+					for _, k := range keys {
+						label += "\n" + k + " = " + shorten(user.Labels[k])
+					}
+					addNodeOnce(graph, "cluster_Users", d.UserID, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
+
+					// Add an edge from user to a contract
+					addEdge(graph, d.UserID, contractName, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 				}
-				addNodeOnce(graph, "cluster_Users", d.UserID, map[string]string{"label": label, "style": "filled", "fillcolor": "/" + colorScheme + "/" + strconv.Itoa(color)}, was)
-
-				// Add an edge from user to a contract
-				addEdge(graph, d.UserID, contractName, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 			}
 		}
 	}
@@ -104,28 +106,30 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 		addNodeOnce(graph, "cluster_Service_Allocations_"+key.ServiceName, serviceAllocationKey, map[string]string{"label": "Context: " + key.ContextNameWithKeys}, was)
 
 		// Add an edge from service to service instances box
-		for dependencyID := range instance.DependencyIds {
-			userID := policy.Dependencies.DependenciesByID[dependencyID].UserID
-			color := getUserColor(userID, colorForUser, &usedColors)
+		for dependencyKey, _ := range instance.DependencyKeys {
+			// namespace, kind, name
+			color := getColor(dependencyKey, colorMap, &usedColors)
 			addEdge(graph, key.ServiceName, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
 		}
 	}
 
 	// Third, show service-contract dependencies
 	if policy != nil {
-		for serviceName1, service1 := range policy.Services {
-			// Resolve every component
-			for _, component := range service1.Components {
-				contractName2 := component.Contract
-				if contractName2 != "" {
-					// Add a node with service1
-					addNodeOnce(graph, "cluster_Services", serviceName1, nil, was)
+		for _, policyNS := range policy.Namespace {
+			for serviceName1, service1 := range policyNS.Services {
+				// Resolve every component
+				for _, component := range service1.Components {
+					contractName2 := component.Contract
+					if contractName2 != "" {
+						// Add a node with service1
+						addNodeOnce(graph, "cluster_Services", serviceName1, nil, was)
 
-					// Add a node with service2
-					addNodeOnce(graph, "cluster_Contracts", contractName2, nil, was)
+						// Add a node with service2
+						addNodeOnce(graph, "cluster_Contracts", contractName2, nil, was)
 
-					// Show dependency
-					addEdge(graph, serviceName1, contractName2, map[string]string{"color": "gray60"})
+						// Show dependency
+						addEdge(graph, serviceName1, contractName2, map[string]string{"color": "gray60"})
+					}
 				}
 			}
 		}
@@ -137,15 +141,15 @@ func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, ex
 }
 
 // Returns a color for the given user
-func getUserColor(userID string, colorForUser map[string]int, usedColors *int) int {
-	color, ok := colorForUser[userID]
+func getColor(key string, keyColorMap map[string]int, usedColors *int) int {
+	color, ok := keyColorMap[key]
 	if !ok {
 		*usedColors++
 		if *usedColors > colorCount {
 			*usedColors = 1
 		}
 		color = *usedColors
-		colorForUser[userID] = color
+		keyColorMap[key] = color
 	}
 	return color
 }

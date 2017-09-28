@@ -69,22 +69,23 @@ func NewPolicyResolver(policy *Policy, externalData *external.Data) *PolicyResol
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *EventLog, error) {
 	var semaphore = make(chan int, THREAD_POOL_SIZE)
-	var errs = make(chan error, len(resolver.policy.Dependencies.DependenciesByID))
+	dependencies := resolver.policy.GetObjectsByKind(DependencyObject.Kind)
+	var errs = make(chan error, len(dependencies))
 
 	// Run every declared dependency via policy and resolve it
-	for _, d := range resolver.policy.Dependencies.DependenciesByID {
+	for _, d := range dependencies {
 		// resolve dependency via applying policy
 		semaphore <- 1
 		go func(d *Dependency) {
 			node, err := resolver.resolveDependency(d)
 			errs <- resolver.combineData(node, err)
 			<-semaphore
-		}(d)
+		}(d.(*Dependency))
 	}
 
 	// Wait for all go routines to end
 	errFound := 0
-	for i := 0; i < len(resolver.policy.Dependencies.DependenciesByID); i++ {
+	for i := 0; i < len(dependencies); i++ {
 		err := <-errs
 		if err != nil {
 			errFound++
@@ -132,12 +133,12 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 
 	// exit if dependency has not been fulfilled. otherwise, proceed to data aggregation
-	if !node.resolved {
+	if !node.resolved || node.serviceKey == nil {
 		return nil
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.DependencyInstanceMap[node.dependency.GetID()] = node.serviceKey.GetKey()
+	resolver.resolution.DependencyInstanceMap[node.dependency.GetKey()] = node.serviceKey.GetKey()
 
 	// append component instance data
 	err := resolver.resolution.AppendData(node.resolution)
@@ -175,6 +176,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		// Return a policy processing error in case service is not present in policy
 		return node.cannotResolveInstance(err)
 	}
+	node.namespace = node.contract.Namespace
 	node.objectResolved(node.contract)
 
 	// Process service and transform labels
@@ -213,7 +215,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	}
 
 	// Process global rules before processing service key and dependent component keys
-	ruleResult, err := node.processRules(resolver.policy)
+	ruleResult, err := node.processRules()
 	if err != nil {
 		// Return an error in case of rule processing error
 		return node.cannotResolveInstance(err)

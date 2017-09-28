@@ -1,40 +1,33 @@
 Implementation:
 
-1. Support for namespaces [ARCH DISCUSSION NEEDED]
-  - we need to make sure everything that calls getName() is within a namespace
+1. Add unit tests for namespaces
+
+2. Implement policy validation
+  - e.g. compile all expressions, templates, etc
   - add checks for duplicate names in the same NS
-  - add references to support "namespace/"
-  - inheritance / make sure we are looking for contexts in the right namespace
-  - move istio into a 'system' namespace
-  - rules in namespaces? global rules in system namespace?
-  - rules to reference namespaces?
 
-2. ACL [ARCH DISCUSSION NEEDED]
+3. ACL [ARCH DISCUSSION NEEDED]
 
-3. Istio [ARCH DISCUSSION NEEDED]
+4. Istio [ARCH DISCUSSION NEEDED]
   - Figure out a good model to fit services like istio into the engine
   - Without having user to create contexts for them
+  - Move to 'system' namespace?
 
-4. Implement LDAP sync as an external service
+5. Implement LDAP sync as an external service
   - Generic system for aggregating and storing labels from different data sources
   - Log: gets tied to a separate revision of users, and the service keeps N last revisions)
-
-5. Implement policy validation
-  - e.g. compile all expressions, templates, etc
 
 6. Attach policy apply log to component instances
 
 7. Versions for services
-   - Version is a special label, which can be compared
+   - special label, which can be compared
 
-8. Aptomi quickstart
-   - with sample app
+8. Aptomi quickstart with sample app
 
 9. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
 
 
 Minor issues:
-- Get rid of dependency ID
 - Deal with code style and missing comments
 - Shall we consider renaming .User -> .Consumer?
 - Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
@@ -174,3 +167,13 @@ Done:
 
 * Included cluster into component key
   * added unit tests
+
+* Got rid of dependency ID
+  * moved to keys
+
+* Initial support for namespaces
+  * namespace is a part of component key
+  * all calls to get objects call policy.GetObject() and supply a namespace relative to which the call should be made
+  * clusters are in 'system' namespace
+  * rules can be in current namespace or/and in 'system' namespace
+  * policy can refer  add references to support "namespace/"

@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -15,28 +16,28 @@ func TestPolicyResolverAndResolvedData(t *testing.T) {
 	assert.Equal(t, 12, len(resolution.ComponentInstanceMap), "Policy resolution data should have correct number of entries")
 
 	// Resolution for test context
-	kafkaTest := getInstanceByParams(t, "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
-	assert.Equal(t, 1, len(kafkaTest.DependencyIds), "One dependency should be resolved with access to test")
-	assert.NotEmpty(t, resolution.DependencyInstanceMap["dep_id_1"], "Only Alice should have access to test")
+	kafkaTest := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
+	assert.Equal(t, 1, len(kafkaTest.DependencyKeys), "One dependency should be resolved with access to test, but found %v", kafkaTest.DependencyKeys)
+	assert.NotEmpty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_1"], "Alice should have access to test")
 
 	// Resolution for prod context
-	kafkaProd := getInstanceByParams(t, "cluster-us-east", "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
-	assert.Equal(t, 1, len(kafkaProd.DependencyIds), "One dependency should be resolved with access to prod, but found %v", kafkaProd.DependencyIds)
-	assert.Equal(t, "2", policy.Dependencies.DependenciesByID["dep_id_2"].UserID, "Only Bob should have access to prod (Carol is compromised)")
+	kafkaProd := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
+	assert.Equal(t, 1, len(kafkaProd.DependencyKeys), "One dependency should be resolved with access to prod, but found %v", kafkaProd.DependencyKeys)
+	assert.NotEmpty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_2"], "Bob should have access to prod")
 }
 
 func TestPolicyResolverAndUnresolvedData(t *testing.T) {
 	_, resolution := loadPolicyAndResolve(t)
 
 	// Dave dependency on kafka should not be resolved
-	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_4"], "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
+	assert.Empty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_4"], "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
 }
 
 func TestPolicyResolverLabelProcessing(t *testing.T) {
 	_, resolution := loadPolicyAndResolve(t)
 
 	// Check labels for Bob's dependency
-	serviceInstance := getInstanceByDependencyId(t, "dep_id_2", resolution)
+	serviceInstance := getInstanceByDependencyKey(t, "main:dependency:dep_id_2", resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
 	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")
@@ -47,13 +48,17 @@ func TestPolicyResolverLabelProcessing(t *testing.T) {
 func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 	policy, resolution := loadPolicyAndResolve(t)
 
-	kafkaTest := getInstanceByParams(t, "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
+	kafkaTest := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
 
 	// Check that code parameters evaluate correctly
-	assert.Equal(t, "cluster-us-west-zookeeper-test-platform-services-component2", kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
+	assert.Equal(t, strings.Join(
+		[]string{"cluster-us-west", "main", "zookeeper", "test", "platform-services", "component2"}, "-",
+	), kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
 
 	// Check that discovery parameters evaluate correctly
-	assert.Equal(t, "kafka-cluster-us-east-kafka-test-platform-services-component2-url", kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+	assert.Equal(t, strings.Join(
+		[]string{"kafka", "cluster-us-east", "main", "kafka", "test", "platform-services", "component2", "url"}, "-",
+	), kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// Check that nested parameters evaluate correctly
 	for i := 1; i <= 5; i++ {
@@ -64,7 +69,7 @@ func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Dependency{
+	dependency := &Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -72,19 +77,20 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 		},
 		UserID:   "non-existing-user-123456789",
 		Contract: "newcontract",
-	})
+	}
+	policy.AddObject(dependency)
 
 	// dependency referring to non-existing user should not trigger a critical error
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
 
 	// dependency should be just skipped
-	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should not be resolved")
+	assert.Empty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should not be resolved")
 }
 
 func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Dependency{
+	dependency := &Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -92,13 +98,14 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 		},
 		UserID:   "4",
 		Contract: "non-existing-contract-123456789",
-	})
+	}
+	policy.AddObject(dependency)
 
 	// dependency referring to non-existing contract should not trigger a critical error
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
 
 	// dependency should be just skipped
-	assert.Empty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should not be resolved")
+	assert.Empty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should not be resolved")
 }
 
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
@@ -899,7 +906,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Dependency{
+	dependency := &Dependency{
 		Metadata: Metadata{
 			Kind:      DependencyObject.Kind,
 			Namespace: "main",
@@ -907,13 +914,14 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 		},
 		UserID:   "7",
 		Contract: "contractA",
-	})
+	}
+	policy.AddObject(dependency)
 
 	// unknown component type should not result in critical error
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
 
 	// check that both dependencies got resolved
-	assert.NotEmpty(t, resolution.DependencyInstanceMap["dep_id_new"], "Dependency should be resolved")
+	assert.NotEmpty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should be resolved")
 }
 
 func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
@@ -1018,8 +1026,8 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 	resolution := resolvePolicy(t, policy, ResSuccess, "")
 
 	// check that both dependencies got resolved
-	instance1 := getInstanceByDependencyId(t, "dep_1", resolution)
-	instance2 := getInstanceByDependencyId(t, "dep_2", resolution)
+	instance1 := getInstanceByDependencyKey(t, "main:dependency:dep_1", resolution)
+	instance2 := getInstanceByDependencyKey(t, "main:dependency:dep_2", resolution)
 	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels["cluster"], "Cluster should be set correctly via rules")
 	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels["cluster"], "Cluster should be set correctly via rules")
 }

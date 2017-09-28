@@ -43,6 +43,22 @@ func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
 	all together
 */
 
+func (node *resolutionNode) errorClusterDoesNotExist() error {
+	var err *errors.ErrorWithDetails
+	if label, ok := node.labels.Labels["cluster"]; ok {
+		err = errors.NewErrorWithDetails(
+			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", SystemNamespace, label),
+			errors.Details{},
+		)
+	} else {
+		err = errors.NewErrorWithDetails(
+			fmt.Sprintf("Engine needs cluster defined, but 'cluster' label is not set"),
+			errors.Details{},
+		)
+	}
+	return NewCriticalError(err)
+}
+
 func (node *resolutionNode) errorServiceDoesNotExist() error {
 	var name string
 	if node.context.Allocation != nil {
@@ -57,9 +73,17 @@ func (node *resolutionNode) errorServiceDoesNotExist() error {
 	return NewCriticalError(err)
 }
 
-func (node *resolutionNode) errorServiceOwnerDoesNotExist() error {
+func (node *resolutionNode) errorServiceOwnerDoesNotExist(service *Service) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Owner doesn't exist for service '%s': %s", node.context.Allocation.Service, node.resolver.policy.Services[node.context.Allocation.Service].Owner),
+		fmt.Sprintf("Owner doesn't exist for service '%s': %s", service.Name, service.Owner),
+		errors.Details{},
+	)
+	return NewCriticalError(err)
+}
+
+func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *Service) error {
+	err := errors.NewErrorWithDetails(
+		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", service.GetKey(), node.contract.GetKey()),
 		errors.Details{},
 	)
 	return NewCriticalError(err)
@@ -212,10 +236,10 @@ func (node *resolutionNode) logTestedContextCriteria(context *Context, matched b
 	}).Debugf("Trying context '%s' within contract '%s'. Matched = %t", context.Name, node.contract.Name, matched)
 }
 
-func (node *resolutionNode) logRulesProcessingResult(result *RuleActionResult) {
+func (node *resolutionNode) logRulesProcessingResult(policyNamespace *PolicyNamespace, result *RuleActionResult) {
 	node.eventLog.WithFields(Fields{
 		"result": result,
-	}).Debugf("Rules processed for context '%s' within contract '%s'. Dependency allowed", node.context.Name, node.contract.Name)
+	}).Debugf("Rules processed within namespace '%s' for context '%s' within contract '%s'. Dependency allowed", policyNamespace.Name, node.context.Name, node.contract.Name)
 }
 
 func (node *resolutionNode) logTestedRuleMatch(rule *Rule, match bool) {
@@ -273,7 +297,11 @@ func (node *resolutionNode) logCannotResolveInstance() {
 }
 
 func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstance) {
-	code := resolver.policy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
+	serviceObj, err := resolver.policy.GetObject(ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	if err != nil {
+		panic(fmt.Sprintf("Fatal error while getting service '%s/%s' from the policy: %s", instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace, err))
+	}
+	code := serviceObj.(*Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
 	if code != nil {
 		paramsTemplate := code.Params
 		params := instance.CalculatedCodeParams
@@ -287,7 +315,11 @@ func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstan
 }
 
 func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentInstance) {
-	paramsTemplate := resolver.policy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName].Discovery
+	serviceObj, err := resolver.policy.GetObject(ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	if err != nil {
+		panic(fmt.Sprintf("Fatal error while getting service '%s/%s' from the policy: %s", instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace, err))
+	}
+	paramsTemplate := serviceObj.(*Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Discovery
 	params := instance.CalculatedDiscovery
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {

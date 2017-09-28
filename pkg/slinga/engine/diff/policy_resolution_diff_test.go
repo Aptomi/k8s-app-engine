@@ -25,9 +25,10 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 
 	// Add another dependency and resolve policy
 	nextPolicy := language.LoadUnitTestsPolicy("../../testdata/unittests")
-	nextPolicy.Dependencies.AddDependency(
+	nextPolicy.AddObject(
 		&language.Dependency{
 			Metadata: language.Metadata{
+				Kind:      language.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},
@@ -47,9 +48,10 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 
 	// Add dependency, resolve policy
 	policyNext := language.LoadUnitTestsPolicy("../../testdata/unittests")
-	policyNext.Dependencies.AddDependency(
+	policyNext.AddObject(
 		&language.Dependency{
 			Metadata: language.Metadata{
+				Kind:      language.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},

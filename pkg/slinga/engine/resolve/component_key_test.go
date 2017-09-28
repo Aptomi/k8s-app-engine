@@ -6,15 +6,15 @@ import (
 )
 
 func TestComponentKeyCopy(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	policyNS := loadUnitTestsPolicy().Namespace["main"]
 
 	key := NewComponentInstanceKey(
-		policy.Clusters["cluster-us-west"],
-		policy.Contracts["zookeeper"],
-		policy.Contracts["zookeeper"].Contexts[0],
+		policyNS.Clusters["cluster-us-west"],
+		policyNS.Contracts["zookeeper"],
+		policyNS.Contracts["zookeeper"].Contexts[0],
 		[]string{"x", "y", "z"},
-		policy.Services["zookeeper"],
-		policy.Services["zookeeper"].Components[0],
+		policyNS.Services["zookeeper"],
+		policyNS.Services["zookeeper"].Components[0],
 	)
 
 	keyCopy := key.MakeCopy()

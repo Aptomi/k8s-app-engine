@@ -52,26 +52,23 @@ func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, 
 
 func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) ([]*istioRouteRule, error) {
 	instance := resolution.ComponentInstanceMap[componentKey]
-	component := policy.Services[instance.Metadata.Key.ServiceName].GetComponentsMap()[instance.Metadata.Key.ComponentName]
-
-	calcLabels := resolution.ComponentInstanceMap[componentKey].CalculatedLabels
-	cluster, err := policy.GetClusterByLabels(calcLabels)
+	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, err
 	}
+	service := serviceObj.(*lang.Service)
+	component := service.GetComponentsMap()[instance.Metadata.Key.ComponentName]
+
+	calcLabels := resolution.ComponentInstanceMap[componentKey].CalculatedLabels
+	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels["cluster"], lang.SystemNamespace)
+	if err != nil {
+		return nil, err
+	}
+	cluster := clusterObj.(*lang.Cluster)
 
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return nil, err
-	}
-
-	// get all users who're using service
-	dependencyIds := resolution.ComponentInstanceMap[componentKey].DependencyIds
-	users := make([]*lang.User, 0)
-	for dependencyID := range dependencyIds {
-		// todo check if user doesn't exist
-		userID := policy.Dependencies.DependenciesByID[dependencyID].UserID
-		users = append(users, externalData.UserLoader.LoadUserByID(userID))
 	}
 
 	allows, err := strconv.ParseBool(instance.DataForPlugins[resolve.ALLOW_INGRESS])

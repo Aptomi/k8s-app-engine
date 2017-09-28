@@ -3,64 +3,55 @@ package language
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
+	"strings"
 )
 
-/*
-	This file declares all the necessary structures for Slinga
-*/
-
-// Policy describes the entire policy with all namespaces included
-type Policy = PolicyNamespace
+// Policy describes the entire policy with all namespaces
+type Policy struct {
+	Namespace map[string]*PolicyNamespace
+}
 
 func NewPolicy() *Policy {
-	return NewPolicyNamespace()
-}
-
-// PolicyNamespace describes a specific namespace in a policy (services, contracts, clusters, rules and dependencies, etc)
-type PolicyNamespace struct {
-	Services     map[string]*Service
-	Contracts    map[string]*Contract
-	Clusters     map[string]*Cluster
-	Rules        *GlobalRules
-	Dependencies *GlobalDependencies
-}
-
-func NewPolicyNamespace() *PolicyNamespace {
-	return &PolicyNamespace{
-		Services:     make(map[string]*Service),
-		Contracts:    make(map[string]*Contract),
-		Clusters:     make(map[string]*Cluster),
-		Rules:        NewGlobalRules(),
-		Dependencies: NewGlobalDependencies(),
+	return &Policy{
+		Namespace: make(map[string]*PolicyNamespace),
 	}
 }
 
-// TODO: deal with namespaces
-func (policy *PolicyNamespace) AddObject(object object.Base) {
-	switch kind := object.GetKind(); kind {
-	case ServiceObject.Kind:
-		policy.Services[object.GetName()] = object.(*Service)
-	case ContractObject.Kind:
-		policy.Contracts[object.GetName()] = object.(*Contract)
-	case ClusterObject.Kind:
-		policy.Clusters[object.GetName()] = object.(*Cluster)
-	case RuleObject.Kind:
-		policy.Rules.addRule(object.(*Rule))
-	case DependencyObject.Kind:
-		policy.Dependencies.AddDependency(object.(*Dependency))
-	default:
-		panic(fmt.Sprintf("Can't add object to policy: %v", object))
+func (policy *Policy) AddObject(object object.Base) {
+	policyNamespace, ok := policy.Namespace[object.GetNamespace()]
+	if !ok {
+		policyNamespace = NewPolicyNamespace(object.GetNamespace())
+		policy.Namespace[object.GetNamespace()] = policyNamespace
 	}
+	policyNamespace.addObject(object)
 }
 
-func (policy *PolicyNamespace) GetClusterByLabels(labels *LabelSet) (*Cluster, error) {
-	var cluster *Cluster
-	if clusterName, ok := labels.Labels["cluster"]; ok {
-		if cluster, ok = policy.Clusters[clusterName]; !ok || cluster == nil {
-			return nil, fmt.Errorf("Cluster '%s' not found in the policy", clusterName)
-		}
+func (policy *Policy) GetObjectsByKind(kind string) []object.Base {
+	result := []object.Base{}
+	for _, policyNS := range policy.Namespace {
+		result = append(result, policyNS.getObjectsByKind(kind)...)
+	}
+	return result
+}
+
+func (policy *Policy) GetObject(kind string, locator string, currentNs string) (object.Base, error) {
+	// parse locator: [namespace/]name. we might add [domain/] in the future
+	parts := strings.Split(locator, "/")
+	var ns, name string
+	if len(parts) == 1 {
+		ns = currentNs
+		name = parts[0]
+	} else if len(parts) == 2 {
+		ns = parts[0]
+		name = parts[1]
 	} else {
-		return nil, fmt.Errorf("Label with name 'cluster' is not present, but required by the engine")
+		return nil, fmt.Errorf("Can't parse reference to a policy object: ", locator)
 	}
-	return cluster, nil
+
+	policyNS, ok := policy.Namespace[ns]
+	if !ok {
+		return nil, fmt.Errorf("Namespace %s doesn't exist, but referenced from ref %s", ns, locator)
+	}
+
+	return policyNS.getObject(kind, name), nil
 }

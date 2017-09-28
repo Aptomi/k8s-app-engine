@@ -23,7 +23,8 @@ func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.Polic
 
 	existingRules := make([]*istioRouteRule, 0)
 
-	for _, cluster := range policy.Clusters {
+	for _, clusterObj := range policy.GetObjectsByKind(lang.ClusterObject.Kind) {
+		cluster := clusterObj.(*lang.Cluster)
 		cache, err := p.getCache(cluster, eventLog)
 		if err != nil {
 			return err
