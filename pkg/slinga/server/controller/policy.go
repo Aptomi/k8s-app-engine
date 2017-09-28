@@ -81,6 +81,7 @@ func (ctl *PolicyControllerImpl) GetPolicyFromData(policyData *PolicyData) (*lan
 }
 
 func (ctl *PolicyControllerImpl) GetPolicy(policyGen object.Generation) (*language.Policy, error) {
+	// todo should we use RWMutex for get/update policy?
 	policyData, err := ctl.GetPolicyData(policyGen)
 	if err != nil {
 		return nil, err
