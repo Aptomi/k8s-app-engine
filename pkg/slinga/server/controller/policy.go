@@ -30,14 +30,19 @@ var PolicyDataObject = &object.Info{
 type PolicyData struct {
 	language.Metadata
 
-	Objects map[string]map[string]object.Generation // kind -> name -> generation
+	Objects map[string]map[string]map[string]object.Generation // ns -> kind -> name -> generation
 }
 
 func (p *PolicyData) Add(obj object.Base) {
-	byKind, exist := p.Objects[obj.GetKind()]
+	byNs, exist := p.Objects[obj.GetNamespace()]
+	if !exist {
+		byNs = make(map[string]map[string]object.Generation)
+		p.Objects[obj.GetNamespace()] = byNs
+	}
+	byKind, exist := byNs[obj.GetKind()]
 	if !exist {
 		byKind = make(map[string]object.Generation)
-		p.Objects[obj.GetKind()] = byKind
+		byNs[obj.GetKind()] = byKind
 	}
 	byKind[obj.GetName()] = obj.GetGeneration()
 }
@@ -67,13 +72,15 @@ func (ctl *PolicyControllerImpl) GetPolicyFromData(policyData *PolicyData) (*lan
 
 	// in case of first version of policy, we just need to have empty policy
 	if policyData != nil && policyData.Objects != nil {
-		for kind, nameGen := range policyData.Objects {
-			for name, gen := range nameGen {
-				obj, err := ctl.store.GetByName(object.SystemNS, kind, name, gen)
-				if err != nil {
-					return nil, err
+		for ns, kindNameGen := range policyData.Objects {
+			for kind, nameGen := range kindNameGen {
+				for name, gen := range nameGen {
+					obj, err := ctl.store.GetByName(ns, kind, name, gen)
+					if err != nil {
+						return nil, err
+					}
+					policy.AddObject(obj)
 				}
-				policy.AddObject(obj)
 			}
 		}
 	}
@@ -109,7 +116,7 @@ func (ctl *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (boo
 				Kind:      PolicyDataObject.Kind,
 				Name:      "policy",
 			},
-			Objects: make(map[string]map[string]object.Generation),
+			Objects: make(map[string]map[string]map[string]object.Generation),
 		}
 		changed = true
 	}
