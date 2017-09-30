@@ -1,39 +1,8 @@
 Implementation:
 
-1. Add unit tests for namespaces
+1. const SystemNamespace = "system"
 
-2. Implement policy validation
-  - e.g. compile all expressions, templates, etc
-  - add checks for duplicate names in the same NS
-
-3. ACL [ARCH DISCUSSION NEEDED]
-
-4. Istio [ARCH DISCUSSION NEEDED]
-  - Figure out a good model to fit services like istio into the engine
-  - Without having user to create contexts for them
-  - Move to 'system' namespace?
-
-5. Implement LDAP sync as an external service
-  - Generic system for aggregating and storing labels from different data sources
-  - Log: gets tied to a separate revision of users, and the service keeps N last revisions)
-
-6. Attach policy apply log to component instances
-
-7. Versions for services
-   - special label, which can be compared
-
-8. Aptomi quickstart with sample app
-
-9. Illustrate prod vs. stage contexts better in the demo (# of replicas, etc)
-
-
-Minor issues:
-- Deal with code style and missing comments
-- Shall we consider renaming .User -> .Consumer?
-- Plugins should support noop mode (if at all possible). I.e. noop should log Helm commands, but don't run them
-- Unit tests are 50% using "testdata" and 50% using hand-created objects. Might make sense to use the latter everywhere
-- Deal with EscapeName (it's Helm plugin specific, should not be present in engine)
-
+-- -- --
 
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
