@@ -60,7 +60,7 @@ func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey str
 	component := service.GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	calcLabels := resolution.ComponentInstanceMap[componentKey].CalculatedLabels
-	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels["cluster"], lang.SystemNamespace)
+	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels[lang.LabelCluster], lang.SystemNamespace)
 	if err != nil {
 		return nil, err
 	}

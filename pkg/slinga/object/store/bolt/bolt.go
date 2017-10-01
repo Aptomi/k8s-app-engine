@@ -103,12 +103,7 @@ func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
 			return err
 		}
 
-		err = bucket.Put([]byte(strings.Join([]string{obj.GetKey(), obj.GetGeneration().String()}, object.KeySeparator)), data)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return bucket.Put([]byte(strings.Join([]string{obj.GetKey(), obj.GetGeneration().String()}, object.KeySeparator)), data)
 	})
 
 	return updated, err

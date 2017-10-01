@@ -80,7 +80,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 	}).Info("Deploying new component instance: " + instance.GetKey())
 
 	if component.Code != nil {
-		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
+		clusterName, ok := instance.CalculatedCodeParams[language.LabelCluster].(string)
 		if !ok {
 			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}

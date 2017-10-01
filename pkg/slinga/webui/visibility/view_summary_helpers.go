@@ -21,7 +21,7 @@ func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) stri
 			return "N/A"
 		}
 	*/
-	return "" //view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels["cluster"]
+	return "" //view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels[language.LabelCluster]
 }
 
 func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) string {
@@ -65,7 +65,7 @@ func (view SummaryView) getInstanceStats(instance *resolve.ComponentInstance) st
 }
 
 func (view SummaryView) getResolvedClusterNameByInst(instance *resolve.ComponentInstance) string {
-	return "" //view.revision.Resolution.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels["cluster"]
+	return "" //view.revision.Resolution.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels[language.LabelCluster]
 }
 
 func (view SummaryView) getResolvedContextNameByInst(instance *resolve.ComponentInstance) string {

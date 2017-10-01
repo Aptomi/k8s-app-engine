@@ -45,7 +45,7 @@ func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
 
 func (node *resolutionNode) errorClusterDoesNotExist() error {
 	var err *errors.ErrorWithDetails
-	if label, ok := node.labels.Labels["cluster"]; ok {
+	if label, ok := node.labels.Labels[LabelCluster]; ok {
 		err = errors.NewErrorWithDetails(
 			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", SystemNamespace, label),
 			errors.Details{},

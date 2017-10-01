@@ -298,7 +298,7 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*ComponentInstanceKey, error) {
-	clusterObj, err := node.resolver.policy.GetObject(ClusterObject.Kind, node.labels.Labels["cluster"], SystemNamespace)
+	clusterObj, err := node.resolver.policy.GetObject(ClusterObject.Kind, node.labels.Labels[LabelCluster], SystemNamespace)
 	if err != nil {
 		return nil, node.errorClusterDoesNotExist()
 	}

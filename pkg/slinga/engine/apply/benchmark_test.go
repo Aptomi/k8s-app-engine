@@ -214,7 +214,7 @@ func (gen *PolicyGenerator) makeService() *language.Service {
 		labelName := gen.generatedLabelKeys[gen.random.Intn(len(gen.generatedLabelKeys))]
 
 		params := util.NestedParameterMap{}
-		params["cluster"] = "cluster-test"
+		params[language.LabelCluster] = "cluster-test"
 		for j := 0; j < gen.codeParams; j++ {
 			name := "param-" + strconv.Itoa(j)
 			value := "prefix-{{ .Labels." + labelName + " }}-suffix"
@@ -267,7 +267,7 @@ func (gen *PolicyGenerator) makeRules() {
 		},
 		Actions: &language.RuleActions{
 			Dependency:   language.DependencyAction("allow"),
-			ChangeLabels: language.ChangeLabelsAction(language.NewLabelOperationsSetSingleLabel("cluster", "cluster-test")),
+			ChangeLabels: language.ChangeLabelsAction(language.NewLabelOperationsSetSingleLabel(language.LabelCluster, "cluster-test")),
 		},
 	})
 }

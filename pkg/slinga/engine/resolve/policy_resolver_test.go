@@ -305,7 +305,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -388,7 +388,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -506,7 +506,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -607,7 +607,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -734,7 +734,7 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -823,7 +823,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -902,7 +902,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -940,7 +940,7 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 				Code: &Code{
 					Type: "aptomi/code/unittests",
 					Params: util.NestedParameterMap{
-						"cluster": "{{ .Labels.cluster }}",
+						LabelCluster: "{{ .Labels.cluster }}",
 					},
 				},
 			},
@@ -976,7 +976,7 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-east")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-east")),
 		},
 	})
 
@@ -992,7 +992,7 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 		},
 		Actions: &RuleActions{
 			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel("cluster", "cluster-us-west")),
+			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
 		},
 	})
 
@@ -1028,6 +1028,6 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 	// check that both dependencies got resolved
 	instance1 := getInstanceByDependencyKey(t, "main:dependency:dep_1", resolution)
 	instance2 := getInstanceByDependencyKey(t, "main:dependency:dep_2", resolution)
-	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels["cluster"], "Cluster should be set correctly via rules")
-	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels["cluster"], "Cluster should be set correctly via rules")
+	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels[LabelCluster], "Cluster should be set correctly via rules")
+	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels[LabelCluster], "Cluster should be set correctly via rules")
 }

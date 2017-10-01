@@ -72,7 +72,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 	}).Info("Destructing a running component instance: " + instance.GetKey())
 
 	if component.Code != nil {
-		clusterName, ok := instance.CalculatedCodeParams["cluster"].(string)
+		clusterName, ok := instance.CalculatedCodeParams[language.LabelCluster].(string)
 		if !ok {
 			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}

@@ -76,7 +76,7 @@ func (n serviceInstanceNode) getLabel() string {
 				running: <i>%s</i>`,
 			html.EscapeString(n.service.Name),
 			len(n.service.Components), // TODO: fix
-			html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
+			html.EscapeString(n.instance.CalculatedLabels.Labels[LabelCluster]),
 			html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 		)
 	}
@@ -85,7 +85,7 @@ func (n serviceInstanceNode) getLabel() string {
 			cluster: <i>%s</i>
 			running: <i>%s</i>`,
 		html.EscapeString(n.service.Name),
-		html.EscapeString(n.instance.CalculatedLabels.Labels["cluster"]),
+		html.EscapeString(n.instance.CalculatedLabels.Labels[LabelCluster]),
 		html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 	)
 }

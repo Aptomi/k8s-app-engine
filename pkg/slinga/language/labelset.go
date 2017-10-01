@@ -2,6 +2,8 @@ package language
 
 import "reflect"
 
+const LabelCluster = "cluster"
+
 // LabelSet defines the set of labels that will be manipulated
 type LabelSet struct {
 	Labels map[string]string
