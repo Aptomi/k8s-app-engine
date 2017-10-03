@@ -1,7 +1,7 @@
 package resolve
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"strings"
 )
 
@@ -31,7 +31,7 @@ type ComponentInstanceKey struct {
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(cluster *Cluster, contract *Contract, context *Context, allocationsKeysResolved []string, service *Service, component *ServiceComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(cluster *lang.Cluster, contract *lang.Contract, context *lang.Context, allocationsKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
 	contextNameWithKeys := getContextNameWithKeys(contextName, allocationsKeysResolved)
 	return &ComponentInstanceKey{
@@ -94,7 +94,7 @@ func (cik ComponentInstanceKey) GetKey() string {
 
 // If cluster has not been resolved yet and we need a key, generate one
 // Otherwise use cluster name
-func getClusterNameUnsafe(cluster *Cluster) string {
+func getClusterNameUnsafe(cluster *lang.Cluster) string {
 	if cluster == nil {
 		return componentUnresolvedName
 	}
@@ -103,7 +103,7 @@ func getClusterNameUnsafe(cluster *Cluster) string {
 
 // If contract has not been resolved yet and we need a key, generate one
 // Otherwise use contract name
-func getContractNameUnsafe(contract *Contract) string {
+func getContractNameUnsafe(contract *lang.Contract) string {
 	if contract == nil {
 		return componentUnresolvedName
 	}
@@ -112,7 +112,7 @@ func getContractNameUnsafe(contract *Contract) string {
 
 // If contract has not been resolved yet and we need a key, generate one
 // Otherwise use contract namespace
-func getContractNamespaceUnsafe(contract *Contract) string {
+func getContractNamespaceUnsafe(contract *lang.Contract) string {
 	if contract == nil {
 		return componentUnresolvedName
 	}
@@ -121,7 +121,7 @@ func getContractNamespaceUnsafe(contract *Contract) string {
 
 // If context has not been resolved yet and we need a key, generate one
 // Otherwise use context name
-func getContextNameUnsafe(context *Context) string {
+func getContextNameUnsafe(context *lang.Context) string {
 	if context == nil {
 		return componentUnresolvedName
 	}
@@ -130,7 +130,7 @@ func getContextNameUnsafe(context *Context) string {
 
 // If service has not been resolved yet and we need a key, generate one
 // Otherwise use service name
-func getServiceNameUnsafe(service *Service) string {
+func getServiceNameUnsafe(service *lang.Service) string {
 	if service == nil {
 		return componentUnresolvedName
 	}
@@ -139,7 +139,7 @@ func getServiceNameUnsafe(service *Service) string {
 
 // If component has not been resolved yet and we need a key, generate one
 // Otherwise use component name
-func getComponentNameUnsafe(component *ServiceComponent) string {
+func getComponentNameUnsafe(component *lang.ServiceComponent) string {
 	if component == nil {
 		return componentRootName
 	}

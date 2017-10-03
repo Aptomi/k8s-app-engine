@@ -1,10 +1,10 @@
 package resolve
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
@@ -17,10 +17,10 @@ type resolutionNode struct {
 	resolver *PolicyResolver
 
 	// pointer to event log (local to the node)
-	eventLog *EventLog
+	eventLog *eventlog.EventLog
 
 	// combined event logs from all resolution nodes in the subtree
-	eventLogsCombined []*EventLog
+	eventLogsCombined []*eventlog.EventLog
 
 	// new instance of PolicyResolution, where resolution resolution will be stored
 	resolution *PolicyResolution
@@ -29,32 +29,32 @@ type resolutionNode struct {
 	depth int
 
 	// reference to initial dependency
-	dependency *Dependency
+	dependency *lang.Dependency
 
 	// reference to user who requested this dependency
-	user *User
+	user *lang.User
 
 	// reference to the namespace & contract we are currently resolving
 	namespace    string
 	contractName string
-	contract     *Contract
+	contract     *lang.Contract
 
 	// reference to the current set of labels
-	labels *LabelSet
+	labels *lang.LabelSet
 
 	// reference to the context & the corresponding service that were matched
-	context *Context
-	service *Service
+	context *lang.Context
+	service *lang.Service
 
 	// reference to the allocation keys that were resolved
 	allocationKeysResolved []string
 
 	// reference to the current node in discovery tree for components announcing their discovery properties
 	// component1...component2...component3 -> component instance key
-	discoveryTreeNode NestedParameterMap
+	discoveryTreeNode util.NestedParameterMap
 
 	// reference to the current component in discovery tree
-	component *ServiceComponent
+	component *lang.ServiceComponent
 
 	// reference to the current component key
 	componentKey *ComponentInstanceKey
@@ -70,21 +70,21 @@ type resolutionNode struct {
 }
 
 // Creates a new resolution node as a starting point for resolving a particular dependency
-func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resolutionNode {
+func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *resolutionNode {
 	// combining user labels and dependency labels
 	user := resolver.externalData.UserLoader.LoadUserByID(dependency.UserID)
-	labels := NewLabelSet(dependency.Labels)
+	labels := lang.NewLabelSet(dependency.Labels)
 	if user != nil {
 		labels.AddLabels(user.Labels)
 	}
 
-	eventLog := NewEventLog()
+	eventLog := eventlog.NewEventLog()
 	return &resolutionNode{
 		resolved: false,
 
 		resolver:          resolver,
 		eventLog:          eventLog,
-		eventLogsCombined: []*EventLog{eventLog},
+		eventLogsCombined: []*eventlog.EventLog{eventLog},
 
 		resolution: NewPolicyResolution(),
 
@@ -100,7 +100,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 		labels: labels,
 
 		// empty discovery tree
-		discoveryTreeNode: NestedParameterMap{},
+		discoveryTreeNode: util.NestedParameterMap{},
 
 		// empty path
 		path: []string{},
@@ -109,13 +109,13 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *Dependency) *resol
 
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
-	eventLog := NewEventLog()
+	eventLog := eventlog.NewEventLog()
 	return &resolutionNode{
 		resolved: false,
 
 		resolver:          node.resolver,
 		eventLog:          eventLog,
-		eventLogsCombined: []*EventLog{eventLog},
+		eventLogsCombined: []*eventlog.EventLog{eventLog},
 
 		resolution: node.resolution,
 
@@ -128,7 +128,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		contractName: node.component.Contract,
 
 		// proceed with the current set of labels
-		labels: NewLabelSet(node.labels.Labels),
+		labels: lang.NewLabelSet(node.labels.Labels),
 
 		// move further by the discovery tree via component name link
 		discoveryTreeNode: node.discoveryTreeNode.GetNestedMap(node.component.Name),
@@ -137,7 +137,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		arrivalKey: node.componentKey,
 
 		// copy path
-		path: CopySliceOfStrings(node.path),
+		path: util.CopySliceOfStrings(node.path),
 	}
 }
 
@@ -197,27 +197,27 @@ func (node *resolutionNode) checkUserExists() error {
 }
 
 // Helper to get a contract
-func (node *resolutionNode) getContract(policy *Policy) (*Contract, error) {
-	contractObj, err := policy.GetObject(ContractObject.Kind, node.contractName, node.namespace)
+func (node *resolutionNode) getContract(policy *lang.Policy) (*lang.Contract, error) {
+	contractObj, err := policy.GetObject(lang.ContractObject.Kind, node.contractName, node.namespace)
 	if err != nil {
 		return nil, node.errorContractDoesNotExist()
 	}
 	if contractObj == nil {
 		return nil, node.errorContractDoesNotExist()
 	}
-	contract := contractObj.(*Contract)
+	contract := contractObj.(*lang.Contract)
 	node.logContractFound(contract)
 	return contract, nil
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) {
+func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Context, error) {
 	// Locate the list of contexts for service
 	node.logStartMatchingContexts()
 
 	// Find matching context
 	contextualDataForExpression := node.getContextualDataForContextExpression()
-	var contextMatched *Context
+	var contextMatched *lang.Context
 	for _, context := range node.contract.Contexts {
 		// Check if context matches (based on criteria)
 		matched, err := context.Matches(contextualDataForExpression, node.resolver.expressionCache)
@@ -242,12 +242,12 @@ func (node *resolutionNode) getMatchedContext(policy *Policy) (*Context, error) 
 }
 
 // Helper to get a matched service
-func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) {
+func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Service, error) {
 	if node.context.Allocation == nil {
 		return nil, node.errorServiceDoesNotExist()
 	}
 
-	serviceObj, err := policy.GetObject(ServiceObject.Kind, node.context.Allocation.Service, node.namespace)
+	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, node.context.Allocation.Service, node.namespace)
 	if err != nil {
 		return nil, node.errorServiceDoesNotExist()
 	}
@@ -255,7 +255,7 @@ func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) 
 		return nil, node.errorServiceDoesNotExist()
 	}
 
-	service := serviceObj.(*Service)
+	service := serviceObj.(*lang.Service)
 	serviceOwner := node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)
 
 	// If a service has no owner, it is considered a malformed policy, so let's return an error
@@ -273,7 +273,7 @@ func (node *resolutionNode) getMatchedService(policy *Policy) (*Service, error) 
 }
 
 // Helper to resolve allocation keys
-func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, error) {
+func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string, error) {
 	// If there is no allocation, there are no keys to resolve
 	if node.context.Allocation == nil {
 		return nil, nil
@@ -289,7 +289,7 @@ func (node *resolutionNode) resolveAllocationKeys(policy *Policy) ([]string, err
 	return result, nil
 }
 
-func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error) {
+func (node *resolutionNode) sortServiceComponents() ([]*lang.ServiceComponent, error) {
 	result, err := node.service.GetComponentsSortedTopologically()
 	if err != nil {
 		return nil, node.errorWhenDoingTopologicalSort(err)
@@ -298,8 +298,8 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 }
 
 // createComponentKey creates a component key
-func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*ComponentInstanceKey, error) {
-	clusterObj, err := node.resolver.policy.GetObject(ClusterObject.Kind, node.labels.Labels[LabelCluster], object.SystemNS)
+func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent) (*ComponentInstanceKey, error) {
+	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, node.labels.Labels[lang.LabelCluster], object.SystemNS)
 	if err != nil {
 		return nil, node.errorClusterDoesNotExist()
 	}
@@ -308,7 +308,7 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*Co
 	}
 
 	return NewComponentInstanceKey(
-		clusterObj.(*Cluster),
+		clusterObj.(*lang.Cluster),
 		node.contract,
 		node.context,
 		node.allocationKeysResolved,
@@ -317,14 +317,14 @@ func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*Co
 	), nil
 }
 
-func (node *resolutionNode) transformLabels(labels *LabelSet, operations LabelOperations) {
+func (node *resolutionNode) transformLabels(labels *lang.LabelSet, operations lang.LabelOperations) {
 	changedLabels := labels.ApplyTransform(operations)
 	if changedLabels {
 		node.logLabels(labels, "after transform")
 	}
 }
 
-func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *PolicyNamespace, result *RuleActionResult) error {
+func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.PolicyNamespace, result *lang.RuleActionResult) error {
 	if policyNamespace == nil {
 		return nil
 	}
@@ -360,8 +360,8 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *PolicyN
 	return nil
 }
 
-func (node *resolutionNode) processRules() (*RuleActionResult, error) {
-	result := NewRuleActionResult(node.labels)
+func (node *resolutionNode) processRules() (*lang.RuleActionResult, error) {
+	result := lang.NewRuleActionResult(node.labels)
 	var err error
 
 	// process rules within the current namespace
@@ -404,7 +404,7 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	}
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
-	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = EscapeName(node.componentKey.GetKey())
+	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = util.EscapeName(node.componentKey.GetKey())
 	for k, v := range componentDiscoveryParams {
 		node.discoveryTreeNode.GetNestedMap(node.component.Name)[k] = v
 	}

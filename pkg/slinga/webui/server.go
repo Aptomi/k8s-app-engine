@@ -1,7 +1,7 @@
 package webui
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui/visibility"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -69,7 +69,7 @@ func Serve(r *httprouter.Router) {
 
 	// serve all files from "webui" folder and require auth for everything except login.html
 	r.Handler(http.MethodGet, "/ui/", publicFilesHandler("/ui/", http.Dir("./webui/")))
-	r.Handler(http.MethodGet, "/run/", runFilesHandler("/run/", http.Dir(GetAptomiBaseDir())))
+	r.Handler(http.MethodGet, "/run/", runFilesHandler("/run/", http.Dir(db.GetAptomiBaseDir())))
 
 	// serve all API endpoints at /api/ path and require auth
 	r.Handler(http.MethodGet, "/api/endpoints", requireAuth(endpointsHandler))

@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/cluster"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/component"
-	. "github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func getPolicy() *Policy {
-	return LoadUnitTestsPolicy("../../testdata/unittests")
+func getPolicy() *lang.Policy {
+	return lang.LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
 func getExternalData() *external.Data {
@@ -26,9 +26,9 @@ func getExternalData() *external.Data {
 	)
 }
 
-func resolvePolicy(t *testing.T, policy *Policy, externalData *external.Data) *PolicyResolution {
+func resolvePolicy(t *testing.T, policy *lang.Policy, externalData *external.Data) *resolve.PolicyResolution {
 	t.Helper()
-	resolver := NewPolicyResolver(policy, externalData)
+	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
 		hook := &eventlog.HookStdout{}
@@ -39,11 +39,11 @@ func resolvePolicy(t *testing.T, policy *Policy, externalData *external.Data) *P
 }
 
 // TODO: this has to be changed to use the new serialization code instead of serializing to YAML
-func emulateSaveAndLoadResolution(resolution *PolicyResolution) *PolicyResolution {
-	policyNew := Policy{}
+func emulateSaveAndLoadResolution(resolution *resolve.PolicyResolution) *resolve.PolicyResolution {
+	policyNew := lang.Policy{}
 	yaml.DeserializeObject(yaml.SerializeObject(resolution), &policyNew)
 
-	resolutionNew := PolicyResolution{}
+	resolutionNew := resolve.PolicyResolution{}
 	yaml.DeserializeObject(yaml.SerializeObject(resolution), &resolutionNew)
 
 	return &resolutionNew

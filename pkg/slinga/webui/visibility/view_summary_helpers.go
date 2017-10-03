@@ -2,11 +2,11 @@ package visibility
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"strings"
 )
 
-func (view SummaryView) getDependencyStats(dependency *Dependency) string {
+func (view SummaryView) getDependencyStats(dependency *lang.Dependency) string {
 	/*
 		if !dependency.Resolved {
 			return "N/A"
@@ -15,7 +15,7 @@ func (view SummaryView) getDependencyStats(dependency *Dependency) string {
 	return "" //NewTimeDiff(view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].GetRunningTime()).Humanize()
 }
 
-func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) string {
+func (view SummaryView) getResolvedClusterNameByDep(dependency *lang.Dependency) string {
 	/*
 		if !dependency.Resolved {
 			return "N/A"
@@ -24,7 +24,7 @@ func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) stri
 	return "" //view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels[lang.LabelCluster]
 }
 
-func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) string {
+func (view SummaryView) getResolvedContextNameByDep(dependency *lang.Dependency) string {
 	/*
 		if !dependency.Resolved {
 			return "N/A"
@@ -36,13 +36,13 @@ func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) stri
 	*/
 }
 
-func (view SummaryView) getRuleAppliedTo(rule *Rule) string {
+func (view SummaryView) getRuleAppliedTo(rule *lang.Rule) string {
 	// TODO: complete
 	return "-1 instances"
 }
 
-func (view SummaryView) getRuleMatchedUsers(rule *Rule) []*User {
-	matchedUsers := make([]*User, 0)
+func (view SummaryView) getRuleMatchedUsers(rule *lang.Rule) []*lang.User {
+	matchedUsers := make([]*lang.User, 0)
 
 	/*
 		for _, user := range view.revision.UserLoader.LoadUsersAll().Users {

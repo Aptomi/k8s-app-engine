@@ -3,7 +3,7 @@ package graphviz
 import (
 	"bytes"
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/awalterschulze/gographviz"
 	"image"
 	"image/png"
@@ -14,7 +14,7 @@ import (
 // Saves graph into a file
 func getGraphImage(graph *gographviz.Graph) (image.Image, error) {
 	// Original graph in .dot
-	fileNameDot := WriteTempFile("graphviz", graph.String())
+	fileNameDot := util.WriteTempFile("graphviz", graph.String())
 	defer os.Remove(fileNameDot)
 
 	// Graph with improved layout in .dot

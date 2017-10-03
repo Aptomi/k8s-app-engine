@@ -3,21 +3,21 @@ package visibility
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"html"
 )
 
 type serviceInstanceNode struct {
 	key             string
-	service         *Service
+	service         *lang.Service
 	context         string
 	contextWithKeys string
 	instance        *resolve.ComponentInstance
 	primary         bool
 }
 
-func newServiceInstanceNode(key string, service *Service, context string, contextWithKeys string, instance *resolve.ComponentInstance, primary bool) graphNode {
+func newServiceInstanceNode(key string, service *lang.Service, context string, contextWithKeys string, instance *resolve.ComponentInstance, primary bool) graphNode {
 	return serviceInstanceNode{
 		key:             key,
 		service:         service,
@@ -76,8 +76,8 @@ func (n serviceInstanceNode) getLabel() string {
 				running: <i>%s</i>`,
 			html.EscapeString(n.service.Name),
 			len(n.service.Components), // TODO: fix
-			html.EscapeString(n.instance.CalculatedLabels.Labels[LabelCluster]),
-			html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
+			html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]),
+			html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 		)
 	}
 	return fmt.Sprintf(
@@ -85,8 +85,8 @@ func (n serviceInstanceNode) getLabel() string {
 			cluster: <i>%s</i>
 			running: <i>%s</i>`,
 		html.EscapeString(n.service.Name),
-		html.EscapeString(n.instance.CalculatedLabels.Labels[LabelCluster]),
-		html.EscapeString(NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
+		html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]),
+		html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()),
 	)
 }
 

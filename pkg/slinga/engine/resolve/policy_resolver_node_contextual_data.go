@@ -4,7 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 /*
@@ -102,14 +102,14 @@ func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 }
 
 // How discovery tree is visible from the policy language
-func (node *resolutionNode) proxyDiscovery(discoveryTree NestedParameterMap, cik *ComponentInstanceKey) interface{} {
+func (node *resolutionNode) proxyDiscovery(discoveryTree util.NestedParameterMap, cik *ComponentInstanceKey) interface{} {
 	result := discoveryTree.MakeCopy()
 
 	// special case to announce own component instance
-	result["instance"] = EscapeName(cik.GetKey())
+	result["instance"] = util.EscapeName(cik.GetKey())
 
 	// special case to announce own component ID
-	result["instanceId"] = HashFnv(cik.GetKey())
+	result["instanceId"] = util.HashFnv(cik.GetKey())
 
 	// expose parent service information as well
 	if cik.IsComponent() {
@@ -117,13 +117,13 @@ func (node *resolutionNode) proxyDiscovery(discoveryTree NestedParameterMap, cik
 		serviceCik := cik.GetParentServiceKey()
 
 		// create a bucket for service
-		result["service"] = NestedParameterMap{}
+		result["service"] = util.NestedParameterMap{}
 
 		// special case to announce own component instance
-		result.GetNestedMap("service")["instance"] = EscapeName(serviceCik.GetKey())
+		result.GetNestedMap("service")["instance"] = util.EscapeName(serviceCik.GetKey())
 
 		// special case to announce own component ID
-		result.GetNestedMap("service")["instanceId"] = HashFnv(serviceCik.GetKey())
+		result.GetNestedMap("service")["instanceId"] = util.HashFnv(serviceCik.GetKey())
 	}
 
 	return result

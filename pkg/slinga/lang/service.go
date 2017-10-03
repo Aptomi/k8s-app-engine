@@ -3,7 +3,7 @@ package lang
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"sync"
 )
 
@@ -39,14 +39,14 @@ type ServiceComponent struct {
 
 	// Otherwise it's a code component
 	Code         *Code
-	Discovery    NestedParameterMap
+	Discovery    util.NestedParameterMap
 	Dependencies []string
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
 	Type   string
-	Params NestedParameterMap
+	Params util.NestedParameterMap
 }
 
 // GetComponentsMap lazily initializes and returns a map of name -> component

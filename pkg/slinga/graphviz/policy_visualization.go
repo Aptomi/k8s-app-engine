@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/awalterschulze/gographviz"
 	"image"
 	"strconv"
@@ -71,7 +71,7 @@ func makeGraph(policy *lang.Policy, resolution *resolve.PolicyResolution, extern
 					// Add a node with user
 					user := externalData.UserLoader.LoadUserByID(d.UserID)
 					label := "Name: " + user.Name + " (" + user.ID + ")"
-					keys := GetSortedStringKeys(user.Labels)
+					keys := util.GetSortedStringKeys(user.Labels)
 					for _, k := range keys {
 						label += "\n" + k + " = " + shorten(user.Labels[k])
 					}

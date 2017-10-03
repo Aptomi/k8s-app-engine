@@ -5,10 +5,10 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 const (
@@ -16,17 +16,17 @@ const (
 	ResError   = iota
 )
 
-func loadUnitTestsPolicy() *Policy {
-	return LoadUnitTestsPolicy("../../testdata/unittests")
+func loadUnitTestsPolicy() *lang.Policy {
+	return lang.LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
-func loadPolicyAndResolve(t *testing.T) (*Policy, *PolicyResolution) {
+func loadPolicyAndResolve(t *testing.T) (*lang.Policy, *PolicyResolution) {
 	t.Helper()
 	policy := loadUnitTestsPolicy()
 	return policy, resolvePolicy(t, policy, ResSuccess, "")
 }
 
-func resolvePolicy(t *testing.T, policy *Policy, expectedResult int, expectedErrorMessage string) *PolicyResolution {
+func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expectedErrorMessage string) *PolicyResolution {
 	t.Helper()
 	externalData := external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
@@ -72,7 +72,7 @@ func getInstanceByDependencyKey(t *testing.T, dependencyId string, resolution *P
 	return instance
 }
 
-func getInstanceByParams(t *testing.T, namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByParams(t *testing.T, namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *lang.Policy, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
 	cluster := policy.Namespace[object.SystemNS].Clusters[clusterName]
 	contract := policy.Namespace[namespace].Contracts[contractName]

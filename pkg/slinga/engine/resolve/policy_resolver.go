@@ -2,12 +2,12 @@ package resolve
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"sync"
 )
 
@@ -50,7 +50,7 @@ type PolicyResolver struct {
 	resolution *PolicyResolution
 
 	// Buffered event log - gets populated during policy resolution
-	eventLog *EventLog
+	eventLog *eventlog.EventLog
 }
 
 // NewPolicyResolver creates a new policy resolver
@@ -61,12 +61,12 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 		expressionCache: expression.NewExpressionCache(),
 		templateCache:   template.NewTemplateCache(),
 		resolution:      NewPolicyResolution(),
-		eventLog:        NewEventLog(),
+		eventLog:        eventlog.NewEventLog(),
 	}
 }
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *EventLog, error) {
+func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *eventlog.EventLog, error) {
 	var semaphore = make(chan int, THREAD_POOL_SIZE)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))
@@ -228,7 +228,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	node.objectResolved(node.serviceKey)
 
 	// Check if we've been there already
-	cycle := ContainsString(node.path, node.serviceKey.GetKey())
+	cycle := util.ContainsString(node.path, node.serviceKey.GetKey())
 	node.path = append(node.path, node.serviceKey.GetKey())
 	if cycle {
 		err = node.errorServiceCycleDetected()
@@ -265,7 +265,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		node.resolution.RecordLabels(node.componentKey, node.labels)
 
 		// Create new map with resolution keys for component
-		node.discoveryTreeNode[node.component.Name] = NestedParameterMap{}
+		node.discoveryTreeNode[node.component.Name] = util.NestedParameterMap{}
 
 		// Calculate and store discovery params
 		err := node.calculateAndStoreDiscoveryParams()

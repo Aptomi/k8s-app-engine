@@ -1,8 +1,8 @@
 package resolve
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // PolicyResolution contains resolution data for the policy
@@ -39,7 +39,7 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 }
 
 // Record dependency for component instance
-func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *Dependency, ruleResult *RuleActionResult) {
+func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *lang.Dependency, ruleResult *lang.RuleActionResult) {
 	instance := resolution.GetComponentInstanceEntry(cik)
 	instance.addDependency(dependency.GetKey())
 	instance.addRuleInformation(ruleResult)
@@ -56,17 +56,17 @@ func (resolution *PolicyResolution) recordProcessingOrder(cik *ComponentInstance
 }
 
 // Stores calculated discovery params for component instance
-func (resolution *PolicyResolution) RecordCodeParams(cik *ComponentInstanceKey, codeParams NestedParameterMap) error {
+func (resolution *PolicyResolution) RecordCodeParams(cik *ComponentInstanceKey, codeParams util.NestedParameterMap) error {
 	return resolution.GetComponentInstanceEntry(cik).addCodeParams(codeParams)
 }
 
 // Stores calculated discovery params for component instance
-func (resolution *PolicyResolution) RecordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams NestedParameterMap) error {
+func (resolution *PolicyResolution) RecordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams util.NestedParameterMap) error {
 	return resolution.GetComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
 }
 
 // Stores calculated labels for component instance
-func (resolution *PolicyResolution) RecordLabels(cik *ComponentInstanceKey, labels *LabelSet) {
+func (resolution *PolicyResolution) RecordLabels(cik *ComponentInstanceKey, labels *lang.LabelSet) {
 	resolution.GetComponentInstanceEntry(cik).addLabels(labels)
 }
 

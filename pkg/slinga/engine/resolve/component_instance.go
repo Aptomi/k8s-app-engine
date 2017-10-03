@@ -3,9 +3,9 @@ package resolve
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"strconv"
 	"time"
 )
@@ -34,9 +34,9 @@ type ComponentInstance struct {
 	DependencyKeys map[string]bool
 
 	// Calculated parameters for the component
-	CalculatedLabels     *LabelSet
-	CalculatedDiscovery  NestedParameterMap
-	CalculatedCodeParams NestedParameterMap
+	CalculatedLabels     *lang.LabelSet
+	CalculatedDiscovery  util.NestedParameterMap
+	CalculatedCodeParams util.NestedParameterMap
 
 	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
 	EdgesIn  map[string]bool
@@ -59,9 +59,9 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
 		Metadata:             &ComponentInstanceMetadata{cik, ComponentInstanceObject.Kind},
 		DependencyKeys:       make(map[string]bool),
-		CalculatedLabels:     NewLabelSet(make(map[string]string)),
-		CalculatedDiscovery:  NestedParameterMap{},
-		CalculatedCodeParams: NestedParameterMap{},
+		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),
+		CalculatedDiscovery:  util.NestedParameterMap{},
+		CalculatedCodeParams: util.NestedParameterMap{},
 		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
 		DataForPlugins:       make(map[string]string),
@@ -102,11 +102,11 @@ func (instance *ComponentInstance) addDependency(dependencyKey string) {
 	instance.DependencyKeys[dependencyKey] = true
 }
 
-func (instance *ComponentInstance) addRuleInformation(result *RuleActionResult) {
+func (instance *ComponentInstance) addRuleInformation(result *lang.RuleActionResult) {
 	instance.DataForPlugins[ALLOW_INGRESS] = strconv.FormatBool(result.AllowIngress)
 }
 
-func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) error {
+func (instance *ComponentInstance) addCodeParams(codeParams util.NestedParameterMap) error {
 	if len(instance.CalculatedCodeParams) == 0 {
 		// Record code parameters
 		instance.CalculatedCodeParams = codeParams
@@ -125,7 +125,7 @@ func (instance *ComponentInstance) addCodeParams(codeParams NestedParameterMap) 
 	return nil
 }
 
-func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedParameterMap) error {
+func (instance *ComponentInstance) addDiscoveryParams(discoveryParams util.NestedParameterMap) error {
 	if len(instance.CalculatedDiscovery) == 0 {
 		// Record discovery parameters
 		instance.CalculatedDiscovery = discoveryParams
@@ -144,7 +144,7 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams NestedPara
 	return nil
 }
 
-func (instance *ComponentInstance) addLabels(labels *LabelSet) {
+func (instance *ComponentInstance) addLabels(labels *lang.LabelSet) {
 	// it's pretty typical for us to come with different labels to a component instance, let's combine them all
 	instance.CalculatedLabels.AddLabels(labels.Labels)
 }

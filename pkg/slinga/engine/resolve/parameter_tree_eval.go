@@ -3,10 +3,10 @@ package resolve
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
-func processParameterTreeNode(node interface{}, parameters *template.TemplateParameters, result NestedParameterMap, key string, cache *template.TemplateCache) error {
+func processParameterTreeNode(node interface{}, parameters *template.TemplateParameters, result util.NestedParameterMap, key string, cache *template.TemplateCache) error {
 	if node == nil {
 		return nil
 	}
@@ -17,17 +17,17 @@ func processParameterTreeNode(node interface{}, parameters *template.TemplatePar
 		if err != nil {
 			return err
 		}
-		result[key] = EscapeName(evaluatedValue)
+		result[key] = util.EscapeName(evaluatedValue)
 		return nil
 	}
 
 	// If it's a map, process it recursively
-	if paramsMap, ok := node.(NestedParameterMap); ok {
+	if paramsMap, ok := node.(util.NestedParameterMap); ok {
 		if len(key) > 0 {
 			result = result.GetNestedMap(key)
 		}
 		for pKey, pValue := range paramsMap {
-			result[pKey] = NestedParameterMap{}
+			result[pKey] = util.NestedParameterMap{}
 			err := processParameterTreeNode(pValue, parameters, result, pKey, cache)
 			if err != nil {
 				return err
@@ -41,7 +41,7 @@ func processParameterTreeNode(node interface{}, parameters *template.TemplatePar
 }
 
 // evaluateParameterTree processes code or discovery params and calculates the whole tree
-func evaluateParameterTree(tree NestedParameterMap, parameters *template.TemplateParameters, cache *template.TemplateCache) (NestedParameterMap, error) {
+func evaluateParameterTree(tree util.NestedParameterMap, parameters *template.TemplateParameters, cache *template.TemplateCache) (util.NestedParameterMap, error) {
 	if tree == nil {
 		return nil, nil
 	}
@@ -49,7 +49,7 @@ func evaluateParameterTree(tree NestedParameterMap, parameters *template.Templat
 		cache = template.NewTemplateCache()
 	}
 
-	result := NestedParameterMap{}
+	result := util.NestedParameterMap{}
 	err := processParameterTreeNode(tree, parameters, result, "", cache)
 	return result, err
 }

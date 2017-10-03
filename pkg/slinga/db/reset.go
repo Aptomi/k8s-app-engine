@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
 // ResetAptomiState fully resets aptomi state by deleting all files and directories from its database
@@ -10,7 +10,7 @@ import (
 func ResetAptomiState() {
 	baseDir := GetAptomiBaseDir()
 
-	err := DeleteDirectoryContents(baseDir)
+	err := util.DeleteDirectoryContents(baseDir)
 	if err != nil {
 		panic(fmt.Sprintf("Directory '%s' contents can't be deleted: %s", baseDir, err.Error()))
 	}

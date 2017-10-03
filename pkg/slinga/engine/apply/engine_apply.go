@@ -6,7 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
@@ -26,7 +26,7 @@ type EngineApply struct {
 	actions []action.Base
 
 	// Buffered event log - gets populated while applying changes
-	eventLog *EventLog
+	eventLog *eventlog.EventLog
 
 	// Progress indicator
 	progress progress.ProgressIndicator
@@ -44,13 +44,13 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 		externalData:       externalData,
 		plugins:            plugins,
 		actions:            actions,
-		eventLog:           NewEventLog(),
+		eventLog:           eventlog.NewEventLog(),
 		progress:           progress.NewProgressConsole(),
 	}
 }
 
 // Apply method applies all changes via plugins, updates actual state, returns the updated actual state and event log
-func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *EventLog, error) {
+func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *eventlog.EventLog, error) {
 	// initialize progress indicator
 	apply.progress.SetTotal(len(apply.actions))
 

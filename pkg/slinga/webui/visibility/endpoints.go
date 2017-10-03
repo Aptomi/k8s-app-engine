@@ -1,7 +1,7 @@
 package visibility
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 )
 
 type rLink struct {
@@ -18,7 +18,7 @@ type rEndpoint struct {
 }
 
 type userEndpoints struct {
-	User      *User
+	User      *lang.User
 	Endpoints []rEndpoint
 }
 

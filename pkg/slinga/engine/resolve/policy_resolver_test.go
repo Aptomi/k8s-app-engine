@@ -1,7 +1,7 @@
 package resolve
 
 import (
-	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"strconv"
@@ -69,9 +69,9 @@ func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	dependency := &Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	dependency := &lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -90,9 +90,9 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	dependency := &Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	dependency := &lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -111,36 +111,36 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 		Owner: "1",
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "special-invalid-context-require-any",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAll: []string{"true"},
 				RequireAny: []string{"specialname + '123')((("},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "xyz",
 			},
 		}},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -155,24 +155,24 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 		Owner: "1",
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "special-invalid-context-keys",
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "xyz",
 				Keys: []string{
 					"wowowow {{{{.......",
@@ -181,9 +181,9 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 		}},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -198,23 +198,23 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "special-invalid-context-keys",
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "xyz",
 				Keys: []string{
 					"wowowow {{{{.......",
@@ -223,9 +223,9 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 		}},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -240,16 +240,16 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "special-invalid-rule-require-all",
 		},
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"specialname + '123')((("},
 		},
-		Actions: &RuleActions{},
+		Actions: &lang.RuleActions{},
 	})
 
 	// policy with invalid rule should not be resolved successfully
@@ -259,17 +259,17 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 					Params: util.NestedParameterMap{
 						"address": "{{ .Labels.deplabel }}",
@@ -279,39 +279,39 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "xyz",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"service.Name == 'xyz'"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new_1",
 		},
@@ -322,9 +322,9 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new_2",
 		},
@@ -342,59 +342,59 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component",
 				Discovery: util.NestedParameterMap{
 					"address": "{{ .Labels.deplabel }}",
 				},
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 			},
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "xyz",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "xyz",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"service.Name == 'xyz'"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new_1",
 		},
@@ -405,9 +405,9 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new_2",
 		},
@@ -425,14 +425,14 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceA",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name:     "component",
 				Contract: "contractB",
@@ -440,17 +440,17 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceB",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 					Params: util.NestedParameterMap{
 						"address": "{{ ..... invalid",
@@ -460,59 +460,59 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractA",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceA",
 			},
 		}},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractB",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceB",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB')"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -527,14 +527,14 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceA",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name:     "component",
 				Contract: "contractB",
@@ -542,78 +542,78 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceB",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component",
 				Discovery: util.NestedParameterMap{
 					"address": "{{ .... invalid",
 				},
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 			},
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractA",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceA",
 			},
 		}},
 	})
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractB",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceB",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB')"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -628,14 +628,14 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 func TestPolicyResolverServiceLoop(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceA",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name:     "component",
 				Contract: "contractB",
@@ -643,14 +643,14 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceB",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name:     "component",
 				Contract: "contractC",
@@ -658,14 +658,14 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceC",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name:     "component",
 				Contract: "contractA",
@@ -673,74 +673,74 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractA",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceA",
 			},
 		}},
 	})
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractB",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceB",
 			},
 		}},
 	})
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractC",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceC",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB', 'serviceC')"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	dependency := &Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	dependency := &lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -756,17 +756,17 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 func TestPolicyResolverComponentLoop(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceA",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component1",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 				Dependencies: []string{
@@ -775,7 +775,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 			},
 			{
 				Name: "component2",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 				Dependencies: []string{
@@ -784,7 +784,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 			},
 			{
 				Name: "component3",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 				Dependencies: []string{
@@ -794,42 +794,42 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractA",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceA",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"service.Name == 'serviceA'"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -844,20 +844,20 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "serviceA",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component-unknown",
 			},
 			{
 				Name: "component1",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 				Dependencies: []string{
@@ -866,49 +866,49 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 			},
 			{
 				Name: "component2",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 				},
 			},
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contractA",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "serviceA",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: 1,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"service.Name == 'serviceA'"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	dependency := &Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	dependency := &lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
@@ -927,78 +927,78 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 	policy := loadUnitTestsPolicy()
 
-	policy.AddObject(&Service{
-		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
+	policy.AddObject(&lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "service",
 		},
 		Owner: "1",
-		Components: []*ServiceComponent{
+		Components: []*lang.ServiceComponent{
 			{
 				Name: "component",
-				Code: &Code{
+				Code: &lang.Code{
 					Type: "aptomi/code/unittests",
 					Params: util.NestedParameterMap{
-						LabelCluster: "{{ .Labels.cluster }}",
+						lang.LabelCluster: "{{ .Labels.cluster }}",
 					},
 				},
 			},
 		},
 	})
 
-	policy.AddObject(&Contract{
-		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
+	policy.AddObject(&lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
 			Namespace: "main",
 			Name:      "contract",
 		},
-		Contexts: []*Context{{
+		Contexts: []*lang.Context{{
 			Name: "context",
-			Criteria: &Criteria{
+			Criteria: &lang.Criteria{
 				RequireAny: []string{"true"},
 			},
-			Allocation: &Allocation{
+			Allocation: &lang.Allocation{
 				Service: "service",
 			},
 		}},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule1",
 		},
 		Weight: 100,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"label1 == 'value1'"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-east")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-east")),
 		},
 	})
 
-	policy.AddObject(&Rule{
-		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
+	policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule2",
 		},
 		Weight: 200,
-		Criteria: &Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"label2 == 'value2'"},
 		},
-		Actions: &RuleActions{
-			Dependency:   DependencyAction("allow"),
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(LabelCluster, "cluster-us-west")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
 		},
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_1",
 		},
@@ -1009,9 +1009,9 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 		Contract: "contract",
 	})
 
-	policy.AddObject(&Dependency{
-		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
+	policy.AddObject(&lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_2",
 		},
@@ -1028,6 +1028,6 @@ func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
 	// check that both dependencies got resolved
 	instance1 := getInstanceByDependencyKey(t, "main:dependency:dep_1", resolution)
 	instance2 := getInstanceByDependencyKey(t, "main:dependency:dep_2", resolution)
-	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels[LabelCluster], "Cluster should be set correctly via rules")
-	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels[LabelCluster], "Cluster should be set correctly via rules")
+	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
+	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 }
