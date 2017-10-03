@@ -284,7 +284,7 @@ func (gen *PolicyGenerator) makeContracts() {
 		}
 
 		// generate non-matching contexts
-		for i := 0; i < gen.contextsPerContract-1; i++ {
+		for j := 0; j < gen.contextsPerContract-1; j++ {
 			context := &lang.Context{
 				Name: "context-" + gen.randomString(20),
 				Criteria: &lang.Criteria{
