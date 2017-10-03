@@ -68,6 +68,10 @@ install: build
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomi
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomictl
 
+.PHONY: fmt
+fmt:
+	${GO} fmt ./...
+
 .PHONY: lint
 lint: prepare_gometalinter
 	${GOENV} gometalinter --config=gometalinter.json --deadline=180s ./pkg/... ./cmd/...
