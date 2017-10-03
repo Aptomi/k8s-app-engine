@@ -153,6 +153,7 @@ func (rule *istioRouteRule) destroy() error {
 	return nil
 }
 
+// TODO: this function seems to be unused?
 func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster, eventLog *event.Log) (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
