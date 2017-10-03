@@ -32,9 +32,9 @@ func NewPolicyVisualizationDeltaImage(nextPolicy *lang.Policy, nextResolution *r
 func makeGraph(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
-	graph.SetName("Main")
-	graph.AddAttr("Main", "compound", "true")
-	graph.SetDir(true)
+	_ = graph.SetName("Main")
+	_ = graph.AddAttr("Main", "compound", "true")
+	_ = graph.SetDir(true)
 
 	was := make(map[string]bool)
 

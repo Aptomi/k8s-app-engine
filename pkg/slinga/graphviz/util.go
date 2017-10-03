@@ -32,14 +32,14 @@ func findSubraphName(prev *gographviz.Graph, nName string) string {
 
 // Adds an edge if it doesn't exist already
 func addEdge(g *gographviz.Graph, src string, dst string, attrs map[string]string) {
-	g.AddEdge(esc(src), esc(dst), true, escAttrs(attrs))
+	_ = g.AddEdge(esc(src), esc(dst), true, escAttrs(attrs))
 }
 
 // Adds a subgraph if it doesn't exist already
 func addSubgraphOnce(g *gographviz.Graph, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
 	wasKey := "SUBGRAPH" + "#" + parentGraph + "#" + name
 	if !was[wasKey] {
-		g.AddSubGraph(esc(parentGraph), esc(name), escAttrs(attrs))
+		_ = g.AddSubGraph(esc(parentGraph), esc(name), escAttrs(attrs))
 		was[wasKey] = true
 	}
 }
@@ -48,7 +48,7 @@ func addSubgraphOnce(g *gographviz.Graph, parentGraph string, name string, attrs
 func addNodeOnce(g *gographviz.Graph, parentGraph string, name string, attrs map[string]string, was map[string]bool) {
 	wasKey := "NODE" + "#" + parentGraph + "#" + name
 	if !was[wasKey] {
-		g.AddNode(esc(parentGraph), esc(name), escAttrs(attrs))
+		_ = g.AddNode(esc(parentGraph), esc(name), escAttrs(attrs))
 		was[wasKey] = true
 	}
 }
