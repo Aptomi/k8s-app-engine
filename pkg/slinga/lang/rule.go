@@ -30,7 +30,7 @@ type RuleActions struct {
 }
 
 // Matches returns if a rule matches
-func (rule *Rule) Matches(params *expression.ExpressionParameters, cache *expression.ExpressionCache) (bool, error) {
+func (rule *Rule) Matches(params *expression.Parameters, cache *expression.Cache) (bool, error) {
 	if rule.Criteria == nil {
 		return true, nil
 	}

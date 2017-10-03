@@ -4,11 +4,11 @@ import (
 	"strconv"
 )
 
-type ExpressionParameters map[string]interface{}
+type Parameters map[string]interface{}
 
-func NewExpressionParams(stringParams map[string]string, structParams map[string]interface{}) *ExpressionParameters {
+func NewParams(stringParams map[string]string, structParams map[string]interface{}) *Parameters {
 	// Populate parameter map
-	result := ExpressionParameters{}
+	result := Parameters{}
 
 	for k, v := range stringParams {
 		// string parameters have to be casted to the appropriate type before evaluation

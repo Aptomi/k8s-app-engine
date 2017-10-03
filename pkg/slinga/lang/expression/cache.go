@@ -2,15 +2,15 @@ package expression
 
 import "sync"
 
-type ExpressionCache struct {
+type Cache struct {
 	eCache sync.Map
 }
 
-func NewExpressionCache() *ExpressionCache {
-	return &ExpressionCache{eCache: sync.Map{}}
+func NewCache() *Cache {
+	return &Cache{eCache: sync.Map{}}
 }
 
-func (cache *ExpressionCache) EvaluateAsBool(expressionStr string, params *ExpressionParameters) (bool, error) {
+func (cache *Cache) EvaluateAsBool(expressionStr string, params *Parameters) (bool, error) {
 	// Look up expression from the cache
 	var expression *Expression
 	expressionCached, ok := cache.eCache.Load(expressionStr)

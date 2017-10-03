@@ -12,7 +12,7 @@ const (
 	ResEvalError    = iota
 )
 
-func evaluate(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int) {
+func evaluate(t *testing.T, expressionStr string, params *Parameters, expectedResult int) {
 	// Check for compilation
 	expr, err := NewExpression(expressionStr)
 	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Expression compilation (success vs. error): "+expressionStr) || expectedResult == ResCompileError {
@@ -29,7 +29,7 @@ func evaluate(t *testing.T, expressionStr string, params *ExpressionParameters, 
 	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: "+expressionStr)
 }
 
-func evaluateWithCache(t *testing.T, expressionStr string, params *ExpressionParameters, expectedResult int, cache *ExpressionCache) {
+func evaluateWithCache(t *testing.T, expressionStr string, params *Parameters, expectedResult int, cache *Cache) {
 	// Check for compilation & evaluation
 	for i := 0; i < 10; i++ {
 		result, err := cache.EvaluateAsBool(expressionStr, params)
@@ -43,7 +43,7 @@ func evaluateWithCache(t *testing.T, expressionStr string, params *ExpressionPar
 }
 
 func TestExpressions(t *testing.T) {
-	params := NewExpressionParams(
+	params := NewParams(
 		map[string]string{
 			"foo":         "10",
 			"unusedLabel": "3",
@@ -118,7 +118,7 @@ func TestExpressions(t *testing.T) {
 		evaluate(t, test.expression, params, test.result)
 	}
 
-	cache := NewExpressionCache()
+	cache := NewCache()
 	for _, test := range tests {
 		evaluateWithCache(t, test.expression, params, test.result, cache)
 	}

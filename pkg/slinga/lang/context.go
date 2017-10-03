@@ -20,7 +20,7 @@ type Context struct {
 }
 
 // Matches checks if context criteria is satisfied
-func (context *Context) Matches(params *expression.ExpressionParameters, cache *expression.ExpressionCache) (bool, error) {
+func (context *Context) Matches(params *expression.Parameters, cache *expression.Cache) (bool, error) {
 	if context.Criteria == nil {
 		return true, nil
 	}

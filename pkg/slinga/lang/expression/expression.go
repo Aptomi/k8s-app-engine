@@ -38,7 +38,7 @@ func NewExpression(expressionStr string) (*Expression, error) {
 }
 
 // Evaluate an expression, given a set of labels
-func (expression *Expression) EvaluateAsBool(params *ExpressionParameters) (bool, error) {
+func (expression *Expression) EvaluateAsBool(params *Parameters) (bool, error) {
 	// Evaluate
 	result, err := expression.expressionCompiled.Evaluate(*params)
 	if err != nil {

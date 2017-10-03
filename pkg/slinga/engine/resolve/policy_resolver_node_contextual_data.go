@@ -13,8 +13,8 @@ import (
 
 // This method defines which contextual information will be exposed to the expression engine (for evaluating criterias)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
-func (node *resolutionNode) getContextualDataForContextExpression() *expression.ExpressionParameters {
-	return expression.NewExpressionParams(
+func (node *resolutionNode) getContextualDataForContextExpression() *expression.Parameters {
+	return expression.NewParams(
 		node.labels.Labels,
 		map[string]interface{}{},
 	)
@@ -26,8 +26,8 @@ func (node *resolutionNode) getContextualDataForContextExpression() *expression.
 
 // This method defines which contextual information will be exposed to the expression engine (for evaluating rules)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
-func (node *resolutionNode) getContextualDataForRuleExpression() *expression.ExpressionParameters {
-	return expression.NewExpressionParams(
+func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Parameters {
+	return expression.NewParams(
 		node.labels.Labels,
 		map[string]interface{}{
 			"service": node.proxyService(node.service),

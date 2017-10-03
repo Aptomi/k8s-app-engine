@@ -14,7 +14,7 @@ const (
 	ResError = iota
 )
 
-func match(t *testing.T, context *Context, params *expression.ExpressionParameters, expected int, cache *expression.ExpressionCache) {
+func match(t *testing.T, context *Context, params *expression.Parameters, expected int, cache *expression.Cache) {
 	t.Helper()
 	result, err := context.Matches(params, cache)
 	assert.Equal(t, expected == ResError, err != nil, "Context matching (success vs. error): "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
@@ -23,10 +23,10 @@ func match(t *testing.T, context *Context, params *expression.ExpressionParamete
 	}
 }
 
-func matchContext(t *testing.T, context *Context, paramsMatch []*expression.ExpressionParameters, paramsDoesntMatch []*expression.ExpressionParameters, paramsError []*expression.ExpressionParameters) {
+func matchContext(t *testing.T, context *Context, paramsMatch []*expression.Parameters, paramsDoesntMatch []*expression.Parameters, paramsError []*expression.Parameters) {
 	// Evaluate with and without cache
 	t.Helper()
-	cache := expression.NewExpressionCache()
+	cache := expression.NewCache()
 	for _, params := range paramsMatch {
 		match(t, context, params, ResTrue, nil)
 		match(t, context, params, ResTrue, cache)
@@ -64,8 +64,8 @@ func TestServiceContextMatching(t *testing.T) {
 	}
 
 	// Params which result in matching
-	paramsMatch := []*expression.ExpressionParameters{
-		expression.NewExpressionParams(
+	paramsMatch := []*expression.Parameters{
+		expression.NewParams(
 			map[string]string{
 				"dev":      "no",
 				"prod":     "yes",
@@ -76,8 +76,8 @@ func TestServiceContextMatching(t *testing.T) {
 	}
 
 	// Params which don't result in matching
-	paramsDoesntMatch := []*expression.ExpressionParameters{
-		expression.NewExpressionParams(
+	paramsDoesntMatch := []*expression.Parameters{
+		expression.NewParams(
 			map[string]string{
 				"dev":      "yes",
 				"prod":     "no",
@@ -93,7 +93,7 @@ func TestServiceContextMatching(t *testing.T) {
 			},
 		),
 
-		expression.NewExpressionParams(
+		expression.NewParams(
 			map[string]string{
 				"dev":      "no",
 				"prod":     "yes",
@@ -120,8 +120,8 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 			RequireNone: []string{"false"},
 		},
 	}
-	paramsDoesntMatch := []*expression.ExpressionParameters{
-		expression.NewExpressionParams(
+	paramsDoesntMatch := []*expression.Parameters{
+		expression.NewParams(
 			map[string]string{
 				"never1": "a1",
 				"never2": "a2",
@@ -141,8 +141,8 @@ func TestServiceContextRequireAnyEmpty(t *testing.T) {
 			RequireNone: []string{"false"},
 		},
 	}
-	paramsMatch := []*expression.ExpressionParameters{
-		expression.NewExpressionParams(
+	paramsMatch := []*expression.Parameters{
+		expression.NewParams(
 			map[string]string{
 				"specialname": "specialvalue",
 			},
@@ -155,8 +155,8 @@ func TestServiceContextRequireAnyEmpty(t *testing.T) {
 
 func TestServiceContextEmptyCriteria(t *testing.T) {
 	context := &Context{}
-	paramsMatch := []*expression.ExpressionParameters{
-		expression.NewExpressionParams(
+	paramsMatch := []*expression.Parameters{
+		expression.NewParams(
 			map[string]string{
 				"somename": "somevalue",
 			},
@@ -193,8 +193,8 @@ func makeInvalidContexts() []*Context {
 
 func TestServiceContextInvalidCriteria(t *testing.T) {
 	contexts := makeInvalidContexts()
-	paramsError := []*expression.ExpressionParameters{
-		expression.NewExpressionParams(
+	paramsError := []*expression.Parameters{
+		expression.NewParams(
 			map[string]string{
 				"specialname": "specialvalue",
 			},
