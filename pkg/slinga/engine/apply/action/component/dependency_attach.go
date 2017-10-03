@@ -13,19 +13,19 @@ var AttachDependencyActionObject = &object.Info{
 type AttachDependencyAction struct {
 	*action.Metadata
 	ComponentKey string
-	DependencyId string
+	DependencyID string
 }
 
-func NewAttachDependencyAction(revision object.Generation, componentKey string, dependencyId string) *AttachDependencyAction {
+func NewAttachDependencyAction(revision object.Generation, componentKey string, dependencyID string) *AttachDependencyAction {
 	return &AttachDependencyAction{
-		Metadata:     action.NewMetadata(revision, AttachDependencyActionObject.Kind, componentKey, dependencyId),
+		Metadata:     action.NewMetadata(revision, AttachDependencyActionObject.Kind, componentKey, dependencyID),
 		ComponentKey: componentKey,
-		DependencyId: dependencyId,
+		DependencyID: dependencyID,
 	}
 }
 
 func (a *AttachDependencyAction) GetName() string {
-	return "Component " + a.ComponentKey + " attach dependency " + a.DependencyId
+	return "Component " + a.ComponentKey + " attach dependency " + a.DependencyID
 }
 
 func (a *AttachDependencyAction) Apply(context *action.Context) error {

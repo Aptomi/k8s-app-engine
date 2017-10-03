@@ -13,19 +13,19 @@ var DetachDependencyActionObject = &object.Info{
 type DetachDependencyAction struct {
 	*action.Metadata
 	ComponentKey string
-	DependencyId string
+	DependencyID string
 }
 
-func NewDetachDependencyAction(revision object.Generation, componentKey string, dependencyId string) *DetachDependencyAction {
+func NewDetachDependencyAction(revision object.Generation, componentKey string, dependencyID string) *DetachDependencyAction {
 	return &DetachDependencyAction{
-		Metadata:     action.NewMetadata(revision, DetachDependencyActionObject.Kind, componentKey, dependencyId),
+		Metadata:     action.NewMetadata(revision, DetachDependencyActionObject.Kind, componentKey, dependencyID),
 		ComponentKey: componentKey,
-		DependencyId: dependencyId,
+		DependencyID: dependencyID,
 	}
 }
 
 func (a *DetachDependencyAction) GetName() string {
-	return "Component " + a.ComponentKey + " detach dependency " + a.DependencyId
+	return "Component " + a.ComponentKey + " detach dependency " + a.DependencyID
 }
 
 func (a *DetachDependencyAction) Apply(context *action.Context) error {
