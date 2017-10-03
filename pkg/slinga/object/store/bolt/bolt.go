@@ -31,12 +31,10 @@ func (b *boltStore) Open(connection string) error {
 	b.db = db
 
 	// Initialize all buckets and indexes
-	err = b.db.Update(func(tx *bolt.Tx) error {
+	return b.db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(objectsBucket)
 		return err
 	})
-
-	return err
 }
 
 var objectsBucket = []byte("objects")
@@ -83,7 +81,10 @@ func (b *boltStore) Save(obj object.Base) (bool, error) {
 		if existingObj != nil {
 			obj.SetGeneration(existingObj.GetGeneration())
 			if !reflect.DeepEqual(obj, existingObj) {
-				b.setNextGeneration(obj)
+				errGen := b.setNextGeneration(obj)
+				if errGen != nil {
+					return false, fmt.Errorf("Error while calling setNextGeneration(%s): %s", obj, errGen)
+				}
 				updated = true
 			}
 		} else {
@@ -97,7 +98,7 @@ func (b *boltStore) Save(obj object.Base) (bool, error) {
 	err := b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
-			return fmt.Errorf("Bucket not found: ")
+			return fmt.Errorf("Bucket not found: %s", objectsBucket)
 		}
 
 		data, err := b.codec.MarshalOne(obj)

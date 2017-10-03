@@ -57,7 +57,7 @@ func Apply(config *viper.Viper) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint: errcheck
 
 	// todo(slujanov): process response - check status and print returned data
 	fmt.Println("Response:", resp)

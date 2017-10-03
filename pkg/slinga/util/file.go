@@ -17,7 +17,7 @@ func CopyFile(src, dst string) (err error) {
 	if err != nil {
 		return
 	}
-	defer in.Close()
+	defer in.Close() // nolint: errcheck
 	out, err := os.Create(dst)
 	if err != nil {
 		return
@@ -101,7 +101,7 @@ func DeleteDirectoryContents(dir string) error {
 	if err != nil {
 		return err
 	}
-	defer d.Close()
+	defer d.Close() // nolint: errcheck
 	names, err := d.Readdirnames(-1)
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func DeleteDirectoryContents(dir string) error {
 // WriteTempFile creates a temporary file and returns its name
 func WriteTempFile(prefix string, content string) string {
 	tmpFile, err := ioutil.TempFile("", "aptomi-"+prefix)
-	defer tmpFile.Close()
+	defer tmpFile.Close() // nolint: errcheck
 
 	if err != nil {
 		panic("Failed to create temp file")

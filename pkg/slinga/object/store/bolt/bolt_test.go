@@ -16,7 +16,7 @@ func TestBoltStore(t *testing.T) {
 
 	f, err := ioutil.TempFile("", t.Name())
 	assert.Nil(t, err, "Temp file should be successfully created")
-	defer os.Remove(f.Name())
+	defer os.Remove(f.Name()) // nolint: errcheck
 
 	err = db.Open(f.Name())
 	if err != nil {
