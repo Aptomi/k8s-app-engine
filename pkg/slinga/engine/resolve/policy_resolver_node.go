@@ -362,10 +362,9 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 
 func (node *resolutionNode) processRules() (*lang.RuleActionResult, error) {
 	result := lang.NewRuleActionResult(node.labels)
-	var err error
 
 	// process rules within the current namespace
-	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[node.namespace], result)
+	var err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[node.namespace], result)
 	if err != nil {
 		return nil, err
 	}

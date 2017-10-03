@@ -24,7 +24,7 @@ func (a *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p ht
 	fmt.Printf("[handleGetPolicy] rev: %s, ns: %s\n", rev, ns)
 
 	if len(ns) != 0 {
-		// get all by ns from specific revision
+		// todo get all by ns from specific revision
 	}
 }
 

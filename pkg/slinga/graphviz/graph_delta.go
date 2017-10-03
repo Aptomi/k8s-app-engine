@@ -9,12 +9,14 @@ import (
 func Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
 	// New nodes, edges, subgraphs must be highlighted
 	{
-		for _, s := range next.SubGraphs.SubGraphs {
-			if _, inPrev := prev.SubGraphs.SubGraphs[s.Name]; !inPrev {
-				// New subgraph -> no special treatment needed
-				// s.Attrs.Add("style", "filled")
+		/*
+			for _, s := range next.SubGraphs.SubGraphs {
+				if _, inPrev := prev.SubGraphs.SubGraphs[s.Name]; !inPrev {
+					// New subgraph -> no special treatment needed
+					// s.Attrs.Add("style", "filled")
+				}
 			}
-		}
+		*/
 		for _, n := range next.Nodes.Nodes {
 			if _, inPrev := prev.Nodes.Lookup[n.Name]; !inPrev {
 				// New node -> filled green
