@@ -10,7 +10,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
-	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -36,17 +35,6 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, externalData *external.Dat
 		t.FailNow()
 	}
 	return result
-}
-
-// TODO: this has to be changed to use the new serialization code instead of serializing to YAML
-func emulateSaveAndLoadResolution(resolution *resolve.PolicyResolution) *resolve.PolicyResolution {
-	policyNew := lang.Policy{}
-	yaml.DeserializeObject(yaml.SerializeObject(resolution), &policyNew)
-
-	resolutionNew := resolve.PolicyResolution{}
-	yaml.DeserializeObject(yaml.SerializeObject(resolution), &resolutionNew)
-
-	return &resolutionNew
 }
 
 func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {

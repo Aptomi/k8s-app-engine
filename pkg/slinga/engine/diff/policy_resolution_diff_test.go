@@ -8,7 +8,6 @@ import (
 func TestEmptyDiff(t *testing.T) {
 	externalData := getExternalData()
 	resolvedPrev := resolvePolicy(t, getPolicy(), externalData)
-	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	resolvedNext := resolvePolicy(t, getPolicy(), externalData)
 
@@ -21,7 +20,6 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 	externalData := getExternalData()
 
 	resolvedPrev := resolvePolicy(t, getPolicy(), externalData)
-	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Add another dependency and resolve policy
 	nextPolicy := lang.LoadUnitTestsPolicy("../../testdata/unittests")
@@ -76,7 +74,6 @@ func TestDiffHasDestructedComponents(t *testing.T) {
 	// Resolve unit test policy
 	externalData := getExternalData()
 	resolvedPrev := resolvePolicy(t, getPolicy(), externalData)
-	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Now resolve empty policy
 	nextPolicy := lang.NewPolicy()

@@ -129,7 +129,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
 
-	// Add another dependency, resolve, calculate difference against prev resolution data, emulate save/load
+	// Add another dependency, resolve, calculate difference against prev resolution data
 	desiredPolicyNext := getPolicy()
 	dependencyNew := &lang.Dependency{
 		Metadata: lang.Metadata{
