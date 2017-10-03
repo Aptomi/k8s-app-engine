@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	. "github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
@@ -44,7 +44,7 @@ var policyCmdApply = &cobra.Command{
 		prevState := resolve.NewPolicyResolution()
 
 		// Generate the next usage state
-		policyDir := GetAptomiPolicyDir()
+		policyDir := db.GetAptomiPolicyDir()
 		store := lang.NewFileLoader(policyDir)
 		policy := lang.NewPolicy()
 
@@ -62,8 +62,8 @@ var policyCmdApply = &cobra.Command{
 		}
 
 		externalData := external.NewData(
-			users.NewUserLoaderFromLDAP(GetAptomiPolicyDir()),
-			secrets.NewSecretLoaderFromDir(GetAptomiPolicyDir()),
+			users.NewUserLoaderFromLDAP(db.GetAptomiPolicyDir()),
+			secrets.NewSecretLoaderFromDir(db.GetAptomiPolicyDir()),
 		)
 		resolver := resolve.NewPolicyResolver(policy, externalData)
 		resolution, eventLog, err := resolver.ResolveAllDependencies()
@@ -125,9 +125,9 @@ var policyCmdReset = &cobra.Command{
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 		if force {
-			ResetAptomiState()
+			db.ResetAptomiState()
 		} else {
-			fmt.Println("This will erase everything under " + GetAptomiBaseDir())
+			fmt.Println("This will erase everything under " + db.GetAptomiBaseDir())
 			fmt.Println("No action is taken. If you are sure, use --force to delete all the data")
 		}
 	},
