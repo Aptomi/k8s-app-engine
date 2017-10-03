@@ -17,7 +17,7 @@ import (
 	- calculates PolicyResolution as an output
 */
 
-const THREAD_POOL_SIZE = 8
+const ThreadPoolSize = 8
 
 type PolicyResolver struct {
 	/*
@@ -67,7 +67,7 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *event.Log, error) {
-	var semaphore = make(chan int, THREAD_POOL_SIZE)
+	var semaphore = make(chan int, ThreadPoolSize)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))
 

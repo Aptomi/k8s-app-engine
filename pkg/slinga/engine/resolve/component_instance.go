@@ -20,7 +20,7 @@ type ComponentInstanceMetadata struct {
 	Kind string
 }
 
-const ALLOW_INGRESS = "allow_ingress"
+const AllowIngres = "allow_ingress"
 
 // ComponentInstance is a struct that holds data for a given component instance, containing list of user IDs and calculated labels
 // When adding new fields to this object, it's crucial to modify appendData() method as well (!)
@@ -103,7 +103,7 @@ func (instance *ComponentInstance) addDependency(dependencyKey string) {
 }
 
 func (instance *ComponentInstance) addRuleInformation(result *lang.RuleActionResult) {
-	instance.DataForPlugins[ALLOW_INGRESS] = strconv.FormatBool(result.AllowIngress)
+	instance.DataForPlugins[AllowIngres] = strconv.FormatBool(result.AllowIngress)
 }
 
 func (instance *ComponentInstance) addCodeParams(codeParams util.NestedParameterMap) error {

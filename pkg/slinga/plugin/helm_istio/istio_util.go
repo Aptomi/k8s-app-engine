@@ -72,7 +72,7 @@ func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey str
 		return nil, err
 	}
 
-	allows, err := strconv.ParseBool(instance.DataForPlugins[resolve.ALLOW_INGRESS])
+	allows, err := strconv.ParseBool(instance.DataForPlugins[resolve.AllowIngres])
 	if err != nil {
 		return nil, err
 	}

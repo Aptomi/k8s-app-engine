@@ -146,7 +146,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 // And makes a decision whether to swallow the error, or fail policy processing
 func (node *resolutionNode) cannotResolveInstance(err error) error {
 	var criticalError *CriticalError
-	var isCriticalError bool = false
+	isCriticalError := false
 
 	// Log critical error as error in the event log
 	if err != nil {

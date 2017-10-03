@@ -58,10 +58,10 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expect
 	return result
 }
 
-func getInstanceByDependencyKey(t *testing.T, dependencyId string, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByDependencyKey(t *testing.T, dependencyID string, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
-	key := resolution.DependencyInstanceMap[dependencyId]
-	if !assert.NotZero(t, len(key), "Dependency %s should be resolved", dependencyId) {
+	key := resolution.DependencyInstanceMap[dependencyID]
+	if !assert.NotZero(t, len(key), "Dependency %s should be resolved", dependencyID) {
 		t.Log(resolution.DependencyInstanceMap)
 		t.FailNow()
 	}

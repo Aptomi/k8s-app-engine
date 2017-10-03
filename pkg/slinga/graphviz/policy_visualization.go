@@ -106,7 +106,7 @@ func makeGraph(policy *lang.Policy, resolution *resolve.PolicyResolution, extern
 		addNodeOnce(graph, "cluster_Service_Allocations_"+key.ServiceName, serviceAllocationKey, map[string]string{"label": "Context: " + key.ContextNameWithKeys}, was)
 
 		// Add an edge from service to service instances box
-		for dependencyKey, _ := range instance.DependencyKeys {
+		for dependencyKey := range instance.DependencyKeys {
 			// namespace, kind, name
 			color := getColor(dependencyKey, colorMap, &usedColors)
 			addEdge(graph, key.ServiceName, serviceAllocationKey, map[string]string{"color": "/" + colorScheme + "/" + strconv.Itoa(color)})
