@@ -6,7 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
-func processParameterTreeNode(node interface{}, parameters *template.TemplateParameters, result util.NestedParameterMap, key string, cache *template.TemplateCache) error {
+func processParameterTreeNode(node interface{}, parameters *template.Parameters, result util.NestedParameterMap, key string, cache *template.Cache) error {
 	if node == nil {
 		return nil
 	}
@@ -41,12 +41,12 @@ func processParameterTreeNode(node interface{}, parameters *template.TemplatePar
 }
 
 // evaluateParameterTree processes code or discovery params and calculates the whole tree
-func evaluateParameterTree(tree util.NestedParameterMap, parameters *template.TemplateParameters, cache *template.TemplateCache) (util.NestedParameterMap, error) {
+func evaluateParameterTree(tree util.NestedParameterMap, parameters *template.Parameters, cache *template.Cache) (util.NestedParameterMap, error) {
 	if tree == nil {
 		return nil, nil
 	}
 	if cache == nil {
-		cache = template.NewTemplateCache()
+		cache = template.NewCache()
 	}
 
 	result := util.NestedParameterMap{}

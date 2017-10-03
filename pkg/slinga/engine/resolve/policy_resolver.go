@@ -38,7 +38,7 @@ type PolicyResolver struct {
 	expressionCache *expression.Cache
 
 	// Template cache
-	templateCache *template.TemplateCache
+	templateCache *template.Cache
 
 	/*
 		Calculated objects (aggregated over all dependencies)
@@ -59,7 +59,7 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 		policy:          policy,
 		externalData:    externalData,
 		expressionCache: expression.NewCache(),
-		templateCache:   template.NewTemplateCache(),
+		templateCache:   template.NewCache(),
 		resolution:      NewPolicyResolution(),
 		eventLog:        event.NewLog(),
 	}

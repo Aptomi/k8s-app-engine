@@ -41,8 +41,8 @@ func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Par
 
 // This method defines which contextual information will be exposed to the template engine (for evaluating all templates - discovery, code params, etc)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
-func (node *resolutionNode) getContextualDataForContextAllocationTemplate() *template.TemplateParameters {
-	return template.NewTemplateParams(
+func (node *resolutionNode) getContextualDataForContextAllocationTemplate() *template.Parameters {
+	return template.NewParams(
 		struct {
 			User   interface{}
 			Labels interface{}
@@ -55,8 +55,8 @@ func (node *resolutionNode) getContextualDataForContextAllocationTemplate() *tem
 
 // This method defines which contextual information will be exposed to the template engine (for evaluating all templates - discovery, code params, etc)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
-func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *template.TemplateParameters {
-	return template.NewTemplateParams(
+func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *template.Parameters {
+	return template.NewParams(
 		struct {
 			User      interface{}
 			Labels    interface{}

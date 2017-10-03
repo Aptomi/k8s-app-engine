@@ -41,7 +41,7 @@ func matchContext(t *testing.T, context *Context, paramsMatch []*expression.Para
 	}
 }
 
-func evalKeys(t *testing.T, context *Context, params *template.TemplateParameters, expectedError bool, expected []string, cache *template.TemplateCache) {
+func evalKeys(t *testing.T, context *Context, params *template.Parameters, expectedError bool, expected []string, cache *template.Cache) {
 	t.Helper()
 	keys, err := context.ResolveKeys(params, cache)
 	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params))
@@ -222,7 +222,7 @@ func TestServiceContextKeyResolution(t *testing.T) {
 	}
 
 	// Params which result in successful key evaluation
-	paramSuccess := template.NewTemplateParams(
+	paramSuccess := template.NewParams(
 		struct {
 			User interface{}
 		}{
@@ -235,7 +235,7 @@ func TestServiceContextKeyResolution(t *testing.T) {
 	)
 
 	// Params which result in unsuccessful key evaluation
-	paramFailure := template.NewTemplateParams(
+	paramFailure := template.NewParams(
 		struct {
 			User interface{}
 		}{
@@ -248,7 +248,7 @@ func TestServiceContextKeyResolution(t *testing.T) {
 	)
 
 	// Evaluate with and without cache
-	cache := template.NewTemplateCache()
+	cache := template.NewCache()
 
 	// Success
 	evalKeys(t, context, paramSuccess, false, []string{"actualvalue"}, nil)

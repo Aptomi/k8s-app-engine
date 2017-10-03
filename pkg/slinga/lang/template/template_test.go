@@ -11,7 +11,7 @@ const (
 	ResEvalError    = iota
 )
 
-func evaluate(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *TemplateParameters) {
+func evaluate(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *Parameters) {
 	// Check for compilation
 	tmpl, err := NewTemplate(templateStr)
 	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Template compilation (success vs. error): "+templateStr) || expectedResult == ResCompileError {
@@ -28,7 +28,7 @@ func evaluate(t *testing.T, templateStr string, expectedResult int, expectedStr 
 	assert.Equal(t, expectedStr, resultStr, "Template evaluation result: "+templateStr)
 }
 
-func evaluateWithCache(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *TemplateParameters, cache *TemplateCache) {
+func evaluateWithCache(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *Parameters, cache *Cache) {
 	for i := 0; i < 10; i++ {
 		// Check for compilation & evaluation
 		resultStr, err := cache.Evaluate(templateStr, params)
@@ -42,7 +42,7 @@ func evaluateWithCache(t *testing.T, templateStr string, expectedResult int, exp
 }
 
 func TestTemplateEvaluation(t *testing.T) {
-	params := NewTemplateParams(struct {
+	params := NewParams(struct {
 		Labels interface{}
 		User   interface{}
 	}{
@@ -81,7 +81,7 @@ func TestTemplateEvaluation(t *testing.T) {
 		evaluate(t, test.template, test.result, test.expectedString, params)
 	}
 
-	cache := NewTemplateCache()
+	cache := NewCache()
 	for _, test := range tests {
 		evaluateWithCache(t, test.template, test.result, test.expectedString, params, cache)
 	}

@@ -25,7 +25,7 @@ func NewTemplate(templateStr string) (*Template, error) {
 }
 
 // Evaluate an expression, given a set of labels
-func (template *Template) Evaluate(params *TemplateParameters) (string, error) {
+func (template *Template) Evaluate(params *Parameters) (string, error) {
 	// Evaluate
 	var doc bytes.Buffer
 

@@ -2,15 +2,15 @@ package template
 
 import "sync"
 
-type TemplateCache struct {
+type Cache struct {
 	tCache sync.Map
 }
 
-func NewTemplateCache() *TemplateCache {
-	return &TemplateCache{tCache: sync.Map{}}
+func NewCache() *Cache {
+	return &Cache{tCache: sync.Map{}}
 }
 
-func (cache *TemplateCache) Evaluate(templateStr string, params *TemplateParameters) (string, error) {
+func (cache *Cache) Evaluate(templateStr string, params *Parameters) (string, error) {
 	// Look up template from the cache
 	var template *Template
 	templateCached, ok := cache.tCache.Load(templateStr)

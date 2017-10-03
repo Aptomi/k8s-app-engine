@@ -28,9 +28,9 @@ func (context *Context) Matches(params *expression.Parameters, cache *expression
 }
 
 // Resolves dynamic allocation keys
-func (context *Context) ResolveKeys(params *template.TemplateParameters, cache *template.TemplateCache) ([]string, error) {
+func (context *Context) ResolveKeys(params *template.Parameters, cache *template.Cache) ([]string, error) {
 	if cache == nil {
-		cache = template.NewTemplateCache()
+		cache = template.NewCache()
 	}
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
 	result := []string{}
