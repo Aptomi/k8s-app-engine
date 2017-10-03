@@ -147,3 +147,5 @@ Done:
 * rename language -> lang
 
 * rename eventlog -> event (and rename struct to Log)
+
+* add configuration for gometalinter

@@ -1,0 +1,22 @@
+{
+  "Enable": [
+    "megacheck",
+    "interfacer",
+    "errcheck",
+    "goconst",
+    "gofmt",
+    "ineffassign",
+    "structcheck",
+    "unconvert",
+    "gas",
+    "golint",
+    "gotypex",
+    "varcheck",
+    "vet",
+    "deadcode",
+    "gocyclo",
+    "vetshadow",
+    "gotype"
+  ],
+  "Cyclo": 20
+}

@@ -68,21 +68,9 @@ install: build
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomi
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomictl
 
-.PHONY: fmt
-fmt:
-	${GO} fmt ./...
-
-.PHONY: vet
-vet:
-	${GO} tool vet -all -shadow ./cmd ./pkg || echo "\nSome vet checks failed\n"
-
 .PHONY: lint
 lint: prepare_gometalinter
-	${GOENV} gometalinter --deadline=120s ./pkg/... ./cmd/...
-
-.PHONY: validate
-validate: fmt vet lint
-	@echo "\nAll validations passed"
+	${GOENV} gometalinter --config=gometalinter.json --deadline=180s ./pkg/... ./cmd/...
 
 .PHONY: clean
 clean:
