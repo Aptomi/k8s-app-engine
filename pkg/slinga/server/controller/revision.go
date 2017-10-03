@@ -1,13 +1,13 @@
 package controller
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 )
 
 type RevisionController interface {
-	GetRevision(object.Generation) (*language.Policy, error)
+	GetRevision(object.Generation) (*lang.Policy, error)
 	NewRevision([]object.Base) error
 }
 
@@ -19,7 +19,7 @@ type RevisionControllerImpl struct {
 	store store.ObjectStore
 }
 
-func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*language.Policy, error) {
+func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*lang.Policy, error) {
 	return nil, nil
 }
 

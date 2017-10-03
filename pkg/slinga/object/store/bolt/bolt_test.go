@@ -1,7 +1,7 @@
 package bolt
 
 import (
-	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/stretchr/testify/assert"

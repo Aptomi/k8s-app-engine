@@ -2,8 +2,8 @@ package users
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/mattn/go-zglob"
 	"strconv"
 	"sync"
@@ -14,7 +14,7 @@ type UserLoaderFromDir struct {
 	once sync.Once
 
 	baseDir     string
-	cachedUsers *language.GlobalUsers
+	cachedUsers *lang.GlobalUsers
 }
 
 // NewUserLoaderFromDir returns new UserLoaderFromDir, given a directory where files should be read from
@@ -25,11 +25,11 @@ func NewUserLoaderFromDir(baseDir string) UserLoader {
 }
 
 // LoadUsersAll loads all users
-func (loader *UserLoaderFromDir) LoadUsersAll() language.GlobalUsers {
+func (loader *UserLoaderFromDir) LoadUsersAll() lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
 		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeUsersFile))
-		loader.cachedUsers = &language.GlobalUsers{Users: make(map[string]*language.User)}
+		loader.cachedUsers = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
 		for _, fileName := range files {
 			t := loadUsersFromFile(fileName)
 			for _, u := range t {
@@ -42,7 +42,7 @@ func (loader *UserLoaderFromDir) LoadUsersAll() language.GlobalUsers {
 }
 
 // LoadUserByID loads a single user by ID
-func (loader *UserLoaderFromDir) LoadUserByID(id string) *language.User {
+func (loader *UserLoaderFromDir) LoadUserByID(id string) *lang.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
@@ -52,6 +52,6 @@ func (loader *UserLoaderFromDir) Summary() string {
 }
 
 // Loads users from file
-func loadUsersFromFile(fileName string) []*language.User {
-	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*language.User{}).(*[]*language.User)
+func loadUsersFromFile(fileName string) []*lang.User {
+	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*lang.User{}).(*[]*lang.User)
 }

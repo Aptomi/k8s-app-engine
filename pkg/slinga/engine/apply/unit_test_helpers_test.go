@@ -8,7 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -18,8 +18,8 @@ import (
 	"time"
 )
 
-func getPolicy() *language.Policy {
-	return language.LoadUnitTestsPolicy("../../testdata/unittests")
+func getPolicy() *lang.Policy {
+	return lang.LoadUnitTestsPolicy("../../testdata/unittests")
 }
 
 func getExternalData() *external.Data {
@@ -29,7 +29,7 @@ func getExternalData() *external.Data {
 	)
 }
 
-func resolvePolicy(t *testing.T, policy *language.Policy, externalData *external.Data) *resolve.PolicyResolution {
+func resolvePolicy(t *testing.T, policy *lang.Policy, externalData *external.Data) *resolve.PolicyResolution {
 	t.Helper()
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
@@ -88,7 +88,7 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func getInstanceKey(namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
+func getInstanceKey(namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *lang.Policy) string {
 	cluster := policy.Namespace[object.SystemNS].Clusters[clusterName]
 	contract := policy.Namespace[namespace].Contracts[contractName]
 	context := contract.FindContextByName(contextName)
@@ -124,7 +124,7 @@ func (p *testPlugin) GetSupportedCodeTypes() []string {
 	return []string{}
 }
 
-func (p *testPlugin) Create(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+func (p *testPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
 	eventLog.WithFields(eventlog.Fields{}).Infof("[+] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
@@ -133,7 +133,7 @@ func (p *testPlugin) Create(cluster *language.Cluster, deployName string, params
 	}
 	return nil
 }
-func (p *testPlugin) Update(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+func (p *testPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
 	eventLog.WithFields(eventlog.Fields{}).Infof("[*] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
@@ -142,7 +142,7 @@ func (p *testPlugin) Update(cluster *language.Cluster, deployName string, params
 	}
 	return nil
 }
-func (p *testPlugin) Destroy(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
 	eventLog.WithFields(eventlog.Fields{}).Infof("[-] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
@@ -151,11 +151,11 @@ func (p *testPlugin) Destroy(cluster *language.Cluster, deployName string, param
 	}
 	return nil
 }
-func (p *testPlugin) Endpoints(cluster *language.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) (map[string]string, error) {
+func (p *testPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) (map[string]string, error) {
 	return nil, nil
 }
 
-func (p *testPlugin) Process(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
+func (p *testPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
 	return nil
 }
 

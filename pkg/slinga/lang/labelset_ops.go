@@ -1,4 +1,4 @@
-package language
+package lang
 
 // LabelOperations defines the set of label manipulations (e.g. set/remove)
 type LabelOperations map[string]map[string]string

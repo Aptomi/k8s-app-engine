@@ -3,7 +3,7 @@ package helm_istio
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"k8s.io/helm/pkg/kube"
 	"sync"
 )

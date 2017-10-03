@@ -2,7 +2,7 @@ package visibility
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"strings"
 )
 
@@ -21,7 +21,7 @@ func (view SummaryView) getResolvedClusterNameByDep(dependency *Dependency) stri
 			return "N/A"
 		}
 	*/
-	return "" //view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels[language.LabelCluster]
+	return "" //view.revision.Resolution.ComponentInstanceMap[dependency.ServiceKey].CalculatedLabels.Labels[lang.LabelCluster]
 }
 
 func (view SummaryView) getResolvedContextNameByDep(dependency *Dependency) string {
@@ -65,7 +65,7 @@ func (view SummaryView) getInstanceStats(instance *resolve.ComponentInstance) st
 }
 
 func (view SummaryView) getResolvedClusterNameByInst(instance *resolve.ComponentInstance) string {
-	return "" //view.revision.Resolution.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels[language.LabelCluster]
+	return "" //view.revision.Resolution.ComponentInstanceMap[instance.Key.GetKey()].CalculatedLabels.Labels[lang.LabelCluster]
 }
 
 func (view SummaryView) getResolvedContextNameByInst(instance *resolve.ComponentInstance) string {

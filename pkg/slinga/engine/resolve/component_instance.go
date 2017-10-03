@@ -3,7 +3,7 @@ package resolve
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"strconv"

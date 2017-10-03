@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"testing"
 )
 
@@ -24,11 +24,11 @@ func TestDiffHasCreatedComponents(t *testing.T) {
 	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Add another dependency and resolve policy
-	nextPolicy := language.LoadUnitTestsPolicy("../../testdata/unittests")
+	nextPolicy := lang.LoadUnitTestsPolicy("../../testdata/unittests")
 	nextPolicy.AddObject(
-		&language.Dependency{
-			Metadata: language.Metadata{
-				Kind:      language.DependencyObject.Kind,
+		&lang.Dependency{
+			Metadata: lang.Metadata{
+				Kind:      lang.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},
@@ -47,11 +47,11 @@ func TestDiffHasUpdatedComponents(t *testing.T) {
 	externalData := getExternalData()
 
 	// Add dependency, resolve policy
-	policyNext := language.LoadUnitTestsPolicy("../../testdata/unittests")
+	policyNext := lang.LoadUnitTestsPolicy("../../testdata/unittests")
 	policyNext.AddObject(
-		&language.Dependency{
-			Metadata: language.Metadata{
-				Kind:      language.DependencyObject.Kind,
+		&lang.Dependency{
+			Metadata: lang.Metadata{
+				Kind:      lang.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dep_id_5",
 			},
@@ -79,7 +79,7 @@ func TestDiffHasDestructedComponents(t *testing.T) {
 	resolvedPrev = emulateSaveAndLoadResolution(resolvedPrev)
 
 	// Now resolve empty policy
-	nextPolicy := language.NewPolicy()
+	nextPolicy := lang.NewPolicy()
 	resolvedNext := resolvePolicy(t, nextPolicy, externalData)
 
 	// Calculate difference

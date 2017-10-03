@@ -2,7 +2,7 @@ package secrets
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/mattn/go-zglob"
 	"sort"
 	"sync"

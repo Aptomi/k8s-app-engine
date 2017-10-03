@@ -1,4 +1,4 @@
-package language
+package lang
 
 type ChangeLabelsAction LabelOperations
 

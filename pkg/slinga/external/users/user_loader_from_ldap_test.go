@@ -2,7 +2,7 @@ package users
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -58,7 +58,7 @@ func TestLoadUsersFromLDAPIndividually(t *testing.T) {
 	}
 }
 
-func compareUsers(t *testing.T, uDir *language.User, uLDAP *language.User) {
+func compareUsers(t *testing.T, uDir *lang.User, uLDAP *lang.User) {
 	// check that name matches
 	assert.Equal(t, uDir.Name, uLDAP.Name, "User LDAP name should match")
 	// check that labels are mapped correctly

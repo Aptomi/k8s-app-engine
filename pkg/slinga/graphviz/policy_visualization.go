@@ -4,7 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/awalterschulze/gographviz"
 	"image"
@@ -22,20 +22,20 @@ type PolicyVisualization struct {
 }
 
 // NewPolicyVisualizationImage returns an image with policy/resolution information
-func NewPolicyVisualizationImage(policy *language.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
+func NewPolicyVisualizationImage(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
 	graph := makeGraph(policy, resolution, externalData)
 	return getGraphImage(graph)
 }
 
 // NewPolicyVisualizationDeltaImage returns an image with policy/resolution information
-func NewPolicyVisualizationDeltaImage(nextPolicy *language.Policy, nextResolution *resolve.PolicyResolution, prevPolicy *language.Policy, prevResolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
+func NewPolicyVisualizationDeltaImage(nextPolicy *lang.Policy, nextResolution *resolve.PolicyResolution, prevPolicy *lang.Policy, prevResolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {
 	nextGraph := makeGraph(nextPolicy, nextResolution, externalData)
 	prevGraph := makeGraph(prevPolicy, prevResolution, externalData)
 	deltaGraph := Delta(prevGraph, nextGraph)
 	return getGraphImage(deltaGraph)
 }
 
-func makeGraph(policy *language.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
+func makeGraph(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
 	// Write graph into a file
 	graph := gographviz.NewGraph()
 	graph.SetName("Main")

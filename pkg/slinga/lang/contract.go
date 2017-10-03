@@ -1,4 +1,4 @@
-package language
+package lang
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"

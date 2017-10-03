@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/kubernetes/pkg/api"

@@ -1,9 +1,9 @@
 package resolve
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
@@ -74,9 +74,9 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 */
 
 // How service is visible from the policy language
-func (node *resolutionNode) proxyService(service *language.Service) interface{} {
+func (node *resolutionNode) proxyService(service *lang.Service) interface{} {
 	return struct {
-		language.Metadata
+		lang.Metadata
 		Labels interface{}
 		Owner  interface{}
 	}{
@@ -87,7 +87,7 @@ func (node *resolutionNode) proxyService(service *language.Service) interface{} 
 }
 
 // How user is visible from the policy language
-func (node *resolutionNode) proxyUser(user *language.User) interface{} {
+func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 	return struct {
 		ID      interface{}
 		Name    interface{}

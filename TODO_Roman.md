@@ -1,6 +1,6 @@
 Implementation:
 
-1. const SystemNamespace = "system"
+1. eventlog -> event (and rename struct to Log)
 
 -- -- --
 
@@ -146,3 +146,8 @@ Done:
   * clusters are in 'system' namespace
   * rules can be in current namespace or/and in 'system' namespace
   * policy can refer  add references to support "namespace/"
+
+* const SystemNamespace = "system"
+  * replace with object.SystemNS
+
+* rename language -> lang

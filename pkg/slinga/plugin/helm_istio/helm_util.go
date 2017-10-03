@@ -3,7 +3,7 @@ package helm_istio
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
-	lang "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 	"k8s.io/helm/pkg/helm"

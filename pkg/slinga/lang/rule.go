@@ -1,7 +1,7 @@
-package language
+package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"sort"
 	"sync"

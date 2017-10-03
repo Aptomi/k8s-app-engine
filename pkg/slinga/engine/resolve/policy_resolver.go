@@ -4,10 +4,9 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"sync"
 )
@@ -26,7 +25,7 @@ type PolicyResolver struct {
 	*/
 
 	// Policy
-	policy *Policy
+	policy *lang.Policy
 
 	// External data
 	externalData *external.Data
@@ -55,7 +54,7 @@ type PolicyResolver struct {
 }
 
 // NewPolicyResolver creates a new policy resolver
-func NewPolicyResolver(policy *Policy, externalData *external.Data) *PolicyResolver {
+func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *PolicyResolver {
 	return &PolicyResolver{
 		policy:          policy,
 		externalData:    externalData,
@@ -69,18 +68,18 @@ func NewPolicyResolver(policy *Policy, externalData *external.Data) *PolicyResol
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *EventLog, error) {
 	var semaphore = make(chan int, THREAD_POOL_SIZE)
-	dependencies := resolver.policy.GetObjectsByKind(DependencyObject.Kind)
+	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))
 
 	// Run every declared dependency via policy and resolve it
 	for _, d := range dependencies {
 		// resolve dependency via applying policy
 		semaphore <- 1
-		go func(d *Dependency) {
+		go func(d *lang.Dependency) {
 			node, err := resolver.resolveDependency(d)
 			errs <- resolver.combineData(node, err)
 			<-semaphore
-		}(d.(*Dependency))
+		}(d.(*lang.Dependency))
 	}
 
 	// Wait for all go routines to end
@@ -109,7 +108,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *Ev
 }
 
 // Resolves a single dependency
-func (resolver *PolicyResolver) resolveDependency(d *language.Dependency) (*resolutionNode, error) {
+func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (*resolutionNode, error) {
 	// create resolution node and resolve it
 	node := resolver.newResolutionNode(d)
 	return node, resolver.resolveNode(node)

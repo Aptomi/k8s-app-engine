@@ -1,8 +1,8 @@
-package language
+package lang
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/expression"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
 )
 
 // Criteria defines a structure with require-all, require-any and require-none syntax

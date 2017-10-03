@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -21,11 +21,11 @@ func TestPolicyVisualization(t *testing.T) {
 	)
 
 	// empty policy and empty resolution result
-	policyEmpty := language.NewPolicy()
+	policyEmpty := lang.NewPolicy()
 	resolutionEmpty := resolve.NewPolicyResolution()
 
 	// unit test policy resolved revision
-	policy := language.LoadUnitTestsPolicy("../testdata/unittests")
+	policy := lang.LoadUnitTestsPolicy("../testdata/unittests")
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	resolutionNew, _, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {

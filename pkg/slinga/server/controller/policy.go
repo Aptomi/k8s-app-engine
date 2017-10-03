@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 	"sync"
@@ -11,9 +11,9 @@ import (
 const PolicyName = "policy"
 
 type PolicyController interface {
-	GetPolicy(object.Generation) (*language.Policy, error)
+	GetPolicy(object.Generation) (*lang.Policy, error)
 	GetPolicyData(object.Generation) (*PolicyData, error)
-	GetPolicyFromData(policyData *PolicyData) (*language.Policy, error)
+	GetPolicyFromData(policyData *PolicyData) (*lang.Policy, error)
 	UpdatePolicy([]object.Base) (bool, *PolicyData, error)
 }
 
@@ -28,7 +28,7 @@ var PolicyDataObject = &object.Info{
 }
 
 type PolicyData struct {
-	language.Metadata
+	lang.Metadata
 
 	Objects map[string]map[string]map[string]object.Generation // ns -> kind -> name -> generation
 }
@@ -67,8 +67,8 @@ func (ctl *PolicyControllerImpl) GetPolicyData(gen object.Generation) (*PolicyDa
 	return data, nil
 }
 
-func (ctl *PolicyControllerImpl) GetPolicyFromData(policyData *PolicyData) (*language.Policy, error) {
-	policy := language.NewPolicy()
+func (ctl *PolicyControllerImpl) GetPolicyFromData(policyData *PolicyData) (*lang.Policy, error) {
+	policy := lang.NewPolicy()
 
 	// in case of first version of policy, we just need to have empty policy
 	if policyData != nil && policyData.Objects != nil {
@@ -87,7 +87,7 @@ func (ctl *PolicyControllerImpl) GetPolicyFromData(policyData *PolicyData) (*lan
 	return policy, nil
 }
 
-func (ctl *PolicyControllerImpl) GetPolicy(policyGen object.Generation) (*language.Policy, error) {
+func (ctl *PolicyControllerImpl) GetPolicy(policyGen object.Generation) (*lang.Policy, error) {
 	// todo should we use RWMutex for get/update policy?
 	policyData, err := ctl.GetPolicyData(policyGen)
 	if err != nil {
@@ -111,7 +111,7 @@ func (ctl *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (boo
 	// it could happen only for the fist time
 	if policyData == nil {
 		policyData = &PolicyData{
-			Metadata: language.Metadata{
+			Metadata: lang.Metadata{
 				Namespace: object.SystemNS,
 				Kind:      PolicyDataObject.Kind,
 				Name:      "policy",

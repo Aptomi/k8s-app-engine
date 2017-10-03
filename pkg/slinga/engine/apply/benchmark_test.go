@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"math/rand"
 	"strconv"
@@ -71,8 +71,8 @@ type PolicyGenerator struct {
 	generatedLabels    map[string]string
 	generatedLabelKeys []string
 
-	generatedServices []*language.Service
-	policy            *language.Policy
+	generatedServices []*lang.Service
+	policy            *lang.Policy
 	externalData      *external.Data
 }
 
@@ -88,11 +88,11 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		rules:                     rules,
 		users:                     users,
 		dependencies:              dependencies,
-		policy:                    language.NewPolicy(),
+		policy:                    lang.NewPolicy(),
 	}
 }
 
-func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *external.Data) {
+func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external.Data) {
 	// pre-generate the list of labels
 	gen.makeLabels()
 
@@ -118,10 +118,10 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*language.Policy, *exte
 	)
 
 	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Dependencies = %d, Users = %d\n",
-		len(gen.policy.GetObjectsByKind(language.ServiceObject.Kind)),
+		len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind)),
 		maxChainLen,
-		len(gen.policy.GetObjectsByKind(language.ContractObject.Kind))*gen.contextsPerContract,
-		len(gen.policy.GetObjectsByKind(language.DependencyObject.Kind)),
+		len(gen.policy.GetObjectsByKind(lang.ContractObject.Kind))*gen.contextsPerContract,
+		len(gen.policy.GetObjectsByKind(lang.DependencyObject.Kind)),
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
 
@@ -160,7 +160,7 @@ func (gen *PolicyGenerator) makeLabels() {
 }
 
 func (gen *PolicyGenerator) makeServices() int {
-	gen.generatedServices = make([]*language.Service, gen.services)
+	gen.generatedServices = make([]*lang.Service, gen.services)
 	for i := 0; i < gen.services; i++ {
 		gen.generatedServices[i] = gen.makeService()
 	}
@@ -188,7 +188,7 @@ func (gen *PolicyGenerator) makeServices() int {
 			cnt[j] = cnt[i] + 1
 		}
 
-		component := &language.ServiceComponent{
+		component := &lang.ServiceComponent{
 			Name:     "dep-" + strconv.Itoa(i),
 			Contract: "contract-" + strconv.Itoa(j),
 		}
@@ -197,33 +197,33 @@ func (gen *PolicyGenerator) makeServices() int {
 	return maxChainLen
 }
 
-func (gen *PolicyGenerator) makeService() *language.Service {
-	id := len(gen.policy.GetObjectsByKind(language.ServiceObject.Kind))
+func (gen *PolicyGenerator) makeService() *lang.Service {
+	id := len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind))
 
-	service := &language.Service{
-		Metadata: language.Metadata{
-			Kind:      language.ServiceObject.Kind,
+	service := &lang.Service{
+		Metadata: lang.Metadata{
+			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "service-" + strconv.Itoa(id),
 		},
 		Owner:      "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
-		Components: []*language.ServiceComponent{},
+		Components: []*lang.ServiceComponent{},
 	}
 
 	for i := 0; i < gen.serviceCodeComponents; i++ {
 		labelName := gen.generatedLabelKeys[gen.random.Intn(len(gen.generatedLabelKeys))]
 
 		params := util.NestedParameterMap{}
-		params[language.LabelCluster] = "cluster-test"
+		params[lang.LabelCluster] = "cluster-test"
 		for j := 0; j < gen.codeParams; j++ {
 			name := "param-" + strconv.Itoa(j)
 			value := "prefix-{{ .Labels." + labelName + " }}-suffix"
 			params[name] = value
 		}
 
-		component := &language.ServiceComponent{
+		component := &lang.ServiceComponent{
 			Name: "component-" + strconv.Itoa(i),
-			Code: &language.Code{
+			Code: &lang.Code{
 				Type:   "aptomi/code/unittests",
 				Params: params,
 			},
@@ -238,56 +238,56 @@ func (gen *PolicyGenerator) makeService() *language.Service {
 func (gen *PolicyGenerator) makeRules() {
 	// generate non-matching rules
 	for i := 0; i < gen.rules-1; i++ {
-		gen.policy.AddObject(&language.Rule{
-			Metadata: language.Metadata{
-				Kind:      language.RuleObject.Kind,
+		gen.policy.AddObject(&lang.Rule{
+			Metadata: lang.Metadata{
+				Kind:      lang.RuleObject.Kind,
 				Namespace: "main",
 				Name:      "rule",
 			},
 			Weight: i,
-			Criteria: &language.Criteria{
+			Criteria: &lang.Criteria{
 				RequireAll: []string{"service.Name == 'some-name-" + strconv.Itoa(i) + "'"},
 			},
-			Actions: &language.RuleActions{
-				Dependency: language.DependencyAction("reject"),
+			Actions: &lang.RuleActions{
+				Dependency: lang.DependencyAction("reject"),
 			},
 		})
 	}
 
 	// generate rule which allows all dependencies
-	gen.policy.AddObject(&language.Rule{
-		Metadata: language.Metadata{
-			Kind:      language.RuleObject.Kind,
+	gen.policy.AddObject(&lang.Rule{
+		Metadata: lang.Metadata{
+			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
 		Weight: gen.rules,
-		Criteria: &language.Criteria{
+		Criteria: &lang.Criteria{
 			RequireAll: []string{"true"},
 		},
-		Actions: &language.RuleActions{
-			Dependency:   language.DependencyAction("allow"),
-			ChangeLabels: language.ChangeLabelsAction(language.NewLabelOperationsSetSingleLabel(language.LabelCluster, "cluster-test")),
+		Actions: &lang.RuleActions{
+			Dependency:   lang.DependencyAction("allow"),
+			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-test")),
 		},
 	})
 }
 
 func (gen *PolicyGenerator) makeContracts() {
 	for i := 0; i < gen.services; i++ {
-		contract := &language.Contract{
-			Metadata: language.Metadata{
-				Kind:      language.ContractObject.Kind,
+		contract := &lang.Contract{
+			Metadata: lang.Metadata{
+				Kind:      lang.ContractObject.Kind,
 				Namespace: "main",
 				Name:      "contract-" + strconv.Itoa(i),
 			},
-			Contexts: []*language.Context{},
+			Contexts: []*lang.Context{},
 		}
 
 		// generate non-matching contexts
 		for i := 0; i < gen.contextsPerContract-1; i++ {
-			context := &language.Context{
+			context := &lang.Context{
 				Name: "context-" + gen.randomString(20),
-				Criteria: &language.Criteria{
+				Criteria: &lang.Criteria{
 					RequireAll: []string{"true"},
 					RequireAny: []string{
 						gen.randomString(20) + "=='" + gen.randomString(20) + "'",
@@ -295,7 +295,7 @@ func (gen *PolicyGenerator) makeContracts() {
 						gen.randomString(20) + "=='" + gen.randomString(20) + "'",
 					},
 				},
-				Allocation: &language.Allocation{
+				Allocation: &lang.Allocation{
 					Service: "service-" + strconv.Itoa(i),
 				},
 			}
@@ -303,12 +303,12 @@ func (gen *PolicyGenerator) makeContracts() {
 		}
 
 		// generate matching context
-		context := &language.Context{
+		context := &lang.Context{
 			Name: "context-" + gen.randomString(20),
-			Criteria: &language.Criteria{
+			Criteria: &lang.Criteria{
 				RequireAll: []string{"true"},
 			},
-			Allocation: &language.Allocation{
+			Allocation: &lang.Allocation{
 				Service: "service-" + strconv.Itoa(i),
 			},
 		}
@@ -321,9 +321,9 @@ func (gen *PolicyGenerator) makeContracts() {
 
 func (gen *PolicyGenerator) makeDependencies() {
 	for i := 0; i < gen.dependencies; i++ {
-		dependency := &language.Dependency{
-			Metadata: language.Metadata{
-				Kind:      language.DependencyObject.Kind,
+		dependency := &lang.Dependency{
+			Metadata: lang.Metadata{
+				Kind:      lang.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dependency-" + strconv.Itoa(i),
 			},
@@ -335,9 +335,9 @@ func (gen *PolicyGenerator) makeDependencies() {
 }
 
 func (gen *PolicyGenerator) makeCluster() {
-	cluster := &language.Cluster{
-		Metadata: language.Metadata{
-			Kind:      language.ClusterObject.Kind,
+	cluster := &lang.Cluster{
+		Metadata: lang.Metadata{
+			Kind:      lang.ClusterObject.Kind,
 			Namespace: "system",
 			Name:      "cluster-test",
 		},
@@ -349,7 +349,7 @@ type UserLoaderImpl struct {
 	users  int
 	labels map[string]string
 
-	cachedUsers *language.GlobalUsers
+	cachedUsers *lang.GlobalUsers
 }
 
 func NewUserLoaderImpl(users int, labels map[string]string) *UserLoaderImpl {
@@ -359,23 +359,23 @@ func NewUserLoaderImpl(users int, labels map[string]string) *UserLoaderImpl {
 	}
 }
 
-func (loader *UserLoaderImpl) LoadUsersAll() language.GlobalUsers {
+func (loader *UserLoaderImpl) LoadUsersAll() lang.GlobalUsers {
 	if loader.cachedUsers == nil {
-		userMap := make(map[string]*language.User)
+		userMap := make(map[string]*lang.User)
 		for i := 0; i < loader.users; i++ {
-			user := &language.User{
+			user := &lang.User{
 				ID:     "user-" + strconv.Itoa(i),
 				Name:   "user-" + strconv.Itoa(i),
 				Labels: loader.labels,
 			}
 			userMap[user.ID] = user
 		}
-		loader.cachedUsers = &language.GlobalUsers{Users: userMap}
+		loader.cachedUsers = &lang.GlobalUsers{Users: userMap}
 	}
 	return *loader.cachedUsers
 }
 
-func (loader *UserLoaderImpl) LoadUserByID(id string) *language.User {
+func (loader *UserLoaderImpl) LoadUserByID(id string) *lang.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
@@ -394,12 +394,12 @@ func (loader *SecretLoaderImpl) LoadSecretsByUserID(string) map[string]string {
 	return nil
 }
 
-func RunEngine(t *testing.T, testName string, desiredPolicy *language.Policy, externalData *external.Data) {
+func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, externalData *external.Data) {
 	fmt.Printf("Running engine for '%s'\n", testName)
 
 	timeStart := time.Now()
 
-	actualPolicy := language.NewPolicy()
+	actualPolicy := lang.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 	desiredState := resolvePolicy(t, desiredPolicy, externalData)
 

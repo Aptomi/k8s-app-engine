@@ -2,7 +2,7 @@ package apply
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -17,7 +17,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 	externalData := getExternalData()
 
 	// resolve empty policy
-	actualPolicy := language.NewPolicy()
+	actualPolicy := lang.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// resolve full policy
@@ -52,7 +52,7 @@ func TestApplyCreateFailure(t *testing.T) {
 	externalData := getExternalData()
 
 	// resolve empty policy
-	actualPolicy := language.NewPolicy()
+	actualPolicy := lang.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// resolve full policy
@@ -91,7 +91,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	*/
 
 	// Create initial empty resolution data (do not resolve any dependencies)
-	actualPolicy := language.NewPolicy()
+	actualPolicy := lang.NewPolicy()
 	actualState := resolvePolicy(t, actualPolicy, externalData)
 
 	// Resolve all dependencies in policy
@@ -131,9 +131,9 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 
 	// Add another dependency, resolve, calculate difference against prev resolution data, emulate save/load
 	desiredPolicyNext := getPolicy()
-	dependencyNew := &language.Dependency{
-		Metadata: language.Metadata{
-			Kind:      language.DependencyObject.Kind,
+	dependencyNew := &lang.Dependency{
+		Metadata: lang.Metadata{
+			Kind:      lang.DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dep_id_5",
 		},

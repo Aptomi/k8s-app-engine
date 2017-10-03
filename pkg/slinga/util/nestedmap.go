@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/d4l3k/messagediff"
 	"reflect"
 	"strconv"

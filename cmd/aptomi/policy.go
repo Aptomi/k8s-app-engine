@@ -8,7 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -45,8 +45,8 @@ var policyCmdApply = &cobra.Command{
 
 		// Generate the next usage state
 		policyDir := GetAptomiPolicyDir()
-		store := NewFileLoader(policyDir)
-		policy := NewPolicy()
+		store := lang.NewFileLoader(policyDir)
+		policy := lang.NewPolicy()
 
 		objects, err := store.LoadObjects()
 		if err != nil {

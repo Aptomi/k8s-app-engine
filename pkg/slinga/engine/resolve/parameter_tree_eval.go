@@ -2,7 +2,7 @@ package resolve
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/template"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 

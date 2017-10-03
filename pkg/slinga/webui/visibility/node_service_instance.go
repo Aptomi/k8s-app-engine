@@ -3,7 +3,7 @@ package visibility
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	. "github.com/Aptomi/aptomi/pkg/slinga/lang"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 	"html"
 )

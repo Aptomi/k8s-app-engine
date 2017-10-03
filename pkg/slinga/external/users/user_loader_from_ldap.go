@@ -3,8 +3,8 @@ package users
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/db"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
-	"github.com/Aptomi/aptomi/pkg/slinga/language/yaml"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 	"gopkg.in/ldap.v2"
@@ -47,7 +47,7 @@ type UserLoaderFromLDAP struct {
 
 	baseDir     string
 	config      *LDAPConfig
-	cachedUsers *language.GlobalUsers
+	cachedUsers *lang.GlobalUsers
 }
 
 // NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
@@ -59,10 +59,10 @@ func NewUserLoaderFromLDAP(baseDir string) UserLoader {
 }
 
 // LoadUsersAll loads all users
-func (loader *UserLoaderFromLDAP) LoadUsersAll() language.GlobalUsers {
+func (loader *UserLoaderFromLDAP) LoadUsersAll() lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
-		loader.cachedUsers = &language.GlobalUsers{Users: make(map[string]*language.User)}
+		loader.cachedUsers = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
 		t := loader.ldapSearch()
 		for _, u := range t {
 			// add user
@@ -73,7 +73,7 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() language.GlobalUsers {
 }
 
 // LoadUserByID loads a single user by ID
-func (loader *UserLoaderFromLDAP) LoadUserByID(id string) *language.User {
+func (loader *UserLoaderFromLDAP) LoadUserByID(id string) *lang.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
@@ -83,7 +83,7 @@ func (loader *UserLoaderFromLDAP) Summary() string {
 }
 
 // Does search on LDAP and returns entries
-func (loader *UserLoaderFromLDAP) ldapSearch() []*language.User {
+func (loader *UserLoaderFromLDAP) ldapSearch() []*lang.User {
 	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", loader.config.Host, loader.config.Port))
 	if err != nil {
 		panic(err)
@@ -103,9 +103,9 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*language.User {
 		panic(err)
 	}
 
-	result := []*language.User{}
+	result := []*lang.User{}
 	for _, entry := range searchResult.Entries {
-		user := &language.User{
+		user := &lang.User{
 			ID:     entry.DN,
 			Name:   entry.GetAttributeValue(loader.config.LabelToAtrributes["name"]),
 			Labels: make(map[string]string),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"time"
 )
@@ -61,11 +61,11 @@ func (a *CreateAction) updateActualState(context *action.Context) error {
 
 func (a *CreateAction) processDeployment(context *action.Context) error {
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	serviceObj, err := context.DesiredPolicy.GetObject(language.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return err
 	}
-	component := serviceObj.(*language.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
+	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
 		// This is a service instance. Do nothing
@@ -80,12 +80,12 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 	}).Info("Deploying new component instance: " + instance.GetKey())
 
 	if component.Code != nil {
-		clusterName, ok := instance.CalculatedCodeParams[language.LabelCluster].(string)
+		clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
 		if !ok {
 			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}
 
-		clusterObj, err := context.DesiredPolicy.GetObject(language.ClusterObject.Kind, clusterName, object.SystemNS)
+		clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 			return err
 		}
 
-		err = plugin.Create(clusterObj.(*language.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Create(clusterObj.(*lang.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}

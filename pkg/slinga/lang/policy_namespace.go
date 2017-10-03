@@ -1,4 +1,4 @@
-package language
+package lang
 
 import (
 	"fmt"

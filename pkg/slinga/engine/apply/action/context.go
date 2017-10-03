@@ -5,14 +5,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 )
 
 type Context struct {
-	DesiredPolicy      *language.Policy
+	DesiredPolicy      *lang.Policy
 	DesiredState       *resolve.PolicyResolution
-	ActualPolicy       *language.Policy
+	ActualPolicy       *lang.Policy
 	ActualState        *resolve.PolicyResolution
 	ActualStateUpdater actual.StateUpdater
 	ExternalData       *external.Data
@@ -20,7 +20,7 @@ type Context struct {
 	EventLog           *eventlog.EventLog
 }
 
-func NewContext(desiredPolicy *language.Policy, desiredState *resolve.PolicyResolution, actualPolicy *language.Policy,
+func NewContext(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualPolicy *lang.Policy,
 	actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data,
 	plugins plugin.Registry, eventLog *eventlog.EventLog) *Context {
 

@@ -1,4 +1,4 @@
-package language
+package lang
 
 /*
 	This file declares all the necessary structures for representing

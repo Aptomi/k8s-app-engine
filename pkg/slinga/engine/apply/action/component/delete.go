@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
-	"github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
@@ -53,11 +53,11 @@ func (a *DeleteAction) updateActualState(context *action.Context) error {
 
 func (a *DeleteAction) processDeployment(context *action.Context) error {
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	serviceObj, err := context.ActualPolicy.GetObject(language.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	serviceObj, err := context.ActualPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return err
 	}
-	component := serviceObj.(*language.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
+	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
 		// This is a service instance. Do nothing
@@ -72,12 +72,12 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 	}).Info("Destructing a running component instance: " + instance.GetKey())
 
 	if component.Code != nil {
-		clusterName, ok := instance.CalculatedCodeParams[language.LabelCluster].(string)
+		clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
 		if !ok {
 			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}
 
-		clusterObj, err := context.DesiredPolicy.GetObject(language.ClusterObject.Kind, clusterName, object.SystemNS)
+		clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 			return err
 		}
 
-		err = plugin.Destroy(clusterObj.(*language.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Destroy(clusterObj.(*lang.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}
