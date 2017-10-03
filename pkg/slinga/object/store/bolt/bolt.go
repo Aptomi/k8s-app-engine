@@ -36,7 +36,7 @@ func (b *boltStore) Open(connection string) error {
 		return err
 	})
 
-	return nil
+	return err
 }
 
 var objectsBucket = []byte("objects")
