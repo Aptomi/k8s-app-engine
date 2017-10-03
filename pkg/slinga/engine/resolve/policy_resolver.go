@@ -8,6 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
+	"runtime"
 	"sync"
 )
 
@@ -18,7 +19,7 @@ import (
 */
 
 // ThreadPoolSize is the number of threads for policy evaluation and processing
-const ThreadPoolSize = 8
+var ThreadPoolSize = runtime.NumCPU()
 
 // PolicyResolver is a core of aptomi which does policy processing and resolution of all dependencies (consumer -> service)
 type PolicyResolver struct {
