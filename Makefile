@@ -41,7 +41,8 @@ test-race:
 .PHONY: alltest
 alltest:
 	${GO} test -v ./...
-	@echo "\nAll unit & integration tests passed"
+	${GO} test -bench . -count 1 ./pkg/slinga/engine/...
+	@echo "\nAll tests passed (unit, integration, benchmark)"
 
 .PHONY: test-loop
 test-loop:
@@ -77,7 +78,7 @@ vet:
 
 .PHONY: lint
 lint: prepare_gometalinter
-	${GOENV} gometalinter --deadline=120s ./pkg/... ./cmd/... | grep -v 'should not use dot imports'
+	${GOENV} gometalinter --deadline=120s ./pkg/... ./cmd/...
 
 .PHONY: validate
 validate: fmt vet lint
