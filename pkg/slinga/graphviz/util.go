@@ -56,11 +56,10 @@ func addNodeOnce(g *gographviz.Graph, parentGraph string, name string, attrs map
 // Opens an image via "open" (preview in Mac OS) for debugging purposes
 func OpenImage(image image.Image) {
 	tmpFile, err := ioutil.TempFile("", "aptomi-graphviz-debug")
-	defer tmpFile.Close() // nolint: errcheck
-
 	if err != nil {
 		panic("Failed to create temp file")
 	}
+	defer tmpFile.Close() // nolint: errcheck
 
 	err = png.Encode(tmpFile, image)
 	if err != nil {
