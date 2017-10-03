@@ -24,10 +24,7 @@ func isHTML(s string) bool {
 			count--
 		}
 	}
-	if count == 0 {
-		return true
-	}
-	return false
+	return count == 0
 }
 
 func isLetter(ch rune) bool {
