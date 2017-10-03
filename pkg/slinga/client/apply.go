@@ -137,7 +137,7 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 				allFiles = append(allFiles, policyPath)
 			}
 		} else if os.IsNotExist(err) {
-			return nil, fmt.Errorf("Path doesn't exists: %s error: %s", policyPath, err)
+			return nil, fmt.Errorf("Path doesn't exist: %s error: %s", policyPath, err)
 		} else {
 			return nil, fmt.Errorf("Error while processing path: %s", err)
 		}
