@@ -14,8 +14,6 @@ const componentUnresolvedName = "unknown"
 // componentRootName is a name of component for service entry (which in turn consists of components)
 const componentRootName = "root"
 
-// TODO: what about namespaces?!
-
 // ComponentInstanceKey is a struct representing a key for the component instance and the fields it consists of
 // When adding keys to this method, don't forget to modify the constructor and copy routines
 type ComponentInstanceKey struct {
