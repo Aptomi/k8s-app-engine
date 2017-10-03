@@ -82,7 +82,7 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
 		}
 
-		clusterObj, err := context.DesiredPolicy.GetObject(language.ClusterObject.Kind, clusterName, language.SystemNamespace)
+		clusterObj, err := context.DesiredPolicy.GetObject(language.ClusterObject.Kind, clusterName, object.SystemNS)
 		if err != nil {
 			return err
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -73,7 +74,7 @@ func getInstanceByDependencyKey(t *testing.T, dependencyId string, resolution *P
 
 func getInstanceByParams(t *testing.T, namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *Policy, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
-	cluster := policy.Namespace[SystemNamespace].Clusters[clusterName]
+	cluster := policy.Namespace[object.SystemNS].Clusters[clusterName]
 	contract := policy.Namespace[namespace].Contracts[contractName]
 	context := contract.FindContextByName(contextName)
 	service := policy.Namespace[namespace].Services[context.Allocation.Service]

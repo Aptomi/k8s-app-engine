@@ -3,6 +3,7 @@ package resolve
 import (
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	. "github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
@@ -298,7 +299,7 @@ func (node *resolutionNode) sortServiceComponents() ([]*ServiceComponent, error)
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *ServiceComponent) (*ComponentInstanceKey, error) {
-	clusterObj, err := node.resolver.policy.GetObject(ClusterObject.Kind, node.labels.Labels[LabelCluster], SystemNamespace)
+	clusterObj, err := node.resolver.policy.GetObject(ClusterObject.Kind, node.labels.Labels[LabelCluster], object.SystemNS)
 	if err != nil {
 		return nil, node.errorClusterDoesNotExist()
 	}
@@ -370,7 +371,7 @@ func (node *resolutionNode) processRules() (*RuleActionResult, error) {
 	}
 
 	// process rules globally (within system namespace)
-	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[SystemNamespace], result)
+	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[object.SystemNS], result)
 	if err != nil {
 		return nil, err
 	}

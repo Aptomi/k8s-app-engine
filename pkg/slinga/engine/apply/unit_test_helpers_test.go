@@ -89,7 +89,7 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 }
 
 func getInstanceKey(namespace string, clusterName string, contractName string, contextName string, allocationKeysResolved []string, componentName string, policy *language.Policy) string {
-	cluster := policy.Namespace[language.SystemNamespace].Clusters[clusterName]
+	cluster := policy.Namespace[object.SystemNS].Clusters[clusterName]
 	contract := policy.Namespace[namespace].Contracts[contractName]
 	context := contract.FindContextByName(contextName)
 	service := policy.Namespace[namespace].Services[context.Allocation.Service]

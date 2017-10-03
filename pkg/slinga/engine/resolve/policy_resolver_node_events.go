@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
 	. "github.com/Aptomi/aptomi/pkg/slinga/eventlog"
 	. "github.com/Aptomi/aptomi/pkg/slinga/language"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"strings"
 )
 
@@ -47,7 +48,7 @@ func (node *resolutionNode) errorClusterDoesNotExist() error {
 	var err *errors.ErrorWithDetails
 	if label, ok := node.labels.Labels[LabelCluster]; ok {
 		err = errors.NewErrorWithDetails(
-			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", SystemNamespace, label),
+			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", object.SystemNS, label),
 			errors.Details{},
 		)
 	} else {

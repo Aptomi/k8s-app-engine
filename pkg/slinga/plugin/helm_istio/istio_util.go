@@ -13,6 +13,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *eventlog.EventLog) ([]string, error) {
@@ -60,7 +61,7 @@ func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey str
 	component := service.GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	calcLabels := resolution.ComponentInstanceMap[componentKey].CalculatedLabels
-	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels[lang.LabelCluster], lang.SystemNamespace)
+	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels[lang.LabelCluster], object.SystemNS)
 	if err != nil {
 		return nil, err
 	}

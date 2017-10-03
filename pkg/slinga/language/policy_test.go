@@ -1,6 +1,7 @@
 package language
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -8,7 +9,7 @@ import (
 func TestLoadPolicy(t *testing.T) {
 	policy := LoadUnitTestsPolicy("../testdata/unittests")
 	policyMain := policy.Namespace["main"]
-	policySystem := policy.Namespace[SystemNamespace]
+	policySystem := policy.Namespace[object.SystemNS]
 
 	// Check services
 	assert.Equal(t, 2, len(policyMain.Services), "Two services should be loaded")

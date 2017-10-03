@@ -5,8 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-const SystemNamespace = "system"
-
 // PolicyNamespace describes a specific namespace in a policy (services, contracts, clusters, rules and dependencies, etc)
 type PolicyNamespace struct {
 	Name         string
@@ -28,23 +26,23 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 	}
 }
 
-func (policyNamespace *PolicyNamespace) addObject(object object.Base) {
-	switch kind := object.GetKind(); kind {
+func (policyNamespace *PolicyNamespace) addObject(obj object.Base) {
+	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
-		policyNamespace.Services[object.GetName()] = object.(*Service)
+		policyNamespace.Services[obj.GetName()] = obj.(*Service)
 	case ContractObject.Kind:
-		policyNamespace.Contracts[object.GetName()] = object.(*Contract)
+		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract)
 	case ClusterObject.Kind:
-		if object.GetNamespace() != SystemNamespace {
-			panic(fmt.Sprintf("Adding cluster '%s' into a non-system namespace '%s'", object.GetKey(), object.GetNamespace()))
+		if obj.GetNamespace() != object.SystemNS {
+			panic(fmt.Sprintf("Adding cluster '%s' into a non-system namespace '%s'", obj.GetKey(), obj.GetNamespace()))
 		}
-		policyNamespace.Clusters[object.GetName()] = object.(*Cluster)
+		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
 	case RuleObject.Kind:
-		policyNamespace.Rules.addRule(object.(*Rule))
+		policyNamespace.Rules.addRule(obj.(*Rule))
 	case DependencyObject.Kind:
-		policyNamespace.Dependencies.AddDependency(object.(*Dependency))
+		policyNamespace.Dependencies.AddDependency(obj.(*Dependency))
 	default:
-		panic(fmt.Sprintf("Can't add object to policy namespace: %v", object))
+		panic(fmt.Sprintf("Can't add object to policy namespace: %v", obj))
 	}
 }
 
