@@ -27,7 +27,7 @@ type endpointsView struct {
 }
 
 // Endpoints returns a view with all endpoints
-func Endpoints(currentUserID string) endpointsView {
+func Endpoints(currentUserID string) interface{} {
 	/*
 		revision := resolve.LoadRevision()
 		users := revision.UserLoader.LoadUsersAll().Users

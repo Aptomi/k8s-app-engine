@@ -5,9 +5,9 @@ type item struct {
 	Title string `json:"title"`
 }
 
-// TODO: change UserId -> UserId (and don't break UI...)
+// TODO: UI may be broken now because lint forced changing UserId -> UserID
 type detail struct {
-	UserId          string
+	UserID          string
 	Users           []*item
 	Services        []*item
 	Dependencies    []*item
@@ -17,7 +17,7 @@ type detail struct {
 }
 
 // NewDetails returns detail object
-func NewDetails(userID string) detail {
+func NewDetails(userID string) interface{} {
 	/*
 		revision := resolve.LoadRevision()
 		summary := diff.GetSummary(revision)

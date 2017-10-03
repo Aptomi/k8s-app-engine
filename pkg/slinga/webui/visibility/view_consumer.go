@@ -1,10 +1,10 @@
 package visibility
 
 // ConsumerView represents a view from a particular consumer(s) (service consumer point of view)
-// TODO: userId and dependencyId must be userID and dependencyID (but it kinda breaks UI...)
+// TODO: UI may be broken now because of userID and dependencyID (lint forced changing Id -> ID)
 type ConsumerView struct {
-	userId       string
-	dependencyId string
+	userID       string
+	dependencyID string
 	//	revision     *resolve.Revision
 	g *graph
 }
@@ -12,8 +12,8 @@ type ConsumerView struct {
 // NewConsumerView creates a new ConsumerView
 func NewConsumerView(userID string, dependencyID string) ConsumerView {
 	return ConsumerView{
-		userId:       userID,
-		dependencyId: dependencyID,
+		userID:       userID,
+		dependencyID: dependencyID,
 		//		revision:     resolve.LoadRevision(),
 		g: newGraph(),
 	}
@@ -24,7 +24,7 @@ func (view ConsumerView) GetData() interface{} {
 	/*
 		// go over all dependencies of a given user
 		for _, dependency := range view.revision.Policy.Dependencies.DependenciesByID {
-			if filterMatches(dependency.UserID, view.userId) && filterMatches(dependency.GetID(), view.dependencyId) {
+			if filterMatches(dependency.UserID, view.userID) && filterMatches(dependency.GetID(), view.dependencyID) {
 				// Step 1 - add a node for every matching dependency found
 				dependencyNode := newDependencyNode(dependency, false, view.revision.UserLoader)
 				view.g.addNode(dependencyNode, 0)
