@@ -33,29 +33,32 @@ import (
 // Some notes
 // * in dev mode serve webui files from specified directory, otherwise serve from inside of binary
 
+// Server is a HTTP server which serves API and UI
 type Server struct {
 	config           *viper.Viper
 	backgroundErrors chan string
 	catalog          *object.Catalog
-	codec            codec.MarshalUnmarshaler
+	codec            codec.MarshallerUnmarshaller
 
 	store      store.ObjectStore
 	policyCtl  controller.PolicyController
 	httpServer *http.Server
 }
 
-func New(config *viper.Viper) *Server {
+// NewServer creates a new HTTP Server
+func NewServer(config *viper.Viper) *Server {
 	s := &Server{
 		config:           config,
 		backgroundErrors: make(chan string),
 	}
 
-	s.catalog = object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
+	s.catalog = object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
 	s.codec = yaml.NewCodec(s.catalog)
 
 	return s
 }
 
+// Start makes HTTP server start serving content
 func (s *Server) Start() {
 	s.initStore()
 	s.initPolicyController()

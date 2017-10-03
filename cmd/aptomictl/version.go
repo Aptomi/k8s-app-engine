@@ -16,5 +16,5 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	AptomiCtlCmd.AddCommand(versionCmd)
+	aptomiCtlCmd.AddCommand(versionCmd)
 }

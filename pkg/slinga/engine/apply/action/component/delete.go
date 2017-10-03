@@ -8,16 +8,19 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
+// DeleteActionObject is an informational data structure with Kind and Constructor for the action
 var DeleteActionObject = &object.Info{
 	Kind:        "action-component-delete",
 	Constructor: func() object.Base { return &DeleteAction{} },
 }
 
+// DeleteAction is a action which gets called when an existing component needs to be destroyed (i.e. existing instance of code needs to be terminated in the cloud)
 type DeleteAction struct {
 	*action.Metadata
 	ComponentKey string
 }
 
+// NewDeleteAction creates new DeleteAction
 func NewDeleteAction(revision object.Generation, componentKey string) *DeleteAction {
 	return &DeleteAction{
 		Metadata:     action.NewMetadata(revision, DeleteActionObject.Kind, componentKey),
@@ -25,10 +28,12 @@ func NewDeleteAction(revision object.Generation, componentKey string) *DeleteAct
 	}
 }
 
+// GetName returns action name
 func (a *DeleteAction) GetName() string {
 	return "Delete component " + a.ComponentKey
 }
 
+// Apply applies the action
 func (a *DeleteAction) Apply(context *action.Context) error {
 	// delete from cloud
 	err := a.processDeployment(context)

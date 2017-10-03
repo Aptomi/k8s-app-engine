@@ -22,7 +22,7 @@ type UserSecrets struct {
 	Secrets map[string]string
 }
 
-// SecretLoaderFromDir returns new UserLoaderFromDir, given a directory where files should be read from
+// NewSecretLoaderFromDir returns new UserLoaderFromDir, given a directory where files should be read from
 func NewSecretLoaderFromDir(baseDir string) SecretLoader {
 	return &SecretLoaderFromDir{
 		baseDir: baseDir,

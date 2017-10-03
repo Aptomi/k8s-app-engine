@@ -6,11 +6,13 @@ import (
 	"github.com/ralekseenkov/govaluate"
 )
 
+// Expression struct contains expression string as well as its compiled version
 type Expression struct {
 	expressionStr      string
 	expressionCompiled *govaluate.EvaluableExpression
 }
 
+// NewExpression compiles an expression and returns the result in Expression struct
 func NewExpression(expressionStr string) (*Expression, error) {
 	functions := map[string]govaluate.ExpressionFunction{
 		"in": func(args ...interface{}) (interface{}, error) {
@@ -37,7 +39,7 @@ func NewExpression(expressionStr string) (*Expression, error) {
 	}, nil
 }
 
-// Evaluate an expression, given a set of labels
+// EvaluateAsBool evaluates a compiled boolean expression given a set of parameters
 func (expression *Expression) EvaluateAsBool(params *Parameters) (bool, error) {
 	// Evaluate
 	result, err := expression.expressionCompiled.Evaluate(*params)

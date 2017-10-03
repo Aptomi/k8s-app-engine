@@ -9,7 +9,7 @@ import (
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	if err := AptomiCtlCmd.Execute(); err != nil {
+	if err := aptomiCtlCmd.Execute(); err != nil {
 		panic(fmt.Sprintf("Error while executing command: %s", err))
 	}
 }

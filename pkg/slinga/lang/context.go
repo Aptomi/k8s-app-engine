@@ -5,13 +5,13 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
 )
 
-// Allocation
+// Allocation says which service should be allocated for a given contract->context and which additional keys should be added to component instance key
 type Allocation struct {
 	Service string
 	Keys    []string
 }
 
-// Context
+// Context represents a single context within a contract
 type Context struct {
 	Name         string
 	Criteria     *Criteria
@@ -27,7 +27,7 @@ func (context *Context) Matches(params *expression.Parameters, cache *expression
 	return context.Criteria.allows(params, cache)
 }
 
-// Resolves dynamic allocation keys
+// ResolveKeys resolves dynamic allocation keys, which later get added to component instance key
 func (context *Context) ResolveKeys(params *template.Parameters, cache *template.Cache) ([]string, error) {
 	if cache == nil {
 		cache = template.NewCache()

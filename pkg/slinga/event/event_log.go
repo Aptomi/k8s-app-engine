@@ -7,12 +7,16 @@ import (
 	"io/ioutil"
 )
 
+// Fields is a set of named fields. Fields are attached to every log record
 type Fields map[string]interface{}
 
+// AttachedObjects is a list of core aptomi lang objects attached to a set of log records (e.g. dependency, user, contract, context, key)
 type AttachedObjects struct {
 	objects []interface{}
 }
 
+// Log is an buffered event log
+// It stores all log entries in memory first, then allows them to be processed and stored
 type Log struct {
 	logger     *logrus.Logger
 	attachedTo *AttachedObjects
@@ -73,6 +77,7 @@ func (eventLog *Log) Append(that *Log) {
 	eventLog.hook.entries = append(eventLog.hook.entries, that.hook.entries...)
 }
 
+// LogError logs an error. Errors with details are processed specially, their details get unfolded as record fields
 func (eventLog *Log) LogError(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
@@ -82,7 +87,8 @@ func (eventLog *Log) LogError(err error) {
 	}
 }
 
-func (eventLog *Log) LogErrorAsWarning(err error) {
+// LogWarning logs a warning. Errors with details are processed specially, their details get unfolded as record fields
+func (eventLog *Log) LogWarning(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
 		eventLog.WithFields(Fields(errWithDetails.Details())).Warning(err.Error())
@@ -91,7 +97,7 @@ func (eventLog *Log) LogErrorAsWarning(err error) {
 	}
 }
 
-// Save takes all buffered entries and saves them
+// Save takes all buffered event log entries and saves them
 func (eventLog *Log) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hook.entries {
 		e.Data["attachedTo"] = eventLog.attachedTo

@@ -6,23 +6,28 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 )
 
+// RevisionController is responsible to creating new and retrieving existing aptomi policy revisions
 type RevisionController interface {
 	GetRevision(object.Generation) (*lang.Policy, error)
 	NewRevision([]object.Base) error
 }
 
+// NewRevisionController creates a new RevisionController
 func NewRevisionController(store store.ObjectStore) RevisionController {
 	return &RevisionControllerImpl{store}
 }
 
+// RevisionControllerImpl is an implementation of RevisionController which creates revisions in the underlying data store
 type RevisionControllerImpl struct {
 	store store.ObjectStore
 }
 
+// GetRevision is not needed for RevisionControllerImpl. Always returns nil
 func (c *RevisionControllerImpl) GetRevision(gen object.Generation) (*lang.Policy, error) {
 	return nil, nil
 }
 
+// NewRevision creates a new revision
 func (c *RevisionControllerImpl) NewRevision(update []object.Base) error {
 	// When user submits a change
 	// [1] Acquire global lock for policy version creation

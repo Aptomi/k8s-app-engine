@@ -2,20 +2,21 @@ package progress
 
 import "math"
 
+// Indicator is an interface which represents progress bar indicator
 type Indicator interface {
-	// This method should be called to initialize progress indicator with 'total' steps
+	// SetTotal should be called to initialize progress indicator with 'total' steps
 	SetTotal(total int)
 
-	// This method should be called to advance progress indicator by 1 step, assuming we are located in a certain 'stage'
+	// Advance should be called to advance progress indicator by 1 step, assuming we are located in a certain 'stage'
 	Advance(stage string)
 
-	// This method should be called when you are done using progress indicator (e.g. done, or error happened in the middle)
+	// Done should be called when you are done using progress indicator (e.g. done, or error happened in the middle)
 	Done()
 
-	// This method should be called when you are done using progress indicator (e.g. done, or error happened in the middle)
+	// IsDone method should be called to check if progress indicator has already been marked as Done()
 	IsDone() bool
 
-	// This method should be called to retrieve % of completion as integer. Note that you should rely on IsDone() instead of relying on 100% returned by this method
+	// GetCompletionPercent should be called to retrieve % of completion as integer. Note that you should rely on IsDone() instead of relying on 100% returned by this method
 	GetCompletionPercent() int
 }
 

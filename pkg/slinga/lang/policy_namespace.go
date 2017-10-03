@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-// PolicyNamespace describes a specific namespace in a policy (services, contracts, clusters, rules and dependencies, etc)
+// PolicyNamespace describes a specific namespace in aptomi policy (services, contracts, clusters, rules, dependencies, etc)
 type PolicyNamespace struct {
 	Name         string
 	Services     map[string]*Service
@@ -15,6 +15,7 @@ type PolicyNamespace struct {
 	Dependencies *GlobalDependencies
 }
 
+// NewPolicyNamespace creates a new PolicyNamespace
 func NewPolicyNamespace(name string) *PolicyNamespace {
 	return &PolicyNamespace{
 		Name:         name,

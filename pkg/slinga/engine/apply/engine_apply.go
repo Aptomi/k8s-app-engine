@@ -12,6 +12,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 )
 
+// EngineApply executes actions to convert desired state to actual state
 type EngineApply struct {
 	// References to desired/actual objects
 	desiredPolicy      *lang.Policy
@@ -34,6 +35,7 @@ type EngineApply struct {
 
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
+// NewEngineApply creates an instance of EngineApply
 func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,

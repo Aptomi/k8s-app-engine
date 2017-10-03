@@ -2,6 +2,7 @@ package plugin
 
 import "fmt"
 
+// Registry is a registry of all aptomi engine plugins
 type Registry interface {
 	GetDeployPlugin(codeType string) (DeployPlugin, error)
 	GetClustersPostProcessingPlugins() []ClustersPostProcessPlugin
@@ -12,6 +13,7 @@ type defaultRegistry struct {
 	clustersPostProcessPlugins []ClustersPostProcessPlugin
 }
 
+// NewRegistry creates a registry of aptomi engine plugins
 func NewRegistry(deployPlugins []DeployPlugin, clustersPostProcessPlugins []ClustersPostProcessPlugin) Registry {
 	deployPluginsMap := make(map[string]DeployPlugin, len(deployPlugins))
 	for _, plugin := range deployPlugins {

@@ -2,6 +2,7 @@ package lang
 
 import "reflect"
 
+// LabelCluster is a special label name where cluster should be stored. It's required by the engine during policy processing
 const LabelCluster = "cluster"
 
 // LabelSet defines the set of labels that will be manipulated

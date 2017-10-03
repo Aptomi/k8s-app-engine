@@ -2,14 +2,17 @@ package template
 
 import "sync"
 
+// Cache is a cache of compiled text templates
 type Cache struct {
 	tCache sync.Map
 }
 
+// NewCache creates a new Cache
 func NewCache() *Cache {
 	return &Cache{tCache: sync.Map{}}
 }
 
+// Evaluate evaluates text template given a set of parameters, using the compiled text template from cache
 func (cache *Cache) Evaluate(templateStr string, params *Parameters) (string, error) {
 	// Look up template from the cache
 	var template *Template

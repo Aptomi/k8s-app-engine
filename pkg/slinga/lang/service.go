@@ -7,6 +7,7 @@ import (
 	"sync"
 )
 
+// ServiceObject is an informational data structure with Kind and Constructor for Service
 var ServiceObject = &object.Info{
 	Kind:        "service",
 	Versioned:   true,

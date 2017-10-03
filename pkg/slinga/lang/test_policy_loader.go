@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// LoadUnitTestsPolicy is a helper which loads unit test policy from a set of files
 func LoadUnitTestsPolicy(storeDir string) *Policy {
 	loader := NewFileLoader(storeDir)
 
@@ -28,17 +29,19 @@ func LoadUnitTestsPolicy(storeDir string) *Policy {
 	return policy
 }
 
+// NewFileLoader creates new FileLoader
 func NewFileLoader(path string) *FileLoader {
-	catalog := object.NewObjectCatalog(ServiceObject, ContractObject, ClusterObject, RuleObject, DependencyObject)
-
+	catalog := object.NewCatalog(ServiceObject, ContractObject, ClusterObject, RuleObject, DependencyObject)
 	return &FileLoader{yaml.NewCodec(catalog), path}
 }
 
+// FileLoader is a helper struct which loads catalog objects from a set of files and returns it as FileLoader
 type FileLoader struct {
-	codec codec.MarshalUnmarshaler
+	codec codec.MarshallerUnmarshaller
 	path  string
 }
 
+// LoadObjects loads all YAML objects from a given path/**/*.yaml
 func (store *FileLoader) LoadObjects() ([]object.Base, error) {
 	files, _ := zglob.Glob(filepath.Join(store.path, "**", "*.yaml"))
 	sort.Strings(files)

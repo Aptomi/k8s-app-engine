@@ -16,7 +16,7 @@ type clusterCache struct {
 	istioSvc            string       // istio svc name
 }
 
-func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (*clusterCache, error) {
+func (p *Plugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (*clusterCache, error) {
 	cache, _ /*loaded*/ := p.cache.LoadOrStore(cluster.Namespace, new(clusterCache))
 	c, ok := cache.(*clusterCache)
 	if ok {
@@ -26,16 +26,17 @@ func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (
 		}
 		return c, nil
 	}
-	panic(fmt.Sprintf("clusterCache expected in HelmIstioPlugin cache, but found: %v", c))
+	panic(fmt.Sprintf("clusterCache expected in Plugin cache, but found: %v", c))
 }
 
-func (p *HelmIstioPlugin) Cleanup() error {
+// Cleanup runs cleanup phase of Plugin
+func (p *Plugin) Cleanup() error {
 	var err error
 	p.cache.Range(func(key, value interface{}) bool {
 		if c, ok := value.(*clusterCache); ok {
 			c.tillerTunnel.Close()
 		} else {
-			panic(fmt.Sprintf("clusterCache expected in HelmIstioPlugin cache, but found: %v", c))
+			panic(fmt.Sprintf("clusterCache expected in Plugin cache, but found: %v", c))
 		}
 		return true
 	})

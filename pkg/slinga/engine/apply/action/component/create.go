@@ -9,17 +9,20 @@ import (
 	"time"
 )
 
+// CreateActionObject is an informational data structure with Kind and Constructor for the action
 var CreateActionObject = &object.Info{
 	Kind:        "action-component-create",
 	Constructor: func() object.Base { return &CreateAction{} },
 }
 
+// CreateAction is a action which gets called when a new component needs to be instantiated (i.e. new instance of code to be deployed to the cloud)
 type CreateAction struct {
 	// Key is the revision id and action id pair
 	*action.Metadata
 	ComponentKey string
 }
 
+// NewCreateAction creates new CreateAction
 func NewCreateAction(revision object.Generation, componentKey string) *CreateAction {
 	return &CreateAction{
 		Metadata:     action.NewMetadata(revision, CreateActionObject.Kind, componentKey),
@@ -27,10 +30,12 @@ func NewCreateAction(revision object.Generation, componentKey string) *CreateAct
 	}
 }
 
+// GetName returns action name
 func (a *CreateAction) GetName() string {
 	return "Create component " + a.ComponentKey
 }
 
+// Apply applies the action
 func (a *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud
 	err := a.processDeployment(context)

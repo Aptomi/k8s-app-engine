@@ -13,13 +13,14 @@ import (
 	"time"
 )
 
-func NewBoltStore(catalog *object.Catalog, codec codec.MarshalUnmarshaler) store.ObjectStore {
+// NewBoltStore creates a new object store based on BoltDB
+func NewBoltStore(catalog *object.Catalog, codec codec.MarshallerUnmarshaller) store.ObjectStore {
 	return &boltStore{catalog: catalog, codec: codec}
 }
 
 type boltStore struct {
 	catalog *object.Catalog
-	codec   codec.MarshalUnmarshaler
+	codec   codec.MarshallerUnmarshaller
 	db      *bolt.DB
 }
 

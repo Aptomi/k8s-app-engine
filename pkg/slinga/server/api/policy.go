@@ -9,9 +9,10 @@ import (
 	"net/http"
 )
 
+// PolicyAPI is a an object which allows to retrieve and update policy via API
 type PolicyAPI struct {
 	ctl   controller.PolicyController
-	codec codec.MarshalUnmarshaler
+	codec codec.MarshallerUnmarshaller
 }
 
 func (a *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -67,7 +68,8 @@ func (a *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 	//}
 }
 
-func ServePolicy(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshalUnmarshaler) {
+// ServePolicy registers policy processing handlers in API
+func ServePolicy(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshallerUnmarshaller) {
 	h := PolicyAPI{ctl, cod}
 
 	router.GET("/api/v1/policy", h.handleGetPolicy)

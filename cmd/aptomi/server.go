@@ -11,7 +11,7 @@ var serverCmd = &cobra.Command{
 	Short: "Server",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		server.New(viper.GetViper()).Start()
+		server.NewServer(viper.GetViper()).Start()
 	},
 }
 

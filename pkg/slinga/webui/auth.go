@@ -15,6 +15,7 @@ func getLoggedInUserID(r *http.Request) string {
 	return userID
 }
 
+// NewAptomiUserLoader returns a user loader for aptomi
 func NewAptomiUserLoader() users.UserLoader {
 	return nil
 }

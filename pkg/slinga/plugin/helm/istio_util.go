@@ -51,7 +51,7 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, 
 	return nil, nil
 }
 
-func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) ([]*istioRouteRule, error) {
+func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) ([]*istioRouteRule, error) {
 	instance := resolution.ComponentInstanceMap[componentKey]
 	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {

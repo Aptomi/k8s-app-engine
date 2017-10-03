@@ -1,8 +1,15 @@
 package object
 
 const (
-	FirstGen  Generation = 1
-	LastGen   Generation = 0
-	SystemNS             = "system"
-	DefaultNS            = "default"
+	// FirstGen is a number of the first generation for an object
+	FirstGen Generation = 1
+
+	// LastGen is a number of the initial generation for an object
+	LastGen Generation = 0
+
+	// SystemNS is a name of system namespace
+	SystemNS = "system"
+
+	// DefaultNS is a name of default namespace
+	DefaultNS = "default"
 )

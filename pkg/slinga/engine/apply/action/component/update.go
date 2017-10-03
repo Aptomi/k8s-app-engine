@@ -9,16 +9,19 @@ import (
 	"time"
 )
 
+// UpdateActionObject is an informational data structure with Kind and Constructor for the action
 var UpdateActionObject = &object.Info{
 	Kind:        "action-component-update",
 	Constructor: func() object.Base { return &DeleteAction{} },
 }
 
+// UpdateAction is a action which gets called when an existing component needs to be updated (i.e. parameters of a running code instance need to be changed in the cloud)
 type UpdateAction struct {
 	*action.Metadata
 	ComponentKey string
 }
 
+// NewUpdateAction creates new UpdateAction
 func NewUpdateAction(revision object.Generation, componentKey string) *UpdateAction {
 	return &UpdateAction{
 		Metadata:     action.NewMetadata(revision, UpdateActionObject.Kind, componentKey),
@@ -26,6 +29,12 @@ func NewUpdateAction(revision object.Generation, componentKey string) *UpdateAct
 	}
 }
 
+// GetName returns action name
+func (a *UpdateAction) GetName() string {
+	return "Update component " + a.ComponentKey
+}
+
+// Apply applies the action
 func (a *UpdateAction) Apply(context *action.Context) error {
 	// update in the cloud
 	err := a.processDeployment(context)
@@ -36,10 +45,6 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 
 	// update actual state
 	return a.updateActualState(context)
-}
-
-func (a *UpdateAction) GetName() string {
-	return "Update component " + a.ComponentKey
 }
 
 func (a *UpdateAction) updateActualState(context *action.Context) error {

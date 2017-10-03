@@ -15,19 +15,22 @@ import (
 
 var helmCodeTypes = []string{"helm", "aptomi/code/kubernetes-helm"}
 
-func (p *HelmIstioPlugin) GetSupportedCodeTypes() []string {
+// GetSupportedCodeTypes returns all code types for which this plugin is registered to
+func (p *Plugin) GetSupportedCodeTypes() []string {
 	return helmCodeTypes
 }
 
-func (p *HelmIstioPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+// Create creates component instance in the cloud by deploying a helm chart
+func (p *Plugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
-func (p *HelmIstioPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+// Update updates component instance in the cloud by updating parameters of a helm chart
+func (p *Plugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
-func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
+func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return err
@@ -84,8 +87,8 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 	return err
 }
 
-// Destroy for HelmIstioPlugin runs "helm delete" for the corresponding helm chart
-func (p *HelmIstioPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+// Destroy for Plugin runs "helm delete" for the corresponding helm chart
+func (p *Plugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return err
@@ -104,7 +107,7 @@ func (p *HelmIstioPlugin) Destroy(cluster *lang.Cluster, deployName string, para
 }
 
 // Endpoints returns map from port type to url for all services of the current chart
-func (p *HelmIstioPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
+func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return nil, err

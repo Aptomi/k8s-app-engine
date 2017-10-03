@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
+// DeployPlugin is a plugin which allows to create, update and destroy component instances in the cloud
 type DeployPlugin interface {
 	Plugin
 

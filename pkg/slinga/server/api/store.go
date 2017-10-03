@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// ServeAdminStore registers admin-level data store viewing handlers in API
 func ServeAdminStore(router *httprouter.Router, store store.ObjectStore) {
 	router.GET("/api/v1/admin/store", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		err := store.Dump(w)

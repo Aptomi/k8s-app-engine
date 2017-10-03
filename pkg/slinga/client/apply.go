@@ -19,10 +19,11 @@ import (
 	"time"
 )
 
+// Apply finds all policy files and uploads/applies them by making a call to aptomi server
 func Apply(config *viper.Viper) error {
 	policyPaths := config.GetStringSlice("apply.policyPaths")
 
-	catalog := object.NewObjectCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
+	catalog := object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
 	cod := yaml.NewCodec(catalog)
 
 	allObjects, err := readFiles(policyPaths, cod)
@@ -88,7 +89,7 @@ func Apply(config *viper.Viper) error {
 	return nil
 }
 
-func readFiles(policyPaths []string, codec codec.MarshalUnmarshaler) ([]object.Base, error) {
+func readFiles(policyPaths []string, codec codec.MarshallerUnmarshaller) ([]object.Base, error) {
 	files, err := findPolicyFiles(policyPaths)
 	if err != nil {
 		return nil, fmt.Errorf("Error while searching for policy files: %s", err)

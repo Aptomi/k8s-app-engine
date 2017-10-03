@@ -13,6 +13,7 @@ type Data struct {
 	SecretLoader secrets.SecretLoader
 }
 
+// NewData creates a new instance of external Data
 func NewData(userLoader users.UserLoader, secretLoader secrets.SecretLoader) *Data {
 	return &Data{
 		UserLoader:   userLoader,

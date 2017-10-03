@@ -17,8 +17,10 @@ import (
 	- calculates PolicyResolution as an output
 */
 
+// ThreadPoolSize is the number of threads for policy evaluation and processing
 const ThreadPoolSize = 8
 
+// PolicyResolver is a core of aptomi which does policy processing and resolution of all dependencies (consumer -> service)
 type PolicyResolver struct {
 	/*
 		Input objects

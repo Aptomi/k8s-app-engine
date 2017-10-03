@@ -9,6 +9,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 )
 
+// Context is a data struct that will be passed into all state update actions
+// As actions need access to desired and actual data (policy, state), list of plugins, event log, etc
 type Context struct {
 	DesiredPolicy      *lang.Policy
 	DesiredState       *resolve.PolicyResolution
@@ -20,6 +22,7 @@ type Context struct {
 	EventLog           *event.Log
 }
 
+// NewContext creates a new instance of Context
 func NewContext(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualPolicy *lang.Policy,
 	actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data,
 	plugins plugin.Registry, eventLog *event.Log) *Context {

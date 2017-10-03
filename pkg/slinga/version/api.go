@@ -14,6 +14,7 @@ func handleVersion(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) 
 	}
 }
 
+// Serve registers version handler in the API
 func Serve(r *httprouter.Router) {
 	r.GET("/version", handleVersion)
 }

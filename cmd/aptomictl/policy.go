@@ -48,5 +48,5 @@ func init() {
 	}
 
 	policyCmd.AddCommand(policyApplyCmd, policyShowCmd)
-	AptomiCtlCmd.AddCommand(policyCmd)
+	aptomiCtlCmd.AddCommand(policyCmd)
 }

@@ -9,7 +9,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 )
 
-func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
+// Process is a post-processing action which gets called only once, updating all istio rules
+func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	// todo(slukjanov): do something with progress
 	var prog progress.Indicator
 

@@ -6,17 +6,19 @@ import (
 	"strings"
 )
 
-// Policy describes the entire policy with all namespaces
+// Policy describes the entire aptomi policy, consisting of multiple namespaces
 type Policy struct {
 	Namespace map[string]*PolicyNamespace
 }
 
+// NewPolicy creates a new Policy
 func NewPolicy() *Policy {
 	return &Policy{
 		Namespace: make(map[string]*PolicyNamespace),
 	}
 }
 
+// AddObject adds an object into the policy, putting it into the corresponding namespace
 func (policy *Policy) AddObject(object object.Base) {
 	policyNamespace, ok := policy.Namespace[object.GetNamespace()]
 	if !ok {
@@ -26,6 +28,7 @@ func (policy *Policy) AddObject(object object.Base) {
 	policyNamespace.addObject(object)
 }
 
+// GetObjectsByKind returns all objects in a policy with a given kind, across all namespaces
 func (policy *Policy) GetObjectsByKind(kind string) []object.Base {
 	result := []object.Base{}
 	for _, policyNS := range policy.Namespace {
@@ -34,6 +37,7 @@ func (policy *Policy) GetObjectsByKind(kind string) []object.Base {
 	return result
 }
 
+// GetObject looks up and returns an objects from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made
 func (policy *Policy) GetObject(kind string, locator string, currentNs string) (object.Base, error) {
 	// parse locator: [namespace/]name. we might add [domain/] in the future
 	parts := strings.Split(locator, "/")

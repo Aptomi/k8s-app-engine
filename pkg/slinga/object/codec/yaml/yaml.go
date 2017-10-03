@@ -7,7 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func NewCodec(catalog *object.Catalog) codec.MarshalUnmarshaler {
+// NewCodec creates a new YAML codec to marshal and unmarshal objects
+func NewCodec(catalog *object.Catalog) codec.MarshallerUnmarshaller {
 	return &yamlCodec{catalog}
 }
 
@@ -15,7 +16,7 @@ type yamlCodec struct {
 	catalog *object.Catalog
 }
 
-// YamlCodecName is the name of Yaml MarshalUnmarshaler implementation
+// YamlCodecName is the name of Yaml MarshallerUnmarshaller implementation
 const YamlCodecName = "yaml"
 
 func (c *yamlCodec) GetName() string {

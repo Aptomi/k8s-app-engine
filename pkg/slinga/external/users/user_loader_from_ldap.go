@@ -13,6 +13,7 @@ import (
 	"sync"
 )
 
+// LDAPConfig contains configuration for LDAP sync service (host, port, DN, filter query and mapping of LDAP properties to Aptomi attributes)
 type LDAPConfig struct {
 	Host              string
 	Port              int

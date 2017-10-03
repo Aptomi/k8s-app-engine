@@ -12,6 +12,7 @@ func (generation Generation) String() string {
 	return strconv.FormatUint(uint64(generation), 10)
 }
 
+// Next returns the next generation of the base object (current + 1)
 func (generation Generation) Next() Generation {
 	return generation + 1
 }

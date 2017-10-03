@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	AptomiCtlCmd = &cobra.Command{
+	aptomiCtlCmd = &cobra.Command{
 		Use:   "aptomictl", // todo(slukjanov)
 		Short: "",          // todo(slukjanov)
 		Long:  "",          // todo(slukjanov)
@@ -38,10 +38,10 @@ var (
 func init() {
 	viper.SetEnvPrefix(envPrefix)
 
-	AptomiCtlCmd.PersistentFlags().StringP("config", "c", "", "Config file or dir path")
+	aptomiCtlCmd.PersistentFlags().StringP("config", "c", "", "Config file or dir path")
 
-	AptomiCtlCmd.PersistentFlags().String("host", "127.0.0.1", "Server API host")
-	err := viper.BindPFlag("server.host", AptomiCtlCmd.PersistentFlags().Lookup("host"))
+	aptomiCtlCmd.PersistentFlags().String("host", "127.0.0.1", "Server API host")
+	err := viper.BindPFlag("server.host", aptomiCtlCmd.PersistentFlags().Lookup("host"))
 	if err != nil {
 		panic(err) // todo is it ok to panic here?
 	}
@@ -50,8 +50,8 @@ func init() {
 		panic(err) // todo is it ok to panic here?
 	}
 
-	AptomiCtlCmd.PersistentFlags().Uint16P("port", "p", 27866, "Server API port")
-	err = viper.BindPFlag("server.port", AptomiCtlCmd.PersistentFlags().Lookup("port"))
+	aptomiCtlCmd.PersistentFlags().Uint16P("port", "p", 27866, "Server API port")
+	err = viper.BindPFlag("server.port", aptomiCtlCmd.PersistentFlags().Lookup("port"))
 	if err != nil {
 		panic(err) // todo is it ok to panic here?
 	}

@@ -4,13 +4,13 @@ import (
 	"sync"
 )
 
-// HelmIstioPlugin is an executor that uses Helm for deployment of apps on kubernetes
-type HelmIstioPlugin struct {
+// Plugin uses Helm for deployment of apps on kubernetes
+type Plugin struct {
 	cache *sync.Map
 }
 
-func NewHelmIstioPlugin() *HelmIstioPlugin {
-	return &HelmIstioPlugin{
+func NewPlugin() *Plugin {
+	return &Plugin{
 		cache: new(sync.Map),
 	}
 }

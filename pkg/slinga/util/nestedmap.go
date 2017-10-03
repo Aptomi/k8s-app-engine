@@ -14,7 +14,7 @@ import (
 // NestedParameterMap allows to work with nested maps [string][string]...[string] -> value
 type NestedParameterMap map[string]interface{}
 
-// Custom unmarshal function to deal with interface{} -> string conversions
+// UnmarshalYAML is a custom unmarshal function for NestedParameterMap to deal with interface{} -> string conversions
 func (src *NestedParameterMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	result := make(map[interface{}]interface{})
 	if err := unmarshal(&result); err != nil {

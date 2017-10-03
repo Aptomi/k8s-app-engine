@@ -6,6 +6,7 @@ import (
 	"io"
 )
 
+// WriteJSON writes an object marshalled into JSON into a given writer
 func WriteJSON(w io.Writer, obj interface{}) error {
 	res, err := json.Marshal(obj)
 	if err != nil {

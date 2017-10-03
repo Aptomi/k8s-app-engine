@@ -11,7 +11,7 @@ func NewLabelOperations(setMap map[string]string, removeMap map[string]string) L
 	return result
 }
 
-// NewLabelOperations creates a new LabelOperations object, to set a single "k"="v" label
+// NewLabelOperationsSetSingleLabel creates a new LabelOperations object to set a single "k"="v" label
 func NewLabelOperationsSetSingleLabel(k string, v string) LabelOperations {
 	result := LabelOperations{}
 	result["set"] = map[string]string{k: v}

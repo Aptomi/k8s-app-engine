@@ -29,7 +29,7 @@ func NewPolicyResolution() *PolicyResolution {
 	}
 }
 
-// Gets a component instance entry or creates an new entry if it doesn't exist
+// GetComponentInstanceEntry retrieves a component instance entry by key, or creates an new entry if it doesn't exist
 func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInstanceKey) *ComponentInstance {
 	key := cik.GetKey()
 	if _, ok := resolution.ComponentInstanceMap[key]; !ok {
@@ -38,7 +38,7 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 	return resolution.ComponentInstanceMap[key]
 }
 
-// Record dependency for component instance
+// RecordResolved takes a component instance and adds a new dependency record into it
 func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *lang.Dependency, ruleResult *lang.RuleActionResult) {
 	instance := resolution.GetComponentInstanceEntry(cik)
 	instance.addDependency(dependency.GetKey())
@@ -55,22 +55,22 @@ func (resolution *PolicyResolution) recordProcessingOrder(cik *ComponentInstance
 	}
 }
 
-// Stores calculated discovery params for component instance
+// RecordCodeParams stores calculated code params for component instance
 func (resolution *PolicyResolution) RecordCodeParams(cik *ComponentInstanceKey, codeParams util.NestedParameterMap) error {
 	return resolution.GetComponentInstanceEntry(cik).addCodeParams(codeParams)
 }
 
-// Stores calculated discovery params for component instance
+// RecordDiscoveryParams stores calculated discovery params for component instance
 func (resolution *PolicyResolution) RecordDiscoveryParams(cik *ComponentInstanceKey, discoveryParams util.NestedParameterMap) error {
 	return resolution.GetComponentInstanceEntry(cik).addDiscoveryParams(discoveryParams)
 }
 
-// Stores calculated labels for component instance
+// RecordLabels stores calculated labels for component instance
 func (resolution *PolicyResolution) RecordLabels(cik *ComponentInstanceKey, labels *lang.LabelSet) {
 	resolution.GetComponentInstanceEntry(cik).addLabels(labels)
 }
 
-// Stores an outgoing edge for component instance as we are traversing the graph
+// StoreEdge stores incoming/outgoing graph edges for component instance for observability and reporting
 func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *ComponentInstanceKey) {
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that
 	if src != nil && dst != nil {
@@ -79,7 +79,7 @@ func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *Co
 	}
 }
 
-// Appends data to the current PolicyResolution
+// AppendData appends data to the current PolicyResolution record by aggregating data over component instances
 func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
 	for _, instance := range ops.ComponentInstanceMap {
 		err := resolution.GetComponentInstanceEntry(instance.Metadata.Key).appendData(instance)

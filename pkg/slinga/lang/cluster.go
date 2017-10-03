@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
+// ClusterObject is an informational data structure with Kind and Constructor for Cluster
 var ClusterObject = &object.Info{
 	Kind:        "cluster",
 	Versioned:   true,

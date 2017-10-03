@@ -4,17 +4,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-/*
-	This file declares all the necessary structures for Dependencies (User "wants" Service)
-*/
-
+// DependencyObject is an informational data structure with Kind and Constructor for Dependency
 var DependencyObject = &object.Info{
 	Kind:        "dependency",
 	Versioned:   true,
 	Constructor: func() object.Base { return &Dependency{} },
 }
 
-// Dependency in a form <UserID> requested <Service> (and provided additional <Labels>)
+// Dependency is a service use intent, declared a form <User> requested <Contract> and specified a set of <Labels>
 type Dependency struct {
 	Metadata
 
@@ -25,7 +22,7 @@ type Dependency struct {
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)
 type GlobalDependencies struct {
-	// dependencies <service> -> list of dependencies
+	// DependenciesByContract contains dependency map <contractName> -> list of dependencies
 	DependenciesByContract map[string][]*Dependency
 }
 

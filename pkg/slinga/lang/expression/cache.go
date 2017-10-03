@@ -2,14 +2,17 @@ package expression
 
 import "sync"
 
+// Cache is a cache of compiled expressions
 type Cache struct {
 	eCache sync.Map
 }
 
+// NewCache creates a new Cache
 func NewCache() *Cache {
 	return &Cache{eCache: sync.Map{}}
 }
 
+// EvaluateAsBool evaluates boolean expression given a set of parameters, using the compiled expression from cache
 func (cache *Cache) EvaluateAsBool(expressionStr string, params *Parameters) (bool, error) {
 	// Look up expression from the cache
 	var expression *Expression

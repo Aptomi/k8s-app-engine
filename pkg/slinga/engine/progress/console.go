@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Console is a console-based progress indicator
 type Console struct {
 	*progressCount
 	progress    *uiprogress.Progress
@@ -15,6 +16,7 @@ type Console struct {
 	out         io.Writer
 }
 
+// NewConsole creates a new console-based progress indicator
 func NewConsole() *Console {
 	progress := uiprogress.New()
 	progress.RefreshInterval = time.Second
@@ -41,26 +43,31 @@ func (progressConsole *Console) createProgressBar() {
 	})
 }
 
+// SetOut set output writer for writing progress information to
 func (progressConsole *Console) SetOut(out io.Writer) {
 	progressConsole.out = out
 }
 
+// SetTotal sets the total number of steps in a progress indicator
 func (progressConsole *Console) SetTotal(total int) {
 	progressConsole.setTotalInternal(total + 1)
 	progressConsole.createProgressBar()
 	progressConsole.Advance("Init")
 }
 
+// Advance advances progress indicator by one step
 func (progressConsole *Console) Advance(stage string) {
 	progressConsole.advanceInternal(stage)
 	progressConsole.progressBar.Incr()
 }
 
+// Done should be called once done working with progress indicator
 func (progressConsole *Console) Done() {
 	progressConsole.doneInternal()
 	progressConsole.progress.Stop()
 }
 
+// IsDone returns if progress indicator was already marked as Done()
 func (progressConsole *Console) IsDone() bool {
 	return progressConsole.isDoneInternal()
 }

@@ -7,6 +7,7 @@ import (
 	"sync"
 )
 
+// RuleObject is an informational data structure with Kind and Constructor for Rule
 var RuleObject = &object.Info{
 	Kind:        "rule",
 	Versioned:   true,
@@ -54,6 +55,7 @@ func (globalRules *GlobalRules) addRule(rule *Rule) {
 	globalRules.Rules = append(globalRules.Rules, rule)
 }
 
+// GetRulesSortedByWeight returns all rules sorted by weight
 func (globalRules *GlobalRules) GetRulesSortedByWeight() []*Rule {
 	globalRules.once.Do(func() {
 		globalRules.rulesSorted = append(globalRules.rulesSorted, globalRules.Rules...)

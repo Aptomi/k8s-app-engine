@@ -17,6 +17,8 @@ func init() {
 	}
 }
 
+// ShortSuffix generates a short alphanumerical suffix
+// TODO: this seems to be not used anywhere
 func ShortSuffix() string {
 	bytes := make([]byte, randAddonLength)
 	for letterIdx, random, remain := 0, int64(0), 0; letterIdx < randAddonLength; {

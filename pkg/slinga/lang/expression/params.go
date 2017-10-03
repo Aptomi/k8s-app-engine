@@ -4,8 +4,10 @@ import (
 	"strconv"
 )
 
+// Parameters is a set of named parameters for the expression
 type Parameters map[string]interface{}
 
+// NewParams creates a new instance of Parameters
 func NewParams(stringParams map[string]string, structParams map[string]interface{}) *Parameters {
 	// Populate parameter map
 	result := Parameters{}

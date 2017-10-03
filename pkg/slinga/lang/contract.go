@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
+// ContractObject is an informational data structure with Kind and Constructor for Contract
 var ContractObject = &object.Info{
 	Kind:        "contract",
 	Versioned:   true,
@@ -14,14 +15,14 @@ var ContractObject = &object.Info{
 type Contract struct {
 	Metadata
 
-	// Label changes
+	// ChangeLabels contains change label actions in the policy
 	ChangeLabels LabelOperations `yaml:"change-labels"`
 
-	// List of contexts
+	// Contexts contains an ordered list of contexts within a contract
 	Contexts []*Context
 }
 
-// Returns the context by name
+// FindContextByName finds a context by name
 func (contract *Contract) FindContextByName(contextName string) *Context {
 	for _, context := range contract.Contexts {
 		if context.Name == contextName {

@@ -5,6 +5,7 @@ import (
 	"io"
 )
 
+// ObjectStore is a interface which allows to implement interchangeable data stores for objects
 type ObjectStore interface {
 	Open(connection string) error
 	Close() error

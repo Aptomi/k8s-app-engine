@@ -8,11 +8,13 @@ import (
 	t "text/template"
 )
 
+// Template struct contains text template string as well as its compiled version
 type Template struct {
 	templateStr      string
 	templateCompiled *t.Template
 }
 
+// NewTemplate compiles a text template and returns the result in Template struct
 func NewTemplate(templateStr string) (*Template, error) {
 	templateCompiled, err := t.New("").Parse(templateStr)
 	if err != nil {
@@ -24,7 +26,7 @@ func NewTemplate(templateStr string) (*Template, error) {
 	}, nil
 }
 
-// Evaluate an expression, given a set of labels
+// Evaluate evaluates a compiled text template given a set parameters
 func (template *Template) Evaluate(params *Parameters) (string, error) {
 	// Evaluate
 	var doc bytes.Buffer

@@ -161,7 +161,7 @@ func (node *resolutionNode) cannotResolveInstance(err error) error {
 			}
 		} else {
 			// Log it
-			node.eventLog.LogErrorAsWarning(err)
+			node.eventLog.LogWarning(err)
 		}
 	}
 
