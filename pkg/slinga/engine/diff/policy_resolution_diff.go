@@ -10,13 +10,13 @@ import (
 
 // PolicyResolutionDiff represents a difference between two policy resolution data structs
 type PolicyResolutionDiff struct {
-	// Previous policy resolution data
+	// Prev is actual policy resolution data
 	Prev *resolve.PolicyResolution
 
-	// Previous policy resolution data
+	// Next is desired policy resolution data
 	Next *resolve.PolicyResolution
 
-	// Actions that need to be taken, in the right order
+	// Actions is a generated, ordered list of actions that need to be executed in order to get from an actual state to the desired state
 	Actions []action.Base
 
 	Revision object.Generation
