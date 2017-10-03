@@ -1,14 +1,14 @@
 package resolve
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 const (
@@ -37,7 +37,7 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expect
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {
 		// print log into stdout and exit
-		hook := &eventlog.HookStdout{}
+		hook := &event.HookStdout{}
 		eventLog.Save(hook)
 		t.FailNow()
 		return nil
@@ -45,10 +45,10 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expect
 
 	if expectedResult == ResError {
 		// check for error message
-		verifier := eventlog.NewUnitTestLogVerifier(expectedErrorMessage)
+		verifier := event.NewUnitTestLogVerifier(expectedErrorMessage)
 		resolver.eventLog.Save(verifier)
 		if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: "+expectedErrorMessage) {
-			hook := &eventlog.HookStdout{}
+			hook := &event.HookStdout{}
 			resolver.eventLog.Save(hook)
 			t.FailNow()
 		}

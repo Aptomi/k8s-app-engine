@@ -3,7 +3,7 @@ package helm_istio
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -16,7 +16,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
-func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *eventlog.EventLog) ([]string, error) {
+func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
 	_, client, err := cache.newKubeClient(cluster, eventLog)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, 
 	return nil, nil
 }
 
-func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) ([]*istioRouteRule, error) {
+func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) ([]*istioRouteRule, error) {
 	instance := resolution.ComponentInstanceMap[componentKey]
 	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
@@ -153,7 +153,7 @@ func (rule *istioRouteRule) destroy() error {
 	return nil
 }
 
-func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster, eventLog *eventlog.EventLog) (string, error) {
+func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster, eventLog *event.Log) (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	. "github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
@@ -68,10 +68,10 @@ var policyCmdApply = &cobra.Command{
 		resolver := resolve.NewPolicyResolver(policy, externalData)
 		resolution, eventLog, err := resolver.ResolveAllDependencies()
 		if err != nil {
-			eventLog.Save(&eventlog.HookStdout{})
+			eventLog.Save(&event.HookStdout{})
 			log.Panicf("Cannot resolve policy: %v %v %v", err, resolution, prevState)
 		}
-		eventLog.Save(&eventlog.HookStdout{})
+		eventLog.Save(&event.HookStdout{})
 
 		fmt.Println("Success")
 		fmt.Println("Components:", len(resolution.ComponentInstanceMap))

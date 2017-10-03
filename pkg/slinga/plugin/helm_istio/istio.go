@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 )
 
-func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
+func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	// todo(slukjanov): do something with progress
 	var prog progress.ProgressIndicator
 
@@ -18,7 +18,7 @@ func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.Polic
 	}
 
 	eventLog.WithFields(
-		eventlog.Fields{},
+		event.Fields{},
 	).Info("Figuring out which Istio rules have to be added/deleted")
 
 	existingRules := make([]*istioRouteRule, 0)
@@ -88,7 +88,7 @@ func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.Polic
 	changed := false
 	for _, createRulesForComponent := range createRules {
 		for _, rule := range createRulesForComponent {
-			eventLog.WithFields(eventlog.Fields{}).Infof("Creating Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
+			eventLog.WithFields(event.Fields{}).Infof("Creating Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
 			err := rule.create()
 			if err != nil {
 				return err
@@ -100,7 +100,7 @@ func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.Polic
 
 	// process deletions all at once
 	for _, rule := range deleteRules {
-		eventLog.WithFields(eventlog.Fields{}).Infof("Deleting Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
+		eventLog.WithFields(event.Fields{}).Infof("Deleting Istio rule: %s (%s)", rule.Service, rule.Cluster.Name)
 		err := rule.destroy()
 		if err != nil {
 			return err
@@ -110,9 +110,9 @@ func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.Polic
 	prog.Advance("Istio")
 
 	if changed {
-		eventLog.WithFields(eventlog.Fields{}).Infof("Successfully processed Istio rules")
+		eventLog.WithFields(event.Fields{}).Infof("Successfully processed Istio rules")
 	} else {
-		eventLog.WithFields(eventlog.Fields{}).Infof("No changes in Istio rules")
+		eventLog.WithFields(event.Fields{}).Infof("No changes in Istio rules")
 	}
 
 	return nil

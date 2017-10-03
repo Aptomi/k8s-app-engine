@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
@@ -34,7 +34,7 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, externalData *external.Dat
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
-		hook := &eventlog.HookStdout{}
+		hook := &event.HookStdout{}
 		eventLog.Save(hook)
 		t.FailNow()
 	}
@@ -48,17 +48,17 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCn
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
 		// print log into stdout and exit
-		hook := &eventlog.HookStdout{}
+		hook := &event.HookStdout{}
 		eventLog.Save(hook)
 		t.FailNow()
 	}
 
 	if expectedResult == ResError {
 		// check for error messages
-		verifier := eventlog.NewUnitTestLogVerifier(errorMsg)
+		verifier := event.NewUnitTestLogVerifier(errorMsg)
 		eventLog.Save(verifier)
 		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of error messages containing words: "+errorMsg) {
-			hook := &eventlog.HookStdout{}
+			hook := &event.HookStdout{}
 			eventLog.Save(hook)
 			t.FailNow()
 		}
@@ -124,8 +124,8 @@ func (p *testPlugin) GetSupportedCodeTypes() []string {
 	return []string{}
 }
 
-func (p *testPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
-	eventLog.WithFields(eventlog.Fields{}).Infof("[+] %s", deployName)
+func (p *testPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	eventLog.WithFields(event.Fields{}).Infof("[+] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
 			return fmt.Errorf("Apply failed for component: %s", deployName)
@@ -133,8 +133,8 @@ func (p *testPlugin) Create(cluster *lang.Cluster, deployName string, params uti
 	}
 	return nil
 }
-func (p *testPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
-	eventLog.WithFields(eventlog.Fields{}).Infof("[*] %s", deployName)
+func (p *testPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	eventLog.WithFields(event.Fields{}).Infof("[*] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
 			return fmt.Errorf("Update failed for component: %s", deployName)
@@ -142,8 +142,8 @@ func (p *testPlugin) Update(cluster *lang.Cluster, deployName string, params uti
 	}
 	return nil
 }
-func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
-	eventLog.WithFields(eventlog.Fields{}).Infof("[-] %s", deployName)
+func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	eventLog.WithFields(event.Fields{}).Infof("[-] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
 			return fmt.Errorf("Delete failed for component: %s", deployName)
@@ -151,11 +151,11 @@ func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params ut
 	}
 	return nil
 }
-func (p *testPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) (map[string]string, error) {
+func (p *testPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
 	return nil, nil
 }
 
-func (p *testPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *eventlog.EventLog) error {
+func (p *testPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	return nil
 }
 

@@ -3,7 +3,7 @@ package resolve
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"strings"
@@ -184,10 +184,10 @@ func (node *resolutionNode) logStartResolvingDependency() {
 	}
 	if node.depth == 0 {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(eventlog.Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", userName, node.dependency.Contract)
+		node.eventLog.WithFields(event.Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", userName, node.dependency.Contract)
 	} else {
 		// recursively processing sub-dependencies
-		node.eventLog.WithFields(eventlog.Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Contract, node.contractName, node.depth)
+		node.eventLog.WithFields(event.Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Contract, node.contractName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
@@ -198,19 +198,19 @@ func (node *resolutionNode) logLabels(labelSet *lang.LabelSet, scope string) {
 	if node.user != nil {
 		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserID(node.user.ID))
 	}
-	node.eventLog.WithFields(eventlog.Fields{
+	node.eventLog.WithFields(event.Fields{
 		"labels": labelSet.Labels,
 	}).Infof("Labels (%s): %s and %d secrets", scope, labelSet.Labels, secretCnt)
 }
 
 func (node *resolutionNode) logContractFound(contract *lang.Contract) {
-	node.eventLog.WithFields(eventlog.Fields{
+	node.eventLog.WithFields(event.Fields{
 		"contract": contract,
 	}).Debugf("Contract found in policy: '%s'", contract.Name)
 }
 
 func (node *resolutionNode) logServiceFound(service *lang.Service) {
-	node.eventLog.WithFields(eventlog.Fields{
+	node.eventLog.WithFields(event.Fields{
 		"service": service,
 	}).Debugf("Service found in policy: '%s'", service.Name)
 }
@@ -220,31 +220,31 @@ func (node *resolutionNode) logStartMatchingContexts() {
 	for _, context := range node.contract.Contexts {
 		contextNames = append(contextNames, context.Name)
 	}
-	node.eventLog.WithFields(eventlog.Fields{}).Infof("Picking context within contract '%s'. Trying contexts: %s", node.contract.Name, contextNames)
+	node.eventLog.WithFields(event.Fields{}).Infof("Picking context within contract '%s'. Trying contexts: %s", node.contract.Name, contextNames)
 }
 
 func (node *resolutionNode) logContextMatched(contextMatched *lang.Context) {
-	node.eventLog.WithFields(eventlog.Fields{}).Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
+	node.eventLog.WithFields(event.Fields{}).Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
 }
 
 func (node *resolutionNode) logContextNotMatched() {
-	node.eventLog.WithFields(eventlog.Fields{}).Warningf("Unable to find matching context within contract: '%s'", node.contract.Name)
+	node.eventLog.WithFields(event.Fields{}).Warningf("Unable to find matching context within contract: '%s'", node.contract.Name)
 }
 
 func (node *resolutionNode) logTestedContextCriteria(context *lang.Context, matched bool) {
-	node.eventLog.WithFields(eventlog.Fields{
+	node.eventLog.WithFields(event.Fields{
 		"context": context,
 	}).Debugf("Trying context '%s' within contract '%s'. Matched = %t", context.Name, node.contract.Name, matched)
 }
 
 func (node *resolutionNode) logRulesProcessingResult(policyNamespace *lang.PolicyNamespace, result *lang.RuleActionResult) {
-	node.eventLog.WithFields(eventlog.Fields{
+	node.eventLog.WithFields(event.Fields{
 		"result": result,
 	}).Debugf("Rules processed within namespace '%s' for context '%s' within contract '%s'. Dependency allowed", policyNamespace.Name, node.context.Name, node.contract.Name)
 }
 
 func (node *resolutionNode) logTestedRuleMatch(rule *lang.Rule, match bool) {
-	node.eventLog.WithFields(eventlog.Fields{
+	node.eventLog.WithFields(event.Fields{
 		"rule":  rule,
 		"match": match,
 	}).Debugf("Testing if rule '%s' applies in context '%s' within contract '%s'. Result: %t", rule.Name, node.context.Name, node.contract.Name, match)
@@ -252,7 +252,7 @@ func (node *resolutionNode) logTestedRuleMatch(rule *lang.Rule, match bool) {
 
 func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys []string) {
 	if len(resolvedKeys) > 0 {
-		node.eventLog.WithFields(eventlog.Fields{
+		node.eventLog.WithFields(event.Fields{
 			"keys":         node.context.Allocation.Keys,
 			"keysResolved": resolvedKeys,
 		}).Infof("Allocation keys successfully resolved for context '%s' within contract '%s': %s", node.context.Name, node.contract.Name, resolvedKeys)
@@ -261,16 +261,16 @@ func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys [
 
 func (node *resolutionNode) logResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
-		node.eventLog.WithFields(eventlog.Fields{}).Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
+		node.eventLog.WithFields(event.Fields{}).Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
 	} else if node.component.Contract != "" {
-		node.eventLog.WithFields(eventlog.Fields{}).Infof("Processing dependency on another contract: %s", node.component.Contract)
+		node.eventLog.WithFields(event.Fields{}).Infof("Processing dependency on another contract: %s", node.component.Contract)
 	} else {
-		node.eventLog.WithFields(eventlog.Fields{}).Warningf("Skipping unknown component (not code and not contract): %s", node.component.Name)
+		node.eventLog.WithFields(event.Fields{}).Warningf("Skipping unknown component (not code and not contract): %s", node.component.Name)
 	}
 }
 
 func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstanceKey) {
-	fields := eventlog.Fields{
+	fields := event.Fields{
 		"user":       node.user.Name,
 		"dependency": node.dependency,
 		"key":        cik,
@@ -289,11 +289,11 @@ func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstan
 
 func (node *resolutionNode) logCannotResolveInstance() {
 	if node.service == nil {
-		node.eventLog.WithFields(eventlog.Fields{}).Warningf("Cannot resolve instance: contract '%s'", node.contractName)
+		node.eventLog.WithFields(event.Fields{}).Warningf("Cannot resolve instance: contract '%s'", node.contractName)
 	} else if node.component == nil {
-		node.eventLog.WithFields(eventlog.Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s'", node.contractName, node.service.Name)
+		node.eventLog.WithFields(event.Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s'", node.contractName, node.service.Name)
 	} else {
-		node.eventLog.WithFields(eventlog.Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s', component '%s'", node.contractName, node.service.Name, node.component.Name)
+		node.eventLog.WithFields(event.Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s', component '%s'", node.contractName, node.service.Name, node.component.Name)
 	}
 }
 
@@ -308,7 +308,7 @@ func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstan
 		params := instance.CalculatedCodeParams
 		diff := strings.TrimSpace(paramsTemplate.Diff(params))
 		if len(diff) > 0 {
-			resolver.eventLog.WithFields(eventlog.Fields{
+			resolver.eventLog.WithFields(event.Fields{
 				"params": diff,
 			}).Debugf("Calculated code params for component '%s'", instance.Metadata.Key.GetKey())
 		}
@@ -324,7 +324,7 @@ func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentI
 	params := instance.CalculatedDiscovery
 	diff := strings.TrimSpace(paramsTemplate.Diff(params))
 	if len(diff) > 0 {
-		resolver.eventLog.WithFields(eventlog.Fields{
+		resolver.eventLog.WithFields(event.Fields{
 			"params": diff,
 		}).Debugf("Calculated discovery params for component '%s'", instance.Metadata.Key.GetKey())
 	}

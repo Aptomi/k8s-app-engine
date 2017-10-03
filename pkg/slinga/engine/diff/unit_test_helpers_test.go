@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/cluster"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
@@ -31,7 +31,7 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, externalData *external.Dat
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.Nil(t, err, "Policy should be resolved without errors") {
-		hook := &eventlog.HookStdout{}
+		hook := &event.HookStdout{}
 		eventLog.Save(hook)
 		t.FailNow()
 	}

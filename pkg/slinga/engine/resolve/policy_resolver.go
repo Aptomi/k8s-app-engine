@@ -2,7 +2,7 @@ package resolve
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
@@ -50,7 +50,7 @@ type PolicyResolver struct {
 	resolution *PolicyResolution
 
 	// Buffered event log - gets populated during policy resolution
-	eventLog *eventlog.EventLog
+	eventLog *event.Log
 }
 
 // NewPolicyResolver creates a new policy resolver
@@ -61,12 +61,12 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 		expressionCache: expression.NewExpressionCache(),
 		templateCache:   template.NewTemplateCache(),
 		resolution:      NewPolicyResolution(),
-		eventLog:        eventlog.NewEventLog(),
+		eventLog:        event.NewLog(),
 	}
 }
 
 // ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
-func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *eventlog.EventLog, error) {
+func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *event.Log, error) {
 	var semaphore = make(chan int, THREAD_POOL_SIZE)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))

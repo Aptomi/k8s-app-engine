@@ -3,7 +3,7 @@ package helm_istio
 import (
 	"errors"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"k8s.io/helm/pkg/helm/portforwarder"
 	"k8s.io/helm/pkg/kube"
@@ -12,7 +12,7 @@ import (
 	"k8s.io/kubernetes/pkg/client/restclient"
 )
 
-func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog *eventlog.EventLog) error {
+func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog *event.Log) error {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 
@@ -39,12 +39,12 @@ func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog
 	cache.tillerTunnel = tunnel
 	cache.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 
-	eventLog.WithFields(eventlog.Fields{}).Debugf("Created k8s tunnel using local port: %s", tunnel.Local)
+	eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port: %s", tunnel.Local)
 
 	return nil
 }
 
-func (cache *clusterCache) newKubeClient(cluster *lang.Cluster, eventLog *eventlog.EventLog) (*restclient.Config, *internalclientset.Clientset, error) {
+func (cache *clusterCache) newKubeClient(cluster *lang.Cluster, eventLog *event.Log) (*restclient.Config, *internalclientset.Clientset, error) {
 	// todo(slukjanov): cache kube client config?
 	kubeContext := cluster.Config.KubeContext
 	config, err := kube.GetConfig(kubeContext).ClientConfig()
@@ -59,7 +59,7 @@ func (cache *clusterCache) newKubeClient(cluster *lang.Cluster, eventLog *eventl
 	return config, client, nil
 }
 
-func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLog *eventlog.EventLog) (string, error) {
+func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLog *event.Log) (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 

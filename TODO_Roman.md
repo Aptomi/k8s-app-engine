@@ -1,9 +1,3 @@
-Implementation:
-
-1. eventlog -> event (and rename struct to Log)
-
--- -- --
-
 Done:
 * Flexible contexts (==inheritance, ==more powerful expressions)
 
@@ -151,3 +145,5 @@ Done:
   * replace with object.SystemNS
 
 * rename language -> lang
+
+* rename eventlog -> event (and rename struct to Log)

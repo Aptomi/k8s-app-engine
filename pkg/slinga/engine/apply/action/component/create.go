@@ -3,7 +3,7 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"time"
@@ -73,7 +73,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 	}
 
 	// Instantiate component
-	context.EventLog.WithFields(eventlog.Fields{
+	context.EventLog.WithFields(event.Fields{
 		"componentKey": instance.Metadata.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,

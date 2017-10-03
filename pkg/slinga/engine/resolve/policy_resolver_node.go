@@ -1,7 +1,7 @@
 package resolve
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
@@ -17,10 +17,10 @@ type resolutionNode struct {
 	resolver *PolicyResolver
 
 	// pointer to event log (local to the node)
-	eventLog *eventlog.EventLog
+	eventLog *event.Log
 
 	// combined event logs from all resolution nodes in the subtree
-	eventLogsCombined []*eventlog.EventLog
+	eventLogsCombined []*event.Log
 
 	// new instance of PolicyResolution, where resolution resolution will be stored
 	resolution *PolicyResolution
@@ -78,13 +78,13 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *
 		labels.AddLabels(user.Labels)
 	}
 
-	eventLog := eventlog.NewEventLog()
+	eventLog := event.NewLog()
 	return &resolutionNode{
 		resolved: false,
 
 		resolver:          resolver,
 		eventLog:          eventLog,
-		eventLogsCombined: []*eventlog.EventLog{eventLog},
+		eventLogsCombined: []*event.Log{eventLog},
 
 		resolution: NewPolicyResolution(),
 
@@ -109,13 +109,13 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *
 
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
-	eventLog := eventlog.NewEventLog()
+	eventLog := event.NewLog()
 	return &resolutionNode{
 		resolved: false,
 
 		resolver:          node.resolver,
 		eventLog:          eventLog,
-		eventLogsCombined: []*eventlog.EventLog{eventLog},
+		eventLogsCombined: []*event.Log{eventLog},
 
 		resolution: node.resolution,
 

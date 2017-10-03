@@ -1,4 +1,4 @@
-package eventlog
+package event
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/errors"
@@ -13,23 +13,23 @@ type AttachedObjects struct {
 	objects []interface{}
 }
 
-type EventLog struct {
+type Log struct {
 	logger     *logrus.Logger
 	attachedTo *AttachedObjects
 	hook       *messageBuffer
 }
 
-// NewEventLog creates a new instance of event log
+// NewLog creates a new instance of event log
 // Initially it just buffers all entries and doesn't write them
 // It needs to buffer all entries, so that the context can be later attached to them
 // before they get serialized and written to an external source
-func NewEventLog() *EventLog {
+func NewLog() *Log {
 	logger := logrus.New()
 	logger.Level = logrus.DebugLevel
 	logger.Out = ioutil.Discard
 	hook := &messageBuffer{}
 	logger.Hooks.Add(hook)
-	return &EventLog{
+	return &Log{
 		logger:     logger,
 		attachedTo: &AttachedObjects{},
 		hook:       hook,
@@ -45,7 +45,7 @@ func fieldValue(data interface{}) interface{} {
 }
 
 // WithFields creates a new log entry with a given set of fields
-func (eventLog *EventLog) WithFields(fields Fields) *logrus.Entry {
+func (eventLog *Log) WithFields(fields Fields) *logrus.Entry {
 	// see if there is any details which have to added to the log from the error
 	for key, value := range fields {
 		if errWithDetails, ok := value.(*errors.ErrorWithDetails); ok {
@@ -64,16 +64,16 @@ func (eventLog *EventLog) WithFields(fields Fields) *logrus.Entry {
 
 // AttachTo attaches all entries in this event log to a certain object
 // E.g. dependency, user, contract, context, serviceKey
-func (eventLog *EventLog) AttachTo(object interface{}) {
+func (eventLog *Log) AttachTo(object interface{}) {
 	eventLog.attachedTo.objects = append(eventLog.attachedTo.objects, object)
 }
 
 // Append adds entries to the event logs
-func (eventLog *EventLog) Append(that *EventLog) {
+func (eventLog *Log) Append(that *Log) {
 	eventLog.hook.entries = append(eventLog.hook.entries, that.hook.entries...)
 }
 
-func (eventLog *EventLog) LogError(err error) {
+func (eventLog *Log) LogError(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
 		eventLog.WithFields(Fields(errWithDetails.Details())).Error(err.Error())
@@ -82,7 +82,7 @@ func (eventLog *EventLog) LogError(err error) {
 	}
 }
 
-func (eventLog *EventLog) LogErrorAsWarning(err error) {
+func (eventLog *Log) LogErrorAsWarning(err error) {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
 		eventLog.WithFields(Fields(errWithDetails.Details())).Warning(err.Error())
@@ -92,7 +92,7 @@ func (eventLog *EventLog) LogErrorAsWarning(err error) {
 }
 
 // Save takes all buffered entries and saves them
-func (eventLog *EventLog) Save(hook logrus.Hook) {
+func (eventLog *Log) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hook.entries {
 		e.Data["attachedTo"] = eventLog.attachedTo
 		err := hook.Fire(e)

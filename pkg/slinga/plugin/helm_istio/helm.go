@@ -2,7 +2,7 @@ package helm_istio
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"gopkg.in/yaml.v2"
@@ -19,15 +19,15 @@ func (p *HelmIstioPlugin) GetSupportedCodeTypes() []string {
 	return helmCodeTypes
 }
 
-func (p *HelmIstioPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+func (p *HelmIstioPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
-func (p *HelmIstioPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+func (p *HelmIstioPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
-func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog, create bool) error {
+func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return err
@@ -59,10 +59,10 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 
 		if exists {
 			// If a release already exists, let's just go ahead and update it
-			eventLog.WithFields(eventlog.Fields{}).Infof("Release '%s' already exists. Updating it", releaseName)
+			eventLog.WithFields(event.Fields{}).Infof("Release '%s' already exists. Updating it", releaseName)
 		}
 
-		eventLog.WithFields(eventlog.Fields{
+		eventLog.WithFields(event.Fields{
 			"release": releaseName,
 			"chart":   chartName,
 			"path":    chartPath,
@@ -71,7 +71,7 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 
 		_, err = helmClient.InstallRelease(chartPath, cluster.Config.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
 	} else {
-		eventLog.WithFields(eventlog.Fields{
+		eventLog.WithFields(event.Fields{
 			"release": releaseName,
 			"chart":   chartName,
 			"path":    chartPath,
@@ -85,7 +85,7 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 }
 
 // Destroy for HelmIstioPlugin runs "helm delete" for the corresponding helm chart
-func (p *HelmIstioPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) error {
+func (p *HelmIstioPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (p *HelmIstioPlugin) Destroy(cluster *lang.Cluster, deployName string, para
 
 	helmClient := cache.newHelmClient(cluster)
 
-	eventLog.WithFields(eventlog.Fields{
+	eventLog.WithFields(event.Fields{
 		"release": releaseName,
 	}).Infof("Deleting Helm release '%s'", releaseName)
 
@@ -104,7 +104,7 @@ func (p *HelmIstioPlugin) Destroy(cluster *lang.Cluster, deployName string, para
 }
 
 // Endpoints returns map from port type to url for all services of the current chart
-func (p *HelmIstioPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *eventlog.EventLog) (map[string]string, error) {
+func (p *HelmIstioPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return nil, err

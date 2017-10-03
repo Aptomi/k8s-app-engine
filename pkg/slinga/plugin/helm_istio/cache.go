@@ -2,7 +2,7 @@ package helm_istio
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/eventlog"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"k8s.io/helm/pkg/kube"
 	"sync"
@@ -16,7 +16,7 @@ type clusterCache struct {
 	istioSvc            string       // istio svc name
 }
 
-func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *eventlog.EventLog) (*clusterCache, error) {
+func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (*clusterCache, error) {
 	cache, _ /*loaded*/ := p.cache.LoadOrStore(cluster.Namespace, new(clusterCache))
 	if c, ok := cache.(*clusterCache); ok {
 		err := c.setupTillerConnection(cluster, eventLog)
