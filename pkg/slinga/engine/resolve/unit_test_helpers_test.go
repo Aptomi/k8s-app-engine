@@ -6,9 +6,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 const (

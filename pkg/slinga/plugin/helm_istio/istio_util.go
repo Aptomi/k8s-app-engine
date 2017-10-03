@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
@@ -13,7 +14,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
