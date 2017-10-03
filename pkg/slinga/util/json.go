@@ -13,9 +13,5 @@ func WriteJSON(w io.Writer, obj interface{}) error {
 	}
 
 	_, err = fmt.Fprint(w, string(res))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

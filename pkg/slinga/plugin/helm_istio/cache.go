@@ -18,15 +18,15 @@ type clusterCache struct {
 
 func (p *HelmIstioPlugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (*clusterCache, error) {
 	cache, _ /*loaded*/ := p.cache.LoadOrStore(cluster.Namespace, new(clusterCache))
-	if c, ok := cache.(*clusterCache); ok {
+	c, ok := cache.(*clusterCache)
+	if ok {
 		err := c.setupTillerConnection(cluster, eventLog)
 		if err != nil {
 			return nil, err
 		}
 		return c, nil
-	} else {
-		panic(fmt.Sprintf("clusterCache expected in HelmIstioPlugin cache, but found: %v", c))
 	}
+	panic(fmt.Sprintf("clusterCache expected in HelmIstioPlugin cache, but found: %v", c))
 }
 
 func (p *HelmIstioPlugin) Cleanup() error {

@@ -1,7 +1,6 @@
 package graphviz
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
@@ -15,11 +14,6 @@ import (
 const noEntriesNodeName = "No entries"
 const colorScheme = "set19"
 const colorCount = 9
-
-// PolicyVisualization accepts diff and defines additional methods for visualizing the policy
-type PolicyVisualization struct {
-	diff *diff.PolicyResolutionDiff
-}
 
 // NewPolicyVisualizationImage returns an image with policy/resolution information
 func NewPolicyVisualizationImage(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) (image.Image, error) {

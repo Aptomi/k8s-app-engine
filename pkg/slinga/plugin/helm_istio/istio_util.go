@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func (cache *clusterCache) getHttpServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
+func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
 	_, client, err := cache.newKubeClient(cluster, eventLog)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (p *HelmIstioPlugin) getDesiredIstioRouteRulesForComponent(componentKey str
 			return nil, err
 		}
 
-		services, err := cache.getHttpServicesForHelmRelease(cluster, releaseName, chartName, eventLog)
+		services, err := cache.getHTTPServicesForHelmRelease(cluster, releaseName, chartName, eventLog)
 		if err != nil {
 			return nil, err
 		}
