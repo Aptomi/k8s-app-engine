@@ -45,12 +45,12 @@ func (policy *Policy) GetObject(kind string, locator string, currentNs string) (
 		ns = parts[0]
 		name = parts[1]
 	} else {
-		return nil, fmt.Errorf("Can't parse reference to a policy object: ", locator)
+		return nil, fmt.Errorf("Can't parse policy object locator: '%s'", locator)
 	}
 
 	policyNS, ok := policy.Namespace[ns]
 	if !ok {
-		return nil, fmt.Errorf("Namespace %s doesn't exist, but referenced from ref %s", ns, locator)
+		return nil, fmt.Errorf("Namespace '%s' doesn't exist, but referenced in locator '%s'", ns, locator)
 	}
 
 	return policyNS.getObject(kind, name), nil

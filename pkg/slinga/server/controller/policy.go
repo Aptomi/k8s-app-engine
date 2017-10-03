@@ -122,7 +122,8 @@ func (ctl *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (boo
 	}
 
 	for _, updatedObj := range updatedObjects {
-		updated, err := ctl.store.Save(updatedObj)
+		var updated bool
+		updated, err = ctl.store.Save(updatedObj)
 		if err != nil {
 			return false, nil, err
 		}

@@ -52,9 +52,9 @@ func (p *HelmIstioPlugin) createOrUpdate(cluster *lang.Cluster, deployName strin
 	}
 
 	if create {
-		exists, err := findHelmRelease(helmClient, releaseName)
-		if err != nil {
-			return fmt.Errorf("Error while looking for Helm release %s: %s", releaseName, err)
+		exists, errRelease := findHelmRelease(helmClient, releaseName)
+		if errRelease != nil {
+			return fmt.Errorf("Error while looking for Helm release %s: %s", releaseName, errRelease)
 		}
 
 		if exists {

@@ -68,11 +68,13 @@ func (b *boltStore) setNextGeneration(obj object.Base) error {
 	return nil
 }
 
-func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
+func (b *boltStore) Save(obj object.Base) (bool, error) {
 	info := b.catalog.Get(obj.GetKind())
 	if info == nil {
 		return false, fmt.Errorf("Unknown kind: %s", obj.GetKind())
 	}
+
+	updated := false
 	if info.Versioned {
 		existingObj, err := b.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration())
 		if err != nil {
@@ -92,7 +94,7 @@ func (b *boltStore) Save(obj object.Base) (updated bool, err error) {
 		obj.SetGeneration(object.LastGen)
 	}
 
-	err = b.db.Update(func(tx *bolt.Tx) error {
+	err := b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
 			return fmt.Errorf("Bucket not found: ")

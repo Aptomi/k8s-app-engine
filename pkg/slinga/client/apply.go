@@ -121,15 +121,15 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	allFiles := make([]string, 0, len(policyPaths))
 
 	for _, rawPolicyPath := range policyPaths {
-		policyPath, err := filepath.Abs(rawPolicyPath)
-		if err != nil {
-			return nil, fmt.Errorf("Error reading filepath: %s", err)
+		policyPath, errPath := filepath.Abs(rawPolicyPath)
+		if errPath != nil {
+			return nil, fmt.Errorf("Error reading filepath: %s", errPath)
 		}
 
 		if stat, err := os.Stat(policyPath); err == nil {
 			if stat.IsDir() { // if dir provided, use all yaml files from it
-				files, err := zglob.Glob(filepath.Join(policyPath, "**", "*.yaml"))
-				if err != nil {
+				files, errGlob := zglob.Glob(filepath.Join(policyPath, "**", "*.yaml"))
+				if errGlob != nil {
 					return nil, fmt.Errorf("Error while searching yaml files in directory: %s error: %s", policyPath, err)
 				}
 				allFiles = append(allFiles, files...)
