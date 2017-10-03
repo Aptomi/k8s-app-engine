@@ -11,7 +11,7 @@ import (
 
 func (p *HelmIstioPlugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	// todo(slukjanov): do something with progress
-	var prog progress.ProgressIndicator
+	var prog progress.Indicator
 
 	if len(resolution.ComponentProcessingOrder) == 0 {
 		return nil

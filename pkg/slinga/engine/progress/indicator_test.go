@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
-func makeProgressIndicators() []ProgressIndicator {
-	p1 := NewProgressNoop()
-	p2 := NewProgressConsole()
+func makeProgressIndicators() []Indicator {
+	p1 := NewNoop()
+	p2 := NewConsole()
 	p2.SetOut(new(bytes.Buffer))
-	return []ProgressIndicator{p1, p2}
+	return []Indicator{p1, p2}
 }
 
 func TestProgressNoop(t *testing.T) {

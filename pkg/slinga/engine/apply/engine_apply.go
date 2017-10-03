@@ -29,7 +29,7 @@ type EngineApply struct {
 	eventLog *event.Log
 
 	// Progress indicator
-	progress progress.ProgressIndicator
+	progress progress.Indicator
 }
 
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
@@ -45,7 +45,7 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 		plugins:            plugins,
 		actions:            actions,
 		eventLog:           event.NewLog(),
-		progress:           progress.NewProgressConsole(),
+		progress:           progress.NewConsole(),
 	}
 }
 

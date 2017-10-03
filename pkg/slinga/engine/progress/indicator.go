@@ -2,7 +2,7 @@ package progress
 
 import "math"
 
-type ProgressIndicator interface {
+type Indicator interface {
 	// This method should be called to initialize progress indicator with 'total' steps
 	SetTotal(total int)
 

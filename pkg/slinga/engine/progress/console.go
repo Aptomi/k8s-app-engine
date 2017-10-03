@@ -8,25 +8,25 @@ import (
 	"time"
 )
 
-type ProgressConsole struct {
+type Console struct {
 	*progressCount
 	progress    *uiprogress.Progress
 	progressBar *uiprogress.Bar
 	out         io.Writer
 }
 
-func NewProgressConsole() *ProgressConsole {
+func NewConsole() *Console {
 	progress := uiprogress.New()
 	progress.RefreshInterval = time.Second
 	progress.Start()
-	return &ProgressConsole{
+	return &Console{
 		progressCount: &progressCount{},
 		progress:      progress,
 		out:           os.Stdout,
 	}
 }
 
-func (progressConsole *ProgressConsole) createProgressBar() {
+func (progressConsole *Console) createProgressBar() {
 	progressConsole.progress.SetOut(progressConsole.out)
 	if progressConsole.getTotalInternal() > 0 {
 		fmt.Fprintln(progressConsole.out, "[Applying changes]")
@@ -41,26 +41,26 @@ func (progressConsole *ProgressConsole) createProgressBar() {
 	})
 }
 
-func (progressConsole *ProgressConsole) SetOut(out io.Writer) {
+func (progressConsole *Console) SetOut(out io.Writer) {
 	progressConsole.out = out
 }
 
-func (progressConsole *ProgressConsole) SetTotal(total int) {
+func (progressConsole *Console) SetTotal(total int) {
 	progressConsole.setTotalInternal(total + 1)
 	progressConsole.createProgressBar()
 	progressConsole.Advance("Init")
 }
 
-func (progressConsole *ProgressConsole) Advance(stage string) {
+func (progressConsole *Console) Advance(stage string) {
 	progressConsole.advanceInternal(stage)
 	progressConsole.progressBar.Incr()
 }
 
-func (progressConsole *ProgressConsole) Done() {
+func (progressConsole *Console) Done() {
 	progressConsole.doneInternal()
 	progressConsole.progress.Stop()
 }
 
-func (progressConsole *ProgressConsole) IsDone() bool {
+func (progressConsole *Console) IsDone() bool {
 	return progressConsole.isDoneInternal()
 }
