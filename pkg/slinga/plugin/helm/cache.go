@@ -1,4 +1,4 @@
-package helm_istio
+package helm
 
 import (
 	"fmt"
