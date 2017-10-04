@@ -27,26 +27,87 @@ func TestPolicyResolverAndResolvedData(t *testing.T) {
 	assert.NotEmpty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_2"], "Bob should have access to prod")
 }
 
-func TestPolicyResolverAndUnresolvedData(t *testing.T) {
-	_, resolution := loadPolicyAndResolve(t)
+func TestPolicyResolverPartialMatching(t *testing.T) {
+	b := builder.NewPolicyBuilder()
 
-	// Dave dependency on kafka should not be resolved
-	assert.Empty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_4"], "Partial matching is broken. User has access to kafka, but not to zookeeper that kafka depends on. This should not be resolved successfully")
+	// create a service, which depends on another service
+	service1 := b.AddService(b.AddUser())
+	contract1 := b.AddContract(service1, b.Criteria("label1 == 'value1'", "true", "false"))
+	service2 := b.AddService(b.AddUser())
+	contract2 := b.AddContract(service2, b.Criteria("label2 == 'value2'", "true", "false"))
+	b.AddServiceComponent(service1, b.ContractComponent(contract2))
+
+	// add rules to allow all dependencies
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+
+	// add dependency with full labels (should be resolved successfully)
+	d1 := b.AddDependency(b.AddUser(), contract1)
+	d1.Labels["label1"] = "value1"
+	d1.Labels["label2"] = "value2"
+
+	// add dependency with partial labels (should not resolved)
+	d2 := b.AddDependency(b.AddUser(), contract1)
+	d2.Labels["label1"] = "value1"
+
+	// policy resolution should be completed successfully
+	resolution := resolvePolicyNew(t, b, ResSuccess, "Successfully resolved")
+
+	// check that only first dependency got resolved
+	assert.NotEmpty(t, resolution.DependencyInstanceMap[d1.GetKey()], "Dependency with full set of labels should be resolved")
+	assert.Empty(t, resolution.DependencyInstanceMap[d2.GetKey()], "Dependency with partial labels should not be resolved")
 }
 
-func TestPolicyResolverLabelProcessing(t *testing.T) {
-	_, resolution := loadPolicyAndResolve(t)
+func TestPolicyResolverCalculatedLabels(t *testing.T) {
+	b := builder.NewPolicyBuilder()
 
-	// Check labels for Bob's dependency
-	serviceInstance := getInstanceByDependencyKey(t, "main:dependency:dep_id_2", resolution)
+	// first contract adds a label 'labelExtra1'
+	service1 := b.AddService(b.AddUser())
+	contract1 := b.AddContract(service1, b.Criteria("label1 == 'value1'", "true", "false"))
+	contract1.ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra1", "labelValue1")
+
+	// second contract adds a label 'labelExtra2' and removes 'label3'
+	service2 := b.AddService(b.AddUser())
+	contract2 := b.AddContract(service2, b.Criteria("label2 == 'value2'", "true", "false"))
+	contract2.ChangeLabels = lang.NewLabelOperations(
+		map[string]string{"labelExtra2": "labelValue2"},
+		map[string]string{"label3": ""},
+	)
+	contract2.Contexts[0].ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra3", "labelValue3")
+	b.AddServiceComponent(service1, b.ContractComponent(contract2))
+
+	// add rules to allow all dependencies
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+
+	// add dependency with labels 'label1', 'label2' and 'label3'
+	dependency := b.AddDependency(b.AddUser(), contract1)
+	dependency.Labels["label1"] = "value1"
+	dependency.Labels["label2"] = "value2"
+	dependency.Labels["label3"] = "value3"
+
+	// policy resolution should be completed successfully
+	resolution := resolvePolicyNew(t, b, ResSuccess, "Successfully resolved")
+
+	// check that dependency got resolved
+	assert.NotEmpty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should be resolved")
+
+	// check labels for the end service (service2/contract2)
+	serviceInstance := getInstanceByParams(t, b.Namespace(), cluster.Name, contract2.Name, contract2.Contexts[0].Name, nil, componentRootName, b.Policy(), resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
-	assert.Equal(t, "yes", labels["important"], "Label 'important=yes' should be carried from dependency all the way through the policy")
-	assert.Equal(t, "true", labels["prod-low-ctx"], "Label 'prod-low-ctx=true' should be added on context match")
-	assert.Equal(t, "", labels["some-label-to-be-removed"], "Label 'some-label-to-be-removed' should be removed on context match")
-	assert.Equal(t, "true", labels["prod-low-alloc"], "Label 'prod-low-alloc=true' should be added on allocation match")
+
+	assert.Equal(t, "value1", labels["label1"], "Label 'label1=value1' should be carried from dependency all the way through the policy")
+	assert.Equal(t, "value2", labels["label2"], "Label 'label2=value2' should be carried from dependency all the way through the policy")
+	assert.Empty(t, labels["label3"], "Label 'label3' should be removed")
+
+	assert.Equal(t, "labelValue1", labels["labelExtra1"], "Label 'labelExtra1' should be added on contract match")
+	assert.Equal(t, "labelValue2", labels["labelExtra2"], "Label 'labelExtra2' should be added on contract match")
+	assert.Equal(t, "labelValue3", labels["labelExtra3"], "Label 'labelExtra3' should be added on context match")
+
+	assert.Equal(t, cluster.Name, labels[lang.LabelCluster], "Label 'cluster' should be set")
 }
 
-func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
+func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	policy, resolution := loadPolicyAndResolve(t)
 
 	kafkaTest := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
@@ -70,7 +131,7 @@ func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService(b.AddUser())
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	user := &lang.User{ID: "non-existing-user-123456789"}
 	dependency := b.AddDependency(user, contract)
 
@@ -94,7 +155,7 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService(b.AddUser())
 	criteria := b.Criteria("true", "specialname + '123')(((", "false")
-	contract := b.AddContract(service, criteria, nil)
+	contract := b.AddContract(service, criteria)
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid context criteria should result in an error
@@ -104,7 +165,8 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService(b.AddUser())
-	contract := b.AddContract(service, b.CriteriaTrue(), b.AllocationKeys("w {{..."))
+	contract := b.AddContract(service, b.CriteriaTrue())
+	contract.Contexts[0].Allocation.Keys = b.AllocationKeys("w {{...")
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid context allocation keys should result in an error
@@ -114,7 +176,7 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService(nil)
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid service (without owner) should result in an error
@@ -124,7 +186,7 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService(b.AddUser())
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	b.AddDependency(b.AddUser(), contract)
 	b.AddRule(b.Criteria("specialname + '123')(((", "true", "false"), nil)
 
@@ -143,7 +205,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 			nil,
 		),
 	)
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -170,7 +232,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 		),
 	)
 
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -196,7 +258,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 			nil,
 		),
 	)
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -218,7 +280,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 			util.NestedParameterMap{"address": "{{ .Labels..."},
 		),
 	)
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -234,11 +296,11 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 
 	// create 3 services
 	service1 := b.AddService(b.AddUser())
-	contract1 := b.AddContract(service1, b.CriteriaTrue(), nil)
+	contract1 := b.AddContract(service1, b.CriteriaTrue())
 	service2 := b.AddService(b.AddUser())
-	contract2 := b.AddContract(service2, b.CriteriaTrue(), nil)
+	contract2 := b.AddContract(service2, b.CriteriaTrue())
 	service3 := b.AddService(b.AddUser())
-	contract3 := b.AddContract(service3, b.CriteriaTrue(), nil)
+	contract3 := b.AddContract(service3, b.CriteriaTrue())
 
 	// create service-level cycle
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
@@ -260,7 +322,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 
 	// create 3 services
 	service := b.AddService(b.AddUser())
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 
 	// create component cycle
 	component1 := b.CodeComponent(nil, nil)
@@ -298,7 +360,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	b.AddServiceComponent(service, component2)
 	b.AddServiceComponent(service, component3)
 
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -323,7 +385,7 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 			nil,
 		),
 	)
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 
 	// add rules, which say to deploy to different clusters based on label value
 	cluster1 := b.AddCluster()

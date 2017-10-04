@@ -86,7 +86,7 @@ func (builder *PolicyBuilder) AddService(owner *lang.User) *lang.Service {
 }
 
 // AddContract creates a new contract for a given service and adds it to the policy
-func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.Criteria, keys []string) *lang.Contract {
+func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.Criteria) *lang.Contract {
 	result := &lang.Contract{
 		Metadata: lang.Metadata{
 			Kind:      lang.ContractObject.Kind,
@@ -98,7 +98,6 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 			Criteria: criteria,
 			Allocation: &lang.Allocation{
 				Service: service.Name,
-				Keys:    keys,
 			},
 		}},
 	}
@@ -219,4 +218,9 @@ func (builder *PolicyBuilder) External() *external.Data {
 		builder.users,
 		builder.secrets,
 	)
+}
+
+// Namespace returns the current namespace
+func (builder *PolicyBuilder) Namespace() string {
+	return builder.namespace
 }

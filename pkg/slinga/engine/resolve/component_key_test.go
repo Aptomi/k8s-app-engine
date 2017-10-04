@@ -11,7 +11,7 @@ func TestComponentKeyCopy(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService(b.AddUser())
 	b.AddServiceComponent(service, b.CodeComponent(nil, nil))
-	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	contract := b.AddContract(service, b.CriteriaTrue())
 	key := NewComponentInstanceKey(
 		b.AddCluster(),
 		contract,
