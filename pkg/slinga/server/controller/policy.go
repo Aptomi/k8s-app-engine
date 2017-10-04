@@ -153,5 +153,12 @@ func (ctl *PolicyControllerImpl) UpdatePolicy(updatedObjects []object.Base) (boo
 
 	// policy, err := ctl.getPolicyFromData(policyData)
 
+	// todo: add policy changed / not changed response, if changed - show expected policy resolution? + attach resolution event log to the new version of policy
+
+	// [3] Show user what changes will be triggered by his changes to the policy
+	//   1. load previous desired state (from last revision)
+	//   1. calculate new desired state (run resolver // resolver.ResolveAllDependencies())
+	//   1. compare and return changes to the user [without saving to db]
+
 	return changed, policyData, err
 }
