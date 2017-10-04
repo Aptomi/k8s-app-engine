@@ -99,3 +99,26 @@ ifndef HAS_GLIDE
 	curl https://glide.sh/get | sh
 endif
 
+.PHONY: w-dep
+w-dep:
+	cd webui; npm install
+
+.PHONY: w-test
+w-test:
+	cd webui; npm test
+
+.PHONY: w-test-unit
+w-test-unit:
+	cd webui; npm run unit
+
+.PHONY: w-test-e2e
+w-test-e2e:
+	cd webui; npm run e2e
+
+.PHONY: w-dev
+w-dev:
+	cd webui; npm run dev
+
+.PHONY: w-build
+w-build:
+	cd webui; npm run build
