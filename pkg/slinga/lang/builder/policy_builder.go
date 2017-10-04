@@ -105,6 +105,31 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 	return result
 }
 
+// AddContractMultipleContexts creates contract with multiple contexts for a given service and adds it to the policy
+func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service, criteriaArray ...*lang.Criteria) *lang.Contract {
+	result := &lang.Contract{
+		Metadata: lang.Metadata{
+			Kind:      lang.ContractObject.Kind,
+			Namespace: builder.namespace,
+			Name:      util.RandomID(builder.random, idLength),
+		},
+	}
+	for _, criteria := range criteriaArray {
+		result.Contexts = append(result.Contexts,
+			&lang.Context{
+				Name:     util.RandomID(builder.random, idLength),
+				Criteria: criteria,
+				Allocation: &lang.Allocation{
+					Service: service.Name,
+				},
+			},
+		)
+	}
+
+	builder.policy.AddObject(result)
+	return result
+}
+
 // AddRule creates a new rule and adds it to the policy
 func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.RuleActions) *lang.Rule {
 	result := &lang.Rule{
@@ -183,8 +208,9 @@ func (builder *PolicyBuilder) ContractComponent(contract *lang.Contract) *lang.S
 }
 
 // AddServiceComponent adds a given service component to the service
-func (builder *PolicyBuilder) AddServiceComponent(service *lang.Service, component *lang.ServiceComponent) {
+func (builder *PolicyBuilder) AddServiceComponent(service *lang.Service, component *lang.ServiceComponent) *lang.ServiceComponent {
 	service.Components = append(service.Components, component)
+	return component
 }
 
 // AddComponentDependency adds a component dependency on another component

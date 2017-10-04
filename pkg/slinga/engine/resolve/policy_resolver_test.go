@@ -1,30 +1,50 @@
 package resolve
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
-	"strconv"
-	"strings"
 	"testing"
 )
 
-func TestPolicyResolverAndResolvedData(t *testing.T) {
-	policy, resolution := loadPolicyAndResolve(t)
+func TestPolicyResolverContract(t *testing.T) {
+	// multiple contexts
+	b := builder.NewPolicyBuilder()
 
-	// Check that policy resolution finished correctly
-	assert.Equal(t, 12, len(resolution.ComponentInstanceMap), "Policy resolution data should have correct number of entries")
+	// create a service with two contexts within a contract
+	service := b.AddService(b.AddUser())
+	component := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+	contract := b.AddContractMultipleContexts(service,
+		b.Criteria("label1 == 'value1'", "true", "false"),
+		b.Criteria("label2 == 'value2'", "true", "false"),
+	)
 
-	// Resolution for test context
-	kafkaTest := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
-	assert.Equal(t, 1, len(kafkaTest.DependencyKeys), "One dependency should be resolved with access to test, but found %v", kafkaTest.DependencyKeys)
-	assert.NotEmpty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_1"], "Alice should have access to test")
+	// add rules to allow all dependencies
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	// Resolution for prod context
-	kafkaProd := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "prod-low", []string{"team-platform_services", "true"}, "component2", policy, resolution)
-	assert.Equal(t, 1, len(kafkaProd.DependencyKeys), "One dependency should be resolved with access to prod, but found %v", kafkaProd.DependencyKeys)
-	assert.NotEmpty(t, resolution.DependencyInstanceMap["main:dependency:dep_id_2"], "Bob should have access to prod")
+	// add dependency (should be resolved to the first context)
+	d1 := b.AddDependency(b.AddUser(), contract)
+	d1.Labels["label1"] = "value1"
+
+	// add dependency (should be resolved to the second context)
+	d2 := b.AddDependency(b.AddUser(), contract)
+	d2.Labels["label2"] = "value2"
+
+	// policy resolution should be completed successfully
+	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
+	assert.NotEmpty(t, resolution.DependencyInstanceMap[d1.GetKey()], "Dependency should be resolved")
+	assert.NotEmpty(t, resolution.DependencyInstanceMap[d2.GetKey()], "Dependency should be resolved")
+
+	// check instance 1
+	instance1 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component, resolution)
+	assert.Equal(t, 1, len(instance1.DependencyKeys), "Instance should be referenced by one dependency")
+
+	// check instance 2
+	instance2 := getInstanceByParams(t, cluster, contract, contract.Contexts[1], nil, service, component, resolution)
+	assert.Equal(t, 1, len(instance2.DependencyKeys), "Instance should be referenced by one dependency")
 }
 
 func TestPolicyResolverPartialMatching(t *testing.T) {
@@ -51,7 +71,7 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	d2.Labels["label1"] = "value1"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicyNew(t, b, ResSuccess, "Successfully resolved")
+	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that only first dependency got resolved
 	assert.NotEmpty(t, resolution.DependencyInstanceMap[d1.GetKey()], "Dependency with full set of labels should be resolved")
@@ -87,13 +107,13 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	dependency.Labels["label3"] = "value3"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicyNew(t, b, ResSuccess, "Successfully resolved")
+	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that dependency got resolved
 	assert.NotEmpty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should be resolved")
 
 	// check labels for the end service (service2/contract2)
-	serviceInstance := getInstanceByParams(t, b.Namespace(), cluster.Name, contract2.Name, contract2.Contexts[0].Name, nil, componentRootName, b.Policy(), resolution)
+	serviceInstance := getInstanceByParams(t, cluster, contract2, contract2.Contexts[0], nil, service2, nil, resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 
 	assert.Equal(t, "value1", labels["label1"], "Label 'label1=value1' should be carried from dependency all the way through the policy")
@@ -108,24 +128,55 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 }
 
 func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
-	policy, resolution := loadPolicyAndResolve(t)
+	b := builder.NewPolicyBuilder()
 
-	kafkaTest := getInstanceByParams(t, "main", "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", policy, resolution)
+	// create a service with 2 components and multiple parameters
+	service := b.AddService(b.AddUser())
+	component1 := b.CodeComponent(
+		nil,
+		util.NestedParameterMap{"url": "component1-{{ .Discovery.instance }}"},
+	)
+	component2 := b.CodeComponent(
+		util.NestedParameterMap{
+			"cluster": "{{ .Labels.cluster }}",
+			"address": fmt.Sprintf("{{ .Discovery.%s.url }}", component1.Name),
+			"nested": util.NestedParameterMap{
+				"param": util.NestedParameterMap{
+					"name1": "value1",
+					"name2": "123456789",
+					"name3": "{{ .Labels.cluster }}",
+				},
+			},
+		},
+		util.NestedParameterMap{"url": "component2-{{ .Discovery.instance }}"},
+	)
+	b.AddServiceComponent(service, component1)
+	b.AddServiceComponent(service, component2)
 
-	// Check that code parameters evaluate correctly
-	assert.Equal(t, strings.Join(
-		[]string{"cluster-us-west", "main", "zookeeper", "test", "platform-services", "component2"}, "-",
-	), kafkaTest.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
+	contract := b.AddContract(service, b.CriteriaTrue())
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	// Check that discovery parameters evaluate correctly
-	assert.Equal(t, strings.Join(
-		[]string{"kafka", "cluster-us-east", "main", "kafka", "test", "platform-services", "component2", "url"}, "-",
-	), kafkaTest.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+	// add dependencies which feed conflicting labels into a given component
+	b.AddDependency(b.AddUser(), contract)
 
-	// Check that nested parameters evaluate correctly
-	for i := 1; i <= 5; i++ {
-		assert.Equal(t, "value"+strconv.Itoa(i), kafkaTest.CalculatedCodeParams.GetNestedMap("data" + strconv.Itoa(i)).GetNestedMap("param")["name"], "Nested code parameters should be calculated correctly")
-	}
+	// policy should be resolved successfully
+	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
+
+	// check discovery parameters of component 1
+	instance1 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component1, resolution)
+	assert.Regexp(t, "^component1-(.+)$", instance1.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+
+	// check discovery parameters of component 2
+	instance2 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component2, resolution)
+	assert.Regexp(t, "^component2-(.+)$", instance2.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
+
+	// check code parameters of component 2
+	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams["cluster"], "Code parameter should be calculated correctly")
+	assert.Equal(t, instance1.CalculatedDiscovery["url"], instance2.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
+	assert.Equal(t, "value1", instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name1"], "Code parameter should be calculated correctly")
+	assert.Equal(t, "123456789", instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name2"], "Code parameter should be calculated correctly")
+	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name3"], "Code parameter should be calculated correctly")
 }
 
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
@@ -136,7 +187,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	dependency := b.AddDependency(user, contract)
 
 	// dependency declared by non-existing consumer should not trigger a critical error
-	resolution := resolvePolicyNew(t, b, ResSuccess, "non-existing user")
+	resolution := resolvePolicy(t, b, ResSuccess, "non-existing user")
 	assert.Empty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should not be resolved")
 }
 
@@ -147,7 +198,7 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 	dependency := b.AddDependency(user, contract)
 
 	// dependency referring to non-existing contract should not trigger a critical error
-	resolution := resolvePolicyNew(t, b, ResSuccess, "non-existing contract")
+	resolution := resolvePolicy(t, b, ResSuccess, "non-existing contract")
 	assert.Empty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should not be resolved")
 }
 
@@ -159,7 +210,7 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid context criteria should result in an error
-	resolvePolicyNew(t, b, ResError, "Unable to compile expression")
+	resolvePolicy(t, b, ResError, "Unable to compile expression")
 }
 
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
@@ -170,7 +221,7 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid context allocation keys should result in an error
-	resolvePolicyNew(t, b, ResError, "Error while resolving allocation keys")
+	resolvePolicy(t, b, ResError, "Error while resolving allocation keys")
 }
 
 func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
@@ -180,7 +231,7 @@ func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid service (without owner) should result in an error
-	resolvePolicyNew(t, b, ResError, "Owner doesn't exist for service")
+	resolvePolicy(t, b, ResError, "Owner doesn't exist for service")
 }
 
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
@@ -191,7 +242,7 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 	b.AddRule(b.Criteria("specialname + '123')(((", "true", "false"), nil)
 
 	// policy resolution with invalid rule should result in an error
-	resolvePolicyNew(t, b, ResError, "Unable to compile expression")
+	resolvePolicy(t, b, ResError, "Unable to compile expression")
 }
 
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
@@ -217,7 +268,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	d2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting code parameters should result in an error
-	resolvePolicyNew(t, b, ResError, "Conflicting code parameters")
+	resolvePolicy(t, b, ResError, "Conflicting code parameters")
 }
 
 func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
@@ -244,7 +295,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	d2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting discovery parameters should result in an error
-	resolvePolicyNew(t, b, ResError, "Conflicting discovery parameters")
+	resolvePolicy(t, b, ResError, "Conflicting discovery parameters")
 }
 
 func TestPolicyResolverInvalidCodeParams(t *testing.T) {
@@ -266,7 +317,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid code parameters should result in an error
-	resolvePolicyNew(t, b, ResError, "Error when processing code params")
+	resolvePolicy(t, b, ResError, "Error when processing code params")
 }
 
 func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
@@ -288,7 +339,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid discovery parameters should result in an error
-	resolvePolicyNew(t, b, ResError, "Error when processing discovery params")
+	resolvePolicy(t, b, ResError, "Error when processing discovery params")
 }
 
 func TestPolicyResolverServiceLoop(t *testing.T) {
@@ -314,7 +365,7 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract1)
 
 	// policy resolution with service dependency cycle should should result in an error
-	resolvePolicyNew(t, b, ResError, "service cycle detected")
+	resolvePolicy(t, b, ResError, "service cycle detected")
 }
 
 func TestPolicyResolverComponentLoop(t *testing.T) {
@@ -325,15 +376,12 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 	contract := b.AddContract(service, b.CriteriaTrue())
 
 	// create component cycle
-	component1 := b.CodeComponent(nil, nil)
-	component2 := b.CodeComponent(nil, nil)
-	component3 := b.CodeComponent(nil, nil)
+	component1 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+	component2 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+	component3 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
 	b.AddComponentDependency(component1, component2)
 	b.AddComponentDependency(component2, component3)
 	b.AddComponentDependency(component3, component1)
-	b.AddServiceComponent(service, component1)
-	b.AddServiceComponent(service, component2)
-	b.AddServiceComponent(service, component3)
 
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
@@ -342,7 +390,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with service dependency cycle should should result in an error
-	resolvePolicyNew(t, b, ResError, "Component cycle detected")
+	resolvePolicy(t, b, ResError, "Component cycle detected")
 }
 
 func TestPolicyResolverUnknownComponentType(t *testing.T) {
@@ -350,15 +398,11 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 
 	// create a with 3 components, first component is not code and not contract (engine should just skip it)
 	service := b.AddService(b.AddUser())
-	component1 := b.UnknownComponent()
-	component2 := b.CodeComponent(nil, nil)
-	component3 := b.CodeComponent(nil, nil)
+	component1 := b.AddServiceComponent(service, b.UnknownComponent())
+	component2 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+	component3 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
 	b.AddComponentDependency(component1, component2)
 	b.AddComponentDependency(component2, component3)
-
-	b.AddServiceComponent(service, component1)
-	b.AddServiceComponent(service, component2)
-	b.AddServiceComponent(service, component3)
 
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
@@ -368,7 +412,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	dependency := b.AddDependency(b.AddUser(), contract)
 
 	// unknown component type should not result in critical error
-	resolution := resolvePolicyNew(t, b, ResSuccess, "Skipping unknown component")
+	resolution := resolvePolicy(t, b, ResSuccess, "Skipping unknown component")
 
 	// check that both dependencies got resolved
 	assert.NotEmpty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should be resolved")
@@ -400,7 +444,7 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	d2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicyNew(t, b, ResSuccess, "Successfully resolved")
+	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that both dependencies got resolved and got placed in different clusters
 	instance1 := getInstanceByDependencyKey(t, d1.GetKey(), resolution)
