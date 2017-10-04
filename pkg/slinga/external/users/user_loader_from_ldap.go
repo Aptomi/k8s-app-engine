@@ -60,7 +60,7 @@ func NewUserLoaderFromLDAP(baseDir string) UserLoader {
 }
 
 // LoadUsersAll loads all users
-func (loader *UserLoaderFromLDAP) LoadUsersAll() lang.GlobalUsers {
+func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
 		loader.cachedUsers = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
@@ -70,7 +70,7 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() lang.GlobalUsers {
 			loader.cachedUsers.Users[u.ID] = u
 		}
 	})
-	return *loader.cachedUsers
+	return loader.cachedUsers
 }
 
 // LoadUserByID loads a single user by ID

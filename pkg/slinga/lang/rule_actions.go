@@ -1,5 +1,8 @@
 package lang
 
+// Allow is a special constant that is used in rule actions for allowing dependencies, ingress traffic, etc
+const Allow = "allow"
+
 // ChangeLabelsAction is a rule action to change labels
 type ChangeLabelsAction LabelOperations
 
@@ -28,10 +31,10 @@ func NewRuleActionResult(labels *LabelSet) *RuleActionResult {
 // ApplyActions applies rule actions and updates result
 func (rule *Rule) ApplyActions(result *RuleActionResult) {
 	if rule.Actions.Dependency != "" {
-		result.AllowDependency = string(rule.Actions.Dependency) == "allow"
+		result.AllowDependency = string(rule.Actions.Dependency) == Allow
 	}
 	if rule.Actions.Ingress != "" {
-		result.AllowIngress = string(rule.Actions.Ingress) == "allow"
+		result.AllowIngress = string(rule.Actions.Ingress) == Allow
 	}
 	result.ChangedLabelsOnLastApply = false
 	if rule.Actions.ChangeLabels != nil {

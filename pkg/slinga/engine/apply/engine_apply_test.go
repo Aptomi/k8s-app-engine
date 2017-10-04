@@ -42,7 +42,7 @@ func TestApplyCreateSuccess(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "")
+	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
 
 	// check that actual state got updated
 	assert.Equal(t, 12, len(actualState.ComponentInstanceMap), "Actual state should be empty")
@@ -111,7 +111,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	updatedActualState := applyAndCheck(t, applier, ResSuccess, 0, "")
+	updatedActualState := applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
 
 	// Check creation/update times
 	key = getInstanceKey("main", "cluster-us-east", "kafka", "test", []string{"platform_services"}, "component2", desiredPolicy)
@@ -157,7 +157,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	updatedActualState = applyAndCheck(t, applier, ResSuccess, 0, "")
+	updatedActualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
 
 	// Check creation/update times
 	kafkaTimes2 := getTimes(t, key, updatedActualState)
@@ -196,7 +196,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	updatedActualState = applyAndCheck(t, applier, ResSuccess, 0, "")
+	updatedActualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
 
 	// Check creation/update times for component
 	componentTimesUpdated := getTimes(t, keyComponent, updatedActualState)

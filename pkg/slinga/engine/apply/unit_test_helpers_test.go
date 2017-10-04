@@ -42,7 +42,7 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, externalData *external.Dat
 	return result
 }
 
-func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, errorMsg string) *resolve.PolicyResolution {
+func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, expectedMessage string) *resolve.PolicyResolution {
 	t.Helper()
 	actualState, eventLog, err := apply.Apply()
 
@@ -55,9 +55,9 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCn
 
 	if expectedResult == ResError {
 		// check for error messages
-		verifier := event.NewUnitTestLogVerifier(errorMsg)
+		verifier := event.NewUnitTestLogVerifier(expectedMessage, expectedResult == ResError)
 		eventLog.Save(verifier)
-		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of error messages containing words: "+errorMsg) {
+		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of messages containing words: "+expectedMessage) {
 			hook := &event.HookStdout{}
 			eventLog.Save(hook)
 			t.FailNow()

@@ -7,13 +7,14 @@ import (
 
 // UnitTestLogVerifier is a mock logger and a unit test helper for verifying event log messages
 type UnitTestLogVerifier struct {
-	checkForErrorMessage string
-	cnt                  int
+	expectedMessage string
+	isError         bool
+	cnt             int
 }
 
 // NewUnitTestLogVerifier creates a new UnitTestLogVerifier which searches for a given error message
-func NewUnitTestLogVerifier(checkForErrorMessage string) *UnitTestLogVerifier {
-	return &UnitTestLogVerifier{checkForErrorMessage: checkForErrorMessage}
+func NewUnitTestLogVerifier(expectedMessage string, isError bool) *UnitTestLogVerifier {
+	return &UnitTestLogVerifier{expectedMessage: expectedMessage, isError: isError}
 }
 
 // Levels returns a set of levels for the mock logger. Returns all levels
@@ -23,8 +24,10 @@ func (verifier *UnitTestLogVerifier) Levels() []logrus.Level {
 
 // Fire processes a log entry. If it contains a given error message, it increments verifier.cnt
 func (verifier *UnitTestLogVerifier) Fire(e *logrus.Entry) error {
-	if e.Level == logrus.ErrorLevel && strings.Contains(e.Message, verifier.checkForErrorMessage) {
-		verifier.cnt++
+	if len(verifier.expectedMessage) > 0 && strings.Contains(e.Message, verifier.expectedMessage) {
+		if !verifier.isError || (verifier.isError && e.Level == logrus.ErrorLevel) {
+			verifier.cnt++
+		}
 	}
 	return nil
 }

@@ -25,7 +25,7 @@ func NewUserLoaderFromDir(baseDir string) UserLoader {
 }
 
 // LoadUsersAll loads all users
-func (loader *UserLoaderFromDir) LoadUsersAll() lang.GlobalUsers {
+func (loader *UserLoaderFromDir) LoadUsersAll() *lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
 		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeUsersFile))
@@ -38,7 +38,7 @@ func (loader *UserLoaderFromDir) LoadUsersAll() lang.GlobalUsers {
 			}
 		}
 	})
-	return *loader.cachedUsers
+	return loader.cachedUsers
 }
 
 // LoadUserByID loads a single user by ID

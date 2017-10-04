@@ -2,6 +2,7 @@ package resolve
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"strconv"
@@ -67,967 +68,281 @@ func TestPolicyResolverCodeAndDiscoveryParamsEval(t *testing.T) {
 }
 
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
+	service := b.AddService(b.AddUser())
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	user := &lang.User{ID: "non-existing-user-123456789"}
+	dependency := b.AddDependency(user, contract)
 
-	dependency := &lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "non-existing-user-123456789",
-		Contract: "newcontract",
-	}
-	policy.AddObject(dependency)
-
-	// dependency referring to non-existing user should not trigger a critical error
-	resolution := resolvePolicy(t, policy, ResSuccess, "")
-
-	// dependency should be just skipped
+	// dependency declared by non-existing consumer should not trigger a critical error
+	resolution := resolvePolicyNew(t, b, ResSuccess, "non-existing user")
 	assert.Empty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should not be resolved")
 }
 
 func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
-	policy := loadUnitTestsPolicy()
-
-	dependency := &lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "4",
-		Contract: "non-existing-contract-123456789",
-	}
-	policy.AddObject(dependency)
+	b := builder.NewPolicyBuilder()
+	user := b.AddUser()
+	contract := &lang.Contract{Metadata: lang.Metadata{Name: "non-existing-contract-123456789"}}
+	dependency := b.AddDependency(user, contract)
 
 	// dependency referring to non-existing contract should not trigger a critical error
-	resolution := resolvePolicy(t, policy, ResSuccess, "")
-
-	// dependency should be just skipped
+	resolution := resolvePolicyNew(t, b, ResSuccess, "non-existing contract")
 	assert.Empty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should not be resolved")
 }
 
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
+	service := b.AddService(b.AddUser())
+	criteria := b.Criteria("true", "specialname + '123')(((", "false")
+	contract := b.AddContract(service, criteria, nil)
+	b.AddDependency(b.AddUser(), contract)
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Owner: "1",
-	})
-
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Contexts: []*lang.Context{{
-			Name: "special-invalid-context-require-any",
-			Criteria: &lang.Criteria{
-				RequireAll: []string{"true"},
-				RequireAny: []string{"specialname + '123')((("},
-			},
-			Allocation: &lang.Allocation{
-				Service: "xyz",
-			},
-		}},
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-	})
-
-	// policy with invalid context should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Unable to compile expression")
+	// policy resolution with invalid context criteria should result in an error
+	resolvePolicyNew(t, b, ResError, "Unable to compile expression")
 }
 
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
+	service := b.AddService(b.AddUser())
+	contract := b.AddContract(service, b.CriteriaTrue(), b.AllocationKeys("w {{..."))
+	b.AddDependency(b.AddUser(), contract)
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Owner: "1",
-	})
-
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Contexts: []*lang.Context{{
-			Name: "special-invalid-context-keys",
-			Allocation: &lang.Allocation{
-				Service: "xyz",
-				Keys: []string{
-					"wowowow {{{{.......",
-				},
-			},
-		}},
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-	})
-
-	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Error while resolving allocation keys")
+	// policy resolution with invalid context allocation keys should result in an error
+	resolvePolicyNew(t, b, ResError, "Error while resolving allocation keys")
 }
 
 func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
+	service := b.AddService(nil)
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	b.AddDependency(b.AddUser(), contract)
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-	})
-
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Contexts: []*lang.Context{{
-			Name: "special-invalid-context-keys",
-			Allocation: &lang.Allocation{
-				Service: "xyz",
-				Keys: []string{
-					"wowowow {{{{.......",
-				},
-			},
-		}},
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-	})
-
-	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Owner doesn't exist")
+	// policy resolution with invalid service (without owner) should result in an error
+	resolvePolicyNew(t, b, ResError, "Owner doesn't exist for service")
 }
 
 func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
+	service := b.AddService(b.AddUser())
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	b.AddDependency(b.AddUser(), contract)
+	b.AddRule(b.Criteria("specialname + '123')(((", "true", "false"), nil)
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "special-invalid-rule-require-all",
-		},
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"specialname + '123')((("},
-		},
-		Actions: &lang.RuleActions{},
-	})
-
-	// policy with invalid rule should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Unable to compile expression")
+	// policy resolution with invalid rule should result in an error
+	resolvePolicyNew(t, b, ResError, "Unable to compile expression")
 }
 
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-					Params: util.NestedParameterMap{
-						"address": "{{ .Labels.deplabel }}",
-					},
-				},
-			},
-		},
-	})
+	// create a service which uses label in its code parameters
+	service := b.AddService(b.AddUser())
+	b.AddServiceComponent(service,
+		b.CodeComponent(
+			util.NestedParameterMap{"address": "{{ .Labels.deplabel }}"},
+			nil,
+		),
+	)
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Allocation: &lang.Allocation{
-				Service: "xyz",
-			},
-		}},
-	})
+	// add dependencies which feed conflicting labels into a given component
+	d1 := b.AddDependency(b.AddUser(), contract)
+	d1.Labels["deplabel"] = "1"
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"service.Name == 'xyz'"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
+	d2 := b.AddDependency(b.AddUser(), contract)
+	d2.Labels["deplabel"] = "2"
 
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new_1",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-		Labels: map[string]string{
-			"deplabel": "1",
-		},
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new_2",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-		Labels: map[string]string{
-			"deplabel": "2",
-		},
-	})
-
-	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Conflicting code parameters")
+	// policy resolution with conflicting code parameters should result in an error
+	resolvePolicyNew(t, b, ResError, "Conflicting code parameters")
 }
 
 func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component",
-				Discovery: util.NestedParameterMap{
-					"address": "{{ .Labels.deplabel }}",
-				},
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-			},
-		},
-	})
+	// create a service which uses label in its discovery parameters
+	service := b.AddService(b.AddUser())
+	b.AddServiceComponent(service,
+		b.CodeComponent(
+			nil,
+			util.NestedParameterMap{"address": "{{ .Labels.deplabel }}"},
+		),
+	)
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "xyz",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Allocation: &lang.Allocation{
-				Service: "xyz",
-			},
-		}},
-	})
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"service.Name == 'xyz'"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
+	// add dependencies which feed conflicting labels into a given component
+	d1 := b.AddDependency(b.AddUser(), contract)
+	d1.Labels["deplabel"] = "1"
 
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new_1",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-		Labels: map[string]string{
-			"deplabel": "1",
-		},
-	})
+	d2 := b.AddDependency(b.AddUser(), contract)
+	d2.Labels["deplabel"] = "2"
 
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new_2",
-		},
-		UserID:   "7",
-		Contract: "xyz",
-		Labels: map[string]string{
-			"deplabel": "2",
-		},
-	})
-
-	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Conflicting discovery parameters")
+	// policy resolution with conflicting discovery parameters should result in an error
+	resolvePolicyNew(t, b, ResError, "Conflicting discovery parameters")
 }
 
 func TestPolicyResolverInvalidCodeParams(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceA",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name:     "component",
-				Contract: "contractB",
-			},
-		},
-	})
+	// create a service which uses label in its code parameters
+	service := b.AddService(b.AddUser())
+	b.AddServiceComponent(service,
+		b.CodeComponent(
+			util.NestedParameterMap{"address": "{{ .Labels..."},
+			nil,
+		),
+	)
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceB",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-					Params: util.NestedParameterMap{
-						"address": "{{ ..... invalid",
-					},
-				},
-			},
-		},
-	})
+	// add dependency
+	b.AddDependency(b.AddUser(), contract)
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractA",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceA",
-			},
-		}},
-	})
-
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractB",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceB",
-			},
-		}},
-	})
-
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB')"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "contractA",
-	})
-
-	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Error when processing code params")
+	// policy resolution with invalid code parameters should result in an error
+	resolvePolicyNew(t, b, ResError, "Error when processing code params")
 }
 
 func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceA",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name:     "component",
-				Contract: "contractB",
-			},
-		},
-	})
+	// create a service which uses label in its code parameters
+	service := b.AddService(b.AddUser())
+	b.AddServiceComponent(service,
+		b.CodeComponent(
+			nil,
+			util.NestedParameterMap{"address": "{{ .Labels..."},
+		),
+	)
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceB",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component",
-				Discovery: util.NestedParameterMap{
-					"address": "{{ .... invalid",
-				},
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-			},
-		},
-	})
+	// add dependency
+	b.AddDependency(b.AddUser(), contract)
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractA",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceA",
-			},
-		}},
-	})
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractB",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceB",
-			},
-		}},
-	})
-
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB')"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "contractA",
-	})
-
-	// policy with invalid context allocation keys should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Error when processing discovery params")
+	// policy resolution with invalid discovery parameters should result in an error
+	resolvePolicyNew(t, b, ResError, "Error when processing discovery params")
 }
 
 func TestPolicyResolverServiceLoop(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceA",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name:     "component",
-				Contract: "contractB",
-			},
-		},
-	})
+	// create 3 services
+	service1 := b.AddService(b.AddUser())
+	contract1 := b.AddContract(service1, b.CriteriaTrue(), nil)
+	service2 := b.AddService(b.AddUser())
+	contract2 := b.AddContract(service2, b.CriteriaTrue(), nil)
+	service3 := b.AddService(b.AddUser())
+	contract3 := b.AddContract(service3, b.CriteriaTrue(), nil)
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceB",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name:     "component",
-				Contract: "contractC",
-			},
-		},
-	})
+	// create service-level cycle
+	b.AddServiceComponent(service1, b.ContractComponent(contract2))
+	b.AddServiceComponent(service2, b.ContractComponent(contract3))
+	b.AddServiceComponent(service3, b.ContractComponent(contract1))
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceC",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name:     "component",
-				Contract: "contractA",
-			},
-		},
-	})
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractA",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceA",
-			},
-		}},
-	})
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractB",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceB",
-			},
-		}},
-	})
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractC",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceC",
-			},
-		}},
-	})
+	// add dependency
+	b.AddDependency(b.AddUser(), contract1)
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"in(service.Name, 'serviceA', 'serviceB', 'serviceC')"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
-
-	dependency := &lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "contractA",
-	}
-	policy.AddObject(dependency)
-
-	// policy with cycle should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "cycle detected")
+	// policy resolution with service dependency cycle should should result in an error
+	resolvePolicyNew(t, b, ResError, "service cycle detected")
 }
 
 func TestPolicyResolverComponentLoop(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceA",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component1",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-				Dependencies: []string{
-					"component2",
-				},
-			},
-			{
-				Name: "component2",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-				Dependencies: []string{
-					"component3",
-				},
-			},
-			{
-				Name: "component3",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-				Dependencies: []string{
-					"component1",
-				},
-			},
-		},
-	})
+	// create 3 services
+	service := b.AddService(b.AddUser())
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractA",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceA",
-			},
-		}},
-	})
+	// create component cycle
+	component1 := b.CodeComponent(nil, nil)
+	component2 := b.CodeComponent(nil, nil)
+	component3 := b.CodeComponent(nil, nil)
+	b.AddComponentDependency(component1, component2)
+	b.AddComponentDependency(component2, component3)
+	b.AddComponentDependency(component3, component1)
+	b.AddServiceComponent(service, component1)
+	b.AddServiceComponent(service, component2)
+	b.AddServiceComponent(service, component3)
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"service.Name == 'serviceA'"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "contractA",
-	})
+	// add dependency
+	b.AddDependency(b.AddUser(), contract)
 
-	// policy with component cycle should not be resolved successfully
-	resolvePolicy(t, policy, ResError, "Component cycle detected")
+	// policy resolution with service dependency cycle should should result in an error
+	resolvePolicyNew(t, b, ResError, "Component cycle detected")
 }
 
 func TestPolicyResolverUnknownComponentType(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "serviceA",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component-unknown",
-			},
-			{
-				Name: "component1",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-				Dependencies: []string{
-					"component2",
-				},
-			},
-			{
-				Name: "component2",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-				},
-			},
-		},
-	})
+	// create a with 3 components, first component is not code and not contract (engine should just skip it)
+	service := b.AddService(b.AddUser())
+	component1 := b.UnknownComponent()
+	component2 := b.CodeComponent(nil, nil)
+	component3 := b.CodeComponent(nil, nil)
+	b.AddComponentDependency(component1, component2)
+	b.AddComponentDependency(component2, component3)
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contractA",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "serviceA",
-			},
-		}},
-	})
+	b.AddServiceComponent(service, component1)
+	b.AddServiceComponent(service, component2)
+	b.AddServiceComponent(service, component3)
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule",
-		},
-		Weight: 1,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"service.Name == 'serviceA'"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
-	dependency := &lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_id_new",
-		},
-		UserID:   "7",
-		Contract: "contractA",
-	}
-	policy.AddObject(dependency)
+	// add dependency
+	dependency := b.AddDependency(b.AddUser(), contract)
 
 	// unknown component type should not result in critical error
-	resolution := resolvePolicy(t, policy, ResSuccess, "")
+	resolution := resolvePolicyNew(t, b, ResSuccess, "Skipping unknown component")
 
 	// check that both dependencies got resolved
 	assert.NotEmpty(t, resolution.DependencyInstanceMap[dependency.GetKey()], "Dependency should be resolved")
 }
 
-func TestPolicyResolverRulesForTwoClusters(t *testing.T) {
-	policy := loadUnitTestsPolicy()
+func TestPolicyResolverPickClusterViaRules(t *testing.T) {
+	b := builder.NewPolicyBuilder()
 
-	policy.AddObject(&lang.Service{
-		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
-			Namespace: "main",
-			Name:      "service",
-		},
-		Owner: "1",
-		Components: []*lang.ServiceComponent{
-			{
-				Name: "component",
-				Code: &lang.Code{
-					Type: "aptomi/code/unittests",
-					Params: util.NestedParameterMap{
-						lang.LabelCluster: "{{ .Labels.cluster }}",
-					},
-				},
-			},
-		},
-	})
+	// create a service which can be deployed to different clusters
+	service := b.AddService(b.AddUser())
+	b.AddServiceComponent(service,
+		b.CodeComponent(
+			util.NestedParameterMap{lang.LabelCluster: "{{ .Labels.cluster }}"},
+			nil,
+		),
+	)
+	contract := b.AddContract(service, b.CriteriaTrue(), nil)
 
-	policy.AddObject(&lang.Contract{
-		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
-			Namespace: "main",
-			Name:      "contract",
-		},
-		Contexts: []*lang.Context{{
-			Name: "context",
-			Criteria: &lang.Criteria{
-				RequireAny: []string{"true"},
-			},
-			Allocation: &lang.Allocation{
-				Service: "service",
-			},
-		}},
-	})
+	// add rules, which say to deploy to different clusters based on label value
+	cluster1 := b.AddCluster()
+	cluster2 := b.AddCluster()
+	b.AddRule(b.Criteria("label1 == 'value1'", "true", "false"), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster1.Name)))
+	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster2.Name)))
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule1",
-		},
-		Weight: 100,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"label1 == 'value1'"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-east")),
-		},
-	})
+	// add dependencies
+	d1 := b.AddDependency(b.AddUser(), contract)
+	d1.Labels["label1"] = "value1"
+	d2 := b.AddDependency(b.AddUser(), contract)
+	d2.Labels["label2"] = "value2"
 
-	policy.AddObject(&lang.Rule{
-		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
-			Namespace: "main",
-			Name:      "rule2",
-		},
-		Weight: 200,
-		Criteria: &lang.Criteria{
-			RequireAll: []string{"label2 == 'value2'"},
-		},
-		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-us-west")),
-		},
-	})
+	// policy resolution should be completed successfully
+	resolution := resolvePolicyNew(t, b, ResSuccess, "Successfully resolved")
 
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_1",
-		},
-		UserID: "7",
-		Labels: map[string]string{
-			"label1": "value1",
-		},
-		Contract: "contract",
-	})
-
-	policy.AddObject(&lang.Dependency{
-		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
-			Namespace: "main",
-			Name:      "dep_2",
-		},
-		UserID: "7",
-		Labels: map[string]string{
-			"label2": "value2",
-		},
-		Contract: "contract",
-	})
-
-	// unknown component type should not result in critical error
-	resolution := resolvePolicy(t, policy, ResSuccess, "")
-
-	// check that both dependencies got resolved
-	instance1 := getInstanceByDependencyKey(t, "main:dependency:dep_1", resolution)
-	instance2 := getInstanceByDependencyKey(t, "main:dependency:dep_2", resolution)
-	assert.Equal(t, "cluster-us-east", instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
-	assert.Equal(t, "cluster-us-west", instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
+	// check that both dependencies got resolved and got placed in different clusters
+	instance1 := getInstanceByDependencyKey(t, d1.GetKey(), resolution)
+	instance2 := getInstanceByDependencyKey(t, d2.GetKey(), resolution)
+	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
+	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 }

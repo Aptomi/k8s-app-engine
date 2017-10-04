@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -23,10 +24,10 @@ func loadUnitTestsPolicy() *lang.Policy {
 func loadPolicyAndResolve(t *testing.T) (*lang.Policy, *PolicyResolution) {
 	t.Helper()
 	policy := loadUnitTestsPolicy()
-	return policy, resolvePolicy(t, policy, ResSuccess, "")
+	return policy, resolvePolicy(t, policy, ResSuccess, "Successfully resolved")
 }
 
-func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expectedErrorMessage string) *PolicyResolution {
+func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expectedMessage string) *PolicyResolution {
 	t.Helper()
 	externalData := external.NewData(
 		users.NewUserLoaderFromDir("../../testdata/unittests"),
@@ -43,16 +44,38 @@ func resolvePolicy(t *testing.T, policy *lang.Policy, expectedResult int, expect
 		return nil
 	}
 
-	if expectedResult == ResError {
-		// check for error message
-		verifier := event.NewUnitTestLogVerifier(expectedErrorMessage)
-		resolver.eventLog.Save(verifier)
-		if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: "+expectedErrorMessage) {
-			hook := &event.HookStdout{}
-			resolver.eventLog.Save(hook)
-			t.FailNow()
-		}
+	// check for error message
+	verifier := event.NewUnitTestLogVerifier(expectedMessage, expectedResult == ResError)
+	resolver.eventLog.Save(verifier)
+	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have a message containing words: "+expectedMessage) {
+		hook := &event.HookStdout{}
+		resolver.eventLog.Save(hook)
+		t.FailNow()
+	}
+
+	return result
+}
+
+func resolvePolicyNew(t *testing.T, builder *builder.PolicyBuilder, expectedResult int, expectedLogMessage string) *PolicyResolution {
+	t.Helper()
+	resolver := NewPolicyResolver(builder.Policy(), builder.External())
+	result, eventLog, err := resolver.ResolveAllDependencies()
+
+	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {
+		// print log into stdout and exit
+		hook := &event.HookStdout{}
+		eventLog.Save(hook)
+		t.FailNow()
 		return nil
+	}
+
+	// check for error message
+	verifier := event.NewUnitTestLogVerifier(expectedLogMessage, expectedResult == ResError)
+	resolver.eventLog.Save(verifier)
+	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: "+expectedLogMessage) {
+		hook := &event.HookStdout{}
+		resolver.eventLog.Save(hook)
+		t.FailNow()
 	}
 
 	return result

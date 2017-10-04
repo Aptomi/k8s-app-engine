@@ -130,26 +130,11 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	return gen.policy, gen.externalData
 }
 
-func (gen *PolicyGenerator) randomString(length int) string {
-	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		if i == 0 {
-			// first letter non-numeric
-			b[i] = charset[gen.random.Intn(len(charset)-10)]
-		} else {
-			// other letters any
-			b[i] = charset[gen.random.Intn(len(charset))]
-		}
-	}
-	return string(b)
-}
-
 func (gen *PolicyGenerator) makeLabels() {
 	gen.generatedLabels = make(map[string]string)
 	for i := 0; i < gen.labels; i++ {
-		name := gen.randomString(10)
-		value := gen.randomString(25)
+		name := util.RandomID(gen.random, 10)
+		value := util.RandomID(gen.random, 25)
 		gen.generatedLabels[name] = value
 	}
 
@@ -266,7 +251,7 @@ func (gen *PolicyGenerator) makeRules() {
 			RequireAll: []string{"true"},
 		},
 		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction("allow"),
+			Dependency:   lang.DependencyAction(lang.Allow),
 			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-test")),
 		},
 	})
@@ -286,13 +271,13 @@ func (gen *PolicyGenerator) makeContracts() {
 		// generate non-matching contexts
 		for j := 0; j < gen.contextsPerContract-1; j++ {
 			context := &lang.Context{
-				Name: "context-" + gen.randomString(20),
+				Name: "context-" + util.RandomID(gen.random, 20),
 				Criteria: &lang.Criteria{
 					RequireAll: []string{"true"},
 					RequireAny: []string{
-						gen.randomString(20) + "=='" + gen.randomString(20) + "'",
-						gen.randomString(20) + "=='" + gen.randomString(20) + "'",
-						gen.randomString(20) + "=='" + gen.randomString(20) + "'",
+						util.RandomID(gen.random, 20) + "=='" + util.RandomID(gen.random, 20) + "'",
+						util.RandomID(gen.random, 20) + "=='" + util.RandomID(gen.random, 20) + "'",
+						util.RandomID(gen.random, 20) + "=='" + util.RandomID(gen.random, 20) + "'",
 					},
 				},
 				Allocation: &lang.Allocation{
@@ -304,7 +289,7 @@ func (gen *PolicyGenerator) makeContracts() {
 
 		// generate matching context
 		context := &lang.Context{
-			Name: "context-" + gen.randomString(20),
+			Name: "context-" + util.RandomID(gen.random, 20),
 			Criteria: &lang.Criteria{
 				RequireAll: []string{"true"},
 			},
@@ -359,7 +344,7 @@ func NewUserLoaderImpl(users int, labels map[string]string) *UserLoaderImpl {
 	}
 }
 
-func (loader *UserLoaderImpl) LoadUsersAll() lang.GlobalUsers {
+func (loader *UserLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
 	if loader.cachedUsers == nil {
 		userMap := make(map[string]*lang.User)
 		for i := 0; i < loader.users; i++ {
@@ -372,7 +357,7 @@ func (loader *UserLoaderImpl) LoadUsersAll() lang.GlobalUsers {
 		}
 		loader.cachedUsers = &lang.GlobalUsers{Users: userMap}
 	}
-	return *loader.cachedUsers
+	return loader.cachedUsers
 }
 
 func (loader *UserLoaderImpl) LoadUserByID(id string) *lang.User {
@@ -417,7 +402,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		actions,
 	)
 
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "")
+	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
 
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)

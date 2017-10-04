@@ -35,10 +35,10 @@ type Service struct {
 type ServiceComponent struct {
 	Name string
 
-	// Component can point to a contract as a dependency
+	// Contract, if not empty, means that component points to another contract as a dependency
 	Contract string
 
-	// Otherwise it's a code component
+	// Code, if not empty, means that component is a code that can be instantiated
 	Code         *Code
 	Discovery    util.NestedParameterMap
 	Dependencies []string
