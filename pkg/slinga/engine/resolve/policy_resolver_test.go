@@ -11,7 +11,6 @@ import (
 )
 
 func TestPolicyResolverContract(t *testing.T) {
-	// multiple contexts
 	b := builder.NewPolicyBuilder()
 
 	// create a service with two contexts within a contract
