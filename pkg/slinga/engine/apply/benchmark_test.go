@@ -2,10 +2,14 @@ package apply
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
+	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -385,8 +389,8 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	timeStart := time.Now()
 
 	actualPolicy := lang.NewPolicy()
-	actualState := resolvePolicy(t, actualPolicy, externalData)
-	desiredState := resolvePolicy(t, desiredPolicy, externalData)
+	actualState := resolvePolicyBenchmark(t, actualPolicy, externalData)
+	desiredState := resolvePolicyBenchmark(t, desiredPolicy, externalData)
 
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions
@@ -396,9 +400,9 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		desiredState,
 		actualPolicy,
 		actualState,
-		NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(),
 		externalData,
-		NewTestPluginRegistry("fail-components-like-these"),
+		MockPluginFailOnComponent("fail-components-like-these"),
 		actions,
 	)
 
@@ -412,4 +416,17 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	if len(desiredState.DependencyInstanceMap) <= 0 {
 		panic("No dependencies resolved")
 	}
+}
+
+func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data) *resolve.PolicyResolution {
+	t.Helper()
+	resolver := resolve.NewPolicyResolver(policy, externalData)
+	result, eventLog, err := resolver.ResolveAllDependencies()
+	if !assert.Nil(t, err, "Policy should be resolved without errors") {
+		hook := &event.HookStdout{}
+		eventLog.Save(hook)
+		t.FailNow()
+	}
+
+	return result
 }
