@@ -78,28 +78,28 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []object.B
 	return result
 }
 
-func (policyNamespace *PolicyNamespace) getObject(kind string, name string) object.Base {
+func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (object.Base, error) {
 	var ok bool
 	var result object.Base
 	switch kind {
 	case ServiceObject.Kind:
 		if result, ok = policyNamespace.Services[name]; !ok {
-			return nil
+			return nil, nil
 		}
 	case ContractObject.Kind:
 		if result, ok = policyNamespace.Contracts[name]; !ok {
-			return nil
+			return nil, nil
 		}
 	case ClusterObject.Kind:
 		if result, ok = policyNamespace.Clusters[name]; !ok {
-			return nil
+			return nil, nil
 		}
 	case RuleObject.Kind:
-		panic(fmt.Sprintf("Rule not supported here. Can't get object from policy namespace by kind and name: %s, %s", kind, name))
+		return nil, fmt.Errorf("Rule not supported by PolicyNamespace.getObject(): %s, %s", kind, name)
 	case DependencyObject.Kind:
-		panic(fmt.Sprintf("Dependency not supported here. Can't get object from policy namespace by kind and name: %s, %s", kind, name))
+		return nil, fmt.Errorf("Dependency not supported by PolicyNamespace.getObject(): %s, %s", kind, name)
 	default:
-		panic(fmt.Sprintf("Can't get object from policy namespace by kind and name: %s, %s", kind, name))
+		return nil, fmt.Errorf("Unknown object kind in PolicyNamespace.getObject(): %s, %s", kind, name)
 	}
-	return result
+	return result, nil
 }

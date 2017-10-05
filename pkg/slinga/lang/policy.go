@@ -57,5 +57,5 @@ func (policy *Policy) GetObject(kind string, locator string, currentNs string) (
 		return nil, fmt.Errorf("Namespace '%s' doesn't exist, but referenced in locator '%s'", ns, locator)
 	}
 
-	return policyNS.getObject(kind, name), nil
+	return policyNS.getObject(kind, name)
 }

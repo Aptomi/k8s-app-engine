@@ -3,32 +3,98 @@ package lang
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 )
 
-func TestLoadPolicy(t *testing.T) {
-	policy := LoadUnitTestsPolicy("../testdata/unittests")
-	policyMain := policy.Namespace["main"]
-	policySystem := policy.Namespace[object.SystemNS]
+func TestPolicy(t *testing.T) {
+	namespace := "main"
+	policy := NewPolicy()
+	for i := 0; i < 10; i++ {
+		policy.AddObject(&Service{
+			Metadata: Metadata{
+				Kind:      ServiceObject.Kind,
+				Namespace: namespace,
+				Name:      "service" + strconv.Itoa(i),
+			},
+		})
+		policy.AddObject(&Contract{
+			Metadata: Metadata{
+				Kind:      ContractObject.Kind,
+				Namespace: namespace,
+				Name:      "contract" + strconv.Itoa(i),
+			},
+		})
+		policy.AddObject(&Cluster{
+			Metadata: Metadata{
+				Kind:      ClusterObject.Kind,
+				Namespace: object.SystemNS,
+				Name:      "cluster" + strconv.Itoa(i),
+			},
+		})
+		policy.AddObject(&Rule{
+			Metadata: Metadata{
+				Kind:      RuleObject.Kind,
+				Namespace: namespace,
+				Name:      "rule" + strconv.Itoa(i),
+			},
+		})
+		policy.AddObject(&Dependency{
+			Metadata: Metadata{
+				Kind:      DependencyObject.Kind,
+				Namespace: namespace,
+				Name:      "dependency" + strconv.Itoa(i),
+			},
+		})
+	}
 
-	// Check services
-	assert.Equal(t, 2, len(policyMain.Services), "Two services should be loaded")
-	assert.NotNil(t, policyMain.Services["kafka"], "Kafka service should be loaded")
-	assert.NotNil(t, policyMain.Services["zookeeper"], "Zookeeper service should be loaded")
+	// retrieve objects
+	catalog := object.NewCatalog(ServiceObject, ContractObject)
+	for _, kind := range catalog.Kinds {
+		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
 
-	// Check contracts
-	assert.Equal(t, 2, len(policyMain.Contracts), "Two contracts should be loaded")
-	assert.NotNil(t, policyMain.Contracts["kafka"], "Kafka contract should be loaded")
-	assert.Equal(t, 3, len(policyMain.Contracts["kafka"].Contexts), "Kafka contract should have contexts")
-	assert.NotNil(t, policyMain.Contracts["zookeeper"], "Zookeeper contract should be loaded")
-	assert.Equal(t, 3, len(policyMain.Contracts["zookeeper"].Contexts), "Zookeeper contract should have contexts")
+		for i := 0; i < 10; i++ {
+			name := kind.Kind + strconv.Itoa(i)
 
-	// Check clusters
-	assert.Equal(t, 2, len(policySystem.Clusters), "Two clusters should be loaded")
+			// get within current namespace
+			obj1, err := policy.GetObject(kind.Kind, name, namespace)
+			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
+			assert.NotNil(t, obj1, "Get object by kind '%s' should return an object", name)
 
-	// Check rules
-	assert.Equal(t, 4, len(policyMain.Rules.Rules), "Correct number of rule action types should be loaded")
+			// get by absolute path
+			obj2, err := policy.GetObject(kind.Kind, namespace+"/"+name, "")
+			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
+			assert.NotNil(t, obj2, "Get object by kind '%s' should return an object", name)
+		}
+	}
 
-	// Check dependencies
-	assert.Equal(t, 4, len(policyMain.Dependencies.DependenciesByContract["kafka"]), "Dependencies on kafka should be declared")
+	catalog = object.NewCatalog(ClusterObject)
+	for _, kind := range catalog.Kinds {
+		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
+
+		for i := 0; i < 10; i++ {
+			name := kind.Kind + strconv.Itoa(i)
+
+			// get within current namespace
+			obj1, err := policy.GetObject(kind.Kind, name, object.SystemNS)
+			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
+			assert.NotNil(t, obj1, "Get object by kind '%s' should return an object", name)
+
+			// get by absolute path
+			obj2, err := policy.GetObject(kind.Kind, object.SystemNS+"/"+name, "")
+			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
+			assert.NotNil(t, obj2, "Get object by kind '%s' should return an object", name)
+		}
+	}
+
+	catalog = object.NewCatalog(RuleObject, DependencyObject)
+	for _, kind := range catalog.Kinds {
+		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
+
+		for i := 0; i < 10; i++ {
+			name := kind.Kind + strconv.Itoa(i)
+			_, err := policy.GetObject(kind.Kind, kind.Kind+strconv.Itoa(i), namespace)
+			assert.Error(t, err, "Get object by kind '%s' should return an error", name)
+		}
+	}
 }
