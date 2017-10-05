@@ -17,7 +17,7 @@ func TestBoltStore(t *testing.T) {
 	db := NewBoltStore(catalog, yaml.NewCodec(catalog))
 
 	f, err := ioutil.TempFile("", t.Name())
-	assert.Nil(t, err, "Temp file should be successfully created")
+	assert.NoError(t, err, "Temp file should be successfully created")
 	defer os.Remove(f.Name()) // nolint: errcheck
 
 	err = db.Open(f.Name())

@@ -422,7 +422,7 @@ func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *ext
 	t.Helper()
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
-	if !assert.Nil(t, err, "Policy should be resolved without errors") {
+	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		hook := &event.HookStdout{}
 		eventLog.Save(hook)
 		t.FailNow()

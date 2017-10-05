@@ -28,14 +28,14 @@ func TestPolicyVisualization(t *testing.T) {
 	policy := lang.LoadUnitTestsPolicy("../testdata/unittests")
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	resolutionNew, _, err := resolver.ResolveAllDependencies()
-	if !assert.Nil(t, err, "Policy should be resolved without errors") {
+	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
 	}
 
 	// generate images
 	{
 		imagePrev, err := NewPolicyVisualizationImage(policyEmpty, resolutionEmpty, externalData)
-		assert.Nil(t, err, "Image should be generated")
+		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imagePrev.Bounds().Dx() < 20, "Image for empty policy resolution should be empty")
 		assert.True(t, imagePrev.Bounds().Dy() < 20, "Image for empty policy resolution should be empty")
 
@@ -44,7 +44,7 @@ func TestPolicyVisualization(t *testing.T) {
 
 	{
 		imageNext, err := NewPolicyVisualizationImage(policy, resolutionNew, externalData)
-		assert.Nil(t, err, "Image should be generated")
+		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imageNext.Bounds().Dx() > 800, "Image for unit test resolved policy should be big enough")
 		assert.True(t, imageNext.Bounds().Dy() > 800, "Image for unit test resolved policy should be big enough")
 
@@ -54,7 +54,7 @@ func TestPolicyVisualization(t *testing.T) {
 	{
 		// delta (empty) -> (non-empty)
 		imageDiff, err := NewPolicyVisualizationDeltaImage(policy, resolutionNew, policyEmpty, resolutionEmpty, externalData)
-		assert.Nil(t, err, "Image should be generated")
+		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imageDiff.Bounds().Dx() > 800, "Image for unit test resolved policy diff against empty (all additions) should be big enough")
 		assert.True(t, imageDiff.Bounds().Dy() > 800, "Image for unit test resolved policy diff against empty (all additions) should be big enough")
 
@@ -64,7 +64,7 @@ func TestPolicyVisualization(t *testing.T) {
 	{
 		// delta (non-empty) -> (empty)
 		imageDiff, err := NewPolicyVisualizationDeltaImage(policyEmpty, resolutionEmpty, policy, resolutionNew, externalData)
-		assert.Nil(t, err, "Image should be generated")
+		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imageDiff.Bounds().Dx() > 800, "Image for unit test resolved policy diff against empty (all deletions) should be big enough")
 		assert.True(t, imageDiff.Bounds().Dy() > 800, "Image for unit test resolved policy diff against empty (all deletions) should be big enough")
 
