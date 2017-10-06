@@ -7,24 +7,23 @@ import (
 
 // Metadata is an object metadata for all state update actions
 type Metadata struct {
-	Key      string
 	Kind     string
+	Name     string
 	Revision object.Generation
 }
 
 // NewMetadata creates new Metadata
 func NewMetadata(revision object.Generation, kind string, keys ...string) *Metadata {
-	keysStr := strings.Join(keys, object.KeySeparator)
 	return &Metadata{
-		Key:      strings.Join([]string{revision.String(), kind, keysStr}, object.KeySeparator),
 		Kind:     kind,
+		Name:     strings.Join(keys, object.KeySeparator),
 		Revision: revision,
 	}
 }
 
 // GetKey returns an object key
 func (meta *Metadata) GetKey() string {
-	return meta.Key
+	return strings.Join([]string{meta.Revision.String(), meta.Kind, meta.Name}, object.KeySeparator)
 }
 
 // GetNamespace returns a namespace for an action (it's always a system namespace)
