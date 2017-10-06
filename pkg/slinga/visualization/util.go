@@ -1,4 +1,4 @@
-package graphviz
+package visualization
 
 import (
 	"bytes"
@@ -9,16 +9,6 @@ import (
 	"io/ioutil"
 	"os/exec"
 )
-
-// Returns a short version of the string
-func shorten(s string) string {
-	const maxLen = 20
-	const suffix = "..."
-	if len(s) > maxLen-len(suffix) {
-		return s[0:maxLen-len(suffix)] + suffix
-	}
-	return s
-}
 
 // Finds subgraph name from relations
 func findSubraphName(prev *gographviz.Graph, nName string) string {

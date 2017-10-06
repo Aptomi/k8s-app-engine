@@ -1,4 +1,4 @@
-package graphviz
+package visualization
 
 import (
 	"fmt"
@@ -49,12 +49,16 @@ func isID(s string) bool {
 			return false
 		}
 
-		// THIS IS THE MOST IMPORTANT LINE
+		// THIS IS A VERY IMPORTANT LINE
 		if c == '_' {
 			return false
 		}
-		// THIS IS THE MOST IMPORTANT LINE
+		// THIS IS A VERY IMPORTANT LINE
 		if c == '=' {
+			return false
+		}
+		// THIS IS A VERY IMPORTANT LINE
+		if c == '#' {
 			return false
 		}
 		i++

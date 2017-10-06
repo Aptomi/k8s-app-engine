@@ -1,4 +1,4 @@
-package graphviz
+package visualization
 
 import (
 	"bytes"
@@ -11,10 +11,12 @@ import (
 	"os/exec"
 )
 
-// Saves graph into a file
-func getGraphImage(graph *gographviz.Graph) (image.Image, error) {
+// CreateImage draws graphviz graph and returns it as an image
+func CreateImage(graph *gographviz.Graph) (image.Image, error) {
+	graphStr := graph.String()
+
 	// Original graph in .dot
-	fileNameDot := util.WriteTempFile("graphviz", graph.String())
+	fileNameDot := util.WriteTempFile("graphviz", graphStr)
 	defer os.Remove(fileNameDot) // nolint: errcheck
 
 	// Graph with improved layout in .dot
@@ -34,7 +36,7 @@ func getGraphImage(graph *gographviz.Graph) (image.Image, error) {
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s", cmd, args, outb.String(), errb.String(), err.Error()))
+			unableToExecute(cmd, args, outb, errb, err, graphStr)
 		}
 	}
 
@@ -48,7 +50,7 @@ func getGraphImage(graph *gographviz.Graph) (image.Image, error) {
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s", cmd, args, outb.String(), errb.String(), err.Error()))
+			unableToExecute(cmd, args, outb, errb, err, graphStr)
 		}
 	}
 
@@ -59,4 +61,8 @@ func getGraphImage(graph *gographviz.Graph) (image.Image, error) {
 	}
 	defer filePng.Close() // nolint: errcheck
 	return png.Decode(filePng)
+}
+
+func unableToExecute(cmd string, args []string, outb bytes.Buffer, errb bytes.Buffer, err error, graph string) {
+	panic(fmt.Sprintf("Unable to execute graphviz '%s' with '%s': %s %s %s\n%s", cmd, args, outb.String(), errb.String(), err, graph))
 }

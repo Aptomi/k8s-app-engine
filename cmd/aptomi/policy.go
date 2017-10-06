@@ -76,8 +76,8 @@ var policyCmdApply = &cobra.Command{
 		fmt.Println("Success")
 		fmt.Println("Components:", len(resolution.ComponentInstanceMap))
 
-		// image, _ := graphviz.NewPolicyVisualizationImage(policy, resolution, externalData)
-		// graphviz.OpenImage(image)
+		// image, _ := visualization.CreateImage(visualization.NewDiagram(policy, resolution, externalData))
+		// visualization.OpenImage(image)
 
 		// Process differences
 		// diff := NewRevisionDiff(nextState, prevState)

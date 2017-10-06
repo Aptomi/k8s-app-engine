@@ -12,23 +12,6 @@ import (
 	"strings"
 )
 
-// LoadUnitTestsPolicy is a helper which loads unit test policy from a set of files
-func LoadUnitTestsPolicy(storeDir string) *Policy {
-	loader := NewFileLoader(storeDir)
-
-	policy := NewPolicy()
-	objects, err := loader.LoadObjects()
-	if err != nil {
-		panic(fmt.Sprintf("Error while loading test policy: %s", err))
-	}
-
-	for _, obj := range objects {
-		policy.AddObject(obj)
-	}
-
-	return policy
-}
-
 // NewFileLoader creates new FileLoader
 func NewFileLoader(path string) *FileLoader {
 	catalog := object.NewCatalog(ServiceObject, ContractObject, ClusterObject, RuleObject, DependencyObject)
