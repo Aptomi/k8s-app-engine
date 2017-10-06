@@ -39,6 +39,11 @@ func NewPolicyBuilderWithNS(namespace string) *PolicyBuilder {
 	}
 }
 
+// SwitchNamespace switches the current namespace where objects will be generated
+func (builder *PolicyBuilder) SwitchNamespace(namespace string) {
+	builder.namespace = namespace
+}
+
 // AddDependency creates a new dependency and adds it to the policy
 func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Contract) *lang.Dependency {
 	result := &lang.Dependency{
@@ -48,7 +53,7 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 			Name:      util.RandomID(builder.random, idLength),
 		},
 		UserID:   user.ID,
-		Contract: contract.Name,
+		Contract: contract.Namespace + "/" + contract.Name,
 		Labels:   make(map[string]string),
 	}
 
@@ -203,7 +208,7 @@ func (builder *PolicyBuilder) CodeComponent(codeParams util.NestedParameterMap, 
 func (builder *PolicyBuilder) ContractComponent(contract *lang.Contract) *lang.ServiceComponent {
 	return &lang.ServiceComponent{
 		Name:     util.RandomID(builder.random, idLength),
-		Contract: contract.Name,
+		Contract: contract.Namespace + "/" + contract.Name,
 	}
 }
 
