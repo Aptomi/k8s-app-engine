@@ -86,9 +86,7 @@ func makePolicyObjects(t *testing.T) []object.Base {
 	objects := make([]object.Base, 0)
 	policy := b.Policy()
 	for _, kind := range testCatalog.Kinds {
-		for _, obj := range policy.GetObjectsByKind(kind.Kind) {
-			objects = append(objects, obj)
-		}
+		objects = append(objects, policy.GetObjectsByKind(kind.Kind)...)
 	}
 
 	data, err := testCodec.MarshalMany(objects)
