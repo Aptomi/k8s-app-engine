@@ -12,9 +12,13 @@ import (
 	"testing"
 )
 
+var (
+	testCatalog = object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	testCodec   = yaml.NewCodec(testCatalog)
+)
+
 func TestBoltStore(t *testing.T) {
-	catalog := object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
-	db := NewBoltStore(catalog, yaml.NewCodec(catalog))
+	db := NewBoltStore(testCatalog, testCodec)
 
 	f, err := ioutil.TempFile("", t.Name())
 	assert.NoError(t, err, "Temp file should be successfully created")
@@ -25,32 +29,23 @@ func TestBoltStore(t *testing.T) {
 		panic(err)
 	}
 
-	b := makePolicyBuilder()
+	policy := makePolicyObjects(t)
 
-	for _, kind := range catalog.Kinds {
-		for _, obj := range b.Policy().GetObjectsByKind(kind.Kind) {
-			updated, err := db.Save(obj)
-			if err != nil {
-				panic(err)
-			}
-			assert.True(t, updated, "Object saved for the first time")
+	for _, obj := range policy {
+		updated, err := db.Save(obj)
+		if err != nil {
+			panic(err)
 		}
+		assert.True(t, updated, "Object saved for the first time")
 	}
 
-	for _, kind := range catalog.Kinds {
-		for _, obj := range b.Policy().GetObjectsByKind(kind.Kind) {
-			objSaved, err := db.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration())
-			if err != nil {
-				panic(err)
-			}
-
-			assert.Exactly(t, obj.GetName(), objSaved.GetName(), "Saved object is not equal to the original object in the policy")
-
-			// TODO: this fails because of deepequal comparison
-			// - nil slice/map becomes empty slide/map after saving
-			// - this should be fixed
-			// assert.Exactly(t, obj, objSaved, "Saved object is not equal to the original object in the policy")
+	for _, obj := range policy {
+		objSaved, err := db.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration())
+		if err != nil {
+			panic(err)
 		}
+
+		assert.Exactly(t, obj, objSaved, "Saved object is not equal to the original object in the policy")
 	}
 }
 
@@ -58,7 +53,8 @@ func TestBoltStore(t *testing.T) {
 	Helpers
 */
 
-func makePolicyBuilder() *builder.PolicyBuilder {
+func makePolicyObjects(t *testing.T) []object.Base {
+	t.Helper()
 	b := builder.NewPolicyBuilder()
 
 	for i := 0; i < 10; i++ {
@@ -84,5 +80,25 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 		dependency.Labels["param"] = "value1"
 	}
 
-	return b
+	// This hack is needed to make sure that we'll get test data in the same way like after marshaling objects
+	// and storing them in DB. Example: empty fields will be stored anyway, while we omitting them in test data.
+
+	objects := make([]object.Base, 0)
+	policy := b.Policy()
+	for _, kind := range testCatalog.Kinds {
+		for _, obj := range policy.GetObjectsByKind(kind.Kind) {
+			objects = append(objects, obj)
+		}
+	}
+
+	data, err := testCodec.MarshalMany(objects)
+	if err != nil {
+		t.Errorf("Error marshaling policy objects: %s", err)
+	}
+	objects, err = testCodec.UnmarshalOneOrMany(data)
+	if err != nil {
+		t.Errorf("Error unmarshaling policy objects: %s", err)
+	}
+
+	return objects
 }
