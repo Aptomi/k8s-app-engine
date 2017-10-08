@@ -142,3 +142,7 @@ func normalize(actions []action.Base) []action.Base {
 	}
 	return result
 }
+
+func (diff *PolicyResolutionDiff) IsChanged() bool {
+	return len(diff.Actions) > 0
+}

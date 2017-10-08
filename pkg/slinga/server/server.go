@@ -65,6 +65,10 @@ func (s *Server) Start() {
 		panic(s.httpServer.ListenAndServe())
 	})
 
+	s.runInBackground("Policy Enforcer", true, func() {
+		NewEnforcer(s.store).Enforce()
+	})
+
 	s.wait()
 }
 
