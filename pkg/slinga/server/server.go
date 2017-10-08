@@ -6,10 +6,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
-	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store/bolt"
 	"github.com/Aptomi/aptomi/pkg/slinga/server/api"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	"github.com/Aptomi/aptomi/pkg/slinga/version"
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
@@ -40,8 +39,7 @@ type Server struct {
 	catalog          *object.Catalog
 	codec            codec.MarshallerUnmarshaller
 
-	store      store.ObjectStore
-	policyCtl  controller.PolicyController
+	store      store.ServerStore
 	httpServer *http.Server
 }
 
@@ -52,7 +50,7 @@ func NewServer(config *viper.Viper) *Server {
 		backgroundErrors: make(chan string),
 	}
 
-	s.catalog = object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
+	s.catalog = object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, store.PolicyDataObject)
 	s.codec = yaml.NewCodec(s.catalog)
 
 	return s
@@ -61,7 +59,6 @@ func NewServer(config *viper.Viper) *Server {
 // Start makes HTTP server start serving content
 func (s *Server) Start() {
 	s.initStore()
-	s.initPolicyController()
 	s.initHTTPServer()
 
 	s.runInBackground("HTTP Server", true, func() {
@@ -79,11 +76,7 @@ func (s *Server) initStore() {
 	if err != nil {
 		panic(fmt.Sprintf("Can't open object store: %s", err))
 	}
-	s.store = b
-}
-
-func (s *Server) initPolicyController() {
-	s.policyCtl = controller.NewPolicyController(s.store)
+	s.store = store.New(b)
 }
 
 func (s *Server) initHTTPServer() {
@@ -93,7 +86,7 @@ func (s *Server) initHTTPServer() {
 	router := httprouter.New()
 
 	version.Serve(router)
-	api.ServePolicy(router, s.policyCtl, s.codec)
+	api.ServePolicy(router, s.store, s.codec)
 	api.ServeAdminStore(router, s.store)
 	webui.Serve(router)
 

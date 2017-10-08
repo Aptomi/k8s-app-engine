@@ -7,7 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	"github.com/gosuri/uitable"
 	"github.com/mattn/go-zglob"
 	"github.com/spf13/viper"
@@ -23,7 +23,7 @@ import (
 func Apply(config *viper.Viper) error {
 	policyPaths := config.GetStringSlice("apply.policyPaths")
 
-	catalog := object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, controller.PolicyDataObject)
+	catalog := object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject, store.PolicyDataObject)
 	cod := yaml.NewCodec(catalog)
 
 	allObjects, err := readFiles(policyPaths, cod)

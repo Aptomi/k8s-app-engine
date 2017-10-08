@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/controller"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 
 // PolicyAPI is a an object which allows to retrieve and update policy via API
 type PolicyAPI struct {
-	ctl   controller.PolicyController
+	store store.ServerStore
 	codec codec.MarshallerUnmarshaller
 }
 
@@ -44,7 +44,7 @@ func (a *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 		panic(fmt.Sprintf("Error unmarshaling policy update request: %s", err))
 	}
 
-	_, policyData, err := a.ctl.UpdatePolicy(objects)
+	_, policyData, err := a.store.UpdatePolicy(objects)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}
@@ -69,8 +69,8 @@ func (a *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p
 }
 
 // ServePolicy registers policy processing handlers in API
-func ServePolicy(router *httprouter.Router, ctl controller.PolicyController, cod codec.MarshallerUnmarshaller) {
-	h := PolicyAPI{ctl, cod}
+func ServePolicy(router *httprouter.Router, store store.ServerStore, cod codec.MarshallerUnmarshaller) {
+	h := PolicyAPI{store, cod}
 
 	router.GET("/api/v1/policy", h.handleGetPolicy)
 	router.GET("/api/v1/policy/:rev", h.handleGetPolicy)
