@@ -1,6 +1,8 @@
 package store
 
 import (
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/actual"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
@@ -12,6 +14,8 @@ type ServerStore interface {
 
 	PolicyStore
 	RevisionStore
+
+	ActualStateUpdater() actual.StateUpdater
 }
 
 type PolicyStore interface {
@@ -21,11 +25,8 @@ type PolicyStore interface {
 }
 
 type RevisionStore interface {
-	GetRevision(object.Generation) (*lang.Policy, error)
-	UpdateRevision() error
-}
-
-type ActualStateStore interface {
+	GetRevision(object.Generation) (*RevisionData, error)
+	NextRevision() (*RevisionData, error)
 }
 
 // PolicyName is an object name under which aptomi policy will be stored in the object store
@@ -36,27 +37,4 @@ var PolicyDataObject = &object.Info{
 	Kind:        "policy",
 	Versioned:   true,
 	Constructor: func() object.Base { return &PolicyData{} },
-}
-
-// PolicyData is a struct which represents policy in the data store. Containing references to a generation for each object included into the policy
-type PolicyData struct {
-	lang.Metadata
-
-	// Objects stores all policy objects in map: namespace -> kind -> name -> generation
-	Objects map[string]map[string]map[string]object.Generation
-}
-
-// Add adds an object to PolicyData
-func (p *PolicyData) Add(obj object.Base) {
-	byNs, exist := p.Objects[obj.GetNamespace()]
-	if !exist {
-		byNs = make(map[string]map[string]object.Generation)
-		p.Objects[obj.GetNamespace()] = byNs
-	}
-	byKind, exist := byNs[obj.GetKind()]
-	if !exist {
-		byKind = make(map[string]object.Generation)
-		byNs[obj.GetKind()] = byKind
-	}
-	byKind[obj.GetName()] = obj.GetGeneration()
 }

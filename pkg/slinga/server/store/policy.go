@@ -6,6 +6,29 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
+// PolicyData is a struct which represents policy in the data store. Containing references to a generation for each object included into the policy
+type PolicyData struct {
+	lang.Metadata
+
+	// Objects stores all policy objects in map: namespace -> kind -> name -> generation
+	Objects map[string]map[string]map[string]object.Generation
+}
+
+// Add adds an object to PolicyData
+func (p *PolicyData) Add(obj object.Base) {
+	byNs, exist := p.Objects[obj.GetNamespace()]
+	if !exist {
+		byNs = make(map[string]map[string]object.Generation)
+		p.Objects[obj.GetNamespace()] = byNs
+	}
+	byKind, exist := byNs[obj.GetKind()]
+	if !exist {
+		byKind = make(map[string]object.Generation)
+		byNs[obj.GetKind()] = byKind
+	}
+	byKind[obj.GetName()] = obj.GetGeneration()
+}
+
 // GetPolicyData retrieves PolicyData given its generation
 func (s *defaultStore) GetPolicyData(gen object.Generation) (*PolicyData, error) {
 	dataObj, err := s.store.GetByName(object.SystemNS, PolicyDataObject.Kind, PolicyName, gen)
