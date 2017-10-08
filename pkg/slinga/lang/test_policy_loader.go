@@ -14,7 +14,7 @@ import (
 
 // NewFileLoader creates new FileLoader
 func NewFileLoader(path string) *FileLoader {
-	catalog := object.NewCatalog(ServiceObject, ContractObject, ClusterObject, RuleObject, DependencyObject)
+	catalog := object.NewCatalog().Append(Objects...)
 	return &FileLoader{yaml.NewCodec(catalog), path}
 }
 

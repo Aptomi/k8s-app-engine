@@ -1,13 +1,5 @@
 package object
 
-// Catalog contains a map of objects informational structures by their kind
-type Catalog struct {
-	Kinds map[string]*Info
-}
-
-// Constructor function definition to create flavors of base objects
-type Constructor func() Base
-
 // Info is an informational structure for an object, which defines its
 // - kind
 // - versioned
@@ -23,14 +15,28 @@ func (info *Info) New() Base {
 	return info.Constructor()
 }
 
+// Catalog contains a map of objects informational structures by their kind
+type Catalog struct {
+	Kinds map[string]*Info
+}
+
+// Constructor function definition to create flavors of base objects
+type Constructor func() Base
+
 // NewCatalog creates a new Catalog
-func NewCatalog(infos ...*Info) *Catalog {
+func NewCatalog() *Catalog {
 	catalog := &Catalog{
 		make(map[string]*Info),
 	}
+
+	return catalog
+}
+
+func (catalog *Catalog) Append(infos ...*Info) *Catalog {
 	for _, info := range infos {
 		catalog.Kinds[info.Kind] = info
 	}
+
 	return catalog
 }
 

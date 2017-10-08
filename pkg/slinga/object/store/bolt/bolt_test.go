@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	testCatalog = object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	testCatalog = object.NewCatalog().Append(lang.Objects...)
 	testCodec   = yaml.NewCodec(testCatalog)
 )
 

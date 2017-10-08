@@ -49,7 +49,7 @@ func TestPolicy(t *testing.T) {
 	}
 
 	// retrieve objects
-	catalog := object.NewCatalog(ServiceObject, ContractObject)
+	catalog := object.NewCatalog().Append(ServiceObject, ContractObject)
 	for _, kind := range catalog.Kinds {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
 
@@ -68,7 +68,7 @@ func TestPolicy(t *testing.T) {
 		}
 	}
 
-	catalog = object.NewCatalog(ClusterObject)
+	catalog = object.NewCatalog().Append(ClusterObject)
 	for _, kind := range catalog.Kinds {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
 
@@ -87,7 +87,7 @@ func TestPolicy(t *testing.T) {
 		}
 	}
 
-	catalog = object.NewCatalog(RuleObject, DependencyObject)
+	catalog = object.NewCatalog().Append(RuleObject, DependencyObject)
 	for _, kind := range catalog.Kinds {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
 

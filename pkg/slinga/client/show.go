@@ -15,7 +15,7 @@ import (
 
 // Show method retrieves current policy from aptomi and prints it
 func Show(config *viper.Viper) error {
-	catalog := object.NewCatalog(lang.ServiceObject, lang.ContractObject, lang.ClusterObject, lang.RuleObject, lang.DependencyObject)
+	catalog := object.NewCatalog().Append(lang.Objects...)
 	cod := yaml.NewCodec(catalog)
 
 	client := &http.Client{
