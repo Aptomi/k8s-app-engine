@@ -63,26 +63,28 @@ func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params
 		if exists {
 			// If a release already exists, let's just go ahead and update it
 			eventLog.WithFields(event.Fields{}).Infof("Release '%s' already exists. Updating it", releaseName)
+		} else {
+			eventLog.WithFields(event.Fields{
+				"release": releaseName,
+				"chart":   chartName,
+				"path":    chartPath,
+				"params":  string(helmParams),
+			}).Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+
+			_, err = helmClient.InstallRelease(chartPath, cluster.Config.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
+
+			return err
 		}
-
-		eventLog.WithFields(event.Fields{
-			"release": releaseName,
-			"chart":   chartName,
-			"path":    chartPath,
-			"params":  string(helmParams),
-		}).Infof("Installing Helm release '%s', chart '%s'", releaseName, chartName)
-
-		_, err = helmClient.InstallRelease(chartPath, cluster.Config.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
-	} else {
-		eventLog.WithFields(event.Fields{
-			"release": releaseName,
-			"chart":   chartName,
-			"path":    chartPath,
-			"params":  string(helmParams),
-		}).Infof("Updating Helm release '%s', chart '%s'", releaseName, chartName)
-
-		_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
 	}
+
+	eventLog.WithFields(event.Fields{
+		"release": releaseName,
+		"chart":   chartName,
+		"path":    chartPath,
+		"params":  string(helmParams),
+	}).Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+
+	_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
 
 	return err
 }
