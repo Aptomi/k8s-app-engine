@@ -84,7 +84,7 @@ function main() {
         k8s_alive $cluster_small_name
         helm_init $cluster_small_name $helm_tiller_image
 
-        log "Applying some magic to increase chance that gcloud tokens will work"
+        log "Final check for k8s and helm alive"
         k8s_alive $cluster_big_name 1>/dev/null 2>/dev/null
         helm_alive $cluster_big_name 1>/dev/null 2>/dev/null
 
