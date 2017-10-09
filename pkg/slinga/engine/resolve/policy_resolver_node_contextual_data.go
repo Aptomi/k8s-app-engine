@@ -106,7 +106,7 @@ func (node *resolutionNode) proxyDiscovery(discoveryTree util.NestedParameterMap
 	result := discoveryTree.MakeCopy()
 
 	// special case to announce own component instance
-	result["instance"] = util.EscapeName(cik.GetKey())
+	result["instance"] = util.EscapeName(cik.GetDeployName())
 
 	// special case to announce own component ID
 	result["instanceId"] = util.HashFnv(cik.GetKey())
