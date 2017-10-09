@@ -145,6 +145,33 @@ func (b *boltStore) GetByName(namespace string, kind string, name string, gen ob
 	return result, err
 }
 
+func (b *boltStore) GetAll(namespace string, kind string) ([]object.Base, error) {
+	// todo support namespaces and kind in different buckets
+	result := make([]object.Base, 0)
+	err := b.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(objectsBucket)
+		if bucket == nil {
+			return fmt.Errorf("Bucket not found: %s", objectsBucket)
+		}
+
+		c := bucket.Cursor()
+		prefix := []byte(strings.Join([]string{namespace, kind}, object.KeySeparator))
+		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+			obj, err := b.codec.UnmarshalOne(v)
+			if err != nil {
+				return err
+			}
+			if obj.GetNamespace() == namespace && obj.GetKind() == kind {
+				result = append(result, obj)
+			}
+		}
+
+		return nil
+	})
+
+	return result, err
+}
+
 func (b *boltStore) Dump(w io.Writer) error {
 	return b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)

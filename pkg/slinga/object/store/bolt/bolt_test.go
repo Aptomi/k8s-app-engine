@@ -47,6 +47,15 @@ func TestBoltStore(t *testing.T) {
 
 		assert.Exactly(t, obj, objSaved, "Saved object is not equal to the original object in the policy")
 	}
+
+	services, err := db.GetAll("main", lang.ServiceObject.Kind)
+	assert.NoError(t, err, "Error while getting all services from main namespace")
+	assert.Len(t, services, 10, "Get all should return correct number of services")
+	for _, obj := range policy {
+		if obj.GetKind() == lang.ServiceObject.Kind {
+			assert.Contains(t, services, obj, "Get all should return all services")
+		}
+	}
 }
 
 /*

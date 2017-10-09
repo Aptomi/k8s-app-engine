@@ -18,5 +18,7 @@ type ObjectStore interface {
 
 	GetByName(namespace string, kind string, name string, gen object.Generation) (object.Base, error)
 
+	GetAll(namespace string, kind string) ([]object.Base, error)
+
 	Dump(writer io.Writer) error
 }
