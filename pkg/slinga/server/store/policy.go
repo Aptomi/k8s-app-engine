@@ -45,24 +45,28 @@ func (s *defaultStore) GetPolicyData(gen object.Generation) (*PolicyData, error)
 	return data, nil
 }
 
-func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, error) {
+func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, object.Generation, error) {
 	policy := lang.NewPolicy()
 
 	// in case of first version of policy, we just need to have empty policy
-	if policyData != nil && policyData.Objects != nil {
-		for ns, kindNameGen := range policyData.Objects {
-			for kind, nameGen := range kindNameGen {
-				for name, gen := range nameGen {
-					obj, err := s.store.GetByName(ns, kind, name, gen)
-					if err != nil {
-						return nil, err
+	if policyData != nil {
+		if policyData.Objects != nil {
+			for ns, kindNameGen := range policyData.Objects {
+				for kind, nameGen := range kindNameGen {
+					for name, gen := range nameGen {
+						obj, err := s.store.GetByName(ns, kind, name, gen)
+						if err != nil {
+							return nil, 0, err
+						}
+						policy.AddObject(obj)
 					}
-					policy.AddObject(obj)
 				}
 			}
 		}
+		return policy, policyData.Generation, nil
+	} else {
+		return policy, 0, nil
 	}
-	return policy, nil
 }
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
@@ -72,8 +76,7 @@ func (s *defaultStore) GetPolicy(policyGen object.Generation) (*lang.Policy, obj
 	if err != nil {
 		return nil, 0, err
 	}
-	policy, err := s.getPolicyFromData(policyData)
-	return policy, policyData.Generation, err
+	return s.getPolicyFromData(policyData)
 }
 
 // UpdatePolicy updates a list of changed objects in the underlying data store
