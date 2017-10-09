@@ -78,7 +78,7 @@ func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, poli
 	}
 	// todo(slukjanov) check code type before moving forward, only helm supported
 	if !allows && component != nil && component.Code != nil {
-		releaseName := helmReleaseName(componentKey)
+		releaseName := helmReleaseName(instance.GetDeployName())
 		chartName, err := helmChartName(instance.CalculatedCodeParams)
 		if err != nil {
 			return nil, err
