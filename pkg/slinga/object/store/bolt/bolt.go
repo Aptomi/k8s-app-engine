@@ -92,8 +92,6 @@ func (b *boltStore) Save(obj object.Base) (bool, error) {
 			obj.SetGeneration(object.FirstGen)
 			updated = true
 		}
-	} else {
-		obj.SetGeneration(object.LastGen)
 	}
 
 	err := b.db.Update(func(tx *bolt.Tx) error {
