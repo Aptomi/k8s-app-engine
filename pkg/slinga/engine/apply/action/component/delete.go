@@ -95,7 +95,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 			return err
 		}
 
-		err = plugin.Destroy(clusterObj.(*lang.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Destroy(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}

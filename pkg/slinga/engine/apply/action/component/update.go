@@ -100,7 +100,7 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 			return err
 		}
 
-		err = plugin.Update(clusterObj.(*lang.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Update(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}

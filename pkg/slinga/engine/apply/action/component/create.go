@@ -103,7 +103,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 			return err
 		}
 
-		err = plugin.Create(clusterObj.(*lang.Cluster), a.ComponentKey, instance.CalculatedCodeParams, context.EventLog)
+		err = plugin.Create(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
 		if err != nil {
 			return err
 		}

@@ -86,6 +86,11 @@ func (instance *ComponentInstance) GetKey() string {
 	return instance.Metadata.Key.GetKey()
 }
 
+// GetDeployName returns a string that could be used as name for deployment inside the cluster
+func (instance *ComponentInstance) GetDeployName() string {
+	return instance.Metadata.Key.GetDeployName()
+}
+
 // GetNamespace returns an object namespace. It's a system namespace for all component instances
 func (instance *ComponentInstance) GetNamespace() string {
 	return object.SystemNS

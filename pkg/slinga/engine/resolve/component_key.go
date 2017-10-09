@@ -92,6 +92,17 @@ func (cik ComponentInstanceKey) GetKey() string {
 	return cik.key
 }
 
+// GetDeployName returns a string that could be used as name for deployment inside the cluster
+func (cik ComponentInstanceKey) GetDeployName() string {
+	return strings.Join(
+		[]string{
+			cik.Namespace,
+			cik.ContractName,
+			cik.ContextNameWithKeys,
+			cik.ComponentName,
+		}, componentInstanceKeySeparator)
+}
+
 // If cluster has not been resolved yet and we need a key, generate one
 // Otherwise use cluster name
 func getClusterNameUnsafe(cluster *lang.Cluster) string {
