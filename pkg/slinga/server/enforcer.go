@@ -18,6 +18,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin/helm"
 	log "github.com/Sirupsen/logrus"
+	"time"
 )
 
 type Enforcer struct {
@@ -29,6 +30,18 @@ func NewEnforcer(store store.ServerStore) *Enforcer {
 }
 
 func (e *Enforcer) Enforce() error {
+	for {
+		err := e.enforce()
+		if err != nil {
+			return err
+		}
+		time.Sleep(5 * time.Second)
+	}
+
+	return nil
+}
+
+func (e *Enforcer) enforce() error {
 	desiredPolicy, desiredPolicyGen, err := e.store.GetPolicy(object.LastGen)
 	if err != nil {
 		return fmt.Errorf("Error while getting desiredPolicy: %s", err)
@@ -65,6 +78,7 @@ func (e *Enforcer) Enforce() error {
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
+	// todo add check that policy gen not changed (always create new revision if policy gen changed)
 	if !stateDiff.IsChanged() {
 		// todo
 		log.Infof("No changes")
