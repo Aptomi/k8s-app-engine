@@ -403,7 +403,7 @@ func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
 	}
 
 	// Populate discovery tree (allow this component to announce its discovery properties in the discovery tree)
-	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = util.EscapeName(node.componentKey.GetKey())
+	node.discoveryTreeNode.GetNestedMap(node.component.Name)["instance"] = util.EscapeName(node.componentKey.GetDeployName())
 	for k, v := range componentDiscoveryParams {
 		node.discoveryTreeNode.GetNestedMap(node.component.Name)[k] = v
 	}

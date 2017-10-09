@@ -120,7 +120,7 @@ func (node *resolutionNode) proxyDiscovery(discoveryTree util.NestedParameterMap
 		result["service"] = util.NestedParameterMap{}
 
 		// special case to announce own component instance
-		result.GetNestedMap("service")["instance"] = util.EscapeName(serviceCik.GetKey())
+		result.GetNestedMap("service")["instance"] = util.EscapeName(serviceCik.GetDeployName())
 
 		// special case to announce own component ID
 		result.GetNestedMap("service")["instanceId"] = util.HashFnv(serviceCik.GetKey())
