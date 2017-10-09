@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/template"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"runtime"
 	"sync"
@@ -140,7 +141,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.DependencyInstanceMap[node.dependency.GetKey()] = node.serviceKey.GetKey()
+	resolver.resolution.DependencyInstanceMap[object.GetKey(node.dependency)] = node.serviceKey.GetKey()
 
 	// append component instance data
 	err := resolver.resolution.AppendData(node.resolution)

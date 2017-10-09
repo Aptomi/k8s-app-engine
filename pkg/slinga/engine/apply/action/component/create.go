@@ -30,11 +30,6 @@ func NewCreateAction(revision object.Generation, componentKey string) *CreateAct
 	}
 }
 
-// GetName returns action name
-func (a *CreateAction) GetName() string {
-	return "Create component " + a.ComponentKey
-}
-
 // Apply applies the action
 func (a *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud

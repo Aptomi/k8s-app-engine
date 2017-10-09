@@ -28,11 +28,6 @@ func NewDeleteAction(revision object.Generation, componentKey string) *DeleteAct
 	}
 }
 
-// GetName returns action name
-func (a *DeleteAction) GetName() string {
-	return "Delete component " + a.ComponentKey
-}
-
 // Apply applies the action
 func (a *DeleteAction) Apply(context *action.Context) error {
 	// delete from cloud

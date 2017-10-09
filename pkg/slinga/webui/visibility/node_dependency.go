@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
 
 type dependencyNode struct {
@@ -37,7 +38,7 @@ func (n dependencyNode) getGroup() string {
 }
 
 func (n dependencyNode) getID() string {
-	return fmt.Sprintf("%s%s", n.getIDPrefix(), n.dependency.GetKey())
+	return fmt.Sprintf("%s%s", n.getIDPrefix(), object.GetKey(n.dependency))
 }
 
 func (n dependencyNode) isItMyID(id string) string {

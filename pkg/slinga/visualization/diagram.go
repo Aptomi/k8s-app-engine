@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/awalterschulze/gographviz"
 	"strconv"
 )
@@ -106,7 +107,7 @@ func (d *Diagram) traceKey(keySrc string, dependency *lang.Dependency, last node
 	var edgesOut map[string]bool
 	if len(keySrc) <= 0 {
 		edgesOut = make(map[string]bool)
-		resolvedKey := d.resolution.DependencyInstanceMap[dependency.GetKey()]
+		resolvedKey := d.resolution.DependencyInstanceMap[object.GetKey(dependency)]
 		if len(resolvedKey) > 0 {
 			edgesOut[resolvedKey] = true
 		}
@@ -127,7 +128,7 @@ func (d *Diagram) traceKey(keySrc string, dependency *lang.Dependency, last node
 					ctxNode.render(d)
 
 					// add an edge, last -> context node
-					edge{src: last, dst: ctxNode, color: d.getColor(dependency.GetKey())}.render(d)
+					edge{src: last, dst: ctxNode, color: d.getColor(object.GetKey(dependency))}.render(d)
 
 					// render service instance node
 					serviceObj, errService := d.policy.GetObject(lang.ServiceObject.Kind, instanceCurrent.Metadata.Key.ServiceName, instanceCurrent.Metadata.Key.Namespace)
@@ -136,7 +137,7 @@ func (d *Diagram) traceKey(keySrc string, dependency *lang.Dependency, last node
 						svcInstNode.render(d)
 
 						// add an edge, last -> service instance node
-						edge{src: ctxNode, dst: svcInstNode, color: d.getColor(dependency.GetKey())}.render(d)
+						edge{src: ctxNode, dst: svcInstNode, color: d.getColor(object.GetKey(dependency))}.render(d)
 
 						// trace current key with updated last
 						d.traceKey(keyDst, dependency, svcInstNode)
@@ -154,7 +155,7 @@ func (d *Diagram) traceKey(keySrc string, dependency *lang.Dependency, last node
 					svcInstNode.render(d)
 
 					// add an edge, last -> service instance node
-					edge{src: last, dst: svcInstNode, color: d.getColor(dependency.GetKey())}.render(d)
+					edge{src: last, dst: svcInstNode, color: d.getColor(object.GetKey(dependency))}.render(d)
 
 					// trace current key with updated last
 					d.traceKey(keyDst, dependency, svcInstNode)

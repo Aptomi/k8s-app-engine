@@ -35,7 +35,7 @@ func (policyNamespace *PolicyNamespace) addObject(obj object.Base) {
 		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract)
 	case ClusterObject.Kind:
 		if obj.GetNamespace() != object.SystemNS {
-			panic(fmt.Sprintf("Adding cluster '%s' into a non-system namespace '%s'", obj.GetKey(), obj.GetNamespace()))
+			panic(fmt.Sprintf("Adding cluster '%s' into a non-system namespace '%s'", obj.GetName(), obj.GetNamespace()))
 		}
 		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
 	case RuleObject.Kind:

@@ -2,6 +2,7 @@ package object
 
 import (
 	"strconv"
+	"strings"
 )
 
 // Generation represents object's "version" and starts from 0
@@ -82,10 +83,13 @@ func KeyFromParts(domain string, namespace string, kind string, name string, ran
 
 // Base interface represents unified object that could be stored in DB, accessed through API, etc.
 type Base interface {
-	GetKey() string
 	GetNamespace() string
 	GetKind() string
 	GetName() string
 	GetGeneration() Generation
 	SetGeneration(Generation)
+}
+
+func GetKey(obj Base) string {
+	return strings.Join([]string{obj.GetNamespace(), obj.GetKind(), obj.GetName()}, KeySeparator)
 }

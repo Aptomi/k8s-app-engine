@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/builder"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -35,8 +36,8 @@ func TestPolicyResolverContract(t *testing.T) {
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, d1.GetKey(), "Dependency should be resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, d2.GetKey(), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(d1), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(d2), "Dependency should be resolved")
 
 	// check instance 1
 	instance1 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component, resolution)
@@ -75,7 +76,7 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, d.GetKey(), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(d), "Dependency should be resolved")
 }
 
 func TestPolicyResolverPartialMatching(t *testing.T) {
@@ -105,8 +106,8 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that only first dependency got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, d1.GetKey(), "Dependency with full set of labels should be resolved")
-	assert.NotContains(t, resolution.DependencyInstanceMap, d2.GetKey(), "Dependency with partial labels should not be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(d1), "Dependency with full set of labels should be resolved")
+	assert.NotContains(t, resolution.DependencyInstanceMap, object.GetKey(d2), "Dependency with partial labels should not be resolved")
 }
 
 func TestPolicyResolverCalculatedLabels(t *testing.T) {
@@ -141,7 +142,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that dependency got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, dependency.GetKey(), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should be resolved")
 
 	// check labels for the end service (service2/contract2)
 	serviceInstance := getInstanceByParams(t, cluster, contract2, contract2.Contexts[0], nil, service2, nil, resolution)
@@ -219,7 +220,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 
 	// dependency declared by non-existing consumer should not trigger a critical error
 	resolution := resolvePolicy(t, b, ResSuccess, "non-existing user")
-	assert.NotContains(t, resolution.DependencyInstanceMap, dependency.GetKey(), "Dependency should not be resolved")
+	assert.NotContains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should not be resolved")
 }
 
 func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
@@ -230,7 +231,7 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 
 	// dependency referring to non-existing contract should not trigger a critical error
 	resolution := resolvePolicy(t, b, ResSuccess, "non-existing contract")
-	assert.NotContains(t, resolution.DependencyInstanceMap, dependency.GetKey(), "Dependency should not be resolved")
+	assert.NotContains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should not be resolved")
 }
 
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
@@ -446,7 +447,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Skipping unknown component")
 
 	// check that both dependencies got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, dependency.GetKey(), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should be resolved")
 }
 
 func TestPolicyResolverPickClusterViaRules(t *testing.T) {
@@ -478,8 +479,8 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that both dependencies got resolved and got placed in different clusters
-	instance1 := getInstanceByDependencyKey(t, d1.GetKey(), resolution)
-	instance2 := getInstanceByDependencyKey(t, d2.GetKey(), resolution)
+	instance1 := getInstanceByDependencyKey(t, object.GetKey(d1), resolution)
+	instance2 := getInstanceByDependencyKey(t, object.GetKey(d2), resolution)
 	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 }

@@ -2,7 +2,6 @@ package lang
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
-	"strings"
 )
 
 // Metadata is an object metadata implementation (NS, Kind, Name, Generation) which works for all standard objects
@@ -11,11 +10,6 @@ type Metadata struct {
 	Kind       string
 	Name       string
 	Generation object.Generation
-}
-
-// GetKey returns object key as NS:Kind:Name:Generation
-func (meta *Metadata) GetKey() string {
-	return strings.Join([]string{meta.Namespace, meta.Kind, meta.Name}, object.KeySeparator)
 }
 
 // GetNamespace returns object namespace

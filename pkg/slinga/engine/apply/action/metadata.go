@@ -14,16 +14,18 @@ type Metadata struct {
 
 // NewMetadata creates new Metadata
 func NewMetadata(revision object.Generation, kind string, keys ...string) *Metadata {
+	keysStr := strings.Join(keys, object.KeySeparator)
+	name := strings.Join([]string{revision.String(), kind, keysStr}, object.KeySeparator)
 	return &Metadata{
 		Kind:     kind,
-		Name:     strings.Join(keys, object.KeySeparator),
+		Name:     name,
 		Revision: revision,
 	}
 }
 
-// GetKey returns an object key
-func (meta *Metadata) GetKey() string {
-	return strings.Join([]string{meta.Revision.String(), meta.Kind, meta.Name}, object.KeySeparator)
+// GetName returns an action name
+func (meta *Metadata) GetName() string {
+	return meta.Name
 }
 
 // GetNamespace returns a namespace for an action (it's always a system namespace)
@@ -48,5 +50,5 @@ func (meta *Metadata) SetGeneration(generation object.Generation) {
 }
 
 func (meta *Metadata) String() string {
-	return meta.GetKey()
+	return meta.GetName()
 }

@@ -2,6 +2,7 @@ package resolve
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 )
 
@@ -41,7 +42,7 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 // RecordResolved takes a component instance and adds a new dependency record into it
 func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *lang.Dependency, ruleResult *lang.RuleActionResult) {
 	instance := resolution.GetComponentInstanceEntry(cik)
-	instance.addDependency(dependency.GetKey())
+	instance.addDependency(object.GetKey(dependency))
 	instance.addRuleInformation(ruleResult)
 	resolution.recordProcessingOrder(cik)
 }

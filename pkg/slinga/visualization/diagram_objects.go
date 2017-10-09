@@ -33,7 +33,7 @@ type contextNode struct {
 
 // Returns unique node identifier
 func (node contextNode) key() string {
-	return keyEscape(strings.Join([]string{node.contract.GetKey(), node.contextName}, object.KeySeparator))
+	return keyEscape(strings.Join([]string{object.GetKey(node.contract), node.contextName}, object.KeySeparator))
 }
 
 // Renders itself into a graph
@@ -90,7 +90,7 @@ type dependencyNode struct {
 
 // Returns unique node identifier
 func (node dependencyNode) key() string {
-	return keyEscape(node.dependency.GetKey())
+	return keyEscape(object.GetKey(node.dependency))
 }
 
 // Renders itself into a graph
@@ -111,7 +111,7 @@ func (node dependencyNode) render(d *Diagram) {
 		map[string]string{
 			"label":     label,
 			"style":     "filled",
-			"fillcolor": d.getColor(node.dependency.GetKey()),
+			"fillcolor": d.getColor(object.GetKey(node.dependency)),
 		},
 		d.created,
 	)
@@ -199,7 +199,7 @@ type contractBox struct {
 }
 
 func (box contractBox) key() string {
-	return keyEscape(strings.Join([]string{"cluster_contract", box.contract.GetKey()}, object.KeySeparator))
+	return keyEscape(strings.Join([]string{"cluster_contract", object.GetKey(box.contract)}, object.KeySeparator))
 }
 
 func (box contractBox) render(d *Diagram) {
@@ -222,7 +222,7 @@ type serviceBox struct {
 }
 
 func (box serviceBox) key() string {
-	return keyEscape(strings.Join([]string{"cluster_service", box.service.GetKey()}, object.KeySeparator))
+	return keyEscape(strings.Join([]string{"cluster_service", object.GetKey(box.service)}, object.KeySeparator))
 }
 
 func (box serviceBox) render(d *Diagram) {

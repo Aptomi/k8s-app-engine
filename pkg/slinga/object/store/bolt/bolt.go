@@ -105,7 +105,7 @@ func (b *boltStore) Save(obj object.Base) (bool, error) {
 			return err
 		}
 
-		return bucket.Put([]byte(strings.Join([]string{obj.GetKey(), obj.GetGeneration().String()}, object.KeySeparator)), data)
+		return bucket.Put([]byte(strings.Join([]string{object.GetKey(obj), obj.GetGeneration().String()}, object.KeySeparator)), data)
 	})
 
 	return updated, err

@@ -27,11 +27,6 @@ func NewDetachDependencyAction(revision object.Generation, componentKey string, 
 	}
 }
 
-// GetName returns action name
-func (a *DetachDependencyAction) GetName() string {
-	return "Component " + a.ComponentKey + " detach dependency " + a.DependencyID
-}
-
 // Apply applies the action
 func (a *DetachDependencyAction) Apply(context *action.Context) error {
 	return nil

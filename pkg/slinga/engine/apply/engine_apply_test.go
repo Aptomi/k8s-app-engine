@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/builder"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/stretchr/testify/assert"
@@ -143,7 +144,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	dependencyNew.Labels["param"] = "value1"
 
 	desiredStateNext := resolvePolicy(t, bDesiredNext)
-	assert.Contains(t, desiredStateNext.DependencyInstanceMap, dependencyNew.GetKey(), "New dependency should also be resolved")
+	assert.Contains(t, desiredStateNext.DependencyInstanceMap, object.GetKey(dependencyNew), "New dependency should also be resolved")
 
 	// Apply to update component times in actual state
 	applier = NewEngineApply(

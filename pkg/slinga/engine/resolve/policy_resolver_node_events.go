@@ -84,7 +84,7 @@ func (node *resolutionNode) errorServiceOwnerDoesNotExist(service *lang.Service)
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", service.GetKey(), node.contract.GetKey()),
+		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", object.GetKey(service), object.GetKey(node.contract)),
 		errors.Details{},
 	)
 	return NewCriticalError(err)

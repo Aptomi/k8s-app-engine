@@ -27,11 +27,6 @@ func NewAttachDependencyAction(revision object.Generation, componentKey string, 
 	}
 }
 
-// GetName returns action name
-func (a *AttachDependencyAction) GetName() string {
-	return "Component " + a.ComponentKey + " attach dependency " + a.DependencyID
-}
-
 // Apply applies the action
 func (a *AttachDependencyAction) Apply(context *action.Context) error {
 	return nil

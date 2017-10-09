@@ -24,11 +24,6 @@ func NewClustersPostProcessAction(revision object.Generation) *PostProcessAction
 	}
 }
 
-// GetName returns action name
-func (a *PostProcessAction) GetName() string {
-	return "Clusters post process"
-}
-
 // Apply applies the action
 func (a *PostProcessAction) Apply(context *action.Context) error {
 	for _, plugin := range context.Plugins.GetClustersPostProcessingPlugins() {

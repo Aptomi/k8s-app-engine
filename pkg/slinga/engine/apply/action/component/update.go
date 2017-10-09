@@ -29,11 +29,6 @@ func NewUpdateAction(revision object.Generation, componentKey string) *UpdateAct
 	}
 }
 
-// GetName returns action name
-func (a *UpdateAction) GetName() string {
-	return "Update component " + a.ComponentKey
-}
-
 // Apply applies the action
 func (a *UpdateAction) Apply(context *action.Context) error {
 	// update in the cloud
