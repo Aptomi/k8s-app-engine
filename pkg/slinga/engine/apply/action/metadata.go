@@ -46,3 +46,7 @@ func (meta *Metadata) GetGeneration() object.Generation {
 func (meta *Metadata) SetGeneration(generation object.Generation) {
 	panic("Action is not a versioned object")
 }
+
+func (meta *Metadata) String() string {
+	return meta.GetKey()
+}
