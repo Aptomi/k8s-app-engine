@@ -50,7 +50,7 @@ func NewServer(config *viper.Viper) *Server {
 		backgroundErrors: make(chan string),
 	}
 
-	s.catalog = object.NewCatalog().Append(lang.Objects...).Append(store.PolicyDataObject)
+	s.catalog = object.NewCatalog().Append(lang.Objects...).Append(store.Objects...)
 	s.codec = yaml.NewCodec(s.catalog)
 
 	return s
