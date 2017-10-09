@@ -29,6 +29,7 @@ type PolicyStore interface {
 type RevisionStore interface {
 	GetRevision(object.Generation) (*RevisionData, error)
 	NextRevision(policyGen object.Generation) (*RevisionData, error)
+	SaveRevision(revision *RevisionData) error
 }
 
 // PolicyName is an object name under which aptomi policy will be stored in the object store
