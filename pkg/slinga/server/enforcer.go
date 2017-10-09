@@ -40,8 +40,10 @@ func (e *Enforcer) Enforce() error {
 		return nil
 	}
 
-	// todo empty state temporarily
-	actualState := resolve.NewPolicyResolution()
+	actualState, err := e.store.GetActualState()
+	if err != nil {
+		return fmt.Errorf("Error while getting actual state: %s", err)
+	}
 
 	externalData := external.NewData(
 		users.NewUserLoaderFromLDAP(db.GetAptomiPolicyDir()),
