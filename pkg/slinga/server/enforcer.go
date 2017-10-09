@@ -13,6 +13,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	//"github.com/Aptomi/aptomi/pkg/slinga/visualization"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
+	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
+	"github.com/Aptomi/aptomi/pkg/slinga/plugin/helm"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -25,10 +27,10 @@ func NewEnforcer(store store.ServerStore) *Enforcer {
 }
 
 func (e *Enforcer) Enforce() {
-	policy, err := e.store.GetPolicy(object.LastGen)
+	desiredPolicy, desiredPolicyGen, err := e.store.GetPolicy(object.LastGen)
 	if err != nil {
 		// todo
-		log.Panicf("Error while getting last policy: %s", err)
+		log.Panicf("Error while getting desiredPolicy: %s", err)
 	}
 
 	// todo empty state temporarily
@@ -39,20 +41,29 @@ func (e *Enforcer) Enforce() {
 		secrets.NewSecretLoaderFromDir(db.GetAptomiPolicyDir()),
 	)
 
-	resolver := resolve.NewPolicyResolver(policy, externalData)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
-		log.Panicf("Cannot resolve policy: %v %v %v", err, desiredState, actualState)
+		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
 
 	eventLog.Save(&event.HookStdout{})
 
-	revision, err := e.store.NextRevision()
+	currRevision, err := e.store.GetRevision(object.LastGen)
+	if err != nil || currRevision == nil {
+		log.Panicf("Unable to get current revision: %s", err)
+	}
+	actualPolicy, _, err := e.store.GetPolicy(currRevision.Policy)
 	if err != nil {
-		log.Panicf("Unable to get next revision", err)
+		log.Panicf("Unable to get actual policy: %s", err)
 	}
 
-	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, revision.GetGeneration())
+	nextRevision, err := e.store.NextRevision(desiredPolicyGen)
+	if err != nil {
+		log.Panicf("Unable to get next revision: %s", err)
+	}
+
+	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
 	if !stateDiff.IsChanged() {
 		log.Infof("No changes")
@@ -62,18 +73,25 @@ func (e *Enforcer) Enforce() {
 
 	// todo generate diagrams
 	//prefDiagram := visualization.NewDiagram(actualPolicy, actualState, externalData)
-	//newDiagram := visualization.NewDiagram(policy, desiredState, externalData)
-	//deltaDiagram := visualization.NewDiagramDelta(policy, desiredState, actualPolicy, actualState, externalData)
+	//newDiagram := visualization.NewDiagram(desiredPolicy, desiredState, externalData)
+	//deltaDiagram := visualization.NewDiagramDelta(desiredPolicy, desiredState, actualPolicy, actualState, externalData)
 	//visualization.CreateImage(...) for all diagrams
 
-	applier := apply.NewEngineApply(policy, desiredState, actualPolicy, actualState, e.store.ActualStateUpdater(), externalData, plugins, stateDiff.Actions)
+	// Build plugins
+	helmIstio := helm.NewPlugin()
+	plugins := plugin.NewRegistry(
+		[]plugin.DeployPlugin{helmIstio},
+		[]plugin.ClustersPostProcessPlugin{helmIstio},
+	)
+
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, e.store.ActualStateUpdater(), externalData, plugins, stateDiff.Actions)
 	resolution, eventLog, err := applier.Apply()
 	if err != nil {
-
+		log.Panicf("Error while applying new revision: %s", err)
 	}
+	log.Infof("Applied new revision with resolution: %v", resolution)
 
 	eventLog.Save(&event.HookStdout{})
-
 }
 
 /*

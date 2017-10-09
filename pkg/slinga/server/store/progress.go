@@ -7,6 +7,10 @@ import (
 	"math"
 )
 
+func (s *defaultStore) Progress(store store.ObjectStore, revision *RevisionData) progress.Indicator {
+	return &revisionProgressStore{store, revision}
+}
+
 type revisionProgress struct {
 	Stage    string
 	Current  int
@@ -57,8 +61,4 @@ func (p *revisionProgressStore) GetCompletionPercent() int {
 		result = 100
 	}
 	return result
-}
-
-func (s *defaultStore) Progress(store store.ObjectStore, revision *RevisionData) progress.Indicator {
-	return &revisionProgressStore{store, revision}
 }

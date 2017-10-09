@@ -66,13 +66,14 @@ func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, 
 }
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
-func (s *defaultStore) GetPolicy(policyGen object.Generation) (*lang.Policy, error) {
+func (s *defaultStore) GetPolicy(policyGen object.Generation) (*lang.Policy, object.Generation, error) {
 	// todo should we use RWMutex for get/update policy?
 	policyData, err := s.GetPolicyData(policyGen)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return s.getPolicyFromData(policyData)
+	policy, err := s.getPolicyFromData(policyData)
+	return policy, policyData.Generation, err
 }
 
 // UpdatePolicy updates a list of changed objects in the underlying data store

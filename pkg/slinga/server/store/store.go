@@ -15,20 +15,20 @@ type ServerStore interface {
 	PolicyStore
 	RevisionStore
 
-	Progress(revision *RevisionData) progress.Indicator
+	Progress(store store.ObjectStore, revision *RevisionData) progress.Indicator
 
 	ActualStateUpdater() actual.StateUpdater
 }
 
 type PolicyStore interface {
-	GetPolicy(object.Generation) (*lang.Policy, error)
+	GetPolicy(object.Generation) (*lang.Policy, object.Generation, error)
 	GetPolicyData(object.Generation) (*PolicyData, error)
 	UpdatePolicy([]object.Base) (bool, *PolicyData, error)
 }
 
 type RevisionStore interface {
 	GetRevision(object.Generation) (*RevisionData, error)
-	NextRevision() (*RevisionData, error)
+	NextRevision(policyGen object.Generation) (*RevisionData, error)
 }
 
 // PolicyName is an object name under which aptomi policy will be stored in the object store
