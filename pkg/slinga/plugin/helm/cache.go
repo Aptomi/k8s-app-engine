@@ -17,7 +17,7 @@ type clusterCache struct {
 }
 
 func (p *Plugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (*clusterCache, error) {
-	cache, _ /*loaded*/ := p.cache.LoadOrStore(cluster.Namespace, new(clusterCache))
+	cache, _ /*loaded*/ := p.cache.LoadOrStore(cluster.Name, new(clusterCache))
 	c, ok := cache.(*clusterCache)
 	if ok {
 		err := c.setupTillerConnection(cluster, eventLog)
