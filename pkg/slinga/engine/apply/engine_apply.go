@@ -74,6 +74,8 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error)
 		apply.progress.Advance("Action")
 		err := act.Apply(context)
 		if err != nil {
+			err = fmt.Errorf("Error while applying action '%s': %s", act, err)
+			apply.eventLog.LogError(err)
 			foundErrors = true
 		}
 	}
