@@ -81,7 +81,7 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResError, 1, "Apply failed for component")
+	actualState = applyAndCheck(t, applier, ResError, 2, "Apply failed for component")
 
 	// check that actual state got updated (service component exists, but no child components got deployed)
 	assert.Equal(t, 1, len(actualState.ComponentInstanceMap), "Actual state should not be empty after apply()")
