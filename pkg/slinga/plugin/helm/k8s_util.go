@@ -39,7 +39,7 @@ func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog
 	cache.tillerTunnel = tunnel
 	cache.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
 
-	eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port: %s", tunnel.Local)
+	eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port: %d", tunnel.Local)
 
 	return nil
 }
