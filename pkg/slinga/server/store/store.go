@@ -2,7 +2,7 @@ package store
 
 import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/actual"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/store"
@@ -14,6 +14,8 @@ type ServerStore interface {
 
 	PolicyStore
 	RevisionStore
+
+	Progress(revision *RevisionData) progress.Indicator
 
 	ActualStateUpdater() actual.StateUpdater
 }

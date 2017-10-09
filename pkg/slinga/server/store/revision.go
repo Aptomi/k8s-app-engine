@@ -19,6 +19,8 @@ type RevisionData struct {
 
 	// Policy represents generation of the corresponding policy
 	Policy object.Generation
+
+	Progress revisionProgress
 }
 
 func (s *defaultStore) GetRevision(object.Generation) (*RevisionData, error) {
