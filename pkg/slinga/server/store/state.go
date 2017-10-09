@@ -12,6 +12,19 @@ func (s *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 	// todo empty state temporarily
 	actualState := resolve.NewPolicyResolution()
 
+	instances, err := s.store.GetAll(object.SystemNS, resolve.ComponentInstanceObject.Kind)
+	if err != nil {
+		return nil, fmt.Errorf("Error while getting all component instances: ", err)
+	}
+
+	for _, instanceObj := range instances {
+		if instance, ok := instanceObj.(*resolve.ComponentInstance); ok {
+			key := instance.GetKey()
+			actualState.ComponentInstanceMap[key] = instance
+			actualState.ComponentProcessingOrder = append(actualState.ComponentProcessingOrder, key)
+		}
+	}
+
 	return actualState, nil
 }
 
