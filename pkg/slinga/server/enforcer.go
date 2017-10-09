@@ -12,7 +12,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	//"github.com/Aptomi/aptomi/pkg/slinga/visualization"
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
+	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin/helm"
 	log "github.com/Sirupsen/logrus"
@@ -26,11 +28,16 @@ func NewEnforcer(store store.ServerStore) *Enforcer {
 	return &Enforcer{store}
 }
 
-func (e *Enforcer) Enforce() {
+func (e *Enforcer) Enforce() error {
 	desiredPolicy, desiredPolicyGen, err := e.store.GetPolicy(object.LastGen)
 	if err != nil {
-		// todo
-		log.Panicf("Error while getting desiredPolicy: %s", err)
+		return fmt.Errorf("Error while getting desiredPolicy: %s", err)
+	}
+
+	// skip policy enforcement if no policy found
+	if desiredPolicy == nil {
+		//todo log
+		return nil
 	}
 
 	// todo empty state temporarily
@@ -44,32 +51,37 @@ func (e *Enforcer) Enforce() {
 	resolver := resolve.NewPolicyResolver(desiredPolicy, externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
-		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
+		return fmt.Errorf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
 
 	eventLog.Save(&event.HookStdout{})
 
-	currRevision, err := e.store.GetRevision(object.LastGen)
-	if err != nil || currRevision == nil {
-		log.Panicf("Unable to get current revision: %s", err)
-	}
-	actualPolicy, _, err := e.store.GetPolicy(currRevision.Policy)
-	if err != nil {
-		log.Panicf("Unable to get actual policy: %s", err)
-	}
-
 	nextRevision, err := e.store.NextRevision(desiredPolicyGen)
 	if err != nil {
-		log.Panicf("Unable to get next revision: %s", err)
+		return fmt.Errorf("Unable to get next revision: %s", err)
 	}
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
 	if !stateDiff.IsChanged() {
+		// todo
 		log.Infof("No changes")
-		return
+		return nil
 	}
+	//todo
 	log.Infof("Changes")
+	// todo if policy gen changed, we still need to save revision but with progress == done
+
+	//todo remove debug log
+	for _, action := range stateDiff.Actions {
+		fmt.Println(action)
+	}
+
+	// Save revision
+	err = e.store.SaveRevision(nextRevision)
+	if err != nil {
+		return fmt.Errorf("Error while saving new revision: %s", err)
+	}
 
 	// todo generate diagrams
 	//prefDiagram := visualization.NewDiagram(actualPolicy, actualState, externalData)
@@ -84,14 +96,41 @@ func (e *Enforcer) Enforce() {
 		[]plugin.ClustersPostProcessPlugin{helmIstio},
 	)
 
+	actualPolicy, err := e.getActualPolicy()
+	if err != nil {
+		return fmt.Errorf("Error while getting actual policy: %s", err)
+	}
+
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, e.store.ActualStateUpdater(), externalData, plugins, stateDiff.Actions)
 	resolution, eventLog, err := applier.Apply()
+
+	eventLog.Save(&event.HookStdout{})
+
 	if err != nil {
-		log.Panicf("Error while applying new revision: %s", err)
+		return fmt.Errorf("Error while applying new revision: %s", err)
 	}
 	log.Infof("Applied new revision with resolution: %v", resolution)
 
-	eventLog.Save(&event.HookStdout{})
+	return nil
+}
+
+func (e *Enforcer) getActualPolicy() (*lang.Policy, error) {
+	currRevision, err := e.store.GetRevision(object.LastGen)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to get current revision: %s", err)
+	}
+
+	// it's just a first revision
+	if currRevision == nil {
+		return lang.NewPolicy(), nil
+	}
+
+	actualPolicy, _, err := e.store.GetPolicy(currRevision.Policy)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to get actual policy: %s", err)
+	}
+
+	return actualPolicy, nil
 }
 
 /*
@@ -128,7 +167,7 @@ func (ctl *RevisionControllerImpl) CheckState() error {
 	resolution, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
 		eventLog.Save(&event.HookStdout{})
-		log.Panicf("Cannot resolve policy: %v %v %v", err, resolution, prevState)
+		return fmt.Errorf("Cannot resolve policy: %v %v %v", err, resolution, prevState)
 	}
 	eventLog.Save(&event.HookStdout{})
 
@@ -156,7 +195,7 @@ func (ctl *RevisionControllerImpl) CheckState() error {
 			resolver := resolve.NewPolicyResolver(policy, userLoader)
 			nextState, err := resolver.ResolveAllDependencies()
 			if err != nil {
-				log.Panicf("Cannot resolve policy: %v", err)
+				return fmt.Errorf("Cannot resolve policy: %v", err)
 			}
 
 			// Process differences
@@ -189,7 +228,7 @@ func (ctl *RevisionControllerImpl) CheckState() error {
 				err := apply.Apply()
 				apply.SaveLog()
 				if err != nil {
-					log.Panicf("Cannot apply policy: %v", err)
+					return fmt.Errorf("Cannot apply policy: %v", err)
 				}
 			}
 
