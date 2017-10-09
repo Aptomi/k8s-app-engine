@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 )
@@ -30,5 +31,13 @@ func (a *PostProcessAction) GetName() string {
 
 // Apply applies the action
 func (a *PostProcessAction) Apply(context *action.Context) error {
+	for _, plugin := range context.Plugins.GetClustersPostProcessingPlugins() {
+		err := plugin.Process(context.DesiredPolicy, context.DesiredState, context.ExternalData, context.EventLog)
+		if err != nil {
+			context.EventLog.LogError(err)
+			return fmt.Errorf("Error while post processing clusters: %s", err)
+		}
+	}
+
 	return nil
 }
