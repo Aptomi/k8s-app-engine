@@ -34,9 +34,21 @@ func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.Polic
 	return result
 }
 
+func appendUpdateAction(actions []action.Base, updateActions map[string]bool, updateAction *component.UpdateAction) []action.Base {
+	if !updateActions[updateAction.GetName()] {
+		updateActions[updateAction.GetName()] = true
+		actions = append(actions, updateAction)
+	}
+
+	return actions
+}
+
 // On a component level -- see which component instance keys appear and disappear
 func (diff *PolicyResolutionDiff) compareAndProduceActions() {
-	actionsByKey := make(map[string][]action.Base)
+	actions := make(map[string][]action.Base)
+
+	updateActions := make(map[string]bool)
+	endpointsActions := make([]action.Base, 0)
 
 	// merge all instance keys from prev and next
 	allKeys := make(map[string]bool)
@@ -48,42 +60,47 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	}
 
 	// go over all the keys and see which one appear and which one disappear
-	for componentKey := range allKeys {
-		uPrev := diff.Prev.ComponentInstanceMap[componentKey]
-		uNext := diff.Next.ComponentInstanceMap[componentKey]
+	for instanceKey := range allKeys {
+		prevInstance := diff.Prev.ComponentInstanceMap[instanceKey]
+		nextInstance := diff.Next.ComponentInstanceMap[instanceKey]
 
 		var depKeysPrev map[string]bool
-		if uPrev != nil {
-			depKeysPrev = uPrev.DependencyKeys
+		if prevInstance != nil {
+			depKeysPrev = prevInstance.DependencyKeys
 		}
 
 		var depKeysNext map[string]bool
-		if uNext != nil {
-			depKeysNext = uNext.DependencyKeys
+		if nextInstance != nil {
+			depKeysNext = nextInstance.DependencyKeys
 		}
+
+		createOrUpdate := false
 
 		// see if a component needs to be instantiated
 		if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
-			actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewCreateAction(diff.Revision, componentKey))
+			createOrUpdate = true
+			actions[instanceKey] = append(actions[instanceKey], component.NewCreateAction(diff.Revision, instanceKey))
 		}
 
 		// see if a component needs to be destructed
 		if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
-			actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewDeleteAction(diff.Revision, componentKey))
+			actions[instanceKey] = append(actions[instanceKey], component.NewDeleteAction(diff.Revision, instanceKey))
 		}
 
 		// see if a component needs to be updated
 		if len(depKeysPrev) > 0 && len(depKeysNext) > 0 {
-			sameParams := uPrev.CalculatedCodeParams.DeepEqual(uNext.CalculatedCodeParams)
+			sameParams := prevInstance.CalculatedCodeParams.DeepEqual(nextInstance.CalculatedCodeParams)
 			if !sameParams {
-				actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewUpdateAction(diff.Revision, componentKey))
+				createOrUpdate = true
+
+				actions[instanceKey] = appendUpdateAction(actions[instanceKey], updateActions, component.NewUpdateAction(diff.Revision, instanceKey))
 
 				// if it has a parent service, indicate that it basically gets updated as well
 				// this is required for adjusting update/creation times of a service with changed component
 				// this may produce duplicate "update" actions for the parent service
-				if uNext.Metadata.Key.IsComponent() {
-					serviceKey := uNext.Metadata.Key.GetParentServiceKey().GetKey()
-					actionsByKey[serviceKey] = append(actionsByKey[serviceKey], component.NewUpdateAction(diff.Revision, serviceKey))
+				if nextInstance.Metadata.Key.IsComponent() {
+					serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
+					actions[serviceKey] = appendUpdateAction(actions[serviceKey], updateActions, component.NewUpdateAction(diff.Revision, serviceKey))
 				}
 			}
 		}
@@ -91,56 +108,44 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		// see if a user needs to be detached from a component
 		for dependencyID := range depKeysPrev {
 			if !depKeysNext[dependencyID] {
-				actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewDetachDependencyAction(diff.Revision, componentKey, dependencyID))
+				actions[instanceKey] = append(actions[instanceKey], component.NewDetachDependencyAction(diff.Revision, instanceKey, dependencyID))
 			}
 		}
 
 		// see if a user needs to be attached to a component
 		for dependencyID := range depKeysNext {
 			if !depKeysPrev[dependencyID] {
-				actionsByKey[componentKey] = append(actionsByKey[componentKey], component.NewAttachDependencyAction(diff.Revision, componentKey, dependencyID))
+				actions[instanceKey] = append(actions[instanceKey], component.NewAttachDependencyAction(diff.Revision, instanceKey, dependencyID))
 			}
+		}
+
+		if createOrUpdate {
+			endpointsActions = append(endpointsActions, component.NewEndpointsAction(diff.Revision, instanceKey))
 		}
 	}
 
 	// Generation actions in the right order
 	for _, key := range diff.Next.ComponentProcessingOrder {
-		actionList, found := actionsByKey[key]
+		actionList, found := actions[key]
 		if found {
-			diff.Actions = append(diff.Actions, normalize(actionList)...)
-			delete(actionsByKey, key)
+			diff.Actions = append(diff.Actions, actionList...)
+			delete(actions, key)
 		}
 	}
 	for _, key := range diff.Prev.ComponentProcessingOrder {
-		actionList, found := actionsByKey[key]
+		actionList, found := actions[key]
 		if found {
-			diff.Actions = append(diff.Actions, normalize(actionList)...)
-			delete(actionsByKey, key)
+			diff.Actions = append(diff.Actions, actionList...)
+			delete(actions, key)
 		}
 	}
 
-	// Generate action for clusters
-	diff.Actions = append(diff.Actions, cluster.NewClustersPostProcessAction(diff.Revision))
-}
+	diff.Actions = append(diff.Actions, endpointsActions...)
 
-// TODO: refactor once we introduce Action kind
-// Due to the nature of action list generation above, certain actions can be added more than once
-// This will ensure that the list is normalized and there will be only one update action for each service instance
-func normalize(actions []action.Base) []action.Base {
-	result := []action.Base{}
-	updateCnt := 0
-	for _, act := range actions {
-		_, isUpdate := act.(*component.UpdateAction)
-		if isUpdate {
-			if updateCnt == 0 {
-				result = append(result, act)
-			}
-			updateCnt++
-		} else {
-			result = append(result, act)
-		}
+	// if any other actions required, clusters should be post processed
+	if len(diff.Actions) > 0 {
+		diff.Actions = append(diff.Actions, cluster.NewClustersPostProcessAction(diff.Revision))
 	}
-	return result
 }
 
 func (diff *PolicyResolutionDiff) IsChanged() bool {

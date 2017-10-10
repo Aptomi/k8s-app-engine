@@ -359,7 +359,7 @@ func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params ut
 }
 
 func (p *testPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
-	return nil, nil
+	return make(map[string]string), nil
 }
 
 func (p *testPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
