@@ -6,13 +6,12 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
-	"time"
 )
 
 // EndpointsActionObject is an informational data structure with Kind and Constructor for the action
 var EndpointsActionObject = &object.Info{
-	Kind:        "action-component-create",
-	Constructor: func() object.Base { return &CreateAction{} },
+	Kind:        "action-component-endpoints",
+	Constructor: func() object.Base { return &EndpointsAction{} },
 }
 
 // EndpointsAction is a action which gets called when a new component changed (created or updated) and endpoints should be updated
@@ -32,6 +31,11 @@ func NewEndpointsAction(revision object.Generation, componentKey string) *Endpoi
 
 // Apply applies the action
 func (a *EndpointsAction) Apply(context *action.Context) error {
+	// skip if it wasn't processed (doesn't exist in actual state)
+	if context.ActualState.ComponentInstanceMap[a.ComponentKey] == nil {
+		return fmt.Errorf("Can't get endpoints of component instance that doesn't present in actual state: %s", a.ComponentKey)
+	}
+
 	err := a.processEndpoints(context)
 	if err != nil {
 		context.EventLog.LogError(err)
@@ -43,12 +47,7 @@ func (a *EndpointsAction) Apply(context *action.Context) error {
 }
 
 func (a *EndpointsAction) updateActualState(context *action.Context) error {
-	// preserve previous creation date before overwriting
-	prevCreatedOn := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedOn
-	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	instance.UpdateTimes(prevCreatedOn, time.Now())
-
-	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
+	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
 	err := context.ActualStateUpdater.Update(instance)
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
@@ -57,7 +56,7 @@ func (a *EndpointsAction) updateActualState(context *action.Context) error {
 }
 
 func (a *EndpointsAction) processEndpoints(context *action.Context) error {
-	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
+	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
 	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return err
