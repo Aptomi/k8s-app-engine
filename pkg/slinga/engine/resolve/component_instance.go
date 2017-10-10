@@ -65,6 +65,9 @@ type ComponentInstance struct {
 
 	// UpdatedOn is the last time when this component instance was updated
 	UpdatedOn time.Time
+
+	// Endpoints represents all URLs that could be used to access deployed service
+	Endpoints map[string]string
 }
 
 // Creates a new component instance
