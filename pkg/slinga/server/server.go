@@ -91,6 +91,7 @@ func (s *Server) initHTTPServer() {
 
 	version.Serve(router)
 	api.ServePolicy(router, s.store, s.codec)
+	api.ServeEndpoints(router, s.store)
 	api.ServeAdminStore(router, s.store)
 	webui.Serve(router)
 
