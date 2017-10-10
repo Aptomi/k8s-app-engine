@@ -64,36 +64,37 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 		return nil
 	}
 
-	// Instantiate component
+	if component.Code == nil {
+		return nil
+	}
+
 	context.EventLog.WithFields(event.Fields{
 		"componentKey": instance.Metadata.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
 	}).Info("Destructing a running component instance: " + instance.GetKey())
 
-	if component.Code != nil {
-		clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
-		if !ok {
-			return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
-		}
+	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
+	if !ok {
+		return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
+	}
 
-		clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
-		if err != nil {
-			return err
-		}
-		if clusterObj == nil {
-			return fmt.Errorf("Can't find cluster in policy: %s", clusterName)
-		}
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
+	if err != nil {
+		return err
+	}
+	if clusterObj == nil {
+		return fmt.Errorf("Can't find cluster in policy: %s", clusterName)
+	}
 
-		plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)
-		if err != nil {
-			return err
-		}
+	plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)
+	if err != nil {
+		return err
+	}
 
-		err = plugin.Destroy(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
-		if err != nil {
-			return err
-		}
+	err = plugin.Destroy(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
+	if err != nil {
+		return err
 	}
 
 	return nil

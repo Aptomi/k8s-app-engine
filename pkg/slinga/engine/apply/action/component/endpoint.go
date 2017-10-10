@@ -9,57 +9,54 @@ import (
 	"time"
 )
 
-// CreateActionObject is an informational data structure with Kind and Constructor for the action
-var CreateActionObject = &object.Info{
+// EndpointsActionObject is an informational data structure with Kind and Constructor for the action
+var EndpointsActionObject = &object.Info{
 	Kind:        "action-component-create",
 	Constructor: func() object.Base { return &CreateAction{} },
 }
 
-// CreateAction is a action which gets called when a new component needs to be instantiated (i.e. new instance of code to be deployed to the cloud)
-type CreateAction struct {
+// EndpointsAction is a action which gets called when a new component changed (created or updated) and endpoints should be updated
+type EndpointsAction struct {
 	// Key is the revision id and action id pair
 	*action.Metadata
 	ComponentKey string
 }
 
-// NewCreateAction creates new CreateAction
-func NewCreateAction(revision object.Generation, componentKey string) *CreateAction {
-	return &CreateAction{
-		Metadata:     action.NewMetadata(revision, CreateActionObject.Kind, componentKey),
+// NewEndpointsAction creates new EndpointsAction
+func NewEndpointsAction(revision object.Generation, componentKey string) *EndpointsAction {
+	return &EndpointsAction{
+		Metadata:     action.NewMetadata(revision, EndpointsActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
 }
 
 // Apply applies the action
-func (a *CreateAction) Apply(context *action.Context) error {
-	// deploy to cloud
-	err := a.processDeployment(context)
+func (a *EndpointsAction) Apply(context *action.Context) error {
+	err := a.processEndpoints(context)
 	if err != nil {
 		context.EventLog.LogError(err)
-		return fmt.Errorf("Errors while creating component '%s': %s", a.ComponentKey, err)
+		return fmt.Errorf("Errors while getting endpoints '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
 	return a.updateActualState(context)
 }
 
-func (a *CreateAction) updateActualState(context *action.Context) error {
-	// get instance from desired state
+func (a *EndpointsAction) updateActualState(context *action.Context) error {
+	// preserve previous creation date before overwriting
+	prevCreatedOn := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedOn
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
+	instance.UpdateTimes(prevCreatedOn, time.Now())
 
-	// update creation and update times
-	instance.UpdateTimes(time.Now(), time.Now())
-
-	// copy it over to the actual state
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	err := context.ActualStateUpdater.Create(instance)
+	err := context.ActualStateUpdater.Update(instance)
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
 	}
 	return nil
 }
 
-func (a *CreateAction) processDeployment(context *action.Context) error {
+func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
 	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
@@ -72,6 +69,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 		return nil
 	}
 
+	// endpoints could be calculated only for components with code
 	if component.Code == nil {
 		return nil
 	}
@@ -80,7 +78,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 		"componentKey": instance.Metadata.Key,
 		"component":    component.Name,
 		"code":         instance.CalculatedCodeParams,
-	}).Info("Deploying new component instance: " + instance.GetKey())
+	}).Info("Getting endpoints for component instance: " + instance.GetKey())
 
 	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
 	if !ok {
@@ -100,10 +98,12 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 		return err
 	}
 
-	err = plugin.Create(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
+	endpoints, err := plugin.Endpoints(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
 	if err != nil {
 		return err
 	}
+
+	instance.Endpoints = endpoints
 
 	return nil
 }
