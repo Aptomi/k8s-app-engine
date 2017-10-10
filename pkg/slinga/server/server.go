@@ -2,6 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/external"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
+	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
@@ -39,8 +43,9 @@ type Server struct {
 	catalog          *object.Catalog
 	codec            codec.MarshallerUnmarshaller
 
-	store      store.ServerStore
-	httpServer *http.Server
+	externalData *external.Data
+	store        store.ServerStore
+	httpServer   *http.Server
 }
 
 // NewServer creates a new HTTP Server
@@ -66,10 +71,17 @@ func (s *Server) Start() {
 	})
 
 	s.runInBackground("Policy Enforcer", true, func() {
-		panic(NewEnforcer(s.store).Enforce())
+		panic(NewEnforcer(s.store, s.externalData).Enforce())
 	})
 
 	s.wait()
+}
+
+func (s *Server) initExternalData() {
+	s.externalData = external.NewData(
+		users.NewUserLoaderFromLDAP(db.GetAptomiPolicyDir()),
+		secrets.NewSecretLoaderFromDir(db.GetAptomiPolicyDir()),
+	)
 }
 
 func (s *Server) initStore() {

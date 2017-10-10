@@ -23,11 +23,12 @@ import (
 )
 
 type Enforcer struct {
-	store store.ServerStore
+	store        store.ServerStore
+	externalData *external.Data
 }
 
-func NewEnforcer(store store.ServerStore) *Enforcer {
-	return &Enforcer{store}
+func NewEnforcer(store store.ServerStore, data *external.Data) *Enforcer {
+	return &Enforcer{store, data}
 }
 
 func logError(err interface{}) {
@@ -71,11 +72,6 @@ func (e *Enforcer) enforce() error {
 	if err != nil {
 		return fmt.Errorf("Error while getting actual state: %s", err)
 	}
-
-	externalData := external.NewData(
-		users.NewUserLoaderFromLDAP(db.GetAptomiPolicyDir()),
-		secrets.NewSecretLoaderFromDir(db.GetAptomiPolicyDir()),
-	)
 
 	resolver := resolve.NewPolicyResolver(desiredPolicy, externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
