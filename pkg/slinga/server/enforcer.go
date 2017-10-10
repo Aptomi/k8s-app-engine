@@ -18,6 +18,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin/helm"
 	log "github.com/Sirupsen/logrus"
+	"runtime/debug"
 	"time"
 )
 
@@ -29,11 +30,18 @@ func NewEnforcer(store store.ServerStore) *Enforcer {
 	return &Enforcer{store}
 }
 
+func logError(err interface{}) {
+	log.Errorf("Error while enforcing policy: %s", err)
+
+	// todo make configurable
+	debug.PrintStack()
+}
+
 func (e *Enforcer) Enforce() error {
 	for {
 		err := e.enforce()
 		if err != nil {
-			return err
+			logError(err)
 		}
 		time.Sleep(5 * time.Second)
 	}
@@ -42,6 +50,12 @@ func (e *Enforcer) Enforce() error {
 }
 
 func (e *Enforcer) enforce() error {
+	defer func() {
+		if err := recover(); err != nil {
+			logError(err)
+		}
+	}()
+
 	desiredPolicy, desiredPolicyGen, err := e.store.GetPolicy(object.LastGen)
 	if err != nil {
 		return fmt.Errorf("Error while getting desiredPolicy: %s", err)
