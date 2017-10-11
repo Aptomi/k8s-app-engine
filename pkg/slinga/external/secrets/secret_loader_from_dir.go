@@ -1,9 +1,10 @@
 package secrets
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/db"
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/mattn/go-zglob"
+	"path/filepath"
 	"sort"
 	"sync"
 )
@@ -35,7 +36,11 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 	loader.once.Do(func() {
 		loader.cachedSecrets = make(map[string]map[string]string)
 
-		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeSecrets))
+		pattern := filepath.Join(loader.baseDir, "**", "secrets*.yaml")
+		files, err := zglob.Glob(pattern)
+		if err != nil {
+			panic(fmt.Errorf("error while searching secrets files"))
+		}
 		sort.Strings(files)
 		for _, f := range files {
 			secrets := loadUserSecretsFromFile(f)

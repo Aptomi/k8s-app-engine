@@ -2,60 +2,26 @@ package users
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/config"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
-	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
-	"github.com/Aptomi/aptomi/pkg/slinga/util"
-	"github.com/mattn/go-zglob"
 	"gopkg.in/ldap.v2"
 	"strconv"
 	"strings"
 	"sync"
 )
 
-// LDAPConfig contains configuration for LDAP sync service (host, port, DN, filter query and mapping of LDAP properties to Aptomi attributes)
-type LDAPConfig struct {
-	Host              string
-	Port              int
-	BaseDN            string
-	Filter            string
-	LabelToAtrributes map[string]string
-}
-
-// Loads LDAP configuration
-func loadLDAPConfig(baseDir string) *LDAPConfig {
-	files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(baseDir, db.TypeUsersLDAP))
-	fileName, err := util.EnsureSingleFile(files)
-	if err != nil {
-		panic(fmt.Sprintf("LDAP config lookup error in directory '%s': %s", baseDir, err.Error()))
-	}
-	result := yaml.LoadObjectFromFile(fileName, &LDAPConfig{}).(*LDAPConfig)
-	return result
-}
-
-// Returns the list of attributes to be retrieved from LDAP
-func (config *LDAPConfig) getAttributes() []string {
-	result := []string{}
-	for _, attr := range config.LabelToAtrributes {
-		result = append(result, attr)
-	}
-	return result
-}
-
 // UserLoaderFromLDAP allows aptomi to load users from LDAP
 type UserLoaderFromLDAP struct {
 	once sync.Once
 
-	baseDir     string
-	config      *LDAPConfig
+	cfg         config.LDAP
 	cachedUsers *lang.GlobalUsers
 }
 
 // NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
-func NewUserLoaderFromLDAP(baseDir string) UserLoader {
+func NewUserLoaderFromLDAP(cfg config.LDAP) UserLoader {
 	return &UserLoaderFromLDAP{
-		baseDir: baseDir,
-		config:  loadLDAPConfig(baseDir),
+		cfg: cfg,
 	}
 }
 
@@ -85,17 +51,17 @@ func (loader *UserLoaderFromLDAP) Summary() string {
 
 // Does search on LDAP and returns entries
 func (loader *UserLoaderFromLDAP) ldapSearch() []*lang.User {
-	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", loader.config.Host, loader.config.Port))
+	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", loader.cfg.Host, loader.cfg.Port))
 	if err != nil {
 		panic(err)
 	}
 	defer l.Close()
 
 	searchRequest := ldap.NewSearchRequest(
-		loader.config.BaseDN,
+		loader.cfg.BaseDN,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		loader.config.Filter,
-		loader.config.getAttributes(),
+		loader.cfg.Filter,
+		loader.cfg.GetAttributes(),
 		nil,
 	)
 
@@ -108,10 +74,10 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*lang.User {
 	for _, entry := range searchResult.Entries {
 		user := &lang.User{
 			ID:     entry.DN,
-			Name:   entry.GetAttributeValue(loader.config.LabelToAtrributes["name"]),
+			Name:   entry.GetAttributeValue(loader.cfg.LabelToAttributes["name"]),
 			Labels: make(map[string]string),
 		}
-		for label, attr := range loader.config.LabelToAtrributes {
+		for label, attr := range loader.cfg.LabelToAttributes {
 			if label != "id" && label != "name" {
 				value := entry.GetAttributeValue(attr)
 				if len(value) > 0 {

@@ -1,10 +1,11 @@
 package users
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/db"
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
 	"github.com/mattn/go-zglob"
+	"path/filepath"
 	"strconv"
 	"sync"
 )
@@ -28,7 +29,11 @@ func NewUserLoaderFromDir(baseDir string) UserLoader {
 func (loader *UserLoaderFromDir) LoadUsersAll() *lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
-		files, _ := zglob.Glob(db.GetAptomiObjectFilePatternYaml(loader.baseDir, db.TypeUsersFile))
+		pattern := filepath.Join(loader.baseDir, "**", "users*.yaml")
+		files, err := zglob.Glob(pattern)
+		if err != nil {
+			panic(fmt.Errorf("error while searching user files: %s", err))
+		}
 		loader.cachedUsers = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
 		for _, fileName := range files {
 			t := loadUsersFromFile(fileName)
