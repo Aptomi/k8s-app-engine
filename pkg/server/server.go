@@ -63,6 +63,7 @@ func NewServer(cfg *config.Server) *Server {
 // Start makes HTTP server start serving content
 func (s *Server) Start() {
 	s.initStore()
+	s.initExternalData()
 	s.initHTTPServer()
 
 	s.runInBackground("HTTP Server", true, func() {
@@ -84,10 +85,8 @@ func (s *Server) initExternalData() {
 }
 
 func (s *Server) initStore() {
-	//todo(slukjanov): init bolt store, take file path from config
 	b := bolt.NewBoltStore(s.catalog, s.codec)
-	//todo load from config
-	err := b.Open("/tmp/aptomi.bolt")
+	err := b.Open(s.cfg.DB.Connection)
 	if err != nil {
 		panic(fmt.Sprintf("Can't open object store: %s", err))
 	}
@@ -95,9 +94,6 @@ func (s *Server) initStore() {
 }
 
 func (s *Server) initHTTPServer() {
-	host, port := "", 8080 // todo(slukjanov): load this properties from config
-	listenAddr := fmt.Sprintf("%s:%d", host, port)
-
 	router := httprouter.New()
 
 	version.Serve(router)
@@ -115,7 +111,7 @@ func (s *Server) initHTTPServer() {
 
 	s.httpServer = &http.Server{
 		Handler:      handler,
-		Addr:         listenAddr,
+		Addr:         s.cfg.API.ListenAddr(),
 		WriteTimeout: 5 * time.Second,
 		ReadTimeout:  30 * time.Second,
 	}

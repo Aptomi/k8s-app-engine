@@ -22,7 +22,7 @@ func Show(cfg *config.Client) error {
 		Timeout: 5 * time.Second,
 	}
 
-	req, err := http.NewRequest(http.MethodGet, cfg.Server.URL(), bytes.NewBuffer([]byte{}))
+	req, err := http.NewRequest(http.MethodGet, cfg.API.URL(), bytes.NewBuffer([]byte{}))
 	if err != nil {
 		return err
 	}

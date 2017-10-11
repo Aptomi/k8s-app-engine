@@ -17,11 +17,10 @@ const (
 var (
 	cfg          = &config.Client{}
 	aptomiCtlCmd = &cobra.Command{
-		Use:   "aptomictl", // todo(slukjanov)
-		Short: "",          // todo(slukjanov)
-		Long:  "",          // todo(slukjanov)
+		Use:   "aptomictl",
+		Short: "aptomictl controls Aptomi",
+		Long:  "aptomictl controls Aptomi",
 
-		// parse the configPath if one is provided, or use the defaults
 		PersistentPreRun: preRun,
 
 		Run: func(cmd *cobra.Command, args []string) {
@@ -34,27 +33,7 @@ var (
 func init() {
 	viper.SetEnvPrefix(envPrefix)
 
-	aptomiCtlCmd.PersistentFlags().StringP("config", "c", "", "Config file or dir path")
-
-	aptomiCtlCmd.PersistentFlags().String("host", "127.0.0.1", "Server API host")
-	err := viper.BindPFlag("server.host", aptomiCtlCmd.PersistentFlags().Lookup("host"))
-	if err != nil {
-		panic(err) // todo is it ok to panic here?
-	}
-	err = viper.BindEnv("server.host", envPrefix+"_HOST")
-	if err != nil {
-		panic(err) // todo is it ok to panic here?
-	}
-
-	aptomiCtlCmd.PersistentFlags().Uint16P("port", "p", 27866, "Server API port")
-	err = viper.BindPFlag("server.port", aptomiCtlCmd.PersistentFlags().Lookup("port"))
-	if err != nil {
-		panic(err) // todo is it ok to panic here?
-	}
-	err = viper.BindEnv("server.port", envPrefix+"_PORT")
-	if err != nil {
-		panic(err) // todo is it ok to panic here?
-	}
+	cmd.AddDefaultFlags(aptomiCtlCmd, envPrefix)
 
 	aptomiCtlCmd.AddCommand(cmd.Version)
 }

@@ -2,19 +2,16 @@ package config
 
 type Server struct {
 	Debug      bool
-	Server     serverServer
+	API        API
+	DB         DB
 	Helm       Helm
 	LDAP       LDAP
 	SecretsDir string `valid:"dir"`
+	Enforcer   Enforcer
 }
 
 func (s Server) IsDebug() bool {
 	return s.Debug
-}
-
-type serverServer struct {
-	Host string `valid:"host,required"`
-	Port string `valid:"port,required"`
 }
 
 // LDAP contains configuration for LDAP sync service (host, port, DN, filter query and mapping of LDAP properties to Aptomi attributes)
@@ -37,4 +34,12 @@ func (cfg *LDAP) GetAttributes() []string {
 
 type Helm struct {
 	ChartsDir string `valid:"dir,required"`
+}
+
+type DB struct {
+	Connection string `valid:"required"`
+}
+
+type Enforcer struct {
+	SkipApply bool
 }
