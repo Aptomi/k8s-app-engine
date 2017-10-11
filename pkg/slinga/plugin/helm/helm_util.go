@@ -2,16 +2,29 @@ package helm
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/db"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/util"
 	"github.com/mattn/go-zglob"
 	"k8s.io/helm/pkg/helm"
+	"path/filepath"
 	"strings"
 )
 
 func (cache *clusterCache) newHelmClient(cluster *lang.Cluster) *helm.Client {
 	return helm.NewClient(helm.Host(cache.tillerHost))
+}
+
+func (p *Plugin) getValidChartPath(chartName string) (string, error) {
+	pattern := filepath.Join(p.cfg.ChartsDir, "**", chartName+".tgz")
+	files, err := zglob.Glob(pattern)
+	if err != nil {
+		return "", fmt.Errorf("error while searching chart %s file: %s", chartName, err)
+	}
+	fileName, err := util.EnsureSingleFile(files)
+	if err != nil {
+		return "", fmt.Errorf("Error while doing chart '%s' lookup: %s", chartName, err)
+	}
+	return fileName, nil
 }
 
 func helmChartName(params util.NestedParameterMap) (string, error) {
@@ -20,15 +33,6 @@ func helmChartName(params util.NestedParameterMap) (string, error) {
 	}
 
 	return "", fmt.Errorf("No chartName in params")
-}
-
-func getValidChartPath(chartName string) (string, error) {
-	files, _ := zglob.Glob(db.GetAptomiObjectFilePatternTgz(db.GetAptomiBaseDir(), db.TypeCharts, chartName))
-	fileName, err := util.EnsureSingleFile(files)
-	if err != nil {
-		return "", fmt.Errorf("Error while doing chart '%s' lookup: %s", chartName, err)
-	}
-	return fileName, nil
 }
 
 func helmReleaseName(deployName string) string {

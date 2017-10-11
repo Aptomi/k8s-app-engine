@@ -44,7 +44,7 @@ func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params
 
 	helmClient := cache.newHelmClient(cluster)
 
-	chartPath, err := getValidChartPath(chartName)
+	chartPath, err := p.getValidChartPath(chartName)
 	if err != nil {
 		return err
 	}
