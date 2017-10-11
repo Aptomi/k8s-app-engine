@@ -1,3 +1,6 @@
+# This file is used in LDAP integration tests
+# All users in LDAP are compared to this reference set of users, making sure that user retrieval and label mapping works correctly
+
 - id: 100
   name: Alice
   labels:

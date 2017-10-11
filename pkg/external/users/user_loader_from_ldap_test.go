@@ -31,7 +31,7 @@ func TestLoadUsersFromLDAP(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromDir("../../testdata/integrationtests")
+	userLoaderDir := NewUserLoaderFromDir("../../testdata/ldap")
 	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
 
 	usersDir := userLoaderDir.LoadUsersAll()
@@ -59,7 +59,7 @@ func TestLoadUsersFromLDAPIndividually(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromDir("../../testdata/integrationtests")
+	userLoaderDir := NewUserLoaderFromDir("../../testdata/ldap")
 	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
 
 	usersDir := userLoaderDir.LoadUsersAll()
