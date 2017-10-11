@@ -6,25 +6,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/event"
-	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin/helm"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	log "github.com/Sirupsen/logrus"
 	"runtime/debug"
 	"time"
 )
-
-type Enforcer struct {
-	store        store.ServerStore
-	externalData *external.Data
-}
-
-func NewEnforcer(store store.ServerStore, data *external.Data) *Enforcer {
-	return &Enforcer{store, data}
-}
 
 func logError(err interface{}) {
 	log.Errorf("Error while enforcing policy: %s", err)
@@ -33,9 +22,9 @@ func logError(err interface{}) {
 	debug.PrintStack()
 }
 
-func (e *Enforcer) Enforce() error {
+func (s *Server) Enforce() error {
 	for {
-		err := e.enforce()
+		err := s.enforce()
 		if err != nil {
 			logError(err)
 		}
@@ -45,14 +34,14 @@ func (e *Enforcer) Enforce() error {
 	return nil
 }
 
-func (e *Enforcer) enforce() error {
+func (s *Server) enforce() error {
 	defer func() {
 		if err := recover(); err != nil {
 			logError(err)
 		}
 	}()
 
-	desiredPolicy, desiredPolicyGen, err := e.store.GetPolicy(object.LastGen)
+	desiredPolicy, desiredPolicyGen, err := s.store.GetPolicy(object.LastGen)
 	if err != nil {
 		return fmt.Errorf("Error while getting desiredPolicy: %s", err)
 	}
@@ -63,12 +52,12 @@ func (e *Enforcer) enforce() error {
 		return nil
 	}
 
-	actualState, err := e.store.GetActualState()
+	actualState, err := s.store.GetActualState()
 	if err != nil {
 		return fmt.Errorf("Error while getting actual state: %s", err)
 	}
 
-	resolver := resolve.NewPolicyResolver(desiredPolicy, e.externalData)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, s.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
 		return fmt.Errorf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
@@ -76,7 +65,7 @@ func (e *Enforcer) enforce() error {
 
 	eventLog.Save(&event.HookStdout{})
 
-	nextRevision, err := e.store.NextRevision(desiredPolicyGen)
+	nextRevision, err := s.store.NextRevision(desiredPolicyGen)
 	if err != nil {
 		return fmt.Errorf("Unable to get next revision: %s", err)
 	}
@@ -99,7 +88,7 @@ func (e *Enforcer) enforce() error {
 	}
 
 	// Save revision
-	err = e.store.SaveRevision(nextRevision)
+	err = s.store.SaveRevision(nextRevision)
 	if err != nil {
 		return fmt.Errorf("Error while saving new revision: %s", err)
 	}
@@ -111,18 +100,18 @@ func (e *Enforcer) enforce() error {
 	//visualization.CreateImage(...) for all diagrams
 
 	// Build plugins
-	helmIstio := helm.NewPlugin()
+	helmIstio := helm.NewPlugin(s.cfg.Helm)
 	plugins := plugin.NewRegistry(
 		[]plugin.DeployPlugin{helmIstio},
 		[]plugin.ClustersPostProcessPlugin{helmIstio},
 	)
 
-	actualPolicy, err := e.getActualPolicy()
+	actualPolicy, err := s.getActualPolicy()
 	if err != nil {
 		return fmt.Errorf("Error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, e.store.ActualStateUpdater(), e.externalData, plugins, stateDiff.Actions)
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, s.store.ActualStateUpdater(), s.externalData, plugins, stateDiff.Actions)
 	resolution, eventLog, err := applier.Apply()
 
 	eventLog.Save(&event.HookStdout{})
@@ -135,8 +124,8 @@ func (e *Enforcer) enforce() error {
 	return nil
 }
 
-func (e *Enforcer) getActualPolicy() (*lang.Policy, error) {
-	currRevision, err := e.store.GetRevision(object.LastGen)
+func (s *Server) getActualPolicy() (*lang.Policy, error) {
+	currRevision, err := s.store.GetRevision(object.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to get current revision: %s", err)
 	}
@@ -146,7 +135,7 @@ func (e *Enforcer) getActualPolicy() (*lang.Policy, error) {
 		return lang.NewPolicy(), nil
 	}
 
-	actualPolicy, _, err := e.store.GetPolicy(currRevision.Policy)
+	actualPolicy, _, err := s.store.GetPolicy(currRevision.Policy)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to get actual policy: %s", err)
 	}

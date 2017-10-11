@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/db"
+	"github.com/Aptomi/aptomi/pkg/slinga/config"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
@@ -17,7 +17,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/webui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
-	"github.com/spf13/viper"
 	"net/http"
 	"os"
 	"time"
@@ -38,7 +37,7 @@ import (
 
 // Server is a HTTP server which serves API and UI
 type Server struct {
-	config           *viper.Viper
+	cfg              *config.Server
 	backgroundErrors chan string
 	catalog          *object.Catalog
 	codec            codec.MarshallerUnmarshaller
@@ -49,9 +48,9 @@ type Server struct {
 }
 
 // NewServer creates a new HTTP Server
-func NewServer(config *viper.Viper) *Server {
+func NewServer(cfg *config.Server) *Server {
 	s := &Server{
-		config:           config,
+		cfg:              cfg,
 		backgroundErrors: make(chan string),
 	}
 
@@ -71,7 +70,7 @@ func (s *Server) Start() {
 	})
 
 	s.runInBackground("Policy Enforcer", true, func() {
-		panic(NewEnforcer(s.store, s.externalData).Enforce())
+		panic(s.Enforce())
 	})
 
 	s.wait()
@@ -79,8 +78,8 @@ func (s *Server) Start() {
 
 func (s *Server) initExternalData() {
 	s.externalData = external.NewData(
-		users.NewUserLoaderFromLDAP(db.GetAptomiPolicyDir()),
-		secrets.NewSecretLoaderFromDir(db.GetAptomiPolicyDir()),
+		users.NewUserLoaderFromLDAP(s.cfg.LDAP),
+		secrets.NewSecretLoaderFromDir(s.cfg.SecretsDir),
 	)
 }
 
