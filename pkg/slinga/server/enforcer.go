@@ -1,22 +1,17 @@
 package server
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/db"
-	//"github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/slinga/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/slinga/event"
 	"github.com/Aptomi/aptomi/pkg/slinga/external"
-	"github.com/Aptomi/aptomi/pkg/slinga/external/secrets"
-	"github.com/Aptomi/aptomi/pkg/slinga/external/users"
-	"github.com/Aptomi/aptomi/pkg/slinga/object"
-	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
-	//"github.com/Aptomi/aptomi/pkg/slinga/visualization"
-	"fmt"
-	"github.com/Aptomi/aptomi/pkg/slinga/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
+	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin"
 	"github.com/Aptomi/aptomi/pkg/slinga/plugin/helm"
+	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	log "github.com/Sirupsen/logrus"
 	"runtime/debug"
 	"time"
@@ -73,7 +68,7 @@ func (e *Enforcer) enforce() error {
 		return fmt.Errorf("Error while getting actual state: %s", err)
 	}
 
-	resolver := resolve.NewPolicyResolver(desiredPolicy, externalData)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, e.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
 		return fmt.Errorf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
@@ -127,7 +122,7 @@ func (e *Enforcer) enforce() error {
 		return fmt.Errorf("Error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, e.store.ActualStateUpdater(), externalData, plugins, stateDiff.Actions)
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, e.store.ActualStateUpdater(), e.externalData, plugins, stateDiff.Actions)
 	resolution, eventLog, err := applier.Apply()
 
 	eventLog.Save(&event.HookStdout{})
