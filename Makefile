@@ -54,8 +54,7 @@ clean-run-noop:
 	${GOENV} APTOMI_DB=$(TMP) tools/demo-local-policy-init.sh
 
 .PHONY: smoke
-smoke: install alltest clean-run-noop
-	-rm -f aptomi aptomictl
+smoke: install alltest
 
 .PHONY: build
 build:
