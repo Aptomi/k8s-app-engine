@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/config"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec"
@@ -10,7 +11,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/slinga/server/store"
 	"github.com/gosuri/uitable"
 	"github.com/mattn/go-zglob"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -19,14 +19,14 @@ import (
 	"time"
 )
 
-// Apply finds all policy files and uploads/applies them by making a call to aptomi server
-func Apply(config *viper.Viper) error {
-	policyPaths := config.GetStringSlice("apply.policyPaths")
+// todo make a client object with apply/show methods
 
+// Apply finds all policy files and uploads/applies them by making a call to aptomi server
+func Apply(cfg *config.Client) error {
 	catalog := object.NewCatalog().Append(lang.Objects...).Append(store.PolicyDataObject)
 	cod := yaml.NewCodec(catalog)
 
-	allObjects, err := readFiles(policyPaths, cod)
+	allObjects, err := readFiles(cfg.Apply.PolicyPaths, cod)
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,11 @@ func Apply(config *viper.Viper) error {
 	}
 
 	client := &http.Client{
+		// todo make configurable
 		Timeout: 5 * time.Second,
 	}
 
-	host := config.GetString("server.host")
-	port := config.GetInt("server.port")
-
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%s:%d/api/v1/policy", host, port), bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodPost, cfg.Server.URL(), bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}

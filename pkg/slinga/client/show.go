@@ -3,18 +3,18 @@ package client
 import (
 	"bytes"
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/config"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/Aptomi/aptomi/pkg/slinga/object"
 	"github.com/Aptomi/aptomi/pkg/slinga/object/codec/yaml"
 	"github.com/gosuri/uitable"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
 // Show method retrieves current policy from aptomi and prints it
-func Show(config *viper.Viper) error {
+func Show(cfg *config.Client) error {
 	catalog := object.NewCatalog().Append(lang.Objects...)
 	cod := yaml.NewCodec(catalog)
 
@@ -22,10 +22,7 @@ func Show(config *viper.Viper) error {
 		Timeout: 5 * time.Second,
 	}
 
-	host := config.GetString("server.host")
-	port := config.GetInt("server.port")
-
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:%d/api/v1/revision", host, port), bytes.NewBuffer([]byte{}))
+	req, err := http.NewRequest(http.MethodGet, cfg.Server.URL(), bytes.NewBuffer([]byte{}))
 	if err != nil {
 		return err
 	}
