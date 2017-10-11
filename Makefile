@@ -2,7 +2,7 @@ GIT_VERSION=$(shell git describe --tags --long --dirty)
 GIT_COMMIT=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GOENV=CGO_ENABLED=0
-GOFLAGS=-ldflags "-X github.com/Aptomi/aptomi/pkg/slinga/version.gitVersion=${GIT_VERSION} -X github.com/Aptomi/aptomi/pkg/slinga/version.gitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/pkg/slinga/version.buildDate=${BUILD_DATE}"
+GOFLAGS=-ldflags "-X github.com/Aptomi/aptomi/pkg/version.gitVersion=${GIT_VERSION} -X github.com/Aptomi/aptomi/pkg/version.gitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/pkg/version.buildDate=${BUILD_DATE}"
 GO=${GOENV} go
 
 .PHONY: default
@@ -19,7 +19,7 @@ vendor-no-color:
 .PHONY: profile-engine
 profile-engine:
 	@echo "Profiling CPU for 30 seconds"
-	${GO} test -bench . -benchtime 30s ./pkg/slinga/engine/apply -cpuprofile cpu.out
+	${GO} test -bench . -benchtime 30s ./pkg/engine/apply -cpuprofile cpu.out
 	${GO} tool pprof -svg apply.test cpu.out > profile.svg
 
 .PHONY: coverage
@@ -41,7 +41,7 @@ test-race:
 .PHONY: alltest
 alltest:
 	${GO} test -v ./...
-	${GO} test -bench . -count 1 ./pkg/slinga/engine/...
+	${GO} test -bench . -count 1 ./pkg/engine/...
 	@echo "\nAll tests passed (unit, integration, benchmark)"
 
 .PHONY: test-loop

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Aptomi/aptomi/pkg/slinga/client"
+	"github.com/Aptomi/aptomi/pkg/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

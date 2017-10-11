@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/Aptomi/aptomi/pkg/slinga/config"
-	"github.com/Aptomi/aptomi/pkg/slinga/lang/yaml"
+	"github.com/Aptomi/aptomi/pkg/config"
+	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	log "github.com/Sirupsen/logrus"
 	vp "github.com/spf13/viper"
 	"os"

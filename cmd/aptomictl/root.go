@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Aptomi/aptomi/cmd"
-	"github.com/Aptomi/aptomi/pkg/slinga/config"
+	"github.com/Aptomi/aptomi/pkg/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
