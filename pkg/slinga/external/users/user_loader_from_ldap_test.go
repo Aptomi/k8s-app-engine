@@ -2,17 +2,37 @@ package users
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/slinga/config"
 	"github.com/Aptomi/aptomi/pkg/slinga/lang"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
+
+var integrationTestsLDAP = config.LDAP{
+	Host:   "localhost",
+	Port:   10389,
+	BaseDN: "o=aptomiOrg",
+	Filter: "(&(objectClass=organizationalPerson))",
+	LabelToAttributes: map[string]string{
+		"id":                "dn",
+		"name":              "cn",
+		"description":       "description",
+		"global_ops":        "isglobalops",
+		"is_operator":       "isoperator",
+		"mail":              "mail",
+		"team":              "team",
+		"org":               "o",
+		"short-description": "role",
+		"deactivated":       "deactivated",
+	},
+}
 
 func TestLoadUsersFromLDAP(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
 	userLoaderDir := NewUserLoaderFromDir("../../testdata/integrationtests")
-	userLoaderLDAP := NewUserLoaderFromLDAP("../../testdata/integrationtests")
+	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
 
 	usersDir := userLoaderDir.LoadUsersAll()
 	usersLDAP := userLoaderLDAP.LoadUsersAll()
@@ -40,7 +60,7 @@ func TestLoadUsersFromLDAPIndividually(t *testing.T) {
 		t.SkipNow()
 	}
 	userLoaderDir := NewUserLoaderFromDir("../../testdata/integrationtests")
-	userLoaderLDAP := NewUserLoaderFromLDAP("../../testdata/integrationtests")
+	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
 
 	usersDir := userLoaderDir.LoadUsersAll()
 
