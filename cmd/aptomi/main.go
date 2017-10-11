@@ -7,6 +7,4 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
-
-	Execute()
 }
