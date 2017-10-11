@@ -43,6 +43,8 @@ import:
   version: ^0.1.0
   subpackages:
   - cmp
+- package: github.com/asaskevich/govalidator
+  version: ^7.0.0
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4

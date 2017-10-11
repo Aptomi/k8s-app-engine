@@ -1,5 +1,5 @@
-hash: 334273c1c8d1aa3433208d4cf27e7df28294375eb23d89e13fd6f47f70d61686
-updated: 2017-09-27T11:11:54.092729279-07:00
+hash: 905f323ab4aa648c4879440e12a36bc96ce2be55061c0015c4a147b4cc1aa15d
+updated: 2017-10-11T02:02:41.764916715-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -8,6 +8,8 @@ imports:
   - internal
 - name: github.com/alecthomas/gometalinter
   version: bae2f1293d092fd8167939d5108d1b025eaef9de
+- name: github.com/asaskevich/govalidator
+  version: 73945b6115bfbbcc57d89b7316e28109364124e1
 - name: github.com/awalterschulze/gographviz
   version: c84395e536e1a1199093a4e6253d1bee99e4cd2a
   subpackages:
@@ -369,7 +371,7 @@ imports:
   - pkg/proto/hapi/version
   - pkg/version
 - name: k8s.io/kubernetes
-  version: f07eea23494be1e7c11a8e2cf51bd96d1ec9fdf1
+  version: e8c167a115ec662726904265d17f75a6d79d78d8
   subpackages:
   - federation/apis/federation
   - federation/apis/federation/install
