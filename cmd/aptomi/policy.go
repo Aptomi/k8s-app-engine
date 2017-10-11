@@ -13,6 +13,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// For apply command
+var noop bool
+var full bool
+var newrevision bool
+var verbose bool
+var emulateDeployment bool
+
+// For reset command
+var force bool
+
 var policyCmd = &cobra.Command{
 	Use:   "policy",
 	Short: "Process policy and execute an action",
@@ -109,7 +119,32 @@ var policyCmdApply = &cobra.Command{
 	},
 }
 
+var policyCmdReset = &cobra.Command{
+	Use:   "reset",
+	Short: "Reset policy and delete all objects in it",
+	Long:  "",
+	Run: func(cmd *cobra.Command, args []string) {
+		if force {
+			db.ResetAptomiState()
+		} else {
+			fmt.Println("This will erase everything under " + db.GetAptomiBaseDir())
+			fmt.Println("No action is taken. If you are sure, use --force to delete all the data")
+		}
+	},
+}
+
 func init() {
 	policyCmd.AddCommand(policyCmdApply)
+	policyCmd.AddCommand(policyCmdReset)
 	RootCmd.AddCommand(policyCmd)
+
+	// Flags for the apply command
+	policyCmdApply.Flags().BoolVarP(&noop, "noop", "n", false, "Process a policy, but do no apply changes (noop mode)")
+	policyCmdApply.Flags().BoolVarP(&full, "full", "f", false, "Re-create missing instances (if they were manually deleted from the underlying cloud), update running instances")
+	policyCmdApply.Flags().BoolVarP(&newrevision, "newrevision", "c", false, "Create new revision, irrespective of whether there are changes in the policy or not")
+	policyCmdApply.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose information in the output")
+	policyCmdApply.Flags().BoolVarP(&emulateDeployment, "emulate", "e", false, "Process a policy, do not deploy anything (emulate deployment), save state to the database")
+
+	// Flags for the reset command
+	policyCmdReset.Flags().BoolVarP(&force, "force", "f", false, "Reset policy. Delete all files and don't ask for a confirmation")
 }
