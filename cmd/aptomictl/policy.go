@@ -20,7 +20,7 @@ var (
 		Long:  "show policy long",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			err := client.Show(viper.GetViper())
+			err := client.Show(cfg)
 			if err != nil {
 				panic(fmt.Sprintf("Error while showing policy: %s", err))
 			}
@@ -32,7 +32,7 @@ var (
 		Long:  "apply policy files long",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			err := client.Apply(viper.GetViper())
+			err := client.Apply(cfg)
 			if err != nil {
 				panic(fmt.Sprintf("Error while applying specified policy: %s", err))
 			}
