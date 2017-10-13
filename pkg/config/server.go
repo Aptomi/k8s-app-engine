@@ -41,5 +41,5 @@ type DB struct {
 }
 
 type Enforcer struct {
-	SkipApply bool
+	Disabled bool
 }
