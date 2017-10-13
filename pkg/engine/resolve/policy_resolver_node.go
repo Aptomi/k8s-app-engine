@@ -349,6 +349,10 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 			if result.ChangedLabelsOnLastApply {
 				node.logLabels(result.Labels, "after transform")
 			}
+
+			if rule.Actions.Stop {
+				break
+			}
 		}
 	}
 

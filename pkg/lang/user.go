@@ -16,9 +16,3 @@ type User struct {
 type GlobalUsers struct {
 	Users map[string]*User
 }
-
-// IsGlobalOps returns if user is a global ops guy
-func (user *User) IsGlobalOps() bool {
-	// TODO: this will have to be changed when we implement roles & ACLs
-	return user.Labels["global_ops"] == "true"
-}

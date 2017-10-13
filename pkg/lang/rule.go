@@ -28,6 +28,7 @@ type RuleActions struct {
 	ChangeLabels ChangeLabelsAction `yaml:"change-labels"`
 	Dependency   DependencyAction
 	Ingress      IngressAction
+	Stop         bool
 }
 
 // Matches returns if a rule matches
