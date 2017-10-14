@@ -30,8 +30,6 @@ func (s *Server) Enforce() error {
 		}
 		time.Sleep(5 * time.Second)
 	}
-
-	return nil
 }
 
 func (s *Server) enforce() error {

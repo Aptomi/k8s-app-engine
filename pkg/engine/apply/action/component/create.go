@@ -100,10 +100,5 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 		return err
 	}
 
-	err = plugin.Create(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return plugin.Create(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
 }

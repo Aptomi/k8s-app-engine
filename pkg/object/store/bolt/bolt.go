@@ -172,6 +172,7 @@ func (b *boltStore) GetAll(namespace string, kind string) ([]object.Base, error)
 	return result, err
 }
 
+// todo it should return valid yaml to use some parsing tools together with client
 func (b *boltStore) Dump(w io.Writer) error {
 	return b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)

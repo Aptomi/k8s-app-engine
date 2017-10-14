@@ -14,7 +14,7 @@ func (s *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 
 	instances, err := s.store.GetAll(object.SystemNS, resolve.ComponentInstanceObject.Kind)
 	if err != nil {
-		return nil, fmt.Errorf("Error while getting all component instances: ", err)
+		return nil, fmt.Errorf("Error while getting all component instances: %s", err)
 	}
 
 	for _, instanceObj := range instances {

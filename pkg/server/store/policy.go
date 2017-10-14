@@ -64,9 +64,9 @@ func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, 
 			}
 		}
 		return policy, policyData.Generation, nil
-	} else {
-		return policy, 0, nil
 	}
+
+	return policy, 0, nil
 }
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy

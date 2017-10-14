@@ -94,7 +94,7 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 	addr := returnFirst(api.NodeExternalIP)
 	if addr == "" {
 		// TODO: this will be removed in 1.7
-		addr = returnFirst(api.NodeLegacyHostIP)
+		addr = returnFirst(api.NodeLegacyHostIP) // nolint: megacheck
 	}
 	if addr == "" {
 		addr = returnFirst(api.NodeInternalIP)

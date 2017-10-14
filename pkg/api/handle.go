@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -54,7 +55,7 @@ func (a *api) read(request *http.Request) []object.Base {
 	return objects
 }
 
-func write(writer http.ResponseWriter, resp reqresp.Response) {
+func write(writer io.Writer, resp reqresp.Response) {
 	data := yaml.SerializeObject(resp)
 	_, wErr := fmt.Fprint(writer, data)
 	if wErr != nil {
