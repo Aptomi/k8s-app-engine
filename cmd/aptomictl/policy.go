@@ -16,8 +16,8 @@ var (
 	}
 	policyShowCmd = &cobra.Command{
 		Use:   "show",
-		Short: "show policy",
-		Long:  "show policy long",
+		Short: "policy show",
+		Long:  "policy show long",
 
 		Run: func(cmd *cobra.Command, args []string) {
 			err := client.Show(cfg)

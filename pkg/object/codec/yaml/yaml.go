@@ -109,6 +109,10 @@ func (c *yamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte
 		return nil, fmt.Errorf("Kind field in metadata isn't a string: %v", single)
 	}
 
+	if len(kind) == 0 {
+		return nil, fmt.Errorf("Empty kind")
+	}
+
 	objectInfo := c.catalog.Get(kind)
 	if objectInfo == nil {
 		return nil, fmt.Errorf("Unknown kind: %s", kind)

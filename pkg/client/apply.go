@@ -44,7 +44,7 @@ func Apply(cfg *config.Client) error {
 		Timeout: 5 * time.Second,
 	}
 
-	req, err := http.NewRequest(http.MethodPost, cfg.API.URL(), bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodPost, cfg.API.URL()+"/policy", bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}

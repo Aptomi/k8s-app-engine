@@ -10,7 +10,7 @@ type API struct {
 }
 
 func (a API) URL() string {
-	return fmt.Sprintf("%s://%s:%s/%s/policy", a.Schema, a.Host, a.Port, a.APIPrefix)
+	return fmt.Sprintf("%s://%s:%s/%s", a.Schema, a.Host, a.Port, a.APIPrefix)
 }
 
 func (a API) ListenAddr() string {
