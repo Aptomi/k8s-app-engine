@@ -2,79 +2,72 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/object/codec"
-	"github.com/Aptomi/aptomi/pkg/server/store"
+	"github.com/Aptomi/aptomi/pkg/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/server/api/reqresp"
+	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
-	"io/ioutil"
 	"net/http"
 )
 
-// PolicyAPI is a an object which allows to retrieve and update policy via API
-type PolicyAPI struct {
-	store store.ServerStore
-	codec codec.MarshallerUnmarshaller
+func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) reqresp.Response {
+	gen := p.ByName("rev")
+
+	if len(gen) == 0 {
+		gen = string(object.LastGen)
+	}
+
+	policyData, err := a.store.GetPolicyData(object.ParseGeneration(gen))
+	if err != nil {
+		log.Panicf("error while getting requested policy: %s", err)
+	}
+
+	return policyData
 }
 
-func (a *PolicyAPI) handleGetPolicy(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	rev, ns := p.ByName("rev"), p.ByName("ns")
+func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) reqresp.Response {
+	objects := a.read(r)
 
-	if len(rev) == 0 {
-		rev = "0" // latest revision
-	}
-
-	fmt.Printf("[handleGetPolicy] rev: %s, ns: %s\n", rev, ns)
-
-	if len(ns) != 0 {
-		// todo get all by ns from specific revision
-	}
-}
-
-func (a *PolicyAPI) handlePolicyUpdate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(fmt.Sprintf("Error while reading bytes from request Body: %s", err))
-	}
-
-	// todo remove bad logging
-	fmt.Println(string(body))
-
-	objects, err := a.codec.UnmarshalOneOrMany(body)
-	if err != nil {
-		// todo it should be badrequest
-		panic(fmt.Sprintf("Error unmarshaling policy update request: %s", err))
-	}
-
-	_, policyData, err := a.store.UpdatePolicy(objects)
+	changed, policyData, err := a.store.UpdatePolicy(objects)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}
 
-	//if updated {
-	data, err := a.codec.MarshalOne(policyData)
-	if err != nil {
-		panic(fmt.Sprintf("Error marshaling updated policy: %s", err))
+	if !changed {
+		return nil
 	}
 
-	// todo bad logging
-	fmt.Println("Response: " + string(data))
-
-	_, err = fmt.Fprint(w, string(data))
+	desiredPolicyGen := policyData.Generation
+	desiredPolicy, _, err := a.store.GetPolicy(desiredPolicyGen)
 	if err != nil {
-		panic(fmt.Sprintf("Error while writing response bytes: %s", err))
+		log.Panicf("Error while getting desiredPolicy: %s", err)
 	}
-	//} else { // nothing changed
-	//	w.WriteHeader(http.StatusBadRequest)
-	//	 todo write some error back to client
-	//}
-}
+	if desiredPolicy == nil {
+		log.Panicf("Can't read policy right after updating it")
+	}
 
-// ServePolicy registers policy processing handlers in API
-func ServePolicy(router *httprouter.Router, store store.ServerStore, cod codec.MarshallerUnmarshaller) {
-	h := PolicyAPI{store, cod}
+	actualState, err := a.store.GetActualState()
+	if err != nil {
+		log.Panicf("Error while getting actual state: %s", err)
+	}
 
-	router.GET("/api/v1/policy", h.handleGetPolicy)
-	router.GET("/api/v1/policy/:rev", h.handleGetPolicy)
-	router.GET("/api/v1/policy/:rev/namespace/:ns", h.handleGetPolicy)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, a.externalData)
+	desiredState, eventLog, err := resolver.ResolveAllDependencies()
+	if err != nil {
+		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
+	}
 
-	router.POST("/api/v1/policy", h.handlePolicyUpdate)
+	// todo save to log with clear prefix
+	eventLog.Save(&event.HookStdout{})
+
+	nextRevision, err := a.store.NextRevision(desiredPolicyGen)
+	if err != nil {
+		log.Panicf("Unable to get next revision: %s", err)
+	}
+
+	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
+
+	return stateDiff.Actions
 }
