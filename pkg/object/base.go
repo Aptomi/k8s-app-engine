@@ -1,6 +1,7 @@
 package object
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -16,6 +17,14 @@ func (generation Generation) String() string {
 // Next returns the next generation of the base object (current + 1)
 func (generation Generation) Next() Generation {
 	return generation + 1
+}
+
+func ParseGeneration(gen string) Generation {
+	val, err := strconv.ParseUint(gen, 10, 64)
+	if err != nil {
+		panic(fmt.Errorf("error while parsing generation from %s: %s", gen, err))
+	}
+	return Generation(val)
 }
 
 // KeySeparator used to separate parts of the Key
