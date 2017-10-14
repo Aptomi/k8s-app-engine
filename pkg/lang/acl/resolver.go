@@ -53,4 +53,6 @@ func (resolver *Resolver) GetUserRole(user *lang.User) (*Role, error) {
 }
 
 func (resolver *Resolver) GetUserPrivileges(user *lang.User) (*Role, error) {
+	// todo implement
+	return nil, nil
 }
