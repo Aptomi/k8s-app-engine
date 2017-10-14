@@ -2,11 +2,11 @@ package api
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/api/reqresp"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/object"
-	"github.com/Aptomi/aptomi/pkg/server/api/reqresp"
 	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"

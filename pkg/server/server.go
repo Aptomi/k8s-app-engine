@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
@@ -11,7 +12,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object/codec"
 	"github.com/Aptomi/aptomi/pkg/object/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/object/store/bolt"
-	"github.com/Aptomi/aptomi/pkg/server/api"
 	"github.com/Aptomi/aptomi/pkg/server/store"
 	"github.com/Aptomi/aptomi/pkg/webui"
 	"github.com/gorilla/handlers"

@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/api/reqresp"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
-	"github.com/Aptomi/aptomi/pkg/server/api/reqresp"
 	log "github.com/Sirupsen/logrus"
 	"net/http"
 	"runtime/debug"
