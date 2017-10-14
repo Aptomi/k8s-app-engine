@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
+	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/object/codec"
@@ -23,7 +24,7 @@ import (
 
 // Apply finds all policy files and uploads/applies them by making a call to aptomi server
 func Apply(cfg *config.Client) error {
-	catalog := object.NewCatalog().Append(lang.Objects...).Append(store.PolicyDataObject)
+	catalog := object.NewCatalog().Append(lang.Objects...).Append(store.Objects...).Append(engine.ActionObjects...)
 	cod := yaml.NewCodec(catalog)
 
 	allObjects, err := readFiles(cfg.Apply.PolicyPaths, cod)
