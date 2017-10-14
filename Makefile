@@ -40,7 +40,11 @@ test-race:
 
 .PHONY: alltest
 alltest:
+ifdef JENKINS_HOME
+	${GO} test -v ./... 2>&1 | go-junit-report | tee junit.xml
+else
 	${GO} test -v ./...
+endif
 	${GO} test -bench . -count 1 ./pkg/engine/...
 	@echo "\nAll tests passed (unit, integration, benchmark)"
 
@@ -101,6 +105,14 @@ HAS_GLIDE := $(shell command -v glide)
 prepare_glide:
 ifndef HAS_GLIDE
 	curl https://glide.sh/get | sh
+endif
+
+HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
+
+.PHONY: prepare_go_junit_report
+prepare_go_junit_report:
+ifndef HAS_GO_JUNIT_REPORT
+	go get -u -v github.com/jstemmer/go-junit-report
 endif
 
 .PHONY: w-dep
