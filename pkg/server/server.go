@@ -13,7 +13,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object/store/bolt"
 	"github.com/Aptomi/aptomi/pkg/server/api"
 	"github.com/Aptomi/aptomi/pkg/server/store"
-	"github.com/Aptomi/aptomi/pkg/version"
 	"github.com/Aptomi/aptomi/pkg/webui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
@@ -21,19 +20,6 @@ import (
 	"os"
 	"time"
 )
-
-// Init http server with all handlers
-// * version handler
-// * api handler
-// * event logs api (should it be separate?)
-// * webui handler (serve static files)
-
-// Start some go routines
-// * users fetcher
-// * revisions applier
-
-// Some notes
-// * in dev mode serve webui files from specified directory, otherwise serve from inside of binary
 
 // Server is a HTTP server which serves API and UI
 type Server struct {
@@ -70,9 +56,11 @@ func (s *Server) Start() {
 		panic(s.httpServer.ListenAndServe())
 	})
 
-	s.runInBackground("Policy Enforcer", true, func() {
-		panic(s.Enforce())
-	})
+	if !s.cfg.Enforcer.Disabled {
+		s.runInBackground("Policy Enforcer", true, func() {
+			panic(s.Enforce())
+		})
+	}
 
 	s.wait()
 }
@@ -96,16 +84,14 @@ func (s *Server) initStore() {
 func (s *Server) initHTTPServer() {
 	router := httprouter.New()
 
-	version.Serve(router)
-	api.ServePolicy(router, s.store, s.codec)
-	api.ServeEndpoints(router, s.store)
-	api.ServeAdminStore(router, s.store)
+	api.New(router, s.store, s.externalData)
 	webui.Serve(router)
 
 	var handler http.Handler = router
 
+	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
-	handler = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler)
+	handler = api.NewPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
 
