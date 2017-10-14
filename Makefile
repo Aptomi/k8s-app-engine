@@ -55,6 +55,7 @@ clean-run-noop:
 
 .PHONY: smoke
 smoke: install alltest
+	tools/smoke.sh
 
 .PHONY: build
 build:
