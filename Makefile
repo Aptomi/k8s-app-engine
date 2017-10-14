@@ -39,7 +39,7 @@ test-race:
 	@echo "\nNo race conditions detected. Unit tests passed"
 
 .PHONY: alltest
-alltest:
+alltest: prepare_go_junit_report
 ifdef JENKINS_HOME
 	${GO} test -v ./... 2>&1 | go-junit-report | tee junit.xml
 else
