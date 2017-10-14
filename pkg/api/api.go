@@ -30,6 +30,8 @@ func (a *api) serve() {
 	//a.get("/api/v1/policy/gen/:gen/ns/:namespace", a.handlePolicyShow)
 	a.post("/api/v1/policy", a.handlePolicyUpdate)
 
+	a.get("/api/v1/endpoints", a.handleEndpointsShow)
+
 	a.getStream("/api/v1/admin/store", a.handleAdminStoreDump)
 
 	a.get("/version", handleVersion)
