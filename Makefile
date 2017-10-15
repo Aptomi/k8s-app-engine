@@ -10,13 +10,13 @@ default: clean build test
 
 .PHONY: vendor
 vendor: prepare_glide
+ifdef JENKINS_HOME
 	${GOENV} glide install --strip-vendor
+else
+	${GOENV} glide --no-color install --strip-vendor
+endif
 	${GO} build -o bin/protoc-gen-go ./vendor/github.com/golang/protobuf/protoc-gen-go
 	tools/setup-apimachinery.sh
-
-.PHONY: vendor-no-color
-vendor-no-color:
-	${GOENV} glide --no-color install --strip-vendor
 
 .PHONY: profile-engine
 profile-engine:
