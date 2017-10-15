@@ -6,10 +6,10 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"gopkg.in/yaml.v2"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/helm/pkg/helm"
-	"k8s.io/kubernetes/pkg/api"
-	k8serrors "k8s.io/kubernetes/pkg/api/errors"
-	"k8s.io/kubernetes/pkg/labels"
 	"strings"
 )
 
@@ -115,12 +115,12 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 		return nil, err
 	}
 
-	_, client, err := cache.newKubeClient(cluster, eventLog)
+	_, kubeClient, err := cache.newKubeClient(cluster, eventLog)
 	if err != nil {
 		return nil, err
 	}
 
-	coreClient := client.Core()
+	client := kubeClient.CoreV1()
 
 	releaseName := helmReleaseName(deployName)
 	chartName, err := helmChartName(params)
@@ -128,13 +128,13 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 		return nil, err
 	}
 
-	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
-	options := api.ListOptions{LabelSelector: selector}
+	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector().String()
+	options := meta.ListOptions{LabelSelector: selector}
 
 	endpoints := make(map[string]string)
 
 	// Check all corresponding services
-	services, err := coreClient.Services(cluster.Config.Namespace).List(options)
+	services, err := client.Services(cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 	}
 
 	// Find Istio Ingress service (how ingress itself exposed)
-	service, err := coreClient.Services(cluster.Config.Namespace).Get("istio-ingress")
+	service, err := client.Services(cluster.Config.Namespace).Get("istio-ingress", meta.GetOptions{})
 	if err != nil {
 		// return if there is no Istio deployed
 		if k8serrors.IsNotFound(err) {
@@ -181,7 +181,7 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 	}
 
 	// Check all corresponding istio ingresses
-	ingresses, err := client.Extensions().Ingresses(cluster.Config.Namespace).List(options)
+	ingresses, err := kubeClient.Extensions().Ingresses(cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}

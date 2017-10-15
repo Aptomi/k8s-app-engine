@@ -8,9 +8,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/labels"
-	k8slabels "k8s.io/kubernetes/pkg/labels"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"os"
 	"strconv"
 	"strings"
@@ -24,8 +23,8 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, 
 
 	coreClient := client.Core()
 
-	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector()
-	options := api.ListOptions{LabelSelector: selector}
+	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector().String()
+	options := meta.ListOptions{LabelSelector: selector}
 
 	// Check all corresponding services
 	services, err := coreClient.Services(cluster.Config.Namespace).List(options)
@@ -167,8 +166,8 @@ func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster, eventLog *event.Lo
 
 		coreClient := client.Core()
 
-		selector := k8slabels.Set{"app": "istio"}.AsSelector()
-		options := api.ListOptions{LabelSelector: selector}
+		selector := labels.Set{"app": "istio"}.AsSelector().String()
+		options := meta.ListOptions{LabelSelector: selector}
 
 		pods, err := coreClient.Pods(cluster.Namespace).List(options)
 		if err != nil {
