@@ -35,6 +35,12 @@ import:
   version: ^0.1.0
   subpackages:
   - cmp
+
+- package: k8s.io/helm
+  version: release-2.6
+  subpackages:
+  - pkg/helm
+
 - package: golang.org/x/net
   subpackages:
   - context
@@ -64,10 +70,6 @@ import:
   version: 1.2.1
 - package: k8s.io/kubernetes
   version: ~1.7.0
-- package: k8s.io/helm
-  version: 211f5f6f33eee7ab6ee2c75fbfd45fcd4262aae7
-  subpackages:
-  - pkg/helm
 - package: github.com/gosuri/uitable
 - package: github.com/asaskevich/govalidator
   version: ^4.0.0
@@ -123,4 +125,3 @@ testImports:
   version: ^1.1.4
   subpackages:
   - assert
-

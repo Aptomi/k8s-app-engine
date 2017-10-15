@@ -1,5 +1,5 @@
-hash: 3a02373f9cd1fa75c08ed9db81afd0d1854b35df77bfee5946a58f43a866e15c
-updated: 2017-10-15T00:46:19.526886441-07:00
+hash: a10a6631eb1e5f50aaf05898118a254f76612524fb7d028a9dd9cea441a30c9e
+updated: 2017-10-15T01:41:24.546837871-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -76,8 +76,6 @@ imports:
   version: ba18e35c5c1b36ef6334cad706eb681153d2d379
 - name: github.com/exponent-io/jsonpath
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
-- name: github.com/facebookgo/symwalk
-  version: 42004b9f322246749dd73ad71008b1f3160c0052
 - name: github.com/fatih/camelcase
   version: f6a740d52f961c60348ebb109adde9f4635d7540
 - name: github.com/fsnotify/fsnotify
@@ -287,17 +285,10 @@ imports:
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:
-  - cast5
   - curve25519
   - ed25519
   - ed25519/internal/edwards25519
   - openpgp
-  - openpgp/armor
-  - openpgp/clearsign
-  - openpgp/elgamal
-  - openpgp/errors
-  - openpgp/packet
-  - openpgp/s2k
   - ssh
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
@@ -374,26 +365,17 @@ imports:
   - pkg/util/feature
   - pkg/util/flag
 - name: k8s.io/helm
-  version: 211f5f6f33eee7ab6ee2c75fbfd45fcd4262aae7
+  version: be3ae4ea91b2960be98c07e8f73754e67e87963c
   subpackages:
   - pkg/chartutil
-  - pkg/getter
   - pkg/helm
-  - pkg/helm/environment
-  - pkg/helm/helmpath
   - pkg/helm/portforwarder
   - pkg/ignore
   - pkg/kube
-  - pkg/plugin
   - pkg/proto/hapi/chart
   - pkg/proto/hapi/release
   - pkg/proto/hapi/services
   - pkg/proto/hapi/version
-  - pkg/provenance
-  - pkg/repo
-  - pkg/timeconv
-  - pkg/tlsutil
-  - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
   version: bc6162cc70b4a39a7f39391564e0dd0be60b39e9
