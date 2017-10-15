@@ -11,6 +11,8 @@ default: clean build test
 .PHONY: vendor
 vendor: prepare_glide
 	${GOENV} glide install --strip-vendor
+	${GO} build -o bin/protoc-gen-go ./vendor/github.com/golang/protobuf/protoc-gen-go
+	tools/setup-apimachinery.sh
 
 .PHONY: vendor-no-color
 vendor-no-color:
@@ -104,7 +106,7 @@ HAS_GLIDE := $(shell command -v glide)
 .PHONY: prepare_glide
 prepare_glide:
 ifndef HAS_GLIDE
-	curl https://glide.sh/get | sh
+	go get -u -v github.com/Masterminds/glide
 endif
 
 HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
