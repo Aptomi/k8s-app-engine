@@ -10,13 +10,14 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"strconv"
 )
 
 func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) reqresp.Response {
 	gen := p.ByName("rev")
 
 	if len(gen) == 0 {
-		gen = string(object.LastGen)
+		gen = strconv.Itoa(int(object.LastGen))
 	}
 
 	policyData, err := a.store.GetPolicyData(object.ParseGeneration(gen))
