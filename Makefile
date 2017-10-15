@@ -10,7 +10,7 @@ default: clean build test
 
 .PHONY: vendor
 vendor: prepare_glide
-ifdef JENKINS_HOME
+ifndef JENKINS_HOME
 	${GOENV} glide install --strip-vendor
 else
 	${GOENV} glide --no-color install --strip-vendor
@@ -42,10 +42,10 @@ test-race:
 
 .PHONY: alltest
 alltest: prepare_go_junit_report
-ifdef JENKINS_HOME
-	${GO} test -v ./... 2>&1 | go-junit-report | tee junit.xml
-else
+ifndef JENKINS_HOME
 	${GO} test -v ./...
+else
+	${GO} test -v ./... 2>&1 | go-junit-report | tee junit.xml
 endif
 	${GO} test -bench . -count 1 ./pkg/engine/...
 	@echo "\nAll tests passed (unit, integration, benchmark)"
