@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/object/codec/yaml"
+	"github.com/Aptomi/aptomi/pkg/server/store"
 	"github.com/gosuri/uitable"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +15,7 @@ import (
 
 // Show method retrieves current policy from aptomi and prints it
 func Show(cfg *config.Client) error {
-	catalog := object.NewCatalog().Append(lang.Objects...)
+	catalog := object.NewCatalog().Append(store.PolicyDataObject)
 	cod := yaml.NewCodec(catalog)
 
 	client := &http.Client{
