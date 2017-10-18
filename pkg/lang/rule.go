@@ -28,7 +28,13 @@ type RuleActions struct {
 	ChangeLabels ChangeLabelsAction `yaml:"change-labels"`
 	Dependency   DependencyAction
 	Ingress      IngressAction
-	Stop         bool
+
+	// Namespaces field is only relevant for ACL rules (have to keep it here due to the lack of generics)
+	// It indicates for which namespaces ACLs are being applied
+	Namespaces map[string]string
+
+	// Stop indicates whether the engine should stop processing a rule chain or not
+	Stop bool
 }
 
 // Matches returns if a rule matches
