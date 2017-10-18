@@ -21,6 +21,9 @@ type PolicyBuilder struct {
 	policy    *lang.Policy
 	users     *users.UserLoaderMock
 	secrets   *secrets.SecretLoaderMock
+
+	domainAdmin     *lang.User
+	domainAdminView *lang.PolicyView
 }
 
 // NewPolicyBuilder creates a new PolicyBuilder with a default "main" namespace
@@ -41,6 +44,10 @@ func NewPolicyBuilderWithNS(namespace string) *PolicyBuilder {
 	for _, rule := range lang.ACLRulesBootstrap {
 		result.policy.AddObject(rule)
 	}
+
+	result.domainAdmin = result.AddUser()
+	result.domainAdmin.Labels["role"] = "aptomi_domain_admin"
+	result.domainAdminView = result.policy.View(result.domainAdmin)
 
 	return result
 }
@@ -63,7 +70,7 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 		Labels:   make(map[string]string),
 	}
 
-	builder.policy.AddObject(result)
+	builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -92,7 +99,7 @@ func (builder *PolicyBuilder) AddService(owner *lang.User) *lang.Service {
 		},
 		Owner: ownerID,
 	}
-	builder.policy.AddObject(result)
+	builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -112,7 +119,7 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 			},
 		}},
 	}
-	builder.policy.AddObject(result)
+	builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -137,7 +144,7 @@ func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service,
 		)
 	}
 
-	builder.policy.AddObject(result)
+	builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -153,7 +160,7 @@ func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.Rul
 		Criteria: criteria,
 		Actions:  actions,
 	}
-	builder.policy.AddObject(result)
+	builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -166,7 +173,7 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 			Name:      util.RandomID(builder.random, idLength),
 		},
 	}
-	builder.policy.AddObject(result)
+	builder.domainAdminView.AddObject(result)
 	return result
 }
 
