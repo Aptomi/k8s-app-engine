@@ -10,6 +10,7 @@ var (
 		ContractObject,
 		ClusterObject,
 		RuleObject,
+		ACLRuleObject,
 		DependencyObject,
 	}
 )

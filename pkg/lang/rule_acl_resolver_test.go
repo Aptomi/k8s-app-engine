@@ -85,7 +85,7 @@ func TestAclResolverBootstrapRules(t *testing.T) {
 		},
 	}
 
-	runTests(testCases, BootstrapACLRules, t)
+	runTests(testCases, ACLRulesBootstrap, t)
 }
 
 func TestAclResolverCustomRules(t *testing.T) {

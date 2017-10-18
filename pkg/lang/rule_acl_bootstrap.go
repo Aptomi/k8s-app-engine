@@ -4,8 +4,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 )
 
-// BootstrapACLRules is a set of default ACL rules, which Aptomi will get initialized with on the first run
-var BootstrapACLRules = []*ACLRule{
+// ACLRulesBootstrap is a set of default ACL rules, which Aptomi will get initialized with on the first run
+var ACLRulesBootstrap = []*ACLRule{
 	// domain admins
 	{
 		Metadata: Metadata{

@@ -30,13 +30,19 @@ func NewPolicyBuilder() *PolicyBuilder {
 
 // NewPolicyBuilderWithNS creates a new PolicyBuilder
 func NewPolicyBuilderWithNS(namespace string) *PolicyBuilder {
-	return &PolicyBuilder{
+	result := &PolicyBuilder{
 		random:    rand.New(rand.NewSource(randSeed)),
 		namespace: namespace,
 		policy:    lang.NewPolicy(),
 		users:     users.NewUserLoaderMock(),
 		secrets:   secrets.NewSecretLoaderMock(),
 	}
+
+	for _, rule := range lang.ACLRulesBootstrap {
+		result.policy.AddObject(rule)
+	}
+
+	return result
 }
 
 // SwitchNamespace switches the current namespace where objects will be generated
