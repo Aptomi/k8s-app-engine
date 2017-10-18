@@ -12,6 +12,7 @@ type PolicyNamespace struct {
 	Contracts    map[string]*Contract
 	Clusters     map[string]*Cluster
 	Rules        *GlobalRules
+	ACLRules     *GlobalRules
 	Dependencies *GlobalDependencies
 }
 
@@ -23,6 +24,7 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 		Contracts:    make(map[string]*Contract),
 		Clusters:     make(map[string]*Cluster),
 		Rules:        NewGlobalRules(),
+		ACLRules:     NewGlobalRules(),
 		Dependencies: NewGlobalDependencies(),
 	}
 }
@@ -40,6 +42,8 @@ func (policyNamespace *PolicyNamespace) addObject(obj object.Base) {
 		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
 	case RuleObject.Kind:
 		policyNamespace.Rules.addRule(obj.(*Rule))
+	case ACLRuleObject.Kind:
+		policyNamespace.ACLRules.addRule(obj.(*Rule))
 	case DependencyObject.Kind:
 		policyNamespace.Dependencies.AddDependency(obj.(*Dependency))
 	default:
@@ -66,6 +70,10 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []object.B
 		for _, rule := range policyNamespace.Rules.Rules {
 			result = append(result, rule)
 		}
+	case ACLRuleObject.Kind:
+		for _, rule := range policyNamespace.ACLRules.Rules {
+			result = append(result, rule)
+		}
 	case DependencyObject.Kind:
 		for _, dependencyList := range policyNamespace.Dependencies.DependenciesByContract {
 			for _, dependency := range dependencyList {
@@ -73,7 +81,7 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []object.B
 			}
 		}
 	default:
-		panic(fmt.Sprintf("Can't get objects by kind: %s", kind))
+		panic(fmt.Sprintf("not supported by PolicyNamespace.getObjectsByKind(): unknown kind %s", kind))
 	}
 	return result
 }
@@ -94,12 +102,10 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (obj
 		if result, ok = policyNamespace.Clusters[name]; !ok {
 			return nil, nil
 		}
-	case RuleObject.Kind:
-		return nil, fmt.Errorf("Rule not supported by PolicyNamespace.getObject(): %s, %s", kind, name)
-	case DependencyObject.Kind:
-		return nil, fmt.Errorf("Dependency not supported by PolicyNamespace.getObject(): %s, %s", kind, name)
+	case RuleObject.Kind, ACLRuleObject.Kind, DependencyObject.Kind:
+		return nil, fmt.Errorf("not supported by PolicyNamespace.getObject(): %s, %s", kind, name)
 	default:
-		return nil, fmt.Errorf("Unknown object kind in PolicyNamespace.getObject(): %s, %s", kind, name)
+		return nil, fmt.Errorf("not supported by PolicyNamespace.getObject(): unknown kind %s, %s", kind, name)
 	}
 	return result, nil
 }

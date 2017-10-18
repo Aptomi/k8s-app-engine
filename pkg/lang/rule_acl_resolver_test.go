@@ -20,7 +20,9 @@ type testCaseObjPrivileges struct {
 }
 
 func runTests(testCases []testCase, rules []*ACLRule, t *testing.T) {
-	resolver := NewACLResolver(rules)
+	globalRules := NewGlobalRules()
+	globalRules.addRule(rules...)
+	resolver := NewACLResolver(globalRules)
 	for _, tc := range testCases {
 		roleMap, err := resolver.getUserRoleMap(tc.user)
 		assert.NoError(t, err, "User role map should be retrieved successfully. Test = %s", tc)

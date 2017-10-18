@@ -15,9 +15,9 @@ type ACLResolver struct {
 }
 
 // NewACLResolver creates a new ACLResolver
-func NewACLResolver(rules []*ACLRule) *ACLResolver {
+func NewACLResolver(globalRules *GlobalRules) *ACLResolver {
 	return &ACLResolver{
-		rules:        rules,
+		rules:        globalRules.GetRulesSortedByWeight(),
 		cache:        expression.NewCache(),
 		roleMapCache: sync.Map{},
 	}

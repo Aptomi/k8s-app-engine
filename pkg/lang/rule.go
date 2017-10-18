@@ -58,8 +58,8 @@ func NewGlobalRules() *GlobalRules {
 	return &GlobalRules{}
 }
 
-func (globalRules *GlobalRules) addRule(rule *Rule) {
-	globalRules.Rules = append(globalRules.Rules, rule)
+func (globalRules *GlobalRules) addRule(rule ...*Rule) {
+	globalRules.Rules = append(globalRules.Rules, rule...)
 }
 
 // GetRulesSortedByWeight returns all rules sorted by weight
