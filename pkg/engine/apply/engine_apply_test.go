@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
@@ -44,6 +45,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		bDesired.External(),
 		MockPluginFailOnComponent(),
 		actions,
+		progress.NewNoop(),
 	)
 
 	// check actual state
@@ -76,6 +78,7 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 		bDesired.External(),
 		MockPluginFailOnComponent(bDesired.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
 		actions,
+		progress.NewNoop(),
 	)
 
 	// check actual state
@@ -111,6 +114,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		bDesired.External(),
 		MockPluginFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions,
+		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results
@@ -156,6 +160,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		bDesiredNext.External(),
 		MockPluginFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState, 0).Actions,
+		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results
@@ -194,6 +199,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		bDesiredNext.External(),
 		MockPluginFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState, 0).Actions,
+		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results

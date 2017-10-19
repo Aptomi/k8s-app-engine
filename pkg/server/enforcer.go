@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -109,7 +110,7 @@ func (s *Server) enforce() error {
 		return fmt.Errorf("Error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, s.store.ActualStateUpdater(), s.externalData, plugins, stateDiff.Actions)
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, s.store.ActualStateUpdater(), s.externalData, plugins, stateDiff.Actions, progress.NewConsole())
 	resolution, eventLog, err := applier.Apply()
 
 	eventLog.Save(&event.HookStdout{})

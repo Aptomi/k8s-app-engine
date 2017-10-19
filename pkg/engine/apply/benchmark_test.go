@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
+	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
@@ -409,6 +410,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		MockPluginFailOnComponent("fail-components-like-these"),
 		actions,
+		progress.NewNoop(),
 	)
 
 	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
