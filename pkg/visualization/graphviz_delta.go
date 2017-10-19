@@ -36,7 +36,7 @@ func Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
 	{
 		for _, s := range prev.SubGraphs.SubGraphs {
 			if _, inNext := next.SubGraphs.SubGraphs[s.Name]; !inNext {
-				// Removed subgraph -> add a sugraph filled red
+				// Removed subgraph -> add a subgraph filled red
 				_ = next.AddSubGraph(next.Name, s.Name, map[string]string{"style": "filled", "fillcolor": "gray18", "fontcolor": "white", "label": s.Attrs["label"]})
 			}
 		}
@@ -51,7 +51,7 @@ func Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
 					_ = n.Attrs.Add("color", "red")
 
 					// Find previous subgraph & put it into the same subgraph
-					subgraphName := findSubraphName(prev, n.Name)
+					subgraphName := findSubgraphName(prev, n.Name)
 					next.Relations.Add(subgraphName, n.Name)
 
 					next.Nodes.Add(n)

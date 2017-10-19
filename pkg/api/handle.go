@@ -49,7 +49,7 @@ func (a *api) read(request *http.Request) []object.Base {
 	objects, err := a.codec.UnmarshalOneOrMany(body)
 	if err != nil {
 		// todo response with some bad request status code
-		log.Panicf("Error unmarshaling policy update request: %s", err)
+		log.Panicf("Error unmarshalling policy update request: %s", err)
 	}
 
 	return objects

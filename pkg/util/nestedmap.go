@@ -85,7 +85,7 @@ func (src NestedParameterMap) DeepEqual(dst NestedParameterMap) bool {
 
 // Diff returns a human-readable diff between two nested parameter maps
 func (src NestedParameterMap) Diff(dst NestedParameterMap) string {
-	// 2nd parameter is true/false, whether the structs are equal or not. We can safely ignore it
+	// second parameter is a result true/false, indicating whether they are equal or not. we can safely ignore it
 	diff, _ := messagediff.PrettyDiff(src, dst)
 	return diff
 }

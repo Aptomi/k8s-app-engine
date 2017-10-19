@@ -20,7 +20,7 @@ type Criteria struct {
 
 // Whether criteria evaluates to "true" for a given set of labels or not
 func (criteria *Criteria) allows(params *expression.Parameters, cache *expression.Cache) (bool, error) {
-	// Make sure all "require-all" criterias evaluate to true
+	// Make sure all "require-all" criteria evaluate to true
 	for _, exprShouldBeTrue := range criteria.RequireAll {
 		result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)
 		if err != nil {
@@ -38,7 +38,7 @@ func (criteria *Criteria) allows(params *expression.Parameters, cache *expressio
 		}
 	}
 
-	// Make sure that none of "require-none" criterias evaluate to true
+	// Make sure that none of "require-none" criteria evaluate to true
 	for _, exprShouldBeFalse := range criteria.RequireNone {
 		result, err := criteria.evaluateBool(exprShouldBeFalse, params, cache)
 		if err != nil {
@@ -56,7 +56,7 @@ func (criteria *Criteria) allows(params *expression.Parameters, cache *expressio
 		}
 	}
 
-	// Make sure at least one "require-any" criterias evaluates to true
+	// Make sure at least one "require-any" criteria evaluates to true
 	if len(criteria.RequireAny) > 0 {
 		for _, exprShouldBeTrue := range criteria.RequireAny {
 			result, err := criteria.evaluateBool(exprShouldBeTrue, params, cache)

@@ -26,7 +26,7 @@ func (g *graph) GetData() lineEntry {
 	sort.Sort(g.nodes)
 	sort.Sort(g.edges)
 
-	// Wrap it into a graph structure for visjs
+	// Wrap it into a graph structure for vis.js
 	return lineEntry{
 		"nodes": g.nodes,
 		"edges": g.edges,

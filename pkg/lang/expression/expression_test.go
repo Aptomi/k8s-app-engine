@@ -69,7 +69,7 @@ func TestExpressions(t *testing.T) {
 		expression string
 		result     int
 	}{
-		// true (bools, ints, strings)
+		// true (checking bool, int, string)
 		{"anotherbar == true", ResTrue},
 		{"anotherbar", ResTrue},
 		{"bar == true", ResTrue},
@@ -94,7 +94,7 @@ func TestExpressions(t *testing.T) {
 		// we are explicitly converting all integer-like params to integers, so this should always be false (expected behavior)
 		{"foo == '10'", ResFalse},
 
-		// we are explicitly converting all bool-like params to bools, so this should always be false (expected behavior)
+		// we are explicitly converting all bool-like params to bool, so this should always be false (expected behavior)
 		{"anotherbar == 't'", ResFalse},
 
 		// check that struct expressions work

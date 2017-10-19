@@ -106,7 +106,7 @@ func makePolicyObjects(t *testing.T) []object.Base {
 	}
 	objects, err = testCodec.UnmarshalOneOrMany(data)
 	if err != nil {
-		t.Errorf("Error unmarshaling policy objects: %s", err)
+		t.Errorf("Error unmarshalling policy objects: %s", err)
 	}
 
 	return objects

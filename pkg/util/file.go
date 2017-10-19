@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 // CopyFile copies the contents of the file named src to the file named
@@ -23,9 +22,9 @@ func CopyFile(src, dst string) (err error) {
 		return
 	}
 	defer func() {
-		cerr := out.Close()
+		errClose := out.Close()
 		if err == nil {
-			err = cerr
+			err = errClose
 		}
 	}()
 	if _, err = io.Copy(out, in); err != nil {
@@ -35,84 +34,9 @@ func CopyFile(src, dst string) (err error) {
 	return
 }
 
-// CopyDirectory recursively copies a directory tree
-// Source directory must exist, destination directory must not exist
-func CopyDirectory(srcDir string, dstDir string) (err error) {
-	// get properties of source directory
-	srcStat, err := os.Stat(srcDir)
-	if err != nil {
-		return err
-	}
-	if !srcStat.IsDir() {
-		return fmt.Errorf("source is not a directory")
-	}
-
-	/*
-		// ensure destination directory does not already exist
-		_, err = os.Open(dstDir)
-		if !os.IsNotExist(err) {
-			return fmt.Errorf("Destination directory already exists")
-		}
-	*/
-
-	// create destination dir
-	err = os.MkdirAll(dstDir, srcStat.Mode())
-	if err != nil {
-		return err
-	}
-
-	// get all entries in a directory
-	entries, err := ioutil.ReadDir(srcDir)
-	if err != nil {
-		return err
-	}
-	for _, entry := range entries {
-		sfp := filepath.Join(srcDir, entry.Name())
-		dfp := filepath.Join(dstDir, entry.Name())
-		if entry.IsDir() {
-			err = CopyDirectory(sfp, dfp)
-			if err != nil {
-				return err
-			}
-		} else {
-			// perform copy
-			err = CopyFile(sfp, dfp)
-			if err != nil {
-				return err
-			}
-		}
-
-	}
-	return nil
-}
-
 // DeleteFile deletes a file
 func DeleteFile(src string) (err error) {
 	return os.Remove(src)
-}
-
-// DeleteDirectoryContents removes all contents of a directory
-func DeleteDirectoryContents(dir string) error {
-	d, err := os.Open(dir)
-	if os.IsNotExist(err) {
-		// do nothing
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	defer d.Close() // nolint: errcheck
-	names, err := d.Readdirnames(-1)
-	if err != nil {
-		return err
-	}
-	for _, name := range names {
-		err = os.RemoveAll(filepath.Join(dir, name))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // WriteTempFile creates a temporary file and returns its name

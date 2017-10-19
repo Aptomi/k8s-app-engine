@@ -11,7 +11,7 @@ import (
 )
 
 // Finds subgraph name from relations
-func findSubraphName(prev *gographviz.Graph, nName string) string {
+func findSubgraphName(prev *gographviz.Graph, nName string) string {
 	for gName := range prev.Relations.ParentToChildren {
 		if prev.Relations.ParentToChildren[gName][nName] {
 			return gName
@@ -61,10 +61,10 @@ func OpenImage(image image.Image) {
 		cmd := "open"
 		args := []string{tmpFile.Name()}
 		command := exec.Command(cmd, args...)
-		var outb, errb bytes.Buffer
-		command.Stdout = &outb
-		command.Stderr = &errb
-		if err := command.Run(); err != nil || len(errb.String()) > 0 {
+		var outBuf, errBuf bytes.Buffer
+		command.Stdout = &outBuf
+		command.Stderr = &errBuf
+		if err := command.Run(); err != nil || len(errBuf.String()) > 0 {
 			panic(fmt.Sprintf("Unable to open '%s': %s", tmpFile.Name(), err))
 		}
 	}

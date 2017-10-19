@@ -21,8 +21,8 @@ func TestLoadUsersFromDir(t *testing.T) {
 
 	// check user labels
 	userAlice := userLoader.LoadUserByID("1")
-	assert.Equal(t, 6, len(userAlice.Labels), "Alice's labelset should have correct length")
-	assert.Equal(t, "Alice", userAlice.Name, "Should load Alice user by ID")
+	assert.Equal(t, "Alice", userAlice.Name, "Alice should have correct name when loaded by ID")
+	assert.Equal(t, 6, len(userAlice.Labels), "Alice should have correct label count")
 	assert.Equal(t, "yes", userAlice.Labels["dev"], "Alice should have dev='yes' label")
 	assert.Equal(t, "no", userAlice.Labels["prod"], "Alice should have prod='no' label")
 

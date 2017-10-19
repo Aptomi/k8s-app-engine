@@ -9,7 +9,4 @@ const (
 
 	// SystemNS is a name of system namespace
 	SystemNS = "system"
-
-	// DefaultNS is a name of default namespace
-	DefaultNS = "default"
 )

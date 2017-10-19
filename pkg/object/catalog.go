@@ -32,8 +32,8 @@ func NewCatalog() *Catalog {
 	return catalog
 }
 
-func (catalog *Catalog) Append(infos ...*Info) *Catalog {
-	for _, info := range infos {
+func (catalog *Catalog) Append(infoList ...*Info) *Catalog {
+	for _, info := range infoList {
 		catalog.Kinds[info.Kind] = info
 	}
 

@@ -32,11 +32,11 @@ func CreateImage(graph *gographviz.Graph) (image.Image, error) {
 		cmd := "unflatten"
 		args := []string{"-f", "-l", "4", "-o" + fileNameDotFlat, fileNameDot}
 		command := exec.Command(cmd, args...)
-		var outb, errb bytes.Buffer
-		command.Stdout = &outb
-		command.Stderr = &errb
-		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			unableToExecute(cmd, args, outb, errb, err, graphStr)
+		var outBuf, errBuf bytes.Buffer
+		command.Stdout = &outBuf
+		command.Stderr = &errBuf
+		if err := command.Run(); err != nil || len(errBuf.String()) > 0 {
+			unableToExecute(cmd, args, outBuf, errBuf, err, graphStr)
 		}
 	}
 
@@ -46,11 +46,11 @@ func CreateImage(graph *gographviz.Graph) (image.Image, error) {
 		args := []string{"-Tpng", "-o" + fileNamePng, fileNameDotFlat}
 		// args := []string{"-Tpng", "-Kfdp", "-o" + fileNamePng, fileNameDotFlat}
 		command := exec.Command(cmd, args...)
-		var outb, errb bytes.Buffer
-		command.Stdout = &outb
-		command.Stderr = &errb
-		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			unableToExecute(cmd, args, outb, errb, err, graphStr)
+		var outBuf, errBuf bytes.Buffer
+		command.Stdout = &outBuf
+		command.Stderr = &errBuf
+		if err := command.Run(); err != nil || len(errBuf.String()) > 0 {
+			unableToExecute(cmd, args, outBuf, errBuf, err, graphStr)
 		}
 	}
 

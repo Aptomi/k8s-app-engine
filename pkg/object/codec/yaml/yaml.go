@@ -16,11 +16,8 @@ type yamlCodec struct {
 	catalog *object.Catalog
 }
 
-// YamlCodecName is the name of Yaml MarshallerUnmarshaller implementation
-const YamlCodecName = "yaml"
-
 func (c *yamlCodec) GetName() string {
-	return YamlCodecName
+	return "yaml"
 }
 
 func (c *yamlCodec) MarshalOne(object object.Base) ([]byte, error) {
@@ -48,7 +45,7 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 	raw := new(interface{})
 	err := yaml.Unmarshal(data, raw)
 	if err != nil {
-		return nil, fmt.Errorf("error while unmarshaling data to raw interface{}: %s", err)
+		return nil, fmt.Errorf("error while unmarshalling data to raw interface{}: %s", err)
 	}
 
 	result := make([]object.Base, 0)
@@ -56,7 +53,7 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 	if elem, ok := (*raw).(map[interface{}]interface{}); ok { // if it's a single object (map)
 		obj, err := c.unmarshalRaw(elem, data)
 		if err != nil {
-			return nil, fmt.Errorf("error while unmarshaling single object: %s", err)
+			return nil, fmt.Errorf("error while unmarshalling single object: %s", err)
 		}
 
 		result = append(result, obj)
@@ -71,12 +68,12 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 
 			elemData, err := yaml.Marshal(sliceElem) // get []byte for current elem only
 			if err != nil {
-				return nil, fmt.Errorf("error while unmarshaling element #%d (marshal step): %s", idx, err)
+				return nil, fmt.Errorf("error while unmarshalling element #%d (marshal step): %s", idx, err)
 			}
 
 			obj, err := c.unmarshalRaw(sliceElem, elemData) // unmarshal to kind type
 			if err != nil {
-				return nil, fmt.Errorf("error while unmarshaling element #%d (final step): %s", idx, err)
+				return nil, fmt.Errorf("error while unmarshalling element #%d (final step): %s", idx, err)
 			}
 
 			result = append(result, obj)

@@ -59,7 +59,7 @@ func Apply(cfg *config.Client) error {
 	}
 	defer resp.Body.Close() // nolint: errcheck
 
-	// todo(slujanov): process response - check status and print returned data
+	// todo(slukjanov): process response - check status and print returned data
 	fmt.Println("Response:", resp)
 
 	respData, err := ioutil.ReadAll(resp.Body)
@@ -72,7 +72,7 @@ func Apply(cfg *config.Client) error {
 
 	objects, err := cod.UnmarshalOneOrMany(respData)
 	if err != nil {
-		panic(fmt.Sprintf("Error while unmarshaling response: %s", err))
+		panic(fmt.Sprintf("Error while unmarshalling response: %s", err))
 	}
 
 	// todo(slukjanov): pretty print response
