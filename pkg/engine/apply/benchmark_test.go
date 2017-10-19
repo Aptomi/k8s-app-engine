@@ -261,7 +261,6 @@ func (gen *PolicyGenerator) makeRules() {
 			RequireAll: []string{"true"},
 		},
 		Actions: &lang.RuleActions{
-			Dependency:   lang.DependencyAction(lang.Allow),
 			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-test")),
 		},
 	})

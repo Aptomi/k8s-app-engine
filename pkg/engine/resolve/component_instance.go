@@ -130,7 +130,7 @@ func (instance *ComponentInstance) addDependency(dependencyKey string) {
 }
 
 func (instance *ComponentInstance) addRuleInformation(result *lang.RuleActionResult) {
-	instance.DataForPlugins[AllowIngres] = strconv.FormatBool(result.AllowIngress)
+	instance.DataForPlugins[AllowIngres] = strconv.FormatBool(!result.RejectIngress)
 }
 
 func (instance *ComponentInstance) addCodeParams(codeParams util.NestedParameterMap) error {

@@ -243,14 +243,8 @@ func (builder *PolicyBuilder) AddComponentDependency(component *lang.ServiceComp
 }
 
 // RuleActions creates a new RuleActions object
-func (builder *PolicyBuilder) RuleActions(dependencyAction string, ingresAction string, labelOps lang.LabelOperations) *lang.RuleActions {
+func (builder *PolicyBuilder) RuleActions(labelOps lang.LabelOperations) *lang.RuleActions {
 	result := &lang.RuleActions{}
-	if len(dependencyAction) > 0 {
-		result.Dependency = lang.DependencyAction(dependencyAction)
-	}
-	if len(ingresAction) > 0 {
-		result.Ingress = lang.IngressAction(dependencyAction)
-	}
 	if labelOps != nil {
 		result.ChangeLabels = lang.ChangeLabelsAction(labelOps)
 	}

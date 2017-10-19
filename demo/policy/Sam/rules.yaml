@@ -7,13 +7,10 @@
     require-all:
       - org == 'it' && is_operator
       - in(service.Labels.type, 'analytics', 'dev-apps', 'service-mesh')
-    require-none:
-      - team == 'mobile-dev'
   actions:
     change-labels:
       set:
         cluster: cluster-us-east
-    dependency: allow
 
 - metadata:
     kind: rule
@@ -24,21 +21,29 @@
     require-all:
       - org == 'dev'
       - in(service.Labels.type, 'analytics', 'dev-apps', 'service-mesh')
-    require-none:
-      - team == 'mobile-dev'
   actions:
     change-labels:
       set:
         cluster: cluster-us-west
-    dependency: allow
 
 - metadata:
     kind: rule
     namespace: main
-    name: allow_all_traffic_except_for_deactivated_users
+    name: reject_dependency_for_mobile_dev_users
   weight: 3000
   criteria:
-    require-none:
+    require-all:
+      - team == 'mobile-dev'
+  actions:
+    dependency: reject
+
+- metadata:
+    kind: rule
+    namespace: main
+    name: reject_traffic_for_deactivated_users
+  weight: 4000
+  criteria:
+    require-all:
       - deactivated
   actions:
-    ingress: allow
+    ingress: reject

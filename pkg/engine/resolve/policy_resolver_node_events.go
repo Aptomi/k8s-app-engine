@@ -251,7 +251,7 @@ func (node *resolutionNode) logTestedContextCriteria(context *lang.Context, matc
 func (node *resolutionNode) logRulesProcessingResult(policyNamespace *lang.PolicyNamespace, result *lang.RuleActionResult) {
 	node.eventLog.WithFields(event.Fields{
 		"result": result,
-	}).Debugf("Rules processed within namespace '%s' for context '%s' within contract '%s'. Dependency allowed", policyNamespace.Name, node.context.Name, node.contract.Name)
+	}).Debugf("Rules processed within namespace '%s' for context '%s' within contract '%s'", policyNamespace.Name, node.context.Name, node.contract.Name)
 }
 
 func (node *resolutionNode) logTestedRuleMatch(rule *lang.Rule, match bool) {

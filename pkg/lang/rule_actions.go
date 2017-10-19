@@ -4,8 +4,8 @@ import (
 	"strings"
 )
 
-// Allow is a special constant that is used in rule actions for allowing dependencies, ingress traffic, etc
-const Allow = "allow"
+// Reject is a special constant that is used in rule actions for rejecting dependencies, ingress traffic, etc
+const Reject = "reject"
 
 // ChangeLabelsAction is a rule action to change labels
 type ChangeLabelsAction LabelOperations
@@ -18,8 +18,8 @@ type IngressAction string
 
 // RuleActionResult is a result of processing multiple rules on a given component
 type RuleActionResult struct {
-	AllowDependency bool
-	AllowIngress    bool
+	RejectDependency bool
+	RejectIngress    bool
 
 	ChangedLabelsOnLastApply bool
 	Labels                   *LabelSet
@@ -37,12 +37,8 @@ func NewRuleActionResult(labels *LabelSet) *RuleActionResult {
 
 // ApplyActions applies rule actions and updates result
 func (rule *Rule) ApplyActions(result *RuleActionResult) {
-	if rule.Actions.Dependency != "" {
-		result.AllowDependency = string(rule.Actions.Dependency) == Allow
-	}
-	if rule.Actions.Ingress != "" {
-		result.AllowIngress = string(rule.Actions.Ingress) == Allow
-	}
+	result.RejectDependency = string(rule.Actions.Dependency) == Reject
+	result.RejectIngress = string(rule.Actions.Ingress) == Reject
 
 	result.ChangedLabelsOnLastApply = false
 	if rule.Actions.ChangeLabels != nil {

@@ -24,7 +24,7 @@ func TestPolicyResolverContract(t *testing.T) {
 
 	// add rules to allow all dependencies
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency (should be resolved to the first context)
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -58,14 +58,14 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 	service1 := b.AddService(b.AddUser())
 	b.AddServiceComponent(service1, b.CodeComponent(nil, nil))
 	contract1 := b.AddContract(service1, b.CriteriaTrue())
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// create objects in ns2
 	b.SwitchNamespace("ns2")
 	service2 := b.AddService(b.AddUser())
 	b.AddServiceComponent(service2, b.CodeComponent(nil, nil))
 	contract2 := b.AddContract(service2, b.CriteriaTrue())
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// ns1/service1 -> depends on -> ns2/contract2
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
@@ -91,7 +91,7 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 
 	// add rules to allow all dependencies
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency with full labels (should be resolved successfully)
 	d1 := b.AddDependency(b.AddUser(), contract1)
@@ -130,7 +130,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 
 	// add rules to allow all dependencies
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency with labels 'label1', 'label2' and 'label3'
 	dependency := b.AddDependency(b.AddUser(), contract1)
@@ -187,7 +187,7 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
 	b.AddDependency(b.AddUser(), contract)
@@ -290,7 +290,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	)
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -317,7 +317,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -343,7 +343,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 	)
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency
 	b.AddDependency(b.AddUser(), contract)
@@ -365,7 +365,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 	)
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency
 	b.AddDependency(b.AddUser(), contract)
@@ -391,7 +391,7 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	b.AddServiceComponent(service3, b.ContractComponent(contract1))
 
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency
 	b.AddDependency(b.AddUser(), contract1)
@@ -416,7 +416,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 	b.AddComponentDependency(component3, component1)
 
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency
 	b.AddDependency(b.AddUser(), contract)
@@ -438,7 +438,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add dependency
 	dependency := b.AddDependency(b.AddUser(), contract)
@@ -466,8 +466,8 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	// add rules, which say to deploy to different clusters based on label value
 	cluster1 := b.AddCluster()
 	cluster2 := b.AddCluster()
-	b.AddRule(b.Criteria("label1 == 'value1'", "true", "false"), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster1.Name)))
-	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster2.Name)))
+	b.AddRule(b.Criteria("label1 == 'value1'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster1.Name)))
+	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster2.Name)))
 
 	// add dependencies
 	d1 := b.AddDependency(b.AddUser(), contract)

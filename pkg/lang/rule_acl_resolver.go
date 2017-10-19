@@ -75,9 +75,6 @@ func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]b
 		}
 		if matched {
 			rule.ApplyActions(result)
-			if rule.Actions.Stop {
-				break
-			}
 		}
 	}
 

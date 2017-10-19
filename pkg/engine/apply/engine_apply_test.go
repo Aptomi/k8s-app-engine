@@ -238,7 +238,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 	// add rules to allow all dependencies
 	clusterObj := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.Allow, lang.Allow, lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
 
 	// add dependency
 	dependency := b.AddDependency(b.AddUser(), contract)

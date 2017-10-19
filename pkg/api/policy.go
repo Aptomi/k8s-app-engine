@@ -56,12 +56,13 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) reqresp.R
 
 	resolver := resolve.NewPolicyResolver(desiredPolicy, a.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
-	if err != nil {
-		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
-	}
 
 	// todo save to log with clear prefix
 	eventLog.Save(&event.HookStdout{})
+
+	if err != nil {
+		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
+	}
 
 	nextRevision, err := a.store.NextRevision(desiredPolicyGen)
 	if err != nil {

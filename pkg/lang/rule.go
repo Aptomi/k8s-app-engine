@@ -34,9 +34,6 @@ type RuleActions struct {
 	// AddRole field is only relevant for ACL rules (have to keep it in this class due to the lack of generics)
 	// Key in the map is role ID, while value is a set of comma-separated namespaces to which this role applies
 	AddRole map[string]string `yaml:"add-role"`
-
-	// Stop indicates whether the engine should stop processing a rule chain or not
-	Stop bool
 }
 
 // Matches returns if a rule matches

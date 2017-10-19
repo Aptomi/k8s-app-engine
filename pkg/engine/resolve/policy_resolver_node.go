@@ -348,23 +348,13 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 			rule.ApplyActions(result)
 
 			// if a dependency has been rejected, handle it right away and return that we cannot resolve it
-			if len(rule.Actions.Dependency) > 0 {
-				if !result.AllowDependency {
-					return node.errorDependencyNotAllowedByRules()
-				}
+			if result.RejectDependency {
+				return node.errorDependencyNotAllowedByRules()
 			}
 			if result.ChangedLabelsOnLastApply {
 				node.logLabels(result.Labels, "after transform")
 			}
-
-			if rule.Actions.Stop {
-				break
-			}
 		}
-	}
-
-	if !result.AllowDependency {
-		return node.errorDependencyNotAllowedByRules()
 	}
 
 	node.logRulesProcessingResult(policyNamespace, result)
