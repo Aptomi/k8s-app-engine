@@ -36,7 +36,7 @@ func Apply(cfg *config.Client) error {
 	// prepare single []byte to send to API
 	data, err := cod.MarshalMany(allObjects)
 	if err != nil {
-		return fmt.Errorf("Error while marshaling data for sending to API: %s", err)
+		return fmt.Errorf("error while marshaling data for sending to API: %s", err)
 	}
 
 	client := &http.Client{
@@ -91,27 +91,27 @@ func Apply(cfg *config.Client) error {
 func readFiles(policyPaths []string, codec codec.MarshallerUnmarshaller) ([]object.Base, error) {
 	files, err := findPolicyFiles(policyPaths)
 	if err != nil {
-		return nil, fmt.Errorf("Error while searching for policy files: %s", err)
+		return nil, fmt.Errorf("error while searching for policy files: %s", err)
 	}
 
 	allObjects := make([]object.Base, 0)
 	for _, file := range files {
 		data, err := ioutil.ReadFile(file)
 		if err != nil {
-			return nil, fmt.Errorf("Can't read file %s error: %s", file, err)
+			return nil, fmt.Errorf("can't read file %s error: %s", file, err)
 		}
 
 		// todo(slukjanov): here we can try multiple marshalers, toml for example
 		objects, err := codec.UnmarshalOneOrMany(data)
 		if err != nil {
-			return nil, fmt.Errorf("Can't unmarshal file %s error: %s", file, err)
+			return nil, fmt.Errorf("can't unmarshal file %s error: %s", file, err)
 		}
 
 		allObjects = append(allObjects, objects...)
 	}
 
 	if len(allObjects) == 0 {
-		return nil, fmt.Errorf("No objects found in %s", policyPaths)
+		return nil, fmt.Errorf("no objects found in %s", policyPaths)
 	}
 
 	return allObjects, nil
@@ -123,23 +123,23 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	for _, rawPolicyPath := range policyPaths {
 		policyPath, errPath := filepath.Abs(rawPolicyPath)
 		if errPath != nil {
-			return nil, fmt.Errorf("Error reading filepath: %s", errPath)
+			return nil, fmt.Errorf("error reading filepath: %s", errPath)
 		}
 
 		if stat, err := os.Stat(policyPath); err == nil {
 			if stat.IsDir() { // if dir provided, use all yaml files from it
 				files, errGlob := zglob.Glob(filepath.Join(policyPath, "**", "*.yaml"))
 				if errGlob != nil {
-					return nil, fmt.Errorf("Error while searching yaml files in directory: %s error: %s", policyPath, err)
+					return nil, fmt.Errorf("error while searching yaml files in directory: %s error: %s", policyPath, err)
 				}
 				allFiles = append(allFiles, files...)
 			} else { // if specific file provided, use it
 				allFiles = append(allFiles, policyPath)
 			}
 		} else if os.IsNotExist(err) {
-			return nil, fmt.Errorf("Path doesn't exist: %s error: %s", policyPath, err)
+			return nil, fmt.Errorf("path doesn't exist: %s error: %s", policyPath, err)
 		} else {
-			return nil, fmt.Errorf("Error while processing path: %s", err)
+			return nil, fmt.Errorf("error while processing path: %s", err)
 		}
 	}
 

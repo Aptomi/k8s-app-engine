@@ -63,7 +63,7 @@ func (cache *clusterCache) getK8sClientConfig(cluster *lang.Cluster) (*rest.Conf
 
 	clientConf, err := conf.ClientConfig()
 	if err != nil {
-		return nil, fmt.Errorf("Could not get kubernetes config for cluster %s: %s", cluster.Name, err)
+		return nil, fmt.Errorf("could not get kubernetes config for cluster %s: %s", cluster.Name, err)
 	}
 
 	return clientConf, nil
@@ -77,7 +77,7 @@ func (cache *clusterCache) newKubeClient(cluster *lang.Cluster, eventLog *event.
 
 	client, err := kubernetes.NewForConfig(conf)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Could not get kubernetes client: %s", err)
+		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
 	}
 
 	return conf, client, nil
@@ -93,7 +93,7 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 
 	_, client, err := cache.newKubeClient(cluster, eventLog)
 	if err != nil {
-		return "", fmt.Errorf("Error while creating k8s client to cluster %s: %s", cluster.Name, err)
+		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", cluster.Name, err)
 	}
 
 	nodes, err := client.CoreV1().Nodes().List(meta.ListOptions{})
@@ -101,7 +101,7 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 		return "", err
 	}
 	if len(nodes.Items) == 0 {
-		return "", fmt.Errorf("No nodes found for k8s cluster %s, it's critical eror", cluster.Name)
+		return "", fmt.Errorf("no nodes found for k8s cluster %s, it's critical eror", cluster.Name)
 	}
 
 	returnFirst := func(addrType api.NodeAddressType) string {
@@ -123,7 +123,7 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 		addr = returnFirst(api.NodeHostName)
 	}
 	if addr == "" {
-		return "", errors.New("Couldn't find external IP for cluster")
+		return "", errors.New("couldn't find external IP for cluster")
 	}
 
 	cache.kubeExternalAddress = addr

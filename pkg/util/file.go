@@ -44,7 +44,7 @@ func CopyDirectory(srcDir string, dstDir string) (err error) {
 		return err
 	}
 	if !srcStat.IsDir() {
-		return fmt.Errorf("Source is not a directory")
+		return fmt.Errorf("source is not a directory")
 	}
 
 	/*
@@ -134,10 +134,10 @@ func WriteTempFile(prefix string, content string) string {
 // EnsureSingleFile ensures that only one file matches the list of files
 func EnsureSingleFile(files []string) (string, error) {
 	if len(files) <= 0 {
-		return "", fmt.Errorf("No files found")
+		return "", fmt.Errorf("no files found")
 	}
 	if len(files) > 1 {
-		return "", fmt.Errorf("More than one file found")
+		return "", fmt.Errorf("more than one file found")
 	}
 	return files[0], nil
 }

@@ -33,13 +33,13 @@ func NewEndpointsAction(revision object.Generation, componentKey string) *Endpoi
 func (a *EndpointsAction) Apply(context *action.Context) error {
 	// skip if it wasn't processed (doesn't exist in actual state)
 	if context.ActualState.ComponentInstanceMap[a.ComponentKey] == nil {
-		return fmt.Errorf("Can't get endpoints of component instance that doesn't present in actual state: %s", a.ComponentKey)
+		return fmt.Errorf("can't get endpoints of component instance that doesn't present in actual state: %s", a.ComponentKey)
 	}
 
 	err := a.processEndpoints(context)
 	if err != nil {
 		context.EventLog.LogError(err)
-		return fmt.Errorf("Errors while getting endpoints '%s': %s", a.ComponentKey, err)
+		return fmt.Errorf("errors while getting endpoints '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
@@ -81,7 +81,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 
 	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
 	if !ok {
-		return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
+		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
@@ -89,7 +89,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		return err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("Can't find cluster in policy: %s", clusterName)
+		return fmt.Errorf("can't find cluster in policy: %s", clusterName)
 	}
 
 	plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)

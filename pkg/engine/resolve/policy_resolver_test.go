@@ -242,7 +242,7 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with invalid context criteria should result in an error
-	resolvePolicy(t, b, ResError, "Unable to compile expression")
+	resolvePolicy(t, b, ResError, "unable to compile expression")
 }
 
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
@@ -274,7 +274,7 @@ func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
 	b.AddRule(b.Criteria("specialname + '123')(((", "true", "false"), nil)
 
 	// policy resolution with invalid rule should result in an error
-	resolvePolicy(t, b, ResError, "Unable to compile expression")
+	resolvePolicy(t, b, ResError, "unable to compile expression")
 }
 
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
@@ -422,7 +422,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 	b.AddDependency(b.AddUser(), contract)
 
 	// policy resolution with service dependency cycle should should result in an error
-	resolvePolicy(t, b, ResError, "Component cycle detected")
+	resolvePolicy(t, b, ResError, "component cycle detected")
 }
 
 func TestPolicyResolverUnknownComponentType(t *testing.T) {

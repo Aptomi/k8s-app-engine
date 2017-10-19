@@ -74,7 +74,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error)
 		apply.progress.Advance("Action")
 		err := act.Apply(context)
 		if err != nil {
-			err = fmt.Errorf("Error while applying action '%s': %s", act, err)
+			err = fmt.Errorf("error while applying action '%s': %s", act, err)
 			apply.eventLog.LogError(err)
 			foundErrors = true
 		}
@@ -85,7 +85,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error)
 
 	// Return error if there's been at least one error
 	if foundErrors {
-		err := fmt.Errorf("One or more errors occured while running actions")
+		err := fmt.Errorf("one or more errors occurred while running actions")
 		apply.eventLog.LogError(err)
 		return apply.actualState, apply.eventLog, err
 	}

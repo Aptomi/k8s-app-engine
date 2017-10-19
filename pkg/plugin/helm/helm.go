@@ -57,7 +57,7 @@ func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params
 	if create {
 		exists, errRelease := findHelmRelease(helmClient, releaseName)
 		if errRelease != nil {
-			return fmt.Errorf("Error while looking for Helm release %s: %s", releaseName, errRelease)
+			return fmt.Errorf("error while looking for Helm release %s: %s", releaseName, errRelease)
 		}
 
 		if exists {

@@ -30,7 +30,7 @@ func (a *PostProcessAction) Apply(context *action.Context) error {
 		err := plugin.Process(context.DesiredPolicy, context.DesiredState, context.ExternalData, context.EventLog)
 		if err != nil {
 			context.EventLog.LogError(err)
-			return fmt.Errorf("Error while post processing clusters: %s", err)
+			return fmt.Errorf("error while post processing clusters: %s", err)
 		}
 	}
 

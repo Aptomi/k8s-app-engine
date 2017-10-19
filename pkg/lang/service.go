@@ -70,15 +70,15 @@ func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]
 	for _, vName := range u.Dependencies {
 		v, exists := service.GetComponentsMap()[vName]
 		if !exists {
-			return fmt.Errorf("Service '%s' has a dependency on non-existing component '%s'", service.Name, vName)
+			return fmt.Errorf("service '%s' has a dependency on non-existing component '%s'", service.Name, vName)
 		}
 		if vColor, ok := colors[v.Name]; !ok {
-			// not visited yet -> visit and exit if a cycle was found or another error occured
+			// not visited yet -> visit and exit if a cycle was found or another error occurred
 			if err := service.dfsComponentSort(v, colors); err != nil {
 				return err
 			}
 		} else if vColor == 1 {
-			return fmt.Errorf("Component cycle detected while processing service '%s' component '%s'", service.Name, vName)
+			return fmt.Errorf("component cycle detected while processing service '%s' component '%s'", service.Name, vName)
 		}
 	}
 

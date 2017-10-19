@@ -104,7 +104,7 @@ func (cache *clusterCache) getExistingIstioRouteRulesForCluster(cluster *lang.Cl
 	cmd := "get route-rules"
 	rulesStr, err := cache.runIstioCmd(cmd, cluster)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get route-rules in cluster '%s' by running '%s': %s", cluster.Name, cmd, err)
+		return nil, fmt.Errorf("failed to get route-rules in cluster '%s' by running '%s': %s", cluster.Name, cmd, err)
 	}
 
 	rules := make([]*istioRouteRule, 0)
@@ -139,7 +139,7 @@ func (rule *istioRouteRule) create() error {
 
 	out, err := rule.cache.runIstioCmd("create -f "+ruleFileName, rule.Cluster)
 	if err != nil {
-		return fmt.Errorf("Failed to create istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err)
+		return fmt.Errorf("failed to create istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err)
 	}
 	return nil
 }
@@ -147,7 +147,7 @@ func (rule *istioRouteRule) create() error {
 func (rule *istioRouteRule) destroy() error {
 	out, err := rule.cache.runIstioCmd("delete route-rule "+rule.Service, rule.Cluster)
 	if err != nil {
-		return fmt.Errorf("Failed to delete istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err)
+		return fmt.Errorf("failed to delete istio rule in cluster '%s': %s %s", rule.Cluster.Name, out, err)
 	}
 	return nil
 }

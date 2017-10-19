@@ -97,7 +97,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *ev
 
 	// See if there were any errors
 	if errFound > 0 {
-		return nil, resolver.eventLog, fmt.Errorf("Errors during resolving policy: %d", errFound)
+		return nil, resolver.eventLog, fmt.Errorf("errors occurred during policy resolution: %d", errFound)
 	}
 
 	// Once all components are resolved, print information about them into event log

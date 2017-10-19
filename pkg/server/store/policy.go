@@ -40,7 +40,7 @@ func (s *defaultStore) GetPolicyData(gen object.Generation) (*PolicyData, error)
 	}
 	data, ok := dataObj.(*PolicyData)
 	if !ok {
-		return nil, fmt.Errorf("Unexpected type while getting PolicyData from DB")
+		return nil, fmt.Errorf("unexpected type while getting PolicyData from DB")
 	}
 	return data, nil
 }

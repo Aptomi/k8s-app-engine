@@ -43,7 +43,7 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 	for _, key := range resolution.ComponentProcessingOrder {
 		rules, err := p.getDesiredIstioRouteRulesForComponent(key, policy, resolution, externalData, eventLog)
 		if err != nil {
-			return fmt.Errorf("Error while processing Istio Ingress for component '%s': %s", key, err)
+			return fmt.Errorf("error while processing Istio Ingress for component '%s': %s", key, err)
 		}
 		desiredRules[key] = rules
 		prog.Advance("Istio")

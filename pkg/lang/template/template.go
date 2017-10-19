@@ -18,7 +18,7 @@ type Template struct {
 func NewTemplate(templateStr string) (*Template, error) {
 	templateCompiled, err := t.New("").Parse(templateStr)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to compile template '%s': %s", templateStr, err)
+		return nil, fmt.Errorf("unable to compile template '%s': %s", templateStr, err)
 	}
 	return &Template{
 		templateStr:      templateStr,

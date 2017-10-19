@@ -34,7 +34,7 @@ func (s *defaultStore) GetRevision(gen object.Generation) (*RevisionData, error)
 	}
 	data, ok := dataObj.(*RevisionData)
 	if !ok {
-		return nil, fmt.Errorf("Unexpected type while getting RevisionData from DB")
+		return nil, fmt.Errorf("unexpected type while getting RevisionData from DB")
 	}
 	return data, nil
 }
@@ -42,7 +42,7 @@ func (s *defaultStore) GetRevision(gen object.Generation) (*RevisionData, error)
 func (s *defaultStore) NextRevision(policyGen object.Generation) (*RevisionData, error) {
 	currRevision, err := s.GetRevision(object.LastGen)
 	if err != nil {
-		return nil, fmt.Errorf("Error while geting current revision: %s", err)
+		return nil, fmt.Errorf("error while geting current revision: %s", err)
 	}
 	var gen object.Generation
 	if currRevision == nil {
@@ -65,7 +65,7 @@ func (s *defaultStore) NextRevision(policyGen object.Generation) (*RevisionData,
 func (s *defaultStore) SaveRevision(revision *RevisionData) error {
 	_, err := s.store.Save(revision)
 	if err != nil {
-		return fmt.Errorf("Error while saving revision: %s", err)
+		return fmt.Errorf("error while saving revision: %s", err)
 	}
 
 	return nil

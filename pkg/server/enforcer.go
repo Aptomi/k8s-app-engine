@@ -42,7 +42,7 @@ func (s *Server) enforce() error {
 
 	desiredPolicy, desiredPolicyGen, err := s.store.GetPolicy(object.LastGen)
 	if err != nil {
-		return fmt.Errorf("Error while getting desiredPolicy: %s", err)
+		return fmt.Errorf("error while getting desiredPolicy: %s", err)
 	}
 
 	// skip policy enforcement if no policy found
@@ -53,20 +53,20 @@ func (s *Server) enforce() error {
 
 	actualState, err := s.store.GetActualState()
 	if err != nil {
-		return fmt.Errorf("Error while getting actual state: %s", err)
+		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
 	resolver := resolve.NewPolicyResolver(desiredPolicy, s.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
-		return fmt.Errorf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
+		return fmt.Errorf("cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
 
 	eventLog.Save(&event.HookStdout{})
 
 	nextRevision, err := s.store.NextRevision(desiredPolicyGen)
 	if err != nil {
-		return fmt.Errorf("Unable to get next revision: %s", err)
+		return fmt.Errorf("unable to get next revision: %s", err)
 	}
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
@@ -89,7 +89,7 @@ func (s *Server) enforce() error {
 	// Save revision
 	err = s.store.SaveRevision(nextRevision)
 	if err != nil {
-		return fmt.Errorf("Error while saving new revision: %s", err)
+		return fmt.Errorf("error while saving new revision: %s", err)
 	}
 
 	// todo generate diagrams
@@ -107,7 +107,7 @@ func (s *Server) enforce() error {
 
 	actualPolicy, err := s.getActualPolicy()
 	if err != nil {
-		return fmt.Errorf("Error while getting actual policy: %s", err)
+		return fmt.Errorf("error while getting actual policy: %s", err)
 	}
 
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, s.store.ActualStateUpdater(), s.externalData, plugins, stateDiff.Actions, progress.NewConsole())
@@ -116,7 +116,7 @@ func (s *Server) enforce() error {
 	eventLog.Save(&event.HookStdout{})
 
 	if err != nil {
-		return fmt.Errorf("Error while applying new revision: %s", err)
+		return fmt.Errorf("error while applying new revision: %s", err)
 	}
 	log.Infof("Applied new revision with resolution: %v", resolution)
 
@@ -126,7 +126,7 @@ func (s *Server) enforce() error {
 func (s *Server) getActualPolicy() (*lang.Policy, error) {
 	currRevision, err := s.store.GetRevision(object.LastGen)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get current revision: %s", err)
+		return nil, fmt.Errorf("unable to get current revision: %s", err)
 	}
 
 	// it's just a first revision
@@ -136,7 +136,7 @@ func (s *Server) getActualPolicy() (*lang.Policy, error) {
 
 	actualPolicy, _, err := s.store.GetPolicy(currRevision.Policy)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get actual policy: %s", err)
+		return nil, fmt.Errorf("unable to get actual policy: %s", err)
 	}
 
 	return actualPolicy, nil

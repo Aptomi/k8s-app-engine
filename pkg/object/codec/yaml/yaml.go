@@ -48,7 +48,7 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 	raw := new(interface{})
 	err := yaml.Unmarshal(data, raw)
 	if err != nil {
-		return nil, fmt.Errorf("Error while unmarshaling data to raw interface{}: %s", err)
+		return nil, fmt.Errorf("error while unmarshaling data to raw interface{}: %s", err)
 	}
 
 	result := make([]object.Base, 0)
@@ -56,33 +56,33 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 	if elem, ok := (*raw).(map[interface{}]interface{}); ok { // if it's a single object (map)
 		obj, err := c.unmarshalRaw(elem, data)
 		if err != nil {
-			return nil, fmt.Errorf("Error while unmarshaling single object: %s", err)
+			return nil, fmt.Errorf("error while unmarshaling single object: %s", err)
 		}
 
 		result = append(result, obj)
 	} else if strictOne { // if single object strictly required
-		return nil, fmt.Errorf("Single object expected")
+		return nil, fmt.Errorf("single object expected")
 	} else if slice, ok := (*raw).([]interface{}); ok { // if it's an object slice
 		for idx, rawElem := range slice {
 			sliceElem, ok := rawElem.(map[interface{}]interface{}) // each slice elem should be map
 			if !ok {
-				return nil, fmt.Errorf("Element #%d isn't an object", idx)
+				return nil, fmt.Errorf("element #%d isn't an object", idx)
 			}
 
 			elemData, err := yaml.Marshal(sliceElem) // get []byte for current elem only
 			if err != nil {
-				return nil, fmt.Errorf("Error while unmarshaling element #%d (marshal step): %s", idx, err)
+				return nil, fmt.Errorf("error while unmarshaling element #%d (marshal step): %s", idx, err)
 			}
 
 			obj, err := c.unmarshalRaw(sliceElem, elemData) // unmarshal to kind type
 			if err != nil {
-				return nil, fmt.Errorf("Error while unmarshaling element #%d (final step): %s", idx, err)
+				return nil, fmt.Errorf("error while unmarshaling element #%d (final step): %s", idx, err)
 			}
 
 			result = append(result, obj)
 		}
 	} else { // if it's not an object or object slice
-		return nil, fmt.Errorf("Unmarshalable data (not an object or object slice): %T", raw)
+		return nil, fmt.Errorf("unmarshalable data (not an object or object slice): %T", raw)
 	}
 
 	return result, nil
@@ -91,31 +91,31 @@ func (c *yamlCodec) unmarshalOneOrMany(data []byte, strictOne bool) ([]object.Ba
 func (c *yamlCodec) unmarshalRaw(single map[interface{}]interface{}, data []byte) (object.Base, error) {
 	metaField, ok := single["metadata"]
 	if !ok {
-		return nil, fmt.Errorf("Can't find metadata field inside object: %v", single)
+		return nil, fmt.Errorf("can't find metadata field inside object: %v", single)
 	}
 
 	meta, ok := metaField.(map[interface{}]interface{})
 	if !ok {
-		return nil, fmt.Errorf("Metadata field isn't a map: %v", single)
+		return nil, fmt.Errorf("metadata field isn't a map: %v", single)
 	}
 
 	kindField, ok := meta["kind"]
 	if !ok {
-		return nil, fmt.Errorf("Can't find kind field in metadata: %v", single)
+		return nil, fmt.Errorf("can't find kind field in metadata: %v", single)
 	}
 
 	kind, ok := kindField.(string)
 	if !ok {
-		return nil, fmt.Errorf("Kind field in metadata isn't a string: %v", single)
+		return nil, fmt.Errorf("kind field in metadata isn't a string: %v", single)
 	}
 
 	if len(kind) == 0 {
-		return nil, fmt.Errorf("Empty kind")
+		return nil, fmt.Errorf("empty kind")
 	}
 
 	objectInfo := c.catalog.Get(kind)
 	if objectInfo == nil {
-		return nil, fmt.Errorf("Unknown kind: %s", kind)
+		return nil, fmt.Errorf("unknown kind: %s", kind)
 	}
 
 	obj := objectInfo.New()

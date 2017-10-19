@@ -14,7 +14,7 @@ func (s *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 
 	instances, err := s.store.GetAll(object.SystemNS, resolve.ComponentInstanceObject.Kind)
 	if err != nil {
-		return nil, fmt.Errorf("Error while getting all component instances: %s", err)
+		return nil, fmt.Errorf("error while getting all component instances: %s", err)
 	}
 
 	for _, instanceObj := range instances {
@@ -42,7 +42,7 @@ func (u *defaultStateUpdater) Create(obj object.Base) error {
 
 func (u *defaultStateUpdater) Update(obj object.Base) error {
 	if _, ok := obj.(*resolve.ComponentInstance); !ok {
-		return fmt.Errorf("Only ComponentInstances could be updated using actual.StateUpdater, not: %T", obj)
+		return fmt.Errorf("only ComponentInstances could be updated using actual.StateUpdater, not: %T", obj)
 	}
 
 	_, err := u.store.Save(obj)

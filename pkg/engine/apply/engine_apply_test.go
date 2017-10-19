@@ -85,7 +85,7 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResError, 2, "Apply failed for component")
+	actualState = applyAndCheck(t, applier, ResError, 2, "apply failed for component")
 
 	// check that actual state got updated (service component exists, but no child components got deployed)
 	assert.Equal(t, 1, len(actualState.ComponentInstanceMap), "Actual state should not be empty after apply()")
@@ -338,7 +338,7 @@ func (p *testPlugin) Create(cluster *lang.Cluster, deployName string, params uti
 	eventLog.WithFields(event.Fields{}).Infof("[+] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
-			return fmt.Errorf("Apply failed for component: %s", deployName)
+			return fmt.Errorf("apply failed for component: %s", deployName)
 		}
 	}
 	return nil
@@ -348,7 +348,7 @@ func (p *testPlugin) Update(cluster *lang.Cluster, deployName string, params uti
 	eventLog.WithFields(event.Fields{}).Infof("[*] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
-			return fmt.Errorf("Update failed for component: %s", deployName)
+			return fmt.Errorf("update failed for component: %s", deployName)
 		}
 	}
 	return nil
@@ -358,7 +358,7 @@ func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params ut
 	eventLog.WithFields(event.Fields{}).Infof("[-] %s", deployName)
 	for _, s := range p.failComponents {
 		if strings.Contains(deployName, s) {
-			return fmt.Errorf("Delete failed for component: %s", deployName)
+			return fmt.Errorf("delete failed for component: %s", deployName)
 		}
 	}
 	return nil

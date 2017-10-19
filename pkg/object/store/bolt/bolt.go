@@ -27,7 +27,7 @@ type boltStore struct {
 func (b *boltStore) Open(connection string) error {
 	db, err := bolt.Open(connection, 0600, &bolt.Options{Timeout: 5 * time.Second})
 	if err != nil {
-		return fmt.Errorf("Error while opening BoltDB: %s error: %s", connection, err)
+		return fmt.Errorf("error while opening BoltDB: %s error: %s", connection, err)
 	}
 	b.db = db
 
@@ -43,7 +43,7 @@ var objectsBucket = []byte("objects")
 func (b *boltStore) Close() error {
 	err := b.db.Close()
 	if err != nil {
-		return fmt.Errorf("Error while closing BoltDB: %s", err)
+		return fmt.Errorf("error while closing BoltDB: %s", err)
 	}
 
 	return err
@@ -53,7 +53,7 @@ func (b *boltStore) setNextGeneration(obj object.Base) error {
 	// todo replace this code by checking index that returns last generation
 	info := b.catalog.Get(obj.GetKind())
 	if !info.Versioned {
-		return fmt.Errorf("Kind %s isn't versioned", obj.GetKind())
+		return fmt.Errorf("kind %s isn't versioned", obj.GetKind())
 	}
 	last, err := b.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), object.LastGen)
 	if err != nil {
@@ -70,7 +70,7 @@ func (b *boltStore) setNextGeneration(obj object.Base) error {
 func (b *boltStore) Save(obj object.Base) (bool, error) {
 	info := b.catalog.Get(obj.GetKind())
 	if info == nil {
-		return false, fmt.Errorf("Unknown kind: %s", obj.GetKind())
+		return false, fmt.Errorf("unknown kind: %s", obj.GetKind())
 	}
 
 	updated := false
@@ -84,7 +84,7 @@ func (b *boltStore) Save(obj object.Base) (bool, error) {
 			if !reflect.DeepEqual(obj, existingObj) {
 				errGen := b.setNextGeneration(obj)
 				if errGen != nil {
-					return false, fmt.Errorf("Error while calling setNextGeneration(%s): %s", obj, errGen)
+					return false, fmt.Errorf("error while calling setNextGeneration(%s): %s", obj, errGen)
 				}
 				updated = true
 			}
@@ -97,7 +97,7 @@ func (b *boltStore) Save(obj object.Base) (bool, error) {
 	err := b.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
-			return fmt.Errorf("Bucket not found: %s", objectsBucket)
+			return fmt.Errorf("bucket not found: %s", objectsBucket)
 		}
 
 		data, err := b.codec.MarshalOne(obj)
@@ -117,7 +117,7 @@ func (b *boltStore) GetByName(namespace string, kind string, name string, gen ob
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
-			return fmt.Errorf("Bucket not found: %s", objectsBucket)
+			return fmt.Errorf("bucket not found: %s", objectsBucket)
 		}
 
 		var data []byte
@@ -151,7 +151,7 @@ func (b *boltStore) GetAll(namespace string, kind string) ([]object.Base, error)
 	err := b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
-			return fmt.Errorf("Bucket not found: %s", objectsBucket)
+			return fmt.Errorf("bucket not found: %s", objectsBucket)
 		}
 
 		c := bucket.Cursor()
@@ -177,7 +177,7 @@ func (b *boltStore) Dump(w io.Writer) error {
 	return b.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(objectsBucket)
 		if bucket == nil {
-			return fmt.Errorf("Bucket not found: %s", objectsBucket)
+			return fmt.Errorf("bucket not found: %s", objectsBucket)
 		}
 
 		c := bucket.Cursor()

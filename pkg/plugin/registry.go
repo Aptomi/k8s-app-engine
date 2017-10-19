@@ -34,7 +34,7 @@ func NewRegistry(deployPlugins []DeployPlugin, clustersPostProcessPlugins []Clus
 func (reg *defaultRegistry) GetDeployPlugin(codeType string) (DeployPlugin, error) {
 	plugin, exist := reg.deployPlugins[codeType]
 	if !exist {
-		return nil, fmt.Errorf("Can't find deploy plugin for codeType: %s", codeType)
+		return nil, fmt.Errorf("can't find deploy plugin for codeType: %s", codeType)
 	}
 	return plugin, nil
 }

@@ -34,7 +34,7 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 	err := a.processDeployment(context)
 	if err != nil {
 		context.EventLog.LogError(err)
-		return fmt.Errorf("Errors while deleting component '%s': %s", a.ComponentKey, err)
+		return fmt.Errorf("error while deleting component '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
@@ -76,7 +76,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 
 	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
 	if !ok {
-		return fmt.Errorf("No cluster specified in code params, component instance: %v", a.ComponentKey)
+		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
@@ -84,7 +84,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 		return err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("Can't find cluster in policy: %s", clusterName)
+		return fmt.Errorf("can't find cluster in policy: %s", clusterName)
 	}
 
 	plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)

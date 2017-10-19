@@ -22,7 +22,7 @@ func (p *Plugin) getValidChartPath(chartName string) (string, error) {
 	}
 	fileName, err := util.EnsureSingleFile(files)
 	if err != nil {
-		return "", fmt.Errorf("Error while doing chart '%s' lookup: %s", chartName, err)
+		return "", fmt.Errorf("error while doing chart '%s' lookup: %s", chartName, err)
 	}
 	return fileName, nil
 }
@@ -32,7 +32,7 @@ func helmChartName(params util.NestedParameterMap) (string, error) {
 		return chartName, nil
 	}
 
-	return "", fmt.Errorf("No chartName in params")
+	return "", fmt.Errorf("no chartName in params")
 }
 
 func helmReleaseName(deployName string) string {

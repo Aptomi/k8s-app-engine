@@ -34,7 +34,7 @@ func (store *FileLoader) LoadObjects() ([]object.Base, error) {
 		if !strings.Contains(f, "external") {
 			objects, err := store.loadObjectsFromFile(f)
 			if err != nil {
-				return nil, fmt.Errorf("Error while loading objects from file %s: %s", f, err)
+				return nil, fmt.Errorf("error while loading objects from file %s: %s", f, err)
 			}
 
 			result = append(result, objects...)
@@ -45,11 +45,11 @@ func (store *FileLoader) LoadObjects() ([]object.Base, error) {
 	// and storing them in DB. Example: empty fields will be stored anyway, while we omitting them in test data.
 	data, err := store.codec.MarshalMany(result)
 	if err != nil {
-		return nil, fmt.Errorf("Error marshaling loaded objects: %s", err)
+		return nil, fmt.Errorf("error marshaling loaded objects: %s", err)
 	}
 	result, err = store.codec.UnmarshalOneOrMany(data)
 	if err != nil {
-		return nil, fmt.Errorf("Error unmarshaling loaded objects: %s", err)
+		return nil, fmt.Errorf("error unmarshaling loaded objects: %s", err)
 	}
 
 	return result, nil
@@ -58,11 +58,11 @@ func (store *FileLoader) LoadObjects() ([]object.Base, error) {
 func (store *FileLoader) loadObjectsFromFile(path string) ([]object.Base, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("Error while reading file %s: %s", path, err)
+		return nil, fmt.Errorf("error while reading file %s: %s", path, err)
 	}
 	objects, err := store.codec.UnmarshalOneOrMany(data)
 	if err != nil {
-		return nil, fmt.Errorf("Error while unmarshaling file %s: %s", path, err)
+		return nil, fmt.Errorf("error while unmarshaling file %s: %s", path, err)
 	}
 
 	return objects, nil
