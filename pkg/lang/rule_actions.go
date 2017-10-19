@@ -1,5 +1,9 @@
 package lang
 
+import (
+	"strings"
+)
+
 // Allow is a special constant that is used in rule actions for allowing dependencies, ingress traffic, etc
 const Allow = "allow"
 
@@ -20,14 +24,14 @@ type RuleActionResult struct {
 	ChangedLabelsOnLastApply bool
 	Labels                   *LabelSet
 
-	Namespaces map[string]bool
+	RoleMap map[string]map[string]bool
 }
 
 // NewRuleActionResult creates a new RuleActionResult
 func NewRuleActionResult(labels *LabelSet) *RuleActionResult {
 	return &RuleActionResult{
-		Labels:     labels,
-		Namespaces: make(map[string]bool),
+		Labels:  labels,
+		RoleMap: make(map[string]map[string]bool),
 	}
 }
 
@@ -45,7 +49,29 @@ func (rule *Rule) ApplyActions(result *RuleActionResult) {
 		result.ChangedLabelsOnLastApply = result.Labels.ApplyTransform(LabelOperations(rule.Actions.ChangeLabels))
 	}
 
-	for ns := range rule.Actions.Namespaces {
-		result.Namespaces[ns] = true
+	for roleID, namespaceList := range rule.Actions.AddRole {
+		role := ACLRolesMap[roleID]
+		if role == nil {
+			// skip non-existing roles
+			continue
+		}
+
+		nsMap := result.RoleMap[roleID]
+		if nsMap == nil {
+			nsMap = make(map[string]bool)
+			result.RoleMap[roleID] = nsMap
+		}
+
+		// mark all namespaces for the role
+		namespaces := strings.Split(namespaceList, ",")
+		for _, namespace := range namespaces {
+			nsMap[namespace] = true
+		}
+
+		// if role covers all namespaces, mark it as well
+		if role.Privileges.AllNamespaces {
+			nsMap[namespaceAll] = true
+		}
+
 	}
 }

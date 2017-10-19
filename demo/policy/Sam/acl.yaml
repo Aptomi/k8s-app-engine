@@ -7,9 +7,8 @@
     require-all:
       - global_ops
   actions:
-    change-labels:
-      set:
-        addrole: domain_admin
+    add-role:
+      domain-admin: '*'
 
 # This rule will make Frank, John, and Sam namespace admins
 - metadata:
@@ -20,11 +19,8 @@
     require-all:
       - is_operator
   actions:
-    change-labels:
-      set:
-        addrole: namespace_admin
-    namespaces:
-      main: true
+    add-role:
+      namespace-admin: main
 
 # This rule will make Alice, Bob, and Carol service consumers
 - metadata:
@@ -35,8 +31,5 @@
     require-all:
       - org == 'dev'
   actions:
-    change-labels:
-      set:
-        addrole: service_consumer
-    namespaces:
-      main: true
+    add-role:
+      service-consumer: main

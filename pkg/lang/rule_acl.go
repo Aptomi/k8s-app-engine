@@ -17,9 +17,6 @@ var ACLRuleObject = &object.Info{
 // Allows to define a role which spans across all namespaces (e.g. "domain admin")
 const namespaceAll = "*"
 
-// Special label name to add a role to the user
-const labelRole = "addrole"
-
 // ACLRole is a struct for defining user roles
 // See the list of defined roles below - domain admin, namespace admin, service consumer, and nobody
 type ACLRole struct {
@@ -66,7 +63,7 @@ var noAccess = &Privilege{}
 
 // Domain admin role
 var domainAdmin = &ACLRole{
-	ID:   "domain_admin",
+	ID:   "domain-admin",
 	Name: "Domain Admin",
 	Privileges: &Privileges{
 		AllNamespaces: true,
@@ -85,7 +82,7 @@ var domainAdmin = &ACLRole{
 
 // Namespace admin role
 var namespaceAdmin = &ACLRole{
-	ID:   "namespace_admin",
+	ID:   "namespace-admin",
 	Name: "Namespace Admin",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
@@ -103,7 +100,7 @@ var namespaceAdmin = &ACLRole{
 
 // Service consumer role
 var serviceConsumer = &ACLRole{
-	ID:   "service_consumer",
+	ID:   "service-consumer",
 	Name: "Service Consumer",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
@@ -137,8 +134,16 @@ var nobody = &ACLRole{
 	},
 }
 
-// ACLRolesOrdered represents the ordered list of ACL roles (from most "powerful" to least "powerful")
-var ACLRolesOrdered = map[string]*ACLRole{
+// ACLRolesOrderedList represents the ordered list of ACL roles (from most "powerful" to least "powerful")
+var ACLRolesOrderedList = []*ACLRole{
+	domainAdmin,
+	namespaceAdmin,
+	serviceConsumer,
+	nobody,
+}
+
+// ACLRolesMap represents the map of ACL roles (Role ID -> Role)
+var ACLRolesMap = map[string]*ACLRole{
 	domainAdmin.ID:     domainAdmin,
 	namespaceAdmin.ID:  namespaceAdmin,
 	serviceConsumer.ID: serviceConsumer,

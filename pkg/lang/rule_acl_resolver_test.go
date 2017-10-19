@@ -100,7 +100,7 @@ func TestAclResolverCustomRules(t *testing.T) {
 			Weight:   100,
 			Criteria: &Criteria{RequireAll: []string{"is_domain_admin"}},
 			Actions: &RuleActions{
-				ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(labelRole, domainAdmin.ID)),
+				AddRole: map[string]string{domainAdmin.ID: namespaceAll},
 			},
 		},
 		// namespace admins for 'test' namespace
@@ -113,8 +113,7 @@ func TestAclResolverCustomRules(t *testing.T) {
 			Weight:   200,
 			Criteria: &Criteria{RequireAll: []string{"is_namespace_admin"}},
 			Actions: &RuleActions{
-				ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(labelRole, namespaceAdmin.ID)),
-				Namespaces:   map[string]string{"test": "true"},
+				AddRole: map[string]string{namespaceAdmin.ID: "test"},
 			},
 		},
 		// service consumers for 'test2' namespace
@@ -127,8 +126,20 @@ func TestAclResolverCustomRules(t *testing.T) {
 			Weight:   300,
 			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
 			Actions: &RuleActions{
-				ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(labelRole, serviceConsumer.ID)),
-				Namespaces:   map[string]string{"test2": "true"},
+				AddRole: map[string]string{serviceConsumer.ID: "test2"},
+			},
+		},
+		// bogus rule
+		{
+			Metadata: Metadata{
+				Kind:      ACLRuleObject.Kind,
+				Namespace: object.SystemNS,
+				Name:      "some_bogus_rule",
+			},
+			Weight:   400,
+			Criteria: &Criteria{RequireAll: []string{"true"}},
+			Actions: &RuleActions{
+				AddRole: map[string]string{"unknown-role": "some-value"},
 			},
 		},
 	}

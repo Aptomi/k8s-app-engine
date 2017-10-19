@@ -31,7 +31,7 @@ func (resolver *ACLResolver) GetUserPrivileges(user *User, obj object.Base) (*Pr
 	}
 
 	// figure out which role's privileges apply
-	for _, role := range ACLRolesOrdered {
+	for _, role := range ACLRolesOrderedList {
 		namespaceSpan := roleMap[role.ID]
 		if namespaceSpan[namespaceAll] || namespaceSpan[obj.GetNamespace()] {
 			return role.Privileges.getObjectPrivileges(obj), nil
@@ -66,7 +66,6 @@ func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]b
 		return roleMapCached.(map[string]map[string]bool), nil
 	}
 
-	roleMap := make(map[string]map[string]bool)
 	result := NewRuleActionResult(NewLabelSet(make(map[string]string)))
 	params := expression.NewParams(user.Labels, nil)
 	for _, rule := range resolver.rules {
@@ -82,24 +81,6 @@ func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]b
 		}
 	}
 
-	role, ok := ACLRolesOrdered[result.Labels.Labels[labelRole]]
-	if !ok {
-		role = nobody
-	}
-
-	nsMap := roleMap[role.ID]
-	if nsMap == nil {
-		nsMap = make(map[string]bool)
-		roleMap[role.ID] = nsMap
-	}
-
-	for namespace := range result.Namespaces {
-		nsMap[namespace] = true
-	}
-	if role.Privileges.AllNamespaces {
-		nsMap[namespaceAll] = true
-	}
-
-	resolver.roleMapCache.Store(user.ID, roleMap)
-	return roleMap, nil
+	resolver.roleMapCache.Store(user.ID, result.RoleMap)
+	return result.RoleMap, nil
 }

@@ -25,13 +25,15 @@ type Rule struct {
 
 // RuleActions is a set of actions performed by rule
 type RuleActions struct {
+	// ChangeLabels, Dependency, and Ingress fields are relevant for regular rules
+	// They determine how labels should be changed, whether dependency should be allowed, and whether ingress traffic should be allowed
 	ChangeLabels ChangeLabelsAction `yaml:"change-labels"`
 	Dependency   DependencyAction
 	Ingress      IngressAction
 
-	// Namespaces field is only relevant for ACL rules (have to keep it here due to the lack of generics)
-	// It indicates for which namespaces ACLs are being applied
-	Namespaces map[string]string
+	// AddRole field is only relevant for ACL rules (have to keep it in this class due to the lack of generics)
+	// Key in the map is role ID, while value is a set of comma-separated namespaces to which this role applies
+	AddRole map[string]string `yaml:"add-role"`
 
 	// Stop indicates whether the engine should stop processing a rule chain or not
 	Stop bool

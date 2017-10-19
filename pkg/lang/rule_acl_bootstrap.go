@@ -16,7 +16,7 @@ var ACLRulesBootstrap = []*ACLRule{
 		Weight:   100,
 		Criteria: &Criteria{RequireAll: []string{"role == 'aptomi_domain_admin'"}},
 		Actions: &RuleActions{
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(labelRole, domainAdmin.ID)),
+			AddRole: map[string]string{domainAdmin.ID: namespaceAll},
 		},
 	},
 	// namespace admins for 'main' namespace
@@ -29,8 +29,7 @@ var ACLRulesBootstrap = []*ACLRule{
 		Weight:   200,
 		Criteria: &Criteria{RequireAll: []string{"role == 'aptomi_main_ns_admin'"}},
 		Actions: &RuleActions{
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(labelRole, namespaceAdmin.ID)),
-			Namespaces:   map[string]string{"main": "true"},
+			AddRole: map[string]string{namespaceAdmin.ID: "main"},
 		},
 	},
 	// service consumers for 'main' namespace
@@ -43,8 +42,7 @@ var ACLRulesBootstrap = []*ACLRule{
 		Weight:   300,
 		Criteria: &Criteria{RequireAll: []string{"role == 'aptomi_main_ns_consumer'"}},
 		Actions: &RuleActions{
-			ChangeLabels: ChangeLabelsAction(NewLabelOperationsSetSingleLabel(labelRole, serviceConsumer.ID)),
-			Namespaces:   map[string]string{"main": "true"},
+			AddRole: map[string]string{serviceConsumer.ID: "main"},
 		},
 	},
 }
