@@ -69,7 +69,7 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 		Labels:   make(map[string]string),
 	}
 
-	builder.domainAdminView.AddObject(result)
+	_ = builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -105,7 +105,7 @@ func (builder *PolicyBuilder) AddService(owner *lang.User) *lang.Service {
 		},
 		Owner: ownerID,
 	}
-	builder.domainAdminView.AddObject(result)
+	_ = builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -125,7 +125,7 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 			},
 		}},
 	}
-	builder.domainAdminView.AddObject(result)
+	_ = builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -150,7 +150,7 @@ func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service,
 		)
 	}
 
-	builder.domainAdminView.AddObject(result)
+	_ = builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -166,7 +166,7 @@ func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.Rul
 		Criteria: criteria,
 		Actions:  actions,
 	}
-	builder.domainAdminView.AddObject(result)
+	_ = builder.domainAdminView.AddObject(result)
 	return result
 }
 
@@ -179,7 +179,7 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 			Name:      util.RandomID(builder.random, idLength),
 		},
 	}
-	builder.domainAdminView.AddObject(result)
+	_ = builder.domainAdminView.AddObject(result)
 	return result
 }
 
