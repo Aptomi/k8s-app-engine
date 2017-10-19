@@ -65,7 +65,7 @@ func OpenImage(image image.Image) {
 		command.Stdout = &outb
 		command.Stderr = &errb
 		if err := command.Run(); err != nil || len(errb.String()) > 0 {
-			panic(fmt.Sprintf("Unable to open '%s': %s", tmpFile.Name(), err.Error()))
+			panic(fmt.Sprintf("Unable to open '%s': %s", tmpFile.Name(), err))
 		}
 	}
 }

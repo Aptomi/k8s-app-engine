@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 )
@@ -25,7 +26,7 @@ func (criteria *Criteria) allows(params *expression.Parameters, cache *expressio
 		if err != nil {
 			// propagate expression error up, if happened
 			return false, errors.NewErrorWithDetails(
-				"Can't evaluate 'require-all' in criteria: "+err.Error(),
+				fmt.Sprintf("Can't evaluate 'require-all' in criteria: %s", err),
 				errors.Details{
 					"criteria":   criteria,
 					"expression": exprShouldBeTrue,
@@ -43,7 +44,7 @@ func (criteria *Criteria) allows(params *expression.Parameters, cache *expressio
 		if err != nil {
 			// propagate expression error up, if happened
 			return false, errors.NewErrorWithDetails(
-				"Can't evaluate 'require-node' in criteria: "+err.Error(),
+				fmt.Sprintf("Can't evaluate 'require-node' in criteria: %s", err),
 				errors.Details{
 					"criteria":   criteria,
 					"expression": exprShouldBeFalse,
@@ -62,7 +63,7 @@ func (criteria *Criteria) allows(params *expression.Parameters, cache *expressio
 			if err != nil {
 				// propagate expression error up, if happened
 				return false, errors.NewErrorWithDetails(
-					"Can't evaluate 'require-any' in criteria: "+err.Error(),
+					fmt.Sprintf("Can't evaluate 'require-any' in criteria: %s", err),
 					errors.Details{
 						"criteria":   criteria,
 						"expression": exprShouldBeTrue,

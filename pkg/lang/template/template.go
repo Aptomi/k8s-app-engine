@@ -18,7 +18,7 @@ type Template struct {
 func NewTemplate(templateStr string) (*Template, error) {
 	templateCompiled, err := t.New("").Parse(templateStr)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to compile template '%s': %s", templateStr, err.Error())
+		return nil, fmt.Errorf("Unable to compile template '%s': %s", templateStr, err)
 	}
 	return &Template{
 		templateStr:      templateStr,
@@ -35,7 +35,7 @@ func (template *Template) Evaluate(params *Parameters) (string, error) {
 	err := template.templateCompiled.Execute(&doc, params.params)
 	if err != nil {
 		return "", errors.NewErrorWithDetails(
-			fmt.Sprintf("Unable to evaluate template '%s': %s", template.templateStr, err.Error()),
+			fmt.Sprintf("Unable to evaluate template '%s': %s", template.templateStr, err),
 			errors.Details{
 				"template": template.templateStr,
 				"params":   params,

@@ -31,7 +31,7 @@ func NewExpression(expressionStr string) (*Expression, error) {
 
 	expressionCompiled, err := govaluate.NewEvaluableExpressionWithFunctions(expressionStr, functions)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to compile expression '%s': %s", expressionStr, err.Error())
+		return nil, fmt.Errorf("Unable to compile expression '%s': %s", expressionStr, err)
 	}
 	return &Expression{
 		expressionStr:      expressionStr,
@@ -49,7 +49,7 @@ func (expression *Expression) EvaluateAsBool(params *Parameters) (bool, error) {
 			return false, nil
 		}
 		return false, errors.NewErrorWithDetails(
-			fmt.Sprintf("Unable to evaluate expression '%s': %s", expression.expressionStr, err.Error()),
+			fmt.Sprintf("Unable to evaluate expression '%s': %s", expression.expressionStr, err),
 			errors.Details{
 				"expression": expression.expressionStr,
 				"params":     params,

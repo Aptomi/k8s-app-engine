@@ -103,7 +103,7 @@ func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *
 
 func (node *resolutionNode) errorWhenTestingContext(context *lang.Context, cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error while trying to match context '%s' for contract '%s': %s", context.Name, node.contract.Name, cause.Error()),
+		fmt.Sprintf("Error while trying to match context '%s' for contract '%s': %s", context.Name, node.contract.Name, cause),
 		errors.Details{
 			"context": context,
 			"cause":   cause,
@@ -127,7 +127,7 @@ func (node *resolutionNode) errorWhenProcessingRule(rule *lang.Rule, cause error
 
 func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, cause.Error()),
+		fmt.Sprintf("Error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, cause),
 		errors.Details{
 			"cause": cause,
 		},
@@ -141,7 +141,7 @@ func (node *resolutionNode) errorWhenDoingTopologicalSort(cause error) error {
 		componentNames = append(componentNames, component.Name)
 	}
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Failed to topologically sort components within a service '%s': %s", node.service.Name, cause.Error()),
+		fmt.Sprintf("Failed to topologically sort components within a service '%s': %s", node.service.Name, cause),
 		errors.Details{
 			"cause":          cause,
 			"componentNames": componentNames,
@@ -152,7 +152,7 @@ func (node *resolutionNode) errorWhenDoingTopologicalSort(cause error) error {
 
 func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause.Error()),
+		fmt.Sprintf("Error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause),
 		errors.Details{
 			"component":       node.component,
 			"contextual_data": node.getContextualDataForCodeDiscoveryTemplate(),
@@ -164,7 +164,7 @@ func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
 
 func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause.Error()),
+		fmt.Sprintf("Error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause),
 		errors.Details{
 			"component":       node.component,
 			"contextual_data": node.getContextualDataForCodeDiscoveryTemplate(),

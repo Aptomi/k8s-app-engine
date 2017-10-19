@@ -104,7 +104,7 @@ func (cache *clusterCache) getExistingIstioRouteRulesForCluster(cluster *lang.Cl
 	cmd := "get route-rules"
 	rulesStr, err := cache.runIstioCmd(cmd, cluster)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get route-rules in cluster '%s' by running '%s': %s", cluster.Name, cmd, err.Error())
+		return nil, fmt.Errorf("Failed to get route-rules in cluster '%s' by running '%s': %s", cluster.Name, cmd, err)
 	}
 
 	rules := make([]*istioRouteRule, 0)

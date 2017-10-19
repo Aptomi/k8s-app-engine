@@ -16,7 +16,7 @@ func DeserializeObject(s string, object interface{}) error {
 func SerializeObject(t interface{}) string {
 	d, err := yaml.Marshal(&t)
 	if err != nil {
-		panic(fmt.Sprintf("Can't serialize object '%+v': %s", t, err.Error()))
+		panic(fmt.Sprintf("Can't serialize object '%+v': %s", t, err))
 	}
 	return string(d)
 }
@@ -25,11 +25,11 @@ func SerializeObject(t interface{}) string {
 func LoadObjectFromFile(fileName string, data interface{}) interface{} {
 	dat, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to read file '%s': %s", fileName, err.Error()))
+		panic(fmt.Sprintf("Unable to read file '%s': %s", fileName, err))
 	}
 	err = yaml.Unmarshal(dat, data)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to unmarshal entity from '%s': %s", fileName, err.Error()))
+		panic(fmt.Sprintf("Unable to unmarshal entity from '%s': %s", fileName, err))
 	}
 	return data
 }
@@ -44,12 +44,12 @@ func LoadObjectFromFileDefaultEmpty(fileName string, data interface{}) interface
 	}
 
 	if err != nil {
-		panic(fmt.Sprintf("Unable to read file '%s': %s", fileName, err.Error()))
+		panic(fmt.Sprintf("Unable to read file '%s': %s", fileName, err))
 	}
 
 	err = yaml.Unmarshal(dat, data)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to unmarshal entity from '%s': %s", fileName, err.Error()))
+		panic(fmt.Sprintf("Unable to unmarshal entity from '%s': %s", fileName, err))
 	}
 	return data
 }
@@ -58,6 +58,6 @@ func LoadObjectFromFileDefaultEmpty(fileName string, data interface{}) interface
 func SaveObjectToFile(fileName string, data interface{}) {
 	err := ioutil.WriteFile(fileName, []byte(SerializeObject(data)), 0644)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to save entity to '%s': %s", fileName, err.Error()))
+		panic(fmt.Sprintf("Unable to save entity to '%s': %s", fileName, err))
 	}
 }
