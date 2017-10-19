@@ -39,6 +39,17 @@ func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
 	)
 }
 
+func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
+	userName := node.dependency.UserID
+	if node.user != nil {
+		userName = node.user.Name
+	}
+	return errors.NewErrorWithDetails(
+		fmt.Sprintf("User '%s' not allowed to consume service: %s", userName, err),
+		errors.Details{},
+	)
+}
+
 /*
 	Critical errors. If one of them occurs, engine will report an error and fail policy processing
 	all together

@@ -70,9 +70,9 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 	// ns1/service1 -> depends on -> ns2/contract2
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
 
-	// create dependency in ns3 on ns1/contract1
+	// create dependency in ns3 on ns1/contract1 (it's created on behalf of domain admin, who can for sure consume services from all namespaces)
 	b.SwitchNamespace("ns3")
-	d := b.AddDependency(b.AddUser(), contract1)
+	d := b.AddDependency(b.AddUserDomainAdmin(), contract1)
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")

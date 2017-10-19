@@ -268,6 +268,13 @@ func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Servic
 		return nil, node.errorServiceIsNotInSameNamespaceAsContract(service)
 	}
 
+	// User should have access to consume the service according to the ACL
+	userView := node.resolver.policy.View(node.user)
+	canConsume, err := userView.CanConsume(service)
+	if !canConsume {
+		return nil, node.userNotAllowedToConsumeService(err)
+	}
+
 	node.logServiceFound(service)
 	return service, nil
 }

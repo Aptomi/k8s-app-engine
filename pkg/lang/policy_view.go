@@ -22,48 +22,62 @@ func NewPolicyView(policy *Policy, user *User) *PolicyView {
 
 // AddObject adds an object into the policy, putting it into the corresponding namespace
 // If an ACL-related error occurs or user doesn't have permissions to perform an operation, then ACL error will be returned
-func (policyView *PolicyView) AddObject(obj object.Base) error {
-	privilege, err := policyView.Policy.aclResolver.GetUserPrivileges(policyView.User, obj)
+func (view *PolicyView) AddObject(obj object.Base) error {
+	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return err
 	}
 	if !privilege.Manage {
-		return fmt.Errorf("user '%s' doesn't have permissions to manage object '%s/%s/%s'", policyView.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
-	policyView.Policy.AddObject(obj)
+	view.Policy.AddObject(obj)
 	return nil
 }
 
 // ViewObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made
 // If policy lookup error occurs or user doesn't have permissions to view an object, then ACL error will be returned
-func (policyView *PolicyView) ViewObject(kind string, locator string, currentNs string) (object.Base, error) {
-	obj, err := policyView.Policy.GetObject(kind, locator, currentNs)
+func (view *PolicyView) ViewObject(kind string, locator string, currentNs string) (object.Base, error) {
+	obj, err := view.Policy.GetObject(kind, locator, currentNs)
 	if err != nil {
 		return nil, err
 	}
-	privilege, err := policyView.Policy.aclResolver.GetUserPrivileges(policyView.User, obj)
+	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return nil, err
 	}
 	if !privilege.View {
-		return nil, fmt.Errorf("user '%s' doesn't have permissions to view object '%s/%s/%s'", policyView.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return nil, fmt.Errorf("user '%s' doesn't have ACL permissions to view object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
 	return obj, nil
 }
 
 // ManageObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made
 // If policy lookup error occurs or user doesn't have permissions to manage an object, then ACL error will be returned
-func (policyView *PolicyView) ManageObject(kind string, locator string, currentNs string) (object.Base, error) {
-	obj, err := policyView.Policy.GetObject(kind, locator, currentNs)
+func (view *PolicyView) ManageObject(kind string, locator string, currentNs string) (object.Base, error) {
+	obj, err := view.Policy.GetObject(kind, locator, currentNs)
 	if err != nil {
 		return nil, err
 	}
-	privilege, err := policyView.Policy.aclResolver.GetUserPrivileges(policyView.User, obj)
+	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return nil, err
 	}
 	if !privilege.Manage {
-		return nil, fmt.Errorf("user '%s' doesn't have permissions to manage object '%s/%s/%s'", policyView.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return nil, fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
 	return obj, nil
+}
+
+// CanConsume returns if user has permissions to consume a service
+// If a user can declare a dependency in a given namespace, then he can essentially can consume the service
+func (view *PolicyView) CanConsume(service *Service) (bool, error) {
+	obj := &Metadata{Namespace: service.GetNamespace(), Kind: DependencyObject.Kind}
+	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
+	if err != nil {
+		return false, err
+	}
+	if !privilege.Manage {
+		return false, fmt.Errorf("user '%s' doesn't have ACL permissions to consume service '%s/%s'", view.User.ID, service.GetNamespace(), service.GetName())
+	}
+	return true, nil
 }

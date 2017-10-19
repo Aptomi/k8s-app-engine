@@ -45,8 +45,7 @@ func NewPolicyBuilderWithNS(namespace string) *PolicyBuilder {
 		result.policy.AddObject(rule)
 	}
 
-	result.domainAdmin = result.AddUser()
-	result.domainAdmin.Labels["role"] = "aptomi_domain_admin"
+	result.domainAdmin = result.AddUserDomainAdmin()
 	result.domainAdminView = result.policy.View(result.domainAdmin)
 
 	return result
@@ -74,14 +73,21 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 	return result
 }
 
-// AddUser creates a new user and adds it to the policy
+// AddUser creates a new user who can consume services from the 'main' namespace and adds it to the policy
 func (builder *PolicyBuilder) AddUser() *lang.User {
 	result := &lang.User{
 		ID:     util.RandomID(builder.random, idLength),
 		Name:   util.RandomID(builder.random, idLength),
-		Labels: make(map[string]string),
+		Labels: map[string]string{"role": "aptomi_main_ns_consumer"},
 	}
 	builder.users.AddUser(result)
+	return result
+}
+
+// AddUserDomainAdmin creates a new user who is a domain admin and adds it to the policy
+func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
+	result := builder.AddUser()
+	result.Labels["role"] = "aptomi_domain_admin"
 	return result
 }
 
