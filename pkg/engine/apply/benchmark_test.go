@@ -72,8 +72,8 @@ type PolicyGenerator struct {
 	users                     int
 	dependencies              int
 
-	generatedLabels    map[string]string
-	generatedLabelKeys []string
+	generatedUserLabels map[string]string
+	generatedLabelKeys  []string
 
 	generatedServices []*lang.Service
 	policy            *lang.Policy
@@ -81,7 +81,7 @@ type PolicyGenerator struct {
 }
 
 func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceDependencyMaxChain, contextsPerContract, rules, users, dependencies int) *PolicyGenerator {
-	return &PolicyGenerator{
+	result := &PolicyGenerator{
 		random:                    rand.New(rand.NewSource(randSeed)),
 		labels:                    labels,
 		services:                  services,
@@ -94,11 +94,15 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		dependencies:              dependencies,
 		policy:                    lang.NewPolicy(),
 	}
+	for _, rule := range lang.ACLRulesBootstrap {
+		result.policy.AddObject(rule)
+	}
+	return result
 }
 
 func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external.Data) {
 	// pre-generate the list of labels
-	gen.makeLabels()
+	gen.makeUserLabels()
 
 	// generate services
 	maxChainLen := gen.makeServices()
@@ -117,7 +121,7 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 
 	// every user will have the same set of labels
 	gen.externalData = external.NewData(
-		NewUserLoaderImpl(gen.users, gen.generatedLabels),
+		NewUserLoaderImpl(gen.users, gen.generatedUserLabels),
 		NewSecretLoaderImpl(),
 	)
 
@@ -134,16 +138,17 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	return gen.policy, gen.externalData
 }
 
-func (gen *PolicyGenerator) makeLabels() {
-	gen.generatedLabels = make(map[string]string)
+func (gen *PolicyGenerator) makeUserLabels() {
+	gen.generatedUserLabels = make(map[string]string)
 	for i := 0; i < gen.labels; i++ {
 		name := util.RandomID(gen.random, 10)
 		value := util.RandomID(gen.random, 25)
-		gen.generatedLabels[name] = value
+		gen.generatedUserLabels[name] = value
 	}
+	gen.generatedUserLabels["role"] = "aptomi_domain_admin"
 
 	gen.generatedLabelKeys = []string{}
-	for key := range gen.generatedLabels {
+	for key := range gen.generatedUserLabels {
 		gen.generatedLabelKeys = append(gen.generatedLabelKeys, key)
 	}
 }
@@ -389,8 +394,8 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	timeStart := time.Now()
 
 	actualPolicy := lang.NewPolicy()
-	actualState := resolvePolicyBenchmark(t, actualPolicy, externalData)
-	desiredState := resolvePolicyBenchmark(t, desiredPolicy, externalData)
+	actualState := resolvePolicyBenchmark(t, actualPolicy, externalData, false)
+	desiredState := resolvePolicyBenchmark(t, desiredPolicy, externalData, true)
 
 	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions
@@ -412,20 +417,23 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	timeDiff := timeEnd.Sub(timeStart)
 
 	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), len(desiredState.DependencyInstanceMap), len(actualState.ComponentInstanceMap))
-
-	if len(desiredState.DependencyInstanceMap) <= 0 {
-		panic("No dependencies resolved")
-	}
 }
 
-func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data) *resolve.PolicyResolution {
+func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
 	t.Helper()
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		hook := &event.HookStdout{}
 		eventLog.Save(hook)
+		panic("Policy resolution error")
+	}
+
+	if expectedNonEmpty && len(result.DependencyInstanceMap) <= 0 {
+		hook := &event.HookStdout{}
+		eventLog.Save(hook)
 		t.FailNow()
+		panic("No dependencies resolved")
 	}
 
 	return result
