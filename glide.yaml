@@ -35,6 +35,10 @@ import:
   version: ^0.1.0
   subpackages:
   - cmp
+- package: gopkg.in/go-playground/validator.v9
+  version: ^9.7.0
+- package: github.com/go-playground/universal-translator
+  version: ^0.16.0
 
 - package: k8s.io/helm
   version: release-2.6

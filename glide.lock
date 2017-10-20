@@ -1,5 +1,5 @@
-hash: a10a6631eb1e5f50aaf05898118a254f76612524fb7d028a9dd9cea441a30c9e
-updated: 2017-10-15T01:41:24.546837871-07:00
+hash: cd224aa56f6ffe03092754831535b0d0b72a16d8d72314cebe83023a7e19a698
+updated: 2017-10-20T14:21:33.218232708-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -98,6 +98,12 @@ imports:
   version: d65c7fdb29eca313476e529628176fe17e58c488
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
+- name: github.com/go-playground/locales
+  version: e4cbcb5d0652150d40ad0646651076b6bd2be4f6
+  subpackages:
+  - currency
+- name: github.com/go-playground/universal-translator
+  version: b32fa301c9fe55953584134cb6853a13c87ec0a1
 - name: github.com/gobwas/glob
   version: bea32b9cd2d6f55753d94a28e959b13f0244797a
   subpackages:
@@ -340,6 +346,8 @@ imports:
   - transport
 - name: gopkg.in/asn1-ber.v1
   version: 379148ca0225df7a432012b8df0355c2a2063ac0
+- name: gopkg.in/go-playground/validator.v9
+  version: a021b2ec9a8a8bb970f3f15bc42617cb520e8a64
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ldap.v2
@@ -378,7 +386,7 @@ imports:
   - pkg/proto/hapi/version
   - pkg/version
 - name: k8s.io/kubernetes
-  version: bc6162cc70b4a39a7f39391564e0dd0be60b39e9
+  version: 9e7b2a6b1195703a51a413701e84ebe37521df81
   subpackages:
   - cmd/kubeadm/app/apis/kubeadm
   - federation/apis/federation

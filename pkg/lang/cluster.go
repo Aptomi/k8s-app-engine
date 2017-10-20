@@ -15,7 +15,7 @@ var ClusterObject = &object.Info{
 type Cluster struct {
 	Metadata
 
-	Type   string
+	Type   string `validate:"clustertype"`
 	Labels map[string]string
 	Config struct {
 		KubeContext     string

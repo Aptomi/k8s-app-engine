@@ -19,7 +19,7 @@ type Service struct {
 	Metadata
 
 	Labels     map[string]string
-	Owner      string
+	Owner      string `validate:"required"`
 	Components []*ServiceComponent
 
 	// Lazily evaluated fields (all components topologically sorted). Use via getter

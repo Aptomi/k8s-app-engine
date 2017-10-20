@@ -42,7 +42,10 @@ func NewPolicyBuilderWithNS(namespace string) *PolicyBuilder {
 	}
 
 	for _, rule := range lang.ACLRulesBootstrap {
-		result.policy.AddObject(rule)
+		err := result.policy.AddObject(rule)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	result.domainAdmin = result.AddUserDomainAdmin()
@@ -178,6 +181,7 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 			Namespace: object.SystemNS,
 			Name:      util.RandomID(builder.random, idLength),
 		},
+		Type: "kubernetes",
 	}
 	_ = builder.domainAdminView.AddObject(result)
 	return result

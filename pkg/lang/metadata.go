@@ -6,9 +6,9 @@ import (
 
 // Metadata is an object metadata implementation (NS, Kind, Name, Generation) which works for all standard objects
 type Metadata struct {
-	Namespace  string
-	Kind       string
-	Name       string
+	Namespace  string `validate:"identifier"`
+	Kind       string `validate:"identifier"`
+	Name       string `validate:"identifier"`
 	Generation object.Generation
 }
 

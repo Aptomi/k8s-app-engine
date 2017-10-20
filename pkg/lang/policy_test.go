@@ -71,41 +71,52 @@ func makePolicy() (string, *Policy) {
 	namespace := "main"
 	policy := NewPolicy()
 	for i := 0; i < 10; i++ {
-		policy.AddObject(&Service{
+		addObject(policy, &Service{
 			Metadata: Metadata{
 				Kind:      ServiceObject.Kind,
 				Namespace: namespace,
 				Name:      "service" + strconv.Itoa(i),
 			},
+			Owner: "1",
 		})
-		policy.AddObject(&Contract{
+		addObject(policy, &Contract{
 			Metadata: Metadata{
 				Kind:      ContractObject.Kind,
 				Namespace: namespace,
 				Name:      "contract" + strconv.Itoa(i),
 			},
 		})
-		policy.AddObject(&Cluster{
+		addObject(policy, &Cluster{
 			Metadata: Metadata{
 				Kind:      ClusterObject.Kind,
 				Namespace: object.SystemNS,
 				Name:      "cluster" + strconv.Itoa(i),
 			},
+			Type: "kubernetes",
 		})
-		policy.AddObject(&Rule{
+		addObject(policy, &Rule{
 			Metadata: Metadata{
 				Kind:      RuleObject.Kind,
 				Namespace: namespace,
 				Name:      "rule" + strconv.Itoa(i),
 			},
 		})
-		policy.AddObject(&Dependency{
+		addObject(policy, &Dependency{
 			Metadata: Metadata{
 				Kind:      DependencyObject.Kind,
 				Namespace: namespace,
 				Name:      "dependency" + strconv.Itoa(i),
 			},
+			UserID:   "user" + strconv.Itoa(i),
+			Contract: "contract" + strconv.Itoa(i),
 		})
 	}
 	return namespace, policy
+}
+
+func addObject(policy *Policy, obj object.Base) {
+	err := policy.AddObject(obj)
+	if err != nil {
+		panic(err)
+	}
 }

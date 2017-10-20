@@ -256,9 +256,12 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	resolvePolicy(t, b, ResError, "Error while resolving allocation keys")
 }
 
-func TestPolicyResolverInvalidServiceWithoutOwner(t *testing.T) {
+func TestPolicyResolverInvalidServiceNonExistingOwner(t *testing.T) {
 	b := builder.NewPolicyBuilder()
-	service := b.AddService(nil)
+	service := b.AddService(&lang.User{
+		ID:   "non-existing-user",
+		Name: "non-existing-user",
+	})
 	contract := b.AddContract(service, b.CriteriaTrue())
 	b.AddDependency(b.AddUser(), contract)
 

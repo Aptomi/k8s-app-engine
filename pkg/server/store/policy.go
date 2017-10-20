@@ -54,11 +54,14 @@ func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, 
 			for ns, kindNameGen := range policyData.Objects {
 				for kind, nameGen := range kindNameGen {
 					for name, gen := range nameGen {
-						obj, err := s.store.GetByName(ns, kind, name, gen)
-						if err != nil {
-							return nil, 0, err
+						obj, errStore := s.store.GetByName(ns, kind, name, gen)
+						if errStore != nil {
+							return nil, 0, errStore
 						}
-						policy.AddObject(obj)
+						errPolicy := policy.AddObject(obj)
+						if errPolicy != nil {
+							return nil, 0, errPolicy
+						}
 					}
 				}
 			}

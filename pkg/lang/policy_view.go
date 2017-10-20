@@ -21,7 +21,7 @@ func NewPolicyView(policy *Policy, user *User) *PolicyView {
 }
 
 // AddObject adds an object into the policy, putting it into the corresponding namespace
-// If an ACL-related error occurs or user doesn't have permissions to perform an operation, then ACL error will be returned
+// If an error occurs (e.g. user doesn't have ACL permissions to perform an operation, or object validation error), then it will be returned
 func (view *PolicyView) AddObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
@@ -30,8 +30,7 @@ func (view *PolicyView) AddObject(obj object.Base) error {
 	if !privilege.Manage {
 		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
-	view.Policy.AddObject(obj)
-	return nil
+	return view.Policy.AddObject(obj)
 }
 
 // ViewObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made

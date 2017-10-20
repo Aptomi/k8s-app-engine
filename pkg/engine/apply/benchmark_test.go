@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
@@ -96,7 +97,7 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		policy:                    lang.NewPolicy(),
 	}
 	for _, rule := range lang.ACLRulesBootstrap {
-		result.policy.AddObject(rule)
+		result.addObject(rule)
 	}
 	return result
 }
@@ -226,14 +227,14 @@ func (gen *PolicyGenerator) makeService() *lang.Service {
 		service.Components = append(service.Components, component)
 	}
 
-	gen.policy.AddObject(service)
+	gen.addObject(service)
 	return service
 }
 
 func (gen *PolicyGenerator) makeRules() {
 	// generate non-matching rules
 	for i := 0; i < gen.rules-1; i++ {
-		gen.policy.AddObject(&lang.Rule{
+		gen.addObject(&lang.Rule{
 			Metadata: lang.Metadata{
 				Kind:      lang.RuleObject.Kind,
 				Namespace: "main",
@@ -250,7 +251,7 @@ func (gen *PolicyGenerator) makeRules() {
 	}
 
 	// generate rule which allows all dependencies
-	gen.policy.AddObject(&lang.Rule{
+	gen.addObject(&lang.Rule{
 		Metadata: lang.Metadata{
 			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
@@ -309,7 +310,7 @@ func (gen *PolicyGenerator) makeContracts() {
 		contract.Contexts = append(contract.Contexts, context)
 
 		// add service contract to the policy
-		gen.policy.AddObject(contract)
+		gen.addObject(contract)
 	}
 }
 
@@ -324,7 +325,7 @@ func (gen *PolicyGenerator) makeDependencies() {
 			UserID:   "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
 			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.services)),
 		}
-		gen.policy.AddObject(dependency)
+		gen.addObject(dependency)
 	}
 }
 
@@ -335,8 +336,9 @@ func (gen *PolicyGenerator) makeCluster() {
 			Namespace: "system",
 			Name:      "cluster-test",
 		},
+		Type: "kubernetes",
 	}
-	gen.policy.AddObject(cluster)
+	gen.addObject(cluster)
 }
 
 type UserLoaderImpl struct {
@@ -438,4 +440,11 @@ func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *ext
 	}
 
 	return result
+}
+
+func (gen *PolicyGenerator) addObject(obj object.Base) {
+	err := gen.policy.AddObject(obj)
+	if err != nil {
+		panic(err)
+	}
 }

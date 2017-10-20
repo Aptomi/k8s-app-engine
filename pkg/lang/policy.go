@@ -3,6 +3,7 @@ package lang
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/object"
+	"gopkg.in/go-playground/validator.v9"
 	"strings"
 	"sync"
 )
@@ -10,6 +11,8 @@ import (
 // Policy describes the entire aptomi policy, consisting of multiple namespaces
 type Policy struct {
 	Namespace map[string]*PolicyNamespace
+
+	validator *validator.Validate
 
 	once        sync.Once
 	aclResolver *ACLResolver // lazily initialized value
@@ -19,6 +22,7 @@ type Policy struct {
 func NewPolicy() *Policy {
 	return &Policy{
 		Namespace: make(map[string]*PolicyNamespace),
+		validator: makeValidator(),
 	}
 }
 
@@ -38,13 +42,14 @@ func (policy *Policy) View(user *User) *PolicyView {
 }
 
 // AddObject adds an object into the policy, putting it into the corresponding namespace
-func (policy *Policy) AddObject(obj object.Base) {
+// If error occurs, e.g. object validation error, then it will be returned
+func (policy *Policy) AddObject(obj object.Base) error {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
 	if !ok {
-		policyNamespace = NewPolicyNamespace(obj.GetNamespace())
+		policyNamespace = NewPolicyNamespace(obj.GetNamespace(), policy.validator)
 		policy.Namespace[obj.GetNamespace()] = policyNamespace
 	}
-	policyNamespace.addObject(obj)
+	return policyNamespace.addObject(obj)
 }
 
 // GetObjectsByKind returns all objects in a policy with a given kind, across all namespaces

@@ -20,7 +20,8 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 	// make empty policy with bootstrap ACL
 	policy := NewPolicy()
 	for _, rule := range ACLRulesBootstrap {
-		policy.AddObject(rule)
+		err := policy.AddObject(rule)
+		assert.NoError(t, err, "Bootstrap ACL rule should be added successfully")
 	}
 
 	policyViews := []*PolicyView{
@@ -83,7 +84,8 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 	// make empty policy with bootstrap ACL
 	policy := NewPolicy()
 	for _, rule := range ACLRulesBootstrap {
-		policy.AddObject(rule)
+		err := policy.AddObject(rule)
+		assert.NoError(t, err, "Bootstrap ACL rule should be added successfully")
 	}
 
 	policyViews := []*PolicyView{

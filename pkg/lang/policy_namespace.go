@@ -3,6 +3,7 @@ package lang
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/object"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // PolicyNamespace describes a specific namespace in aptomi policy (services, contracts, clusters, rules, dependencies, etc)
@@ -14,10 +15,12 @@ type PolicyNamespace struct {
 	Rules        *GlobalRules
 	ACLRules     *GlobalRules
 	Dependencies *GlobalDependencies
+
+	validator *validator.Validate
 }
 
 // NewPolicyNamespace creates a new PolicyNamespace
-func NewPolicyNamespace(name string) *PolicyNamespace {
+func NewPolicyNamespace(name string, validator *validator.Validate) *PolicyNamespace {
 	return &PolicyNamespace{
 		Name:         name,
 		Services:     make(map[string]*Service),
@@ -26,10 +29,18 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 		Rules:        NewGlobalRules(),
 		ACLRules:     NewGlobalRules(),
 		Dependencies: NewGlobalDependencies(),
+		validator:    validator,
 	}
 }
 
-func (policyNamespace *PolicyNamespace) addObject(obj object.Base) {
+func (policyNamespace *PolicyNamespace) addObject(obj object.Base) error {
+	// validate object before adding it
+	err := policyNamespace.validator.Struct(obj)
+	if err != nil {
+		return err
+	}
+
+	// add object
 	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
 		policyNamespace.Services[obj.GetName()] = obj.(*Service)
@@ -49,6 +60,7 @@ func (policyNamespace *PolicyNamespace) addObject(obj object.Base) {
 	default:
 		panic(fmt.Sprintf("Can't add object to policy namespace: %v", obj))
 	}
+	return nil
 }
 
 func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []object.Base {

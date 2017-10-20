@@ -18,7 +18,7 @@ var RuleObject = &object.Info{
 type Rule struct {
 	Metadata
 
-	Weight   int
+	Weight   int `validate:"min=0"`
 	Criteria *Criteria
 	Actions  *RuleActions
 }
