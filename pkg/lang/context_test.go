@@ -133,6 +133,35 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 	matchContext(t, context, nil, paramsDoesntMatch, nil)
 }
 
+func TestServiceContextRequireNone(t *testing.T) {
+	context := &Context{
+		Name: "special-not-matched",
+		Criteria: &Criteria{
+			RequireAll: []string{"true"},
+			RequireAny: []string{"true"},
+			RequireNone: []string{
+				"x == 'y'",
+				"bad == 'badvalue'",
+			},
+		},
+	}
+	paramsMatch := []*expression.Parameters{
+		expression.NewParams(
+			nil,
+			nil,
+		),
+	}
+	paramsDoesntMatch := []*expression.Parameters{
+		expression.NewParams(
+			map[string]string{
+				"bad": "badvalue",
+			},
+			nil,
+		),
+	}
+	matchContext(t, context, paramsMatch, paramsDoesntMatch, nil)
+}
+
 func TestServiceContextRequireAnyEmpty(t *testing.T) {
 	context := &Context{
 		Name: "special-matched",
