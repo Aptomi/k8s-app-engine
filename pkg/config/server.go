@@ -5,9 +5,14 @@ type Server struct {
 	API        API
 	DB         DB
 	Helm       Helm
-	LDAP       LDAP
+	Users      UserSources
 	SecretsDir string `valid:"dir"`
 	Enforcer   Enforcer
+}
+
+type UserSources struct {
+	LDAP []LDAP
+	File []string
 }
 
 func (s Server) IsDebug() bool {

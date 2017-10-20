@@ -35,22 +35,23 @@ db:
 enforcer:
   disabled: true
 
-ldap:
-  host: localhost
-  port: 10389
-  basedn: o=aptomiOrg
-  filter: (&(objectClass=organizationalPerson))
-  labeltoattributes:
-    id: dn
-    name: cn
-    description: description
-    global_ops: isglobalops
-    is_operator: isoperator
-    mail: mail
-    team: team
-    org: o
-    short-description: role
-    deactivated: deactivated
+users:
+  ldap:
+    - host: localhost
+      port: 10389
+      basedn: o=aptomiOrg
+      filter: (&(objectClass=organizationalPerson))
+      labeltoattributes:
+        id: dn
+        name: cn
+        description: description
+        global_ops: isglobalops
+        is_operator: isoperator
+        mail: mail
+        team: team
+        org: o
+        short-description: role
+        deactivated: deactivated
 EOL
 
 aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &

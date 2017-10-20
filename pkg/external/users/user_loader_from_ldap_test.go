@@ -27,11 +27,11 @@ var integrationTestsLDAP = config.LDAP{
 	},
 }
 
-func TestLoadUsersFromLDAP(t *testing.T) {
+func TestUserLoaderFromLDAP(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromDir("../../testdata/ldap")
+	userLoaderDir := NewUserLoaderFromFile("../../testdata/ldap/users.yaml")
 	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
 
 	usersDir := userLoaderDir.LoadUsersAll()
@@ -55,11 +55,11 @@ func TestLoadUsersFromLDAP(t *testing.T) {
 	assert.Equal(t, "6 (from LDAP)", userLoaderLDAP.Summary())
 }
 
-func TestLoadUsersFromLDAPIndividually(t *testing.T) {
+func TestUserLoaderFromLDAPLoadByID(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromDir("../../testdata/ldap")
+	userLoaderDir := NewUserLoaderFromFile("../../testdata/ldap/users.yaml")
 	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
 
 	usersDir := userLoaderDir.LoadUsersAll()

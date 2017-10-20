@@ -66,8 +66,15 @@ func (s *Server) Start() {
 }
 
 func (s *Server) initExternalData() {
+	userLoaders := []users.UserLoader{}
+	for _, ldap := range s.cfg.Users.LDAP {
+		userLoaders = append(userLoaders, users.NewUserLoaderFromLDAP(ldap))
+	}
+	for _, file := range s.cfg.Users.File {
+		userLoaders = append(userLoaders, users.NewUserLoaderFromFile(file))
+	}
 	s.externalData = external.NewData(
-		users.NewUserLoaderFromLDAP(s.cfg.LDAP),
+		users.NewUserLoaderMultipleSources(userLoaders),
 		secrets.NewSecretLoaderFromDir(s.cfg.SecretsDir),
 	)
 }

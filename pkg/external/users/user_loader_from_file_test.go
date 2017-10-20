@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestLoadUsersFromDir(t *testing.T) {
-	userLoader := NewUserLoaderFromDir("../../testdata/unittests")
+func TestUserLoaderFromFile(t *testing.T) {
+	userLoader := NewUserLoaderFromFile("../../testdata/unittests/users.yaml")
 
 	// check user names
 	users := userLoader.LoadUsersAll()

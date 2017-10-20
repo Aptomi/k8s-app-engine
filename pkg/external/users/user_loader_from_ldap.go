@@ -14,8 +14,8 @@ import (
 type UserLoaderFromLDAP struct {
 	once sync.Once
 
-	cfg         config.LDAP
-	cachedUsers *lang.GlobalUsers
+	cfg   config.LDAP
+	users *lang.GlobalUsers
 }
 
 // NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
@@ -29,14 +29,13 @@ func NewUserLoaderFromLDAP(cfg config.LDAP) UserLoader {
 func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
-		loader.cachedUsers = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
+		loader.users = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
 		t := loader.ldapSearch()
 		for _, u := range t {
-			// add user
-			loader.cachedUsers.Users[u.ID] = u
+			loader.users.Users[u.ID] = u
 		}
 	})
-	return loader.cachedUsers
+	return loader.users
 }
 
 // LoadUserByID loads a single user by ID
