@@ -95,6 +95,7 @@ var namespaceAdmin = &ACLRole{
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: viewAccess,
 			RuleObject.Kind:    viewAccess,
+			ACLRuleObject.Kind: viewAccess,
 		},
 	},
 }
@@ -113,6 +114,7 @@ var serviceConsumer = &ACLRole{
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: viewAccess,
 			RuleObject.Kind:    viewAccess,
+			ACLRuleObject.Kind: viewAccess,
 		},
 	},
 }
@@ -131,6 +133,7 @@ var nobody = &ACLRole{
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: viewAccess,
 			RuleObject.Kind:    viewAccess,
+			ACLRuleObject.Kind: viewAccess,
 		},
 	},
 }

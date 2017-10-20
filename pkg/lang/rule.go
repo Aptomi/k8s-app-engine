@@ -46,6 +46,10 @@ func (rule *Rule) Matches(params *expression.Parameters, cache *expression.Cache
 
 // GlobalRules is a list of global rules
 type GlobalRules struct {
+	// RuleMap is a map[name] -> *Rule
+	RuleMap map[string]*Rule
+
+	// Rules is an unsorted list of rules
 	Rules []*Rule
 
 	once        sync.Once
@@ -54,10 +58,16 @@ type GlobalRules struct {
 
 // NewGlobalRules creates and initializes a new empty list of global rules
 func NewGlobalRules() *GlobalRules {
-	return &GlobalRules{}
+	return &GlobalRules{
+		RuleMap: make(map[string]*Rule),
+	}
 }
 
 func (globalRules *GlobalRules) addRule(rule ...*Rule) {
+	for _, r := range rule {
+		globalRules.RuleMap[r.GetName()] = r
+	}
+
 	globalRules.Rules = append(globalRules.Rules, rule...)
 }
 

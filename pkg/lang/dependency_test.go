@@ -19,7 +19,7 @@ func TestAddDependency(t *testing.T) {
 	}
 
 	// add it to the list of global dependencies
-	dependencies.AddDependency(depAdd)
+	dependencies.addDependency(depAdd)
 
 	// check that it was successfully added
 	assert.Equal(t, 1, len(dependencies.DependenciesByContract["newcontract"]), "Dependency on 'newcontract' should be added")

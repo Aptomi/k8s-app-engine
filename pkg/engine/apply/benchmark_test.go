@@ -238,7 +238,7 @@ func (gen *PolicyGenerator) makeRules() {
 			Metadata: lang.Metadata{
 				Kind:      lang.RuleObject.Kind,
 				Namespace: "main",
-				Name:      "rule",
+				Name:      "rule-" + strconv.Itoa(i),
 			},
 			Weight: i,
 			Criteria: &lang.Criteria{
@@ -255,7 +255,7 @@ func (gen *PolicyGenerator) makeRules() {
 		Metadata: lang.Metadata{
 			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
-			Name:      "rule",
+			Name:      "rule-" + strconv.Itoa(gen.rules),
 		},
 		Weight: gen.rules,
 		Criteria: &lang.Criteria{

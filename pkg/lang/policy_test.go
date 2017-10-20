@@ -8,10 +8,10 @@ import (
 )
 
 func TestPolicyGetObjects(t *testing.T) {
-	namespace, policy := makePolicy()
+	namespace, policy := makePolicyWithObjects(t)
 
 	// retrieve objects
-	for _, kind := range []string{ServiceObject.Kind, ContractObject.Kind} {
+	for _, kind := range []string{ServiceObject.Kind, ContractObject.Kind, RuleObject.Kind, DependencyObject.Kind} {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
@@ -26,16 +26,6 @@ func TestPolicyGetObjects(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			name := kind + strconv.Itoa(i)
 			getObject(t, policy, kind, name, object.SystemNS)
-		}
-	}
-
-	for _, kind := range []string{RuleObject.Kind, DependencyObject.Kind} {
-		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
-
-		for i := 0; i < 10; i++ {
-			name := kind + strconv.Itoa(i)
-			_, err := policy.GetObject(kind, kind+strconv.Itoa(i), namespace)
-			assert.Error(t, err, "Get object by kind '%s' should return an error", name)
 		}
 	}
 }
@@ -67,7 +57,7 @@ func getObject(t *testing.T, policy *Policy, kind string, name string, namespace
 	assert.Nil(t, obj5)
 }
 
-func makePolicy() (string, *Policy) {
+func makePolicyWithObjects(t *testing.T) (string, *Policy) {
 	namespace := "main"
 	policy := NewPolicy()
 	for i := 0; i < 10; i++ {
@@ -111,7 +101,20 @@ func makePolicy() (string, *Policy) {
 			Contract: "contract" + strconv.Itoa(i),
 		})
 	}
+	for _, rule := range ACLRulesBootstrap {
+		err := policy.AddObject(rule)
+		assert.NoError(t, err, "Bootstrap ACL rule should be added successfully")
+	}
 	return namespace, policy
+}
+
+func makeEmptyPolicy(t *testing.T) *Policy {
+	policy := NewPolicy()
+	for _, rule := range ACLRulesBootstrap {
+		err := policy.AddObject(rule)
+		assert.NoError(t, err, "Bootstrap ACL rule should be added successfully")
+	}
+	return policy
 }
 
 func addObject(policy *Policy, obj object.Base) {

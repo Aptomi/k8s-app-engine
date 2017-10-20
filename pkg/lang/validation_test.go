@@ -22,9 +22,11 @@ func TestPolicyObjectValidationIdentifiers(t *testing.T) {
 }
 
 func TestPolicyObjectValidationDuplicateIdentifiers(t *testing.T) {
-	// TODO: implement for duplicate identifiers
-	passed := []object.Base{}
-	failed := []object.Base{}
+	passed := []object.Base{
+		makeCluster("kubernetes"),
+		makeService("good_name"),
+	}
+	failed := passed
 	runValidationTests(t, passed, failed)
 }
 

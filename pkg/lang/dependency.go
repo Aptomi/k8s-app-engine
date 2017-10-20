@@ -22,6 +22,9 @@ type Dependency struct {
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)
 type GlobalDependencies struct {
+	// DependencyMap is a map[name] -> *Dependency
+	DependencyMap map[string]*Dependency
+
 	// DependenciesByContract contains dependency map <contractName> -> list of dependencies
 	DependenciesByContract map[string][]*Dependency
 }
@@ -29,11 +32,13 @@ type GlobalDependencies struct {
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies
 func NewGlobalDependencies() *GlobalDependencies {
 	return &GlobalDependencies{
+		DependencyMap:          make(map[string]*Dependency),
 		DependenciesByContract: make(map[string][]*Dependency),
 	}
 }
 
-// AddDependency appends a single dependency to an existing object
-func (src GlobalDependencies) AddDependency(dependency *Dependency) {
-	src.DependenciesByContract[dependency.Contract] = append(src.DependenciesByContract[dependency.Contract], dependency)
+// addDependency appends a single dependency to an existing object
+func (globalDependencies GlobalDependencies) addDependency(dependency *Dependency) {
+	globalDependencies.DependencyMap[dependency.GetName()] = dependency
+	globalDependencies.DependenciesByContract[dependency.Contract] = append(globalDependencies.DependenciesByContract[dependency.Contract], dependency)
 }
