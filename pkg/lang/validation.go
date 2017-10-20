@@ -1,7 +1,9 @@
 package lang
 
 import (
+	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"gopkg.in/go-playground/validator.v9"
+	"reflect"
 	"regexp"
 )
 
@@ -9,13 +11,14 @@ func makeValidator() *validator.Validate {
 	result := validator.New()
 	result.RegisterValidation("identifier", ValidateIdentifier)
 	result.RegisterValidation("clustertype", ValidateClusterType)
+	result.RegisterValidation("expression", ValidateExpression)
 	return result
 }
 
-// ValidateIdentifier implements validator.Func and checks if a given string identifier is valid
+// ValidateIdentifier implements validator.Func and checks if a given string is a valid identifier in Aptomi
 func ValidateIdentifier(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
-	ok, err := regexp.MatchString("[a-zA-Z][a-zA-Z0-9]{0,63}", value)
+	ok, err := regexp.MatchString("^[a-zA-Z][a-zA-Z0-9_-]{0,63}$", value)
 	return ok && err == nil
 }
 
@@ -23,4 +26,23 @@ func ValidateIdentifier(fl validator.FieldLevel) bool {
 func ValidateClusterType(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 	return value == "kubernetes"
+}
+
+// ValidateExpression implements validator.Func and checks if a given string is valid expression
+func ValidateExpression(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	result := true
+	if field.Kind() == reflect.Slice || field.Kind() == reflect.Array {
+		for i := 0; i < field.Len(); i++ {
+			result = result && isExpression(field.Index(i).Interface().(string))
+		}
+	} else {
+		result = result && isExpression(field.String())
+	}
+	return result
+}
+
+func isExpression(expressionStr string) bool {
+	_, err := expression.NewExpression(expressionStr)
+	return err == nil
 }

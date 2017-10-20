@@ -269,17 +269,6 @@ func TestPolicyResolverInvalidServiceNonExistingOwner(t *testing.T) {
 	resolvePolicy(t, b, ResError, "Owner doesn't exist for service")
 }
 
-func TestPolicyResolverInvalidRuleCriteria(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-	service := b.AddService(b.AddUser())
-	contract := b.AddContract(service, b.CriteriaTrue())
-	b.AddDependency(b.AddUser(), contract)
-	b.AddRule(b.Criteria("specialname + '123')(((", "true", "false"), nil)
-
-	// policy resolution with invalid rule should result in an error
-	resolvePolicy(t, b, ResError, "unable to compile expression")
-}
-
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 

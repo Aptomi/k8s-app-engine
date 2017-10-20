@@ -9,13 +9,13 @@ import (
 // Criteria defines a structure with require-all, require-any and require-none syntax
 type Criteria struct {
 	// This follows 'AND' logic. This is basically a pre-condition, and all of its expressions are required to evaluate to true
-	RequireAll []string `yaml:"require-all"`
+	RequireAll []string `yaml:"require-all" validate:"expression"`
 
 	// This follows 'OR' logic. At least one of its expressions is required to evaluate to true
-	RequireAny []string `yaml:"require-any"`
+	RequireAny []string `yaml:"require-any" validate:"expression"`
 
 	// This follows 'AND NOT' logic. None of its expressions should evaluate to true
-	RequireNone []string `yaml:"require-none"`
+	RequireNone []string `yaml:"require-none" validate:"expression"`
 }
 
 // Whether criteria evaluates to "true" for a given set of labels or not

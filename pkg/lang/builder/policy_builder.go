@@ -72,7 +72,7 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 		Labels:   make(map[string]string),
 	}
 
-	_ = builder.domainAdminView.AddObject(result)
+	builder.addObject(builder.domainAdminView, result)
 	return result
 }
 
@@ -108,7 +108,7 @@ func (builder *PolicyBuilder) AddService(owner *lang.User) *lang.Service {
 		},
 		Owner: ownerID,
 	}
-	_ = builder.domainAdminView.AddObject(result)
+	builder.addObject(builder.domainAdminView, result)
 	return result
 }
 
@@ -128,7 +128,7 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 			},
 		}},
 	}
-	_ = builder.domainAdminView.AddObject(result)
+	builder.addObject(builder.domainAdminView, result)
 	return result
 }
 
@@ -153,7 +153,7 @@ func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service,
 		)
 	}
 
-	_ = builder.domainAdminView.AddObject(result)
+	builder.addObject(builder.domainAdminView, result)
 	return result
 }
 
@@ -169,7 +169,7 @@ func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.Rul
 		Criteria: criteria,
 		Actions:  actions,
 	}
-	_ = builder.domainAdminView.AddObject(result)
+	builder.addObject(builder.domainAdminView, result)
 	return result
 }
 
@@ -183,7 +183,7 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 		},
 		Type: "kubernetes",
 	}
-	_ = builder.domainAdminView.AddObject(result)
+	builder.addObject(builder.domainAdminView, result)
 	return result
 }
 
@@ -271,4 +271,12 @@ func (builder *PolicyBuilder) External() *external.Data {
 // Namespace returns the current namespace
 func (builder *PolicyBuilder) Namespace() string {
 	return builder.namespace
+}
+
+// Internal function to add objects to the policy
+func (builder *PolicyBuilder) addObject(view *lang.PolicyView, obj object.Base) {
+	err := view.AddObject(obj)
+	if err != nil {
+		panic(err)
+	}
 }

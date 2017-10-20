@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+func TestServiceComponentsTopologicalSort(t *testing.T) {
+	checkTopologicalSort(t, makeNormalService(), []string{"component4", "component1", "component2", "component3"}, false)
+	checkTopologicalSort(t, makeCyclicService(), nil, true)
+	checkTopologicalSort(t, makeBadComponentDependencyService(), nil, true)
+}
+
 func toStringArray(components []*ServiceComponent) []string {
 	result := []string{}
 	for _, component := range components {
@@ -21,12 +27,6 @@ func checkTopologicalSort(t *testing.T, service *Service, expectedComponents []s
 	if err == nil {
 		assert.Equal(t, expectedComponents, componentsSortedStr, "Topological sort should produce correct ordering of components, service: "+service.Name)
 	}
-}
-
-func TestServiceComponentsTopologicalSort(t *testing.T) {
-	checkTopologicalSort(t, makeNormalService(), []string{"component4", "component1", "component2", "component3"}, false)
-	checkTopologicalSort(t, makeCyclicService(), nil, true)
-	checkTopologicalSort(t, makeBadComponentDependencyService(), nil, true)
 }
 
 func makeNormalService() *Service {
