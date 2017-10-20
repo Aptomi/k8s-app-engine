@@ -76,6 +76,7 @@ var domainAdmin = &ACLRole{
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: fullAccess,
 			RuleObject.Kind:    fullAccess,
+			ACLRuleObject.Kind: fullAccess,
 		},
 	},
 }

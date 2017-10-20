@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestPolicyView(t *testing.T) {
+func TestPolicyViewCommonObjects(t *testing.T) {
 	// make policy with objects
 	_, policyOrig := makePolicy()
 
@@ -77,4 +77,43 @@ func TestPolicyView(t *testing.T) {
 		}
 	}
 	assert.Equal(t, errCntConsume, []int{0, 0, 0}, "PolicyView.CanConsume() should work correctly")
+}
+
+func TestPolicyViewManageACLRules(t *testing.T) {
+	// make empty policy with bootstrap ACL
+	policy := NewPolicy()
+	for _, rule := range ACLRulesBootstrap {
+		policy.AddObject(rule)
+	}
+
+	policyViews := []*PolicyView{
+		policy.View(&User{ID: "1", Name: "1", Labels: map[string]string{"role": "aptomi_domain_admin"}}),
+		policy.View(&User{ID: "2", Name: "2", Labels: map[string]string{"role": "aptomi_main_ns_admin"}}),
+		policy.View(&User{ID: "3", Name: "3", Labels: map[string]string{"role": "aptomi_main_ns_consumer"}}),
+	}
+
+	// check AddObject()
+	errCnt := []int{0, 0, 0}
+	customRules := []*ACLRule{
+		{
+			Metadata: Metadata{
+				Kind:      ACLRuleObject.Kind,
+				Namespace: object.SystemNS,
+				Name:      "custom_" + namespaceAdmin.ID,
+			},
+			Weight:   1000,
+			Criteria: &Criteria{RequireAll: []string{"role == 'custom'"}},
+			Actions: &RuleActions{
+				AddRole: map[string]string{namespaceAdmin.ID: "test"},
+			},
+		},
+	}
+	for _, obj := range customRules {
+		for i := 0; i < len(policyViews); i++ {
+			if policyViews[i].AddObject(obj) != nil {
+				errCnt[i]++
+			}
+		}
+	}
+	assert.Equal(t, errCnt, []int{0, 1, 1}, "PolicyView.AddObject() should work correctly for ACL rules")
 }

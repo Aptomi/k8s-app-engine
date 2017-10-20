@@ -27,7 +27,12 @@ func NewPolicy() *Policy {
 // All ACL rules should be loaded and added to the policy before this method gets called
 func (policy *Policy) View(user *User) *PolicyView {
 	policy.once.Do(func() {
-		policy.aclResolver = NewACLResolver(policy.Namespace[object.SystemNS].ACLRules)
+		systemNamespace := policy.Namespace[object.SystemNS]
+		if systemNamespace != nil {
+			policy.aclResolver = NewACLResolver(systemNamespace.ACLRules)
+		} else {
+			policy.aclResolver = NewACLResolver(NewGlobalRules())
+		}
 	})
 	return NewPolicyView(policy, user)
 }
