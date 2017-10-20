@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type testCase struct {
+type aclTestCase struct {
 	user             *User
 	role             *ACLRole
 	namespace        string
@@ -19,7 +19,7 @@ type testCaseObjPrivileges struct {
 	expected *Privilege
 }
 
-func runTests(testCases []testCase, rules []*ACLRule, t *testing.T) {
+func runTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
 	globalRules := NewGlobalRules()
 	globalRules.addRule(rules...)
 	resolver := NewACLResolver(globalRules)
@@ -37,7 +37,7 @@ func runTests(testCases []testCase, rules []*ACLRule, t *testing.T) {
 }
 
 func TestAclResolverBootstrapRules(t *testing.T) {
-	testCases := []testCase{
+	testCases := []aclTestCase{
 		{
 			user:      &User{ID: "1", Labels: map[string]string{"role": "aptomi_domain_admin"}},
 			role:      domainAdmin,
@@ -144,7 +144,7 @@ func TestAclResolverCustomRules(t *testing.T) {
 		},
 	}
 
-	testCases := []testCase{
+	testCases := []aclTestCase{
 		{
 			user:      &User{ID: "1", Labels: map[string]string{"is_domain_admin": "true"}},
 			role:      domainAdmin,
