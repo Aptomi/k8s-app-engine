@@ -44,6 +44,14 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) {
 		log.SetLevel(log.DebugLevel)
 	}
 
+	valid, err := config.Validate(cfg)
+	if err != nil {
+		log.Panicf("Error while validating config: %s", err)
+	}
+	if !valid {
+		log.Panicf("Config is invalid")
+	}
+
 	log.Debugf("Config:\n%s", yaml.SerializeObject(cfg))
 }
 
