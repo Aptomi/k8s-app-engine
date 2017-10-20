@@ -21,13 +21,3 @@ type Contract struct {
 	// Contexts contains an ordered list of contexts within a contract
 	Contexts []*Context
 }
-
-// FindContextByName finds a context by name
-func (contract *Contract) FindContextByName(contextName string) *Context {
-	for _, context := range contract.Contexts {
-		if context.Name == contextName {
-			return context
-		}
-	}
-	return nil
-}
