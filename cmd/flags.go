@@ -38,4 +38,6 @@ func AddDefaultFlags(command *cobra.Command, envPrefix string) {
 	AddStringFlag(command, "api.host", "host", "", "127.0.0.1", envPrefix+"_HOST", "Server API host")
 	AddStringFlag(command, "api.port", "port", "", "27866", envPrefix+"_PORT", "Server API port")
 	AddStringFlag(command, "api.apiPrefix", "api-prefix", "", "api/v1", envPrefix+"_API_PREFIX", "Server API prefix")
+
+	AddStringFlag(command, "auth.username", "username", "u", "", envPrefix+"_USERNAME", "Username")
 }
