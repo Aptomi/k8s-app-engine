@@ -49,51 +49,48 @@ func TestPolicy(t *testing.T) {
 	}
 
 	// retrieve objects
-	catalog := object.NewCatalog().Append(ServiceObject, ContractObject)
-	for _, kind := range catalog.Kinds {
-		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
+	for _, kind := range []string{ServiceObject.Kind, ContractObject.Kind} {
+		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
-			name := kind.Kind + strconv.Itoa(i)
+			name := kind + strconv.Itoa(i)
 
 			// get within current namespace
-			obj1, err := policy.GetObject(kind.Kind, name, namespace)
+			obj1, err := policy.GetObject(kind, name, namespace)
 			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
 			assert.NotNil(t, obj1, "Get object by kind '%s' should return an object", name)
 
 			// get by absolute path
-			obj2, err := policy.GetObject(kind.Kind, namespace+"/"+name, "")
+			obj2, err := policy.GetObject(kind, namespace+"/"+name, "")
 			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
 			assert.NotNil(t, obj2, "Get object by kind '%s' should return an object", name)
 		}
 	}
 
-	catalog = object.NewCatalog().Append(ClusterObject)
-	for _, kind := range catalog.Kinds {
-		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
+	for _, kind := range []string{ClusterObject.Kind} {
+		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
-			name := kind.Kind + strconv.Itoa(i)
+			name := kind + strconv.Itoa(i)
 
 			// get within current namespace
-			obj1, err := policy.GetObject(kind.Kind, name, object.SystemNS)
+			obj1, err := policy.GetObject(kind, name, object.SystemNS)
 			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
 			assert.NotNil(t, obj1, "Get object by kind '%s' should return an object", name)
 
 			// get by absolute path
-			obj2, err := policy.GetObject(kind.Kind, object.SystemNS+"/"+name, "")
+			obj2, err := policy.GetObject(kind, object.SystemNS+"/"+name, "")
 			assert.NoError(t, err, "Get object by kind '%s' should be successful", name)
 			assert.NotNil(t, obj2, "Get object by kind '%s' should return an object", name)
 		}
 	}
 
-	catalog = object.NewCatalog().Append(RuleObject, DependencyObject)
-	for _, kind := range catalog.Kinds {
-		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind.Kind)), "Number of '%s' objects in the policy should be correct", kind.Kind)
+	for _, kind := range []string{RuleObject.Kind, DependencyObject.Kind} {
+		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
-			name := kind.Kind + strconv.Itoa(i)
-			_, err := policy.GetObject(kind.Kind, kind.Kind+strconv.Itoa(i), namespace)
+			name := kind + strconv.Itoa(i)
+			_, err := policy.GetObject(kind, kind+strconv.Itoa(i), namespace)
 			assert.Error(t, err, "Get object by kind '%s' should return an error", name)
 		}
 	}
