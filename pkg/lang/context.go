@@ -7,13 +7,13 @@ import (
 
 // Allocation says which service should be allocated for a given contract->context and which additional keys should be added to component instance key
 type Allocation struct {
-	Service string
-	Keys    []string
+	Service string   `validate:"identifier"`
+	Keys    []string `validate:"template"`
 }
 
 // Context represents a single context within a contract
 type Context struct {
-	Name         string
+	Name         string `validate:"identifier"`
 	Criteria     *Criteria
 	ChangeLabels LabelOperations `yaml:"change-labels"`
 	Allocation   *Allocation

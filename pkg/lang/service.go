@@ -33,20 +33,20 @@ type Service struct {
 
 // ServiceComponent defines component within a service
 type ServiceComponent struct {
-	Name string
+	Name string `validate:"identifier"`
 
 	// Contract, if not empty, means that component points to another contract as a dependency
-	Contract string
+	Contract string `validate:"identifier"`
 
 	// Code, if not empty, means that component is a code that can be instantiated
 	Code         *Code
 	Discovery    util.NestedParameterMap
-	Dependencies []string
+	Dependencies []string `validate:"identifier"`
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
-	Type   string
+	Type   string `validate:"codetype"`
 	Params util.NestedParameterMap
 }
 
