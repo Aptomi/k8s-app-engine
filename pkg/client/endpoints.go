@@ -25,6 +25,7 @@ func Endpoints(cfg *config.Client) error {
 	if err != nil {
 		return err
 	}
+	req.Header.Set("Username", cfg.Auth.Username)
 	req.Header.Set("Content-Type", "application/yaml")
 	req.Header.Set("User-Agent", "aptomictl")
 
