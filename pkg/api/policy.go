@@ -31,6 +31,23 @@ func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) reqresp.Res
 func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) reqresp.Response {
 	objects := a.read(r)
 
+	username := r.Header.Get("Username")
+	// todo check empty username
+	user := a.externalData.UserLoader.LoadUserByID(username)
+	// todo check user == nil
+
+	// Verify ACL for updated objects
+	policy, _, err := a.store.GetPolicy(object.LastGen)
+	if err != nil {
+		log.Panicf("Error while loading current policy: %s", err)
+	}
+	for _, obj := range objects {
+		errAdd := policy.View(user).AddObject(obj)
+		if errAdd != nil {
+			log.Panicf("Error while adding updated object to policy: %s", errAdd)
+		}
+	}
+
 	changed, policyData, err := a.store.UpdatePolicy(objects)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
