@@ -8,41 +8,47 @@ import (
 
 func TestPolicyViewCommonObjects(t *testing.T) {
 	// make policy with objects
-	_, policyOrig := makePolicyWithObjects(t)
+	_, policyWithObjects := makePolicyWithObjects()
 
 	// get the list of objects
 	objList := []object.Base{}
 	for _, obj := range Objects {
-		objList = append(objList, policyOrig.GetObjectsByKind(obj.Kind)...)
+		objList = append(objList, policyWithObjects.GetObjectsByKind(obj.Kind)...)
 	}
 	assert.NotEmpty(t, objList, "Object list should not be empty")
 
 	// users which will be used for viewing policy
-	userViews := []*User{
-		{ID: "1", Name: "1", Labels: map[string]string{"role": "aptomi_domain_admin"}},
-		{ID: "2", Name: "2", Labels: map[string]string{"role": "aptomi_main_ns_admin"}},
-		{ID: "3", Name: "3", Labels: map[string]string{"role": "aptomi_main_ns_consumer"}},
+	users := []*User{
+		{ID: "1", Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
+		{ID: "2", Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
+		{ID: "3", Name: "3", Labels: map[string]string{"is_consumer": "true"}},
 	}
 
 	// check AddObject()
 	errCnt := []int{0, 0, 0}
-	for i := 0; i < len(userViews); i++ {
-		// make empty policy with bootstrap ACL and add objects to it
-		policyView := makeEmptyPolicy(t).View(userViews[i])
+	for i := 0; i < len(users); i++ {
+		// make empty policy with custom ACL and add objects to it
+		policyView := makeEmptyPolicyWithACL().View(users[i])
 		for _, obj := range objList {
 			if policyView.AddObject(obj) != nil {
 				errCnt[i]++
 			}
 		}
 	}
-	bootstrapRulesCnt := len(ACLRulesBootstrap) // they already exist in the policy and can't be added again
-	assert.Equal(t, []int{0 + bootstrapRulesCnt, 10 + bootstrapRulesCnt, 40 + bootstrapRulesCnt}, errCnt, "PolicyView.AddObject() should work correctly")
+	assert.Equal(t, []int{0, 10, 40}, errCnt, "PolicyView.AddObject() should work correctly")
+
+	// construct policy with ACL and add all objects into it
+	policy := makeEmptyPolicyWithACL()
+	for _, obj := range objList {
+		err := policy.AddObject(obj)
+		assert.NoError(t, err, "Policy.AddObject() should work correctly")
+	}
 
 	// check ViewObject() and ManageObject() on policy with objects
 	errCntView := []int{0, 0, 0}
 	errCntManage := []int{0, 0, 0}
-	for i := 0; i < len(userViews); i++ {
-		policyView := policyOrig.View(userViews[i])
+	for i := 0; i < len(users); i++ {
+		policyView := policy.View(users[i])
 		for _, obj := range objList {
 			if _, err := policyView.ViewObject(obj.GetKind(), obj.GetName(), obj.GetNamespace()); err != nil {
 				errCntView[i]++
@@ -53,12 +59,12 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 		}
 	}
 	assert.Equal(t, []int{0, 0, 0}, errCntView, "PolicyView.ViewObject() should work correctly")
-	assert.Equal(t, []int{0, 10 + bootstrapRulesCnt, 40 + bootstrapRulesCnt}, errCntManage, "PolicyView.ManageObject() should work correctly")
+	assert.Equal(t, []int{0, 10, 40}, errCntManage, "PolicyView.ManageObject() should work correctly")
 
 	// check CanConsume()
 	errCntConsume := []int{0, 0, 0}
-	for i := 0; i < len(userViews); i++ {
-		policyView := policyOrig.View(userViews[i])
+	for i := 0; i < len(users); i++ {
+		policyView := policy.View(users[i])
 		for _, obj := range objList {
 			if obj.GetKind() == ServiceObject.Kind {
 				service := obj.(*Service)
@@ -72,18 +78,11 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 }
 
 func TestPolicyViewManageACLRules(t *testing.T) {
-	// make empty policy with bootstrap ACL
-	policy := NewPolicy()
-	for _, rule := range ACLRulesBootstrap {
-		err := policy.AddObject(rule)
-		assert.NoError(t, err, "Bootstrap ACL rule should be added successfully")
-	}
-
 	// users which will be used for viewing policy
-	userViews := []*User{
-		{ID: "1", Name: "1", Labels: map[string]string{"role": "aptomi_domain_admin"}},
-		{ID: "2", Name: "2", Labels: map[string]string{"role": "aptomi_main_ns_admin"}},
-		{ID: "3", Name: "3", Labels: map[string]string{"role": "aptomi_main_ns_consumer"}},
+	users := []*User{
+		{ID: "1", Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
+		{ID: "2", Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
+		{ID: "3", Name: "3", Labels: map[string]string{"is_consumer": "true"}},
 	}
 
 	// check AddObject()
@@ -103,9 +102,9 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 		},
 	}
 	// check AddObject()
-	for i := 0; i < len(userViews); i++ {
-		// make empty policy with bootstrap ACL and add objects to it
-		policyView := makeEmptyPolicy(t).View(userViews[i])
+	for i := 0; i < len(users); i++ {
+		// make empty policy with custom ACL and add objects to it
+		policyView := makeEmptyPolicyWithACL().View(users[i])
 		for _, obj := range customRules {
 			if policyView.AddObject(obj) != nil {
 				errCnt[i]++
@@ -113,4 +112,53 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 		}
 	}
 	assert.Equal(t, []int{0, 1, 1}, errCnt, "PolicyView.AddObject() should work correctly for ACL rules")
+}
+
+func makeEmptyPolicyWithACL() *Policy {
+	var aclRules = []*ACLRule{
+		// domain admins
+		{
+			Metadata: Metadata{
+				Kind:      ACLRuleObject.Kind,
+				Namespace: object.SystemNS,
+				Name:      "is_domain_admin",
+			},
+			Weight:   100,
+			Criteria: &Criteria{RequireAll: []string{"is_domain_admin"}},
+			Actions: &RuleActions{
+				AddRole: map[string]string{domainAdmin.ID: namespaceAll},
+			},
+		},
+		// namespace admins for 'main' namespace
+		{
+			Metadata: Metadata{
+				Kind:      ACLRuleObject.Kind,
+				Namespace: object.SystemNS,
+				Name:      "is_namespace_admin",
+			},
+			Weight:   200,
+			Criteria: &Criteria{RequireAll: []string{"is_namespace_admin"}},
+			Actions: &RuleActions{
+				AddRole: map[string]string{namespaceAdmin.ID: "main"},
+			},
+		},
+		// service consumers for 'main' namespace
+		{
+			Metadata: Metadata{
+				Kind:      ACLRuleObject.Kind,
+				Namespace: object.SystemNS,
+				Name:      "is_consumer",
+			},
+			Weight:   300,
+			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
+			Actions: &RuleActions{
+				AddRole: map[string]string{serviceConsumer.ID: "main"},
+			},
+		},
+	}
+	policy := NewPolicy()
+	for _, rule := range aclRules {
+		policy.AddObject(rule)
+	}
+	return policy
 }
