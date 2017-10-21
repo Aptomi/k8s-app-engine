@@ -42,7 +42,7 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) reqresp.R
 		log.Panicf("Error while loading current policy: %s", err)
 	}
 	for _, obj := range objects {
-		errAdd := policy.View(user).AddObject(obj)
+		errAdd := policy.View(user).ManageObject(obj)
 		if errAdd != nil {
 			log.Panicf("Error while adding updated object to policy: %s", errAdd)
 		}
