@@ -41,13 +41,6 @@ func NewPolicyBuilderWithNS(namespace string) *PolicyBuilder {
 		secrets:   secrets.NewSecretLoaderMock(),
 	}
 
-	for _, rule := range lang.ACLRulesBootstrap {
-		err := result.policy.AddObject(rule)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	result.domainAdmin = result.AddUserDomainAdmin()
 	result.domainAdminView = result.policy.View(result.domainAdmin)
 
@@ -81,7 +74,8 @@ func (builder *PolicyBuilder) AddUser() *lang.User {
 	result := &lang.User{
 		ID:     util.RandomID(builder.random, idLength),
 		Name:   util.RandomID(builder.random, idLength),
-		Labels: map[string]string{"role": "aptomi_main_ns_consumer"},
+		Labels: map[string]string{},
+		Admin:  true, // this will ensure that this user can consume services
 	}
 	builder.users.AddUser(result)
 	return result
@@ -89,9 +83,7 @@ func (builder *PolicyBuilder) AddUser() *lang.User {
 
 // AddUserDomainAdmin creates a new user who is a domain admin and adds it to the policy
 func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
-	result := builder.AddUser()
-	result.Labels["role"] = "aptomi_domain_admin"
-	return result
+	return builder.AddUser()
 }
 
 // AddService creates a new service and adds it to the policy
