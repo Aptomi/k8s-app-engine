@@ -50,10 +50,10 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 	for i := 0; i < len(users); i++ {
 		policyView := policy.View(users[i])
 		for _, obj := range objList {
-			if _, err := policyView.ViewObject(obj.GetKind(), obj.GetName(), obj.GetNamespace()); err != nil {
+			if err := policyView.ViewObject(obj); err != nil {
 				errCntView[i]++
 			}
-			if _, err := policyView.ManageObject(obj.GetKind(), obj.GetName(), obj.GetNamespace()); err != nil {
+			if err := policyView.ManageObject(obj); err != nil {
 				errCntManage[i]++
 			}
 		}

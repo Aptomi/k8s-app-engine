@@ -33,38 +33,28 @@ func (view *PolicyView) AddObject(obj object.Base) error {
 	return view.Policy.AddObject(obj)
 }
 
-// ViewObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made
-// If policy lookup error occurs or user doesn't have permissions to view an object, then ACL error will be returned
-func (view *PolicyView) ViewObject(kind string, locator string, currentNs string) (object.Base, error) {
-	obj, err := view.Policy.GetObject(kind, locator, currentNs)
-	if err != nil {
-		return nil, err
-	}
+// ViewObject checks if user has permissions to view an object. If user has no permissions, ACL error will be returned
+func (view *PolicyView) ViewObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !privilege.View {
-		return nil, fmt.Errorf("user '%s' doesn't have ACL permissions to view object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return fmt.Errorf("user '%s' doesn't have ACL permissions to view object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
-	return obj, nil
+	return nil
 }
 
-// ManageObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made
-// If policy lookup error occurs or user doesn't have permissions to manage an object, then ACL error will be returned
-func (view *PolicyView) ManageObject(kind string, locator string, currentNs string) (object.Base, error) {
-	obj, err := view.Policy.GetObject(kind, locator, currentNs)
-	if err != nil {
-		return nil, err
-	}
+// ManageObject checks if user has permissions to manage an object. If user has no permissions, ACL error will be returned
+func (view *PolicyView) ManageObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !privilege.Manage {
-		return nil, fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
-	return obj, nil
+	return nil
 }
 
 // CanConsume returns if user has permissions to consume a service
