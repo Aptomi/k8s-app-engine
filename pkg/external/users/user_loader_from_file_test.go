@@ -6,7 +6,7 @@ import (
 )
 
 func TestUserLoaderFromFile(t *testing.T) {
-	userLoader := NewUserLoaderFromFile("../../testdata/unittests/users.yaml")
+	userLoader := NewUserLoaderFromFile("../../testdata/unittests/users.yaml", make(map[string]bool))
 
 	// check user names
 	users := userLoader.LoadUsersAll()

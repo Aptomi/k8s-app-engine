@@ -14,14 +14,16 @@ import (
 type UserLoaderFromLDAP struct {
 	once sync.Once
 
-	cfg   config.LDAP
-	users *lang.GlobalUsers
+	cfg                  config.LDAP
+	users                *lang.GlobalUsers
+	domainAdminOverrides map[string]bool
 }
 
 // NewUserLoaderFromLDAP returns new UserLoaderFromLDAP, given location with LDAP configuration file (with host/port and mapping)
-func NewUserLoaderFromLDAP(cfg config.LDAP) UserLoader {
+func NewUserLoaderFromLDAP(cfg config.LDAP, domainAdminOverrides map[string]bool) UserLoader {
 	return &UserLoaderFromLDAP{
-		cfg: cfg,
+		cfg:                  cfg,
+		domainAdminOverrides: domainAdminOverrides,
 	}
 }
 
@@ -33,6 +35,9 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 		t := loader.ldapSearch()
 		for _, u := range t {
 			loader.users.Users[u.ID] = u
+			if _, exist := loader.domainAdminOverrides[strings.ToLower(u.ID)]; exist {
+				u.Admin = true
+			}
 		}
 	})
 	return loader.users

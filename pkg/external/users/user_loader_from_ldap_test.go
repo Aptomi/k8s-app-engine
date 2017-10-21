@@ -31,8 +31,8 @@ func TestUserLoaderFromLDAP(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromFile("../../testdata/ldap/users.yaml")
-	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
+	userLoaderDir := NewUserLoaderFromFile("../../testdata/ldap/users.yaml", make(map[string]bool))
+	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP, make(map[string]bool))
 
 	usersDir := userLoaderDir.LoadUsersAll()
 	usersLDAP := userLoaderLDAP.LoadUsersAll()
@@ -59,8 +59,8 @@ func TestUserLoaderFromLDAPLoadByID(t *testing.T) {
 	if testing.Short() {
 		t.SkipNow()
 	}
-	userLoaderDir := NewUserLoaderFromFile("../../testdata/ldap/users.yaml")
-	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP)
+	userLoaderDir := NewUserLoaderFromFile("../../testdata/ldap/users.yaml", make(map[string]bool))
+	userLoaderLDAP := NewUserLoaderFromLDAP(integrationTestsLDAP, make(map[string]bool))
 
 	usersDir := userLoaderDir.LoadUsersAll()
 

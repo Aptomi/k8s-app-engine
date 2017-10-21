@@ -11,14 +11,16 @@ import (
 type UserLoaderFromFile struct {
 	once sync.Once
 
-	fileName string
-	users    *lang.GlobalUsers
+	fileName             string
+	users                *lang.GlobalUsers
+	domainAdminOverrides map[string]bool
 }
 
 // NewUserLoaderFromFile returns new UserLoaderFromFile
-func NewUserLoaderFromFile(fileName string) UserLoader {
+func NewUserLoaderFromFile(fileName string, domainAdminOverrides map[string]bool) UserLoader {
 	return &UserLoaderFromFile{
-		fileName: fileName,
+		fileName:             fileName,
+		domainAdminOverrides: domainAdminOverrides,
 	}
 }
 
@@ -30,6 +32,9 @@ func (loader *UserLoaderFromFile) LoadUsersAll() *lang.GlobalUsers {
 		t := loadUsersFromFile(loader.fileName)
 		for _, u := range t {
 			loader.users.Users[u.ID] = u
+			if _, exist := loader.domainAdminOverrides[u.ID]; exist {
+				u.Admin = true
+			}
 		}
 	})
 	return loader.users

@@ -1,13 +1,14 @@
 package config
 
 type Server struct {
-	Debug      bool
-	API        API
-	DB         DB
-	Helm       Helm
-	Users      UserSources
-	SecretsDir string `valid:"dir"`
-	Enforcer   Enforcer
+	Debug                bool
+	API                  API
+	DB                   DB
+	Helm                 Helm
+	Users                UserSources
+	SecretsDir           string `valid:"dir"`
+	Enforcer             Enforcer
+	DomainAdminOverrides map[string]bool
 }
 
 type UserSources struct {
