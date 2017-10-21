@@ -173,3 +173,16 @@ func TestAclResolverCustomRules(t *testing.T) {
 
 	runACLTests(testCases, rules, t)
 }
+
+func TestAclResolverAdminUser(t *testing.T) {
+	var rules = []*ACLRule{}
+	testCases := []aclTestCase{
+		{
+			user:      &User{ID: "1", Admin: true},
+			role:      domainAdmin,
+			namespace: namespaceAll,
+			expected:  true,
+		},
+	}
+	runACLTests(testCases, rules, t)
+}

@@ -67,14 +67,21 @@ func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]b
 	}
 
 	result := NewRuleActionResult(NewLabelSet(make(map[string]string)))
-	params := expression.NewParams(user.Labels, nil)
-	for _, rule := range resolver.rules {
-		matched, err := rule.Matches(params, resolver.cache)
-		if err != nil {
-			return nil, fmt.Errorf("unable to resolve role for user '%s': %s", user.ID, err)
-		}
-		if matched {
-			rule.ApplyActions(result)
+	if user.Admin {
+		// this user is explicitly specified as domain admin
+		result.RoleMap[domainAdmin.ID] = make(map[string]bool)
+		result.RoleMap[domainAdmin.ID][namespaceAll] = true
+	} else {
+		// we need to run this user through ACL list
+		params := expression.NewParams(user.Labels, nil)
+		for _, rule := range resolver.rules {
+			matched, err := rule.Matches(params, resolver.cache)
+			if err != nil {
+				return nil, fmt.Errorf("unable to resolve role for user '%s': %s", user.ID, err)
+			}
+			if matched {
+				rule.ApplyActions(result)
+			}
 		}
 	}
 

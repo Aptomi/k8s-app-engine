@@ -10,6 +10,7 @@ type User struct {
 	ID     string
 	Name   string
 	Labels map[string]string
+	Admin  bool
 }
 
 // GlobalUsers contains the global list of users
