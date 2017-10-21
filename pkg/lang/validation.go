@@ -31,7 +31,7 @@ func ValidateCodeType(fl validator.FieldLevel) bool {
 	return util.ContainsString([]string{"helm", "aptomi/code/kubernetes-helm"}, value)
 }
 
-// ValidateIdentifier implements validator.Func and checks if a given string is a valid identifier in Aptomi
+// ValidateIdentifier implements validator.Func and checks if a given string (or a list of strings) is a valid identifier(s)
 func ValidateIdentifier(fl validator.FieldLevel) bool {
 	field := fl.Field()
 	result := true
