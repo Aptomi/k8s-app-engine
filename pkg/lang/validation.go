@@ -9,9 +9,9 @@ import (
 
 func makeValidator() *validator.Validate {
 	result := validator.New()
-	result.RegisterValidation("identifier", ValidateIdentifier)
-	result.RegisterValidation("clustertype", ValidateClusterType)
-	result.RegisterValidation("expression", ValidateExpression)
+	_ = result.RegisterValidation("identifier", ValidateIdentifier)
+	_ = result.RegisterValidation("clustertype", ValidateClusterType)
+	_ = result.RegisterValidation("expression", ValidateExpression)
 	return result
 }
 

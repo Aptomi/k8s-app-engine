@@ -19,7 +19,7 @@ type testCaseObjPrivileges struct {
 	expected *Privilege
 }
 
-func runAclTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
+func runACLTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
 	globalRules := NewGlobalRules()
 	globalRules.addRule(rules...)
 	resolver := NewACLResolver(globalRules)
@@ -85,7 +85,7 @@ func TestAclResolverBootstrapRules(t *testing.T) {
 		},
 	}
 
-	runAclTests(testCases, ACLRulesBootstrap, t)
+	runACLTests(testCases, ACLRulesBootstrap, t)
 }
 
 func TestAclResolverCustomRules(t *testing.T) {
@@ -171,5 +171,5 @@ func TestAclResolverCustomRules(t *testing.T) {
 		},
 	}
 
-	runAclTests(testCases, rules, t)
+	runACLTests(testCases, rules, t)
 }

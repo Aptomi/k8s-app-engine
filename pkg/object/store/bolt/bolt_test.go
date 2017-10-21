@@ -32,17 +32,17 @@ func TestBoltStore(t *testing.T) {
 	policy := makePolicyObjects(t)
 
 	for _, obj := range policy {
-		updated, err := db.Save(obj)
+		updated, errSave := db.Save(obj)
 		if err != nil {
-			panic(err)
+			panic(errSave)
 		}
 		assert.True(t, updated, "Object saved for the first time")
 	}
 
 	for _, obj := range policy {
-		objSaved, err := db.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration())
+		objSaved, errGet := db.GetByName(obj.GetNamespace(), obj.GetKind(), obj.GetName(), obj.GetGeneration())
 		if err != nil {
-			panic(err)
+			panic(errGet)
 		}
 
 		assert.Exactly(t, obj, objSaved, "Saved object is not equal to the original object in the policy")
