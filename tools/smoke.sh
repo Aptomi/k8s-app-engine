@@ -61,4 +61,4 @@ echo "Server PID: ${SERVER_PID}"
 
 sleep 3
 
-aptomictl policy apply --config ${CONF_DIR} -f demo/policy &>${CONF_DIR}/client.log
+aptomictl policy apply --username "cn=Sam,ou=people,o=aptomiOrg" --config ${CONF_DIR} -f demo/policy &>${CONF_DIR}/client.log
