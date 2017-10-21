@@ -5,9 +5,7 @@ set -eou pipefail
 CONF_DIR=$(mktemp -d)
 
 function cleanup() {
-    kill ${SERVER_PID} || true
-    [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
-    [[ -e "${CONF_DIR}/client.log" ]] && awk '{print "[[CLIENT]] " $0}' ${CONF_DIR}/client.log || echo "No client log found."
+    stop_server
     rm -rf ${CONF_DIR}
 }
 
@@ -18,6 +16,13 @@ function free_port() {
         echo -ne "\035" | telnet 127.0.0.1 $port > /dev/null 2>&1;
         [ $? -eq 1 ] && echo "$port" && break;
     done
+}
+
+function stop_server() {
+    echo "Stopping server..."
+    kill ${SERVER_PID} || true
+    [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
+    [[ -e "${CONF_DIR}/client.log" ]] && awk '{print "[[CLIENT]] " $0}' ${CONF_DIR}/client.log || echo "No client log found."
 }
 
 APTOMI_PORT=$(free_port)
@@ -34,6 +39,9 @@ db:
 
 enforcer:
   disabled: true
+
+domainAdminOverrides:
+  "cn=Sam,ou=people,o=aptomiOrg": true
 
 users:
   ldap:
@@ -61,4 +69,4 @@ echo "Server PID: ${SERVER_PID}"
 
 sleep 3
 
-aptomictl policy apply --username "cn=Sam,ou=people,o=aptomiOrg" --config ${CONF_DIR} -f demo/policy &>${CONF_DIR}/client.log
+aptomictl policy --username "cn=Sam,ou=people,o=aptomiOrg" --config ${CONF_DIR} apply -f demo/policy &>${CONF_DIR}/client.log
