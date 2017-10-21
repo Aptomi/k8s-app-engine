@@ -96,9 +96,6 @@ func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents,
 		dependencies:              dependencies,
 		policy:                    lang.NewPolicy(),
 	}
-	for _, rule := range lang.ACLRulesBootstrap {
-		result.addObject(rule)
-	}
 	return result
 }
 
@@ -147,7 +144,6 @@ func (gen *PolicyGenerator) makeUserLabels() {
 		value := util.RandomID(gen.random, 25)
 		gen.generatedUserLabels[name] = value
 	}
-	gen.generatedUserLabels["role"] = "aptomi_domain_admin"
 
 	gen.generatedLabelKeys = []string{}
 	for key := range gen.generatedUserLabels {
@@ -363,6 +359,7 @@ func (loader *UserLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
 				ID:     "user-" + strconv.Itoa(i),
 				Name:   "user-" + strconv.Itoa(i),
 				Labels: loader.labels,
+				Admin:  true,
 			}
 			userMap[user.ID] = user
 		}
