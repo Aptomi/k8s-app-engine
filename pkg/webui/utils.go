@@ -50,6 +50,7 @@ func publicFilesHandler(path string, root http.FileSystem) http.Handler {
 	}))
 }
 
+/*
 func runFilesHandler(path string, root http.FileSystem) http.Handler {
 	return http.StripPrefix(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := pathlib.Clean(r.URL.Path)
@@ -62,6 +63,7 @@ func runFilesHandler(path string, root http.FileSystem) http.Handler {
 		fileServer.ServeHTTP(w, r)
 	}))
 }
+*/
 
 func handleAutoRedirect(w http.ResponseWriter, r *http.Request) {
 	if redirect := r.URL.Query().Get("redirect"); redirect != "" {

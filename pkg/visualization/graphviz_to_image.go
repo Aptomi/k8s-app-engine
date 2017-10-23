@@ -12,8 +12,8 @@ import (
 )
 
 // CreateImage draws graphviz graph and returns it as an image
-func CreateImage(graphInput *gographviz.Graph) (image.Image, error) {
-	graphStr := graphInput.String()
+func CreateImage(graph *gographviz.Graph) (image.Image, error) { // nolint: interfacer
+	graphStr := graph.String()
 
 	// Original graph in .dot
 	fileNameDot := util.WriteTempFile("graphviz", graphStr)

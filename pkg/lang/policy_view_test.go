@@ -158,7 +158,10 @@ func makeEmptyPolicyWithACL() *Policy {
 	}
 	policy := NewPolicy()
 	for _, rule := range aclRules {
-		policy.AddObject(rule)
+		err := policy.AddObject(rule)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return policy
 }

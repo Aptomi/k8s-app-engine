@@ -124,7 +124,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 		}
 	}
 
-	// Generation actions in the right order
+	// Generate actions in the right order
 	for _, key := range diff.Next.ComponentProcessingOrder {
 		actionList, found := actions[key]
 		if found {
