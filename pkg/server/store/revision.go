@@ -24,7 +24,8 @@ type RevisionData struct {
 	Progress revisionProgress
 }
 
-func (s *defaultStore) GetRevision(gen object.Generation) (*RevisionData, error) {
+// GetRevision returns RevisionData for specified generation
+func (s *DefaultStore) GetRevision(gen object.Generation) (*RevisionData, error) {
 	dataObj, err := s.store.GetByName(object.SystemNS, RevisionDataObject.Kind, RevisionName, gen)
 	if err != nil {
 		return nil, err
@@ -39,7 +40,8 @@ func (s *defaultStore) GetRevision(gen object.Generation) (*RevisionData, error)
 	return data, nil
 }
 
-func (s *defaultStore) NextRevision(policyGen object.Generation) (*RevisionData, error) {
+// NextRevision returns new RevisionData for specified policy generation
+func (s *DefaultStore) NextRevision(policyGen object.Generation) (*RevisionData, error) {
 	currRevision, err := s.GetRevision(object.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("error while geting current revision: %s", err)
@@ -62,7 +64,8 @@ func (s *defaultStore) NextRevision(policyGen object.Generation) (*RevisionData,
 	}, nil
 }
 
-func (s *defaultStore) SaveRevision(revision *RevisionData) error {
+// SaveRevision saves specified RevisionData into the store
+func (s *DefaultStore) SaveRevision(revision *RevisionData) error {
 	_, err := s.store.Save(revision)
 	if err != nil {
 		return fmt.Errorf("error while saving revision: %s", err)

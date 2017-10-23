@@ -14,8 +14,8 @@ type UserLoaderMultipleSources struct {
 func NewUserLoaderMultipleSources(loaders []UserLoader) *UserLoaderMultipleSources {
 	result := &UserLoaderMultipleSources{users: &lang.GlobalUsers{Users: make(map[string]*lang.User)}}
 	for _, loader := range loaders {
-		for userId, user := range loader.LoadUsersAll().Users {
-			result.users.Users[userId] = user
+		for userID, user := range loader.LoadUsersAll().Users {
+			result.users.Users[userID] = user
 		}
 	}
 	return result

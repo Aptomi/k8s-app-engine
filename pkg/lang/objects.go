@@ -5,6 +5,7 @@ import (
 )
 
 var (
+	// Objects is a list of object.Info for all lang objects
 	Objects = []*object.Info{
 		ServiceObject,
 		ContractObject,

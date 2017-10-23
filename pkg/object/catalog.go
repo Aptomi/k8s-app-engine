@@ -32,6 +32,7 @@ func NewCatalog() *Catalog {
 	return catalog
 }
 
+// Append adds specified list of object.Info into the object.Catalog
 func (catalog *Catalog) Append(infoList ...*Info) *Catalog {
 	for _, info := range infoList {
 		catalog.Kinds[info.Kind] = info

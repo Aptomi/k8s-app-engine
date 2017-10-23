@@ -30,7 +30,7 @@ func (p *PolicyData) Add(obj object.Base) {
 }
 
 // GetPolicyData retrieves PolicyData given its generation
-func (s *defaultStore) GetPolicyData(gen object.Generation) (*PolicyData, error) {
+func (s *DefaultStore) GetPolicyData(gen object.Generation) (*PolicyData, error) {
 	dataObj, err := s.store.GetByName(object.SystemNS, PolicyDataObject.Kind, PolicyName, gen)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (s *defaultStore) GetPolicyData(gen object.Generation) (*PolicyData, error)
 	return data, nil
 }
 
-func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, object.Generation, error) {
+func (s *DefaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, object.Generation, error) {
 	policy := lang.NewPolicy()
 
 	// in case of first version of policy, we just need to have empty policy
@@ -73,7 +73,7 @@ func (s *defaultStore) getPolicyFromData(policyData *PolicyData) (*lang.Policy, 
 }
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
-func (s *defaultStore) GetPolicy(policyGen object.Generation) (*lang.Policy, object.Generation, error) {
+func (s *DefaultStore) GetPolicy(policyGen object.Generation) (*lang.Policy, object.Generation, error) {
 	// todo should we use RWMutex for get/update policy?
 	policyData, err := s.GetPolicyData(policyGen)
 	if err != nil {
@@ -83,7 +83,7 @@ func (s *defaultStore) GetPolicy(policyGen object.Generation) (*lang.Policy, obj
 }
 
 // UpdatePolicy updates a list of changed objects in the underlying data store
-func (s *defaultStore) UpdatePolicy(updatedObjects []object.Base) (bool, *PolicyData, error) {
+func (s *DefaultStore) UpdatePolicy(updatedObjects []object.Base) (bool, *PolicyData, error) {
 	// we should process only a single policy update request at once
 	s.policyUpdate.Lock()
 	defer s.policyUpdate.Unlock()

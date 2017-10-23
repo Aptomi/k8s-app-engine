@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-func (s *defaultStore) Progress(store store.ObjectStore, revision *RevisionData) progress.Indicator {
+func (s *DefaultStore) Progress(store store.ObjectStore, revision *RevisionData) progress.Indicator {
 	return &revisionProgressStore{store, revision}
 }
 

@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// ActionObjects is a list of the object.Info for all action types
 	ActionObjects = []*object.Info{
 		component.CreateActionObject,
 		component.UpdateActionObject,

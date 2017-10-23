@@ -23,7 +23,7 @@ func logError(err interface{}) {
 	debug.PrintStack()
 }
 
-func (s *Server) Enforce() error {
+func (s *Server) enforceLoop() error {
 	for {
 		err := s.enforce()
 		if err != nil {

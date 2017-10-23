@@ -8,7 +8,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object/store"
 )
 
-func (s *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
+// GetActualState returns current actual state
+func (s *DefaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 	// todo empty state temporarily
 	actualState := resolve.NewPolicyResolution()
 
@@ -28,7 +29,8 @@ func (s *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 	return actualState, nil
 }
 
-func (s *defaultStore) ActualStateUpdater() actual.StateUpdater {
+// ActualStateUpdater returns instance of the state updater
+func (s *DefaultStore) ActualStateUpdater() actual.StateUpdater {
 	return &defaultStateUpdater{s.store}
 }
 
@@ -36,10 +38,12 @@ type defaultStateUpdater struct {
 	store store.ObjectStore
 }
 
+// Create is used for reacting on object create event
 func (u *defaultStateUpdater) Create(obj object.Base) error {
 	return u.Update(obj)
 }
 
+// Update is used for reacting on object updating event (currently supported only for ComponentInstance
 func (u *defaultStateUpdater) Update(obj object.Base) error {
 	if _, ok := obj.(*resolve.ComponentInstance); !ok {
 		return fmt.Errorf("only ComponentInstances could be updated using actual.StateUpdater, not: %T", obj)
@@ -49,6 +53,7 @@ func (u *defaultStateUpdater) Update(obj object.Base) error {
 	return err
 }
 
+// Delete is used for reacting on object delete event (not supported for now)
 func (u *defaultStateUpdater) Delete(string) error {
 	// todo
 	panic("not implemented: defaultStateUpdater.Delete")

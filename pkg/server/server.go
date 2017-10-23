@@ -58,7 +58,7 @@ func (s *Server) Start() {
 
 	if !s.cfg.Enforcer.Disabled {
 		s.runInBackground("Policy Enforcer", true, func() {
-			panic(s.Enforce())
+			panic(s.enforceLoop())
 		})
 	}
 

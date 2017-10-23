@@ -5,15 +5,19 @@ import (
 	"sync"
 )
 
-type defaultStore struct {
+// DefaultStore is the ServerStore implementation that is the glue layer for saving different engine objects into the
+// object store
+type DefaultStore struct {
 	policyUpdate sync.Mutex
 	store        store.ObjectStore
 }
 
+// New returns default implementation of ServerStore
 func New(store store.ObjectStore) ServerStore {
-	return &defaultStore{sync.Mutex{}, store}
+	return &DefaultStore{sync.Mutex{}, store}
 }
 
-func (s *defaultStore) Object() store.ObjectStore {
+// Object returns backing ObjectStore instance to work directly with it
+func (s *DefaultStore) Object() store.ObjectStore {
 	return s.store
 }

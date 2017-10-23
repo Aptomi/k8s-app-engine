@@ -6,5 +6,6 @@ import (
 )
 
 var (
+	// Objects is the list of object.Info for all server store objects used
 	Objects = []*object.Info{PolicyDataObject, RevisionDataObject, resolve.ComponentInstanceObject}
 )

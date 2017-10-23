@@ -148,6 +148,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	}
 }
 
+// IsChanged returns true if diff has some actions to be applied
 func (diff *PolicyResolutionDiff) IsChanged() bool {
 	return len(diff.Actions) > 0
 }

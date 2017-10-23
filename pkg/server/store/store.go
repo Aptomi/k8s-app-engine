@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object/store"
 )
 
+// ServerStore represents main store interface
 type ServerStore interface {
 	// Object returns store.ObjectStore
 	Object() store.ObjectStore
@@ -23,12 +24,14 @@ type ServerStore interface {
 	GetActualState() (*resolve.PolicyResolution, error)
 }
 
+// PolicyStore represents methods to store Policy
 type PolicyStore interface {
 	GetPolicy(object.Generation) (*lang.Policy, object.Generation, error)
 	GetPolicyData(object.Generation) (*PolicyData, error)
 	UpdatePolicy([]object.Base) (bool, *PolicyData, error)
 }
 
+// RevisionStore represents methods to store Revision
 type RevisionStore interface {
 	GetRevision(object.Generation) (*RevisionData, error)
 	NextRevision(policyGen object.Generation) (*RevisionData, error)
