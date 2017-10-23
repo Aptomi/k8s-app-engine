@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is the instance of cobra command that shows version from version package (injected at build tome)
 var Version = &cobra.Command{
 	Use:   "version",
 	Short: "Print the Aptomi Client version",

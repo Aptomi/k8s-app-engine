@@ -10,6 +10,9 @@ import (
 	"path/filepath"
 )
 
+// ReadConfig reads configuration from CLI flags, default or specified file path into provided config object using the
+// provided Viper instance and default configuration directory. It'll be checking if --config provided first and there
+// are supported config file types in it if it's directory.
 func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) {
 	configFilePath := viper.GetString("config")
 

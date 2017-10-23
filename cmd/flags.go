@@ -6,11 +6,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+// AddStringFlag adds string flag to provided cobra command and registers with provided env variable name
 func AddStringFlag(command *cobra.Command, key, flagName, flagShorthand, defaultValue, env, usage string) {
 	command.PersistentFlags().StringP(flagName, flagShorthand, defaultValue, usage)
 	bindFlagEnv(command, key, flagName, env)
 }
 
+// AddBoolFlag adds bool flag to provided cobra command and registers with provided env variable name
 func AddBoolFlag(command *cobra.Command, key, flagName, flagShorthand string, defaultValue bool, env, usage string) {
 	command.PersistentFlags().BoolP(flagName, flagShorthand, defaultValue, usage)
 	bindFlagEnv(command, key, flagName, env)
@@ -29,6 +31,7 @@ func bindFlagEnv(command *cobra.Command, key, flagName, env string) {
 	}
 }
 
+// AddDefaultFlags add all the flags that are needed by any aptomi CLI
 func AddDefaultFlags(command *cobra.Command, envPrefix string) {
 	AddStringFlag(command, "config", "config", "c", "", envPrefix+"_CONFIG", "Config file or config dir path")
 
