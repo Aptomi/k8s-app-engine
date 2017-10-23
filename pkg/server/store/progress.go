@@ -7,6 +7,7 @@ import (
 	"math"
 )
 
+// Progress returns progress indicator that stores progress into the RevisionData object in DB
 func (s *DefaultStore) Progress(store store.ObjectStore, revision *RevisionData) progress.Indicator {
 	return &revisionProgressStore{store, revision}
 }
