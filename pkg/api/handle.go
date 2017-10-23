@@ -12,18 +12,18 @@ import (
 	"net/http"
 )
 
-type Handler = func(*http.Request, httprouter.Params) reqresp.Response
-type StreamHandler = func(http.ResponseWriter, *http.Request, httprouter.Params)
+type handler = func(*http.Request, httprouter.Params) reqresp.Response
+type streamHandler = func(http.ResponseWriter, *http.Request, httprouter.Params)
 
-func (a *api) get(path string, handler Handler) {
+func (a *api) get(path string, handler handler) {
 	a.handle("GET", path, handler)
 }
 
-func (a *api) post(path string, handler Handler) {
+func (a *api) post(path string, handler handler) {
 	a.handle("POST", path, handler)
 }
 
-func (a *api) handle(method string, path string, handler Handler) {
+func (a *api) handle(method string, path string, handler handler) {
 	a.router.Handle(method, path, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		resp := handler(request, params)
 		if resp != nil {
@@ -34,7 +34,7 @@ func (a *api) handle(method string, path string, handler Handler) {
 	})
 }
 
-func (a *api) getStream(path string, handler StreamHandler) {
+func (a *api) getStream(path string, handler streamHandler) {
 	a.router.GET(path, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		handler(writer, request, params)
 	})

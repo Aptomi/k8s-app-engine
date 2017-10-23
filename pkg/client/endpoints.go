@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// Endpoints retrieves all endpoints for deployed services
 func Endpoints(cfg *config.Client) error {
 	catalog := object.NewCatalog().Append(engine.ActionObjects...)
 	cod := yaml.NewCodec(catalog)

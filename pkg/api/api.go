@@ -17,11 +17,11 @@ type api struct {
 	externalData *external.Data
 }
 
-func New(router *httprouter.Router, store store.ServerStore, externalData *external.Data) *api {
+// Serve initializes everything needed by HTTP API and puts it into the provided http router
+func Serve(router *httprouter.Router, store store.ServerStore, externalData *external.Data) {
 	catalog := object.NewCatalog().Append(lang.Objects...)
 	a := &api{router, yaml.NewCodec(catalog), store, externalData}
 	a.serve()
-	return a
 }
 
 func (a *api) serve() {

@@ -9,6 +9,7 @@ import (
 	"runtime/debug"
 )
 
+// NewPanicHandler returns HTTP handler for Panics processing
 func NewPanicHandler(handler http.Handler) http.Handler {
 	return &panicHandler{handler}
 }

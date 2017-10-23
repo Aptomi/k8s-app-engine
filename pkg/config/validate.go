@@ -19,6 +19,7 @@ func init() {
 	})
 }
 
+// Validate gets configuration instance and processing validation annotations
 func Validate(config Base) (bool, error) {
 	return govalidator.ValidateStruct(config)
 }
