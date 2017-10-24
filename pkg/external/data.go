@@ -5,9 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external/users"
 )
 
-// Data represents all data which is external to Aptomi, including
-// - users
-// - secrets
+// Data represents all data which is external to Aptomi, including Users and Secrets
 type Data struct {
 	UserLoader   users.UserLoader
 	SecretLoader secrets.SecretLoader
