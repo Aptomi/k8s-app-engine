@@ -7,11 +7,7 @@ import (
 	"strconv"
 )
 
-/*
-	This file declares all utility structures and methods required for working with map[string]interface{}, which may contain nested maps
-*/
-
-// NestedParameterMap allows to work with nested maps [string][string]...[string] -> value
+// NestedParameterMap is a nested map of parameters, which allows to work with maps [string][string]...[string] -> string, int, bool values
 type NestedParameterMap map[string]interface{}
 
 // UnmarshalYAML is a custom unmarshal function for NestedParameterMap to deal with interface{} -> string conversions
