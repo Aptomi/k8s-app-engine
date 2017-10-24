@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Show method retrieves current policy from aptomi and prints it
+// Show method retrieves current policy from Aptomi and prints it to console
 func Show(cfg *config.Client) error {
 	catalog := object.NewCatalog().Append(store.PolicyDataObject)
 	cod := yaml.NewCodec(catalog)

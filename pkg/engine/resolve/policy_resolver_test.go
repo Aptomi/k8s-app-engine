@@ -493,17 +493,17 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult 
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {
 		// print log into stdout and exit
-		hook := &event.HookStdout{}
+		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()
 		return nil
 	}
 
 	// check for error message
-	verifier := event.NewUnitTestLogVerifier(expectedLogMessage, expectedResult == ResError)
+	verifier := event.NewLogVerifier(expectedLogMessage, expectedResult == ResError)
 	resolver.eventLog.Save(verifier)
 	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: "+expectedLogMessage) {
-		hook := &event.HookStdout{}
+		hook := &event.HookConsole{}
 		resolver.eventLog.Save(hook)
 		t.FailNow()
 	}

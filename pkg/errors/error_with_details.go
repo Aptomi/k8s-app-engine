@@ -3,7 +3,8 @@ package errors
 // Details is a type which defines a map of objects that will be attached to the error
 type Details map[string]interface{}
 
-// ErrorWithDetails is a custom error which also stores a context (map of objects) in addition to the error message itself
+// ErrorWithDetails is a custom error which stores additional information about the context in which an error occurred.
+// It stores the context, i.e. a map of objects (or, details) in addition to the error message itself
 type ErrorWithDetails struct {
 	message string
 	details Details

@@ -74,7 +74,7 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response 
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 
 	// todo save to log with clear prefix
-	eventLog.Save(&event.HookStdout{})
+	eventLog.Save(&event.HookConsole{})
 
 	if err != nil {
 		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)

@@ -62,7 +62,7 @@ func (s *Server) enforce() error {
 		return fmt.Errorf("cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
 
-	eventLog.Save(&event.HookStdout{})
+	eventLog.Save(&event.HookConsole{})
 
 	nextRevision, err := s.store.NextRevision(desiredPolicyGen)
 	if err != nil {
@@ -113,7 +113,7 @@ func (s *Server) enforce() error {
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, s.store.ActualStateUpdater(), s.externalData, plugins, stateDiff.Actions, progress.NewConsole())
 	resolution, eventLog, err := applier.Apply()
 
-	eventLog.Save(&event.HookStdout{})
+	eventLog.Save(&event.HookConsole{})
 
 	if err != nil {
 		return fmt.Errorf("error while applying new revision: %s", err)

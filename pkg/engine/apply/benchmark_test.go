@@ -424,13 +424,13 @@ func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *ext
 	resolver := resolve.NewPolicyResolver(policy, externalData)
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
-		hook := &event.HookStdout{}
+		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		panic("Policy resolution error")
 	}
 
 	if expectedNonEmpty && len(result.DependencyInstanceMap) <= 0 {
-		hook := &event.HookStdout{}
+		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()
 		panic("No dependencies resolved")

@@ -22,7 +22,7 @@ import (
 
 // todo make a client object with apply/show methods
 
-// Apply finds all policy files and uploads/applies them by making a call to aptomi server
+// Apply finds all policy files in a specified path, uploads them to Aptomi by making an API call to apply changes
 func Apply(cfg *config.Client) error {
 	catalog := object.NewCatalog().Append(lang.Objects...).Append(store.Objects...).Append(engine.ActionObjects...)
 	cod := yaml.NewCodec(catalog)

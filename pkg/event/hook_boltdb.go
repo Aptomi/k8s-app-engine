@@ -5,11 +5,11 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-// HookBoltDB allows event log entries to be persisted in BoltDB
+// HookBoltDB implements event log hook, which persists all event log entries in BoltDB
 type HookBoltDB struct {
 }
 
-// Levels says that this hook should be fired on messages of all log levels
+// Levels defines on which log levels this hook should be fired
 func (buf *HookBoltDB) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
@@ -17,7 +17,7 @@ func (buf *HookBoltDB) Levels() []logrus.Level {
 // Fire processes a single log entry
 func (buf *HookBoltDB) Fire(e *logrus.Entry) error {
 	// figure out to which objects this entry should be attached to
-	attachedToObjects := e.Data["attachedTo"].(*AttachedObjects).objects
+	attachedToObjects := e.Data["attachedTo"].(*attachedObjects).objects
 	delete(e.Data, "attachedTo")
 
 	// TODO: store this entry into bolt

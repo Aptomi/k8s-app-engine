@@ -252,7 +252,7 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External())
 	result, eventLog, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
-		hook := &event.HookStdout{}
+		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()
 	}
@@ -266,17 +266,17 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCn
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
 		// print log into stdout and exit
-		hook := &event.HookStdout{}
+		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()
 	}
 
 	if expectedResult == ResError {
 		// check for error messages
-		verifier := event.NewUnitTestLogVerifier(expectedMessage, expectedResult == ResError)
+		verifier := event.NewLogVerifier(expectedMessage, expectedResult == ResError)
 		eventLog.Save(verifier)
 		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of messages containing words: "+expectedMessage) {
-			hook := &event.HookStdout{}
+			hook := &event.HookConsole{}
 			eventLog.Save(hook)
 			t.FailNow()
 		}

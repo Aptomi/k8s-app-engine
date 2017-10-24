@@ -5,17 +5,17 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-// HookStdout allows event log entries to be printed to stdout
-type HookStdout struct {
+// HookConsole implements event log hook, which prints all event log entries to the console (stdout)
+type HookConsole struct {
 }
 
-// Levels says that this hook should be fired on messages of all log levels
-func (buf *HookStdout) Levels() []logrus.Level {
+// Levels defines on which log levels this hook should be fired
+func (buf *HookConsole) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
 // Fire processes a single log entry
-func (buf *HookStdout) Fire(e *logrus.Entry) error {
+func (buf *HookConsole) Fire(e *logrus.Entry) error {
 	fmt.Printf("[%s] %s\n", e.Level, e.Message)
 	return nil
 }

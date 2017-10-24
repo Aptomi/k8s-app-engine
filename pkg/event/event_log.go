@@ -10,32 +10,32 @@ import (
 // Fields is a set of named fields. Fields are attached to every log record
 type Fields map[string]interface{}
 
-// AttachedObjects is a list of core aptomi lang objects attached to a set of log records (e.g. dependency, user, contract, context, key)
-type AttachedObjects struct {
+// attachedObjects is a list of core aptomi lang objects attached to a set of log records (e.g. dependency, user, contract, context, key)
+type attachedObjects struct {
 	objects []interface{}
 }
 
-// Log is an buffered event log
+// Log is an buffered event log.
 // It stores all log entries in memory first, then allows them to be processed and stored
 type Log struct {
 	logger     *logrus.Logger
-	attachedTo *AttachedObjects
-	hook       *messageBuffer
+	attachedTo *attachedObjects
+	hook       *HookMemory
 }
 
-// NewLog creates a new instance of event log
-// Initially it just buffers all entries and doesn't write them
+// NewLog creates a new instance of event log.
+// Initially it just buffers all entries and doesn't write them.
 // It needs to buffer all entries, so that the context can be later attached to them
 // before they get serialized and written to an external source
 func NewLog() *Log {
 	logger := logrus.New()
 	logger.Level = logrus.DebugLevel
 	logger.Out = ioutil.Discard
-	hook := &messageBuffer{}
+	hook := &HookMemory{}
 	logger.Hooks.Add(hook)
 	return &Log{
 		logger:     logger,
-		attachedTo: &AttachedObjects{},
+		attachedTo: &attachedObjects{},
 		hook:       hook,
 	}
 }
