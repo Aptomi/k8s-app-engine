@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/api/reqresp"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -13,7 +12,7 @@ import (
 	"strconv"
 )
 
-func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) reqresp.Response {
+func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) Response {
 	gen := p.ByName("rev")
 
 	if len(gen) == 0 {
@@ -28,7 +27,7 @@ func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) reqresp.Res
 	return policyData
 }
 
-func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) reqresp.Response {
+func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response {
 	objects := a.read(r)
 
 	username := r.Header.Get("Username")

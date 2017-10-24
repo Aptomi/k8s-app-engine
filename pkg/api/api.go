@@ -17,7 +17,7 @@ type api struct {
 	externalData *external.Data
 }
 
-// Serve initializes everything needed by HTTP API and puts it into the provided http router
+// Serve initializes everything needed by REST API and registers all API endpoints in the provided http router
 func Serve(router *httprouter.Router, store store.ServerStore, externalData *external.Data) {
 	catalog := object.NewCatalog().Append(lang.Objects...)
 	a := &api{router, yaml.NewCodec(catalog), store, externalData}

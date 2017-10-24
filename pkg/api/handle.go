@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/api/reqresp"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"github.com/Aptomi/aptomi/pkg/object"
 	log "github.com/Sirupsen/logrus"
@@ -12,7 +11,7 @@ import (
 	"net/http"
 )
 
-type handler = func(*http.Request, httprouter.Params) reqresp.Response
+type handler = func(*http.Request, httprouter.Params) Response
 type streamHandler = func(http.ResponseWriter, *http.Request, httprouter.Params)
 
 func (a *api) get(path string, handler handler) {
@@ -55,7 +54,7 @@ func (a *api) read(request *http.Request) []object.Base {
 	return objects
 }
 
-func write(writer io.Writer, resp reqresp.Response) {
+func write(writer io.Writer, resp Response) {
 	data := yaml.SerializeObject(resp)
 	_, wErr := fmt.Fprint(writer, data)
 	if wErr != nil {

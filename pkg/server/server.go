@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-// Server is a HTTP server which serves API and UI
+// Server is Aptomi server. It serves API and UI calls, as well as does policy enforcement
 type Server struct {
 	cfg              *config.Server
 	backgroundErrors chan string
@@ -33,7 +33,7 @@ type Server struct {
 	httpServer   *http.Server
 }
 
-// NewServer creates a new HTTP Server
+// NewServer creates a new Aptomi Server
 func NewServer(cfg *config.Server) *Server {
 	s := &Server{
 		cfg:              cfg,
@@ -46,16 +46,20 @@ func NewServer(cfg *config.Server) *Server {
 	return s
 }
 
-// Start makes HTTP server start serving content
+// Start initializes Aptomi server, starts serving API/UI, and as well as runs the required background jobs for actual policy enforcement
 func (s *Server) Start() {
 	s.initStore()
 	s.initExternalData()
+
+	// Register UI and API handlers
 	s.initHTTPServer()
 
+	// Start HTTP server
 	s.runInBackground("HTTP Server", true, func() {
 		panic(s.httpServer.ListenAndServe())
 	})
 
+	// Start policy enforcement job
 	if !s.cfg.Enforcer.Disabled {
 		s.runInBackground("Policy Enforcer", true, func() {
 			panic(s.enforceLoop())
@@ -98,7 +102,7 @@ func (s *Server) initHTTPServer() {
 
 	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
-	handler = api.NewPanicHandler(handler)
+	handler = newPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
 

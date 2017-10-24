@@ -5,8 +5,8 @@ import (
 	"sync"
 )
 
-// DefaultStore is the ServerStore implementation that is the glue layer for saving different engine objects into the
-// object store
+// DefaultStore is the ServerStore implementation that is the glue layer for saving
+// different engine objects into the object store
 type DefaultStore struct {
 	policyUpdate sync.Mutex
 	store        store.ObjectStore

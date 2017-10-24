@@ -1,13 +1,12 @@
 package api
 
 import (
-	"github.com/Aptomi/aptomi/pkg/api/reqresp"
 	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
-func (a *api) handleEndpointsShow(r *http.Request, p httprouter.Params) reqresp.Response {
+func (a *api) handleEndpointsShow(r *http.Request, p httprouter.Params) Response {
 	endpoints := make(map[string]map[string]string)
 	actualState, err := a.store.GetActualState()
 	if err != nil {
