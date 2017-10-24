@@ -7,7 +7,7 @@ import (
 // Parameters is a set of named parameters for the expression
 type Parameters map[string]interface{}
 
-// NewParams creates a new instance of Parameters
+// NewParams creates a new set of named Parameters. Each parameter should be int, bool, or string.
 func NewParams(stringParams map[string]string, structParams map[string]interface{}) *Parameters {
 	// Populate parameter map
 	result := Parameters{}

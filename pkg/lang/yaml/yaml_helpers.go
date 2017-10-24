@@ -16,19 +16,6 @@ func SerializeObject(t interface{}) string {
 	return string(d)
 }
 
-// LoadObjectFromFile loads object from YAML file
-func LoadObjectFromFile(fileName string, data interface{}) interface{} {
-	dat, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		panic(fmt.Sprintf("Unable to read file '%s': %s", fileName, err))
-	}
-	err = yaml.Unmarshal(dat, data)
-	if err != nil {
-		panic(fmt.Sprintf("Unable to unmarshal entity from '%s': %s", fileName, err))
-	}
-	return data
-}
-
 // LoadObjectFromFileDefaultEmpty loads object from YAML file
 func LoadObjectFromFileDefaultEmpty(fileName string, data interface{}) interface{} {
 	dat, err := ioutil.ReadFile(fileName)

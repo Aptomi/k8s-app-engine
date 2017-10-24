@@ -2,17 +2,20 @@ package expression
 
 import "sync"
 
-// Cache is a cache of compiled expressions
+// Cache is a thread-safe cache of compiled expressions
 type Cache struct {
 	eCache sync.Map
 }
 
-// NewCache creates a new Cache
+// NewCache creates a new thread-safe Cache
 func NewCache() *Cache {
 	return &Cache{eCache: sync.Map{}}
 }
 
-// EvaluateAsBool evaluates boolean expression given a set of parameters, using the compiled expression from cache
+// EvaluateAsBool evaluates boolean expression given a set of parameters.
+// If an compiled expression already exists in cache, it will be used.
+// Otherwise it will get compiled and added to the cache before evaluating the expression.
+// This method is thread-safe and can be called concurrently from multiple goroutines.
 func (cache *Cache) EvaluateAsBool(expressionStr string, params *Parameters) (bool, error) {
 	// Look up expression from the cache
 	var expression *Expression

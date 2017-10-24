@@ -2,17 +2,20 @@ package template
 
 import "sync"
 
-// Cache is a cache of compiled text templates
+// Cache is a thread-safe cache of compiled text templates
 type Cache struct {
 	tCache sync.Map
 }
 
-// NewCache creates a new Cache
+// NewCache creates a new thread-safe Cache
 func NewCache() *Cache {
 	return &Cache{tCache: sync.Map{}}
 }
 
-// Evaluate evaluates text template given a set of parameters, using the compiled text template from cache
+// Evaluate evaluates text template given a set of parameters.
+// If an compiled text template already exists in cache, it will be used.
+// Otherwise it will get compiled and added to the cache before evaluating the text template.
+// This method is thread-safe and can be called concurrently from multiple goroutines.
 func (cache *Cache) Evaluate(templateStr string, params *Parameters) (string, error) {
 	// Look up template from the cache
 	var template *Template

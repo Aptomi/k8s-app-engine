@@ -15,6 +15,7 @@ type Template struct {
 }
 
 // NewTemplate compiles a text template and returns the result in Template struct
+// Parameter templateStr must follow syntax defined by text/template
 func NewTemplate(templateStr string) (*Template, error) {
 	templateCompiled, err := t.New("").Parse(templateStr)
 	if err != nil {
@@ -26,7 +27,7 @@ func NewTemplate(templateStr string) (*Template, error) {
 	}, nil
 }
 
-// Evaluate evaluates a compiled text template given a set parameters
+// Evaluate evaluates a compiled text template given a set named parameters
 func (template *Template) Evaluate(params *Parameters) (string, error) {
 	// Evaluate
 	var doc bytes.Buffer

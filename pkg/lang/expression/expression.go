@@ -13,6 +13,7 @@ type Expression struct {
 }
 
 // NewExpression compiles an expression and returns the result in Expression struct
+// Parameter expressionStr must follow syntax defined by https://github.com/Knetic/govaluate
 func NewExpression(expressionStr string) (*Expression, error) {
 	functions := map[string]govaluate.ExpressionFunction{
 		"in": func(args ...interface{}) (interface{}, error) {
@@ -39,7 +40,7 @@ func NewExpression(expressionStr string) (*Expression, error) {
 	}, nil
 }
 
-// EvaluateAsBool evaluates a compiled boolean expression given a set of parameters
+// EvaluateAsBool evaluates a compiled boolean expression given a set of named parameters
 func (expression *Expression) EvaluateAsBool(params *Parameters) (bool, error) {
 	// Evaluate
 	result, err := expression.expressionCompiled.Evaluate(*params)

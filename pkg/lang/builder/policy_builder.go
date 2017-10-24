@@ -13,8 +13,10 @@ import (
 var randSeed = int64(239)
 var idLength = 16
 
-// PolicyBuilder is a utility struct to help build policy objects
-// It is primarily used in unit tests
+// PolicyBuilder provides simple and easy-to-use way to construct a complete Policy for Aptomi
+// in the source code. It is primarily used in unit tests.
+// When objects are created/added by the policy builder, they get created in the specified namespace
+// with randomly generated IDs/names, so that a user doesn't have to specify them.
 type PolicyBuilder struct {
 	random    *rand.Rand
 	namespace string
