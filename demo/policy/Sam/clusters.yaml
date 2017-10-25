@@ -1,4 +1,4 @@
-# Context definition for us-east
+# Cluster definition for us-east
 - metadata:
     kind: cluster
     namespace: system
@@ -8,7 +8,7 @@
     kubecontext: cluster-us-east
     namespace: demo
 
-# Context definition for us-west
+# Cluster definition for us-west
 - metadata:
     kind: cluster
     namespace: system
