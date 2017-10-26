@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! [ -x "$(command -v telnet)" ]; then
+  echo 'telnet is not installed' >&2
+  exit 1
+fi
+
 set -eou pipefail
 
 CONF_DIR=$(mktemp -d)
