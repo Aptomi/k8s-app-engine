@@ -37,32 +37,29 @@ make
 1. We provide LDAP Server with sample users for Aptomi in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker/README.md)
 2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect to LDAP
 
+### Running examples
+...
+
 ## Dev Guide
 
 ### Running tests
 
-Target     | Command         | LDAP Required
+Command    | Targe t         | LDAP Required
 -----------|-----------------|--------------
-Unit tests | ```make test``` | No
-Integration + Unit tests | ```make alltest``` | Yes
-Smoke tests + Integration + Unit tests | ```make smoke``` | Yes
+```make test```    | Unit tests | No
+```make alltest``` | Integration + Unit tests | Yes
+```make smoke```   | Smoke tests + Integration + Unit tests | Yes
 
 ### How to develop
-Target      | Command         | Description
+Command     | Target          | Description
 ------------|-----------------|--------------
-Format code | ```make fmt```  | Re-formats all code according to Go standards
-Examine code | ```make lint```  | Run linters to examine Go source code and reports suspicious constructs
+```make fmt```  | Format code | Re-formats all code according to Go standards
+```make lint``` | Examine code | Run linters to examine Go source code and reports suspicious constructs
 
 ## Provided scripts
 * `./tools/demo-gke.sh` - to set up 2 k8s clusters on GKE for demo. supports `up`, `down`, or `status`
-* `./tools/demo-init.sh` - starts the demo (except LDAP)
-  * `./tools/demo-local-policy-init.sh` - init local database with demo policy
-  * `./tools/demo-push.sh` - pushes demo policy to https://github.com/Frostman/aptomi-demo/
-  * `./tools/demo-watch-apply.sh` - watches remote github repo. Once new commit is detected, it updates the local copy and runs Aptomi
-* `tools/dev-watch-server.sh` - starts Aptomi UI in Dev mode. If .go files get changed, it will recompile and re-launch the server
 
 ## How to set up demo environment on Google Cloud
-
 1. ```brew install kubernetes-cli kubernetes-helm```
   * Do we still need this, in addition to `./tools/install-clients.sh`?
 1. ```curl https://sdk.cloud.google.com | bash```
