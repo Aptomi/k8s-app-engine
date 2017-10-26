@@ -198,7 +198,6 @@ func (gen *PolicyGenerator) makeService() *lang.Service {
 			Namespace: "main",
 			Name:      "service-" + strconv.Itoa(id),
 		},
-		Owner:      "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
 		Components: []*lang.ServiceComponent{},
 	}
 

@@ -89,18 +89,13 @@ func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
 }
 
 // AddService creates a new service and adds it to the policy
-func (builder *PolicyBuilder) AddService(owner *lang.User) *lang.Service {
-	var ownerID = ""
-	if owner != nil {
-		ownerID = owner.ID
-	}
+func (builder *PolicyBuilder) AddService() *lang.Service {
 	result := &lang.Service{
 		Metadata: lang.Metadata{
 			Kind:      lang.ServiceObject.Kind,
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
-		Owner: ownerID,
 	}
 	builder.addObject(builder.domainAdminView, result)
 	return result

@@ -78,11 +78,9 @@ func (node *resolutionNode) proxyService(service *lang.Service) interface{} {
 	return struct {
 		lang.Metadata
 		Labels interface{}
-		Owner  interface{}
 	}{
 		Metadata: service.Metadata,
 		Labels:   service.Labels,
-		Owner:    node.proxyUser(node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)),
 	}
 }
 

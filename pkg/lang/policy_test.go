@@ -67,7 +67,6 @@ func makePolicyWithObjects() (string, *Policy) {
 				Namespace: namespace,
 				Name:      "service" + strconv.Itoa(i),
 			},
-			Owner: "1",
 		})
 		addObject(policy, &Contract{
 			Metadata: Metadata{

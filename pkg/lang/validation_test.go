@@ -108,6 +108,5 @@ func makeService(name string) *Service {
 			Namespace: "main",
 			Name:      name,
 		},
-		Owner: "1",
 	}
 }

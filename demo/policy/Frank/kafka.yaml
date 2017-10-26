@@ -4,8 +4,6 @@
     namespace: main
     name: kafka
 
-  owner: cn=Frank,ou=people,o=aptomiOrg
-
   labels:
     type: analytics
 

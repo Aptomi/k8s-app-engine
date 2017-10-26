@@ -15,7 +15,7 @@ func TestPolicyResolverContract(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service with two contexts within a contract
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	component := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
 	contract := b.AddContractMultipleContexts(service,
 		b.Criteria("label1 == 'value1'", "true", "false"),
@@ -55,14 +55,14 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 
 	// create objects in ns1
 	b.SwitchNamespace("ns1")
-	service1 := b.AddService(b.AddUser())
+	service1 := b.AddService()
 	b.AddServiceComponent(service1, b.CodeComponent(nil, nil))
 	contract1 := b.AddContract(service1, b.CriteriaTrue())
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// create objects in ns2
 	b.SwitchNamespace("ns2")
-	service2 := b.AddService(b.AddUser())
+	service2 := b.AddService()
 	b.AddServiceComponent(service2, b.CodeComponent(nil, nil))
 	contract2 := b.AddContract(service2, b.CriteriaTrue())
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
@@ -83,9 +83,9 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service, which depends on another service
-	service1 := b.AddService(b.AddUser())
+	service1 := b.AddService()
 	contract1 := b.AddContract(service1, b.Criteria("label1 == 'value1'", "true", "false"))
-	service2 := b.AddService(b.AddUser())
+	service2 := b.AddService()
 	contract2 := b.AddContract(service2, b.Criteria("label2 == 'value2'", "true", "false"))
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
 
@@ -114,12 +114,12 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// first contract adds a label 'labelExtra1'
-	service1 := b.AddService(b.AddUser())
+	service1 := b.AddService()
 	contract1 := b.AddContract(service1, b.Criteria("label1 == 'value1'", "true", "false"))
 	contract1.ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra1", "labelValue1")
 
 	// second contract adds a label 'labelExtra2' and removes 'label3'
-	service2 := b.AddService(b.AddUser())
+	service2 := b.AddService()
 	contract2 := b.AddContract(service2, b.Criteria("label2 == 'value2'", "true", "false"))
 	contract2.ChangeLabels = lang.NewLabelOperations(
 		map[string]string{"labelExtra2": "labelValue2"},
@@ -163,7 +163,7 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service with 2 components and multiple parameters
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	component1 := b.CodeComponent(
 		nil,
 		util.NestedParameterMap{"url": "component1-{{ .Discovery.instance }}"},
@@ -213,7 +213,7 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	b := builder.NewPolicyBuilder()
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	contract := b.AddContract(service, b.CriteriaTrue())
 	user := &lang.User{ID: "non-existing-user-123456789"}
 	dependency := b.AddDependency(user, contract)
@@ -236,7 +236,7 @@ func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
 
 func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 	b := builder.NewPolicyBuilder()
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	criteria := b.Criteria("true", "specialname + '123')(((", "false")
 	contract := b.AddContract(service, criteria)
 	b.AddDependency(b.AddUser(), contract)
@@ -247,7 +247,7 @@ func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
 
 func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	b := builder.NewPolicyBuilder()
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	contract := b.AddContract(service, b.CriteriaTrue())
 	contract.Contexts[0].Allocation.Keys = b.AllocationKeys("w {{...")
 	b.AddDependency(b.AddUser(), contract)
@@ -256,24 +256,11 @@ func TestPolicyResolverInvalidContextKeys(t *testing.T) {
 	resolvePolicy(t, b, ResError, "Error while resolving allocation keys")
 }
 
-func TestPolicyResolverInvalidServiceNonExistingOwner(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-	service := b.AddService(&lang.User{
-		ID:   "non-existing-user",
-		Name: "non-existing-user",
-	})
-	contract := b.AddContract(service, b.CriteriaTrue())
-	b.AddDependency(b.AddUser(), contract)
-
-	// policy resolution with invalid service (without owner) should result in an error
-	resolvePolicy(t, b, ResError, "Owner doesn't exist for service")
-}
-
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service which uses label in its code parameters
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			util.NestedParameterMap{"address": "{{ .Labels.deplabel }}"},
@@ -299,7 +286,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service which uses label in its discovery parameters
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			nil,
@@ -326,7 +313,7 @@ func TestPolicyResolverInvalidCodeParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service which uses label in its code parameters
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			util.NestedParameterMap{"address": "{{ .Labels..."},
@@ -348,7 +335,7 @@ func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service which uses label in its code parameters
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			nil,
@@ -370,11 +357,11 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create 3 services
-	service1 := b.AddService(b.AddUser())
+	service1 := b.AddService()
 	contract1 := b.AddContract(service1, b.CriteriaTrue())
-	service2 := b.AddService(b.AddUser())
+	service2 := b.AddService()
 	contract2 := b.AddContract(service2, b.CriteriaTrue())
-	service3 := b.AddService(b.AddUser())
+	service3 := b.AddService()
 	contract3 := b.AddContract(service3, b.CriteriaTrue())
 
 	// create service-level cycle
@@ -396,7 +383,7 @@ func TestPolicyResolverComponentLoop(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create 3 services
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	contract := b.AddContract(service, b.CriteriaTrue())
 
 	// create component cycle
@@ -421,7 +408,7 @@ func TestPolicyResolverUnknownComponentType(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a with 3 components, first component is not code and not contract (engine should just skip it)
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	component1 := b.AddServiceComponent(service, b.UnknownComponent())
 	component2 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
 	component3 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
@@ -446,7 +433,7 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service which can be deployed to different clusters
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			util.NestedParameterMap{lang.LabelCluster: "{{ .Labels.cluster }}"},

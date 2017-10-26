@@ -4,8 +4,6 @@
     namespace: main
     name: istio
 
-  owner: cn=Sam,ou=people,o=aptomiOrg
-
   labels:
     type: service-mesh
 

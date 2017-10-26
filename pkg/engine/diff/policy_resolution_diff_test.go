@@ -97,7 +97,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	b := builder.NewPolicyBuilder()
 
 	// create a service
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			util.NestedParameterMap{"param": "{{ .Labels.param }}"},

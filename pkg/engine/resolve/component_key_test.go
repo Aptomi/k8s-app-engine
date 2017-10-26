@@ -9,7 +9,7 @@ import (
 func TestComponentKeyCopy(t *testing.T) {
 	// create component key
 	b := builder.NewPolicyBuilder()
-	service := b.AddService(b.AddUser())
+	service := b.AddService()
 	component := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
 	contract := b.AddContract(service, b.CriteriaTrue())
 	key := NewComponentInstanceKey(

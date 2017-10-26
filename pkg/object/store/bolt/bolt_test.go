@@ -68,7 +68,7 @@ func makePolicyObjects(t *testing.T) []object.Base {
 
 	for i := 0; i < 10; i++ {
 		// create a service
-		service := b.AddService(b.AddUser())
+		service := b.AddService()
 		b.AddServiceComponent(service,
 			b.CodeComponent(
 				util.NestedParameterMap{

@@ -256,12 +256,6 @@ func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Servic
 	}
 
 	service := serviceObj.(*lang.Service)
-	serviceOwner := node.resolver.externalData.UserLoader.LoadUserByID(service.Owner)
-
-	// If a service has no owner, it is considered a malformed policy, so let's return an error
-	if serviceOwner == nil {
-		return nil, node.errorServiceOwnerDoesNotExist(service)
-	}
 
 	// Service should be located in the same namespace as contract
 	if service.Namespace != node.contract.Namespace {

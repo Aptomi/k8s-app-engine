@@ -36,7 +36,6 @@ func makeNormalService() *Service {
 			Namespace: "main",
 			Name:      "normal",
 		},
-		Owner: "1",
 		Components: []*ServiceComponent{
 			{
 				Name:         "component1",
@@ -65,7 +64,6 @@ func makeCyclicService() *Service {
 			Namespace: "main",
 			Name:      "badcomponentdependency",
 		},
-		Owner: "1",
 		Components: []*ServiceComponent{
 			{
 				Name:         "component1",
@@ -94,7 +92,6 @@ func makeBadComponentDependencyService() *Service {
 			Namespace: "main",
 			Name:      "cyclic",
 		},
-		Owner: "1",
 		Components: []*ServiceComponent{
 			{
 				Name:         "component1",

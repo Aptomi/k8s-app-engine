@@ -78,9 +78,8 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	// three services
 	services := []*lang.Service{}
 	contracts := []*lang.Contract{}
-	user := b.AddUser()
 	for i := 0; i < 3; i++ {
-		service := b.AddService(user)
+		service := b.AddService()
 		contract := b.AddContract(service, b.CriteriaTrue())
 
 		// three components each

@@ -4,8 +4,6 @@
     namespace: main
     name: twitter_stats
 
-  owner: cn=John,ou=people,o=aptomiOrg
-
   labels:
     type: dev-apps
 
