@@ -11,6 +11,13 @@ Bulding Aptomi from source and running integration tests is a very straightforwa
 * telnet - for the script which runs smoke tests
 * docker - to run provided LDAP server with sample user data
 
+Check out Aptomi source code from the repo:
+```
+mkdir $GOPATH/src/github.com/Aptomi
+cd $GOPATH/src/github.com/Aptomi
+git clone git@github.com:Aptomi/aptomi.git
+```
+
 If you are on macOS, install brew, install [Docker For Mac](https://docs.docker.com/docker-for-mac/install/) and run: 
 ```
 brew install graphviz telnet docker
@@ -18,10 +25,10 @@ brew install graphviz telnet docker
 
 Install Helm, Istio, Kubectl clients:
 ```
-./tools/install-clients.sh`
+./tools/install-clients.sh
 ```
 
-All Go dependencies are managed using [Glide](https://glide.sh/). The following command will fetch all dependencies and put them into "vendor" folder:
+All Go dependencies are managed using [Glide](https://glide.sh/). The following command will fetch all dependencies defined in `glide.lock` and put them into "vendor" folder:
 ```
 make vendor 
 ```
