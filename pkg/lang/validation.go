@@ -11,28 +11,28 @@ import (
 
 func makeValidator() *validator.Validate {
 	result := validator.New()
-	_ = result.RegisterValidation("identifier", ValidateIdentifier)
-	_ = result.RegisterValidation("clustertype", ValidateClusterType)
-	_ = result.RegisterValidation("codetype", ValidateCodeType)
-	_ = result.RegisterValidation("expression", ValidateExpression)
-	_ = result.RegisterValidation("template", ValidateTemplate)
+	_ = result.RegisterValidation("identifier", validateIdentifier)
+	_ = result.RegisterValidation("clustertype", validateClusterType)
+	_ = result.RegisterValidation("codetype", validateCodeType)
+	_ = result.RegisterValidation("expression", validateExpression)
+	_ = result.RegisterValidation("template", validateTemplate)
 	return result
 }
 
-// ValidateClusterType implements validator.Func and checks if a given string is a valid cluster type
-func ValidateClusterType(fl validator.FieldLevel) bool {
+// validateClusterType implements validator.Func and checks if a given string is a valid cluster type
+func validateClusterType(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 	return value == "kubernetes"
 }
 
-// ValidateCodeType implements validator.Func and checks if a given string is a valid code type
-func ValidateCodeType(fl validator.FieldLevel) bool {
+// validateCodeType implements validator.Func and checks if a given string is a valid code type
+func validateCodeType(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 	return util.ContainsString([]string{"helm", "aptomi/code/kubernetes-helm"}, value)
 }
 
-// ValidateIdentifier implements validator.Func and checks if a given string (or a list of strings) is a valid identifier(s)
-func ValidateIdentifier(fl validator.FieldLevel) bool {
+// validateIdentifier implements validator.Func and checks if a given string (or a list of strings) is a valid identifier(s)
+func validateIdentifier(fl validator.FieldLevel) bool {
 	field := fl.Field()
 	result := true
 	if field.Kind() == reflect.Slice || field.Kind() == reflect.Array {
@@ -45,8 +45,8 @@ func ValidateIdentifier(fl validator.FieldLevel) bool {
 	return result
 }
 
-// ValidateExpression implements validator.Func and checks if a given string (or a list of strings) is valid expression(s)
-func ValidateExpression(fl validator.FieldLevel) bool {
+// validateExpression implements validator.Func and checks if a given string (or a list of strings) is valid expression(s)
+func validateExpression(fl validator.FieldLevel) bool {
 	field := fl.Field()
 	result := true
 	if field.Kind() == reflect.Slice || field.Kind() == reflect.Array {
@@ -59,8 +59,8 @@ func ValidateExpression(fl validator.FieldLevel) bool {
 	return result
 }
 
-// ValidateTemplate implements validator.Func and checks if a given string (or a list of strings) is valid template(s)
-func ValidateTemplate(fl validator.FieldLevel) bool {
+// validateTemplate implements validator.Func and checks if a given string (or a list of strings) is valid template(s)
+func validateTemplate(fl validator.FieldLevel) bool {
 	field := fl.Field()
 	result := true
 	if field.Kind() == reflect.Slice || field.Kind() == reflect.Array {

@@ -8,12 +8,26 @@ import (
 	"sync"
 )
 
-// Policy describes the entire aptomi policy, consisting of multiple namespaces
+// Policy describes the entire Aptomi policy.
+//
+// At the highest level, policy consists of namespaces. Namespaces provide isolation for policy objects and access to
+// namespaces can be controlled via ACL rules. Thus, different users can have different access rights to different parts
+// of Aptomi policy. Namespaces are useful in environments with many users, multiple teams and projects.
+//
+// Objects get stored in their corresponding namespaces. Names of objects must be unique within a namespace and a given
+// object kind.
+//
+// Once policy is defined, it can be passed to the engine for policy resolution. Policy resolution translates a given
+// policy (intent) into actual state (what services/components need to created/updated/deleted, how and where) and the
+// corresponding set of actions.
 type Policy struct {
+	// Namespace is a map from namespace name into a PolicyNamespace
 	Namespace map[string]*PolicyNamespace
 
+	// Validator for policy objects
 	validator *validator.Validate
 
+	// Access control rules for different policy namespaces
 	once        sync.Once
 	aclResolver *ACLResolver // lazily initialized value
 }
@@ -41,8 +55,9 @@ func (policy *Policy) View(user *User) *PolicyView {
 	return NewPolicyView(policy, user)
 }
 
-// AddObject adds an object into the policy, putting it into the corresponding namespace
-// If error occurs, e.g. object validation error, then it will be returned
+// AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
+// Namespace. If error occurs (e.g. object validation error, objects with duplicate names, etc) then the error
+// will be returned
 func (policy *Policy) AddObject(obj object.Base) error {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
 	if !ok {
@@ -61,7 +76,8 @@ func (policy *Policy) GetObjectsByKind(kind string) []object.Base {
 	return result
 }
 
-// GetObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and namespace relative to which the call is being made
+// GetObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and current
+// namespace relative to which the call is being made
 func (policy *Policy) GetObject(kind string, locator string, currentNs string) (object.Base, error) {
 	// parse locator: [namespace/]name. we might add [domain/] in the future
 	parts := strings.Split(locator, "/")

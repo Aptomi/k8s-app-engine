@@ -6,19 +6,30 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 )
 
-// Criteria defines a structure with require-all, require-any and require-none syntax
+// Criteria is a structure which allows users to define complex matching expressions in the policy. Criteria
+// expressions can refer to labels through variables. It supports require-all, require-any and require-none clauses,
+// with a list of expressions under each clause.
+//
+// Criteria gets evaluated to true only when
+// (1) All RequireAll expression evaluate to true,
+// (2) At least one of RequireAny expressions evaluates to true,
+// (3) None of RequireNone expressions evaluate to true.
+//
+// If any of RequireAll, RequireAny, RequireNone are absent, the corresponding clause will be skipped. So it's
+// perfectly fine to have a criteria with fewer than 3 clauses (e.g. just RequireAll), or with no sections at all. Empty
+// criteria without any clauses always evaluates to true
 type Criteria struct {
-	// This follows 'AND' logic. This is basically a pre-condition, and all of its expressions are required to evaluate to true
+	// RequireAll follows 'AND' logic
 	RequireAll []string `yaml:"require-all" validate:"expression"`
 
-	// This follows 'OR' logic. At least one of its expressions is required to evaluate to true
+	// RequireAny follows 'OR' logic
 	RequireAny []string `yaml:"require-any" validate:"expression"`
 
-	// This follows 'AND NOT' logic. None of its expressions should evaluate to true
+	// RequireNone follows 'AND NOT'
 	RequireNone []string `yaml:"require-none" validate:"expression"`
 }
 
-// Whether criteria evaluates to "true" for a given set of labels or not
+// Returns whether criteria evaluates to "true", given a set of parameters for its expressions and a cache
 func (criteria *Criteria) allows(params *expression.Parameters, cache *expression.Cache) (bool, error) {
 	// Make sure all "require-all" criteria evaluate to true
 	for _, exprShouldBeTrue := range criteria.RequireAll {
@@ -83,6 +94,8 @@ func (criteria *Criteria) allows(params *expression.Parameters, cache *expressio
 	return true, nil
 }
 
+// Evaluates bool expression, given a set of parameters and a cache. If cache is nil, it will still be evaluated
+// successfully, but without a cache
 func (criteria *Criteria) evaluateBool(expressionStr string, params *expression.Parameters, cache *expression.Cache) (bool, error) {
 	if cache == nil {
 		cache = expression.NewCache()

@@ -11,7 +11,9 @@ var DependencyObject = &object.Info{
 	Constructor: func() object.Base { return &Dependency{} },
 }
 
-// Dependency is a service use intent, declared a form <User> requested <Contract> and specified a set of <Labels>
+// Dependency is a declaration of use, defined in a form <User> needs an instance of <Contract> with
+// specified set of <Labels>. It allows users to request contracts, which will translate into instantiation of
+// service instances (and their dependencies) in the cloud
 type Dependency struct {
 	Metadata
 

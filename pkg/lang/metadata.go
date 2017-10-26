@@ -4,7 +4,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 )
 
-// Metadata is an object metadata implementation (NS, Kind, Name, Generation) which works for all standard objects
+// Metadata is an object metadata implementation (Namespace, Kind, Name, Generation) which works for all standard objects.
+// Namespace defines in which namespace the object is defined. An object always gets placed in only one namespace.
+// Kind describes type of the object (e.g. Service, Contract, Cluster, etc)
+// Name is a user-provided string identifier of an object. Names are usually human readable and must be unique across
+// objects within the same namespace and the same object kind.
 type Metadata struct {
 	Namespace  string `validate:"identifier"`
 	Kind       string `validate:"identifier"`

@@ -14,29 +14,44 @@ var RuleObject = &object.Info{
 	Constructor: func() object.Base { return &Rule{} },
 }
 
-// Rule is a rule
+// Rule is a generic mechanism for defining rules in Aptomi.
+//
+// Rules can be used to set certain labels on certain conditions as well as perform certain actions (such as rejecting
+// dependencies, rejecting ingress traffic, etc)
+//
+// ACLRule is inherited from Rule, so the same mechanism is used for processing ACLs in Aptomi.
 type Rule struct {
 	Metadata
 
-	Weight   int `validate:"min=0"`
+	// Weight defined for the rule. All rules are sorted in the order of increasing weight and applied in that order
+	Weight int `validate:"min=0"`
+
+	// Criteria - if it gets evaluated to true during policy resolution, then rules's actions will be executed.
+	// It's an optional field, so if it's nil then it is considered to be evaluated to true automatically
 	Criteria *Criteria
-	Actions  *RuleActions
+
+	// Actions define the set of actions that will be executed if Criteria gets evaluated to true
+	Actions *RuleActions
 }
 
-// RuleActions is a set of actions performed by rule
+// RuleActions is a set of actions that can be performed by a rule. All fields in this structure are optional. If a
+// field is defined, then the corresponding action will be processed
 type RuleActions struct {
-	// ChangeLabels, Dependency, and Ingress fields are relevant for regular rules
-	// They determine how labels should be changed, whether dependency should be allowed, and whether ingress traffic should be allowed
+	// ChangeLabels defines how labels should be transformed
 	ChangeLabels ChangeLabelsAction `yaml:"change-labels"`
-	Dependency   DependencyAction
-	Ingress      IngressAction
 
-	// AddRole field is only relevant for ACL rules (have to keep it in this class due to the lack of generics)
+	// Dependency defines whether dependency should be rejected
+	Dependency DependencyAction
+
+	// Ingress defines whether ingress traffic should be rejected
+	Ingress IngressAction
+
+	// AddRole field is only relevant for ACL rules (have to keep it in this class due to the lack of generics).
 	// Key in the map is role ID, while value is a set of comma-separated namespaces to which this role applies
 	AddRole map[string]string `yaml:"add-role"`
 }
 
-// Matches returns if a rule matches
+// Matches returns true if a rule matches
 func (rule *Rule) Matches(params *expression.Parameters, cache *expression.Cache) (bool, error) {
 	if rule.Criteria == nil {
 		return true, nil
@@ -44,7 +59,7 @@ func (rule *Rule) Matches(params *expression.Parameters, cache *expression.Cache
 	return rule.Criteria.allows(params, cache)
 }
 
-// GlobalRules is a list of global rules
+// GlobalRules contains a map of global rules by name, as well as the list of sorted rules
 type GlobalRules struct {
 	// RuleMap is a map[name] -> *Rule
 	RuleMap map[string]*Rule

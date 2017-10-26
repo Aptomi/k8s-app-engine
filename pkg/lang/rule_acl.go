@@ -4,7 +4,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 )
 
-// ACLRule is a struct for defining rules which map users to their roles in Aptomi
+// ACLRule defines which users have which roles in Aptomi. They should be configured by Aptomi domain admins in the
+// policy. ACLRules allow to pick groups of users and assign ACL roles to them (e.g. give access to a particular
+// namespace)
 type ACLRule = Rule
 
 // ACLRuleObject is an informational data structure with Kind and Constructor for ACLRule
@@ -17,8 +19,15 @@ var ACLRuleObject = &object.Info{
 // Allows to define a role which spans across all namespaces (e.g. "domain admin")
 const namespaceAll = "*"
 
-// ACLRole is a struct for defining user roles
-// See the list of defined roles below - domain admin, namespace admin, service consumer, and nobody
+// ACLRole is a struct for defining user roles and their privileges.
+// Aptomi has 4 built-in user roles: domain admin, namespace admin, service consumer, and nobody.
+// Domain admin has full access rights to all namespaces. It can manage global objects in 'system' namespace (clusters,
+// rules, and ACL rules).
+// Namespace admin has full access right to a given set of namespaces, but it cannot global objects in 'system' namespace (clusters,
+// rules, and ACL rules).
+// Service consumer can only consume services within a given set of namespaces. Service consumption is treated as capability
+// to instantiate services in a given namespace.
+// Nobody cannot do anything except viewing the policy.
 type ACLRole struct {
 	ID         string
 	Name       string
@@ -27,8 +36,8 @@ type ACLRole struct {
 
 // Privileges defines a set of privileges for a particular role in Aptomi
 type Privileges struct {
-	// If AllNamespaces is set to true, then those user privileges apply to all namespaces
-	// Otherwise it applies to a set of given namespaces
+	// AllNamespaces, when set to true, indicated that user privileges apply to all namespaces. Otherwise it applies
+	// to a set of given namespaces
 	AllNamespaces bool
 
 	// NamespaceObjects specifies whether or not this role can view/manage a certain object kind within a non-system namespace

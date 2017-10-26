@@ -94,7 +94,7 @@ func TestAclResolver(t *testing.T) {
 			Weight:   300,
 			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{serviceConsumer.ID: "main2"},
+				AddRole: map[string]string{serviceConsumer.ID: "main1, main2 ,main3,main4"},
 			},
 		},
 		// bogus rule

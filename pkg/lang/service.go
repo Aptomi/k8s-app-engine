@@ -14,11 +14,19 @@ var ServiceObject = &object.Info{
 	Constructor: func() object.Base { return &Service{} },
 }
 
-// Service defines individual service
+// Service defines individual service in Aptomi. The idea is that services get defined by different teams. Those
+// teams define service-specific consumption rules of how others can consume their services.
+//
+// Service typically consists of one or more components. Each component can either be pointer to the code (e.g.
+// docker container image with metadata that needs to be started/managed) or it can be dependency on another\
+// contract (which will get fulfilled by Aptomi)
 type Service struct {
 	Metadata
 
-	Labels     map[string]string
+	// Labels is a set of labels attached to the service
+	Labels map[string]string
+
+	// Components is the list of components service consists of
 	Components []*ServiceComponent
 
 	// Lazily evaluated fields (all components topologically sorted). Use via getter
@@ -32,20 +40,35 @@ type Service struct {
 
 // ServiceComponent defines component within a service
 type ServiceComponent struct {
+	// Name is a user-defined component name
 	Name string `validate:"identifier"`
 
-	// Contract, if not empty, means that component points to another contract as a dependency
+	// Contract, if not empty, denoted that the component points to another contract as a dependency. Meaning that
+	// a service needs to have another service running as its dependency (e.g. 'wordpress' service needs a 'database'
+	// contract). This dependency will be fulfilled at policy resolution time.
 	Contract string `validate:"identifier"`
 
-	// Code, if not empty, means that component is a code that can be instantiated
-	Code         *Code
-	Discovery    util.NestedParameterMap
+	// Code, if not empty, means that component is a code that can be instantiated with certain parameters (e.g. docker
+	// container image)
+	Code *Code
+
+	// Discovery is a map of discovery parameters that this component exposes to other services
+	Discovery util.NestedParameterMap
+
+	// Dependencies is cross-component dependencies within a service. Component may need other components within that
+	// service to run, before it gets instantiated
 	Dependencies []string `validate:"identifier"`
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
-	Type   string `validate:"codetype"`
+	// Type represents code type (e.g. aptomi/code/kubernetes-helm). It determines the plugin that will get executed for
+	// for this code component
+	Type string `validate:"codetype"`
+
+	// Params define parameters that will be passed down to the deployment plugin. Params follow text template syntax
+	// and can refer to arbitrary labels, as well as discovery parameters exposed by other components (within the
+	// current service) and discovery parameters exposed by services the current service depends on
 	Params util.NestedParameterMap
 }
 

@@ -61,7 +61,7 @@ func (rule *Rule) ApplyActions(result *RuleActionResult) {
 		// mark all namespaces for the role
 		namespaces := strings.Split(namespaceList, ",")
 		for _, namespace := range namespaces {
-			nsMap[namespace] = true
+			nsMap[strings.TrimSpace(namespace)] = true
 		}
 
 		// if role covers all namespaces, mark it as well

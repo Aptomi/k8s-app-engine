@@ -5,12 +5,13 @@ import "reflect"
 // LabelCluster is a special label name where cluster should be stored. It's required by the engine during policy processing
 const LabelCluster = "cluster"
 
-// LabelSet defines the set of labels that will be manipulated
+// LabelSet defines the set of labels that will be manipulated throughout policy execution. All labels are stored
+// in a 'key' -> 'value' map
 type LabelSet struct {
 	Labels map[string]string
 }
 
-// NewLabelSet creates a new LabelSet from a given set of labels
+// NewLabelSet creates a new LabelSet from a given map of text labels
 func NewLabelSet(labels map[string]string) *LabelSet {
 	result := &LabelSet{Labels: make(map[string]string, len(labels))}
 	result.AddLabels(labels)
@@ -24,8 +25,8 @@ func (src *LabelSet) AddLabels(addMap map[string]string) {
 	}
 }
 
-// ApplyTransform applies set of transformations to labels
-// Returns true if changes have been made
+// ApplyTransform applies a given set of label transformations to the current set of labels.
+// The method teturns true if changes have been made to the current set
 func (src *LabelSet) ApplyTransform(ops LabelOperations) bool {
 	changed := false
 	if ops != nil {
@@ -49,7 +50,6 @@ func (src *LabelSet) ApplyTransform(ops LabelOperations) bool {
 }
 
 // Equal compares two labels sets. If one is nil and another one is empty, it will return true as well
-// This method ignores IsSecret for now
 func (src *LabelSet) Equal(dst *LabelSet) bool {
 	if len(src.Labels) == 0 && len(dst.Labels) == 0 {
 		return true

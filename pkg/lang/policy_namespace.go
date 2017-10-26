@@ -6,7 +6,8 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// PolicyNamespace describes a specific namespace in aptomi policy (services, contracts, clusters, rules, dependencies, etc)
+// PolicyNamespace describes a specific namespace within Aptomi policy.
+// All policy objects get placed in the appropriate maps and structs within PolicyNamespace.
 type PolicyNamespace struct {
 	Name         string
 	Services     map[string]*Service
@@ -16,6 +17,7 @@ type PolicyNamespace struct {
 	ACLRules     *GlobalRules
 	Dependencies *GlobalDependencies
 
+	// Validator for policy objects
 	validator *validator.Validate
 }
 

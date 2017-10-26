@@ -5,11 +5,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 )
 
-// PolicyView an struct which allows to view/manage policy on behalf on a certain user
-// It will enforce all ACLs, allowing the user to only perform actions which he is allowed to perform
+// PolicyView allows to view/manage policy objects on behalf on a certain user
+// It will enforce all ACLs, allowing the user to only perform actions which he is entitled to perform.
 type PolicyView struct {
+	// Policy which gets viewed
 	Policy *Policy
-	User   *User
+
+	// User who is viewing policy
+	User *User
 }
 
 // NewPolicyView creates a new PolicyView
@@ -20,8 +23,9 @@ func NewPolicyView(policy *Policy, user *User) *PolicyView {
 	}
 }
 
-// AddObject adds an object into the policy, putting it into the corresponding namespace
-// If an error occurs (e.g. user doesn't have ACL permissions to perform an operation, or object validation error), then it will be returned
+// AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
+// Namespace. If error occurs (e.g. object validation error, objects with duplicate names, etc) then the error
+// will be returned
 func (view *PolicyView) AddObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
@@ -33,7 +37,8 @@ func (view *PolicyView) AddObject(obj object.Base) error {
 	return view.Policy.AddObject(obj)
 }
 
-// ViewObject checks if user has permissions to view an object. If user has no permissions, ACL error will be returned
+// ViewObject checks if user has permissions to view a given object. If user has no permissions, then ACL error
+// will be returned
 func (view *PolicyView) ViewObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
@@ -45,7 +50,8 @@ func (view *PolicyView) ViewObject(obj object.Base) error {
 	return nil
 }
 
-// ManageObject checks if user has permissions to manage an object. If user has no permissions, ACL error will be returned
+// ManageObject checks if user has permissions to manage a given object. If user has no permissions, then ACL error
+// will be returned
 func (view *PolicyView) ManageObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
@@ -57,7 +63,7 @@ func (view *PolicyView) ManageObject(obj object.Base) error {
 	return nil
 }
 
-// CanConsume returns if user has permissions to consume a service
+// CanConsume returns if user has permissions to consume a given service.
 // If a user can declare a dependency in a given namespace, then he can essentially can consume the service
 func (view *PolicyView) CanConsume(service *Service) (bool, error) {
 	obj := &Metadata{Namespace: service.GetNamespace(), Kind: DependencyObject.Kind}

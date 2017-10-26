@@ -7,7 +7,8 @@ import (
 	"sync"
 )
 
-// ACLResolver is a struct which allows to perform ACL resolution for the end users and objects they access
+// ACLResolver is a struct which allows to perform ACL resolution, allowing to retrieve user privileges for the
+// objects they access
 type ACLResolver struct {
 	rules        []*ACLRule
 	cache        *expression.Cache
@@ -23,7 +24,7 @@ func NewACLResolver(globalRules *GlobalRules) *ACLResolver {
 	}
 }
 
-// GetUserPrivileges is a main method which determines which privileges a user has for a particular object
+// GetUserPrivileges is a main method which determines privileges that a given user has for a given object
 func (resolver *ACLResolver) GetUserPrivileges(user *User, obj object.Base) (*Privilege, error) {
 	roleMap, err := resolver.getUserRoleMap(user)
 	if err != nil {
