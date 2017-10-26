@@ -34,8 +34,8 @@ make
 ## User Guide
 
 ### How to start provided LDAP Server with sample data
-1. We provide LDAP Server with sample users for Aptomi in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker/README.md)
-2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect to LDAP
+1. In order to run Aptomi examples and smoke tests, there is an LDAP Server with sample users in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker/README.md)
+2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed, follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect
 
 ### Running examples
 ...
@@ -44,7 +44,7 @@ make
 
 ### Running tests
 
-Command    | Targe t         | LDAP Required
+Command    | Target          | LDAP Required
 -----------|-----------------|--------------
 ```make test```    | Unit tests | No
 ```make alltest``` | Integration + Unit tests | Yes
