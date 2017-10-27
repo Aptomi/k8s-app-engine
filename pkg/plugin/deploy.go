@@ -6,7 +6,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// DeployPlugin is a plugin which allows to create, update and destroy component instances in the cloud
+// DeployPlugin is a definition of deployment plugin which takes care of creating, updating and destroying
+// component instances in the cloud
 type DeployPlugin interface {
 	Plugin
 

@@ -9,7 +9,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 )
 
-// Process is a post-processing action which gets called only once, updating all istio rules
+// Process is a action which gets called on cluster post-processing plugin once for each cluster. It manages
+// all Istio rules and makes sure they are up to date by creating/deleting/updating rules if/as needed
 func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	// todo(slukjanov): do something with progress
 	prog := progress.NewNoop()

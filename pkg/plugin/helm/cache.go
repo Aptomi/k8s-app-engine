@@ -28,17 +28,3 @@ func (p *Plugin) getCache(cluster *lang.Cluster, eventLog *event.Log) (*clusterC
 	}
 	panic(fmt.Sprintf("clusterCache expected in Plugin cache, but found: %v", c))
 }
-
-// Cleanup runs cleanup phase of Plugin
-func (p *Plugin) Cleanup() error {
-	var err error
-	p.cache.Range(func(key, value interface{}) bool {
-		if c, ok := value.(*clusterCache); ok {
-			c.tillerTunnel.Close()
-		} else {
-			panic(fmt.Sprintf("clusterCache expected in Plugin cache, but found: %v", c))
-		}
-		return true
-	})
-	return err
-}

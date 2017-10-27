@@ -20,12 +20,12 @@ func (p *Plugin) GetSupportedCodeTypes() []string {
 	return helmCodeTypes
 }
 
-// Create creates component instance in the cloud by deploying a helm chart
+// Create implements creation of a new component instance in the cloud by deploying a Helm chart
 func (p *Plugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
-// Update updates component instance in the cloud by updating parameters of a helm chart
+// Update implements update of an existing component instance in the cloud by updating parameters of a helm chart
 func (p *Plugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
@@ -89,7 +89,7 @@ func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params
 	return err
 }
 
-// Destroy for Plugin runs "helm delete" for the corresponding helm chart
+// Destroy implements destruction of an existing component instance in the cloud by running "helm delete" on the corresponding helm chart
 func (p *Plugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
@@ -105,6 +105,20 @@ func (p *Plugin) Destroy(cluster *lang.Cluster, deployName string, params util.N
 	}).Infof("Deleting Helm release '%s'", releaseName)
 
 	_, err = helmClient.DeleteRelease(releaseName, helm.DeletePurge(true))
+	return err
+}
+
+// Cleanup implements cleanup phase for the Helm plugin. It closes all created and cached Tiller tunnels.
+func (p *Plugin) Cleanup() error {
+	var err error
+	p.cache.Range(func(key, value interface{}) bool {
+		if c, ok := value.(*clusterCache); ok {
+			c.tillerTunnel.Close()
+		} else {
+			panic(fmt.Sprintf("clusterCache expected in Plugin cache, but found: %v", c))
+		}
+		return true
+	})
 	return err
 }
 

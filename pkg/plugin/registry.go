@@ -2,7 +2,7 @@ package plugin
 
 import "fmt"
 
-// Registry is a registry of all aptomi engine plugins
+// Registry is a registry of all Aptomi engine plugins
 type Registry interface {
 	GetDeployPlugin(codeType string) (DeployPlugin, error)
 	GetClustersPostProcessingPlugins() []ClustersPostProcessPlugin
