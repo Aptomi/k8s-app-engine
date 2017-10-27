@@ -14,8 +14,10 @@ const noEntriesNodeName = "No entries"
 const colorScheme = "set19"
 const colorCount = 9
 
-// Diagram is a visualization diagram for policy and resolution data
-type Diagram struct {
+// diagram allows to visualize Aptomi policy and resolution data in a diagram and then save it as PNG.
+// It can also render deltas between two visualizations, showing new and deleted objects between policies and resolution data.
+// diagram essentially gets represented as graphviz graph.
+type diagram struct {
 	// Input data
 	policy        *lang.Policy
 	resolution    *resolve.PolicyResolution
@@ -33,9 +35,9 @@ type Diagram struct {
 	graph *gographviz.Graph
 }
 
-// NewDiagram returns a Diagram visualizing policy and resolution data
-func NewDiagram(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
-	diagram := &Diagram{
+// NewGraph returns a graphviz graph that visualizes policy and resolution data
+func NewGraph(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
+	diagram := &diagram{
 		policy:        policy,
 		resolution:    resolution,
 		externalData:  externalData,
@@ -48,15 +50,15 @@ func NewDiagram(policy *lang.Policy, resolution *resolve.PolicyResolution, exter
 	return diagram.toGraphviz()
 }
 
-// NewDiagramDelta returns a Diagram visualizing delta between two "policy/resolution" states
-func NewDiagramDelta(nextPolicy *lang.Policy, nextResolution *resolve.PolicyResolution, prevPolicy *lang.Policy, prevResolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
-	nextGraph := NewDiagram(nextPolicy, nextResolution, externalData)
-	prevGraph := NewDiagram(prevPolicy, prevResolution, externalData)
-	return Delta(prevGraph, nextGraph)
+// NewGraphDiff returns a graphviz graph that visualizes difference/delta between two "policy and resolution data" states
+func NewGraphDiff(nextPolicy *lang.Policy, nextResolution *resolve.PolicyResolution, prevPolicy *lang.Policy, prevResolution *resolve.PolicyResolution, externalData *external.Data) *gographviz.Graph {
+	nextGraph := NewGraph(nextPolicy, nextResolution, externalData)
+	prevGraph := NewGraph(prevPolicy, prevResolution, externalData)
+	return graphvizDelta(prevGraph, nextGraph)
 }
 
 // Produces diagram as graphviz graph
-func (d *Diagram) toGraphviz() *gographviz.Graph {
+func (d *diagram) toGraphviz() *gographviz.Graph {
 	// Initialize graph properties
 	_ = d.graph.SetName("Main")
 	_ = d.graph.AddAttr("Main", "compound", "true")
@@ -103,7 +105,7 @@ func (d *Diagram) toGraphviz() *gographviz.Graph {
 	return d.graph
 }
 
-func (d *Diagram) traceKey(keySrc string, dependency *lang.Dependency, last node) {
+func (d *diagram) traceKey(keySrc string, dependency *lang.Dependency, last node) {
 	var edgesOut map[string]bool
 	if len(keySrc) <= 0 {
 		edgesOut = make(map[string]bool)
@@ -171,7 +173,7 @@ func (d *Diagram) traceKey(keySrc string, dependency *lang.Dependency, last node
 }
 
 // Returns a color for the given key
-func (d *Diagram) getColor(key string) string {
+func (d *diagram) getColor(key string) string {
 	color, ok := d.colorMap[key]
 	if !ok {
 		d.usedColors++

@@ -29,7 +29,7 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	// generate images
 	{
-		imagePrev, err := CreateImage(NewDiagram(policyEmpty, resolutionEmpty, b.External()))
+		imagePrev, err := Graph2Image(NewGraph(policyEmpty, resolutionEmpty, b.External()))
 		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imagePrev.Bounds().Dx() < 20, "Image for empty policy resolution should be empty")
 		assert.True(t, imagePrev.Bounds().Dy() < 20, "Image for empty policy resolution should be empty")
@@ -38,7 +38,7 @@ func TestVisualizationDiagram(t *testing.T) {
 	}
 
 	{
-		imageNext, err := CreateImage(NewDiagram(b.Policy(), resolutionNew, b.External()))
+		imageNext, err := Graph2Image(NewGraph(b.Policy(), resolutionNew, b.External()))
 		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imageNext.Bounds().Dx() > 500, "Image for unit test resolved policy should be big enough: %s", imageNext.Bounds())
 		assert.True(t, imageNext.Bounds().Dy() > 500, "Image for unit test resolved policy should be big enough: %s", imageNext.Bounds())
@@ -48,7 +48,7 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	{
 		// delta (empty) -> (non-empty)
-		imageDiff, err := CreateImage(NewDiagramDelta(b.Policy(), resolutionNew, policyEmpty, resolutionEmpty, b.External()))
+		imageDiff, err := Graph2Image(NewGraphDiff(b.Policy(), resolutionNew, policyEmpty, resolutionEmpty, b.External()))
 		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imageDiff.Bounds().Dx() > 500, "Image for unit test resolved policy diff against empty (all additions) should be big enough: %s", imageDiff.Bounds())
 		assert.True(t, imageDiff.Bounds().Dy() > 500, "Image for unit test resolved policy diff against empty (all additions) should be big enough: %s", imageDiff.Bounds())
@@ -58,7 +58,7 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	{
 		// delta (non-empty) -> (empty)
-		imageDiff, err := CreateImage(NewDiagramDelta(policyEmpty, resolutionEmpty, b.Policy(), resolutionNew, b.External()))
+		imageDiff, err := Graph2Image(NewGraphDiff(policyEmpty, resolutionEmpty, b.Policy(), resolutionNew, b.External()))
 		assert.NoError(t, err, "Image should be generated")
 		assert.True(t, imageDiff.Bounds().Dx() > 500, "Image for unit test resolved policy diff against empty (all deletions) should be big enough: %s", imageDiff.Bounds())
 		assert.True(t, imageDiff.Bounds().Dy() > 500, "Image for unit test resolved policy diff against empty (all deletions) should be big enough: %s", imageDiff.Bounds())

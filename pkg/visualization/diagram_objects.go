@@ -22,7 +22,7 @@ func keyEscape(key string) string {
 
 type node interface {
 	key() string
-	render(*Diagram)
+	render(*diagram)
 }
 
 // Internal struct for context node
@@ -37,7 +37,7 @@ func (node contextNode) key() string {
 }
 
 // Renders itself into a graph
-func (node contextNode) render(d *Diagram) {
+func (node contextNode) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: node.contract.Namespace}.render(d)
 
@@ -66,7 +66,7 @@ func (node serviceInstanceNode) key() string {
 }
 
 // Renders itself into a graph
-func (node serviceInstanceNode) render(d *Diagram) {
+func (node serviceInstanceNode) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: node.instance.Metadata.Key.Namespace}.render(d)
 
@@ -94,7 +94,7 @@ func (node dependencyNode) key() string {
 }
 
 // Renders itself into a graph
-func (node dependencyNode) render(d *Diagram) {
+func (node dependencyNode) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: node.dependency.Namespace}.render(d)
 
@@ -128,7 +128,7 @@ func (node errorNode) key() string {
 }
 
 // Renders itself into a graph
-func (node errorNode) render(d *Diagram) {
+func (node errorNode) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: "errors"}.render(d)
 
@@ -159,7 +159,7 @@ func (box namespaceBox) key() string {
 	return keyEscape(strings.Join([]string{"cluster_namespace", box.namespace}, object.KeySeparator))
 }
 
-func (box namespaceBox) render(d *Diagram) {
+func (box namespaceBox) render(d *diagram) {
 	// render namespace box itself
 	addSubgraphOnce(
 		d.graph,
@@ -179,7 +179,7 @@ func (box dependencyBox) key() string {
 	return keyEscape(strings.Join([]string{"cluster_namespace", box.namespace, "dependency"}, object.KeySeparator))
 }
 
-func (box dependencyBox) render(d *Diagram) {
+func (box dependencyBox) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: box.namespace}.render(d) // nolint: megacheck
 
@@ -202,7 +202,7 @@ func (box contractBox) key() string {
 	return keyEscape(strings.Join([]string{"cluster_contract", object.GetKey(box.contract)}, object.KeySeparator))
 }
 
-func (box contractBox) render(d *Diagram) {
+func (box contractBox) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: "errors"}.render(d)
 
@@ -225,7 +225,7 @@ func (box serviceBox) key() string {
 	return keyEscape(strings.Join([]string{"cluster_service", object.GetKey(box.service)}, object.KeySeparator))
 }
 
-func (box serviceBox) render(d *Diagram) {
+func (box serviceBox) render(d *diagram) {
 	// render namespace box
 	namespaceBox{namespace: box.service.Namespace}.render(d)
 
@@ -250,7 +250,7 @@ type edge struct {
 	color string
 }
 
-func (e edge) render(d *Diagram) {
+func (e edge) render(d *diagram) {
 	attrs := make(map[string]string)
 	if len(e.label) > 0 {
 		attrs["label"] = e.label

@@ -5,8 +5,9 @@ import (
 	"strings"
 )
 
-// Delta calculates difference between two graphs and returns it as a graph (it also modifies <next> to represent that difference)
-func Delta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
+// graphvizDelta calculates difference between two graphs and returns it as a graph.
+// As a side effect, it also modifies <next> to represent that resulting graph.
+func graphvizDelta(prev *gographviz.Graph, next *gographviz.Graph) *gographviz.Graph {
 	// New nodes, edges, subgraphs must be highlighted
 	{
 		/*

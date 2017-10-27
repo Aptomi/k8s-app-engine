@@ -11,8 +11,8 @@ import (
 	"os/exec"
 )
 
-// CreateImage draws graphviz graph and returns it as an image
-func CreateImage(graph *gographviz.Graph) (image.Image, error) { // nolint: interfacer
+// Graph2Image converts graphviz graph into an image
+func Graph2Image(graph *gographviz.Graph) (image.Image, error) { // nolint: interfacer
 	graphStr := graph.String()
 
 	// Original graph in .dot
