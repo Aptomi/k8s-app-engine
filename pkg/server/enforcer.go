@@ -72,7 +72,7 @@ func (s *Server) enforce() error {
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
 	// todo add check that policy gen not changed (always create new revision if policy gen changed)
-	if !stateDiff.IsChanged() {
+	if len(stateDiff.Actions) <= 0 {
 		// todo
 		log.Infof("No changes")
 		return nil

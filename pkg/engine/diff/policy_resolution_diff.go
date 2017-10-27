@@ -8,7 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 )
 
-// PolicyResolutionDiff represents a difference between two policy resolution data structs
+// PolicyResolutionDiff represents a difference between two policy resolution data structs (actual and desired states)
 type PolicyResolutionDiff struct {
 	// Prev is actual policy resolution data
 	Prev *resolve.PolicyResolution
@@ -22,7 +22,10 @@ type PolicyResolutionDiff struct {
 	Revision object.Generation
 }
 
-// NewPolicyResolutionDiff calculates difference between two given policy resolution structs
+// NewPolicyResolutionDiff calculates difference between two given policy resolution structs (actual and desired states).
+// It iterates over all component instances and figures out which component instances have to be instantiated (new
+// consumers appeared and they didn't exist before), which component instances have to be updated (e.g. parameters changed), which component
+// instances have to be destroyed (that have no consumers left), and so on.
 func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.PolicyResolution, revision object.Generation) *PolicyResolutionDiff {
 	result := &PolicyResolutionDiff{
 		Prev:     prev,
@@ -146,9 +149,4 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	if len(diff.Actions) > 0 {
 		diff.Actions = append(diff.Actions, global.NewPostProcessAction(diff.Revision))
 	}
-}
-
-// IsChanged returns true if diff has some actions to be applied
-func (diff *PolicyResolutionDiff) IsChanged() bool {
-	return len(diff.Actions) > 0
 }
