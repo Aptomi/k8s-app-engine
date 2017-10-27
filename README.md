@@ -71,11 +71,11 @@ start with LDAP, which is also required by Aptomi examples and smoke tests.
 ### Getting Started
 Once Aptomi is installed, you can get started by running the following examples:
 
-Example    | Description 
------------|-------------
-[Example 1](examples/01/) | Description of Example 1 
-[Example 2](examples/02/) | Description of Example 2
-[Example 3](examples/03-twitter-analytics) | Twitter Analytics Application
+Example    | Description  | Diagram
+-----------|--------------|--------------
+[examples/01](examples/01) | Description of Example 1 | [Image for example #1](examples/01/diagram.png)  
+[examples/02](examples/02) | Description of Example 2 | [Image for example #2](examples/02/diagram.png)
+[examples/03-twitter-analytics](examples/03-twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Image for example #3](examples/03-twitter-analytics/diagram.png)
 
 ### How It Works
 TODO: architecture diagrams
