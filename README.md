@@ -47,7 +47,7 @@ TODO: "go get", script, docker container? it need to have clients, graphviz, etc
 ### Configuring LDAP
 Aptomi needs to be configured with user data source in order to retrieve their labels/properties. It's recommended to
 start with LDAP, which is also required by Aptomi examples and smoke tests.
-1. LDAP Server with sample users is provided in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker/README.md)
+1. LDAP Server with sample users is provided in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker)
 2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed, follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect
 
 ### Getting Started
@@ -120,7 +120,7 @@ TODO: write something about it
 List of areas where we could use help:
 - Adding support for additional cloud providers (AWS ECS, GKE, Docker Datacenter, Mesos)
 - ... ... ...
-- See [Feature Backlog](milestone/11)
+- See [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
 
 ### Provided scripts
 * `./tools/demo-gke.sh` - to set up 2 k8s clusters on GKE for demo. supports `up`, `down`, or `status`
