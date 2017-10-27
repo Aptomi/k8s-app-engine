@@ -13,7 +13,25 @@ Aptomi’s primary focus is Docker and Kubernetes, but it can work on any enviro
 TODO: Picture, where it's in the stack
 
 ## Table of contents
-TODO: use https://github.com/thlorenz/doctoc
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Features](#features)
+- [User Guide](#user-guide)
+  - [Installation](#installation)
+  - [Configuring LDAP](#configuring-ldap)
+  - [Getting Started](#getting-started)
+  - [How It Works](#how-it-works)
+  - [Aptomi language](#aptomi-language)
+- [Dev Guide](#dev-guide)
+  - [Building From Source](#building-from-source)
+  - [Tests & Linters](#tests--linters)
+  - [How to contribute](#how-to-contribute)
+  - [Provided scripts](#provided-scripts)
+  - [How to set up demo environment on Google Cloud](#how-to-set-up-demo-environment-on-google-cloud)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features
 - **Easy way to deploy and manage complex applications**
@@ -63,7 +81,7 @@ Example    | Description
 TODO: architecture diagrams
 TODO: how policy enforcement works
 
-### Learning Aptomi language
+### Aptomi language
 TODO: policy documentation 
 
 ## Dev Guide
@@ -73,6 +91,7 @@ Bulding Aptomi from source and running integration tests is a very straightforwa
 * graphviz - so that Aptomi can generate diagrams via [GraphViz](http://www.graphviz.org/Download..php)
 * telnet - for the script which runs smoke tests
 * docker - to run provided LDAP server with sample user data
+* npm - to automatically generate TOC in README.md 
 
 Check out Aptomi source code from the repo:
 ```
@@ -83,7 +102,7 @@ git clone git@github.com:Aptomi/aptomi.git
 
 If you are on macOS, install brew, install [Docker For Mac](https://docs.docker.com/docker-for-mac/install/) and run: 
 ```
-brew install graphviz telnet docker
+brew install graphviz telnet docker npm
 ```
 
 Install Helm, Istio, Kubectl clients:

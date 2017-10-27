@@ -84,6 +84,11 @@ install: build
 fmt:
 	${GO} fmt ./...
 
+.PHONY: clean
+clean:
+	-rm -f aptomi aptomictl
+	${GO} clean -r -i
+
 .PHONY: lint
 lint: prepare_gometalinter
 ifdef JENKINS_HOME
@@ -91,11 +96,6 @@ ifdef JENKINS_HOME
 else
 	${GOENV} gometalinter --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
 endif
-
-.PHONY: clean
-clean:
-	-rm -f aptomi aptomictl
-	${GO} clean -r -i
 
 HAS_GOMETALINTER := $(shell command -v gometalinter)
 
@@ -105,6 +105,18 @@ ifndef HAS_GOMETALINTER
 	go get -u -v -d github.com/alecthomas/gometalinter && \
 	go install -v github.com/alecthomas/gometalinter && \
 	gometalinter --install --update
+endif
+
+.PHONY: toc
+toc: prepare_doctoc
+	doctoc README.md
+
+HAS_DOCTOC := $(shell command -v doctoc)
+
+.PHONY: prepare_doctoc
+prepare_doctoc:
+ifndef HAS_DOCTOC
+	npm install -g doctoc
 endif
 
 HAS_GLIDE := $(shell command -v glide)
