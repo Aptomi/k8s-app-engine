@@ -2,7 +2,7 @@ package actual
 
 import "github.com/Aptomi/aptomi/pkg/object"
 
-// NewNoOpActionStateUpdater creates a mock state updater which does nothing (useful in unit tests)
+// NewNoOpActionStateUpdater creates a mock state updater for unit tests, which does nothing
 func NewNoOpActionStateUpdater() StateUpdater {
 	return &noOpActualStateUpdater{}
 }

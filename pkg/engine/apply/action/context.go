@@ -9,8 +9,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin"
 )
 
-// Context is a data struct that will be passed into all state update actions
-// As actions need access to desired and actual data (policy, state), list of plugins, event log, etc
+// Context is a data struct that will be passed into all state update actions, giving actions access to desired
+// and actual data (policy, state), list of plugins, event log, etc
 type Context struct {
 	DesiredPolicy      *lang.Policy
 	DesiredState       *resolve.PolicyResolution

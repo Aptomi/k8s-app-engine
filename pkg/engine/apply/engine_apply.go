@@ -12,7 +12,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin"
 )
 
-// EngineApply executes actions to convert desired state to actual state
+// EngineApply executes actions to get from an actual state to desired state
 type EngineApply struct {
 	// References to desired/actual objects
 	desiredPolicy      *lang.Policy
@@ -51,7 +51,11 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 	}
 }
 
-// Apply method applies all changes via plugins, updates actual state, returns the updated actual state and event log
+// Apply method executes all actions, actions call plugins to apply changes and roll them out to the cloud.
+// It returns the updated actual state and event log.
+// As actions get executed, they will instantiate/update/delete components according to the resolved
+// policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
+// available), actual state may not be equal to desired state after performing all the actions.
 func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error) {
 	// initialize progress indicator
 	apply.progress.SetTotal(len(apply.actions))

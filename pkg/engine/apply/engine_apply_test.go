@@ -318,8 +318,8 @@ func (reg *testRegistry) GetDeployPlugin(codeType string) (plugin.DeployPlugin, 
 	return reg.testPlugin, nil
 }
 
-func (reg *testRegistry) GetClustersPostProcessingPlugins() []plugin.ClustersPostProcessPlugin {
-	return []plugin.ClustersPostProcessPlugin{reg.testPlugin}
+func (reg *testRegistry) GetPostProcessingPlugins() []plugin.PostProcessPlugin {
+	return []plugin.PostProcessPlugin{reg.testPlugin}
 }
 
 type testPlugin struct {

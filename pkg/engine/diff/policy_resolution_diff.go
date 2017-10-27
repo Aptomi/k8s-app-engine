@@ -2,8 +2,8 @@ package diff
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action/cluster"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action/global"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/object"
 )
@@ -142,9 +142,9 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 
 	diff.Actions = append(diff.Actions, endpointsActions...)
 
-	// if any other actions required, clusters should be post processed
+	// call a global post-processing action
 	if len(diff.Actions) > 0 {
-		diff.Actions = append(diff.Actions, cluster.NewClustersPostProcessAction(diff.Revision))
+		diff.Actions = append(diff.Actions, global.NewPostProcessAction(diff.Revision))
 	}
 }
 

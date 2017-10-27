@@ -16,7 +16,6 @@ var EndpointsActionObject = &object.Info{
 
 // EndpointsAction is a action which gets called when a new component changed (created or updated) and endpoints should be updated
 type EndpointsAction struct {
-	// Key is the revision id and action id pair
 	*action.Metadata
 	ComponentKey string
 }

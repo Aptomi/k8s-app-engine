@@ -102,7 +102,7 @@ func (s *Server) enforce() error {
 	helmIstio := helm.NewPlugin(s.cfg.Helm)
 	plugins := plugin.NewRegistry(
 		[]plugin.DeployPlugin{helmIstio},
-		[]plugin.ClustersPostProcessPlugin{helmIstio},
+		[]plugin.PostProcessPlugin{helmIstio},
 	)
 
 	actualPolicy, err := s.getActualPolicy()

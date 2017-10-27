@@ -2,8 +2,8 @@ package diff
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action/cluster"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action/global"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -151,7 +151,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 			cnt.detach++
 		case *component.EndpointsAction:
 			cnt.endpoints++
-		case *cluster.PostProcessAction:
+		case *global.PostProcessAction:
 			cnt.clusters++
 		default:
 			t.Fatalf("Incorrect action type: %T", act)

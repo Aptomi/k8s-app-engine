@@ -1,4 +1,4 @@
-package cluster
+package global
 
 import (
 	"fmt"
@@ -8,29 +8,30 @@ import (
 
 // PostProcessActionObject is an informational data structure with Kind and Constructor for the action
 var PostProcessActionObject = &object.Info{
-	Kind:        "action-clusters-post-process",
+	Kind:        "action-post-process",
 	Constructor: func() object.Base { return &PostProcessAction{} },
 }
 
-// PostProcessAction is a global post-processing action which gets called once after all components have been processed by the engine
+// PostProcessAction is a post-processing action which gets called once after all components have been
+// processed by the engine apply
 type PostProcessAction struct {
 	*action.Metadata
 }
 
-// NewClustersPostProcessAction creates new PostProcessAction
-func NewClustersPostProcessAction(revision object.Generation) *PostProcessAction {
+// NewPostProcessAction creates new PostProcessAction
+func NewPostProcessAction(revision object.Generation) *PostProcessAction {
 	return &PostProcessAction{
 		Metadata: action.NewMetadata(revision, PostProcessActionObject.Kind),
 	}
 }
 
-// Apply applies the action
+// Apply runs all registered post-processing plugins
 func (a *PostProcessAction) Apply(context *action.Context) error {
-	for _, plugin := range context.Plugins.GetClustersPostProcessingPlugins() {
+	for _, plugin := range context.Plugins.GetPostProcessingPlugins() {
 		err := plugin.Process(context.DesiredPolicy, context.DesiredState, context.ExternalData, context.EventLog)
 		if err != nil {
 			context.EventLog.LogError(err)
-			return fmt.Errorf("error while post processing clusters: %s", err)
+			return fmt.Errorf("error while running post processing action: %s", err)
 		}
 	}
 

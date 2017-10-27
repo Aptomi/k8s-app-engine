@@ -5,16 +5,16 @@ import "fmt"
 // Registry is a registry of all Aptomi engine plugins
 type Registry interface {
 	GetDeployPlugin(codeType string) (DeployPlugin, error)
-	GetClustersPostProcessingPlugins() []ClustersPostProcessPlugin
+	GetPostProcessingPlugins() []PostProcessPlugin
 }
 
 type defaultRegistry struct {
-	deployPlugins              map[string]DeployPlugin
-	clustersPostProcessPlugins []ClustersPostProcessPlugin
+	deployPlugins      map[string]DeployPlugin
+	postProcessPlugins []PostProcessPlugin
 }
 
 // NewRegistry creates a registry of aptomi engine plugins
-func NewRegistry(deployPlugins []DeployPlugin, clustersPostProcessPlugins []ClustersPostProcessPlugin) Registry {
+func NewRegistry(deployPlugins []DeployPlugin, postProcessPlugins []PostProcessPlugin) Registry {
 	deployPluginsMap := make(map[string]DeployPlugin, len(deployPlugins))
 	for _, plugin := range deployPlugins {
 		for _, codeType := range plugin.GetSupportedCodeTypes() {
@@ -26,8 +26,8 @@ func NewRegistry(deployPlugins []DeployPlugin, clustersPostProcessPlugins []Clus
 		}
 	}
 	return &defaultRegistry{
-		deployPlugins:              deployPluginsMap,
-		clustersPostProcessPlugins: clustersPostProcessPlugins,
+		deployPlugins:      deployPluginsMap,
+		postProcessPlugins: postProcessPlugins,
 	}
 }
 
@@ -39,6 +39,6 @@ func (reg *defaultRegistry) GetDeployPlugin(codeType string) (DeployPlugin, erro
 	return plugin, nil
 }
 
-func (reg *defaultRegistry) GetClustersPostProcessingPlugins() []ClustersPostProcessPlugin {
-	return reg.clustersPostProcessPlugins
+func (reg *defaultRegistry) GetPostProcessingPlugins() []PostProcessPlugin {
+	return reg.postProcessPlugins
 }

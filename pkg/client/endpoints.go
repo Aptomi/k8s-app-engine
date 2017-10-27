@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action/actioninfo"
 	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/object/codec/yaml"
 	"github.com/gosuri/uitable"
@@ -14,7 +14,7 @@ import (
 
 // Endpoints retrieves all endpoints for deployed services
 func Endpoints(cfg *config.Client) error {
-	catalog := object.NewCatalog().Append(engine.ActionObjects...)
+	catalog := object.NewCatalog().Append(actioninfo.Objects...)
 	cod := yaml.NewCodec(catalog)
 
 	client := &http.Client{

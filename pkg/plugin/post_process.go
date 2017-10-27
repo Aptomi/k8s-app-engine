@@ -7,9 +7,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 )
 
-// ClustersPostProcessPlugin is a definition of post-processing plugin which gets called on each cluster after
-// engine applier is done processing all component instances
-type ClustersPostProcessPlugin interface {
+// PostProcessPlugin is a definition of post-processing plugin which gets called once by an action from the engine
+// applier, after engine is done processing all component instances
+type PostProcessPlugin interface {
 	Plugin
 
 	Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error

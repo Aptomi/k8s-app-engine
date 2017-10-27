@@ -17,7 +17,6 @@ var CreateActionObject = &object.Info{
 
 // CreateAction is a action which gets called when a new component needs to be instantiated (i.e. new instance of code to be deployed to the cloud)
 type CreateAction struct {
-	// Key is the revision id and action id pair
 	*action.Metadata
 	ComponentKey string
 }
