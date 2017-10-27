@@ -13,16 +13,11 @@ import (
 	"sync"
 )
 
-/*
-	Core engine for policy resolution
-	- takes policy an an input
-	- calculates PolicyResolution as an output
-*/
-
 // ThreadPoolSize is the number of threads for policy evaluation and processing
 var ThreadPoolSize = runtime.NumCPU()
 
-// PolicyResolver is a core of aptomi which does policy processing and resolution of all dependencies (consumer -> service)
+// PolicyResolver is a core of Aptomi for policy resolution and translating all service consumption declarations
+// into a single PolicyResolution object which represents desired state of components running in a cloud.
 type PolicyResolver struct {
 	/*
 		Input objects
@@ -69,7 +64,11 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 	}
 }
 
-// ResolveAllDependencies evaluates and resolves all recorded dependencies ("<user> needs <service> with <labels>"), calculating component allocations
+// ResolveAllDependencies takes policy as input and calculates PolicyResolution (desired state) as output.
+//
+// It resolves all recorded service consumption declarations ("<user> needs <contract> with <labels>"), calculating
+// which component have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
+// it can be rendered by the engine diff/apply by deploying/configuring required components/containers in the cloud.
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *event.Log, error) {
 	var semaphore = make(chan int, ThreadPoolSize)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)

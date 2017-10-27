@@ -2,9 +2,11 @@ package resolve
 
 import "github.com/Aptomi/aptomi/pkg/errors"
 
-// CriticalError represents a critical error inside the engine
-// If an error gets wrapped into a critical error, then it signals the engine to stop policy processing and report an error
-// If an error doesn't get wrapped into this critical error, then the engine will just say that current dependency can't be fulfilled and move on to other dependencies
+// CriticalError represents a critical error inside the engine.
+// If a critical error occurs, it signals the engine to stop policy processing and fail policy resolution with an error.
+// If a non-critical error occurs, then the engine will skip the current declaration of service consumption (the one
+// that is currently being processed) and proceed with policy resolution, moving on to the remaining declarations of
+// service consumption
 type CriticalError struct {
 	*errors.ErrorWithDetails
 	logged bool

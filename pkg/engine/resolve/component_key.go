@@ -14,8 +14,16 @@ const componentUnresolvedName = "unknown"
 // componentRootName is a name of component for service entry (which in turn consists of components)
 const componentRootName = "root"
 
-// ComponentInstanceKey is a struct representing a key for the component instance and the fields it consists of
-// When adding keys to this method, don't forget to modify the constructor and copy routines
+// ComponentInstanceKey is a key for component instance. During policy resolution every component instance gets
+// assigned a unique string key. It's important to form those keys correctly, so that we can make actual comparison
+// of actual state (components with their keys) and desired state (components with their keys).
+//
+// Currently, component keys are formed from multiple parameters as follows.
+// Cluster gets included as a part of the key (components running on different clusters must have different keys).
+// Namespace gets included as a part of the key (components from different namespaces must have different keys).
+// Contract, Context (with allocation keys), Service get included as a part of the key (Service must be within the same namespace as Contract).
+// ComponentName gets included as a part of the key. For service-level component instances, ComponentName is
+// set to componentRootName, while for all component instances within a service an actual Component.Name is used.
 type ComponentInstanceKey struct {
 	// cached version of component key
 	key string

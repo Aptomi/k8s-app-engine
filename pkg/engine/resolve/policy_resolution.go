@@ -6,16 +6,18 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// PolicyResolution contains resolution data for the policy
-// When adding new fields to this object, it's crucial to modify appendData() method as well (!)
+// PolicyResolution contains resolution data for the policy. It essentially represents the desired state calculated
+// by policy resolver. It contains a calculated map of component instances with their data, information about
+// resolved service consumption declarations, as well as processing order to components in which they have to be
+// instantiated/updated/deleted.
 type PolicyResolution struct {
-	// resolved component instances: componentKey -> componentInstance
+	// Resolved component instances: componentKey -> componentInstance
 	ComponentInstanceMap map[string]*ComponentInstance
 
-	// resolved dependencies: dependencyID -> serviceKey
+	// Resolved dependencies: dependencyID -> serviceKey
 	DependencyInstanceMap map[string]string
 
-	// resolved component processing order in which components/services have to be processed
+	// Resolved component processing order in which components/services have to be processed
 	componentProcessingOrderHas map[string]bool
 	ComponentProcessingOrder    []string
 }
