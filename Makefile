@@ -87,9 +87,9 @@ fmt:
 .PHONY: lint
 lint: prepare_gometalinter
 ifdef JENKINS_HOME
-	${GOENV} gometalinter --config=gometalinter.json --deadline=180s --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
+	${GOENV} gometalinter --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
 else
-	${GOENV} gometalinter --concurrency=2 --config=gometalinter.json --deadline=180s ./pkg/... ./cmd/...
+	${GOENV} gometalinter --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
 endif
 
 .PHONY: clean

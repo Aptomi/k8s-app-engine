@@ -1,4 +1,5 @@
 {
+  "Deadline": "180s",
   "Enable": [
     "megacheck",
     "interfacer",
@@ -18,5 +19,9 @@
     "vetshadow",
     "gotype"
   ],
-  "Cyclo": 20
+  "Cyclo": 20,
+  "Exclude": [
+    "vendor",
+    "webui"
+  ]
 }
