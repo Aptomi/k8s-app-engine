@@ -21,7 +21,7 @@ TODO: Picture, where it's in the stack
 - [User Guide](#user-guide)
   - [Installation](#installation)
   - [Configuring LDAP](#configuring-ldap)
-  - [Getting Started](#getting-started)
+  - [Getting Started & Examples](#getting-started--examples)
   - [How It Works](#how-it-works)
   - [Aptomi language](#aptomi-language)
 - [Dev Guide](#dev-guide)
@@ -68,7 +68,7 @@ start with LDAP, which is also required by Aptomi examples and smoke tests.
 1. LDAP Server with sample users is provided in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker)
 2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed, follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect
 
-### Getting Started
+### Getting Started & Examples
 Once Aptomi is installed, you can get started by running the following examples:
 
 Example    | Description  | Diagram
