@@ -124,7 +124,7 @@ type errorNode struct {
 
 // Returns unique node identifier
 func (node errorNode) key() string {
-	return keyEscape(strings.Join([]string{"error", fmt.Sprintf("%p", node.err)}, object.KeySeparator))
+	return keyEscape(strings.Join([]string{"error", fmt.Sprintf("%p", node.err)}, object.KeySeparator)) // nolint: vet
 }
 
 // Renders itself into a graph
