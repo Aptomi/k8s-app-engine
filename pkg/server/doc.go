@@ -1,2 +1,3 @@
-// Package server implements Aptomi server. It serves API and UI calls, as well as does policy enforcement.
+// Package server implements Aptomi server, which serves UI/API, performs policy resolution, as well as does
+// continuous state enforcement.
 package server
