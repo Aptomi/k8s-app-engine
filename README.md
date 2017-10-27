@@ -57,7 +57,7 @@ Example    | Description
 -----------|-------------
 [Example 1](examples/01/) | Description of Example 1 
 [Example 2](examples/02/) | Description of Example 2
-[Example 3](examples/03/) | Description of Example 3
+[Example 3](examples/03-twitter-analytics) | Twitter Analytics Application
 
 ### How It Works
 TODO: architecture diagrams
