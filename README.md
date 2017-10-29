@@ -41,7 +41,7 @@ TODO: Picture, where it's in the stack
 - **Easy way to deploy and manage complex applications**
   - TODO: link to a diagram of a complex application
 - **Run on top of any container platform**
-  - k8s, OpenShift, AWS ECS, GKE, Docker Datacenter, Mesos
+  - k8s, OpenShift (with support coming for AWS ECS, GKE, Docker Datacenter, Mesos)
 - **Friendly for Dev and Ops teams**
   - Keep using your existing application templates (Helm, k8s YAMLs, ksonnet, Ansible, etc)
   - Speak services, not containers. Collaborate between organizations and rely on services published by other teams
@@ -149,7 +149,7 @@ List of areas where we could use help:
 - Also, see [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
 
 ### Roadmap
-We will soon pusblish the list of items for Q4 2017 and Q1 2018. In the meantime,
+We will soon publish the list of items for Q4 2017 and Q1 2018. In the meantime,
 [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11) is a good place to look at the roadmap items
 which are being considered.
 
