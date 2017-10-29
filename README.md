@@ -4,11 +4,13 @@
 
 TODO: add slack, email? web site?
 
-Aptomi is a project that simplifies roll-out, operation and control of microservice-based applications. Policy-based service exchange enables individual teams to put their microservices on auto pilot and control service consumption, while providing insights and contextual visibility.
+Aptomi simplifies roll-out, operation and control of complex container-based applications. Instead of dealing with
+thousands of individual containers, Dev and Ops can now talk services. Service-based approach enables Dev to move
+faster, while providing control and insights/contextual visibility to Ops.
 
-Aptomi is particularly useful in environments with multiple teams, clouds, environments and data centers, where policy-based management plays an important role in operating large decentralized infrastructure.
-
-Aptomi’s primary focus is Docker and Kubernetes, but it can work on any environment regardless of container runtime and container orchestration technologies.
+It is particularly useful in environments with multiple teams, clouds and data centers, where intent-based management
+plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
+designed to work with any container runtime and container orchestration technologies.
 
 TODO: Picture, where it's in the stack
 
@@ -28,8 +30,6 @@ TODO: Picture, where it's in the stack
   - [Building From Source](#building-from-source)
   - [Tests & Linters](#tests--linters)
   - [How to contribute](#how-to-contribute)
-  - [Provided scripts](#provided-scripts)
-  - [How to set up demo environment on Google Cloud](#how-to-set-up-demo-environment-on-google-cloud)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -60,7 +60,7 @@ TODO: Picture, where it's in the stack
 ## User Guide
 
 ### Installation
-TODO: "go get", script, docker container? it need to have clients, graphviz, etc
+TODO: "go get", script, docker container? it needs to have clients, graphviz, etc
 
 ### Configuring LDAP
 Aptomi needs to be configured with user data source in order to retrieve their labels/properties. It's recommended to
@@ -140,21 +140,3 @@ List of areas where we could use help:
 - Adding support for additional cloud providers (AWS ECS, GKE, Docker Datacenter, Mesos)
 - ... ... ...
 - See [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
-
-### Provided scripts
-* `./tools/demo-gke.sh` - to set up 2 k8s clusters on GKE for demo. supports `up`, `down`, or `status`
-
-### How to set up demo environment on Google Cloud
-1. ```brew install kubernetes-cli kubernetes-helm```
-  * Do we still need this, in addition to `./tools/install-clients.sh`?
-1. ```curl https://sdk.cloud.google.com | bash```
-1. Create new project in https://console.cloud.google.com/
-1. ```gcloud auth login```
-1. ```gcloud config set project <YOUR_PROJECT_ID>```
-1. https://console.cloud.google.com/ -> API Manager -> Enable API
-  1. Google Container Engine API
-  1. Google Compute Engine API
-1. ```./tools/gke-demo.sh up```
-1. ```./tools/gke-demo.sh status```
-1. Run demo (see README_DEMO.md for instructions)
-1. ```./tools/gke-demo.sh down``` - don't forget to destroy your clusters, so you don't continue to get billed for them
