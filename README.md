@@ -1,10 +1,13 @@
 ![aptomi Logo](aptomi-logo.png)
 
-[![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi - make test)](https://ci.aptomi.io/job/aptomi%20-%20make%20test/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
+[![Build Status](https://ci.aptomi.io/job/aptomi.io%20-%20build%20and%20publish/badge/icon)](https://ci.aptomi.io/job/aptomi.io%20-%20build%20and%20publish/)
+[![Coverage Status](https://coveralls.io/repos/github.com/Aptomi/aptomi/badge.svg?branch=master)](https://coveralls.io/github.com/Aptomi/aptomi?branch=master)
+[![Godoc](https://godoc.org/github.com/Aptomi/aptomi?status.svg)](https://godoc.org/github.com/Aptomi/aptomi)
+[![Release](https://img.shields.io/github/release/aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/releases/latest)
+[![Slack Status](https://slack.yourdomain.com/badge.svg)](https://yourdomain.com)
 
-TODO: add slack, email? web site?
-
-Aptomi simplifies roll-out, operation and control of complex container-based applications. Instead of dealing with
+[Aptomi](http://aptomi.io) simplifies roll-out, operation and control of complex container-based applications. Instead of dealing with
 thousands of individual containers, Dev and Ops can now talk services. Service-based approach enables Dev to move
 faster, while providing control and insights/contextual visibility to Ops.
 
@@ -28,8 +31,9 @@ TODO: Picture, where it's in the stack
   - [Aptomi language](#aptomi-language)
 - [Dev Guide](#dev-guide)
   - [Building From Source](#building-from-source)
-  - [Tests & Linters](#tests--linters)
+  - [Tests & Code Validation](#tests--code-validation)
   - [How to contribute](#how-to-contribute)
+  - [Roadmap](#roadmap)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -120,23 +124,33 @@ To build the binary:
 make 
 ```
 
-### Tests & Linters
+### Tests & Code Validation
 
-Command    | Target          | LDAP Required
+Command    | Action          | LDAP Required
 -----------|-----------------|--------------
 ```make test```    | Unit tests | No
 ```make alltest``` | Integration + Unit tests | Yes
 ```make smoke```   | Smoke tests + Integration + Unit tests | Yes
+```make profile-engine```   | Profile engine for CPU usage | No
+```make coverage```   | Calculate code coverage by unit tests | No
+```make coverage-full```   | Calculate code coverage by unit & integration tests | Yes
 
-Command     | Target          | Description
+Command     | Action          | Description
 ------------|-----------------|--------------
-```make fmt```  | Format code | Re-formats all code according to Go standards
+```make fmt```  | Re-format code | Re-formats all code according to Go standards
 ```make lint``` | Examine code | Run linters to examine Go source code and reports suspicious constructs
 
 ### How to contribute
-TODO: write something about it
+Report a bug. Send us a pull request.
 
 List of areas where we could use help:
+- Feedback from Dev & Ops teams on service & rule definitions
 - Adding support for additional cloud providers (AWS ECS, GKE, Docker Datacenter, Mesos)
-- ... ... ...
-- See [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
+- Also, see [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
+
+### Roadmap
+We will soon pusblish the list of items for Q4 2017 and Q1 2018. In the meantime,
+[Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11) is a good place to look at the roadmap items
+which are being considered.
+
+If you have any questions, please contact us on Slack.
