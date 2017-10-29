@@ -22,7 +22,7 @@ TODO: Picture, where it's in the stack
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Features](#features)
+- [Features & Benefits](#features--benefits)
 - [User Guide](#user-guide)
   - [Installation](#installation)
   - [Configuring LDAP](#configuring-ldap)
@@ -37,7 +37,7 @@ TODO: Picture, where it's in the stack
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Features
+## Features & Benefits
 - **Easy way to deploy and manage complex applications**
   - TODO: link to a diagram of a complex application
 - **Run on top of any container platform**
