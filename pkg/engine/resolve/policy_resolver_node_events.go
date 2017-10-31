@@ -16,36 +16,28 @@ import (
 
 func (node *resolutionNode) errorUserDoesNotExist() error {
 	return errors.NewErrorWithDetails(
-		fmt.Sprintf("Dependency refers to non-existing user: "+node.dependency.UserID),
+		fmt.Sprintf("Dependency refers to non-existing user: %s", node.dependency.User),
 		errors.Details{},
 	)
 }
 
 func (node *resolutionNode) errorContractDoesNotExist() error {
 	return errors.NewErrorWithDetails(
-		fmt.Sprintf("Dependency refers to non-existing contract: "+node.dependency.Contract),
+		fmt.Sprintf("Dependency refers to non-existing contract: %s", node.dependency.Contract),
 		errors.Details{},
 	)
 }
 
 func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
-	userName := node.dependency.UserID
-	if node.user != nil {
-		userName = node.user.Name
-	}
 	return errors.NewErrorWithDetails(
-		fmt.Sprintf("Rules do not allow dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Contract, node.contractName, node.depth),
+		fmt.Sprintf("Rules do not allow dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.dependency.User, node.dependency.Contract, node.contractName, node.depth),
 		errors.Details{},
 	)
 }
 
 func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
-	userName := node.dependency.UserID
-	if node.user != nil {
-		userName = node.user.Name
-	}
 	return errors.NewErrorWithDetails(
-		fmt.Sprintf("User '%s' not allowed to consume service: %s", userName, err),
+		fmt.Sprintf("User '%s' not allowed to consume service: %s", node.dependency.User, err),
 		errors.Details{},
 	)
 }
@@ -181,16 +173,12 @@ func (node *resolutionNode) errorServiceCycleDetected() error {
 */
 
 func (node *resolutionNode) logStartResolvingDependency() {
-	userName := node.dependency.UserID
-	if node.user != nil {
-		userName = node.user.Name
-	}
 	if node.depth == 0 {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(event.Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", userName, node.dependency.Contract)
+		node.eventLog.WithFields(event.Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", node.dependency.User, node.dependency.Contract)
 	} else {
 		// recursively processing sub-dependencies
-		node.eventLog.WithFields(event.Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", userName, node.dependency.Contract, node.contractName, node.depth)
+		node.eventLog.WithFields(event.Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
@@ -199,7 +187,7 @@ func (node *resolutionNode) logStartResolvingDependency() {
 func (node *resolutionNode) logLabels(labelSet *lang.LabelSet, scope string) {
 	secretCnt := 0
 	if node.user != nil {
-		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserID(node.user.ID))
+		secretCnt = len(node.resolver.externalData.SecretLoader.LoadSecretsByUserName(node.user.Name))
 	}
 	node.eventLog.WithFields(event.Fields{
 		"labels": labelSet.Labels,

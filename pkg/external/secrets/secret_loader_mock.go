@@ -13,8 +13,8 @@ func NewSecretLoaderMock() *SecretLoaderMock {
 }
 
 // AddSecret adds a secret for a given user
-func (loader *SecretLoaderMock) AddSecret(userID string, name string, value string) {
-	loader.secrets[userID][name] = value
+func (loader *SecretLoaderMock) AddSecret(userName string, secretName string, secretValue string) {
+	loader.secrets[userName][secretName] = secretValue
 }
 
 // LoadSecretsAll loads all secrets
@@ -22,7 +22,7 @@ func (loader *SecretLoaderMock) LoadSecretsAll() map[string]map[string]string {
 	return loader.secrets
 }
 
-// LoadSecretsByUserID loads secrets for a single user
-func (loader *SecretLoaderMock) LoadSecretsByUserID(userID string) map[string]string {
-	return loader.secrets[userID]
+// LoadSecretsByUserName loads secrets for a single user
+func (loader *SecretLoaderMock) LoadSecretsByUserName(userName string) map[string]string {
+	return loader.secrets[userName]
 }

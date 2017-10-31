@@ -17,7 +17,7 @@ var DependencyObject = &object.Info{
 type Dependency struct {
 	Metadata
 
-	UserID   string `validate:"required"`
+	User     string `validate:"required"`
 	Contract string `validate:"required"`
 	Labels   map[string]string
 }

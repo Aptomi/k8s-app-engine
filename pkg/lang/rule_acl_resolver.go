@@ -62,7 +62,7 @@ func (privileges *Privileges) getObjectPrivileges(obj object.Base) *Privilege {
 // - namespace admin for a set of given namespaces
 // - service consumer for a set of given namespaces
 func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]bool, error) {
-	roleMapCached, ok := resolver.roleMapCache.Load(user.ID)
+	roleMapCached, ok := resolver.roleMapCache.Load(user.Name)
 	if ok {
 		return roleMapCached.(map[string]map[string]bool), nil
 	}
@@ -78,7 +78,7 @@ func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]b
 		for _, rule := range resolver.rules {
 			matched, err := rule.Matches(params, resolver.cache)
 			if err != nil {
-				return nil, fmt.Errorf("unable to resolve role for user '%s': %s", user.ID, err)
+				return nil, fmt.Errorf("unable to resolve role for user '%s': %s", user.Name, err)
 			}
 			if matched {
 				rule.ApplyActions(result)
@@ -86,6 +86,6 @@ func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]b
 		}
 	}
 
-	resolver.roleMapCache.Store(user.ID, result.RoleMap)
+	resolver.roleMapCache.Store(user.Name, result.RoleMap)
 	return result.RoleMap, nil
 }

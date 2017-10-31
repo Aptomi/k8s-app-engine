@@ -317,7 +317,7 @@ func (gen *PolicyGenerator) makeDependencies() {
 				Namespace: "main",
 				Name:      "dependency-" + strconv.Itoa(i),
 			},
-			UserID:   "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
+			User:     "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
 			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.services)),
 		}
 		gen.addObject(dependency)
@@ -355,19 +355,18 @@ func (loader *UserLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
 		userMap := make(map[string]*lang.User)
 		for i := 0; i < loader.users; i++ {
 			user := &lang.User{
-				ID:     "user-" + strconv.Itoa(i),
 				Name:   "user-" + strconv.Itoa(i),
 				Labels: loader.labels,
 				Admin:  true,
 			}
-			userMap[user.ID] = user
+			userMap[user.Name] = user
 		}
 		loader.cachedUsers = &lang.GlobalUsers{Users: userMap}
 	}
 	return loader.cachedUsers
 }
 
-func (loader *UserLoaderImpl) LoadUserByID(id string) *lang.User {
+func (loader *UserLoaderImpl) LoadUserByName(id string) *lang.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
@@ -382,7 +381,7 @@ func NewSecretLoaderImpl() *SecretLoaderImpl {
 	return &SecretLoaderImpl{}
 }
 
-func (loader *SecretLoaderImpl) LoadSecretsByUserID(string) map[string]string {
+func (loader *SecretLoaderImpl) LoadSecretsByUserName(string) map[string]string {
 	return nil
 }
 

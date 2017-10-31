@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -31,8 +32,8 @@ func (loader *UserLoaderFromFile) LoadUsersAll() *lang.GlobalUsers {
 		loader.users = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
 		t := loadUsersFromFile(loader.fileName)
 		for _, u := range t {
-			loader.users.Users[u.ID] = u
-			if _, exist := loader.domainAdminOverrides[u.ID]; exist {
+			loader.users.Users[u.Name] = u
+			if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
 				u.Admin = true
 			}
 		}
@@ -40,9 +41,9 @@ func (loader *UserLoaderFromFile) LoadUsersAll() *lang.GlobalUsers {
 	return loader.users
 }
 
-// LoadUserByID loads a single user by ID
-func (loader *UserLoaderFromFile) LoadUserByID(id string) *lang.User {
-	return loader.LoadUsersAll().Users[id]
+// LoadUserByName loads a single user by name
+func (loader *UserLoaderFromFile) LoadUserByName(name string) *lang.User {
+	return loader.LoadUsersAll().Users[name]
 }
 
 // Summary returns summary as string

@@ -30,7 +30,7 @@ func (n dependencyNode) getID() string {
 }
 
 func (n dependencyNode) getLabel() string {
-	return n.b.externalData.UserLoader.LoadUserByID(n.dependency.UserID).Name
+	return n.dependency.User
 }
 
 /*

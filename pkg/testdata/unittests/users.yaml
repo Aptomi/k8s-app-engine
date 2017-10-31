@@ -1,5 +1,4 @@
-- id: 1
-  name: Alice
+- name: Alice
   labels:
     priority: 3
     org: corporate_it
@@ -8,8 +7,7 @@
     prod: "no"
     changinglabel: 123
 
-- id: 2
-  name: Bob
+- name: Bob
   labels:
     priority: 20
     org: corporate_it
@@ -18,8 +16,7 @@
     prod: "yes"
     changinglabel: 123
 
-- id: 3
-  name: Carol
+- name: Carol
   labels:
     priority: 20
     org: corporate_it
@@ -30,8 +27,7 @@
     changinglabel: 123
 
 # Special user to test partial matching (it has access to kafka, but not to zookeeper that kafka depends on)
-- id: 4
-  name: Dave
+- name: Dave
   labels:
     priority: 3
     org: corporate_it
@@ -42,8 +38,7 @@
     changinglabel: 123
 
 # Special user to test policy diff
-- id: 5
-  name: Elena
+- name: Elena
   labels:
     priority: 200
     org: corporate_it
@@ -53,8 +48,7 @@
     changinglabel: 123
 
 # Special user to test global ops flag
-- id: 6
-  name: Sam
+- name: Sam
   labels:
     org: corporate_it
     is_operator: true
@@ -62,5 +56,4 @@
     team: global-ops-team
 
 # Special user without any labels
-- id: 7
-  name: Noname
+- name: Noname

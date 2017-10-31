@@ -11,7 +11,6 @@ func makeUserLoader(offset, users int) UserLoader {
 	loader := NewUserLoaderMock()
 	for i := 0; i < users; i++ {
 		loader.AddUser(&lang.User{
-			ID:   strconv.Itoa(i + offset),
 			Name: strconv.Itoa(i + offset),
 		})
 	}

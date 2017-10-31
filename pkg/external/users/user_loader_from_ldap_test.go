@@ -39,11 +39,10 @@ func TestUserLoaderFromLDAP(t *testing.T) {
 	assert.Equal(t, len(usersDir.Users), len(usersLDAP.Users), "Correct number of users should be loaded from LDAP")
 
 	for _, uDir := range usersDir.Users {
-		id := uDir.Labels["ldapDN"]
-		uLDAP := usersLDAP.Users[id]
+		uLDAP := usersLDAP.Users[uDir.Name]
 
 		// check that user is found
-		if !assert.NotNil(t, uLDAP, fmt.Sprintf("LDAP user %s should be found", id)) {
+		if !assert.NotNil(t, uLDAP, fmt.Sprintf("LDAP user %s should be found", uDir.Name)) {
 			continue
 		}
 
@@ -65,11 +64,10 @@ func TestUserLoaderFromLDAPLoadByID(t *testing.T) {
 	usersDir := userLoaderDir.LoadUsersAll()
 
 	for _, uDir := range usersDir.Users {
-		id := uDir.Labels["ldapDN"]
-		uLDAP := userLoaderLDAP.LoadUserByID(id)
+		uLDAP := userLoaderLDAP.LoadUserByName(uDir.Name)
 
 		// check that user is found
-		if !assert.NotNil(t, uLDAP, fmt.Sprintf("LDAP user %s should be found", id)) {
+		if !assert.NotNil(t, uLDAP, fmt.Sprintf("LDAP user %s should be found", uDir.Name)) {
 			continue
 		}
 

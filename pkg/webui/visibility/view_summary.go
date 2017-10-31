@@ -28,19 +28,19 @@ func (view SummaryView) getGlobalDependenciesData() interface{} {
 	// table only exists for global ops people
 	result := lineEntryList{}
 	/*
-		if !view.revision.UserLoader.LoadUserByID(view.userID).IsGlobalOps() {
+		if !view.revision.UserLoader.LoadUserByName(view.userID).IsGlobalOps() {
 			return result
 		}
 		for _, dependency := range view.revision.Policy.Dependencies.DependenciesByID {
 			entry := lineEntry{
 				"resolved":        dependency.Resolved,
-				"userName":        view.revision.UserLoader.LoadUserByID(dependency.UserID).Name,
+				"userName":        view.revision.UserLoader.LoadUserByName(dependency.UserID).Name,
 				"serviceName":     dependency.Service,
 				"contextWithKeys": view.getResolvedContextNameByDep(dependency),
 				"cluster":         view.getResolvedClusterNameByDep(dependency),
 				"stats":           view.getDependencyStats(dependency),
 				"dependencyId":    dependency.GetID(),
-				"id":              view.revision.UserLoader.LoadUserByID(dependency.UserID).Name, // entries will be sorted by ID
+				"id":              view.revision.UserLoader.LoadUserByName(dependency.UserID).Name, // entries will be sorted by ID
 			}
 			result = append(result, entry)
 		}
@@ -53,7 +53,7 @@ func (view SummaryView) getGlobalRulesData() interface{} {
 	// table only exists for global ops people
 	result := lineEntryList{}
 	/*
-		if !view.revision.UserLoader.LoadUserByID(view.userID).IsGlobalOps() {
+		if !view.revision.UserLoader.LoadUserByName(view.userID).IsGlobalOps() {
 			return result
 		}
 		for _, ruleList := range view.revision.Policy.Rules.Rules {

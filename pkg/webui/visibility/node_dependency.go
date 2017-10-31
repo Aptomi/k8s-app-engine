@@ -46,13 +46,12 @@ func (n dependencyNode) isItMyID(id string) string {
 }
 
 func (n dependencyNode) getLabel() string {
-	userName := n.userLoader.LoadUserByID(n.dependency.UserID).Name
 	if n.short {
 		// for service owner view, don't display much other than a user name
-		return userName
+		return n.dependency.User
 	}
 	// for consumer view - display full dependency info "user name -> contract"
-	return fmt.Sprintf("%s \u2192 %s", userName, n.dependency.Contract)
+	return fmt.Sprintf("%s \u2192 %s", n.dependency.User, n.dependency.Contract)
 }
 
 func (n dependencyNode) getEdgeLabel(dst graphNode) string {

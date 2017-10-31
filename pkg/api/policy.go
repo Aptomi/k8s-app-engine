@@ -32,7 +32,7 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response 
 
 	username := r.Header.Get("Username")
 	// todo check empty username
-	user := a.externalData.UserLoader.LoadUserByID(username)
+	user := a.externalData.UserLoader.LoadUserByName(username)
 	// todo check user == nil
 
 	// Verify ACL for updated objects

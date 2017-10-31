@@ -11,16 +11,14 @@ func TestUserLoaderFromFile(t *testing.T) {
 	// check user names
 	users := userLoader.LoadUsersAll()
 	assert.Equal(t, 7, len(users.Users), "Correct number of users should be loaded")
-	assert.Equal(t, "Alice", users.Users["1"].Name, "Alice user should be loaded")
-	assert.Equal(t, "Bob", users.Users["2"].Name, "Bob user should be loaded")
-	assert.Equal(t, "Carol", users.Users["3"].Name, "Carol user should be loaded")
-	assert.Equal(t, "Dave", users.Users["4"].Name, "Dave user should be loaded")
-	assert.Equal(t, "Elena", users.Users["5"].Name, "Elena user should be loaded")
-	assert.Equal(t, "Sam", users.Users["6"].Name, "Sam user should be loaded")
-	assert.Equal(t, "Noname", users.Users["7"].Name, "Sam user should be loaded")
+
+	names := []string{"Alice", "Bob", "Carol", "Dave", "Elena", "Sam", "Noname"}
+	for _, name := range names {
+		assert.Equal(t, name, users.Users[name].Name, "%s user should be loaded", name)
+	}
 
 	// check user labels
-	userAlice := userLoader.LoadUserByID("1")
+	userAlice := userLoader.LoadUserByName("Alice")
 	assert.Equal(t, "Alice", userAlice.Name, "Alice should have correct name when loaded by ID")
 	assert.Equal(t, 6, len(userAlice.Labels), "Alice should have correct label count")
 	assert.Equal(t, "yes", userAlice.Labels["dev"], "Alice should have dev='yes' label")

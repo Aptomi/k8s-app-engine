@@ -32,7 +32,7 @@ func (view *PolicyView) AddObject(obj object.Base) error {
 		return err
 	}
 	if !privilege.Manage {
-		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.Name, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
 	return view.Policy.AddObject(obj)
 }
@@ -45,7 +45,7 @@ func (view *PolicyView) ViewObject(obj object.Base) error {
 		return err
 	}
 	if !privilege.View {
-		return fmt.Errorf("user '%s' doesn't have ACL permissions to view object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return fmt.Errorf("user '%s' doesn't have ACL permissions to view object '%s/%s/%s'", view.User.Name, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
 	return nil
 }
@@ -58,7 +58,7 @@ func (view *PolicyView) ManageObject(obj object.Base) error {
 		return err
 	}
 	if !privilege.Manage {
-		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.ID, obj.GetNamespace(), obj.GetKind(), obj.GetName())
+		return fmt.Errorf("user '%s' doesn't have ACL permissions to manage object '%s/%s/%s'", view.User.Name, obj.GetNamespace(), obj.GetKind(), obj.GetName())
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (view *PolicyView) CanConsume(service *Service) (bool, error) {
 		return false, err
 	}
 	if !privilege.Manage {
-		return false, fmt.Errorf("user '%s' doesn't have ACL permissions to consume service '%s/%s'", view.User.ID, service.GetNamespace(), service.GetName())
+		return false, fmt.Errorf("user '%s' doesn't have ACL permissions to consume service '%s/%s'", view.User.Name, service.GetNamespace(), service.GetName())
 	}
 	return true, nil
 }

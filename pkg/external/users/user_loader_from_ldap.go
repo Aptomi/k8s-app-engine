@@ -34,8 +34,8 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 		loader.users = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
 		t := loader.ldapSearch()
 		for _, u := range t {
-			loader.users.Users[u.ID] = u
-			if _, exist := loader.domainAdminOverrides[strings.ToLower(u.ID)]; exist {
+			loader.users.Users[u.Name] = u
+			if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
 				u.Admin = true
 			}
 		}
@@ -43,9 +43,9 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 	return loader.users
 }
 
-// LoadUserByID loads a single user by ID
-func (loader *UserLoaderFromLDAP) LoadUserByID(id string) *lang.User {
-	return loader.LoadUsersAll().Users[id]
+// LoadUserByName loads a single user by name
+func (loader *UserLoaderFromLDAP) LoadUserByName(name string) *lang.User {
+	return loader.LoadUsersAll().Users[name]
 }
 
 // Summary returns summary as string
@@ -77,7 +77,6 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*lang.User {
 	result := []*lang.User{}
 	for _, entry := range searchResult.Entries {
 		user := &lang.User{
-			ID:     entry.DN,
 			Name:   entry.GetAttributeValue(loader.cfg.LabelToAttributes["name"]),
 			Labels: make(map[string]string),
 		}

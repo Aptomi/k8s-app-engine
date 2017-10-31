@@ -25,7 +25,7 @@ func isUnauthorized(r *http.Request) bool {
 	if len(userID) <= 0 {
 		return true
 	}
-	user := NewAptomiUserLoader().LoadUserByID(userID)
+	user := NewAptomiUserLoader().LoadUserByName(userID)
 	return user == nil
 }
 
@@ -43,7 +43,7 @@ func requireAuth(handler http.HandlerFunc) http.HandlerFunc {
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("logUserID")
 	userID = handleShortcutDemoIDs(userID)
-	user := NewAptomiUserLoader().LoadUserByID(userID)
+	user := NewAptomiUserLoader().LoadUserByName(userID)
 
 	if user != nil {
 		http.SetCookie(w, &http.Cookie{Name: "logUserID", Value: userID, Path: "/"})

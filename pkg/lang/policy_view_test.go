@@ -19,9 +19,9 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 
 	// users which will be used for viewing policy
 	users := []*User{
-		{ID: "1", Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
-		{ID: "2", Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
-		{ID: "3", Name: "3", Labels: map[string]string{"is_consumer": "true"}},
+		{Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
+		{Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
+		{Name: "3", Labels: map[string]string{"is_consumer": "true"}},
 	}
 
 	// check AddObject()
@@ -80,9 +80,9 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 func TestPolicyViewManageACLRules(t *testing.T) {
 	// users which will be used for viewing policy
 	users := []*User{
-		{ID: "1", Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
-		{ID: "2", Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
-		{ID: "3", Name: "3", Labels: map[string]string{"is_consumer": "true"}},
+		{Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
+		{Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
+		{Name: "3", Labels: map[string]string{"is_consumer": "true"}},
 	}
 
 	// check AddObject()

@@ -1,8 +1,8 @@
 - metadata:
     kind: dependency
     namespace: main
-    name: alice_tests_new_code_for_twitter_stats_in_stage
-  userid: cn=Alice,ou=people,o=aptomiOrg
+    name: alice_stage
+  user: Alice
   contract: twitter_stats
   labels:
       # Deploy new version of visualization code (pass image tag for container)

@@ -1,8 +1,7 @@
 # This file is used in LDAP integration tests
 # All users in LDAP are compared to this reference set of users, making sure that user retrieval and label mapping works correctly
 
-- id: 100
-  name: Alice
+- name: Alice
   labels:
     description: Alice (Developer/Service Consumer)
     short-description: Dev
@@ -10,8 +9,7 @@
     ldapDN: cn=Alice,ou=people,o=aptomiOrg
     deactivated: false
 
-- id: 101
-  name: Bob
+- name: Bob
   labels:
     description: Bob (Developer/Service Consumer)
     short-description: Dev
@@ -19,8 +17,7 @@
     ldapDN: cn=Bob,ou=people,o=aptomiOrg
     deactivated: false
 
-- id: 102
-  name: Carol
+- name: Carol
   labels:
     description: Carol (Developer/Service Consumer)
     short-description: Dev
@@ -29,8 +26,7 @@
     ldapDN: cn=Carol,ou=people,o=aptomiOrg
     deactivated: false
 
-- id: 201
-  name: John
+- name: John
   labels:
     description: John (Ops for 'twitter-stats' service). He controls its sharing/consumption (prod/stage)
     short-description: Service Ops
@@ -40,8 +36,7 @@
     ldapDN: cn=John,ou=people,o=aptomiOrg
     deactivated: false
 
-- id: 202
-  name: Frank
+- name: Frank
   labels:
     description: Frank (Ops for 'analytics-pipeline' service). He controls its sharing/consumption (prod/stage)
     short-description: Service Ops
@@ -51,8 +46,7 @@
     ldapDN: cn=Frank,ou=people,o=aptomiOrg
     deactivated: false
 
-- id: 301
-  name: Sam
+- name: Sam
   labels:
     description: Sam (Global Ops). He controls global rules
     short-description: Global Ops

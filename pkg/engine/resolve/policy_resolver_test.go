@@ -215,7 +215,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService()
 	contract := b.AddContract(service, b.CriteriaTrue())
-	user := &lang.User{ID: "non-existing-user-123456789"}
+	user := &lang.User{Name: "non-existing-user-123456789"}
 	dependency := b.AddDependency(user, contract)
 
 	// dependency declared by non-existing consumer should not trigger a critical error

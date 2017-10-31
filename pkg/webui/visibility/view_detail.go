@@ -45,7 +45,7 @@ func NewDetails(userID string) interface{} {
 			r.Users = append([]*item{{"all", "All"}}, r.Users...)
 		}
 		for _, userID := range userIds {
-			r.Users = append(r.Users, &item{userID, revision.UserLoader.LoadUserByID(userID).Name})
+			r.Users = append(r.Users, &item{userID, revision.UserLoader.LoadUserByName(userID).Name})
 		}
 
 		// Dependencies
@@ -105,7 +105,7 @@ func NewDetails(userID string) interface{} {
 		}
 
 		// TODO: this will have to be changed when we implement roles & ACLs
-		if revision.UserLoader.LoadUserByID(userID).Labels["global_ops"] == "true" {
+		if revision.UserLoader.LoadUserByName(userID).Labels["global_ops"] == "true" {
 			r.Views = append(r.Views, &item{"globalops", "Global IT/Ops"})
 		}
 	*/

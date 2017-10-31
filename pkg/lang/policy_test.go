@@ -96,7 +96,7 @@ func makePolicyWithObjects() (string, *Policy) {
 				Namespace: namespace,
 				Name:      "dependency" + strconv.Itoa(i),
 			},
-			UserID:   "user" + strconv.Itoa(i),
+			User:     "user" + strconv.Itoa(i),
 			Contract: "contract" + strconv.Itoa(i),
 		})
 	}

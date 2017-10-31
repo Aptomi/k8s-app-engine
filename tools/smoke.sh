@@ -47,7 +47,7 @@ enforcer:
   disabled: true
 
 domainAdminOverrides:
-  "cn=Sam,ou=people,o=aptomiOrg": true
+  Sam: true
 
 users:
   ldap:
@@ -66,6 +66,8 @@ users:
         org: o
         short-description: role
         deactivated: deactivated
+
+secretsDir: ${POLICY_DIR}
 EOL
 
 aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
@@ -75,9 +77,9 @@ echo "Server PID: ${SERVER_PID}"
 
 sleep 3
 
-if aptomictl policy --username "cn=Alice,ou=people,o=aptomiOrg" --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>/dev/null ; then
+if aptomictl policy --username Alice --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>/dev/null ; then
     echo "Alice shouldn't be able to upload policy"
     exit 1
 fi
 
-aptomictl policy --username "cn=Sam,ou=people,o=aptomiOrg" --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>${CONF_DIR}/client.log
+aptomictl policy --username Sam --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>${CONF_DIR}/client.log

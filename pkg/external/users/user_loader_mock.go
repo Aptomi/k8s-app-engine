@@ -19,7 +19,7 @@ func NewUserLoaderMock() *UserLoaderMock {
 
 // AddUser adds a user into the mock structure
 func (loader *UserLoaderMock) AddUser(user *lang.User) {
-	loader.users.Users[user.ID] = user
+	loader.users.Users[user.Name] = user
 }
 
 // LoadUsersAll loads all users
@@ -27,9 +27,9 @@ func (loader *UserLoaderMock) LoadUsersAll() *lang.GlobalUsers {
 	return loader.users
 }
 
-// LoadUserByID loads a single user by ID
-func (loader *UserLoaderMock) LoadUserByID(id string) *lang.User {
-	return loader.users.Users[id]
+// LoadUserByName loads a single user by Name
+func (loader *UserLoaderMock) LoadUserByName(name string) *lang.User {
+	return loader.users.Users[name]
 }
 
 // Summary returns summary as string

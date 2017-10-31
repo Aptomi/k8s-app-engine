@@ -86,17 +86,16 @@ func (node *resolutionNode) proxyService(service *lang.Service) interface{} {
 
 // How user is visible from the policy language
 func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
-	return struct {
-		ID      interface{}
+	result := struct {
 		Name    interface{}
 		Labels  interface{}
 		Secrets interface{}
 	}{
-		ID:      user.ID,
 		Name:    user.Name,
 		Labels:  user.Labels,
-		Secrets: node.resolver.externalData.SecretLoader.LoadSecretsByUserID(user.ID),
+		Secrets: node.resolver.externalData.SecretLoader.LoadSecretsByUserName(user.Name),
 	}
+	return result
 }
 
 // How discovery tree is visible from the policy language

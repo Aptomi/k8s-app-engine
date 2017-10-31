@@ -1,8 +1,8 @@
 - metadata:
     kind: dependency
     namespace: main
-    name: ops_team_runs_twitter_stats_in_prod
-  userid: cn=John,ou=people,o=aptomiOrg
+    name: prod
+  user: John
   contract: twitter_stats
   labels:
     # Deploy specific version of tweeviz (image tag)

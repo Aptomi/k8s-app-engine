@@ -17,9 +17,9 @@ type SecretLoaderFromDir struct {
 	cachedSecrets map[string]map[string]string
 }
 
-// UserSecrets represents a user secret (ID, set of secrets)
+// UserSecrets represents a single user secret (user name and a map of secrets)
 type UserSecrets struct {
-	UserID  string
+	User    string
 	Secrets map[string]string
 }
 
@@ -45,16 +45,16 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 		for _, f := range files {
 			secrets := loadUserSecretsFromFile(f)
 			for _, secret := range secrets {
-				loader.cachedSecrets[secret.UserID] = secret.Secrets
+				loader.cachedSecrets[secret.User] = secret.Secrets
 			}
 		}
 	})
 	return loader.cachedSecrets
 }
 
-// LoadSecretsByUserID loads secrets for a single user
-func (loader *SecretLoaderFromDir) LoadSecretsByUserID(userID string) map[string]string {
-	return loader.LoadSecretsAll()[userID]
+// LoadSecretsByUserName loads secrets for a single user
+func (loader *SecretLoaderFromDir) LoadSecretsByUserName(userName string) map[string]string {
+	return loader.LoadSecretsAll()[userName]
 }
 
 // Loads secrets from file

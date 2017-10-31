@@ -21,14 +21,14 @@ type testCaseObjPrivileges struct {
 
 func (testCase aclTestCase) print(t *testing.T) {
 	if testCase.expected {
-		t.Logf("User '%s': expected role '%s' in namespace '%s'", testCase.user.ID, testCase.role.Name, testCase.namespace)
+		t.Logf("User '%s': expected role '%s' in namespace '%s'", testCase.user.Name, testCase.role.Name, testCase.namespace)
 	} else {
-		t.Logf("User '%s': expected NOT to have role '%s' in namespace '%s'", testCase.user.ID, testCase.role.Name, testCase.namespace)
+		t.Logf("User '%s': expected NOT to have role '%s' in namespace '%s'", testCase.user.Name, testCase.role.Name, testCase.namespace)
 	}
 }
 
 func (privileges testCaseObjPrivileges) print(t *testing.T, testCase aclTestCase) {
-	t.Logf("Object '%s' in namespace '%s', accessed by user '%s'", privileges.obj.GetKind(), privileges.obj.GetNamespace(), testCase.user.ID)
+	t.Logf("Object '%s' in namespace '%s', accessed by user '%s'", privileges.obj.GetKind(), privileges.obj.GetNamespace(), testCase.user.Name)
 }
 
 func runACLTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
@@ -114,7 +114,7 @@ func TestAclResolver(t *testing.T) {
 
 	testCases := []aclTestCase{
 		{
-			user:      &User{ID: "1", Labels: map[string]string{"is_domain_admin": "true"}},
+			user:      &User{Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
 			role:      domainAdmin,
 			namespace: namespaceAll,
 			expected:  true,
@@ -124,7 +124,7 @@ func TestAclResolver(t *testing.T) {
 			},
 		},
 		{
-			user:      &User{ID: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
+			user:      &User{Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
 			role:      namespaceAdmin,
 			namespace: "main",
 			expected:  true,
@@ -135,7 +135,7 @@ func TestAclResolver(t *testing.T) {
 			},
 		},
 		{
-			user:      &User{ID: "3", Labels: map[string]string{"is_consumer": "true"}},
+			user:      &User{Name: "3", Labels: map[string]string{"is_consumer": "true"}},
 			role:      serviceConsumer,
 			namespace: "main2",
 			expected:  true,
@@ -148,7 +148,7 @@ func TestAclResolver(t *testing.T) {
 			},
 		},
 		{
-			user:      &User{ID: "4", Labels: map[string]string{"name": "value"}},
+			user:      &User{Name: "4", Labels: map[string]string{"name": "value"}},
 			role:      nobody,
 			namespace: "main",
 			expected:  false,
@@ -167,7 +167,7 @@ func TestAclResolverAdminUser(t *testing.T) {
 	var rules = []*ACLRule{}
 	testCases := []aclTestCase{
 		{
-			user:      &User{ID: "1", Admin: true},
+			user:      &User{Name: "1", Admin: true},
 			role:      domainAdmin,
 			namespace: namespaceAll,
 			expected:  true,

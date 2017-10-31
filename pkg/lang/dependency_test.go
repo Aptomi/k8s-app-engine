@@ -14,7 +14,7 @@ func TestAddDependency(t *testing.T) {
 			Namespace: "main",
 			Name:      "dep_id_new",
 		},
-		UserID:   "612",
+		User:     "612",
 		Contract: "newcontract",
 	}
 

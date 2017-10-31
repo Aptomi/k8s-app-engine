@@ -1,8 +1,8 @@
 - metadata:
     kind: dependency
     namespace: main
-    name: bob_tests_twitter_stats_vis_in_stage
-  userid: cn=Bob,ou=people,o=aptomiOrg
+    name: bob_stage
+  user: Bob
   contract: twitter_stats
   labels:
       tsvisimage: demo-v61
