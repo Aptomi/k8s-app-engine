@@ -39,17 +39,18 @@ TODO: Picture, where it's in the stack
 
 ## Features & Benefits
 - **Easy way to deploy and manage complex applications**
-  - TODO: link to a diagram of a complex application
+  - See [example](examples/03-twitter-analytics/diagram.png) of a multi-service application based entirely on containers
 - **Run on top of any container platform**
   - k8s, OpenShift (with support coming for AWS ECS, GKE, Docker Datacenter, Mesos)
-- **Friendly for Dev and Ops teams**
+- **Friendly for Dev and Ops**
   - Keep using your existing application templates (Helm, k8s YAMLs, ksonnet, Ansible, etc)
-  - Speak services, not containers. Collaborate between organizations and rely on services published by other teams
-  - Easy changes to the running code -- seconds to propagate updated parameters to the underlying container infrastructure
-- **Lazy allocation of resources**
-  - Containers are running only when needed (i.e. when someone declared an intent to consume the corresponding service)
+  - Speak services, not containers. Collaborate between orgs and rely on services published by other teams
+  - Easy changes to the running code -- seconds to propagate updated parameters, relocate the whole stack to another cluster, restrict access, etc
 - **Continuous state enforcement**
   - Desired state of all services is rendered as a system and continuously validated/enforced 
+  - Built-in service discovery ensures all dependencies always are up to date    
+- **Lazy allocation of resources**
+  - Containers are running only when needed (i.e. when someone declared an intent to consume the corresponding service)
 - **Flexible rule engine. *See examples of user-defined rules:***
   - *Production Instances* get deployed to *us-west*, *Staging Instances* get deployed to *us-west*
   - *Web* and *Mobile* teams always share the same *small* flavor of *Analytics* service in *Staging*, while 
@@ -77,9 +78,9 @@ Once Aptomi is installed, you can get started by running the following examples:
 
 Example    | Description  | Diagram
 -----------|--------------|--------------
-[examples/01](examples/01) | Description of Example 1 | [Image for example #1](examples/01/diagram.png)  
-[examples/02](examples/02) | Description of Example 2 | [Image for example #2](examples/02/diagram.png)
-[examples/03-twitter-analytics](examples/03-twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Image for example #3](examples/03-twitter-analytics/diagram.png)
+[examples/01](examples/01) | Description of Example 1 | [Diagram for example #1](examples/01/diagram.png)  
+[examples/02](examples/02) | Description of Example 2 | [Diagram for example #2](examples/02/diagram.png)
+[examples/03-twitter-analytics](examples/03-twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Diagram for example #3](examples/03-twitter-analytics/diagram.png)
 
 ### How It Works
 TODO: architecture diagrams
