@@ -1,2 +1,2 @@
-// Package visualization implements Aptomi policy visualization using graphviz graphs, which can be saved as images.
+// Package visualization implements Aptomi policy & resolution data visualization using network-based diagrams for visjs
 package visualization
