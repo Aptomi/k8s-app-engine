@@ -15,14 +15,13 @@ It is particularly useful in environments with multiple teams, clouds and data c
 plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
 designed to work with any container runtime and container orchestration technologies.
 
-TODO: Picture, where it's in the stack
-
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
 - [Features & Benefits](#features--benefits)
+- [Where Aptomi is located in the stack](#where-aptomi-is-located-in-the-stack)
 - [User Guide](#user-guide)
   - [Installation](#installation)
   - [Configuring LDAP](#configuring-ldap)
@@ -60,7 +59,13 @@ TODO: Picture, where it's in the stack
     for all developers
 - **Insights & Contextual visibility**
   - Understand what services are running, why they were instantiated, visualize dependencies and impact of changes. No
-    need to deal with thousands of individual containers 
+    need to deal with thousands of individual containers
+    
+## Where Aptomi is located in the stack
+Aptomi sits in between CI/CD and container orchestration. Being in deployment path for applications, it can apply
+higher-level policy rules (see examples above) and configure the underlying infrastructure components accordingly. 
+
+![aptomi Logo](aptomi-stack.png) 
 
 ## User Guide
 
@@ -84,6 +89,7 @@ Example    | Description  | Diagram
 
 ### How It Works
 TODO: architecture diagrams
+TODO: client/server
 TODO: how policy enforcement works
 
 ### Aptomi language
