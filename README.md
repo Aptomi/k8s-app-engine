@@ -64,7 +64,7 @@ TODO: Picture, where it's in the stack
 ## User Guide
 
 ### Installation
-TODO: "go get", script, docker container? it needs to have clients, graphviz, etc
+TODO: "go get", script, docker container? it needs to have clients, etc
 
 ### Configuring LDAP
 Aptomi needs to be configured with user data source in order to retrieve their labels/properties. It's recommended to
@@ -91,8 +91,7 @@ TODO: policy documentation
 ## Dev Guide
 
 ### Building From Source
-Bulding Aptomi from source and running integration tests is a very straightforward process. All you need is Go (ideally 1.9.1) and a couple of external packages:
-* graphviz - so that Aptomi can generate diagrams via [GraphViz](http://www.graphviz.org/Download..php)
+Building Aptomi from source and running integration tests is a very straightforward process. All you need is Go (ideally 1.9.1) and a couple of external packages:
 * telnet - for the script which runs smoke tests
 * docker - to run provided LDAP server with sample user data
 * npm - to automatically generate TOC in README.md 
@@ -106,7 +105,7 @@ git clone git@github.com:Aptomi/aptomi.git
 
 If you are on macOS, install brew, install [Docker For Mac](https://docs.docker.com/docker-for-mac/install/) and run: 
 ```
-brew install graphviz telnet docker npm
+brew install telnet docker npm
 ```
 
 Install Helm, Istio, Kubectl clients:
