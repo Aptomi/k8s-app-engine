@@ -58,11 +58,11 @@ func runValidationTests(t *testing.T, passed []object.Base, failed []object.Base
 	policy := NewPolicy()
 	for _, obj := range passed {
 		err := policy.AddObject(obj)
-		assert.NoError(t, err, "Policy.AddObject() call should be successful (object should pass validation): %v", obj)
+		assert.NoError(t, err, "Policy.AddObject call should be successful (object should pass validation): %v", obj)
 	}
 	for _, obj := range failed {
 		err := policy.AddObject(obj)
-		assert.Error(t, err, "Policy.AddObject() call should return an error (object should fail validation): %v", obj)
+		assert.Error(t, err, "Policy.AddObject call should return an error (object should fail validation): %v", obj) // nolint: vet
 	}
 }
 

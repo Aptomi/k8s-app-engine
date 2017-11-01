@@ -6,6 +6,7 @@ import (
 	"github.com/mattn/go-zglob"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 )
 
@@ -45,7 +46,7 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 		for _, f := range files {
 			secrets := loadUserSecretsFromFile(f)
 			for _, secret := range secrets {
-				loader.cachedSecrets[secret.User] = secret.Secrets
+				loader.cachedSecrets[strings.ToLower(secret.User)] = secret.Secrets
 			}
 		}
 	})
@@ -53,8 +54,8 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 }
 
 // LoadSecretsByUserName loads secrets for a single user
-func (loader *SecretLoaderFromDir) LoadSecretsByUserName(userName string) map[string]string {
-	return loader.LoadSecretsAll()[userName]
+func (loader *SecretLoaderFromDir) LoadSecretsByUserName(user string) map[string]string {
+	return loader.LoadSecretsAll()[strings.ToLower(user)]
 }
 
 // Loads secrets from file

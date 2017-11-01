@@ -370,6 +370,10 @@ func (loader *UserLoaderImpl) LoadUserByName(id string) *lang.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
+func (loader *UserLoaderImpl) Authenticate(userName, password string) (*lang.User, error) {
+	return nil, nil
+}
+
 func (loader *UserLoaderImpl) Summary() string {
 	return "Synthetic user loader"
 }

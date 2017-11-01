@@ -1,4 +1,5 @@
 - name: Alice
+  passwordhash: "$2a$10$Q4EfqIjzhQoryhFi6xXBtuxMFfeKBT1osnbPEYoWFqWnPOPWNTQUK"
   labels:
     priority: 3
     org: corporate_it
@@ -8,6 +9,7 @@
     changinglabel: 123
 
 - name: Bob
+  passwordhash: "$2a$10$vr0bVQbublUZcu4HMeK6XeL1htsQ3MPw/jzLHhB.ELSsO.6yhFiii"
   labels:
     priority: 20
     org: corporate_it
@@ -17,6 +19,7 @@
     changinglabel: 123
 
 - name: Carol
+  passwordhash: "$2a$10$6GwVwddvTv5/rI3P8.dGv.sP8dL60gl6ZKSpt8MKa88EwZPwmOPY."
   labels:
     priority: 20
     org: corporate_it
@@ -25,35 +28,3 @@
     prod: "yes"
     compromised: true
     changinglabel: 123
-
-# Special user to test partial matching (it has access to kafka, but not to zookeeper that kafka depends on)
-- name: Dave
-  labels:
-    priority: 3
-    org: corporate_it
-    team: platform_services
-    dev: "yes"
-    prod: "no"
-    nozookeeper: true
-    changinglabel: 123
-
-# Special user to test policy diff
-- name: Elena
-  labels:
-    priority: 200
-    org: corporate_it
-    team: platform_services
-    dev: "no"
-    prod: "yes"
-    changinglabel: 123
-
-# Special user to test global ops flag
-- name: Sam
-  labels:
-    org: corporate_it
-    is_operator: true
-    global_ops: true
-    team: global-ops-team
-
-# Special user without any labels
-- name: Noname

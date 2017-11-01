@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/actioninfo"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
@@ -22,12 +23,12 @@ import (
 )
 
 var integrationTestsLDAP = config.LDAP{
-	Host:   "localhost",
-	Port:   10389,
-	BaseDN: "o=aptomiOrg",
-	Filter: "(&(objectClass=organizationalPerson))",
+	Host:         "localhost",
+	Port:         10389,
+	BaseDN:       "o=aptomiOrg",
+	Filter:       "(&(objectClass=organizationalPerson))",
+	FilterByName: "(&(objectClass=organizationalPerson)(cn=%s))",
 	LabelToAttributes: map[string]string{
-		"id":                "dn",
 		"name":              "cn",
 		"description":       "description",
 		"global_ops":        "isglobalops",
@@ -60,7 +61,11 @@ func TestVis(t *testing.T) {
 	}
 
 	resolver := resolve.NewPolicyResolver(policy, extData)
-	resolution, _, _ := resolver.ResolveAllDependencies()
+	resolution, eventLog, err := resolver.ResolveAllDependencies()
+	if err != nil {
+		eventLog.Save(&event.HookConsole{})
+		panic(err)
+	}
 
 	// 1 - resolution graph
 	graph := NewGraphBuilder(policy, resolution, extData).DependencyResolution(DependencyResolutionCfgDefault)

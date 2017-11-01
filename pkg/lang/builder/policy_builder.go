@@ -8,6 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"math/rand"
+	"strings"
 )
 
 var randSeed = int64(239)
@@ -62,7 +63,7 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
-		User:     user.Name,
+		User:     strings.ToUpper(user.Name), // we can refer to user using any case, since user name is not case sensitive
 		Contract: contract.Namespace + "/" + contract.Name,
 		Labels:   make(map[string]string),
 	}

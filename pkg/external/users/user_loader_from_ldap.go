@@ -1,6 +1,7 @@
 package users
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -32,10 +33,15 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 	// Right now this can be called concurrently by the engine, so it needs to be thread safe
 	loader.once.Do(func() {
 		loader.users = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
-		t := loader.ldapSearch()
-		for _, u := range t {
+		ldapUsers, err := loader.ldapSearch()
+		if err != nil {
+			// we need user data, but they cannot be loaded from LDAP. for now, let's panic
+			panic(err)
+		}
+		for _, u := range ldapUsers {
+			u.Name = strings.ToLower(u.Name)
 			loader.users.Users[u.Name] = u
-			if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
+			if _, exist := loader.domainAdminOverrides[u.Name]; exist {
 				u.Admin = true
 			}
 		}
@@ -45,7 +51,15 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 
 // LoadUserByName loads a single user by name
 func (loader *UserLoaderFromLDAP) LoadUserByName(name string) *lang.User {
+	name = strings.ToLower(name)
 	return loader.LoadUsersAll().Users[name]
+}
+
+// Authenticate should authenticate a user by username/password.
+// If user exists and username/password is correct, it should be returned.
+// If a user doesn't exist or username/password is not correct, then nil should be returned together with an error.
+func (loader *UserLoaderFromLDAP) Authenticate(name, password string) (*lang.User, error) {
+	return loader.ldapAuthenticate(name, password)
 }
 
 // Summary returns summary as string
@@ -54,10 +68,10 @@ func (loader *UserLoaderFromLDAP) Summary() string {
 }
 
 // Does search on LDAP and returns entries
-func (loader *UserLoaderFromLDAP) ldapSearch() []*lang.User {
+func (loader *UserLoaderFromLDAP) ldapSearch() ([]*lang.User, error) {
 	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", loader.cfg.Host, loader.cfg.Port))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer l.Close()
 
@@ -71,29 +85,81 @@ func (loader *UserLoaderFromLDAP) ldapSearch() []*lang.User {
 
 	searchResult, err := l.Search(searchRequest)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	result := []*lang.User{}
 	for _, entry := range searchResult.Entries {
-		user := &lang.User{
-			Name:   entry.GetAttributeValue(loader.cfg.LabelToAttributes["name"]),
-			Labels: make(map[string]string),
-		}
-		for label, attr := range loader.cfg.LabelToAttributes {
-			if label != "id" && label != "name" {
-				value := entry.GetAttributeValue(attr)
-				if len(value) > 0 {
-					user.Labels[label] = ldapValue(value)
-				}
-			}
-		}
-
-		// fmt.Printf("%+v\n", user)
+		user := loader.userFromLDAPEntry(entry)
 		result = append(result, user)
 	}
 
-	return result
+	return result, nil
+}
+
+// Authenticates a user in ldap
+func (loader *UserLoaderFromLDAP) ldapAuthenticate(name, password string) (*lang.User, error) {
+	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", loader.cfg.Host, loader.cfg.Port))
+	if err != nil {
+		return nil, err
+	}
+	defer l.Close()
+
+	// Start TLS
+	err = l.StartTLS(&tls.Config{InsecureSkipVerify: true})
+	if err != nil {
+		return nil, err
+	}
+
+	// Search for a user by name
+	searchRequest := ldap.NewSearchRequest(
+		loader.cfg.BaseDN,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		fmt.Sprintf(loader.cfg.FilterByName, name),
+		loader.cfg.GetAttributes(),
+		nil,
+	)
+
+	searchResult, err := l.Search(searchRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(searchResult.Entries) <= 0 {
+		return nil, fmt.Errorf("user '%s' does not exist in LDAP", name)
+	}
+	if len(searchResult.Entries) > 1 {
+		return nil, fmt.Errorf("too many LDAP entries returned for user '%s'", name)
+	}
+
+	// Bind as the user to verify their password
+	entry := searchResult.Entries[0]
+	dn := entry.DN
+	err = l.Bind(dn, password)
+	if err != nil {
+		return nil, fmt.Errorf("LDAP bind failed for user '%s': %s", name, err)
+	}
+
+	user := loader.userFromLDAPEntry(entry)
+	return user, nil
+}
+
+func (loader *UserLoaderFromLDAP) userFromLDAPEntry(entry *ldap.Entry) *lang.User {
+	name := entry.GetAttributeValue(loader.cfg.LabelToAttributes["name"])
+	name = strings.ToLower(name)
+	user := &lang.User{
+		Name:   name,
+		Labels: make(map[string]string),
+	}
+	for label, attr := range loader.cfg.LabelToAttributes {
+		if label != "name" {
+			value := entry.GetAttributeValue(attr)
+			if len(value) > 0 {
+				user.Labels[label] = ldapValue(value)
+			}
+		}
+	}
+	return user
 }
 
 func ldapValue(value string) string {

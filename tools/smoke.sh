@@ -53,10 +53,10 @@ users:
   ldap:
     - host: localhost
       port: 10389
-      basedn: o=aptomiOrg
-      filter: (&(objectClass=organizationalPerson))
+      basedn: "o=aptomiOrg"
+      filter: "(&(objectClass=organizationalPerson))"
+      filterbyname: "(&(objectClass=organizationalPerson)(cn=%s))"
       labeltoattributes:
-        id: dn
         name: cn
         description: description
         global_ops: isglobalops

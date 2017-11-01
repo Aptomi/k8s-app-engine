@@ -3,6 +3,7 @@ package users
 import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"strconv"
+	"strings"
 )
 
 // UserLoaderMock allows to mock user loader and use in-memory user storage
@@ -19,6 +20,7 @@ func NewUserLoaderMock() *UserLoaderMock {
 
 // AddUser adds a user into the mock structure
 func (loader *UserLoaderMock) AddUser(user *lang.User) {
+	user.Name = strings.ToLower(user.Name)
 	loader.users.Users[user.Name] = user
 }
 
@@ -29,7 +31,12 @@ func (loader *UserLoaderMock) LoadUsersAll() *lang.GlobalUsers {
 
 // LoadUserByName loads a single user by Name
 func (loader *UserLoaderMock) LoadUserByName(name string) *lang.User {
-	return loader.users.Users[name]
+	return loader.users.Users[strings.ToLower(name)]
+}
+
+// Authenticate does nothing for mock
+func (loader *UserLoaderMock) Authenticate(name, password string) (*lang.User, error) {
+	return nil, nil
 }
 
 // Summary returns summary as string

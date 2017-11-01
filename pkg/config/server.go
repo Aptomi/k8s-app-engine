@@ -25,10 +25,16 @@ func (s Server) IsDebug() bool {
 
 // LDAP contains configuration for LDAP sync service (host, port, DN, filter query and mapping of LDAP properties to Aptomi attributes)
 type LDAP struct {
-	Host              string
-	Port              int
-	BaseDN            string
-	Filter            string
+	Host   string
+	Port   int
+	BaseDN string
+
+	// Filter is LDAP filter query for all users
+	Filter string
+
+	// FilterByName is LDAP filter query when doing user lookup by name
+	FilterByName string
+
 	LabelToAttributes map[string]string
 }
 

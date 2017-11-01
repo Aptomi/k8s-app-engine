@@ -14,7 +14,7 @@ cn: Alice
 description: Alice (Developer/Service Consumer)
 sn: Alice
 mail: alice@aptomiorg.com
-userpassword: alice123
+userpassword: alice
 
 dn: cn=Bob,ou=people,o=aptomiOrg
 changetype: add
@@ -26,7 +26,7 @@ cn: Bob
 description: Bob (Developer/Service Consumer)
 sn: Bob
 mail: bob@aptomiorg.com
-userpassword: bob123
+userpassword: bob
 
 dn: cn=Carol,ou=people,o=aptomiOrg
 changetype: add
@@ -38,7 +38,7 @@ cn: Carol
 description: Carol (Developer/Service Consumer)
 sn: Carol
 mail: carol@aptomiorg.com
-userpassword: carol123
+userpassword: carol
 
 dn: cn=Sam,ou=people,o=aptomiOrg
 changetype: add
@@ -50,7 +50,7 @@ cn: Sam
 description: Sam (Global Ops). He controls global rules
 sn: Sam
 mail: sam@aptomiorg.com
-userpassword: sam123
+userpassword: sam
 
 dn: cn=John,ou=people,o=aptomiOrg
 changetype: add
@@ -62,7 +62,7 @@ cn: John
 description: John (Ops for 'twitter-stats' service). He controls its sharing/consumption (prod/stage)
 sn: John
 mail: john@aptomiorg.com
-userpassword: john123
+userpassword: john
 
 dn: cn=Frank,ou=people,o=aptomiOrg
 changetype: add
@@ -74,7 +74,7 @@ cn: Frank
 description: Frank (Ops for 'analytics-pipeline' service). He controls its sharing/consumption (prod/stage)
 sn: Frank
 mail: frank@aptomiorg.com
-userpassword: frank123
+userpassword: frank
 
 dn: cn=Alice,ou=people,o=aptomiOrg
 changetype: modify

@@ -6,6 +6,9 @@ type User struct {
 	// Name is a unique name of a user
 	Name string
 
+	// Password hash is a hashed and salted user password
+	PasswordHash string
+
 	// Labels is a set of 'name'->'value' string labels, attached to the user
 	Labels map[string]string
 
