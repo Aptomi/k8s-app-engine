@@ -27,13 +27,13 @@ profile-engine:
 .PHONY: coverage
 coverage:
 	@echo "Calculating code coverage (unit tests only)"
-	touch coverage.tmp && echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c '${GO} test -short -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
+	echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c "echo -n '' > coverage.tmp && ${GO} test -short -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out" && rm coverage.tmp
 	${GO} tool cover -html=coverage.out -o coverage.html
 
 .PHONY: coverage-full
 coverage-full:
 	@echo "Calculating code coverage (unit and integration tests)"
-	touch coverage.tmp && echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c '${GO} test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
+	echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c "echo -n '' > coverage.tmp && ${GO} test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out" && rm coverage.tmp
 	${GO} tool cover -html=coverage.out -o coverage.html
 
 .PHONY: test
