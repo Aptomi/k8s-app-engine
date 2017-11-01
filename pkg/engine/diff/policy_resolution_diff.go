@@ -47,7 +47,8 @@ func appendUpdateAction(actions []action.Base, updateActions map[string]bool, up
 }
 
 // On a component level -- see which component instance keys appear and disappear
-func (diff *PolicyResolutionDiff) compareAndProduceActions() {
+// TODO: reduce cyclomatic complexity
+func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocyclo
 	actions := make(map[string][]action.Base)
 
 	updateActions := make(map[string]bool)

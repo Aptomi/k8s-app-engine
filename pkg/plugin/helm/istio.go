@@ -11,7 +11,8 @@ import (
 
 // Process is a action which gets called only once. It manages all Istio rules across all clusters, making sure they
 // are up to date by creating/deleting/updating rules if/as needed
-func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
+// TODO: reduce cyclomatic complexity
+func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error { // nolint: gocyclo
 	// todo(slukjanov): do something with progress
 	prog := progress.NewNoop()
 

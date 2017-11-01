@@ -123,7 +123,8 @@ func (p *Plugin) Cleanup() error {
 }
 
 // Endpoints returns map from port type to url for all services of the current chart
-func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
+// TODO: reduce cyclomatic complexity
+func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) { // nolint: gocyclo
 	cache, err := p.getCache(cluster, eventLog)
 	if err != nil {
 		return nil, err
