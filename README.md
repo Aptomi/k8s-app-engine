@@ -4,8 +4,8 @@
 [![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi%20-%20tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
 [![Coverage Status](https://coveralls.io/repos/github/Aptomi/aptomi/badge.svg)](https://coveralls.io/github/Aptomi/aptomi)
 [![Godoc](https://godoc.org/github.com/Aptomi/aptomi?status.svg)](https://godoc.org/github.com/Aptomi/aptomi)
-[![Release](https://img.shields.io/github/release/aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/releases/latest)
-[![Slack Status](https://slack.yourdomain.com/badge.svg)](https://yourdomain.com)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)]()
+[![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](https://slack.aptomi.io)
 
 [Aptomi](http://aptomi.io) simplifies roll-out, operation and control of complex container-based applications. Instead of dealing with
 thousands of individual containers, Dev and Ops can now talk services. Service-based approach enables Dev to move
