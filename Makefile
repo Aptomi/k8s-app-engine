@@ -60,11 +60,6 @@ endif
 test-loop:
 	while ${GO} test -v ./...; do :; done
 
-.PHONY: clean-run-noop
-clean-run-noop:
-	$(eval TMP := $(shell mktemp -d))
-	${GOENV} APTOMI_DB=$(TMP) tools/demo-local-policy-init.sh
-
 .PHONY: smoke
 smoke: install alltest
 	tools/smoke.sh
