@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
 [![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi - tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
-[![Coverage Status](https://coveralls.io/repos/github.com/Aptomi/aptomi/badge.svg?branch=master)](https://coveralls.io/github.com/Aptomi/aptomi?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/Aptomi/aptomi/badge.svg)](https://coveralls.io/github/Aptomi/aptomi)
 [![Godoc](https://godoc.org/github.com/Aptomi/aptomi?status.svg)](https://godoc.org/github.com/Aptomi/aptomi)
 [![Release](https://img.shields.io/github/release/aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/releases/latest)
 [![Slack Status](https://slack.yourdomain.com/badge.svg)](https://yourdomain.com)
