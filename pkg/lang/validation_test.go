@@ -21,15 +21,6 @@ func TestPolicyObjectValidationIdentifiers(t *testing.T) {
 	runValidationTests(t, passed, failed)
 }
 
-func TestPolicyObjectValidationDuplicateIdentifiers(t *testing.T) {
-	passed := []object.Base{
-		makeCluster("kubernetes"),
-		makeService("good_name"),
-	}
-	failed := passed
-	runValidationTests(t, passed, failed)
-}
-
 func TestPolicyObjectValidationExpressions(t *testing.T) {
 	passed := []object.Base{
 		makeRule(100, "specialname + specialvalue == 'b'", "true", "false"),
@@ -63,14 +54,15 @@ func TestPolicyObjectValidationClusterTypes(t *testing.T) {
 }
 
 func runValidationTests(t *testing.T, passed []object.Base, failed []object.Base) {
+	t.Helper()
 	policy := NewPolicy()
 	for _, obj := range passed {
 		err := policy.AddObject(obj)
-		assert.NoError(t, err, "Policy.AddObject() call should be successful (object should pass validation)")
+		assert.NoError(t, err, "Policy.AddObject() call should be successful (object should pass validation): %v", obj)
 	}
 	for _, obj := range failed {
 		err := policy.AddObject(obj)
-		assert.Error(t, err, "Policy.AddObject() call should return an error (object should fail validation)")
+		assert.Error(t, err, "Policy.AddObject() call should return an error (object should fail validation): %v", obj)
 	}
 }
 

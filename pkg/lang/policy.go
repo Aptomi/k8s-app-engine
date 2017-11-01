@@ -56,8 +56,7 @@ func (policy *Policy) View(user *User) *PolicyView {
 }
 
 // AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
-// Namespace. If error occurs (e.g. object validation error, objects with duplicate names, etc) then the error
-// will be returned
+// Namespace. If error occurs (e.g. object validation error, etc) then the error will be returned
 func (policy *Policy) AddObject(obj object.Base) error {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
 	if !ok {

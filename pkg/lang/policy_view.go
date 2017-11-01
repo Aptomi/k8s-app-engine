@@ -24,8 +24,7 @@ func NewPolicyView(policy *Policy, user *User) *PolicyView {
 }
 
 // AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
-// Namespace. If error occurs (e.g. object validation error, objects with duplicate names, etc) then the error
-// will be returned
+// Namespace. If error occurs (e.g. object validation error, etc) then the error will be returned
 func (view *PolicyView) AddObject(obj object.Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {

@@ -45,37 +45,16 @@ func (policyNamespace *PolicyNamespace) addObject(obj object.Base) error {
 	// add object
 	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
-		if _, exists := policyNamespace.Services[obj.GetName()]; exists {
-			return objectAlreadyExistsError(obj)
-		}
 		policyNamespace.Services[obj.GetName()] = obj.(*Service)
 	case ContractObject.Kind:
-		if _, exists := policyNamespace.Contracts[obj.GetName()]; exists {
-			return objectAlreadyExistsError(obj)
-		}
 		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract)
 	case ClusterObject.Kind:
-		if obj.GetNamespace() != object.SystemNS {
-			return fmt.Errorf("adding cluster '%s' into a non-system namespace '%s'", obj.GetName(), obj.GetNamespace())
-		}
-		if _, exists := policyNamespace.Clusters[obj.GetName()]; exists {
-			return objectAlreadyExistsError(obj)
-		}
 		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
 	case RuleObject.Kind:
-		if _, exists := policyNamespace.Rules.RuleMap[obj.GetName()]; exists {
-			return objectAlreadyExistsError(obj)
-		}
 		policyNamespace.Rules.addRule(obj.(*Rule))
 	case ACLRuleObject.Kind:
-		if _, exists := policyNamespace.ACLRules.RuleMap[obj.GetName()]; exists {
-			return objectAlreadyExistsError(obj)
-		}
 		policyNamespace.ACLRules.addRule(obj.(*Rule))
 	case DependencyObject.Kind:
-		if _, exists := policyNamespace.Dependencies.DependencyMap[obj.GetName()]; exists {
-			return objectAlreadyExistsError(obj)
-		}
 		policyNamespace.Dependencies.addDependency(obj.(*Dependency))
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
@@ -150,8 +129,4 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (obj
 		return nil, fmt.Errorf("not supported by PolicyNamespace.getObject(): unknown kind %s, %s", kind, name)
 	}
 	return result, nil
-}
-
-func objectAlreadyExistsError(obj object.Base) error {
-	return fmt.Errorf("object '%s/%s' already exists in namespace '%s'", obj.GetKind(), obj.GetName(), obj.GetNamespace())
 }
