@@ -36,6 +36,10 @@ coverage-full:
 	echo 'mode: atomic' > coverage.out && ${GO} list ./... | xargs -n1 -I{} sh -c "echo -n '' > coverage.tmp && ${GO} test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out" && rm coverage.tmp
 	${GO} tool cover -html=coverage.out -o coverage.html
 
+.PHONY: coverage-publish
+coverage-publish: prepare_goveralls
+	goveralls -coverprofile coverage.out
+
 .PHONY: test
 test:
 	${GO} test -short -v ./...
@@ -128,6 +132,14 @@ HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
 prepare_go_junit_report:
 ifndef HAS_GO_JUNIT_REPORT
 	go get -u -v github.com/jstemmer/go-junit-report
+endif
+
+HAS_GOVERALLS := $(shell command -v goveralls)
+
+.PHONY: prepare_goveralls
+prepare_goveralls:
+ifndef HAS_GOVERALLS
+	go get -u -v github.com/mattn/goveralls
 endif
 
 .PHONY: w-dep
