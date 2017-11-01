@@ -1,7 +1,7 @@
 ![aptomi Logo](aptomi-logo.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
-[![Build Status](https://ci.aptomi.io/job/aptomi.io%20-%20build%20and%20publish/badge/icon)](https://ci.aptomi.io/job/aptomi.io%20-%20build%20and%20publish/)
+[![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi - tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
 [![Coverage Status](https://coveralls.io/repos/github.com/Aptomi/aptomi/badge.svg?branch=master)](https://coveralls.io/github.com/Aptomi/aptomi?branch=master)
 [![Godoc](https://godoc.org/github.com/Aptomi/aptomi?status.svg)](https://godoc.org/github.com/Aptomi/aptomi)
 [![Release](https://img.shields.io/github/release/aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/releases/latest)
