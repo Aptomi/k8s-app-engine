@@ -56,7 +56,7 @@ func TestVis(t *testing.T) {
 
 	policy := lang.NewPolicy()
 	for _, obj := range allObjects {
-		policy.AddObject(obj)
+		_ = policy.AddObject(obj)
 	}
 
 	resolver := resolve.NewPolicyResolver(policy, extData)
