@@ -8,10 +8,10 @@ import (
 )
 
 /*
-	Data exposed to context expressions/criterias defined in policy
+	Data exposed to context expressions/criteria defined in policy
 */
 
-// This method defines which contextual information will be exposed to the expression engine (for evaluating criterias)
+// This method defines which contextual information will be exposed to the expression engine (for evaluating criteria)
 // Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
 func (node *resolutionNode) getContextualDataForContextExpression() *expression.Parameters {
 	return expression.NewParams(
