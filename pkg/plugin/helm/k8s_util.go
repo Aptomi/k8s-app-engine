@@ -23,7 +23,7 @@ func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog
 		return nil
 	}
 
-	config, client, err := cache.newKubeClient(cluster, eventLog)
+	config, client, err := cache.newKubeClient(cluster)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (cache *clusterCache) getK8sClientConfig(cluster *lang.Cluster) (*rest.Conf
 	return clientConf, nil
 }
 
-func (cache *clusterCache) newKubeClient(cluster *lang.Cluster, eventLog *event.Log) (*rest.Config, kubernetes.Interface, error) {
+func (cache *clusterCache) newKubeClient(cluster *lang.Cluster) (*rest.Config, kubernetes.Interface, error) {
 	conf, err := cache.getK8sClientConfig(cluster)
 	if err != nil {
 		return nil, nil, err
@@ -91,7 +91,7 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 		return cache.kubeExternalAddress, nil
 	}
 
-	_, client, err := cache.newKubeClient(cluster, eventLog)
+	_, client, err := cache.newKubeClient(cluster)
 	if err != nil {
 		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", cluster.Name, err)
 	}

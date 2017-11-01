@@ -129,7 +129,7 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 		return nil, err
 	}
 
-	_, kubeClient, err := cache.newKubeClient(cluster, eventLog)
+	_, kubeClient, err := cache.newKubeClient(cluster)
 	if err != nil {
 		return nil, err
 	}

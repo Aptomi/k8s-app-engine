@@ -16,7 +16,7 @@ import (
 )
 
 func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
-	_, client, err := cache.newKubeClient(cluster, eventLog)
+	_, client, err := cache.newKubeClient(cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -152,14 +152,13 @@ func (rule *istioRouteRule) destroy() error {
 	return nil
 }
 
-// TODO: this function seems to be unused?
-func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster, eventLog *event.Log) (string, error) {
+func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster) (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 
 	istioSvc := cache.istioSvc
 	if len(istioSvc) == 0 {
-		_, client, err := cache.newKubeClient(cluster, eventLog)
+		_, client, err := cache.newKubeClient(cluster)
 		if err != nil {
 			return "", err
 		}
@@ -220,7 +219,11 @@ func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster, eventLog *event.Lo
 }
 
 func (cache *clusterCache) runIstioCmd(cmd string, cluster *lang.Cluster) (string, error) {
-	istioSvc := cache.istioSvc
+	istioSvc, err := cache.getIstioSvc(cluster)
+	if err != nil {
+		return "", err
+	}
+
 	if istioSvc == "" {
 		// todo(slukjanov): it's temp fix for the case when istio isn't running yet, replace it with istio polling?
 		return "", nil
