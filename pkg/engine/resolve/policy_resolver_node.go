@@ -373,7 +373,7 @@ func (node *resolutionNode) processRules() (*lang.RuleActionResult, error) {
 }
 
 func (node *resolutionNode) calculateAndStoreCodeParams() error {
-	componentCodeParams, err := evaluateParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.resolver.templateCache)
+	componentCodeParams, err := util.ProcessParameterTree(node.component.Code.Params, node.getContextualDataForCodeDiscoveryTemplate(), node.resolver.templateCache, util.ModeEvaluate)
 	if err != nil {
 		return node.errorWhenProcessingCodeParams(err)
 	}
@@ -387,7 +387,7 @@ func (node *resolutionNode) calculateAndStoreCodeParams() error {
 }
 
 func (node *resolutionNode) calculateAndStoreDiscoveryParams() error {
-	componentDiscoveryParams, err := evaluateParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.resolver.templateCache)
+	componentDiscoveryParams, err := util.ProcessParameterTree(node.component.Discovery, node.getContextualDataForCodeDiscoveryTemplate(), node.resolver.templateCache, util.ModeEvaluate)
 	if err != nil {
 		return node.errorWhenProcessingDiscoveryParams(err)
 	}

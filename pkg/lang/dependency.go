@@ -15,20 +15,27 @@ var DependencyObject = &object.Info{
 // specified set of <Labels>. It allows users to request contracts, which will translate into instantiation of
 // service instances (and their dependencies) in the cloud
 type Dependency struct {
-	Metadata
+	Metadata `validate:"required"`
 
-	User     string `validate:"required"`
+	// User is a user name for a user, who requested this dependency.
+	User string `validate:"required"`
+
+	// Contract that is being requested. It can be in form of 'contractName', referring to contract within
+	// current namespace. Or it can be in form of 'namespace/contractName', referring to contract in a different
+	// namespace.
 	Contract string `validate:"required"`
-	Labels   map[string]string
+
+	// Labels which are provided by the user.
+	Labels map[string]string `validate:"omitempty,labels"`
 }
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)
 type GlobalDependencies struct {
 	// DependencyMap is a map[name] -> *Dependency
-	DependencyMap map[string]*Dependency
+	DependencyMap map[string]*Dependency `validate:"dive"`
 
 	// DependenciesByContract contains dependency map <contractName> -> list of dependencies
-	DependenciesByContract map[string][]*Dependency
+	DependenciesByContract map[string][]*Dependency `validate:"-"`
 }
 
 // NewGlobalDependencies creates and initializes a new empty list of global dependencies

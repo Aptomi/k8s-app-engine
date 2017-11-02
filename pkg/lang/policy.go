@@ -1,9 +1,9 @@
 package lang
 
 import (
+	"context"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/object"
-	"gopkg.in/go-playground/validator.v9"
 	"strings"
 	"sync"
 )
@@ -22,10 +22,7 @@ import (
 // corresponding set of actions.
 type Policy struct {
 	// Namespace is a map from namespace name into a PolicyNamespace
-	Namespace map[string]*PolicyNamespace
-
-	// Validator for policy objects
-	validator *validator.Validate
+	Namespace map[string]*PolicyNamespace `validate:"dive"`
 
 	// Access control rules for different policy namespaces
 	once        sync.Once
@@ -34,10 +31,7 @@ type Policy struct {
 
 // NewPolicy creates a new Policy
 func NewPolicy() *Policy {
-	return &Policy{
-		Namespace: make(map[string]*PolicyNamespace),
-		validator: makeValidator(),
-	}
+	return &Policy{Namespace: make(map[string]*PolicyNamespace)}
 }
 
 // View returns a policy view object, which allows to make all policy operations on behalf of a certain user
@@ -56,11 +50,11 @@ func (policy *Policy) View(user *User) *PolicyView {
 }
 
 // AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
-// Namespace. If error occurs (e.g. object validation error, etc) then the error will be returned
+// Namespace. If error occurs (e.g. object has an unknown kind) then the error will be returned
 func (policy *Policy) AddObject(obj object.Base) error {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
 	if !ok {
-		policyNamespace = NewPolicyNamespace(obj.GetNamespace(), policy.validator)
+		policyNamespace = NewPolicyNamespace(obj.GetNamespace())
 		policy.Namespace[obj.GetNamespace()] = policyNamespace
 	}
 	return policyNamespace.addObject(obj)
@@ -97,4 +91,14 @@ func (policy *Policy) GetObject(kind string, locator string, currentNs string) (
 	}
 
 	return policyNS.getObject(kind, name)
+}
+
+// Validate performs validation of the entire policy, making sure that all of its objects are well-formed.
+// It also checks that all cross-object references are valid. If policy is malformed, then an error is returned.
+// Otherwise, if policy is correctly formed, then nil is returned.
+// The resulting error can be caster to (validator.ValidationErrors) and iterated over, to get the full list of errors.
+func (policy *Policy) Validate() error {
+	val := makePolicyValidator()
+	ctx := context.WithValue(context.Background(), "policy", policy)
+	return val.StructCtx(ctx, policy)
 }

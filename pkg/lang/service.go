@@ -21,13 +21,13 @@ var ServiceObject = &object.Info{
 // docker container image with metadata that needs to be started/managed) or it can be dependency on another\
 // contract (which will get fulfilled by Aptomi)
 type Service struct {
-	Metadata
+	Metadata `validate:"required"`
 
 	// Labels is a set of labels attached to the service
-	Labels map[string]string
+	Labels map[string]string `validate:"omitempty,labels"`
 
 	// Components is the list of components service consists of
-	Components []*ServiceComponent
+	Components []*ServiceComponent `validate:"dive"`
 
 	// Lazily evaluated fields (all components topologically sorted). Use via getter
 	componentsOrderedOnce sync.Once
@@ -46,18 +46,18 @@ type ServiceComponent struct {
 	// Contract, if not empty, denoted that the component points to another contract as a dependency. Meaning that
 	// a service needs to have another service running as its dependency (e.g. 'wordpress' service needs a 'database'
 	// contract). This dependency will be fulfilled at policy resolution time.
-	Contract string `validate:"identifier"`
+	Contract string `validate:"omitempty"`
 
 	// Code, if not empty, means that component is a code that can be instantiated with certain parameters (e.g. docker
 	// container image)
-	Code *Code
+	Code *Code `validate:"omitempty"`
 
 	// Discovery is a map of discovery parameters that this component exposes to other services
-	Discovery util.NestedParameterMap
+	Discovery util.NestedParameterMap `validate:"omitempty,templateNestedMap"`
 
 	// Dependencies is cross-component dependencies within a service. Component may need other components within that
 	// service to run, before it gets instantiated
-	Dependencies []string `validate:"identifier"`
+	Dependencies []string `validate:"dive,identifier"`
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances
@@ -69,7 +69,7 @@ type Code struct {
 	// Params define parameters that will be passed down to the deployment plugin. Params follow text template syntax
 	// and can refer to arbitrary labels, as well as discovery parameters exposed by other components (within the
 	// current service) and discovery parameters exposed by services the current service depends on
-	Params util.NestedParameterMap
+	Params util.NestedParameterMap `validate:"omitempty,templateNestedMap"`
 }
 
 // GetComponentsMap lazily initializes and returns a map of name -> component

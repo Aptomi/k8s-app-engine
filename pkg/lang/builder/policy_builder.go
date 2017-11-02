@@ -171,6 +171,11 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 			Name:      util.RandomID(builder.random, idLength),
 		},
 		Type: "kubernetes",
+		Config: lang.ClusterConfig{
+			KubeContext:     "value",
+			TillerNamespace: "value",
+			Namespace:       "value",
+		},
 	}
 	builder.addObject(builder.domainAdminView, result)
 	return result
@@ -209,7 +214,7 @@ func (builder *PolicyBuilder) CodeComponent(codeParams util.NestedParameterMap, 
 	return &lang.ServiceComponent{
 		Name: util.RandomID(builder.random, idLength),
 		Code: &lang.Code{
-			Type:   "aptomi/code/unittests",
+			Type:   "helm",
 			Params: codeParams,
 		},
 		Discovery: discoveryParams,
@@ -239,13 +244,17 @@ func (builder *PolicyBuilder) AddComponentDependency(component *lang.ServiceComp
 func (builder *PolicyBuilder) RuleActions(labelOps lang.LabelOperations) *lang.RuleActions {
 	result := &lang.RuleActions{}
 	if labelOps != nil {
-		result.ChangeLabels = lang.ChangeLabelsAction(labelOps)
+		result.ChangeLabels = labelOps
 	}
 	return result
 }
 
 // Policy returns the generated policy
 func (builder *PolicyBuilder) Policy() *lang.Policy {
+	err := builder.policy.Validate()
+	if err != nil {
+		panic(err)
+	}
 	return builder.policy
 }
 

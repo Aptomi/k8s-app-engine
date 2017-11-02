@@ -223,39 +223,6 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	assert.NotContains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should not be resolved")
 }
 
-func TestPolicyResolverDependencyWithNonExistingContract(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-	user := b.AddUser()
-	contract := &lang.Contract{Metadata: lang.Metadata{Name: "non-existing-contract-123456789"}}
-	dependency := b.AddDependency(user, contract)
-
-	// dependency referring to non-existing contract should not trigger a critical error
-	resolution := resolvePolicy(t, b, ResSuccess, "non-existing contract")
-	assert.NotContains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should not be resolved")
-}
-
-func TestPolicyResolverInvalidContextCriteria(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-	service := b.AddService()
-	criteria := b.Criteria("true", "specialname + '123')(((", "false")
-	contract := b.AddContract(service, criteria)
-	b.AddDependency(b.AddUser(), contract)
-
-	// policy resolution with invalid context criteria should result in an error
-	resolvePolicy(t, b, ResError, "unable to compile expression")
-}
-
-func TestPolicyResolverInvalidContextKeys(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-	service := b.AddService()
-	contract := b.AddContract(service, b.CriteriaTrue())
-	contract.Contexts[0].Allocation.Keys = b.AllocationKeys("w {{...")
-	b.AddDependency(b.AddUser(), contract)
-
-	// policy resolution with invalid context allocation keys should result in an error
-	resolvePolicy(t, b, ResError, "Error while resolving allocation keys")
-}
-
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
@@ -309,50 +276,6 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	resolvePolicy(t, b, ResError, "Conflicting discovery parameters")
 }
 
-func TestPolicyResolverInvalidCodeParams(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-
-	// create a service which uses label in its code parameters
-	service := b.AddService()
-	b.AddServiceComponent(service,
-		b.CodeComponent(
-			util.NestedParameterMap{"address": "{{ .Labels..."},
-			nil,
-		),
-	)
-	contract := b.AddContract(service, b.CriteriaTrue())
-	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
-
-	// add dependency
-	b.AddDependency(b.AddUser(), contract)
-
-	// policy resolution with invalid code parameters should result in an error
-	resolvePolicy(t, b, ResError, "Error when processing code params")
-}
-
-func TestPolicyResolverInvalidDiscoveryParams(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-
-	// create a service which uses label in its code parameters
-	service := b.AddService()
-	b.AddServiceComponent(service,
-		b.CodeComponent(
-			nil,
-			util.NestedParameterMap{"address": "{{ .Labels..."},
-		),
-	)
-	contract := b.AddContract(service, b.CriteriaTrue())
-	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
-
-	// add dependency
-	b.AddDependency(b.AddUser(), contract)
-
-	// policy resolution with invalid discovery parameters should result in an error
-	resolvePolicy(t, b, ResError, "Error when processing discovery params")
-}
-
 func TestPolicyResolverServiceLoop(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
@@ -377,56 +300,6 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 
 	// policy resolution with service dependency cycle should should result in an error
 	resolvePolicy(t, b, ResError, "service cycle detected")
-}
-
-func TestPolicyResolverComponentLoop(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-
-	// create 3 services
-	service := b.AddService()
-	contract := b.AddContract(service, b.CriteriaTrue())
-
-	// create component cycle
-	component1 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
-	component2 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
-	component3 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
-	b.AddComponentDependency(component1, component2)
-	b.AddComponentDependency(component2, component3)
-	b.AddComponentDependency(component3, component1)
-
-	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
-
-	// add dependency
-	b.AddDependency(b.AddUser(), contract)
-
-	// policy resolution with service dependency cycle should should result in an error
-	resolvePolicy(t, b, ResError, "component cycle detected")
-}
-
-func TestPolicyResolverUnknownComponentType(t *testing.T) {
-	b := builder.NewPolicyBuilder()
-
-	// create a with 3 components, first component is not code and not contract (engine should just skip it)
-	service := b.AddService()
-	component1 := b.AddServiceComponent(service, b.UnknownComponent())
-	component2 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
-	component3 := b.AddServiceComponent(service, b.CodeComponent(nil, nil))
-	b.AddComponentDependency(component1, component2)
-	b.AddComponentDependency(component2, component3)
-
-	contract := b.AddContract(service, b.CriteriaTrue())
-	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
-
-	// add dependency
-	dependency := b.AddDependency(b.AddUser(), contract)
-
-	// unknown component type should not result in critical error
-	resolution := resolvePolicy(t, b, ResSuccess, "Skipping unknown component")
-
-	// check that both dependencies got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, object.GetKey(dependency), "Dependency should be resolved")
 }
 
 func TestPolicyResolverPickClusterViaRules(t *testing.T) {

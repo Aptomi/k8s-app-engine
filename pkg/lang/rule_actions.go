@@ -7,9 +7,6 @@ import (
 // Reject is a special constant that is used in rule actions for rejecting dependencies, ingress traffic, etc
 const Reject = "reject"
 
-// ChangeLabelsAction is a rule action to change labels
-type ChangeLabelsAction LabelOperations
-
 // DependencyAction is a rule action to allow or disallow dependency to be resolved
 type DependencyAction string
 
@@ -68,6 +65,5 @@ func (rule *Rule) ApplyActions(result *RuleActionResult) {
 		if role.Privileges.AllNamespaces {
 			nsMap[namespaceAll] = true
 		}
-
 	}
 }

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"github.com/d4l3k/messagediff"
 	"reflect"
@@ -89,4 +91,68 @@ func (src NestedParameterMap) Diff(dst NestedParameterMap) string {
 // ToString returns a string representation of a nested parameter map
 func (src NestedParameterMap) ToString() string {
 	return yaml.SerializeObject(src)
+}
+
+const (
+	ModeCompile  = iota
+	ModeEvaluate = iota
+)
+
+// ProcessParameterTree processes NestedParameterMap and calculates the whole tree, assuming values are text templates
+func ProcessParameterTree(tree NestedParameterMap, parameters *template.Parameters, cache *template.Cache, mode int) (NestedParameterMap, error) {
+	if tree == nil {
+		return nil, nil
+	}
+	if cache == nil {
+		cache = template.NewCache()
+	}
+
+	result := NestedParameterMap{}
+	err := processParameterTreeNode(tree, parameters, result, "", cache, mode)
+	return result, err
+}
+
+func processParameterTreeNode(node interface{}, parameters *template.Parameters, result NestedParameterMap, key string, cache *template.Cache, mode int) error {
+	if node == nil {
+		return nil
+	}
+
+	// If it's a string, evaluate template
+	if templateStr, ok := node.(string); ok {
+		if mode == ModeEvaluate {
+			// evaluate and store
+			evaluatedValue, err := cache.Evaluate(templateStr, parameters)
+			if err != nil {
+				return err
+			}
+			result[key] = EscapeName(evaluatedValue)
+		} else if mode == ModeCompile {
+			// just compile
+			_, err := template.NewTemplate(templateStr)
+			if err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("unknown mode: %d", mode)
+		}
+		return nil
+	}
+
+	// If it's a map, process it recursively
+	if paramsMap, ok := node.(NestedParameterMap); ok {
+		if len(key) > 0 {
+			result = result.GetNestedMap(key)
+		}
+		for pKey, pValue := range paramsMap {
+			result[pKey] = NestedParameterMap{}
+			err := processParameterTreeNode(pValue, parameters, result, pKey, cache, mode)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Unknown type, return an error
+	return fmt.Errorf("expected string or NestedParameterMap, but found %v", node)
 }

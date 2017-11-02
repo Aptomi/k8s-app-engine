@@ -132,8 +132,10 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
 
-	// there will be one context matching for each service. it will re-define some of those labels
-	// there will be other contexts, not matching
+	err := gen.policy.Validate()
+	if err != nil {
+		panic(err)
+	}
 	return gen.policy, gen.externalData
 }
 
@@ -215,7 +217,7 @@ func (gen *PolicyGenerator) makeService() *lang.Service {
 		component := &lang.ServiceComponent{
 			Name: "component-" + strconv.Itoa(i),
 			Code: &lang.Code{
-				Type:   "aptomi/code/unittests",
+				Type:   "helm",
 				Params: params,
 			},
 		}
@@ -257,7 +259,7 @@ func (gen *PolicyGenerator) makeRules() {
 			RequireAll: []string{"true"},
 		},
 		Actions: &lang.RuleActions{
-			ChangeLabels: lang.ChangeLabelsAction(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-test")),
+			ChangeLabels: lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-test"),
 		},
 	})
 }
@@ -332,6 +334,11 @@ func (gen *PolicyGenerator) makeCluster() {
 			Name:      "cluster-test",
 		},
 		Type: "kubernetes",
+		Config: lang.ClusterConfig{
+			KubeContext:     "value",
+			TillerNamespace: "value",
+			Namespace:       "value",
+		},
 	}
 	gen.addObject(cluster)
 }
