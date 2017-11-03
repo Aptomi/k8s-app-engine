@@ -179,12 +179,8 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	}
 	node.objectResolved(node.user)
 
-	// Locate the contract
-	node.contract, err = node.getContract(resolver.policy)
-	if err != nil {
-		// Return a policy processing error in case service is not present in policy
-		return node.cannotResolveInstance(err)
-	}
+	// Locate the contract (it should be always be present, as policy has been validated)
+	node.contract = node.getContract(resolver.policy)
 	node.namespace = node.contract.Namespace
 	node.objectResolved(node.contract)
 
@@ -251,8 +247,8 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Store edge (last component instance -> service instance)
 	node.resolution.StoreEdge(node.arrivalKey, node.serviceKey)
 
-	// Now, sort all components in topological order
-	componentsOrdered, err := node.sortServiceComponents()
+	// Now, sort all components in topological order (it should always succeed, as policy has been validated)
+	componentsOrdered, err := node.service.GetComponentsSortedTopologically()
 	if err != nil {
 		// Return an error in case of failed component topological sort
 		return node.cannotResolveInstance(err)

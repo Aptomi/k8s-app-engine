@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/object"
@@ -197,17 +198,14 @@ func (node *resolutionNode) checkUserExists() error {
 }
 
 // Helper to get a contract
-func (node *resolutionNode) getContract(policy *lang.Policy) (*lang.Contract, error) {
+func (node *resolutionNode) getContract(policy *lang.Policy) *lang.Contract {
 	contractObj, err := policy.GetObject(lang.ContractObject.Kind, node.contractName, node.namespace)
-	if err != nil {
-		return nil, node.errorContractDoesNotExist()
-	}
-	if contractObj == nil {
-		return nil, node.errorContractDoesNotExist()
+	if contractObj == nil || err != nil {
+		panic(fmt.Sprintf("Can't get contract '%s/%s': %s", node.namespace, node.contractName, err))
 	}
 	contract := contractObj.(*lang.Contract)
 	node.logContractFound(contract)
-	return contract, nil
+	return contract
 }
 
 // Helper to get a matched context
@@ -243,16 +241,9 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 
 // Helper to get a matched service
 func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Service, error) {
-	if node.context.Allocation == nil {
-		return nil, node.errorServiceDoesNotExist()
-	}
-
 	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, node.context.Allocation.Service, node.namespace)
-	if err != nil {
-		return nil, node.errorServiceDoesNotExist()
-	}
-	if serviceObj == nil {
-		return nil, node.errorServiceDoesNotExist()
+	if serviceObj == nil || err != nil {
+		panic(fmt.Sprintf("Can't get service '%s/%s': %s", node.namespace, node.context.Allocation.Service, err))
 	}
 
 	service := serviceObj.(*lang.Service)
@@ -275,11 +266,6 @@ func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Servic
 
 // Helper to resolve allocation keys
 func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string, error) {
-	// If there is no allocation, there are no keys to resolve
-	if node.context.Allocation == nil {
-		return nil, nil
-	}
-
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
 	result, err := node.context.ResolveKeys(node.getContextualDataForContextAllocationTemplate(), node.resolver.templateCache)
 	if err != nil {
@@ -287,14 +273,6 @@ func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string
 	}
 
 	node.logAllocationKeysSuccessfullyResolved(result)
-	return result, nil
-}
-
-func (node *resolutionNode) sortServiceComponents() ([]*lang.ServiceComponent, error) {
-	result, err := node.service.GetComponentsSortedTopologically()
-	if err != nil {
-		return nil, node.errorWhenDoingTopologicalSort(err)
-	}
 	return result, nil
 }
 

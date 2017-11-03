@@ -21,13 +21,6 @@ func (node *resolutionNode) errorUserDoesNotExist() error {
 	)
 }
 
-func (node *resolutionNode) errorContractDoesNotExist() error {
-	return errors.NewErrorWithDetails(
-		fmt.Sprintf("Dependency refers to non-existing contract: %s", node.dependency.Contract),
-		errors.Details{},
-	)
-}
-
 func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
 	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Rules do not allow dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.dependency.User, node.dependency.Contract, node.contractName, node.depth),
@@ -60,20 +53,6 @@ func (node *resolutionNode) errorClusterDoesNotExist() error {
 			errors.Details{},
 		)
 	}
-	return NewCriticalError(err)
-}
-
-func (node *resolutionNode) errorServiceDoesNotExist() error {
-	var name string
-	if node.context.Allocation != nil {
-		name = node.context.Allocation.Service
-	} else {
-		name = "allocation block is empty"
-	}
-	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Unable to find service definition: %s", name),
-		errors.Details{},
-	)
 	return NewCriticalError(err)
 }
 
@@ -114,21 +93,6 @@ func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error 
 		fmt.Sprintf("Error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, cause),
 		errors.Details{
 			"cause": cause,
-		},
-	)
-	return NewCriticalError(err)
-}
-
-func (node *resolutionNode) errorWhenDoingTopologicalSort(cause error) error {
-	componentNames := []string{}
-	for _, component := range node.service.Components {
-		componentNames = append(componentNames, component.Name)
-	}
-	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Failed to topologically sort components within a service '%s': %s", node.service.Name, cause),
-		errors.Details{
-			"cause":          cause,
-			"componentNames": componentNames,
 		},
 	)
 	return NewCriticalError(err)
