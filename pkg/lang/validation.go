@@ -6,27 +6,46 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/Aptomi/aptomi/pkg/util"
+	english "github.com/go-playground/locales/en"
+	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9/translations/en"
 	"regexp"
 	"strings"
 )
 
+// Custom type for context key, so we don't have to use 'string' directly
 type contextKey string
+
+var policyKey = contextKey("policy")
 
 func (c contextKey) String() string {
 	return "lang context key " + string(c)
 }
 
-var (
-	policyKey = contextKey("policy")
-)
+// Custom error for policy validation
+type policyValidationError struct {
+	errList []string
+}
 
-// TODO: check that clusters should be in system namespace
-// TODO: code coverage in engine
-// TODO: call validate in engine
-// TODO: better error messages
-// TODO: one framework instead of two
-func makePolicyValidator() *validator.Validate {
+func (err policyValidationError) Error() string {
+	return strings.Join(err.errList, "\n")
+}
+
+func (err *policyValidationError) addError(errStr string) {
+	err.errList = append(err.errList, errStr)
+}
+
+// PolicyValidator is a custom validator for the policy
+type PolicyValidator struct {
+	val    *validator.Validate
+	ctx    context.Context
+	policy *Policy
+	trans  ut.Translator
+}
+
+// NewPolicyValidator creates a new PolicyValidator
+func NewPolicyValidator(policy *Policy) *PolicyValidator {
 	result := validator.New()
 
 	// independent validators
@@ -47,8 +66,49 @@ func makePolicyValidator() *validator.Validate {
 	result.RegisterStructValidationCtx(validateDependency, Dependency{})
 	result.RegisterStructValidationCtx(validateContract, Contract{})
 
+	// context
+	ctx := context.WithValue(context.Background(), policyKey, policy)
+
+	// translator
+	eng := english.New()
+	uni := ut.New(eng, eng)
+	trans, _ := uni.GetTranslator("en")
+	err := en.RegisterDefaultTranslations(result, trans)
+	if err != nil {
+		panic(err)
+	}
+
+	return &PolicyValidator{
+		val:    result,
+		ctx:    ctx,
+		policy: policy,
+		trans:  trans,
+	}
+}
+
+func (v *PolicyValidator) Validate() error {
+	// validate policy
+	err := v.val.StructCtx(v.ctx, v.policy)
+	if err == nil {
+		return nil
+	}
+
+	// collect human-readable errors
+	result := policyValidationError{}
+	vErrors := err.(validator.ValidationErrors)
+	for _, vErr := range vErrors {
+		errStr := fmt.Sprintf("%s: %s", vErr.Namespace(), vErr.Translate(v.trans))
+		result.addError(errStr)
+	}
+
 	return result
 }
+
+// TODO: check that clusters should be in system namespace
+// TODO: code coverage in engine
+// TODO: call validate in engine
+// TODO: better error messages
+// TODO: one framework instead of two
 
 // checks if a given string is a valid allow/reject action type
 func validateAllowRejectAction(fl validator.FieldLevel) bool {

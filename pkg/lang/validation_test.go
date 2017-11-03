@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/go-playground/validator.v9"
 	"strconv"
 	"testing"
 )
@@ -181,22 +180,8 @@ func validatePolicy(t *testing.T, result int, objects []object.Base, policy *Pol
 		failed = !assert.Error(t, errValidate, "Policy validation should fail. Objects: \n%s", yaml.SerializeObject(objects)) // nolint: vet
 	}
 
-	if displayErrorMessages() || failed {
-		debugError(errValidate, failed)
-	}
-}
-
-func debugError(err error, failed bool) {
-	if err == nil {
-		return
-	}
-	msg := "INF"
-	if failed {
-		msg = "ERR"
-	}
-	vErrors := err.(validator.ValidationErrors)
-	for _, vErr := range vErrors {
-		fmt.Printf("  [%s] -> %s\n", msg, vErr)
+	if errValidate != nil && (displayErrorMessages() || failed) {
+		fmt.Println(errValidate)
 	}
 }
 

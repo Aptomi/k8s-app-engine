@@ -1,7 +1,6 @@
 package lang
 
 import (
-	"context"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/object"
 	"strings"
@@ -94,11 +93,9 @@ func (policy *Policy) GetObject(kind string, locator string, currentNs string) (
 }
 
 // Validate performs validation of the entire policy, making sure that all of its objects are well-formed.
-// It also checks that all cross-object references are valid. If policy is malformed, then an error is returned.
+// It also checks that all cross-object references are valid. If policy is malformed, then a list of errors is returned.
 // Otherwise, if policy is correctly formed, then nil is returned.
 // The resulting error can be caster to (validator.ValidationErrors) and iterated over, to get the full list of errors.
 func (policy *Policy) Validate() error {
-	val := makePolicyValidator()
-	ctx := context.WithValue(context.Background(), policyKey, policy)
-	return val.StructCtx(ctx, policy)
+	return NewPolicyValidator(policy).Validate()
 }
