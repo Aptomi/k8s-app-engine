@@ -39,7 +39,7 @@ func (rule *Rule) ApplyActions(result *RuleActionResult) {
 
 	result.ChangedLabelsOnLastApply = false
 	if rule.Actions.ChangeLabels != nil {
-		result.ChangedLabelsOnLastApply = result.Labels.ApplyTransform(LabelOperations(rule.Actions.ChangeLabels))
+		result.ChangedLabelsOnLastApply = result.Labels.ApplyTransform(rule.Actions.ChangeLabels)
 	}
 
 	for roleID, namespaceList := range rule.Actions.AddRole {

@@ -94,7 +94,10 @@ func (src NestedParameterMap) ToString() string {
 }
 
 const (
-	ModeCompile  = iota
+	// ModeCompile just compiles all text templates on parameter tree without evaluating
+	ModeCompile = iota
+
+	// ModeEvaluate evaluates the whole parameter tree and all of its text templates, given a set of parameters
 	ModeEvaluate = iota
 )
 

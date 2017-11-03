@@ -99,6 +99,6 @@ func (policy *Policy) GetObject(kind string, locator string, currentNs string) (
 // The resulting error can be caster to (validator.ValidationErrors) and iterated over, to get the full list of errors.
 func (policy *Policy) Validate() error {
 	val := makePolicyValidator()
-	ctx := context.WithValue(context.Background(), "policy", policy)
+	ctx := context.WithValue(context.Background(), policyKey, policy)
 	return val.StructCtx(ctx, policy)
 }

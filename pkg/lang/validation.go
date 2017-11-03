@@ -11,6 +11,21 @@ import (
 	"strings"
 )
 
+type contextKey string
+
+func (c contextKey) String() string {
+	return "lang context key " + string(c)
+}
+
+var (
+	policyKey = contextKey("policy")
+)
+
+// TODO: check that clusters should be in system namespace
+// TODO: code coverage in engine
+// TODO: call validate in engine
+// TODO: better error messages
+// TODO: one framework instead of two
 func makePolicyValidator() *validator.Validate {
 	result := validator.New()
 
@@ -24,7 +39,7 @@ func makePolicyValidator() *validator.Validate {
 	_ = result.RegisterValidation("labels", validateLabels)
 	_ = result.RegisterValidation("labelOperations", validateLabelOperations)
 	_ = result.RegisterValidation("allowReject", validateAllowRejectAction)
-	_ = result.RegisterValidation("addRoleNS", validateAclRoleActionMap)
+	_ = result.RegisterValidation("addRoleNS", validateACLRoleActionMap)
 
 	// validators with context containing policy
 	result.RegisterStructValidation(validateRule, Rule{})
@@ -81,7 +96,7 @@ func validateLabelOperations(fl validator.FieldLevel) bool {
 		if !util.ContainsString([]string{"set", "remove"}, opType) {
 			return false
 		}
-		for name, _ := range operations {
+		for name := range operations {
 			if !isIdentifier(name) {
 				return false
 			}
@@ -91,7 +106,7 @@ func validateLabelOperations(fl validator.FieldLevel) bool {
 }
 
 // checks if a given map is a valid map of setting ACL Role actions
-func validateAclRoleActionMap(fl validator.FieldLevel) bool {
+func validateACLRoleActionMap(fl validator.FieldLevel) bool {
 	addRoleMap := fl.Field().Interface().(map[string]string)
 	for roleID, namespaceList := range addRoleMap {
 		role := ACLRolesMap[roleID]
@@ -123,10 +138,10 @@ func validateLabels(fl validator.FieldLevel) bool {
 
 // checks if service is valid
 func validateService(ctx context.Context, sl validator.StructLevel) {
-	service := sl.Current().Interface().(Service)
+	service := sl.Current().Addr().Interface().(*Service)
 
 	// service should have either code or contract set in its components
-	policy := ctx.Value("policy").(*Policy)
+	policy := ctx.Value(policyKey).(*Policy)
 	for _, component := range service.Components {
 		cnt := 0
 		if component.Code != nil {
@@ -179,8 +194,8 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 
 // checks if dependency is valid
 func validateDependency(ctx context.Context, sl validator.StructLevel) {
-	dependency := sl.Current().Interface().(Dependency)
-	policy := ctx.Value("policy").(*Policy)
+	dependency := sl.Current().Addr().Interface().(*Dependency)
+	policy := ctx.Value(policyKey).(*Policy)
 
 	// dependency should point to an existing contract
 	obj, err := policy.GetObject(ContractObject.Kind, dependency.Contract, dependency.Namespace)
@@ -192,8 +207,8 @@ func validateDependency(ctx context.Context, sl validator.StructLevel) {
 
 // checks if contract is valid
 func validateContract(ctx context.Context, sl validator.StructLevel) {
-	contract := sl.Current().Interface().(Contract)
-	policy := ctx.Value("policy").(*Policy)
+	contract := sl.Current().Addr().Interface().(*Contract)
+	policy := ctx.Value(policyKey).(*Policy)
 
 	// every context should point to an existing service
 	for _, ctx := range contract.Contexts {
@@ -211,7 +226,7 @@ func validateContract(ctx context.Context, sl validator.StructLevel) {
 
 // checks if rule is valid
 func validateRule(sl validator.StructLevel) {
-	rule := sl.Current().Interface().(Rule)
+	rule := sl.Current().Addr().Interface().(*Rule)
 
 	// regular rule should have at least one of the actions set
 	if rule.Metadata.Kind == RuleObject.Kind {

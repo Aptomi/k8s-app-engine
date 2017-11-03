@@ -23,7 +23,7 @@ const (
 )
 
 func displayErrorMessages() bool {
-	return false
+	return true
 }
 
 func TestPolicyValidationService(t *testing.T) {
@@ -174,11 +174,11 @@ func validatePolicy(t *testing.T, result int, objects []object.Base, policy *Pol
 	t.Helper()
 	errValidate := policy.Validate()
 
-	failed := false
+	var failed bool
 	if result == ResSuccess {
 		failed = !assert.NoError(t, errValidate, "Policy validation should succeed. Objects: \n%s", yaml.SerializeObject(objects))
 	} else {
-		failed = !assert.Error(t, errValidate, "Policy validation should fail. Objects: \n%s", yaml.SerializeObject(objects))
+		failed = !assert.Error(t, errValidate, "Policy validation should fail. Objects: \n%s", yaml.SerializeObject(objects)) // nolint: vet
 	}
 
 	if displayErrorMessages() || failed {
