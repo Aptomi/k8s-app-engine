@@ -172,9 +172,8 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 		},
 		Type: "kubernetes",
 		Config: lang.ClusterConfig{
-			KubeContext:     "value",
-			TillerNamespace: "value",
-			Namespace:       "value",
+			KubeContext: "value",
+			Namespace:   "value",
 		},
 	}
 	builder.addObject(builder.domainAdminView, result)

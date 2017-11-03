@@ -70,6 +70,13 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 // which component have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
 // it can be rendered by the engine diff/apply by deploying/configuring required components/containers in the cloud.
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *event.Log, error) {
+	// Run policy validation before resolution, just in case
+	err := resolver.policy.Validate()
+	if err != nil {
+		return nil, resolver.eventLog, err
+	}
+
+	// Allocate semaphore
 	var semaphore = make(chan int, ThreadPoolSize)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))

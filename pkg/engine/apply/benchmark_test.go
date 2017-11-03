@@ -335,9 +335,8 @@ func (gen *PolicyGenerator) makeCluster() {
 		},
 		Type: "kubernetes",
 		Config: lang.ClusterConfig{
-			KubeContext:     "value",
-			TillerNamespace: "value",
-			Namespace:       "value",
+			KubeContext: "value",
+			Namespace:   "value",
 		},
 	}
 	gen.addObject(cluster)

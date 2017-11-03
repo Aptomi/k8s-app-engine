@@ -161,6 +161,10 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 			tag:         "aclRuleActions",
 			translation: fmt.Sprintf("{0} is a required field for ACL rule. Must specify role assignment map"),
 		},
+		{
+			tag:         "systemNS",
+			translation: fmt.Sprintf("{0} must be '%s', but found '{1}'", object.SystemNS),
+		},
 	}
 	for _, t := range translations {
 		err = result.RegisterTranslation(t.tag, trans, registrationFunc(t.tag, t.translation), translateFunc)
@@ -216,7 +220,6 @@ func (v *PolicyValidator) Validate() error {
 }
 
 // TODO: code coverage in engine
-// TODO: call validate in engine
 // TODO: switch components from array to map
 // TODO: one framework instead of two
 
@@ -426,7 +429,7 @@ func validateRule(sl validator.StructLevel) {
 func validateCluster(sl validator.StructLevel) {
 	cluster := sl.Current().Addr().Interface().(*Cluster)
 	if cluster.Namespace != object.SystemNS {
-		sl.ReportError(cluster, "Namespace", "", "systemNS", "")
+		sl.ReportError(cluster.Namespace, "Namespace", "", "systemNS", "")
 	}
 }
 

@@ -29,6 +29,6 @@ type Cluster struct {
 // ClusterConfig defines config for a k8s cluster with Helm
 type ClusterConfig struct {
 	KubeContext     string `validate:"required"`
-	TillerNamespace string `validate:"required"`
+	TillerNamespace string `validate:"omitempty"`
 	Namespace       string `validate:"required"`
 }

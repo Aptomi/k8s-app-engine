@@ -187,6 +187,12 @@ func validatePolicy(t *testing.T, result int, objects []object.Base, policy *Pol
 		failed = !assert.Error(t, errValidate, "Policy validation should fail. Objects: \n%s", yaml.SerializeObject(objects)) // nolint: vet
 	}
 
+	if errValidate != nil {
+		if !assert.NotContains(t, errValidate.Error(), "Error:Field validation", "Policy validation error message is not human readable. Must define a translator") {
+			t.Log(errValidate)
+		}
+	}
+
 	if errValidate != nil && (displayErrorMessages() || failed) {
 		fmt.Println(errValidate)
 	}
@@ -305,9 +311,8 @@ func makeCluster(clusterType, ns string) *Cluster {
 		},
 		Type: clusterType,
 		Config: ClusterConfig{
-			KubeContext:     "value",
-			TillerNamespace: "value",
-			Namespace:       "value",
+			KubeContext: "value",
+			Namespace:   "value",
 		},
 	}
 }
