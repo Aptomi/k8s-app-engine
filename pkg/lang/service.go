@@ -64,7 +64,7 @@ type ServiceComponent struct {
 type Code struct {
 	// Type represents code type (e.g. aptomi/code/kubernetes-helm). It determines the plugin that will get executed for
 	// for this code component
-	Type string `validate:"codetype"`
+	Type string `validate:"required,codetype"`
 
 	// Params define parameters that will be passed down to the deployment plugin. Params follow text template syntax
 	// and can refer to arbitrary labels, as well as discovery parameters exposed by other components (within the

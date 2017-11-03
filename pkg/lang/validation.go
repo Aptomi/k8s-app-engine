@@ -10,8 +10,18 @@ import (
 	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/go-playground/validator.v9/translations/en"
+	"reflect"
 	"regexp"
 	"strings"
+)
+
+// Constants
+var (
+	identifierRegex = "^[a-zA-Z][a-zA-Z0-9_-]{0,63}$"
+	clusterTypes    = []string{"kubernetes"}
+	codeTypes       = []string{"helm", "aptomi/code/kubernetes-helm"}
+	labelOpsKeys    = []string{"set", "remove"}
+	allowReject     = []string{"allow", "reject"}
 )
 
 // Custom type for context key, so we don't have to use 'string' directly
@@ -69,7 +79,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 	// context
 	ctx := context.WithValue(context.Background(), policyKey, policy)
 
-	// translator
+	// default translations
 	eng := english.New()
 	uni := ut.New(eng, eng)
 	trans, _ := uni.GetTranslator("en")
@@ -78,12 +88,108 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 		panic(err)
 	}
 
+	// additional translations
+	translations := []struct {
+		tag         string
+		translation string
+	}{
+		// static
+		{
+			tag:         "identifier",
+			translation: fmt.Sprintf("{0} must be a valid identifier, but found '{1}'"),
+		},
+		{
+			tag:         "clustertype",
+			translation: fmt.Sprintf("{0} must be in %s, but found '{1}'", clusterTypes),
+		},
+		{
+			tag:         "codetype",
+			translation: fmt.Sprintf("{0} must be in %s, but found '{1}'", codeTypes),
+		},
+		{
+			tag:         "expression",
+			translation: fmt.Sprintf("{0} must be a valid expression, but found '{1}'"),
+		},
+		{
+			tag:         "template",
+			translation: fmt.Sprintf("{0} must be a valid text template, but found '{1}'"),
+		},
+		{
+			tag:         "templateNestedMap",
+			translation: fmt.Sprintf("{0} must be a valid text template map (all nested text templates must be valid)"),
+		},
+		{
+			tag:         "labels",
+			translation: fmt.Sprintf("{0} must be a valid label map (all label names must be valid)"),
+		},
+		{
+			tag:         "labelOperations",
+			translation: fmt.Sprintf("{0} must be a valid label operations map (keys must be in %s, all label names must be valid)", labelOpsKeys),
+		},
+		{
+			tag:         "allowReject",
+			translation: fmt.Sprintf("{0} must be in %s, but found '{1}'", allowReject),
+		},
+		{
+			tag:         "addRoleNS",
+			translation: fmt.Sprintf("{0} must be a valid role assignment map (key must be in %s, namespace list must be comma-separated identifiers/wildcards)", util.GetSortedStringKeys(ACLRolesMap)),
+		},
+		// dynamic/custom
+		{
+			tag:         "exists",
+			translation: fmt.Sprintf("object does not exist"),
+		},
+		{
+			tag:         "single",
+			translation: fmt.Sprintf("only a single value is allowed"),
+		},
+		{
+			tag:         "unique",
+			translation: fmt.Sprintf("must be unique, but it is not"),
+		},
+		{
+			tag:         "noComponentCycle",
+			translation: fmt.Sprintf("circular dependency detected in components"),
+		},
+		{
+			tag:         "ruleActions",
+			translation: fmt.Sprintf("{0} must have at least one action defined"),
+		},
+		{
+			tag:         "aclRuleActions",
+			translation: fmt.Sprintf("{0} is a required field for ACL rule. Must specify role assignment map"),
+		},
+	}
+	for _, t := range translations {
+		err = result.RegisterTranslation(t.tag, trans, registrationFunc(t.tag, t.translation), translateFunc)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	return &PolicyValidator{
 		val:    result,
 		ctx:    ctx,
 		policy: policy,
 		trans:  trans,
 	}
+}
+
+func registrationFunc(tag string, translation string) validator.RegisterTranslationsFunc {
+	return func(ut ut.Translator) (err error) {
+		if err = ut.Add(tag, translation, true); err != nil {
+			return
+		}
+		return
+	}
+}
+
+func translateFunc(ut ut.Translator, fe validator.FieldError) string {
+	t, err := ut.T(fe.Tag(), fe.Field(), reflect.ValueOf(fe.Value()).String())
+	if err != nil {
+		return fe.(error).Error()
+	}
+	return t
 }
 
 func (v *PolicyValidator) Validate() error {
@@ -107,22 +213,22 @@ func (v *PolicyValidator) Validate() error {
 // TODO: check that clusters should be in system namespace
 // TODO: code coverage in engine
 // TODO: call validate in engine
-// TODO: better error messages
+// TODO: switch components from array to map
 // TODO: one framework instead of two
 
 // checks if a given string is a valid allow/reject action type
 func validateAllowRejectAction(fl validator.FieldLevel) bool {
-	return util.ContainsString([]string{"allow", "reject"}, fl.Field().String())
+	return util.ContainsString(allowReject, fl.Field().String())
 }
 
 // checks if a given string is a valid cluster type
 func validateClusterType(fl validator.FieldLevel) bool {
-	return util.ContainsString([]string{"kubernetes"}, fl.Field().String())
+	return util.ContainsString(clusterTypes, fl.Field().String())
 }
 
 // checks if a given string is a valid code type
 func validateCodeType(fl validator.FieldLevel) bool {
-	return util.ContainsString([]string{"helm", "aptomi/code/kubernetes-helm"}, fl.Field().String())
+	return util.ContainsString(codeTypes, fl.Field().String())
 }
 
 // checks if a given string (or a list of strings) is valid identifier(s)
@@ -153,7 +259,7 @@ func validateTemplateNestedMap(fl validator.FieldLevel) bool {
 func validateLabelOperations(fl validator.FieldLevel) bool {
 	ops := fl.Field().Interface().(LabelOperations)
 	for opType, operations := range ops {
-		if !util.ContainsString([]string{"set", "remove"}, opType) {
+		if !util.ContainsString(labelOpsKeys, opType) {
 			return false
 		}
 		for name := range operations {
@@ -238,14 +344,14 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 	// components should not have cycles
 	_, err := service.GetComponentsSortedTopologically()
 	if err != nil {
-		sl.ReportError(service, "Components", "", "noCycle", "")
+		sl.ReportError(service, "Components", "", "noComponentCycle", "")
 	}
 
 	// dependencies should point to existing components
 	for _, component := range service.Components {
 		for _, dependencyName := range component.Dependencies {
 			if _, exists := componentNames[dependencyName]; !exists {
-				sl.ReportError(service, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, dependencyName), "", "valid", "")
+				sl.ReportError(service, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, dependencyName), "", "exists", "")
 				return
 			}
 		}
@@ -295,7 +401,7 @@ func validateRule(sl validator.StructLevel) {
 		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Dependency) > 0)
 		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Ingress) > 0)
 		if !hasActions {
-			sl.ReportError(rule.Actions, "Actions", "", "required", "")
+			sl.ReportError(rule.Actions, "Actions", "", "ruleActions", "")
 		}
 		return
 	}
@@ -305,7 +411,7 @@ func validateRule(sl validator.StructLevel) {
 		hasActions := false
 		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.AddRole) > 0)
 		if !hasActions {
-			sl.ReportError(rule.Actions, "Actions.AddRole", "", "required", "")
+			sl.ReportError(rule.Actions, "Actions.AddRole", "", "aclRuleActions", "")
 			return
 		}
 		return
@@ -313,6 +419,6 @@ func validateRule(sl validator.StructLevel) {
 }
 
 func isIdentifier(id string) bool {
-	ok, err := regexp.MatchString("^[a-zA-Z][a-zA-Z0-9_-]{0,63}$", id)
+	ok, err := regexp.MatchString(identifierRegex, id)
 	return ok && err == nil
 }

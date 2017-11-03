@@ -22,7 +22,7 @@ const (
 )
 
 func displayErrorMessages() bool {
-	return true
+	return false
 }
 
 func TestPolicyValidationService(t *testing.T) {
@@ -73,7 +73,7 @@ func TestPolicyValidationService(t *testing.T) {
 }
 
 func TestPolicyValidationContract(t *testing.T) {
-	// Contract (Identifiers & Label Operations)
+	// Contract (Identifiers & Label Operations & Allocation Keys)
 	runValidationTests(t, ResSuccess, true, []object.Base{
 		makeContract("test", 0, ""),
 		makeContract("test", 1, ""),
@@ -94,6 +94,12 @@ func TestPolicyValidationContract(t *testing.T) {
 	runValidationTests(t, ResFailure, false, []object.Base{
 		makeService("service", Empty),
 		makeContract("test1", 0, "service-unknown"),
+	})
+
+	// Check allocation keys
+	runValidationTests(t, ResFailure, false, []object.Base{
+		makeService("service", Empty),
+		invalidAllocationKeys(makeContract("test1", 0, "service")),
 	})
 }
 
@@ -279,6 +285,13 @@ func makeContract(name string, labelOpsNum int, pointToService string) *Contract
 		}
 	}
 
+	return contract
+}
+
+func invalidAllocationKeys(contract *Contract) *Contract {
+	for _, context := range contract.Contexts {
+		context.Allocation.Keys = []string{"{{{ invalid"}
+	}
 	return contract
 }
 
