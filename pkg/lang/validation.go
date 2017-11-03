@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
+	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/util"
 	english "github.com/go-playground/locales/en"
 	"github.com/go-playground/universal-translator"
@@ -72,6 +73,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 
 	// validators with context containing policy
 	result.RegisterStructValidation(validateRule, Rule{})
+	result.RegisterStructValidation(validateCluster, Cluster{})
 	result.RegisterStructValidationCtx(validateService, Service{})
 	result.RegisterStructValidationCtx(validateDependency, Dependency{})
 	result.RegisterStructValidationCtx(validateContract, Contract{})
@@ -192,6 +194,9 @@ func translateFunc(ut ut.Translator, fe validator.FieldError) string {
 	return t
 }
 
+// Validate validates the entire policy for errors and returns an error (it can be casted to
+// policyValidationError, containing a list of errors inside). When error is printed as string, it will
+// automatically contains the full list of validation errors.
 func (v *PolicyValidator) Validate() error {
 	// validate policy
 	err := v.val.StructCtx(v.ctx, v.policy)
@@ -210,7 +215,6 @@ func (v *PolicyValidator) Validate() error {
 	return result
 }
 
-// TODO: check that clusters should be in system namespace
 // TODO: code coverage in engine
 // TODO: call validate in engine
 // TODO: switch components from array to map
@@ -415,6 +419,14 @@ func validateRule(sl validator.StructLevel) {
 			return
 		}
 		return
+	}
+}
+
+// checks if cluster is valid
+func validateCluster(sl validator.StructLevel) {
+	cluster := sl.Current().Addr().Interface().(*Cluster)
+	if cluster.Namespace != object.SystemNS {
+		sl.ReportError(cluster, "Namespace", "", "systemNS", "")
 	}
 }
 

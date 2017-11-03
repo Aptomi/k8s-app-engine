@@ -146,10 +146,11 @@ func TestPolicyValidationACLRule(t *testing.T) {
 func TestPolicyValidationCluster(t *testing.T) {
 	// Clusters (Identifiers & Config)
 	runValidationTests(t, ResSuccess, true, []object.Base{
-		makeCluster("kubernetes"),
+		makeCluster("kubernetes", object.SystemNS),
 	})
 	runValidationTests(t, ResFailure, true, []object.Base{
-		makeCluster("unknown"),
+		makeCluster("unknown", object.SystemNS),
+		makeCluster("kubernetes", "main"),
 	})
 }
 
@@ -295,11 +296,11 @@ func invalidAllocationKeys(contract *Contract) *Contract {
 	return contract
 }
 
-func makeCluster(clusterType string) *Cluster {
+func makeCluster(clusterType, ns string) *Cluster {
 	return &Cluster{
 		Metadata: Metadata{
 			Kind:      ClusterObject.Kind,
-			Namespace: object.SystemNS,
+			Namespace: ns,
 			Name:      "cluster",
 		},
 		Type: clusterType,
