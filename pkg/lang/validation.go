@@ -219,10 +219,6 @@ func (v *PolicyValidator) Validate() error {
 	return result
 }
 
-// TODO: code coverage in engine
-// TODO: switch components from array to map
-// TODO: one framework instead of two
-
 // checks if a given string is a valid allow/reject action type
 func validateAllowRejectAction(fl validator.FieldLevel) bool {
 	return util.ContainsString(allowReject, fl.Field().String())
