@@ -1,4 +1,4 @@
-![aptomi Logo](aptomi-logo.png)
+![aptomi Logo](aptomi-logo-new.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi?refresh)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
 [![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi%20-%20tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
