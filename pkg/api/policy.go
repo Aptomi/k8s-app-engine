@@ -48,10 +48,19 @@ func (api *coreApi) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		log.Panicf("Error while loading current policy: %s", err)
 	}
 	for _, obj := range objects {
-		errAdd := policy.View(user).ManageObject(obj)
+		errAdd := policy.AddObject(obj)
 		if errAdd != nil {
 			log.Panicf("Error while adding updated object to policy: %s", errAdd)
 		}
+		errManage := policy.View(user).ManageObject(obj)
+		if errManage != nil {
+			log.Panicf("Error while adding updated object to policy: %s", errManage)
+		}
+	}
+
+	err = policy.Validate()
+	if err != nil {
+		log.Panicf("Updated policy is invalid: %s", err)
 	}
 
 	// todo(slukjanov): handle deleted
