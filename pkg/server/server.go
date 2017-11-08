@@ -1,19 +1,18 @@
 package server
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/api"
+	"github.com/Aptomi/aptomi/pkg/api/middleware"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
-	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
-	"github.com/Aptomi/aptomi/pkg/object/codec"
-	"github.com/Aptomi/aptomi/pkg/object/codec/yaml"
-	"github.com/Aptomi/aptomi/pkg/object/store/bolt"
-	"github.com/Aptomi/aptomi/pkg/server/store"
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/store"
+	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
+	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
 	"github.com/Aptomi/aptomi/pkg/webui"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -25,11 +24,9 @@ import (
 type Server struct {
 	cfg              *config.Server
 	backgroundErrors chan string
-	catalog          *object.Catalog
-	codec            codec.MarshallerUnmarshaller
 
 	externalData *external.Data
-	store        store.ServerStore
+	store        store.Core
 	httpServer   *http.Server
 }
 
@@ -40,75 +37,73 @@ func NewServer(cfg *config.Server) *Server {
 		backgroundErrors: make(chan string),
 	}
 
-	s.catalog = object.NewCatalog().Append(lang.Objects...).Append(store.Objects...)
-	s.codec = yaml.NewCodec(s.catalog)
-
 	return s
 }
 
 // Start initializes Aptomi server, starts serving API/UI, and as well as runs the required background jobs for actual policy enforcement
-func (s *Server) Start() {
-	s.initStore()
-	s.initExternalData()
+func (server *Server) Start() {
+	server.initStore()
+	server.initExternalData()
 
 	// Register UI and API handlers
-	s.initHTTPServer()
+	server.initHTTPServer()
 
 	// Start HTTP server
-	s.runInBackground("HTTP Server", true, func() {
-		panic(s.httpServer.ListenAndServe())
+	server.runInBackground("HTTP Server", true, func() {
+		panic(server.httpServer.ListenAndServe())
 	})
 
 	// Start policy enforcement job
-	if !s.cfg.Enforcer.Disabled {
-		s.runInBackground("Policy Enforcer", true, func() {
-			panic(s.enforceLoop())
+	if !server.cfg.Enforcer.Disabled {
+		server.runInBackground("Policy Enforcer", true, func() {
+			panic(server.enforceLoop())
 		})
 	}
 
-	s.wait()
+	server.wait()
 }
 
-func (s *Server) initExternalData() {
+func (server *Server) initExternalData() {
 	userLoaders := []users.UserLoader{}
-	for _, ldap := range s.cfg.Users.LDAP {
-		userLoaders = append(userLoaders, users.NewUserLoaderFromLDAP(ldap, s.cfg.DomainAdminOverrides))
+	for _, ldap := range server.cfg.Users.LDAP {
+		userLoaders = append(userLoaders, users.NewUserLoaderFromLDAP(ldap, server.cfg.DomainAdminOverrides))
 	}
-	for _, file := range s.cfg.Users.File {
-		userLoaders = append(userLoaders, users.NewUserLoaderFromFile(file, s.cfg.DomainAdminOverrides))
+	for _, file := range server.cfg.Users.File {
+		userLoaders = append(userLoaders, users.NewUserLoaderFromFile(file, server.cfg.DomainAdminOverrides))
 	}
-	s.externalData = external.NewData(
+	server.externalData = external.NewData(
 		users.NewUserLoaderMultipleSources(userLoaders),
-		secrets.NewSecretLoaderFromDir(s.cfg.SecretsDir),
+		secrets.NewSecretLoaderFromDir(server.cfg.SecretsDir),
 	)
 }
 
-func (s *Server) initStore() {
-	b := bolt.NewBoltStore(s.catalog, s.codec)
-	err := b.Open(s.cfg.DB.Connection)
+func (server *Server) initStore() {
+	registry := runtime.NewRegistry().Append(store.Objects...)
+	b := bolt.NewGenericStore(registry)
+	err := b.Open(server.cfg.DB)
 	if err != nil {
-		panic(fmt.Sprintf("Can't open object store: %s", err))
+		log.Panicf("Can't open object store: %s", err)
 	}
-	s.store = store.New(b)
+	server.store = core.NewStore(b)
 }
 
-func (s *Server) initHTTPServer() {
+func (server *Server) initHTTPServer() {
 	router := httprouter.New()
 
-	api.Serve(router, s.store, s.externalData)
+	api.Serve(router, server.store, server.externalData)
 	webui.Serve(router)
 
 	var handler http.Handler = router
 
 	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
-	handler = newPanicHandler(handler)
+	handler = middleware.NewPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
 
-	s.httpServer = &http.Server{
+	server.httpServer = &http.Server{
 		Handler:      handler,
-		Addr:         s.cfg.API.ListenAddr(),
+		Addr:         server.cfg.API.ListenAddr(),
 		WriteTimeout: 5 * time.Second,
 		ReadTimeout:  30 * time.Second,
 	}

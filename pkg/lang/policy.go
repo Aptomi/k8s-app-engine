@@ -2,7 +2,7 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"strings"
 	"sync"
 )
@@ -38,7 +38,7 @@ func NewPolicy() *Policy {
 // All ACL rules should be loaded and added to the policy before this method gets called
 func (policy *Policy) View(user *User) *PolicyView {
 	policy.once.Do(func() {
-		systemNamespace := policy.Namespace[object.SystemNS]
+		systemNamespace := policy.Namespace[runtime.SystemNS]
 		if systemNamespace != nil {
 			policy.aclResolver = NewACLResolver(systemNamespace.ACLRules)
 		} else {
@@ -50,7 +50,7 @@ func (policy *Policy) View(user *User) *PolicyView {
 
 // AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
 // Namespace. If error occurs (e.g. object has an unknown kind) then the error will be returned
-func (policy *Policy) AddObject(obj object.Base) error {
+func (policy *Policy) AddObject(obj Base) error {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
 	if !ok {
 		policyNamespace = NewPolicyNamespace(obj.GetNamespace())
@@ -60,8 +60,8 @@ func (policy *Policy) AddObject(obj object.Base) error {
 }
 
 // GetObjectsByKind returns all objects in a policy with a given kind, across all namespaces
-func (policy *Policy) GetObjectsByKind(kind string) []object.Base {
-	result := []object.Base{}
+func (policy *Policy) GetObjectsByKind(kind string) []Base {
+	result := []Base{}
 	for _, policyNS := range policy.Namespace {
 		result = append(result, policyNS.getObjectsByKind(kind)...)
 	}
@@ -70,7 +70,7 @@ func (policy *Policy) GetObjectsByKind(kind string) []object.Base {
 
 // GetObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and current
 // namespace relative to which the call is being made
-func (policy *Policy) GetObject(kind string, locator string, currentNs string) (object.Base, error) {
+func (policy *Policy) GetObject(kind string, locator string, currentNs string) (runtime.Object, error) {
 	// parse locator: [namespace/]name. we might add [domain/] in the future
 	parts := strings.Split(locator, "/")
 	var ns, name string

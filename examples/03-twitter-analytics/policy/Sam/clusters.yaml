@@ -1,6 +1,6 @@
 # Cluster definition for us-east
-- metadata:
-    kind: cluster
+- kind: cluster
+  metadata:
     namespace: system
     name: cluster-us-east
   type: kubernetes
@@ -9,8 +9,8 @@
     namespace: demo
 
 # Cluster definition for us-west
-- metadata:
-    kind: cluster
+- kind: cluster
+  metadata:
     namespace: system
     name: cluster-us-west
   type: kubernetes

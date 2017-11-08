@@ -3,24 +3,26 @@ package global
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // PostProcessActionObject is an informational data structure with Kind and Constructor for the action
-var PostProcessActionObject = &object.Info{
+var PostProcessActionObject = &runtime.Info{
 	Kind:        "action-post-process",
-	Constructor: func() object.Base { return &PostProcessAction{} },
+	Constructor: func() runtime.Object { return &PostProcessAction{} },
 }
 
 // PostProcessAction is a post-processing action which gets called once after all components have been
 // processed by the engine apply
 type PostProcessAction struct {
+	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 }
 
 // NewPostProcessAction creates new PostProcessAction
-func NewPostProcessAction(revision object.Generation) *PostProcessAction {
+func NewPostProcessAction(revision runtime.Generation) *PostProcessAction {
 	return &PostProcessAction{
+		TypeKind: PostProcessActionObject.GetTypeKind(),
 		Metadata: action.NewMetadata(revision, PostProcessActionObject.Kind),
 	}
 }

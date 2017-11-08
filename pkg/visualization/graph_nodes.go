@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"html"
 )
@@ -18,7 +18,7 @@ type dependencyNode struct {
 }
 
 func (n dependencyNode) getGroup() string {
-	serviceKey := n.b.resolution.DependencyInstanceMap[object.GetKey(n.dependency)]
+	serviceKey := n.b.resolution.DependencyInstanceMap[runtime.KeyFromStorable(n.dependency)]
 	if len(serviceKey) > 0 {
 		return "dependency"
 	}
@@ -26,7 +26,7 @@ func (n dependencyNode) getGroup() string {
 }
 
 func (n dependencyNode) getID() string {
-	return object.GetKey(n.dependency)
+	return runtime.KeyFromStorable(n.dependency)
 }
 
 func (n dependencyNode) getLabel() string {
@@ -45,7 +45,7 @@ func (n contractNode) getGroup() string {
 }
 
 func (n contractNode) getID() string {
-	return object.GetKey(n.contract)
+	return runtime.KeyFromStorable(n.contract)
 }
 
 func (n contractNode) getLabel() string {
@@ -67,7 +67,7 @@ func (n serviceNode) getGroup() string {
 }
 
 func (n serviceNode) getID() string {
-	return object.GetKey(n.service)
+	return runtime.KeyFromStorable(n.service)
 }
 
 func (n serviceNode) getLabel() string {
@@ -87,7 +87,7 @@ func (n componentNode) getGroup() string {
 }
 
 func (n componentNode) getID() string {
-	return object.GetKey(n.service) + "-" + n.component.Name
+	return runtime.KeyFromStorable(n.service) + "-" + n.component.Name
 }
 
 func (n componentNode) getLabel() string {

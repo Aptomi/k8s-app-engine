@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/external/users"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 type dependencyNode struct {
@@ -38,7 +38,7 @@ func (n dependencyNode) getGroup() string {
 }
 
 func (n dependencyNode) getID() string {
-	return fmt.Sprintf("%s%s", n.getIDPrefix(), object.GetKey(n.dependency))
+	return fmt.Sprintf("%s%s", n.getIDPrefix(), runtime.KeyFromStorable(n.dependency))
 }
 
 func (n dependencyNode) isItMyID(id string) string {

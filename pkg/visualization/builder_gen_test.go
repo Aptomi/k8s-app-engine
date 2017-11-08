@@ -2,18 +2,16 @@ package visualization
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action/actioninfo"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
-	"github.com/Aptomi/aptomi/pkg/object/codec"
-	"github.com/Aptomi/aptomi/pkg/object/codec/yaml"
-	"github.com/Aptomi/aptomi/pkg/server/store"
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"github.com/mattn/go-zglob"
 	"io/ioutil"
 	"os"
@@ -42,8 +40,8 @@ var integrationTestsLDAP = config.LDAP{
 }
 
 func TestVis(t *testing.T) {
-	catalog := object.NewCatalog().Append(lang.Objects...).Append(store.Objects...).Append(actioninfo.Objects...)
-	cod := yaml.NewCodec(catalog)
+	reg := runtime.NewRegistry().Append(api.Objects...)
+	cod := yaml.NewCodec(reg)
 
 	dir := "../../examples/03-twitter-analytics"
 	allObjects, err := readFiles([]string{dir + "/policy"}, cod)
@@ -76,25 +74,32 @@ func TestVis(t *testing.T) {
 	// graph.Save()
 }
 
-func readFiles(policyPaths []string, codec codec.MarshallerUnmarshaller) ([]object.Base, error) {
+func readFiles(policyPaths []string, codec runtime.Codec) ([]lang.Base, error) {
 	files, err := findPolicyFiles(policyPaths)
 	if err != nil {
 		return nil, fmt.Errorf("error while searching for policy files: %s", err)
 	}
 
-	allObjects := make([]object.Base, 0)
+	allObjects := make([]lang.Base, 0)
 	for _, file := range files {
 		data, err := ioutil.ReadFile(file)
 		if err != nil {
 			return nil, fmt.Errorf("can't read file %s error: %s", file, err)
 		}
 
-		objects, err := codec.UnmarshalOneOrMany(data)
+		objects, err := codec.DecodeOneOrMany(data)
 		if err != nil {
 			return nil, fmt.Errorf("can't unmarshal file %s error: %s", file, err)
 		}
 
-		allObjects = append(allObjects, objects...)
+		for _, obj := range objects {
+			langObj, ok := obj.(lang.Base)
+			if !ok {
+				return nil, fmt.Errorf("lang objects expected in file %s, but get: %s", file, obj.GetKind())
+			}
+
+			allObjects = append(allObjects, langObj)
+		}
 	}
 
 	if len(allObjects) == 0 {

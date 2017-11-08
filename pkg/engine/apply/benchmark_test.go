@@ -9,7 +9,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
@@ -195,8 +194,8 @@ func (gen *PolicyGenerator) makeService() *lang.Service {
 	id := len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind))
 
 	service := &lang.Service{
+		TypeKind: lang.ServiceObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "service-" + strconv.Itoa(id),
 		},
@@ -232,8 +231,8 @@ func (gen *PolicyGenerator) makeRules() {
 	// generate non-matching rules
 	for i := 0; i < gen.rules-1; i++ {
 		gen.addObject(&lang.Rule{
+			TypeKind: lang.RuleObject.GetTypeKind(),
 			Metadata: lang.Metadata{
-				Kind:      lang.RuleObject.Kind,
 				Namespace: "main",
 				Name:      "rule-" + strconv.Itoa(i),
 			},
@@ -249,8 +248,8 @@ func (gen *PolicyGenerator) makeRules() {
 
 	// generate rule which allows all dependencies
 	gen.addObject(&lang.Rule{
+		TypeKind: lang.RuleObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule-" + strconv.Itoa(gen.rules),
 		},
@@ -267,8 +266,8 @@ func (gen *PolicyGenerator) makeRules() {
 func (gen *PolicyGenerator) makeContracts() {
 	for i := 0; i < gen.services; i++ {
 		contract := &lang.Contract{
+			TypeKind: lang.ContractObject.GetTypeKind(),
 			Metadata: lang.Metadata{
-				Kind:      lang.ContractObject.Kind,
 				Namespace: "main",
 				Name:      "contract-" + strconv.Itoa(i),
 			},
@@ -314,8 +313,8 @@ func (gen *PolicyGenerator) makeContracts() {
 func (gen *PolicyGenerator) makeDependencies() {
 	for i := 0; i < gen.dependencies; i++ {
 		dependency := &lang.Dependency{
+			TypeKind: lang.DependencyObject.GetTypeKind(),
 			Metadata: lang.Metadata{
-				Kind:      lang.DependencyObject.Kind,
 				Namespace: "main",
 				Name:      "dependency-" + strconv.Itoa(i),
 			},
@@ -328,8 +327,8 @@ func (gen *PolicyGenerator) makeDependencies() {
 
 func (gen *PolicyGenerator) makeCluster() {
 	cluster := &lang.Cluster{
+		TypeKind: lang.ClusterObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.ClusterObject.Kind,
 			Namespace: "system",
 			Name:      "cluster-test",
 		},
@@ -447,7 +446,7 @@ func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *ext
 	return result
 }
 
-func (gen *PolicyGenerator) addObject(obj object.Base) {
+func (gen *PolicyGenerator) addObject(obj lang.Base) {
 	err := gen.policy.AddObject(obj)
 	if err != nil {
 		panic(err)

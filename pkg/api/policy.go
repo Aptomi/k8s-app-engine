@@ -5,38 +5,45 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 )
 
-func (a *api) handlePolicyShow(r *http.Request, p httprouter.Params) Response {
-	gen := p.ByName("rev")
+func (api *coreApi) handlePolicyGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	gen := params.ByName("rev")
 
 	if len(gen) == 0 {
-		gen = strconv.Itoa(int(object.LastGen))
+		gen = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	policyData, err := a.store.GetPolicyData(object.ParseGeneration(gen))
+	policyData, err := api.store.GetPolicyData(runtime.ParseGeneration(gen))
 	if err != nil {
 		log.Panicf("error while getting requested policy: %s", err)
 	}
 
-	return policyData
+	api.contentType.Write(writer, request, policyData)
 }
 
-func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response {
-	objects := a.read(r)
+var PolicyUpdateResultObject = &runtime.Info{
+	Kind:        "policy-update-result",
+	Constructor: func() runtime.Object { return &PolicyUpdateResult{} },
+}
 
-	username := r.Header.Get("Username")
-	// todo check empty username
-	user := a.externalData.UserLoader.LoadUserByName(username)
-	// todo check user == nil
+type PolicyUpdateResult struct {
+	runtime.TypeKind `yaml:",inline"`
+	Actions          []string
+}
+
+func (api *coreApi) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	objects := api.readLang(request)
+
+	user := api.getUserRequired(request)
 
 	// Verify ACL for updated objects
-	policy, _, err := a.store.GetPolicy(object.LastGen)
+	policy, _, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		log.Panicf("Error while loading current policy: %s", err)
 	}
@@ -47,17 +54,24 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response 
 		}
 	}
 
-	changed, policyData, err := a.store.UpdatePolicy(objects)
+	// todo(slukjanov): handle deleted
+	deleted := make([]runtime.Key, 0)
+	changed, policyData, err := api.store.UpdatePolicy(objects, deleted)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}
 
 	if !changed {
-		return nil
+		api.contentType.Write(writer, request, &PolicyUpdateResult{
+			TypeKind: PolicyUpdateResultObject.GetTypeKind(),
+			Actions:  nil,
+		})
+
+		return
 	}
 
-	desiredPolicyGen := policyData.Generation
-	desiredPolicy, _, err := a.store.GetPolicy(desiredPolicyGen)
+	desiredPolicyGen := policyData.GetGeneration()
+	desiredPolicy, _, err := api.store.GetPolicy(desiredPolicyGen)
 	if err != nil {
 		log.Panicf("Error while getting desiredPolicy: %s", err)
 	}
@@ -65,12 +79,13 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response 
 		log.Panicf("Can't read policy right after updating it")
 	}
 
-	actualState, err := a.store.GetActualState()
+	actualState, err := api.store.GetActualState()
 	if err != nil {
 		log.Panicf("Error while getting actual state: %s", err)
 	}
 
-	resolver := resolve.NewPolicyResolver(desiredPolicy, a.externalData)
+	// todo we should resolve before saving policy => add Mutex for this method to make sure it's safe
+	resolver := resolve.NewPolicyResolver(desiredPolicy, api.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 
 	// todo save to log with clear prefix
@@ -80,12 +95,20 @@ func (a *api) handlePolicyUpdate(r *http.Request, p httprouter.Params) Response 
 		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
 
-	nextRevision, err := a.store.NextRevision(desiredPolicyGen)
+	nextRevision, err := api.store.NewRevision(desiredPolicyGen)
 	if err != nil {
 		log.Panicf("Unable to get next revision: %s", err)
 	}
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
-	return stateDiff.Actions
+	actions := make([]string, len(stateDiff.Actions))
+	for idx, action := range stateDiff.Actions {
+		actions[idx] = action.GetName()
+	}
+
+	api.contentType.Write(writer, request, &PolicyUpdateResult{
+		TypeKind: PolicyUpdateResultObject.GetTypeKind(),
+		Actions:  actions,
+	})
 }

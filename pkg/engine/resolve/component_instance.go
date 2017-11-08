@@ -4,22 +4,23 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"strconv"
 	"time"
 )
 
 // ComponentInstanceObject is an informational data structure with Kind and Constructor for component instance object
-var ComponentInstanceObject = &object.Info{
+var ComponentInstanceObject = &runtime.Info{
 	Kind:        "component-instance",
-	Constructor: func() object.Base { return &ComponentInstance{} },
+	Storable:    true,
+	Versioned:   false,
+	Constructor: func() runtime.Object { return &ComponentInstance{} },
 }
 
 // ComponentInstanceMetadata is object metadata for ComponentInstance
 type ComponentInstanceMetadata struct {
-	Key  *ComponentInstanceKey
-	Kind string
+	Key *ComponentInstanceKey
 }
 
 // AllowIngres is an special key, which is used in DataForPlugins to indicate whether ingress traffic should be allowed for a given component instance
@@ -41,6 +42,8 @@ type ComponentInstance struct {
 		These fields get populated during policy resolution.
 		When adding new fields to this object, it's crucial to modify appendData() method as well (!).
 	*/
+
+	runtime.TypeKind `yaml:",inline"`
 
 	// Metadata is an object metadata for component instance
 	Metadata *ComponentInstanceMetadata
@@ -83,7 +86,8 @@ type ComponentInstance struct {
 // Creates a new component instance
 func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
-		Metadata:             &ComponentInstanceMetadata{cik, ComponentInstanceObject.Kind},
+		TypeKind:             ComponentInstanceObject.GetTypeKind(),
+		Metadata:             &ComponentInstanceMetadata{cik},
 		DependencyKeys:       make(map[string]bool),
 		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  util.NestedParameterMap{},
@@ -106,28 +110,12 @@ func (instance *ComponentInstance) GetDeployName() string {
 
 // GetNamespace returns an object namespace. It's a system namespace for all component instances
 func (instance *ComponentInstance) GetNamespace() string {
-	return object.SystemNS
-}
-
-// GetKind returns object kind
-func (instance *ComponentInstance) GetKind() string {
-	return ComponentInstanceObject.Kind
+	return runtime.SystemNS
 }
 
 // GetName returns object name
 func (instance *ComponentInstance) GetName() string {
 	return instance.GetKey()
-}
-
-// GetGeneration returns object generation. Not needed for component instances as they are not versioned
-func (instance *ComponentInstance) GetGeneration() object.Generation {
-	// we aren't storing multiple versions of ComponentInstance
-	return 0
-}
-
-// SetGeneration sets object generation. Not needed for component instances as they are not versioned
-func (instance *ComponentInstance) SetGeneration(generation object.Generation) {
-	panic("ComponentInstance isn't a versioned object")
 }
 
 // GetRunningTime returns the total lifetime of a component instance (since it was launched till now)

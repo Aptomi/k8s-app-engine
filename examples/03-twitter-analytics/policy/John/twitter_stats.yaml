@@ -1,6 +1,6 @@
 # Definition of Twitter Stats service
-- metadata:
-    kind: service
+- kind: service
+  metadata:
     namespace: main
     name: twitter_stats
 
@@ -86,8 +86,8 @@
         - analytics_pipeline
 
 # Contract for Twitter stats
-- metadata:
-    kind: contract
+- kind: contract
+  metadata:
     namespace: main
     name: twitter_stats
 

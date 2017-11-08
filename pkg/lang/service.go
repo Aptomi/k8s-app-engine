@@ -2,16 +2,17 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"sync"
 )
 
 // ServiceObject is an informational data structure with Kind and Constructor for Service
-var ServiceObject = &object.Info{
+var ServiceObject = &runtime.Info{
 	Kind:        "service",
+	Storable:    true,
 	Versioned:   true,
-	Constructor: func() object.Base { return &Service{} },
+	Constructor: func() runtime.Object { return &Service{} },
 }
 
 // Service defines individual service in Aptomi. The idea is that services get defined by different teams. Those
@@ -21,7 +22,8 @@ var ServiceObject = &object.Info{
 // docker container image with metadata that needs to be started/managed) or it can be dependency on another\
 // contract (which will get fulfilled by Aptomi)
 type Service struct {
-	Metadata `validate:"required"`
+	runtime.TypeKind `yaml:",inline"`
+	Metadata         `validate:"required"`
 
 	// Labels is a set of labels attached to the service
 	Labels map[string]string `validate:"omitempty,labels"`

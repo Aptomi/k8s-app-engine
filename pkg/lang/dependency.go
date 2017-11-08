@@ -1,21 +1,23 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // DependencyObject is an informational data structure with Kind and Constructor for Dependency
-var DependencyObject = &object.Info{
+var DependencyObject = &runtime.Info{
 	Kind:        "dependency",
+	Storable:    true,
 	Versioned:   true,
-	Constructor: func() object.Base { return &Dependency{} },
+	Constructor: func() runtime.Object { return &Dependency{} },
 }
 
 // Dependency is a declaration of use, defined in a form <User> needs an instance of <Contract> with
 // specified set of <Labels>. It allows users to request contracts, which will translate into instantiation of
 // service instances (and their dependencies) in the cloud
 type Dependency struct {
-	Metadata `validate:"required"`
+	runtime.TypeKind `yaml:",inline"`
+	Metadata         `validate:"required"`
 
 	// User is a user name for a user, who requested this dependency.
 	User string `validate:"required"`

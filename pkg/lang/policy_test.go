@@ -1,7 +1,7 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
@@ -25,7 +25,7 @@ func TestPolicyGetObjects(t *testing.T) {
 
 		for i := 0; i < 10; i++ {
 			name := kind + strconv.Itoa(i)
-			getObject(t, policy, kind, name, object.SystemNS)
+			getObject(t, policy, kind, name, runtime.SystemNS)
 		}
 	}
 }
@@ -62,37 +62,37 @@ func makePolicyWithObjects() (string, *Policy) {
 	policy := NewPolicy()
 	for i := 0; i < 10; i++ {
 		addObject(policy, &Service{
+			TypeKind: ServiceObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ServiceObject.Kind,
 				Namespace: namespace,
 				Name:      "service" + strconv.Itoa(i),
 			},
 		})
 		addObject(policy, &Contract{
+			TypeKind: ContractObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ContractObject.Kind,
 				Namespace: namespace,
 				Name:      "contract" + strconv.Itoa(i),
 			},
 		})
 		addObject(policy, &Cluster{
+			TypeKind: ClusterObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ClusterObject.Kind,
-				Namespace: object.SystemNS,
+				Namespace: runtime.SystemNS,
 				Name:      "cluster" + strconv.Itoa(i),
 			},
 			Type: "kubernetes",
 		})
 		addObject(policy, &Rule{
+			TypeKind: RuleObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      RuleObject.Kind,
 				Namespace: namespace,
 				Name:      "rule" + strconv.Itoa(i),
 			},
 		})
 		addObject(policy, &Dependency{
+			TypeKind: DependencyObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      DependencyObject.Kind,
 				Namespace: namespace,
 				Name:      "dependency" + strconv.Itoa(i),
 			},
@@ -103,7 +103,7 @@ func makePolicyWithObjects() (string, *Policy) {
 	return namespace, policy
 }
 
-func addObject(policy *Policy, obj object.Base) {
+func addObject(policy *Policy, obj Base) {
 	err := policy.AddObject(obj)
 	if err != nil {
 		panic(err)

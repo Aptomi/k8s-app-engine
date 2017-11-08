@@ -2,7 +2,7 @@ package visualization
 
 import (
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // PolicyCfg defines graph generation parameters for Policy
@@ -27,7 +27,7 @@ func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 	// trace all top-level contracts
 	for _, contractObj := range b.policy.GetObjectsByKind(lang.ContractObject.Kind) {
 		contract := contractObj.(*lang.Contract)
-		if edgesIn[object.GetKey(contract)] <= 0 {
+		if edgesIn[runtime.KeyFromStorable(contract)] <= 0 {
 			b.traceContract(contract, nil, 0, cfg)
 		}
 	}
@@ -49,7 +49,7 @@ func (b *GraphBuilder) findEdgesIn(contract *lang.Contract, edgesIn map[string]i
 					continue
 				}
 				contract := contractObjNew.(*lang.Contract)
-				edgesIn[object.GetKey(contract)]++
+				edgesIn[runtime.KeyFromStorable(contract)]++
 			}
 		}
 	}

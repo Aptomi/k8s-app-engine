@@ -1,6 +1,6 @@
 # Definition of Istio service
-- metadata:
-    kind: service
+- kind: service
+  metadata:
     namespace: main
     name: istio
 
@@ -101,8 +101,8 @@
                 resources: {}
 
 # Contract for Istio
-- metadata:
-    kind: contract
+- kind: contract
+  metadata:
     namespace: main
     name: istio
 

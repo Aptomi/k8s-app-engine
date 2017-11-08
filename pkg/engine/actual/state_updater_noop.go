@@ -1,6 +1,8 @@
 package actual
 
-import "github.com/Aptomi/aptomi/pkg/object"
+import (
+	"github.com/Aptomi/aptomi/pkg/runtime"
+)
 
 // NewNoOpActionStateUpdater creates a mock state updater for unit tests, which does nothing
 func NewNoOpActionStateUpdater() StateUpdater {
@@ -10,11 +12,7 @@ func NewNoOpActionStateUpdater() StateUpdater {
 type noOpActualStateUpdater struct {
 }
 
-func (*noOpActualStateUpdater) Create(obj object.Base) error {
-	return nil
-}
-
-func (*noOpActualStateUpdater) Update(obj object.Base) error {
+func (*noOpActualStateUpdater) Save(obj runtime.Storable) error {
 	return nil
 }
 

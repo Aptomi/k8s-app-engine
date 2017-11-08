@@ -10,8 +10,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
-	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/plugin"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"strings"
@@ -148,7 +148,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	dependencyNew.Labels["param"] = "value1"
 
 	desiredStateNext := resolvePolicy(t, bDesiredNext)
-	assert.Contains(t, desiredStateNext.DependencyInstanceMap, object.GetKey(dependencyNew), "New dependency should also be resolved")
+	assert.Contains(t, desiredStateNext.DependencyInstanceMap, runtime.KeyFromStorable(dependencyNew), "New dependency should also be resolved")
 
 	// Apply to update component times in actual state
 	applier = NewEngineApply(

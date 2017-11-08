@@ -2,25 +2,27 @@ package component
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // AttachDependencyActionObject is an informational data structure with Kind and Constructor for the action
-var AttachDependencyActionObject = &object.Info{
+var AttachDependencyActionObject = &runtime.Info{
 	Kind:        "action-component-dependency-attach",
-	Constructor: func() object.Base { return &AttachDependencyAction{} },
+	Constructor: func() runtime.Object { return &AttachDependencyAction{} },
 }
 
 // AttachDependencyAction is a action which gets called when a consumer is added to an existing component
 type AttachDependencyAction struct {
+	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 	DependencyID string
 }
 
 // NewAttachDependencyAction creates new AttachDependencyAction
-func NewAttachDependencyAction(revision object.Generation, componentKey string, dependencyID string) *AttachDependencyAction {
+func NewAttachDependencyAction(revision runtime.Generation, componentKey string, dependencyID string) *AttachDependencyAction {
 	return &AttachDependencyAction{
+		TypeKind:     AttachDependencyActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(revision, AttachDependencyActionObject.Kind, componentKey, dependencyID),
 		ComponentKey: componentKey,
 		DependencyID: dependencyID,

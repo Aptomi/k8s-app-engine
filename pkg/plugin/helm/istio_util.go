@@ -6,7 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -60,7 +60,7 @@ func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, poli
 	component := service.GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	calcLabels := resolution.ComponentInstanceMap[componentKey].CalculatedLabels
-	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels[lang.LabelCluster], object.SystemNS)
+	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, calcLabels.Labels[lang.LabelCluster], runtime.SystemNS)
 	if err != nil {
 		return nil, err
 	}

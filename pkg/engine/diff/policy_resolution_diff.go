@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/global"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // PolicyResolutionDiff represents a difference between two policy resolution data structs (actual and desired states)
@@ -19,14 +19,14 @@ type PolicyResolutionDiff struct {
 	// Actions is a generated, ordered list of actions that need to be executed in order to get from an actual state to the desired state
 	Actions []action.Base
 
-	Revision object.Generation
+	Revision runtime.Generation
 }
 
 // NewPolicyResolutionDiff calculates difference between two given policy resolution structs (actual and desired states).
 // It iterates over all component instances and figures out which component instances have to be instantiated (new
 // consumers appeared and they didn't exist before), which component instances have to be updated (e.g. parameters changed), which component
 // instances have to be destroyed (that have no consumers left), and so on.
-func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.PolicyResolution, revision object.Generation) *PolicyResolutionDiff {
+func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.PolicyResolution, revision runtime.Generation) *PolicyResolutionDiff {
 	result := &PolicyResolutionDiff{
 		Prev:     prev,
 		Next:     next,

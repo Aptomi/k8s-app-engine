@@ -8,9 +8,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/helm"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/Sirupsen/logrus"
 	"runtime/debug"
 	"time"
@@ -23,9 +23,9 @@ func logError(err interface{}) {
 	debug.PrintStack()
 }
 
-func (s *Server) enforceLoop() error {
+func (server *Server) enforceLoop() error {
 	for {
-		err := s.enforce()
+		err := server.enforce()
 		if err != nil {
 			logError(err)
 		}
@@ -33,14 +33,14 @@ func (s *Server) enforceLoop() error {
 	}
 }
 
-func (s *Server) enforce() error {
+func (server *Server) enforce() error {
 	defer func() {
 		if err := recover(); err != nil {
 			logError(err)
 		}
 	}()
 
-	desiredPolicy, desiredPolicyGen, err := s.store.GetPolicy(object.LastGen)
+	desiredPolicy, desiredPolicyGen, err := server.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		return fmt.Errorf("error while getting desiredPolicy: %s", err)
 	}
@@ -51,12 +51,12 @@ func (s *Server) enforce() error {
 		return nil
 	}
 
-	actualState, err := s.store.GetActualState()
+	actualState, err := server.store.GetActualState()
 	if err != nil {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	resolver := resolve.NewPolicyResolver(desiredPolicy, s.externalData)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
 		return fmt.Errorf("cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
@@ -64,7 +64,7 @@ func (s *Server) enforce() error {
 
 	eventLog.Save(&event.HookConsole{})
 
-	nextRevision, err := s.store.NextRevision(desiredPolicyGen)
+	nextRevision, err := server.store.NewRevision(desiredPolicyGen)
 	if err != nil {
 		return fmt.Errorf("unable to get next revision: %s", err)
 	}
@@ -87,7 +87,7 @@ func (s *Server) enforce() error {
 	}
 
 	// Save revision
-	err = s.store.SaveRevision(nextRevision)
+	err = server.store.SaveRevision(nextRevision)
 	if err != nil {
 		return fmt.Errorf("error while saving new revision: %s", err)
 	}
@@ -99,18 +99,18 @@ func (s *Server) enforce() error {
 	//visualization.CreateImage(...) for all diagrams
 
 	// Build plugins
-	helmIstio := helm.NewPlugin(s.cfg.Helm)
+	helmIstio := helm.NewPlugin(server.cfg.Helm)
 	plugins := plugin.NewRegistry(
 		[]plugin.DeployPlugin{helmIstio},
 		[]plugin.PostProcessPlugin{helmIstio},
 	)
 
-	actualPolicy, err := s.getActualPolicy()
+	actualPolicy, err := server.getActualPolicy()
 	if err != nil {
 		return fmt.Errorf("error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, s.store.ActualStateUpdater(), s.externalData, plugins, stateDiff.Actions, progress.NewConsole())
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, plugins, stateDiff.Actions, progress.NewConsole())
 	resolution, eventLog, err := applier.Apply()
 
 	eventLog.Save(&event.HookConsole{})
@@ -123,8 +123,8 @@ func (s *Server) enforce() error {
 	return nil
 }
 
-func (s *Server) getActualPolicy() (*lang.Policy, error) {
-	currRevision, err := s.store.GetRevision(object.LastGen)
+func (server *Server) getActualPolicy() (*lang.Policy, error) {
+	currRevision, err := server.store.GetRevision(runtime.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get current revision: %s", err)
 	}
@@ -134,7 +134,7 @@ func (s *Server) getActualPolicy() (*lang.Policy, error) {
 		return lang.NewPolicy(), nil
 	}
 
-	actualPolicy, _, err := s.store.GetPolicy(currRevision.Policy)
+	actualPolicy, _, err := server.store.GetPolicy(currRevision.Policy)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get actual policy: %s", err)
 	}

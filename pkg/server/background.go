@@ -22,12 +22,12 @@ func (j *job) start() {
 	j.f()
 }
 
-func (s *Server) runInBackground(name string, infinite bool, f func()) {
-	p := job{name, s.backgroundErrors, f, infinite}
+func (server *Server) runInBackground(name string, infinite bool, f func()) {
+	p := job{name, server.backgroundErrors, f, infinite}
 	go p.start()
 }
 
-func (s *Server) wait() {
-	err := <-s.backgroundErrors
+func (server *Server) wait() {
+	err := <-server.backgroundErrors
 	panic(err)
 }

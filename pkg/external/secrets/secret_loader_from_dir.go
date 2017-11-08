@@ -3,6 +3,7 @@ package secrets
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
+	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"path/filepath"
 	"sort"
@@ -37,6 +38,11 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 	loader.once.Do(func() {
 		loader.cachedSecrets = make(map[string]map[string]string)
 
+		if len(loader.baseDir) == 0 {
+			log.Warnf("Skip loading secrets because baseDir not specified")
+			return
+		}
+
 		pattern := filepath.Join(loader.baseDir, "**", "secrets*.yaml")
 		files, err := zglob.Glob(pattern)
 		if err != nil {
@@ -60,5 +66,6 @@ func (loader *SecretLoaderFromDir) LoadSecretsByUserName(user string) map[string
 
 // Loads secrets from file
 func loadUserSecretsFromFile(fileName string) []*UserSecrets {
+	log.Debugf("Loading secrets from file: %s", fileName)
 	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*UserSecrets{}).(*[]*UserSecrets)
 }

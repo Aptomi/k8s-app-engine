@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
@@ -278,7 +278,7 @@ func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent) (*ComponentInstanceKey, error) {
-	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, node.labels.Labels[lang.LabelCluster], object.SystemNS)
+	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, node.labels.Labels[lang.LabelCluster], runtime.SystemNS)
 	if err != nil {
 		return nil, node.errorClusterDoesNotExist()
 	}
@@ -343,7 +343,7 @@ func (node *resolutionNode) processRules() (*lang.RuleActionResult, error) {
 	}
 
 	// process rules globally (within system namespace)
-	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[object.SystemNS], result)
+	err = node.processRulesWithinNamespace(node.resolver.policy.Namespace[runtime.SystemNS], result)
 	if err != nil {
 		return nil, err
 	}

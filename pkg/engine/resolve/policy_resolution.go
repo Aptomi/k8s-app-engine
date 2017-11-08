@@ -2,7 +2,7 @@ package resolve
 
 import (
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
@@ -44,7 +44,7 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 // RecordResolved takes a component instance and adds a new dependency record into it
 func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *lang.Dependency, ruleResult *lang.RuleActionResult) {
 	instance := resolution.GetComponentInstanceEntry(cik)
-	instance.addDependency(object.GetKey(dependency))
+	instance.addDependency(runtime.KeyFromStorable(dependency))
 	instance.addRuleInformation(ruleResult)
 	resolution.recordProcessingOrder(cik)
 }

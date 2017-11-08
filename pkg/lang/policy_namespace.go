@@ -2,7 +2,6 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/object"
 )
 
 // PolicyNamespace describes a specific namespace within Aptomi policy.
@@ -30,7 +29,7 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 	}
 }
 
-func (policyNamespace *PolicyNamespace) addObject(obj object.Base) error {
+func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	// add object
 	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
@@ -51,8 +50,8 @@ func (policyNamespace *PolicyNamespace) addObject(obj object.Base) error {
 	return nil
 }
 
-func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []object.Base {
-	result := []object.Base{}
+func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
+	var result []Base
 	switch kind {
 	case ServiceObject.Kind:
 		for _, service := range policyNamespace.Services {
@@ -86,9 +85,9 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []object.B
 	return result
 }
 
-func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (object.Base, error) {
+func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (Base, error) {
 	var ok bool
-	var result object.Base
+	var result Base
 	switch kind {
 	case ServiceObject.Kind:
 		if result, ok = policyNamespace.Services[name]; !ok {

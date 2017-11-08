@@ -1,5 +1,5 @@
-- metadata:
-    kind: rule
+- kind: rule
+  metadata:
     namespace: main
     name: analytics_prod_goes_to_us_east
   weight: 1000
@@ -12,8 +12,8 @@
       set:
         cluster: cluster-us-east
 
-- metadata:
-    kind: rule
+- kind: rule
+  metadata:
     namespace: main
     name: analytics_stage_goes_to_us_west
   weight: 2000
@@ -26,8 +26,8 @@
       set:
         cluster: cluster-us-west
 
-- metadata:
-    kind: rule
+- kind: rule
+  metadata:
     namespace: main
     name: reject_dependency_for_mobile_dev_users
   weight: 3000
@@ -37,8 +37,8 @@
   actions:
     dependency: reject
 
-- metadata:
-    kind: rule
+- kind: rule
+  metadata:
     namespace: main
     name: reject_traffic_for_deactivated_users
   weight: 4000

@@ -3,7 +3,7 @@ package lang
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"strconv"
@@ -27,12 +27,12 @@ func displayErrorMessages() bool {
 
 func TestPolicyValidationService(t *testing.T) {
 	// Service (Identifiers & Labels)
-	runValidationTests(t, ResSuccess, true, []object.Base{
+	runValidationTests(t, ResSuccess, true, []Base{
 		makeService("test", 0),
 		makeService("good_name", Empty),
 		makeService("excellent-name_239", Nil),
 	})
-	runValidationTests(t, ResFailure, true, []object.Base{
+	runValidationTests(t, ResFailure, true, []Base{
 		makeService("_invalid", 0),
 		makeService("12-invalid", 0),
 		makeService("invalid-n#ame_239", 0),
@@ -51,7 +51,7 @@ func TestPolicyValidationService(t *testing.T) {
 	for _, components := range componentTestsPass {
 		service := makeService("service", Empty)
 		service.Components = components
-		runValidationTests(t, ResSuccess, false, []object.Base{service, contract})
+		runValidationTests(t, ResSuccess, false, []Base{service, contract})
 	}
 	componentTestsFail := [][]*ServiceComponent{
 		makeServiceComponents(1, contract.Name+"extra", Nil, 0),
@@ -68,36 +68,36 @@ func TestPolicyValidationService(t *testing.T) {
 	for _, components := range componentTestsFail {
 		service := makeService("service", Empty)
 		service.Components = components
-		runValidationTests(t, ResFailure, false, []object.Base{service, contract})
+		runValidationTests(t, ResFailure, false, []Base{service, contract})
 	}
 }
 
 func TestPolicyValidationContract(t *testing.T) {
 	// Contract (Identifiers & Label Operations & Allocation Keys)
-	runValidationTests(t, ResSuccess, true, []object.Base{
+	runValidationTests(t, ResSuccess, true, []Base{
 		makeContract("test", 0, ""),
 		makeContract("test", 1, ""),
 		makeContract("test", Empty, ""),
 		makeContract("test", Nil, ""),
 	})
-	runValidationTests(t, ResFailure, true, []object.Base{
+	runValidationTests(t, ResFailure, true, []Base{
 		makeContract("_invalid", 0, ""),
 		makeContract("valid", Invalid, ""),
 	})
 
 	// Contract should point to an existing service
-	runValidationTests(t, ResSuccess, false, []object.Base{
+	runValidationTests(t, ResSuccess, false, []Base{
 		makeService("service", Empty),
 		makeContract("test1", 0, "service"),
 		makeContract("test2", 1, "service"),
 	})
-	runValidationTests(t, ResFailure, false, []object.Base{
+	runValidationTests(t, ResFailure, false, []Base{
 		makeService("service", Empty),
 		makeContract("test1", 0, "service-unknown"),
 	})
 
 	// Check allocation keys
-	runValidationTests(t, ResFailure, false, []object.Base{
+	runValidationTests(t, ResFailure, false, []Base{
 		makeService("service", Empty),
 		invalidAllocationKeys(makeContract("test1", 0, "service")),
 	})
@@ -105,11 +105,11 @@ func TestPolicyValidationContract(t *testing.T) {
 
 func TestPolicyValidationDependency(t *testing.T) {
 	// Dependency should point to an existing contract
-	runValidationTests(t, ResSuccess, false, []object.Base{
+	runValidationTests(t, ResSuccess, false, []Base{
 		makeContract("contract", 0, ""),
 		makeDependency("contract"),
 	})
-	runValidationTests(t, ResFailure, false, []object.Base{
+	runValidationTests(t, ResFailure, false, []Base{
 		makeContract("contract", 0, ""),
 		makeDependency("contract-unknown"),
 	})
@@ -117,12 +117,12 @@ func TestPolicyValidationDependency(t *testing.T) {
 
 func TestPolicyValidationRule(t *testing.T) {
 	// Rules (Expressions & Actions)
-	runValidationTests(t, ResSuccess, true, []object.Base{
+	runValidationTests(t, ResSuccess, true, []Base{
 		makeRule(1, "true", 0, "labelName"),
 		makeRule(20, "", 1, Reject),
 		makeRule(100, "specialname + specialvalue == 'b'", 2, Reject),
 	})
-	runValidationTests(t, ResFailure, true, []object.Base{
+	runValidationTests(t, ResFailure, true, []Base{
 		makeRule(-1, "true", 0, "labelName"),                               // negative weight
 		makeRule(100, "specialname + '123')(((", 0, "labelName"),           // bad expression
 		makeRule(100, "true", Empty, ""),                                   // no actions specified
@@ -133,10 +133,10 @@ func TestPolicyValidationRule(t *testing.T) {
 
 func TestPolicyValidationACLRule(t *testing.T) {
 	// Rules (Expressions & Actions)
-	runValidationTests(t, ResSuccess, true, []object.Base{
+	runValidationTests(t, ResSuccess, true, []Base{
 		makeACLRule(0),
 	})
-	runValidationTests(t, ResFailure, true, []object.Base{
+	runValidationTests(t, ResFailure, true, []Base{
 		makeACLRule(Empty),
 		makeACLRule(Nil),
 		makeACLRule(Invalid),
@@ -145,16 +145,16 @@ func TestPolicyValidationACLRule(t *testing.T) {
 
 func TestPolicyValidationCluster(t *testing.T) {
 	// Clusters (Identifiers & Config)
-	runValidationTests(t, ResSuccess, true, []object.Base{
-		makeCluster("kubernetes", object.SystemNS),
+	runValidationTests(t, ResSuccess, true, []Base{
+		makeCluster("kubernetes", runtime.SystemNS),
 	})
-	runValidationTests(t, ResFailure, true, []object.Base{
-		makeCluster("unknown", object.SystemNS),
+	runValidationTests(t, ResFailure, true, []Base{
+		makeCluster("unknown", runtime.SystemNS),
 		makeCluster("kubernetes", "main"),
 	})
 }
 
-func runValidationTests(t *testing.T, result int, every bool, objects []object.Base) {
+func runValidationTests(t *testing.T, result int, every bool, objects []Base) {
 	t.Helper()
 
 	if every {
@@ -163,7 +163,7 @@ func runValidationTests(t *testing.T, result int, every bool, objects []object.B
 			policy := NewPolicy()
 			err := policy.AddObject(obj)
 			assert.NoError(t, err, "Unable to add object to policy: %s", obj)
-			validatePolicy(t, result, []object.Base{obj}, policy)
+			validatePolicy(t, result, []Base{obj}, policy)
 		}
 	} else {
 		// all at once
@@ -176,7 +176,7 @@ func runValidationTests(t *testing.T, result int, every bool, objects []object.B
 	}
 }
 
-func validatePolicy(t *testing.T, result int, objects []object.Base, policy *Policy) {
+func validatePolicy(t *testing.T, result int, objects []Base, policy *Policy) {
 	t.Helper()
 	errValidate := policy.Validate()
 
@@ -200,8 +200,8 @@ func validatePolicy(t *testing.T, result int, objects []object.Base, policy *Pol
 
 func makeRule(weight int, expr string, actionNum int, actionKey string) *Rule {
 	rule := &Rule{
+		TypeKind: RuleObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      RuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
@@ -232,8 +232,8 @@ func makeRule(weight int, expr string, actionNum int, actionKey string) *Rule {
 
 func makeACLRule(actionNum int) *Rule {
 	rule := &Rule{
+		TypeKind: ACLRuleObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ACLRuleObject.Kind,
 			Namespace: "main",
 			Name:      "rule",
 		},
@@ -261,8 +261,8 @@ func makeACLRule(actionNum int) *Rule {
 
 func makeContract(name string, labelOpsNum int, pointToService string) *Contract {
 	contract := &Contract{
+		TypeKind: ContractObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ContractObject.Kind,
 			Namespace: "main",
 			Name:      name,
 		},
@@ -304,8 +304,8 @@ func invalidAllocationKeys(contract *Contract) *Contract {
 
 func makeCluster(clusterType, ns string) *Cluster {
 	return &Cluster{
+		TypeKind: ClusterObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ClusterObject.Kind,
 			Namespace: ns,
 			Name:      "cluster",
 		},
@@ -319,8 +319,8 @@ func makeCluster(clusterType, ns string) *Cluster {
 
 func makeService(name string, labelNum int) *Service {
 	service := &Service{
+		TypeKind: ServiceObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      name,
 		},
@@ -342,8 +342,8 @@ func makeService(name string, labelNum int) *Service {
 
 func makeDependency(contract string) *Dependency {
 	dependency := &Dependency{
+		TypeKind: DependencyObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      DependencyObject.Kind,
 			Namespace: "main",
 			Name:      "dependency",
 		},

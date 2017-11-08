@@ -2,7 +2,7 @@ package event
 
 import (
 	"github.com/Aptomi/aptomi/pkg/errors"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 )
@@ -42,8 +42,8 @@ func NewLog() *Log {
 
 // Replaces base objects with their string key value
 func fieldValue(data interface{}) interface{} {
-	if baseObject, ok := data.(object.Base); ok {
-		return object.GetKey(baseObject)
+	if baseObject, ok := data.(runtime.Storable); ok {
+		return runtime.KeyFromStorable(baseObject)
 	}
 	return data
 }

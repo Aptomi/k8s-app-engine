@@ -1,14 +1,25 @@
 package api
 
 import (
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
-func (a *api) handleEndpointsShow(r *http.Request, p httprouter.Params) Response {
+var EndpointsObject = &runtime.Info{
+	Kind:        "endpoints",
+	Constructor: func() runtime.Object { return &Endpoints{} },
+}
+
+type Endpoints struct {
+	runtime.TypeKind `yaml:",inline"`
+	List             map[string]map[string]string
+}
+
+func (api *coreApi) handleEndpointsGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	endpoints := make(map[string]map[string]string)
-	actualState, err := a.store.GetActualState()
+	actualState, err := api.store.GetActualState()
 	if err != nil {
 		log.Panicf("Can't load actual state to get endpoints: %s", err)
 	}
@@ -18,5 +29,8 @@ func (a *api) handleEndpointsShow(r *http.Request, p httprouter.Params) Response
 		}
 	}
 
-	return endpoints
+	api.contentType.Write(writer, request, &Endpoints{
+		TypeKind: EndpointsObject.GetTypeKind(),
+		List:     endpoints,
+	})
 }

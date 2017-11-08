@@ -1,38 +1,35 @@
 package api
 
 import (
+	"github.com/Aptomi/aptomi/pkg/api/codec"
 	"github.com/Aptomi/aptomi/pkg/external"
-	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
-	"github.com/Aptomi/aptomi/pkg/object/codec"
-	"github.com/Aptomi/aptomi/pkg/object/codec/yaml"
-	"github.com/Aptomi/aptomi/pkg/server/store"
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/julienschmidt/httprouter"
 )
 
-type api struct {
-	router       *httprouter.Router
-	codec        codec.MarshallerUnmarshaller
-	store        store.ServerStore
+type coreApi struct {
+	contentType  *codec.ContentTypeHandler
+	store        store.Core
 	externalData *external.Data
 }
 
 // Serve initializes everything needed by REST API and registers all API endpoints in the provided http router
-func Serve(router *httprouter.Router, store store.ServerStore, externalData *external.Data) {
-	catalog := object.NewCatalog().Append(lang.Objects...)
-	a := &api{router, yaml.NewCodec(catalog), store, externalData}
-	a.serve()
+func Serve(router *httprouter.Router, store store.Core, externalData *external.Data) {
+	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(Objects...))
+	api := &coreApi{contentTypeHandler, store, externalData}
+	api.serve(router)
 }
 
-func (a *api) serve() {
-	a.get("/api/v1/policy", a.handlePolicyShow)
-	a.get("/api/v1/policy/gen/:gen", a.handlePolicyShow)
-	//a.get("/api/v1/policy/gen/:gen/ns/:namespace", a.handlePolicyShow)
-	a.post("/api/v1/policy", a.handlePolicyUpdate)
+func (api *coreApi) serve(router *httprouter.Router) {
+	router.GET("/api/v1/policy", api.handlePolicyGet)
+	router.GET("/api/v1/policy/gen/:gen", api.handlePolicyGet)
+	//router.GET("/api/v1/policy/gen/:gen/ns/:namespace", api.handlePolicyGet)
+	router.POST("/api/v1/policy", api.handlePolicyUpdate)
 
-	a.get("/api/v1/endpoints", a.handleEndpointsShow)
+	router.GET("/api/v1/endpoints", api.handleEndpointsGet)
 
-	a.getStream("/api/v1/admin/store", a.handleAdminStoreDump)
+	//api.getStream("/api/v1/admin/store", api.handleAdminStoreDump)
 
-	a.get("/version", handleVersion)
+	router.GET("/version", api.handleVersion)
 }

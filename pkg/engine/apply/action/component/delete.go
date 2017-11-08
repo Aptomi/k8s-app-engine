@@ -5,24 +5,26 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // DeleteActionObject is an informational data structure with Kind and Constructor for the action
-var DeleteActionObject = &object.Info{
+var DeleteActionObject = &runtime.Info{
 	Kind:        "action-component-delete",
-	Constructor: func() object.Base { return &DeleteAction{} },
+	Constructor: func() runtime.Object { return &DeleteAction{} },
 }
 
 // DeleteAction is a action which gets called when an existing component needs to be destroyed (i.e. existing instance of code needs to be terminated in the cloud)
 type DeleteAction struct {
+	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 }
 
 // NewDeleteAction creates new DeleteAction
-func NewDeleteAction(revision object.Generation, componentKey string) *DeleteAction {
+func NewDeleteAction(revision runtime.Generation, componentKey string) *DeleteAction {
 	return &DeleteAction{
+		TypeKind:     DeleteActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(revision, DeleteActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
@@ -79,7 +81,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
 	if err != nil {
 		return err
 	}

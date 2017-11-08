@@ -7,14 +7,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"runtime"
+	sysruntime "runtime"
 	"sync"
 )
 
 // ThreadPoolSize is the number of threads for policy evaluation and processing
-var ThreadPoolSize = runtime.NumCPU()
+var ThreadPoolSize = sysruntime.NumCPU()
 
 // PolicyResolver is a core of Aptomi for policy resolution and translating all service consumption declarations
 // into a single PolicyResolution object which represents desired state of components running in a cloud.
@@ -86,8 +86,8 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *ev
 		// resolve dependency via applying policy
 		semaphore <- 1
 		go func(d *lang.Dependency) {
-			node, err := resolver.resolveDependency(d)
-			errs <- resolver.combineData(node, err)
+			node, resolveErr := resolver.resolveDependency(d)
+			errs <- resolver.combineData(node, resolveErr)
 			<-semaphore
 		}(d.(*lang.Dependency))
 	}
@@ -95,8 +95,8 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *ev
 	// Wait for all go routines to end
 	errFound := 0
 	for i := 0; i < len(dependencies); i++ {
-		err := <-errs
-		if err != nil {
+		resolveErr := <-errs
+		if resolveErr != nil {
 			errFound++
 		}
 	}
@@ -147,7 +147,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.DependencyInstanceMap[object.GetKey(node.dependency)] = node.serviceKey.GetKey()
+	resolver.resolution.DependencyInstanceMap[runtime.KeyFromStorable(node.dependency)] = node.serviceKey.GetKey()
 
 	// append component instance data
 	err := resolver.resolution.AppendData(node.resolution)

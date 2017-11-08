@@ -2,7 +2,6 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/object"
 )
 
 // PolicyView allows to view/manage policy objects on behalf on a certain user
@@ -25,7 +24,7 @@ func NewPolicyView(policy *Policy, user *User) *PolicyView {
 
 // AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
 // Namespace. If error occurs (e.g. object has an unknown kind, etc) then the error will be returned
-func (view *PolicyView) AddObject(obj object.Base) error {
+func (view *PolicyView) AddObject(obj Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return err
@@ -38,7 +37,7 @@ func (view *PolicyView) AddObject(obj object.Base) error {
 
 // ViewObject checks if user has permissions to view a given object. If user has no permissions, then ACL error
 // will be returned
-func (view *PolicyView) ViewObject(obj object.Base) error {
+func (view *PolicyView) ViewObject(obj Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return err
@@ -51,7 +50,7 @@ func (view *PolicyView) ViewObject(obj object.Base) error {
 
 // ManageObject checks if user has permissions to manage a given object. If user has no permissions, then ACL error
 // will be returned
-func (view *PolicyView) ManageObject(obj object.Base) error {
+func (view *PolicyView) ManageObject(obj Base) error {
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return err
@@ -65,7 +64,12 @@ func (view *PolicyView) ManageObject(obj object.Base) error {
 // CanConsume returns if user has permissions to consume a given service.
 // If a user can declare a dependency in a given namespace, then he can essentially can consume the service
 func (view *PolicyView) CanConsume(service *Service) (bool, error) {
-	obj := &Metadata{Namespace: service.GetNamespace(), Kind: DependencyObject.Kind}
+	obj := &Dependency{
+		TypeKind: DependencyObject.GetTypeKind(),
+		Metadata: Metadata{
+			Namespace: service.GetNamespace(),
+		},
+	}
 	privilege, err := view.Policy.aclResolver.GetUserPrivileges(view.User, obj)
 	if err != nil {
 		return false, err

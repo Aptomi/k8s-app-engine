@@ -5,25 +5,27 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"time"
 )
 
 // CreateActionObject is an informational data structure with Kind and Constructor for the action
-var CreateActionObject = &object.Info{
+var CreateActionObject = &runtime.Info{
 	Kind:        "action-component-create",
-	Constructor: func() object.Base { return &CreateAction{} },
+	Constructor: func() runtime.Object { return &CreateAction{} },
 }
 
 // CreateAction is a action which gets called when a new component needs to be instantiated (i.e. new instance of code to be deployed to the cloud)
 type CreateAction struct {
+	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 }
 
 // NewCreateAction creates new CreateAction
-func NewCreateAction(revision object.Generation, componentKey string) *CreateAction {
+func NewCreateAction(revision runtime.Generation, componentKey string) *CreateAction {
 	return &CreateAction{
+		TypeKind:     CreateActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(revision, CreateActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
@@ -51,7 +53,7 @@ func (a *CreateAction) updateActualState(context *action.Context) error {
 
 	// copy it over to the actual state
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	err := context.ActualStateUpdater.Create(instance)
+	err := context.ActualStateUpdater.Save(instance)
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
 	}
@@ -86,7 +88,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
 	if err != nil {
 		return err
 	}

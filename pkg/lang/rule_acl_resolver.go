@@ -3,7 +3,7 @@ package lang
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"sync"
 )
 
@@ -25,7 +25,7 @@ func NewACLResolver(globalRules *GlobalRules) *ACLResolver {
 }
 
 // GetUserPrivileges is a main method which determines privileges that a given user has for a given object
-func (resolver *ACLResolver) GetUserPrivileges(user *User, obj object.Base) (*Privilege, error) {
+func (resolver *ACLResolver) GetUserPrivileges(user *User, obj Base) (*Privilege, error) {
 	roleMap, err := resolver.getUserRoleMap(user)
 	if err != nil {
 		return nil, err
@@ -43,9 +43,9 @@ func (resolver *ACLResolver) GetUserPrivileges(user *User, obj object.Base) (*Pr
 }
 
 // Returns privileges for a given object
-func (privileges *Privileges) getObjectPrivileges(obj object.Base) *Privilege {
+func (privileges *Privileges) getObjectPrivileges(obj Base) *Privilege {
 	var result *Privilege
-	if obj.GetNamespace() == object.SystemNS {
+	if obj.GetNamespace() == runtime.SystemNS {
 		result = privileges.GlobalObjects[obj.GetKind()]
 	} else {
 		result = privileges.NamespaceObjects[obj.GetKind()]

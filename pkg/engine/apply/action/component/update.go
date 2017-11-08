@@ -5,25 +5,27 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"time"
 )
 
 // UpdateActionObject is an informational data structure with Kind and Constructor for the action
-var UpdateActionObject = &object.Info{
+var UpdateActionObject = &runtime.Info{
 	Kind:        "action-component-update",
-	Constructor: func() object.Base { return &DeleteAction{} },
+	Constructor: func() runtime.Object { return &DeleteAction{} },
 }
 
 // UpdateAction is a action which gets called when an existing component needs to be updated (i.e. parameters of a running code instance need to be changed in the cloud)
 type UpdateAction struct {
+	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 }
 
 // NewUpdateAction creates new UpdateAction
-func NewUpdateAction(revision object.Generation, componentKey string) *UpdateAction {
+func NewUpdateAction(revision runtime.Generation, componentKey string) *UpdateAction {
 	return &UpdateAction{
+		TypeKind:     UpdateActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(revision, UpdateActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
@@ -49,7 +51,7 @@ func (a *UpdateAction) updateActualState(context *action.Context) error {
 	instance.UpdateTimes(prevCreatedOn, time.Now())
 
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	err := context.ActualStateUpdater.Update(instance)
+	err := context.ActualStateUpdater.Save(instance)
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
 	}
@@ -84,7 +86,7 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
 	if err != nil {
 		return err
 	}

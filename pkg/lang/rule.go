@@ -2,16 +2,17 @@ package lang
 
 import (
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"sort"
 	"sync"
 )
 
 // RuleObject is an informational data structure with Kind and Constructor for Rule
-var RuleObject = &object.Info{
+var RuleObject = &runtime.Info{
 	Kind:        "rule",
+	Storable:    true,
 	Versioned:   true,
-	Constructor: func() object.Base { return &Rule{} },
+	Constructor: func() runtime.Object { return &Rule{} },
 }
 
 // Rule is a generic mechanism for defining rules in Aptomi.
@@ -21,7 +22,8 @@ var RuleObject = &object.Info{
 //
 // ACLRule is inherited from Rule, so the same mechanism is used for processing ACLs in Aptomi.
 type Rule struct {
-	Metadata `validate:"required"`
+	runtime.TypeKind `yaml:",inline"`
+	Metadata         `validate:"required"`
 
 	// Weight defined for the rule. All rules are sorted in the order of increasing weight and applied in that order
 	Weight int `validate:"min=0"`

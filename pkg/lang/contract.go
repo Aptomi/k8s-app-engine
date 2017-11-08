@@ -3,14 +3,15 @@ package lang
 import (
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // ContractObject is an informational data structure with Kind and Constructor for Contract
-var ContractObject = &object.Info{
+var ContractObject = &runtime.Info{
 	Kind:        "contract",
+	Storable:    true,
 	Versioned:   true,
-	Constructor: func() object.Base { return &Contract{} },
+	Constructor: func() runtime.Object { return &Contract{} },
 }
 
 // Contract is an object, which allows you to define a contract for a service, as well as a set of specific
@@ -19,7 +20,8 @@ var ContractObject = &object.Info{
 //
 // When dependencies get declared, they always get declared on a contract (not on a specific service).
 type Contract struct {
-	Metadata `validate:"required"`
+	runtime.TypeKind `yaml:",inline"`
+	Metadata         `validate:"required"`
 
 	// ChangeLabels defines how current set of labels will get changed/transformed in case
 	// the contract gets matched

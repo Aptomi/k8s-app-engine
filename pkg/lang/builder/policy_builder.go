@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"math/rand"
 	"strings"
@@ -58,8 +58,8 @@ func (builder *PolicyBuilder) SwitchNamespace(namespace string) {
 // AddDependency creates a new dependency and adds it to the policy
 func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Contract) *lang.Dependency {
 	result := &lang.Dependency{
+		TypeKind: lang.DependencyObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.DependencyObject.Kind,
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
@@ -91,8 +91,8 @@ func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
 // AddService creates a new service and adds it to the policy
 func (builder *PolicyBuilder) AddService() *lang.Service {
 	result := &lang.Service{
+		TypeKind: lang.ServiceObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.ServiceObject.Kind,
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
@@ -104,8 +104,8 @@ func (builder *PolicyBuilder) AddService() *lang.Service {
 // AddContract creates a new contract for a given service and adds it to the policy
 func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.Criteria) *lang.Contract {
 	result := &lang.Contract{
+		TypeKind: lang.ContractObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
@@ -124,8 +124,8 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 // AddContractMultipleContexts creates contract with multiple contexts for a given service and adds it to the policy
 func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service, criteriaArray ...*lang.Criteria) *lang.Contract {
 	result := &lang.Contract{
+		TypeKind: lang.ContractObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.ContractObject.Kind,
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
@@ -149,8 +149,8 @@ func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service,
 // AddRule creates a new rule and adds it to the policy
 func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.RuleActions) *lang.Rule {
 	result := &lang.Rule{
+		TypeKind: lang.RuleObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.RuleObject.Kind,
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
@@ -165,9 +165,9 @@ func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.Rul
 // AddCluster creates a new cluster and adds it to the policy
 func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 	result := &lang.Cluster{
+		TypeKind: lang.ClusterObject.GetTypeKind(),
 		Metadata: lang.Metadata{
-			Kind:      lang.ClusterObject.Kind,
-			Namespace: object.SystemNS,
+			Namespace: runtime.SystemNS,
 			Name:      util.RandomID(builder.random, idLength),
 		},
 		Type: "kubernetes",
@@ -271,7 +271,7 @@ func (builder *PolicyBuilder) Namespace() string {
 }
 
 // Internal function to add objects to the policy
-func (builder *PolicyBuilder) addObject(view *lang.PolicyView, obj object.Base) {
+func (builder *PolicyBuilder) addObject(view *lang.PolicyView, obj lang.Base) {
 	err := view.AddObject(obj)
 	if err != nil {
 		panic(err)

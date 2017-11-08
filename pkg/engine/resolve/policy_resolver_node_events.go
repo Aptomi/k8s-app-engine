@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"strings"
 )
 
@@ -44,7 +44,7 @@ func (node *resolutionNode) errorClusterDoesNotExist() error {
 	var err *errors.ErrorWithDetails
 	if label, ok := node.labels.Labels[lang.LabelCluster]; ok {
 		err = errors.NewErrorWithDetails(
-			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", object.SystemNS, label),
+			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", runtime.SystemNS, label),
 			errors.Details{},
 		)
 	} else {
@@ -58,7 +58,7 @@ func (node *resolutionNode) errorClusterDoesNotExist() error {
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", object.GetKey(service), object.GetKey(node.contract)),
+		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", runtime.KeyFromStorable(service), runtime.KeyFromStorable(node.contract)),
 		errors.Details{},
 	)
 	return NewCriticalError(err)

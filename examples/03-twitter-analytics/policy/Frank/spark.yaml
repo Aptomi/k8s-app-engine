@@ -1,6 +1,6 @@
 # Definition of Spark service
-- metadata:
-    kind: service
+- kind: service
+  metadata:
     namespace: main
     name: spark
 
@@ -36,8 +36,8 @@
         - zookeeper
 
 # Contract for Spark
-- metadata:
-    kind: contract
+- kind: contract
+  metadata:
     namespace: main
     name: spark
 

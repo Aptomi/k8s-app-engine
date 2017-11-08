@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	english "github.com/go-playground/locales/en"
 	"github.com/go-playground/universal-translator"
@@ -163,7 +163,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 		},
 		{
 			tag:         "systemNS",
-			translation: fmt.Sprintf("{0} must be '%s', but found '{1}'", object.SystemNS),
+			translation: fmt.Sprintf("{0} must be '%s', but found '{1}'", runtime.SystemNS),
 		},
 	}
 	for _, t := range translations {
@@ -380,14 +380,14 @@ func validateContract(ctx context.Context, sl validator.StructLevel) {
 	policy := ctx.Value(policyKey).(*Policy)
 
 	// every context should point to an existing service
-	for _, ctx := range contract.Contexts {
+	for _, contractCtx := range contract.Contexts {
 		serviceName := ""
-		if ctx.Allocation != nil {
-			serviceName = ctx.Allocation.Service
+		if contractCtx.Allocation != nil {
+			serviceName = contractCtx.Allocation.Service
 		}
 		obj, err := policy.GetObject(ServiceObject.Kind, serviceName, contract.Namespace)
 		if obj == nil || err != nil {
-			sl.ReportError(contract, fmt.Sprintf("Contexts[%s].Service[%s]", ctx.Name, serviceName), "", "exists", "")
+			sl.ReportError(contract, fmt.Sprintf("Contexts[%s].Service[%s]", contractCtx.Name, serviceName), "", "exists", "")
 			return
 		}
 	}
@@ -398,7 +398,7 @@ func validateRule(sl validator.StructLevel) {
 	rule := sl.Current().Addr().Interface().(*Rule)
 
 	// regular rule should have at least one of the actions set
-	if rule.Metadata.Kind == RuleObject.Kind {
+	if rule.GetKind() == RuleObject.Kind {
 		hasActions := false
 		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.ChangeLabels) > 0)
 		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Dependency) > 0)
@@ -410,7 +410,7 @@ func validateRule(sl validator.StructLevel) {
 	}
 
 	// ACL rule should have its action set
-	if rule.Metadata.Kind == ACLRuleObject.Kind {
+	if rule.GetKind() == ACLRuleObject.Kind {
 		hasActions := false
 		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.AddRole) > 0)
 		if !hasActions {
@@ -424,7 +424,7 @@ func validateRule(sl validator.StructLevel) {
 // checks if cluster is valid
 func validateCluster(sl validator.StructLevel) {
 	cluster := sl.Current().Addr().Interface().(*Cluster)
-	if cluster.Namespace != object.SystemNS {
+	if cluster.Namespace != runtime.SystemNS {
 		sl.ReportError(cluster.Namespace, "Namespace", "", "systemNS", "")
 	}
 }

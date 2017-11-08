@@ -1,7 +1,7 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // Metadata is an object metadata implementation (Namespace, Kind, Name, Generation) which works for all standard objects.
@@ -11,19 +11,13 @@ import (
 // objects within the same namespace and the same object kind.
 type Metadata struct {
 	Namespace  string `validate:"identifier"`
-	Kind       string `validate:"identifier"`
 	Name       string `validate:"identifier"`
-	Generation object.Generation
+	Generation runtime.Generation
 }
 
 // GetNamespace returns object namespace
 func (meta *Metadata) GetNamespace() string {
 	return meta.Namespace
-}
-
-// GetKind returns object kind
-func (meta *Metadata) GetKind() string {
-	return meta.Kind
 }
 
 // GetName returns object name
@@ -32,11 +26,11 @@ func (meta *Metadata) GetName() string {
 }
 
 // GetGeneration returns object generation
-func (meta *Metadata) GetGeneration() object.Generation {
+func (meta *Metadata) GetGeneration() runtime.Generation {
 	return meta.Generation
 }
 
 // SetGeneration sets object generation
-func (meta *Metadata) SetGeneration(generation object.Generation) {
+func (meta *Metadata) SetGeneration(generation runtime.Generation) {
 	meta.Generation = generation
 }

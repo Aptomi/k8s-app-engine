@@ -1,6 +1,6 @@
 # Definition of Analytics Pipeline service
-- metadata:
-    kind: service
+- kind: service
+  metadata:
     namespace: main
     name: analytics_pipeline
 
@@ -19,8 +19,8 @@
       contract: hdfs
 
 # Contract for Analytics Pipeline
-- metadata:
-    kind: contract
+- kind: contract
+  metadata:
     namespace: main
     name: analytics_pipeline
 

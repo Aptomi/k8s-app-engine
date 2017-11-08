@@ -1,20 +1,22 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // ClusterObject is an informational data structure with Kind and Constructor for Cluster
-var ClusterObject = &object.Info{
+var ClusterObject = &runtime.Info{
 	Kind:        "cluster",
+	Storable:    true,
 	Versioned:   true,
-	Constructor: func() object.Base { return &Cluster{} },
+	Constructor: func() runtime.Object { return &Cluster{} },
 }
 
 // Cluster defines an individual cluster where containers get deployed.
 // Various cloud providers are supported via setting a cluster type (k8s, Amazon ECS, GKE, etc).
 type Cluster struct {
-	Metadata `validate:"required"`
+	runtime.TypeKind `yaml:",inline"`
+	Metadata         `validate:"required"`
 
 	// Type is a cluster type. Based on its type, the appropriate deployment plugin will be called to deploy containers.
 	Type string `validate:"clustertype"`

@@ -1,7 +1,7 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // ACLRule defines which users have which roles in Aptomi. They should be configured by Aptomi domain admins in the
@@ -10,10 +10,11 @@ import (
 type ACLRule = Rule
 
 // ACLRuleObject is an informational data structure with Kind and Constructor for ACLRule
-var ACLRuleObject = &object.Info{
+var ACLRuleObject = &runtime.Info{
 	Kind:        "aclrule",
+	Storable:    true,
 	Versioned:   true,
-	Constructor: func() object.Base { return &ACLRule{} },
+	Constructor: func() runtime.Object { return &ACLRule{} },
 }
 
 // Allows to define a role which spans across all namespaces (e.g. "domain admin")

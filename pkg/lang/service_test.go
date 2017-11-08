@@ -31,8 +31,8 @@ func checkTopologicalSort(t *testing.T, service *Service, expectedComponents []s
 
 func makeNormalService() *Service {
 	return &Service{
+		TypeKind: ServiceObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "normal",
 		},
@@ -59,8 +59,8 @@ func makeNormalService() *Service {
 
 func makeCyclicService() *Service {
 	return &Service{
+		TypeKind: ServiceObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "badcomponentdependency",
 		},
@@ -87,8 +87,8 @@ func makeCyclicService() *Service {
 
 func makeBadComponentDependencyService() *Service {
 	return &Service{
+		TypeKind: ServiceObject.GetTypeKind(),
 		Metadata: Metadata{
-			Kind:      ServiceObject.Kind,
 			Namespace: "main",
 			Name:      "cyclic",
 		},

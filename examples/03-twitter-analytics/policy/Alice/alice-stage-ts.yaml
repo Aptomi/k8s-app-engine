@@ -1,5 +1,5 @@
-- metadata:
-    kind: dependency
+- kind: dependency
+  metadata:
     namespace: main
     name: alice_stage
   user: Alice

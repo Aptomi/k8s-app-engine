@@ -1,6 +1,6 @@
 # Definition of Kafka service
-- metadata:
-    kind: service
+- kind: service
+  metadata:
     namespace: main
     name: kafka
 
@@ -31,8 +31,8 @@
         - zookeeper
 
 # Contract for Kafka
-- metadata:
-    kind: contract
+- kind: contract
+  metadata:
     namespace: main
     name: kafka
 

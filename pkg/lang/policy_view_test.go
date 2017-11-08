@@ -1,7 +1,7 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -11,8 +11,8 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 	_, policyWithObjects := makePolicyWithObjects()
 
 	// get the list of objects
-	objList := []object.Base{}
-	for _, obj := range Objects {
+	objList := []Base{}
+	for _, obj := range PolicyObjects {
 		objList = append(objList, policyWithObjects.GetObjectsByKind(obj.Kind)...)
 	}
 	assert.NotEmpty(t, objList, "Object list should not be empty")
@@ -89,9 +89,9 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 	errCnt := []int{0, 0, 0}
 	customRules := []*ACLRule{
 		{
+			TypeKind: ACLRuleObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ACLRuleObject.Kind,
-				Namespace: object.SystemNS,
+				Namespace: runtime.SystemNS,
 				Name:      "custom_" + namespaceAdmin.ID,
 			},
 			Weight:   1000,
@@ -118,9 +118,9 @@ func makeEmptyPolicyWithACL() *Policy {
 	var aclRules = []*ACLRule{
 		// domain admins
 		{
+			TypeKind: ACLRuleObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ACLRuleObject.Kind,
-				Namespace: object.SystemNS,
+				Namespace: runtime.SystemNS,
 				Name:      "is_domain_admin",
 			},
 			Weight:   100,
@@ -131,9 +131,9 @@ func makeEmptyPolicyWithACL() *Policy {
 		},
 		// namespace admins for 'main' namespace
 		{
+			TypeKind: ACLRuleObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ACLRuleObject.Kind,
-				Namespace: object.SystemNS,
+				Namespace: runtime.SystemNS,
 				Name:      "is_namespace_admin",
 			},
 			Weight:   200,
@@ -144,9 +144,9 @@ func makeEmptyPolicyWithACL() *Policy {
 		},
 		// service consumers for 'main' namespace
 		{
+			TypeKind: ACLRuleObject.GetTypeKind(),
 			Metadata: Metadata{
-				Kind:      ACLRuleObject.Kind,
-				Namespace: object.SystemNS,
+				Namespace: runtime.SystemNS,
 				Name:      "is_consumer",
 			},
 			Weight:   300,

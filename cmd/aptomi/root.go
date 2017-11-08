@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Aptomi/aptomi/cmd"
+	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,13 +30,13 @@ var (
 func init() {
 	viper.SetEnvPrefix(envPrefix)
 
-	cmd.AddDefaultFlags(aptomiCmd, envPrefix)
+	common.AddDefaultFlags(aptomiCmd, envPrefix)
 
-	cmd.AddStringFlag(aptomiCmd, "db.connection", "db", "", "/etc/aptomi/db.bolt", envPrefix+"_DB_CONN", "DB connection string")
+	common.AddStringFlag(aptomiCmd, "db.connection", "db", "", "/etc/aptomi/db.bolt", envPrefix+"_DB_CONN", "DB connection string")
 
-	aptomiCmd.AddCommand(cmd.Version)
+	aptomiCmd.AddCommand(common.Version)
 }
 
 func preRun(command *cobra.Command, args []string) {
-	cmd.ReadConfig(viper.GetViper(), cfg, "/etc/aptomi")
+	common.ReadConfig(viper.GetViper(), cfg, "/etc/aptomi")
 }

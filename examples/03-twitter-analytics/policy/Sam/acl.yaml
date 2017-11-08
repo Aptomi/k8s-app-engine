@@ -1,6 +1,6 @@
 # This rule will make Sam a domain admin
-- metadata:
-    kind: aclrule
+- kind: aclrule
+  metadata:
     namespace: system
     name: demo_domain_admins_from_ldap
   criteria:
@@ -11,8 +11,8 @@
       domain-admin: '*'
 
 # This rule will make Frank, John, and Sam namespace admins
-- metadata:
-    kind: aclrule
+- kind: aclrule
+  metadata:
     namespace: system
     name: demo_namespace_admins_from_ldap
   criteria:
@@ -23,8 +23,8 @@
       namespace-admin: main
 
 # This rule will make Alice, Bob, and Carol service consumers
-- metadata:
-    kind: aclrule
+- kind: aclrule
+  metadata:
     namespace: system
     name: demo_service_consumers_from_ldap
   criteria:

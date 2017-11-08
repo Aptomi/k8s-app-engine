@@ -5,24 +5,26 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/object"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // EndpointsActionObject is an informational data structure with Kind and Constructor for the action
-var EndpointsActionObject = &object.Info{
+var EndpointsActionObject = &runtime.Info{
 	Kind:        "action-component-endpoints",
-	Constructor: func() object.Base { return &EndpointsAction{} },
+	Constructor: func() runtime.Object { return &EndpointsAction{} },
 }
 
 // EndpointsAction is a action which gets called when a new component changed (created or updated) and endpoints should be updated
 type EndpointsAction struct {
+	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 }
 
 // NewEndpointsAction creates new EndpointsAction
-func NewEndpointsAction(revision object.Generation, componentKey string) *EndpointsAction {
+func NewEndpointsAction(revision runtime.Generation, componentKey string) *EndpointsAction {
 	return &EndpointsAction{
+		TypeKind:     EndpointsActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(revision, EndpointsActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
@@ -47,7 +49,7 @@ func (a *EndpointsAction) Apply(context *action.Context) error {
 
 func (a *EndpointsAction) updateActualState(context *action.Context) error {
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	err := context.ActualStateUpdater.Update(instance)
+	err := context.ActualStateUpdater.Save(instance)
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
 	}
@@ -83,7 +85,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, object.SystemNS)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
 	if err != nil {
 		return err
 	}
