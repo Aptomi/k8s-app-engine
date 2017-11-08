@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (api *coreApi) readLang(request *http.Request) []lang.Base {
+func (api *coreAPI) readLang(request *http.Request) []lang.Base {
 	result := make([]lang.Base, 0)
 
 	for _, obj := range api.contentType.Read(request) {

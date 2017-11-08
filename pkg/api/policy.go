@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-func (api *coreApi) handlePolicyGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	gen := params.ByName("rev")
 
 	if len(gen) == 0 {
@@ -27,17 +27,20 @@ func (api *coreApi) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 	api.contentType.Write(writer, request, policyData)
 }
 
+// PolicyUpdateResultObject is an informational data structure with Kind and Constructor for PolicyUpdateResult
 var PolicyUpdateResultObject = &runtime.Info{
 	Kind:        "policy-update-result",
 	Constructor: func() runtime.Object { return &PolicyUpdateResult{} },
 }
 
+// PolicyUpdateResult represents results for the policy update request (estimated list of actions to be executed to
+// update existing actual state to the desired state)
 type PolicyUpdateResult struct {
 	runtime.TypeKind `yaml:",inline"`
 	Actions          []string
 }
 
-func (api *coreApi) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	objects := api.readLang(request)
 
 	user := api.getUserRequired(request)
@@ -60,7 +63,7 @@ func (api *coreApi) handlePolicyUpdate(writer http.ResponseWriter, request *http
 
 	err = policy.Validate()
 	if err != nil {
-		log.Panicf("Updated policy is invalid: %s", err)
+		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
 
 	// todo(slukjanov): handle deleted

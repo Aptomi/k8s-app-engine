@@ -7,17 +7,19 @@ import (
 	"net/http"
 )
 
+// EndpointsObject is an informational data structure with Kind and Constructor for Endpoints
 var EndpointsObject = &runtime.Info{
 	Kind:        "endpoints",
 	Constructor: func() runtime.Object { return &Endpoints{} },
 }
 
+// Endpoints object represents
 type Endpoints struct {
 	runtime.TypeKind `yaml:",inline"`
 	List             map[string]map[string]string
 }
 
-func (api *coreApi) handleEndpointsGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handleEndpointsGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	endpoints := make(map[string]map[string]string)
 	actualState, err := api.store.GetActualState()
 	if err != nil {

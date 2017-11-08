@@ -8,7 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type coreApi struct {
+type coreAPI struct {
 	contentType  *codec.ContentTypeHandler
 	store        store.Core
 	externalData *external.Data
@@ -17,11 +17,11 @@ type coreApi struct {
 // Serve initializes everything needed by REST API and registers all API endpoints in the provided http router
 func Serve(router *httprouter.Router, store store.Core, externalData *external.Data) {
 	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(Objects...))
-	api := &coreApi{contentTypeHandler, store, externalData}
+	api := &coreAPI{contentTypeHandler, store, externalData}
 	api.serve(router)
 }
 
-func (api *coreApi) serve(router *httprouter.Router) {
+func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy", api.handlePolicyGet)
 	router.GET("/api/v1/policy/gen/:gen", api.handlePolicyGet)
 	//router.GET("/api/v1/policy/gen/:gen/ns/:namespace", api.handlePolicyGet)
