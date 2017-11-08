@@ -234,18 +234,18 @@ func validateCodeType(fl validator.FieldLevel) bool {
 	return util.ContainsString(codeTypes, fl.Field().String())
 }
 
-// checks if a given string (or a list of strings) is valid identifier(s)
+// checks if a given string is valid identifier
 func validateIdentifier(fl validator.FieldLevel) bool {
 	return isIdentifier(fl.Field().String())
 }
 
-// checks if a given string (or a list of strings) is valid expression(s)
+// checks if a given string is valid expression
 func validateExpression(fl validator.FieldLevel) bool {
 	expr, err := expression.NewExpression(fl.Field().String())
 	return expr != nil && err == nil
 }
 
-// checks if a given string (or a list of strings) is valid template(s)
+// checks if a given string is valid template
 func validateTemplate(fl validator.FieldLevel) bool {
 	tmpl, err := template.NewTemplate(fl.Field().String())
 	return tmpl != nil && err == nil

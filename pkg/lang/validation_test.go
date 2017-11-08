@@ -1,7 +1,6 @@
 package lang
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -194,7 +193,7 @@ func validatePolicy(t *testing.T, result int, objects []Base, policy *Policy) {
 	}
 
 	if errValidate != nil && (displayErrorMessages() || failed) {
-		fmt.Println(errValidate)
+		t.Log(errValidate)
 	}
 }
 
