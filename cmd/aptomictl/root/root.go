@@ -13,11 +13,15 @@ import (
 )
 
 const (
+	// EnvPrefix is the prefix for all environment variables used by aptomictl
 	EnvPrefix = "APTOMICTL"
 )
 
 var (
-	Config  = &config.Client{}
+	// Config is the global instance of the client config
+	Config = &config.Client{}
+
+	// Command is the main (root) cobra command for aptomictl
 	Command = &cobra.Command{
 		Use:   "aptomictl",
 		Short: "aptomictl controls Aptomi",
