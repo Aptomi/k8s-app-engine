@@ -43,6 +43,9 @@ api:
 db:
   connection: ${CONF_DIR}/db.bolt
 
+helm:
+  chartsdir: /tmp
+
 enforcer:
   disabled: true
 

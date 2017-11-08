@@ -6,16 +6,20 @@ import (
 )
 
 type testStruct struct {
-	Host      string `valid:"host,required"`
-	Port      string `valid:"port,required"`
-	ChartsDir string `valid:"dir,required"`
+	Host      string `validate:"required,hostname|ip"`
+	Port      int    `validate:"required,min=1,max=65535"`
+	ChartsDir string `validate:"required,dir"`
 }
 
 func (t *testStruct) IsDebug() bool {
 	return false
 }
 
-func TestValidate(t *testing.T) {
+func displayErrorMessages() bool {
+	return false
+}
+
+func TestConfigValidation(t *testing.T) {
 	tests := []struct {
 		name   string
 		config Base
@@ -25,7 +29,7 @@ func TestValidate(t *testing.T) {
 			"success-0.0.0.0:80",
 			&testStruct{
 				Host:      "0.0.0.0",
-				Port:      "80",
+				Port:      80,
 				ChartsDir: "/tmp",
 			},
 			true,
@@ -34,7 +38,7 @@ func TestValidate(t *testing.T) {
 			"success-0.0.0.0:80",
 			&testStruct{
 				Host:      "0.0.0.0",
-				Port:      "80",
+				Port:      80,
 				ChartsDir: "",
 			},
 			false,
@@ -43,7 +47,7 @@ func TestValidate(t *testing.T) {
 			"success-0.0.0.0:80",
 			&testStruct{
 				Host:      "0.0.0.0",
-				Port:      "80",
+				Port:      80,
 				ChartsDir: "/nonexistingdirectoryinroot",
 			},
 			false,
@@ -52,7 +56,7 @@ func TestValidate(t *testing.T) {
 			"success-127.0.0.1:8080",
 			&testStruct{
 				Host:      "127.0.0.1",
-				Port:      "8080",
+				Port:      8080,
 				ChartsDir: "/tmp",
 			},
 			true,
@@ -61,7 +65,7 @@ func TestValidate(t *testing.T) {
 			"success-10.20.30.40:65080",
 			&testStruct{
 				Host:      "10.20.30.40",
-				Port:      "65080",
+				Port:      65080,
 				ChartsDir: "/tmp",
 			},
 			true,
@@ -70,7 +74,7 @@ func TestValidate(t *testing.T) {
 			"success-demo.aptomi.io:65080",
 			&testStruct{
 				Host:      "demo.aptomi.io",
-				Port:      "65080",
+				Port:      65080,
 				ChartsDir: "/tmp",
 			},
 			true,
@@ -79,7 +83,7 @@ func TestValidate(t *testing.T) {
 			"fail-0.0.0.0:0",
 			&testStruct{
 				Host:      "0.0.0.0",
-				Port:      "0",
+				Port:      0,
 				ChartsDir: "/tmp",
 			},
 			false,
@@ -88,7 +92,7 @@ func TestValidate(t *testing.T) {
 			"fail-0.0.0.0:-1",
 			&testStruct{
 				Host:      "0.0.0.0",
-				Port:      "-1",
+				Port:      -1,
 				ChartsDir: "/tmp",
 			},
 			false,
@@ -97,19 +101,18 @@ func TestValidate(t *testing.T) {
 			"fail-:80",
 			&testStruct{
 				Host:      "",
-				Port:      "80",
+				Port:      80,
 				ChartsDir: "/tmp",
 			},
 			false,
 		},
 	}
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			result, err := Validate(test.config)
-			assert.Equal(t, test.result, result)
-			if test.result && !result {
-				t.Logf("Unexpected validation error: %s", err)
-			}
-		})
+		val := NewConfigValidator(test.config)
+		err := val.Validate()
+		failed := !assert.Equal(t, test.result, err == nil, "Validation test case failed: %s", test.config)
+		if err != nil && (displayErrorMessages() || failed) {
+			t.Log(err)
+		}
 	}
 }

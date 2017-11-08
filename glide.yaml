@@ -73,8 +73,6 @@ import:
 - package: k8s.io/kubernetes
   version: ~1.7.0
 - package: github.com/gosuri/uitable
-- package: github.com/asaskevich/govalidator
-  version: ^4.0.0
 - package: golang.org/x/crypto
   subpackages:
   - openpgp

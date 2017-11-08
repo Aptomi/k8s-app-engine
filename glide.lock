@@ -5,8 +5,6 @@ imports:
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
 - name: github.com/alecthomas/gometalinter
   version: bae2f1293d092fd8167939d5108d1b025eaef9de
-- name: github.com/asaskevich/govalidator
-  version: 7664702784775e51966f0885f5cd27435916517b
 - name: github.com/Azure/go-autorest
   version: 58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d
 - name: github.com/beorn7/perks

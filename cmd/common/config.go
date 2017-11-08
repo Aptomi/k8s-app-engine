@@ -47,12 +47,10 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) error
 		log.SetLevel(log.DebugLevel)
 	}
 
-	valid, err := config.Validate(cfg)
-	if err != nil {
-		return fmt.Errorf("error while validating config: %s", err)
-	}
-	if !valid {
-		return fmt.Errorf("config is invalid")
+	val := config.NewConfigValidator(cfg)
+	errValidation := val.Validate()
+	if errValidation != nil {
+		return fmt.Errorf("error while validating config: %s", errValidation)
 	}
 
 	log.Debugf("Config:\n%s", yaml.SerializeObject(cfg))
