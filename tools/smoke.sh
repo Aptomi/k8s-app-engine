@@ -26,7 +26,7 @@ function free_port() {
 
 function stop_server() {
     echo "Stopping server..."
-    kill ${SERVER_PID} || true
+    kill ${SERVER_PID} &>/dev/null || true
     [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
     [[ -e "${CONF_DIR}/client.log" ]] && awk '{print "[[CLIENT]] " $0}' ${CONF_DIR}/client.log || echo "No client log found."
 }
@@ -76,6 +76,12 @@ SERVER_PID=$!
 echo "Server PID: ${SERVER_PID}"
 
 sleep 3
+
+SERVER_RUNNING=`ps | grep aptomi | grep "${SERVER_PID}" || true`
+if [ -z "$SERVER_RUNNING" ]; then
+    echo "Server failed to start"
+    exit 1
+fi
 
 if aptomictl policy --username Alice --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>/dev/null ; then
     echo "Alice shouldn't be able to upload policy"
