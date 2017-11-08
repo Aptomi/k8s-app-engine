@@ -59,6 +59,9 @@ func (cod *yamlCodec) encode(obj interface{}) ([]byte, error) {
 	if cod.json {
 		data, err = utilyaml.YAMLToJSON(data)
 	}
+	if err != nil {
+		return nil, err
+	}
 
 	return data, nil
 }
