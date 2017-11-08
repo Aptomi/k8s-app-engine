@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"path"
 )
 
@@ -50,7 +51,11 @@ func init() {
 }
 
 func preRun(command *cobra.Command, args []string) {
-	common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
+	err := common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 }
 
 func defaultConfigDir() string {

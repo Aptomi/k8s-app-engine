@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	log "github.com/Sirupsen/logrus"
@@ -13,21 +14,20 @@ import (
 // ReadConfig reads configuration from CLI flags, default or specified file path into provided config object using the
 // provided Viper instance and default configuration directory. It'll be checking if --config provided first and there
 // are supported config file types in it if it's directory.
-func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) {
+func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) error {
 	configFilePath := viper.GetString("config")
 
 	if configFilePath != "" { // if config path provided, use it and don't look for default locations
 		configAbsPath, err := filepath.Abs(configFilePath)
 		if err != nil {
-			log.Panicf("Error getting abs path for %s: %s", configFilePath, err)
+			return fmt.Errorf("error getting abs path for %s: %s", configFilePath, err)
 		}
 
 		processConfigAbsPath(viper, configAbsPath)
 	} else { // if no config path available, search in default places
 		// if there is no default config file - just skip config parsing
 		if !isConfigExists(defaultConfigDir) {
-			log.Infof("Can't find config file in default config dir: %s", defaultConfigDir)
-			return
+			return fmt.Errorf("can't find config file in default config dir: %s", defaultConfigDir)
 		}
 
 		viper.AddConfigPath(defaultConfigDir)
@@ -35,12 +35,12 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Panicf("Can't read config: %s", err)
+		return fmt.Errorf("can't read config: %s", err)
 	}
 
 	err := viper.Unmarshal(cfg)
 	if err != nil {
-		log.Panicf("Unable to unmarshal config: %s", err)
+		return fmt.Errorf("unable to unmarshal config: %s", err)
 	}
 
 	if cfg.IsDebug() {
@@ -49,13 +49,14 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) {
 
 	valid, err := config.Validate(cfg)
 	if err != nil {
-		log.Panicf("Error while validating config: %s", err)
+		return fmt.Errorf("error while validating config: %s", err)
 	}
 	if !valid {
-		log.Panicf("Config is invalid")
+		return fmt.Errorf("config is invalid")
 	}
 
 	log.Debugf("Config:\n%s", yaml.SerializeObject(cfg))
+	return nil
 }
 
 func processConfigAbsPath(viper *vp.Viper, path string) {

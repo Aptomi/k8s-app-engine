@@ -3,8 +3,10 @@ package main
 import (
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/config"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 const (
@@ -38,5 +40,9 @@ func init() {
 }
 
 func preRun(command *cobra.Command, args []string) {
-	common.ReadConfig(viper.GetViper(), cfg, "/etc/aptomi")
+	err := common.ReadConfig(viper.GetViper(), cfg, "/etc/aptomi")
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 }
