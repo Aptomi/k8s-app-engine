@@ -251,7 +251,7 @@ func validateTemplate(fl validator.FieldLevel) bool {
 	return tmpl != nil && err == nil
 }
 
-// / checks if a given nested map is a valid map of text templates (e.g. code parameters, discovery parameters, etc)
+// checks if a given nested map is a valid map of text templates (e.g. code parameters, discovery parameters, etc)
 func validateTemplateNestedMap(fl validator.FieldLevel) bool {
 	pMap := fl.Field().Interface().(util.NestedParameterMap)
 	_, err := util.ProcessParameterTree(pMap, nil, nil, util.ModeCompile)
