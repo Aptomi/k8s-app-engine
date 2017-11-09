@@ -1,9 +1,10 @@
 package common
 
 import (
-	log "github.com/Sirupsen/logrus"
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"time"
 )
 
 // AddStringFlag adds string flag to provided cobra command and registers with provided env variable name
@@ -18,15 +19,21 @@ func AddBoolFlag(command *cobra.Command, key, flagName, flagShorthand string, de
 	bindFlagEnv(command, key, flagName, env)
 }
 
+// AddDurationFlag adds duration flag to provided cobra command and registers with provided env variable name
+func AddDurationFlag(command *cobra.Command, key, flagName, flagShorthand string, defaultValue time.Duration, env, usage string) {
+	command.PersistentFlags().DurationP(flagName, flagShorthand, defaultValue, usage)
+	bindFlagEnv(command, key, flagName, env)
+}
+
 func bindFlagEnv(command *cobra.Command, key, flagName, env string) {
 	err := viper.BindPFlag(key, command.PersistentFlags().Lookup(flagName))
 	if err != nil {
-		log.Panicf("Error while binding flag with key %s: %s", key, err)
+		panic(fmt.Sprintf("Error while binding flag with key %s: %s", key, err))
 	}
 	if len(env) > 0 {
 		err = viper.BindEnv(key, env)
 		if err != nil {
-			log.Panicf("Error while binding env var with key %s: %s", key, err)
+			panic(fmt.Sprintf("Error while binding env var with key %s: %s", key, err))
 		}
 	}
 }
@@ -41,6 +48,4 @@ func AddDefaultFlags(command *cobra.Command, envPrefix string) {
 	AddStringFlag(command, "api.host", "host", "", "127.0.0.1", envPrefix+"_HOST", "Server API host")
 	AddStringFlag(command, "api.port", "port", "", "27866", envPrefix+"_PORT", "Server API port")
 	AddStringFlag(command, "api.apiPrefix", "api-prefix", "", "api/v1", envPrefix+"_API_PREFIX", "Server API prefix")
-
-	AddStringFlag(command, "auth.username", "username", "u", "", envPrefix+"_USERNAME", "Username")
 }

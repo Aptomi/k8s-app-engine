@@ -1,9 +1,9 @@
-- kind: dependency
+- kind: dependency1
   metadata:
     namespace: main
     name: alice_stage
   user: Alice
-  contract: twitter_stats
+  contract: twitter_statsa
   labels:
       # Deploy new version of visualization code (pass image tag for container)
       tsvisimage: demo-v62

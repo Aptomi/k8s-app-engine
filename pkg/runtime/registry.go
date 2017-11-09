@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -30,7 +31,7 @@ func (reg *Registry) Append(infos ...*Info) *Registry {
 func (reg *Registry) Get(kind Kind) *Info {
 	info, exist := reg.Kinds[kind]
 	if !exist {
-		log.Panicf("Kind '%s' isn't registered", kind)
+		panic(fmt.Sprintf("Kind '%s' isn't registered", kind))
 	}
 
 	return info
@@ -39,21 +40,21 @@ func (reg *Registry) Get(kind Kind) *Info {
 func (reg *Registry) validateInfo(info *Info) {
 	kind := info.Kind
 	if len(kind) == 0 {
-		log.Panicf("Kind can't be empty")
+		panic(fmt.Sprintf("Kind can't be empty"))
 	}
 
 	if _, exist := reg.Kinds[kind]; exist {
-		log.Panicf("Kind can't be duplicated: %s", kind)
+		panic(fmt.Sprintf("Kind can't be duplicated: %s", kind))
 	}
 
 	obj := info.New()
 	if _, ok := obj.(Storable); info.Storable && !ok {
-		log.Panicf("Kind '%s' registered as Storable but doesn't implement corresponding interface", kind)
+		panic(fmt.Sprintf("Kind '%s' registered as Storable but doesn't implement corresponding interface", kind))
 	} else if !info.Storable && ok {
 		log.Debugf("Kind '%s' registered as non-Storable but implements corresponding interface", kind)
 	}
 	if _, ok := obj.(Versioned); info.Versioned && !ok {
-		log.Panicf("Kind '%s' registered as Versioned but doesn't implement corresponding interface", kind)
+		panic(fmt.Sprintf("Kind '%s' registered as Versioned but doesn't implement corresponding interface", kind))
 	} else if !info.Versioned && ok {
 		log.Debugf("Kind '%s' registered as non-Versioned but implements corresponding interface", kind)
 	}

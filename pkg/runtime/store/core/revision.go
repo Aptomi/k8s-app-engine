@@ -70,7 +70,7 @@ type revisionProgressUpdater struct {
 func (p *revisionProgressUpdater) save() {
 	err := p.store.SaveRevision(p.revision)
 	if err != nil {
-		log.Panicf("Unable to save revision %s progress with err: %s", p.revision.GetGeneration(), err)
+		log.Warnf("Unable to save revision %s progress with err: %s", p.revision.GetGeneration(), err)
 	}
 }
 

@@ -10,7 +10,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"time"
 )
 
 type Client interface {
@@ -27,8 +26,7 @@ type httpClient struct {
 
 func NewClient(cfg *config.Client) Client {
 	client := &http.Client{
-		// todo make configurable
-		Timeout: 5 * time.Second,
+		Timeout: cfg.HTTP.Timeout,
 	}
 	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(api.Objects...))
 

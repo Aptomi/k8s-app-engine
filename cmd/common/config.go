@@ -57,7 +57,7 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) error
 	return nil
 }
 
-func processConfigAbsPath(viper *vp.Viper, path string) {
+func processConfigAbsPath(viper *vp.Viper, path string) error {
 	if stat, err := os.Stat(path); err == nil {
 		if stat.IsDir() { // if dir provided, use only it
 			viper.AddConfigPath(path)
@@ -65,10 +65,12 @@ func processConfigAbsPath(viper *vp.Viper, path string) {
 			viper.SetConfigFile(path)
 		}
 	} else if os.IsNotExist(err) {
-		log.Panicf("Specified config path %s doesn't exists: %s", path, err)
+		return fmt.Errorf("specified config path %s doesn't exists: %s", path, err)
 	} else {
-		log.Panicf("Error while processing specified config path %s: %s", path, err)
+		return fmt.Errorf("error while processing specified config path %s: %s", path, err)
 	}
+
+	return nil
 }
 
 func isConfigExists(configDir string) bool {

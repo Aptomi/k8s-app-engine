@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
-	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 )
@@ -38,7 +37,7 @@ func NewContentTypeHandler(reg *runtime.Registry) *ContentTypeHandler {
 func (handler *ContentTypeHandler) GetCodecByContentType(contentType string) runtime.Codec {
 	codec := handler.codecs[contentType]
 	if codec == nil {
-		log.Panicf("Codec not found for content type: %s", contentType)
+		panic(fmt.Sprintf("Codec not found for content type: %s", contentType))
 	}
 
 	return codec
@@ -68,13 +67,13 @@ func (handler *ContentTypeHandler) GetContentType(header http.Header) string {
 func (handler *ContentTypeHandler) Read(request *http.Request) []runtime.Object {
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		log.Panicf("Error while reading bytes from request Body: %s", err)
+		panic(fmt.Sprintf("Error while reading bytes from request Body: %s", err))
 	}
 
 	objects, err := handler.GetCodec(request.Header).DecodeOneOrMany(body)
 	if err != nil {
 		// todo response with some bad request status code
-		log.Panicf("Error decoding policy update request: %s", err)
+		panic(fmt.Sprintf("Error decoding policy update request: %s", err))
 	}
 
 	return objects
@@ -91,8 +90,7 @@ func (handler *ContentTypeHandler) Write(writer http.ResponseWriter, request *ht
 func (handler *ContentTypeHandler) WriteStatus(writer http.ResponseWriter, request *http.Request, body runtime.Object, status int) {
 	data, err := handler.GetCodec(request.Header).EncodeOne(body)
 	if err != nil {
-		// todo should we log such errors?
-		log.Panicf("Error while encoding body of kind: %s", body.GetKind())
+		panic(fmt.Sprintf("Error while encoding body of kind: %s", body.GetKind()))
 	}
 
 	writer.Header().Set("Content-Type", handler.GetContentType(request.Header))
@@ -100,6 +98,6 @@ func (handler *ContentTypeHandler) WriteStatus(writer http.ResponseWriter, reque
 
 	_, wErr := fmt.Fprint(writer, string(data))
 	if wErr != nil {
-		log.Panicf("Error while writing body: %s", wErr)
+		panic(fmt.Sprintf("Error while writing body: %s", wErr))
 	}
 }

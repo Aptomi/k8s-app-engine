@@ -1,16 +1,17 @@
 package root
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/endpoints"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/policy"
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/config"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 	"path"
+	"time"
 )
 
 const (
@@ -42,6 +43,9 @@ func init() {
 
 	common.AddDefaultFlags(Command, EnvPrefix)
 
+	common.AddStringFlag(Command, "auth.username", "username", "u", "", EnvPrefix+"_USERNAME", "Username")
+	common.AddDurationFlag(Command, "http.timeout", "timeout", "", 15*time.Second, EnvPrefix+"_TIMEOUT", "HTTP Timeout")
+
 	// Add sub commands
 	Command.AddCommand(
 		common.Version,
@@ -61,7 +65,7 @@ func preRun(command *cobra.Command, args []string) {
 func defaultConfigDir() string {
 	home, err := homedir.Dir()
 	if err != nil {
-		log.Panicf("Can't find homedir: %s", err)
+		panic(fmt.Sprintf("Can't find home dir: %s", err))
 	}
 
 	return path.Join(home, ".aptomi")

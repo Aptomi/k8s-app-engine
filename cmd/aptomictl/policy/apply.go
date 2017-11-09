@@ -8,7 +8,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -28,12 +27,12 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			allObjects, err := readFiles(paths)
 			if err != nil {
-				log.Panicf("Error while reading policy files for applying: %s", err)
+				panic(fmt.Sprintf("Error while reading policy files for applying: %s", err))
 			}
 
 			result, err := rest.New(cfg, http.NewClient(cfg)).Policy().Apply(allObjects)
 			if err != nil {
-				log.Panicf("Error while applying policy")
+				panic(fmt.Sprintf("Error while applying policy: %s", err))
 			}
 
 			// todo(slukjanov): replace with -o yaml / json / etc handler

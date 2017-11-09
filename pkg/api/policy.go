@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
@@ -21,7 +20,7 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 
 	policyData, err := api.store.GetPolicyData(runtime.ParseGeneration(gen))
 	if err != nil {
-		log.Panicf("error while getting requested policy: %s", err)
+		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
 
 	api.contentType.Write(writer, request, policyData)
@@ -48,16 +47,16 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	// Verify ACL for updated objects
 	policy, _, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
-		log.Panicf("Error while loading current policy: %s", err)
+		panic(fmt.Sprintf("Error while loading current policy: %s", err))
 	}
 	for _, obj := range objects {
 		errAdd := policy.AddObject(obj)
 		if errAdd != nil {
-			log.Panicf("Error while adding updated object to policy: %s", errAdd)
+			panic(fmt.Sprintf("Error while adding updated object to policy: %s", errAdd))
 		}
 		errManage := policy.View(user).ManageObject(obj)
 		if errManage != nil {
-			log.Panicf("Error while adding updated object to policy: %s", errManage)
+			panic(fmt.Sprintf("Error while adding updated object to policy: %s", errManage))
 		}
 	}
 
@@ -85,15 +84,15 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	desiredPolicyGen := policyData.GetGeneration()
 	desiredPolicy, _, err := api.store.GetPolicy(desiredPolicyGen)
 	if err != nil {
-		log.Panicf("Error while getting desiredPolicy: %s", err)
+		panic(fmt.Sprintf("Error while getting desiredPolicy: %s", err))
 	}
 	if desiredPolicy == nil {
-		log.Panicf("Can't read policy right after updating it")
+		panic(fmt.Sprintf("Can't read policy right after updating it"))
 	}
 
 	actualState, err := api.store.GetActualState()
 	if err != nil {
-		log.Panicf("Error while getting actual state: %s", err)
+		panic(fmt.Sprintf("Error while getting actual state: %s", err))
 	}
 
 	// todo we should resolve before saving policy => add Mutex for this method to make sure it's safe
@@ -104,12 +103,12 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	eventLog.Save(&event.HookConsole{})
 
 	if err != nil {
-		log.Panicf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
+		panic(fmt.Sprintf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState))
 	}
 
 	nextRevision, err := api.store.NewRevision(desiredPolicyGen)
 	if err != nil {
-		log.Panicf("Unable to get next revision: %s", err)
+		panic(fmt.Sprintf("Unable to get next revision: %s", err))
 	}
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())

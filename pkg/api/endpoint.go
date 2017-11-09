@@ -1,8 +1,8 @@
 package api
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	log "github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -23,7 +23,7 @@ func (api *coreAPI) handleEndpointsGet(writer http.ResponseWriter, request *http
 	endpoints := make(map[string]map[string]string)
 	actualState, err := api.store.GetActualState()
 	if err != nil {
-		log.Panicf("Can't load actual state to get endpoints: %s", err)
+		panic(fmt.Sprintf("Can't load actual state to get endpoints: %s", err))
 	}
 	for _, instance := range actualState.ComponentInstanceMap {
 		if len(instance.Endpoints) > 0 {

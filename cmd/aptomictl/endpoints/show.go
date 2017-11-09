@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
-	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +17,7 @@ func newShowCommand(cfg *config.Client) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			endpoints, err := rest.New(cfg, http.NewClient(cfg)).Endpoints().Show()
 			if err != nil {
-				log.Panicf("Error while requesting endpoints")
+				panic(fmt.Sprintf("Error while requesting endpoints: %s", err))
 			}
 
 			// todo(slukjanov): replace with -o yaml / json / etc handler

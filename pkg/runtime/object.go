@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -49,10 +50,10 @@ const KeySeparator = "/"
 
 func KeyFromParts(namespace string, kind Kind, name string) Key {
 	if len(namespace) == 0 {
-		log.Panicf("Key couldn't be created with empty namespace")
+		panic(fmt.Sprintf("Key couldn't be created with empty namespace"))
 	}
 	if len(kind) == 0 {
-		log.Panicf("Key couldn't be created with empty kind")
+		panic(fmt.Sprintf("Key couldn't be created with empty kind"))
 	}
 
 	key := namespace + KeySeparator + kind

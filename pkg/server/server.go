@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/api/middleware"
 	"github.com/Aptomi/aptomi/pkg/config"
@@ -12,7 +13,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
 	"github.com/Aptomi/aptomi/pkg/webui"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -82,7 +82,7 @@ func (server *Server) initStore() {
 	b := bolt.NewGenericStore(registry)
 	err := b.Open(server.cfg.DB)
 	if err != nil {
-		log.Panicf("Can't open object store: %s", err)
+		panic(fmt.Sprintf("Can't open object store: %s", err))
 	}
 	server.store = core.NewStore(b)
 }

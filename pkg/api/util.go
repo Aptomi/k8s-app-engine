@@ -1,8 +1,8 @@
 package api
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	log "github.com/Sirupsen/logrus"
 	"net/http"
 )
 
@@ -13,8 +13,7 @@ func (api *coreAPI) readLang(request *http.Request) []lang.Base {
 		langObj, ok := obj.(lang.Base)
 
 		if !ok {
-			// todo replace with error?
-			log.Panicf("Trying to read lang objects while non-lang ones found: %s", obj.GetKind())
+			panic(fmt.Sprintf("Trying to read lang objects while non-lang ones found: %s", obj.GetKind()))
 		}
 
 		result = append(result, langObj)
