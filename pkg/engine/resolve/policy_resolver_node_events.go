@@ -58,7 +58,7 @@ func (node *resolutionNode) errorClusterDoesNotExist() error {
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
 	err := errors.NewErrorWithDetails(
-		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", runtime.KeyFromStorable(service), runtime.KeyFromStorable(node.contract)),
+		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", runtime.KeyForStorable(service), runtime.KeyForStorable(node.contract)),
 		errors.Details{},
 	)
 	return NewCriticalError(err)

@@ -44,7 +44,7 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 // RecordResolved takes a component instance and adds a new dependency record into it
 func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *lang.Dependency, ruleResult *lang.RuleActionResult) {
 	instance := resolution.GetComponentInstanceEntry(cik)
-	instance.addDependency(runtime.KeyFromStorable(dependency))
+	instance.addDependency(runtime.KeyForStorable(dependency))
 	instance.addRuleInformation(ruleResult)
 	resolution.recordProcessingOrder(cik)
 }

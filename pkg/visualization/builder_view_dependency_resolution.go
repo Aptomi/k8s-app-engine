@@ -34,7 +34,7 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 	if len(keySrc) <= 0 {
 		// if we are tracing a dependency, then add an outgoing edge to its corresponding service instance
 		edgesOut = make(map[string]bool)
-		resolvedKey := b.resolution.DependencyInstanceMap[runtime.KeyFromStorable(dependency)]
+		resolvedKey := b.resolution.DependencyInstanceMap[runtime.KeyForStorable(dependency)]
 		if len(resolvedKey) > 0 {
 			edgesOut[resolvedKey] = true
 		}

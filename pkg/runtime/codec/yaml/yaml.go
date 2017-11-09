@@ -12,6 +12,7 @@ type yamlCodec struct {
 	json     bool
 }
 
+// NewCodec returns instance of the YAML runtime codec for provided object registry
 func NewCodec(registry *runtime.Registry) runtime.Codec {
 	return &yamlCodec{
 		registry: registry,
@@ -19,6 +20,7 @@ func NewCodec(registry *runtime.Registry) runtime.Codec {
 	}
 }
 
+// NewJSONCodec returns instance of the JSON runtime codec for provided object registry
 func NewJSONCodec(registry *runtime.Registry) runtime.Codec {
 	return &yamlCodec{
 		registry: registry,

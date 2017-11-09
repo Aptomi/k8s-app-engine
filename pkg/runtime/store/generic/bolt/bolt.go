@@ -153,7 +153,7 @@ func (bs *boltStore) setNextGeneration(obj runtime.Versioned) error {
 	if !info.Versioned {
 		return fmt.Errorf("kind %s isn't versioned", obj.GetKind())
 	}
-	last, err := bs.GetGen(runtime.KeyFromStorable(obj), runtime.LastGen)
+	last, err := bs.GetGen(runtime.KeyForStorable(obj), runtime.LastGen)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (bs *boltStore) Save(obj runtime.Storable) (bool, error) {
 	if info == nil {
 		return false, fmt.Errorf("unknown kind: %s", obj.GetKind())
 	}
-	key := runtime.KeyFromStorable(obj)
+	key := runtime.KeyForStorable(obj)
 	boltPath := key
 	updated := false
 	if info.Versioned { // todo extract into "Prepare versioned"

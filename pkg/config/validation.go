@@ -24,15 +24,15 @@ func (err *configValidationError) addError(errStr string) {
 	err.errList = append(err.errList, errStr)
 }
 
-// ConfigValidator is a custom validator for configs
-type ConfigValidator struct {
+// Validator is a custom validator for configs
+type Validator struct {
 	val    *validator.Validate
 	config Base
 	trans  ut.Translator
 }
 
-// NewConfigValidator creates a new ConfigValidator
-func NewConfigValidator(config Base) *ConfigValidator {
+// NewValidator creates a new Validator
+func NewValidator(config Base) *Validator {
 	result := validator.New()
 
 	// independent validators
@@ -69,7 +69,7 @@ func NewConfigValidator(config Base) *ConfigValidator {
 		}
 	}
 
-	return &ConfigValidator{
+	return &Validator{
 		val:    result,
 		config: config,
 		trans:  trans,
@@ -96,7 +96,7 @@ func translateFunc(ut ut.Translator, fe validator.FieldError) string {
 // Validate validates config for errors and returns an error (it can be casted to
 // configValidationError, containing a list of errors inside). When error is printed as string, it will
 // automatically contains the full list of validation errors.
-func (v *ConfigValidator) Validate() error {
+func (v *Validator) Validate() error {
 	// validate policy
 	err := v.val.Struct(v.config)
 	if err == nil {

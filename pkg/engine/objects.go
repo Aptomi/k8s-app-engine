@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	// ActionObjects is a list of informational objects for all actions
 	ActionObjects = []*runtime.Info{
 		component.CreateActionObject,
 		component.UpdateActionObject,
@@ -17,6 +18,8 @@ var (
 		component.EndpointsActionObject,
 		global.PostProcessActionObject,
 	}
+
+	// Objects is the list of informational objects for all objects in the engine
 	Objects = runtime.AppendAll([]*runtime.Info{
 		PolicyDataObject,
 		RevisionObject,

@@ -11,6 +11,7 @@ type coreClient struct {
 	httpClient http.Client
 }
 
+// New returns new instance of the Core API client http rest implementation
 func New(cfg *config.Client, httpClient http.Client) client.Core {
 	return &coreClient{cfg, httpClient}
 }

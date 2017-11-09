@@ -38,7 +38,7 @@ func (n dependencyNode) getGroup() string {
 }
 
 func (n dependencyNode) getID() string {
-	return fmt.Sprintf("%s%s", n.getIDPrefix(), runtime.KeyFromStorable(n.dependency))
+	return fmt.Sprintf("%s%s", n.getIDPrefix(), runtime.KeyForStorable(n.dependency))
 }
 
 func (n dependencyNode) isItMyID(id string) string {

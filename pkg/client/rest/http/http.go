@@ -12,6 +12,7 @@ import (
 	"net/http"
 )
 
+// Client is the interface for doing HTTP requests that operates using runtime objects
 type Client interface {
 	GET(path string, expected *runtime.Info) (runtime.Object, error)
 	POST(path string, expected *runtime.Info, body runtime.Object) (runtime.Object, error)
@@ -24,6 +25,7 @@ type httpClient struct {
 	cfg         *config.Client
 }
 
+// NewClient returns implementation of
 func NewClient(cfg *config.Client) Client {
 	client := &http.Client{
 		Timeout: cfg.HTTP.Timeout,

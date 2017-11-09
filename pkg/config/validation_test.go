@@ -108,7 +108,7 @@ func TestConfigValidation(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		val := NewConfigValidator(test.config)
+		val := NewValidator(test.config)
 		err := val.Validate()
 		failed := !assert.Equal(t, test.result, err == nil, "Validation test case failed: %s", test.config)
 		if err != nil && (displayErrorMessages() || failed) {

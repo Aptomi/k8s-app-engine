@@ -15,6 +15,7 @@ var RevisionObject = &runtime.Info{
 	Constructor: func() runtime.Object { return &Revision{} },
 }
 
+// RevisionKey is the default key for the Revision object (there is only one Revision exists but with multiple generations)
 var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, RevisionObject.Kind, runtime.EmptyName)
 
 // Revision is a "milestone" in applying
@@ -28,6 +29,7 @@ type Revision struct {
 	Progress RevisionProgress
 }
 
+// RevisionProgress represents revision applying progress
 type RevisionProgress struct {
 	Stage    string
 	Current  int
@@ -35,18 +37,22 @@ type RevisionProgress struct {
 	Finished bool
 }
 
+// GetName returns Revision name
 func (revision *Revision) GetName() string {
 	return runtime.EmptyName
 }
 
+// GetNamespace returns Revision namespace
 func (revision *Revision) GetNamespace() string {
 	return runtime.SystemNS
 }
 
+// GetGeneration returns Revision generation
 func (revision *Revision) GetGeneration() runtime.Generation {
 	return revision.Metadata.Generation
 }
 
+// SetGeneration returns Revision generation
 func (revision *Revision) SetGeneration(gen runtime.Generation) {
 	revision.Metadata.Generation = gen
 }

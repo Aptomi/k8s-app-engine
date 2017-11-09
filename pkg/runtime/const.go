@@ -10,5 +10,6 @@ const (
 	// SystemNS is a name of system namespace
 	SystemNS = "system"
 
+	// EmptyName is the default empty name for runtime objects
 	EmptyName = ""
 )

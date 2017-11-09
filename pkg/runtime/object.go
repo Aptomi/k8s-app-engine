@@ -1,82 +1,23 @@
 package runtime
 
-import (
-	"fmt"
-	log "github.com/Sirupsen/logrus"
-)
-
-type Kind = string
-
-var Unknown = Kind("unknown")
-
+// Object represents minimal object that could be operated in runtime with only Kind being mandatory characteristic
 type Object interface {
 	GetKind() Kind
 }
 
+// Storable represents runtime object that could be stored in database and having two additional mandatory characteristics:
+// Name and Namespace that together with Kind forms Key (namespace + kind + name) that represents coordinates of the
+// object in database
 type Storable interface {
 	Object
 	GetName() string
 	GetNamespace() string
 }
 
+// Versioned extends Storable with mandatory Generation characteristic to represent versioned objects that are having
+// multiple generations stored in database
 type Versioned interface {
 	Storable
 	GetGeneration() Generation
 	SetGeneration(gen Generation)
-}
-
-type Info struct {
-	Kind        Kind
-	Storable    bool
-	Versioned   bool
-	Constructor Constructor
-}
-
-// Constructor is a function to get instance of the specific object
-type Constructor func() Object
-
-// New creates a new instance of the specific object defined in Info
-func (info *Info) New() Object {
-	return info.Constructor()
-}
-
-func (info *Info) GetTypeKind() TypeKind {
-	return TypeKind{info.Kind}
-}
-
-type Key = string
-
-const KeySeparator = "/"
-
-func KeyFromParts(namespace string, kind Kind, name string) Key {
-	if len(namespace) == 0 {
-		panic(fmt.Sprintf("Key couldn't be created with empty namespace"))
-	}
-	if len(kind) == 0 {
-		panic(fmt.Sprintf("Key couldn't be created with empty kind"))
-	}
-
-	key := namespace + KeySeparator + kind
-
-	if len(name) > 0 {
-		key += KeySeparator + name
-	}
-
-	return key
-}
-
-func KeyFromStorable(obj Storable) Key {
-	return KeyFromParts(obj.GetNamespace(), obj.GetKind(), obj.GetName())
-}
-
-type TypeKind struct {
-	Kind Kind
-}
-
-func (tk *TypeKind) GetKind() Kind {
-	return tk.Kind
-}
-
-type GenerationMetadata struct {
-	Generation Generation
 }

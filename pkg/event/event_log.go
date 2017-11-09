@@ -43,7 +43,7 @@ func NewLog() *Log {
 // Replaces base objects with their string key value
 func fieldValue(data interface{}) interface{} {
 	if baseObject, ok := data.(runtime.Storable); ok {
-		return runtime.KeyFromStorable(baseObject)
+		return runtime.KeyForStorable(baseObject)
 	}
 	return data
 }

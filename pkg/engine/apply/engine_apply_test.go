@@ -148,7 +148,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	dependencyNew.Labels["param"] = "value1"
 
 	desiredStateNext := resolvePolicy(t, bDesiredNext)
-	assert.Contains(t, desiredStateNext.DependencyInstanceMap, runtime.KeyFromStorable(dependencyNew), "New dependency should also be resolved")
+	assert.Contains(t, desiredStateNext.DependencyInstanceMap, runtime.KeyForStorable(dependencyNew), "New dependency should also be resolved")
 
 	// Apply to update component times in actual state
 	applier = NewEngineApply(

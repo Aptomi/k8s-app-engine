@@ -13,6 +13,7 @@ var PolicyDataObject = &runtime.Info{
 	Constructor: func() runtime.Object { return &PolicyData{} },
 }
 
+// PolicyDataKey is the default key for the policy object (there is only one policy exists but with multiple generations)
 var PolicyDataKey = runtime.KeyFromParts(runtime.SystemNS, PolicyDataObject.Kind, runtime.EmptyName)
 
 // PolicyData is a struct which contains references to a generation for each object included into the policy
@@ -24,22 +25,27 @@ type PolicyData struct {
 	Objects map[string]map[string]map[string]runtime.Generation
 }
 
+// PolicyDataMetadata is the metadata for PolicyData object that includes generation
 type PolicyDataMetadata struct {
 	Generation runtime.Generation
 }
 
+// GetName returns PolicyData name
 func (policyData *PolicyData) GetName() string {
 	return runtime.EmptyName
 }
 
+// GetNamespace returns PolicyData namespace
 func (policyData *PolicyData) GetNamespace() string {
 	return runtime.SystemNS
 }
 
+// GetGeneration returns PolicyData generation
 func (policyData *PolicyData) GetGeneration() runtime.Generation {
 	return policyData.Metadata.Generation
 }
 
+// SetGeneration sets PolicyData generation
 func (policyData *PolicyData) SetGeneration(gen runtime.Generation) {
 	policyData.Metadata.Generation = gen
 }

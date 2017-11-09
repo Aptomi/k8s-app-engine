@@ -12,5 +12,6 @@ type versionClient struct {
 }
 
 func (client *versionClient) Show() (*api.Version, error) {
+	// todo(slukjanov): implement version show
 	panic("implement me")
 }

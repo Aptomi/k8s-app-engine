@@ -18,7 +18,7 @@ type dependencyNode struct {
 }
 
 func (n dependencyNode) getGroup() string {
-	serviceKey := n.b.resolution.DependencyInstanceMap[runtime.KeyFromStorable(n.dependency)]
+	serviceKey := n.b.resolution.DependencyInstanceMap[runtime.KeyForStorable(n.dependency)]
 	if len(serviceKey) > 0 {
 		return "dependency"
 	}
@@ -26,7 +26,7 @@ func (n dependencyNode) getGroup() string {
 }
 
 func (n dependencyNode) getID() string {
-	return runtime.KeyFromStorable(n.dependency)
+	return runtime.KeyForStorable(n.dependency)
 }
 
 func (n dependencyNode) getLabel() string {
@@ -45,7 +45,7 @@ func (n contractNode) getGroup() string {
 }
 
 func (n contractNode) getID() string {
-	return runtime.KeyFromStorable(n.contract)
+	return runtime.KeyForStorable(n.contract)
 }
 
 func (n contractNode) getLabel() string {
@@ -67,7 +67,7 @@ func (n serviceNode) getGroup() string {
 }
 
 func (n serviceNode) getID() string {
-	return runtime.KeyFromStorable(n.service)
+	return runtime.KeyForStorable(n.service)
 }
 
 func (n serviceNode) getLabel() string {
@@ -87,7 +87,7 @@ func (n componentNode) getGroup() string {
 }
 
 func (n componentNode) getID() string {
-	return runtime.KeyFromStorable(n.service) + "-" + n.component.Name
+	return runtime.KeyForStorable(n.service) + "-" + n.component.Name
 }
 
 func (n componentNode) getLabel() string {

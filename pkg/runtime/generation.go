@@ -26,3 +26,8 @@ func ParseGeneration(gen string) Generation {
 	}
 	return Generation(val)
 }
+
+// GenerationMetadata is the default struct for metadata with only generation in it
+type GenerationMetadata struct {
+	Generation Generation
+}

@@ -41,5 +41,6 @@ func (client *policyClient) Apply(updated []runtime.Object) (*api.PolicyUpdateRe
 }
 
 func (client *policyClient) Delete(deleted []string) (*api.PolicyUpdateResult, error) {
+	// todo(slukjanov): implement policy delete handling
 	panic("implement me")
 }

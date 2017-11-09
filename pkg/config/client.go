@@ -12,6 +12,7 @@ type Client struct {
 	HTTP  HTTP `validate:"required"`
 }
 
+// HTTP is the config for low level HTTP client
 type HTTP struct {
 	Timeout time.Duration
 }

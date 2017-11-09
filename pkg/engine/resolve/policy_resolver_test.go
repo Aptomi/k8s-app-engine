@@ -36,8 +36,8 @@ func TestPolicyResolverContract(t *testing.T) {
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(d1), "Dependency should be resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(d2), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d1), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d2), "Dependency should be resolved")
 
 	// check instance 1
 	instance1 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component, resolution)
@@ -76,7 +76,7 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(d), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d), "Dependency should be resolved")
 }
 
 func TestPolicyResolverPartialMatching(t *testing.T) {
@@ -106,8 +106,8 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that only first dependency got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(d1), "Dependency with full set of labels should be resolved")
-	assert.NotContains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(d2), "Dependency with partial labels should not be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d1), "Dependency with full set of labels should be resolved")
+	assert.NotContains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d2), "Dependency with partial labels should not be resolved")
 }
 
 func TestPolicyResolverCalculatedLabels(t *testing.T) {
@@ -142,7 +142,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that dependency got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(dependency), "Dependency should be resolved")
+	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(dependency), "Dependency should be resolved")
 
 	// check labels for the end service (service2/contract2)
 	serviceInstance := getInstanceByParams(t, cluster, contract2, contract2.Contexts[0], nil, service2, nil, resolution)
@@ -220,7 +220,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 
 	// dependency declared by non-existing consumer should not trigger a critical error
 	resolution := resolvePolicy(t, b, ResSuccess, "non-existing user")
-	assert.NotContains(t, resolution.DependencyInstanceMap, runtime.KeyFromStorable(dependency), "Dependency should not be resolved")
+	assert.NotContains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(dependency), "Dependency should not be resolved")
 }
 
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
@@ -331,8 +331,8 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that both dependencies got resolved and got placed in different clusters
-	instance1 := getInstanceByDependencyKey(t, runtime.KeyFromStorable(d1), resolution)
-	instance2 := getInstanceByDependencyKey(t, runtime.KeyFromStorable(d2), resolution)
+	instance1 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d1), resolution)
+	instance2 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d2), resolution)
 	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 }

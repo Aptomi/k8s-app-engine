@@ -147,7 +147,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.DependencyInstanceMap[runtime.KeyFromStorable(node.dependency)] = node.serviceKey.GetKey()
+	resolver.resolution.DependencyInstanceMap[runtime.KeyForStorable(node.dependency)] = node.serviceKey.GetKey()
 
 	// append component instance data
 	err := resolver.resolution.AppendData(node.resolution)
