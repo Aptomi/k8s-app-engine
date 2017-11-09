@@ -1,4 +1,4 @@
-- kind: dependency1
+- kind: dependency
   metadata:
     namespace: main
     name: alice_stage
