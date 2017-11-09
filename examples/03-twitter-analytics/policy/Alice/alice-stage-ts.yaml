@@ -3,7 +3,7 @@
     namespace: main
     name: alice_stage
   user: Alice
-  contract: twitter_statsa
+  contract: twitter_stats
   labels:
       # Deploy new version of visualization code (pass image tag for container)
       tsvisimage: demo-v62
