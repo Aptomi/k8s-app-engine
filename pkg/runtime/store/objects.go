@@ -7,5 +7,6 @@ import (
 )
 
 var (
+	// Objects represents list of all storable objects
 	Objects = runtime.AppendAll(engine.Objects, lang.PolicyObjects)
 )

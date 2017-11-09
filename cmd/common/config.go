@@ -23,7 +23,10 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) error
 			return fmt.Errorf("error getting abs path for %s: %s", configFilePath, err)
 		}
 
-		processConfigAbsPath(viper, configAbsPath)
+		err = processConfigAbsPath(viper, configAbsPath)
+		if err != nil {
+			return err
+		}
 	} else { // if no config path available, search in default places
 		// if there is no default config file - just skip config parsing
 		if !isConfigExists(defaultConfigDir) {
