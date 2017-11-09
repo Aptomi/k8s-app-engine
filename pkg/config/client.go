@@ -9,6 +9,7 @@ type Client struct {
 	Debug bool `validate:"-"`
 	API   API  `validate:"required"`
 	Auth  Auth `validate:"required"`
+	HTTP  HTTP `validate:"required"`
 }
 
 type HTTP struct {

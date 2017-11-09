@@ -57,8 +57,7 @@ func init() {
 func preRun(command *cobra.Command, args []string) {
 	err := common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		panic(fmt.Sprintf("error while reading config"))
 	}
 }
 
