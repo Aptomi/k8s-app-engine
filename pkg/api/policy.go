@@ -12,7 +12,7 @@ import (
 )
 
 func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	gen := params.ByName("rev")
+	gen := params.ByName("gen")
 
 	if len(gen) == 0 {
 		gen = strconv.Itoa(int(runtime.LastGen))
