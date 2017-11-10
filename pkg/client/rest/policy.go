@@ -14,8 +14,8 @@ type policyClient struct {
 	httpClient http.Client
 }
 
-func (client *policyClient) Show() (*engine.PolicyData, error) {
-	response, err := client.httpClient.GET("/policy", engine.PolicyDataObject)
+func (client *policyClient) Show(gen runtime.Generation) (*engine.PolicyData, error) {
+	response, err := client.httpClient.GET(fmt.Sprintf("/policy/gen/%d", gen), engine.PolicyDataObject)
 	if err != nil {
 		return nil, err
 	}

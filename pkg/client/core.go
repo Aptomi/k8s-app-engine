@@ -16,7 +16,7 @@ type Core interface {
 
 // Policy is the interface for managing Policy
 type Policy interface {
-	Show() (*engine.PolicyData, error)
+	Show(gen runtime.Generation) (*engine.PolicyData, error)
 	Apply([]runtime.Object) (*api.PolicyUpdateResult, error)
 	Delete([]string) (*api.PolicyUpdateResult, error)
 }
