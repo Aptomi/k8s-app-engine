@@ -20,7 +20,11 @@ func (api *coreAPI) handleRevisionGet(writer http.ResponseWriter, request *http.
 		panic(fmt.Sprintf("error while getting requested revision: %s", err))
 	}
 
-	api.contentType.Write(writer, request, revision)
+	if revision == nil {
+		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+	} else {
+		api.contentType.Write(writer, request, revision)
+	}
 }
 
 func (api *coreAPI) handleRevisionGetByPolicy(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -35,5 +39,9 @@ func (api *coreAPI) handleRevisionGetByPolicy(writer http.ResponseWriter, reques
 		panic(fmt.Sprintf("error while getting requested revision: %s", err))
 	}
 
-	api.contentType.Write(writer, request, revision)
+	if revision == nil {
+		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+	} else {
+		api.contentType.Write(writer, request, revision)
+	}
 }
