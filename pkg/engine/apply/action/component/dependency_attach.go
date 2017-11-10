@@ -37,8 +37,13 @@ func (a *AttachDependencyAction) Apply(context *action.Context) error {
 }
 
 func (a *AttachDependencyAction) updateActualState(context *action.Context) error {
+	componentInstance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	if componentInstance == nil {
+		return nil
+	}
+
 	// preserve previous creation date before overwriting
-	prevCreatedOn := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedOn
+	prevCreatedOn := componentInstance.CreatedOn
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
 	instance.UpdateTimes(prevCreatedOn, time.Now())
 
