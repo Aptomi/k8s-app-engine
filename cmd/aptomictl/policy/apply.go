@@ -61,7 +61,6 @@ func readFiles(policyPaths []string) ([]runtime.Object, error) {
 			return nil, fmt.Errorf("can't read file %s error: %s", file, readErr)
 		}
 
-		// todo(slukjanov): here we can try multiple marshalers, toml for example
 		objects, decodeErr := codec.DecodeOneOrMany(data)
 		if decodeErr != nil {
 			return nil, fmt.Errorf("can't unmarshal file %s error: %s", file, decodeErr)
@@ -109,7 +108,7 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 		}
 	}
 
-	sort.Strings(allFiles) // todo(slukjanov): do we really need to sort files?
+	sort.Strings(allFiles)
 
 	// todo(slukjanov): log list of files from which we're applying policy
 	//fmt.Println("Apply policy from following files:")
