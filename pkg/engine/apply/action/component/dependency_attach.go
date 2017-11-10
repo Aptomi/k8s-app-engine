@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"time"
 )
 
 // AttachDependencyActionObject is an informational data structure with Kind and Constructor for the action
@@ -37,20 +36,22 @@ func (a *AttachDependencyAction) Apply(context *action.Context) error {
 }
 
 func (a *AttachDependencyAction) updateActualState(context *action.Context) error {
-	componentInstance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	if componentInstance == nil {
+	actual := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	// in case if create component instance failed or deleted there will be no component instance in actual state
+	if actual == nil {
 		return nil
 	}
 
-	// preserve previous creation date before overwriting
-	prevCreatedOn := componentInstance.CreatedOn
-	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	instance.UpdateTimes(prevCreatedOn, time.Now())
+	// preserve previous create and update date before overwriting
+	desired := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
+	desired.UpdateTimes(actual.CreatedOn, actual.UpdatedOn)
 
-	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	err := context.ActualStateUpdater.Save(instance)
+	context.ActualState.ComponentInstanceMap[a.ComponentKey] = desired
+
+	err := context.ActualStateUpdater.Save(desired)
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
 	}
+
 	return nil
 }
