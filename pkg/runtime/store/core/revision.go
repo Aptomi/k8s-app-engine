@@ -38,6 +38,11 @@ func (ds *defaultStore) GetFirstRevisionForPolicy(policyGen runtime.Generation) 
 	var result *engine.Revision
 	for _, revisionObj := range revisionObjs {
 		revision := revisionObj.(*engine.Revision)
+
+		if revision.Policy != policyGen {
+			continue
+		}
+
 		if result == nil || revision.GetGeneration() < result.GetGeneration() {
 			result = revision
 		}

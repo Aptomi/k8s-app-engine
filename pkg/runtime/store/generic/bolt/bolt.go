@@ -128,7 +128,7 @@ func (bs *boltStore) List(prefix string) ([]runtime.Storable, error) {
 		}
 
 		c := bucket.Cursor()
-		prefixBytes := []byte(prefix + "/")
+		prefixBytes := []byte(prefix + boltSeparator)
 		for k, v := c.Seek(prefixBytes); k != nil && bytes.HasPrefix(k, prefixBytes); k, v = c.Next() {
 			baseObj, err := bs.codec.DecodeOne(v)
 			if err != nil {
