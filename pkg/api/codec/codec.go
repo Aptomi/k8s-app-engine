@@ -96,8 +96,10 @@ func (handler *ContentTypeHandler) WriteStatus(writer http.ResponseWriter, reque
 	writer.Header().Set("Content-Type", handler.GetContentType(request.Header))
 	writer.WriteHeader(status)
 
-	_, wErr := fmt.Fprint(writer, string(data))
-	if wErr != nil {
-		panic(fmt.Sprintf("Error while writing body: %s", wErr))
+	if body != nil {
+		_, wErr := fmt.Fprint(writer, string(data))
+		if wErr != nil {
+			panic(fmt.Sprintf("Error while writing body: %s", wErr))
+		}
 	}
 }
