@@ -24,12 +24,13 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy", api.handlePolicyGet)
 	router.GET("/api/v1/policy/gen/:gen", api.handlePolicyGet)
-	//router.GET("/api/v1/policy/gen/:gen/ns/:namespace", api.handlePolicyGet)
 	router.POST("/api/v1/policy", api.handlePolicyUpdate)
 
 	router.GET("/api/v1/endpoints", api.handleEndpointsGet)
 
-	//api.getStream("/api/v1/admin/store", api.handleAdminStoreDump)
+	router.GET("/api/v1/revision", api.handleRevisionGet)
+	router.GET("/api/v1/revision/gen/:gen", api.handleRevisionGet)
+	router.GET("/api/v1/revision/policy/:policy", api.handleRevisionGetByPolicy)
 
 	router.GET("/version", api.handleVersion)
 }

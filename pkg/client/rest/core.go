@@ -24,6 +24,10 @@ func (client *coreClient) Endpoints() client.Endpoints {
 	return &endpointsClient{client.cfg, client.httpClient}
 }
 
+func (client *coreClient) Revision() client.Revision {
+	return &revisionClient{client.cfg, client.httpClient}
+}
+
 func (client *coreClient) Version() client.Version {
 	return &versionClient{client.cfg, client.httpClient}
 }

@@ -26,6 +26,7 @@ type Policy interface {
 // Revision represents database operations for Revision object
 type Revision interface {
 	GetRevision(gen runtime.Generation) (*engine.Revision, error)
+	GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 	NewRevision(policyGen runtime.Generation) (*engine.Revision, error)
 	SaveRevision(revision *engine.Revision) error
 	GetRevisionProgressUpdater(revision *engine.Revision) progress.Indicator

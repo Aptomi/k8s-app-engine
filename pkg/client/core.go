@@ -10,6 +10,7 @@ import (
 type Core interface {
 	Policy() Policy
 	Endpoints() Endpoints
+	Revision() Revision
 	Version() Version
 }
 
@@ -23,6 +24,12 @@ type Policy interface {
 // Endpoints is the interface for getting info about endpoints
 type Endpoints interface {
 	Show() (*api.Endpoints, error)
+}
+
+// Revision is the interface for getting Revisions
+type Revision interface {
+	Show(gen runtime.Generation) (*engine.Revision, error)
+	ShowByPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 }
 
 // Version is the interface for getting current server version

@@ -19,11 +19,31 @@ func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, e
 	if dataObj == nil {
 		return nil, nil
 	}
+
 	data, ok := dataObj.(*engine.Revision)
 	if !ok {
 		return nil, fmt.Errorf("unexpected type while getting Revision from DB")
 	}
+
 	return data, nil
+}
+
+// GetFirstRevisionForPolicy returns first revision for specified policy generation in chronological order
+func (ds *defaultStore) GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
+	revisionObjs, err := ds.store.List(engine.RevisionKey)
+	if err != nil {
+		return nil, err
+	}
+
+	var result *engine.Revision
+	for _, revisionObj := range revisionObjs {
+		revision := revisionObj.(*engine.Revision)
+		if result == nil || revision.GetGeneration() < result.GetGeneration() {
+			result = revision
+		}
+	}
+
+	return result, nil
 }
 
 // NewRevision returns new Revision for specified policy generation
@@ -32,6 +52,7 @@ func (ds *defaultStore) NewRevision(policyGen runtime.Generation) (*engine.Revis
 	if err != nil {
 		return nil, fmt.Errorf("error while geting current revision: %s", err)
 	}
+
 	var gen runtime.Generation
 	if currRevision == nil {
 		gen = runtime.FirstGen
