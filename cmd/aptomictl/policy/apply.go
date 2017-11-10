@@ -14,10 +14,12 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 func newApplyCommand(cfg *config.Client) *cobra.Command {
 	paths := make([]string, 0)
+	var wait bool
 
 	cmd := &cobra.Command{
 		Use:   "apply",
@@ -30,17 +32,44 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 				panic(fmt.Sprintf("Error while reading policy files for applying: %s", err))
 			}
 
-			result, err := rest.New(cfg, http.NewClient(cfg)).Policy().Apply(allObjects)
+			client := rest.New(cfg, http.NewClient(cfg))
+			result, err := client.Policy().Apply(allObjects)
 			if err != nil {
 				panic(fmt.Sprintf("Error while applying policy: %s", err))
 			}
 
 			// todo(slukjanov): replace with -o yaml / json / etc handler
 			fmt.Println(result)
+
+			if !wait {
+				return
+			}
+
+			fmt.Println("Waiting for the first revision with updated policy to be applied")
+
+			// todo limit retries by time ~ 10 mins
+			for {
+				// todo configurable
+				time.Sleep(1 * time.Second)
+
+				rev, revErr := client.Revision().ShowByPolicy(result.PolicyGeneration)
+				if revErr != nil {
+					fmt.Println("Error while getting revision for applied policy")
+					continue
+				}
+
+				// todo print progress
+
+				if rev.Progress.Finished {
+					fmt.Println(rev)
+					break
+				}
+			}
 		},
 	}
 
 	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files, dirs with policy to apply")
+	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until first revision with updated policy will be fully applied")
 
 	return cmd
 }
