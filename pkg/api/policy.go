@@ -36,6 +36,7 @@ var PolicyUpdateResultObject = &runtime.Info{
 // update existing actual state to the desired state)
 type PolicyUpdateResult struct {
 	runtime.TypeKind `yaml:",inline"`
+	PolicyGeneration runtime.Generation
 	Actions          []string
 }
 
@@ -45,22 +46,22 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Verify ACL for updated objects
-	policy, _, err := api.store.GetPolicy(runtime.LastGen)
+	currentPolicy, currentPolicyGeneration, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("Error while loading current policy: %s", err))
 	}
 	for _, obj := range objects {
-		errAdd := policy.AddObject(obj)
+		errAdd := currentPolicy.AddObject(obj)
 		if errAdd != nil {
 			panic(fmt.Sprintf("Error while adding updated object to policy: %s", errAdd))
 		}
-		errManage := policy.View(user).ManageObject(obj)
+		errManage := currentPolicy.View(user).ManageObject(obj)
 		if errManage != nil {
 			panic(fmt.Sprintf("Error while adding updated object to policy: %s", errManage))
 		}
 	}
 
-	err = policy.Validate()
+	err = currentPolicy.Validate()
 	if err != nil {
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
@@ -74,8 +75,9 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 
 	if !changed {
 		api.contentType.Write(writer, request, &PolicyUpdateResult{
-			TypeKind: PolicyUpdateResultObject.GetTypeKind(),
-			Actions:  nil,
+			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+			PolicyGeneration: currentPolicyGeneration,
+			Actions:          nil,
 		})
 
 		return
@@ -119,7 +121,8 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	}
 
 	api.contentType.Write(writer, request, &PolicyUpdateResult{
-		TypeKind: PolicyUpdateResultObject.GetTypeKind(),
-		Actions:  actions,
+		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+		PolicyGeneration: desiredPolicyGen,
+		Actions:          actions,
 	})
 }
