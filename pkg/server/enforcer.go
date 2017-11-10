@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -24,6 +23,8 @@ func logError(err interface{}) {
 }
 
 func (server *Server) enforceLoop() error {
+	// todo create initial Policy and Revision before anything else (and remove checks from all other places, make sure API not running before that?)
+
 	for {
 		err := server.enforce()
 		if err != nil {
@@ -47,7 +48,7 @@ func (server *Server) enforce() error {
 
 	// skip policy enforcement if no policy found
 	if desiredPolicy == nil {
-		//todo log
+		// todo log
 		return nil
 	}
 
@@ -64,6 +65,12 @@ func (server *Server) enforce() error {
 
 	eventLog.Save(&event.HookConsole{})
 
+	// todo think about initial state when there is no revision at all
+	currRevision, err := server.store.GetRevision(runtime.LastGen)
+	if err != nil {
+		return fmt.Errorf("unable to get curr revision: %s", err)
+	}
+
 	nextRevision, err := server.store.NewRevision(desiredPolicyGen)
 	if err != nil {
 		return fmt.Errorf("unable to get next revision: %s", err)
@@ -71,17 +78,17 @@ func (server *Server) enforce() error {
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
-	// todo add check that policy gen not changed (always create new revision if policy gen changed)
-	if len(stateDiff.Actions) <= 0 {
+	// policy changed while no actions needed to achieve desired state
+	if len(stateDiff.Actions) <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
 		// todo
 		log.Infof("No changes")
 		return nil
 	}
-	//todo
+	// todo
 	log.Infof("Changes")
 	// todo if policy gen changed, we still need to save revision but with progress == done
 
-	//todo remove debug log
+	// todo remove debug log
 	for _, action := range stateDiff.Actions {
 		fmt.Println(action)
 	}
@@ -110,7 +117,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, plugins, stateDiff.Actions, progress.NewConsole())
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, plugins, stateDiff.Actions, server.store.GetRevisionProgressUpdater(nextRevision))
 	resolution, eventLog, err := applier.Apply()
 
 	eventLog.Save(&event.HookConsole{})

@@ -30,7 +30,7 @@ func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, e
 
 // GetFirstRevisionForPolicy returns first revision for specified policy generation in chronological order
 func (ds *defaultStore) GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
-	revisionObjs, err := ds.store.List(engine.RevisionKey)
+	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
 		return nil, err
 	}
@@ -74,11 +74,21 @@ func (ds *defaultStore) NewRevision(policyGen runtime.Generation) (*engine.Revis
 	}, nil
 }
 
-// SaveRevision saves specified Revision into the store
+// SaveRevision saves specified Revision into the store with possibly new generation creation
 func (ds *defaultStore) SaveRevision(revision *engine.Revision) error {
 	_, err := ds.store.Save(revision)
 	if err != nil {
 		return fmt.Errorf("error while saving revision: %s", err)
+	}
+
+	return nil
+}
+
+// UpdateRevision updates specified Revision in the store without creating new generation
+func (ds *defaultStore) UpdateRevision(revision *engine.Revision) error {
+	_, err := ds.store.Update(revision)
+	if err != nil {
+		return fmt.Errorf("error while updating revision: %s", err)
 	}
 
 	return nil
@@ -94,7 +104,7 @@ type revisionProgressUpdater struct {
 }
 
 func (p *revisionProgressUpdater) save() {
-	err := p.store.SaveRevision(p.revision)
+	err := p.store.UpdateRevision(p.revision)
 	if err != nil {
 		log.Warnf("Unable to save revision %s progress with err: %s", p.revision.GetGeneration(), err)
 	}

@@ -62,7 +62,7 @@ func (bs *boltStore) Get(key string) (runtime.Storable, error) {
 			return fmt.Errorf("bucket not found: %s", objectsBucket)
 		}
 
-		data := bucket.Get([]byte(key))
+		data := bucket.Get([]byte(key + boltSeparator + genStr(runtime.LastGen)))
 
 		if data != nil {
 			obj, err := bs.codec.DecodeOne(data)
@@ -98,7 +98,7 @@ func (bs *boltStore) GetGen(key string, gen runtime.Generation) (runtime.Version
 				data = v
 			}
 		} else {
-			data = bucket.Get([]byte(key + boltSeparator + gen.String()))
+			data = bucket.Get([]byte(key + boltSeparator + genStr(gen)))
 		}
 
 		if data != nil {
@@ -128,7 +128,7 @@ func (bs *boltStore) List(prefix string) ([]runtime.Storable, error) {
 		}
 
 		c := bucket.Cursor()
-		prefixBytes := []byte(prefix + boltSeparator)
+		prefixBytes := []byte(prefix)
 		for k, v := c.Seek(prefixBytes); k != nil && bytes.HasPrefix(k, prefixBytes); k, v = c.Next() {
 			baseObj, err := bs.codec.DecodeOne(v)
 			if err != nil {
@@ -145,6 +145,10 @@ func (bs *boltStore) List(prefix string) ([]runtime.Storable, error) {
 	})
 
 	return result, err
+}
+
+func (bs *boltStore) ListGenerations(key string) ([]runtime.Storable, error) {
+	return bs.List(key + boltSeparator)
 }
 
 func (bs *boltStore) setNextGeneration(obj runtime.Versioned) error {
@@ -166,6 +170,14 @@ func (bs *boltStore) setNextGeneration(obj runtime.Versioned) error {
 }
 
 func (bs *boltStore) Save(obj runtime.Storable) (bool, error) {
+	return bs.save(obj, false)
+}
+
+func (bs *boltStore) Update(obj runtime.Storable) (bool, error) {
+	return bs.save(obj, true)
+}
+
+func (bs *boltStore) save(obj runtime.Storable, updateCurrent bool) (bool, error) {
 	info := bs.registry.Get(obj.GetKind())
 	if info == nil {
 		return false, fmt.Errorf("unknown kind: %s", obj.GetKind())
@@ -179,13 +191,14 @@ func (bs *boltStore) Save(obj runtime.Storable) (bool, error) {
 			return false, fmt.Errorf("versioned object doesn't implement Versioned interface: %s", obj.GetKind())
 		}
 
+		// todo we should compare with latest in some cases
 		existingObj, err := bs.GetGen(key, versionedObj.GetGeneration())
 		if err != nil {
 			return false, err
 		}
 		if existingObj != nil {
 			versionedObj.SetGeneration(existingObj.GetGeneration())
-			if !reflect.DeepEqual(obj, existingObj) {
+			if !updateCurrent && !reflect.DeepEqual(obj, existingObj) {
 				errGen := bs.setNextGeneration(versionedObj)
 				if errGen != nil {
 					return false, fmt.Errorf("error while calling setNextGeneration(%s): %s", obj, errGen)
@@ -193,13 +206,15 @@ func (bs *boltStore) Save(obj runtime.Storable) (bool, error) {
 				updated = true
 			}
 		} else {
-			versionedObj.SetGeneration(runtime.FirstGen)
+			if versionedObj.GetGeneration() == runtime.LastGen {
+				versionedObj.SetGeneration(runtime.FirstGen)
+			}
 			updated = true
 		}
 
-		boltPath += boltSeparator + versionedObj.GetGeneration().String()
+		boltPath += boltSeparator + genStr(versionedObj.GetGeneration())
 	} else { // not versioned
-		boltPath += boltSeparator + runtime.LastGen.String()
+		boltPath += boltSeparator + genStr(runtime.LastGen)
 	}
 
 	err := bs.db.Update(func(tx *bolt.Tx) error {
@@ -221,4 +236,9 @@ func (bs *boltStore) Save(obj runtime.Storable) (bool, error) {
 
 func (bs *boltStore) Delete(key string) error {
 	panic("implement me")
+}
+
+// todo replace with adding bytes to []byte
+func genStr(gen runtime.Generation) string {
+	return fmt.Sprintf("%20d", gen)
 }

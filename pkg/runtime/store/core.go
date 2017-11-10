@@ -29,6 +29,7 @@ type Revision interface {
 	GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 	NewRevision(policyGen runtime.Generation) (*engine.Revision, error)
 	SaveRevision(revision *engine.Revision) error
+	UpdateRevision(revision *engine.Revision) error
 	GetRevisionProgressUpdater(revision *engine.Revision) progress.Indicator
 }
 
