@@ -146,6 +146,9 @@ Command     | Action          | Description
 ```make fmt```  | Re-format code | Re-formats all code according to Go standards
 ```make lint``` | Examine code | Run linters to examine Go source code and reports suspicious constructs
 
+### WebUI
+It's work in progress now and initially based on https://github.com/devjin0617/vue2-admin-lte 
+
 ### How to contribute
 Report a bug. Send us a pull request.
 

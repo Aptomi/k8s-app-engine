@@ -1,23 +1,41 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <div class="wrapper">
+      <va-navibar></va-navibar>
+      <va-slider :slideMenuItems="slideMenuItems"></va-slider>
+      <va-content-wrap></va-content-wrap>
+      <Modal></Modal>
+    </div>
   </div>
 </template>
 
 <script>
+import VANaviBar from 'NaviBar.vue'
+import VASlider from 'Slider.vue'
+import VAContentWrap from 'ContentWrap.vue'
+import Modal from './components/Modal.vue'
+import store from './vuex/store.js'
+import slideMenuItems from './lib/slideMenuItems.js'
+
 export default {
-  name: 'app'
+  name: 'app',
+  data () {
+    return {
+      slideMenuItems: slideMenuItems
+    }
+  },
+  created () {
+  },
+  components: {
+    'va-navibar': VANaviBar,
+    'va-slider': VASlider,
+    'va-content-wrap': VAContentWrap,
+    Modal
+  },
+  store
 }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
