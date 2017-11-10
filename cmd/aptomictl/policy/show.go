@@ -1,6 +1,9 @@
 package policy
 
 import (
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/client/rest"
+	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/spf13/cobra"
 )
@@ -12,10 +15,13 @@ func newShowCommand(cfg *config.Client) *cobra.Command {
 		Long:  "policy show long",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			//err := client.Show(cfg)
-			//if err != nil {
-			//	panic(fmt.Sprintf("Error while showing policy: %s", err))
-			//}
+			result, err := rest.New(cfg, http.NewClient(cfg)).Policy().Show()
+			if err != nil {
+				panic(fmt.Sprintf("Error while showing policy: %s", err))
+			}
+
+			// todo(slukjanov): replace with -o yaml / json / etc handler
+			fmt.Println(result)
 		},
 	}
 }
