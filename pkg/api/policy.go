@@ -23,7 +23,11 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
 
-	api.contentType.Write(writer, request, policyData)
+	if policyData == nil {
+		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+	} else {
+		api.contentType.Write(writer, request, policyData)
+	}
 }
 
 // PolicyUpdateResultObject is an informational data structure with Kind and Constructor for PolicyUpdateResult
