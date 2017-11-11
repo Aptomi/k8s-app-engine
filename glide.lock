@@ -1,5 +1,5 @@
-hash: cd224aa56f6ffe03092754831535b0d0b72a16d8d72314cebe83023a7e19a698
-updated: 2017-10-20T14:21:33.218232708-07:00
+hash: 0f71d341665165ba2a9e50752676d25fd687a247e1610a332617b2b96bf34551
+updated: 2017-11-10T18:46:52.62788144-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -92,6 +92,7 @@ imports:
   version: e4cbcb5d0652150d40ad0646651076b6bd2be4f6
   subpackages:
   - currency
+  - en
 - name: github.com/go-playground/universal-translator
   version: b32fa301c9fe55953584134cb6853a13c87ec0a1
 - name: github.com/gobwas/glob
@@ -151,7 +152,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/gorilla/handlers
-  version: a4043c62cc2329bacda331d33fc908ab11ef0ec3
+  version: 90663712d74cb411cbef281bc1e08c19d1a76145
 - name: github.com/gosuri/uilive
   version: ac356e6e42cd31fcef8e6aec13ae9ed6fe87713e
 - name: github.com/gosuri/uiprogress
@@ -160,9 +161,6 @@ imports:
   - util/strutil
 - name: github.com/gosuri/uitable
   version: 36ee7e946282a3fb1cfecd476ddc9b35d8847e42
-  subpackages:
-  - util/strutil
-  - util/wordwrap
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
 - name: github.com/hashicorp/hcl
@@ -252,6 +250,8 @@ imports:
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/ralekseenkov/govaluate
   version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
+- name: github.com/rs/cors
+  version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
@@ -281,6 +281,8 @@ imports:
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:
+  - bcrypt
+  - blowfish
   - curve25519
   - ed25519
   - ed25519/internal/edwards25519
@@ -337,7 +339,9 @@ imports:
 - name: gopkg.in/asn1-ber.v1
   version: 379148ca0225df7a432012b8df0355c2a2063ac0
 - name: gopkg.in/go-playground/validator.v9
-  version: a021b2ec9a8a8bb970f3f15bc42617cb520e8a64
+  version: 1304298bf10d085adec514b076772a79c9cadb6b
+  subpackages:
+  - translations/en
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ldap.v2
@@ -376,7 +380,7 @@ imports:
   - pkg/proto/hapi/version
   - pkg/version
 - name: k8s.io/kubernetes
-  version: 9e7b2a6b1195703a51a413701e84ebe37521df81
+  version: bebdeb749f1fa3da9e1312c4b08e439c404b3136
   subpackages:
   - cmd/kubeadm/app/apis/kubeadm
   - federation/apis/federation

@@ -15,6 +15,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/webui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rs/cors"
 	"net/http"
 	"os"
 	"time"
@@ -97,6 +98,7 @@ func (server *Server) initHTTPServer() {
 
 	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
+	handler = cors.Default().Handler(handler)
 	handler = middleware.NewPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
