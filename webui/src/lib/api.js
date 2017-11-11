@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 const yaml = require('js-yaml')
 const delayMs = 1000
-const basePath = 'http://127.0.0.1:27866/api/v1/'
+const basePath = process.env.API_BASEPATH
 
 /*
  * Exported functions, which can be used in pages/components
@@ -50,7 +50,11 @@ function callAPI (handler, successFunc, errorFunc) {
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        successFunc(yaml.safeLoad(xhr.responseText))
+        try {
+          successFunc(yaml.safeLoad(xhr.responseText))
+        } catch (err) {
+          errorFunc('exception occurred: ' + err)
+        }
       } else {
         if (xhr.statusText) {
           errorFunc(xhr.status + ' ' + xhr.statusText)
