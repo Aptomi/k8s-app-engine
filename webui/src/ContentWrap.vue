@@ -13,7 +13,7 @@
       </ol>
     </section>
 
-    <section class="content">
+    <section class="content container-fluid">
       <transition name="page" mode="out-in">
         <router-view></router-view>
       </transition>

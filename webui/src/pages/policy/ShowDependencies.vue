@@ -11,51 +11,51 @@
           <!-- /.box-header -->
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">
-              <tr>
-                <th>Name</th>
-                <th>User</th>
-                <th>Contract</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-              <tr>
-                <td>alice-stage</td>
-                <td>Alice</td>
-                <td>twitter-stats</td>
-                <td><span class="label label-success">Deployed</span></td>
-                <td>2 min ago</td>
-                <td>
-                  <button type="button" class="btn btn-default btn-xs">Show Endpoints</button>
-                </td>
-              </tr>
-              <tr>
-                <td>bob-stage</td>
-                <td>Bob</td>
-                <td>twitter-stats</td>
-                <td><span class="label label-primary center">Processing</span></td>
-                <td>10 min ago</td>
-                <td>
-                </td>
-              </tr>
-              <tr>
-                <td>carol-stage</td>
-                <td>Carol</td>
-                <td>twitter-stats</td>
-                <td><span class="label label-danger center">Not Resolved</span></td>
-                <td>10 min ago</td>
-                <td>
-                </td>
-              </tr>
-              <tr>
-                <td>prod</td>
-                <td>John</td>
-                <td>twitter-stats</td>
-                <td><span class="label label-success">Deployed</span></td>
-                <td>2 hours ago</td>
-                <td>
-                  <button type="button" class="btn btn-default btn-xs">Show Endpoints</button>
-                </td>
-              </tr>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>User</th>
+                  <th>Contract</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>alice-stage</td>
+                  <td>Alice</td>
+                  <td>twitter-stats</td>
+                  <td><span class="label label-success">Deployed</span></td>
+                  <td>
+                    <button type="button" class="btn btn-default btn-xs">Show Endpoints</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>bob-stage</td>
+                  <td>Bob</td>
+                  <td>twitter-stats</td>
+                  <td><span class="label label-primary center">Processing</span></td>
+                  <td>
+                  </td>
+                </tr>
+                <tr>
+                  <td>carol-stage</td>
+                  <td>Carol</td>
+                  <td>twitter-stats</td>
+                  <td><span class="label label-danger center">Not Resolved</span></td>
+                  <td>
+                  </td>
+                </tr>
+                <tr>
+                  <td>prod</td>
+                  <td>John</td>
+                  <td>twitter-stats</td>
+                  <td><span class="label label-success">Deployed</span></td>
+                  <td>
+                    <button type="button" class="btn btn-default btn-xs">Show Endpoints</button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <!-- /.box-body -->
@@ -74,18 +74,22 @@
           <!-- /.box-header -->
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">
-              <tr>
-                <th>Component</th>
-                <th>URL</th>
-              </tr>
-              <tr>
-                <td>zookeeper</td>
-                <td><a href="#">http://127.0.0.1:12345</a></td>
-              </tr>
-              <tr>
-                <td>hdfs</td>
-                <td><a href="#">http://127.0.0.1:23456</a></td>
-              </tr>
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>zookeeper</td>
+                  <td><a href="#">http://127.0.0.1:12345</a></td>
+                </tr>
+                <tr>
+                  <td>hdfs</td>
+                  <td><a href="#">http://127.0.0.1:23456</a></td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <!-- /.box-body -->
