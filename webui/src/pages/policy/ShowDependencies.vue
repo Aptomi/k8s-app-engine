@@ -9,6 +9,9 @@
             <h3 class="box-title">Declared Dependencies</h3>
           </div>
           <!-- /.box-header -->
+          <div class="overlay" v-if="loading">
+            <i class="fa fa-refresh fa-spin"></i>
+          </div>
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">
               <thead>
@@ -21,6 +24,9 @@
                 </tr>
               </thead>
               <tbody>
+                <tr v-if="error">
+                  <td><span class="label label-danger center">Error: {{ error }}</span></td>
+                </tr>
                 <tr>
                   <td>alice-stage</td>
                   <td>Alice</td>
@@ -102,10 +108,57 @@
 </template>
 
 <script>
+const yaml = require('js-yaml')
+
+function loadYAML (path, ctx, success, error) {
+  var xhr = new XMLHttpRequest()
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        success(yaml.safeLoad(xhr.responseText), ctx)
+      } else {
+        if (xhr.statusText) {
+          error(xhr.statusText, ctx)
+        } else {
+          error('uknown error', ctx)
+        }
+      }
+    }
+  }
+  xhr.open('GET', path, true)
+  xhr.send()
+}
+
 export default {
   name: 'show-dependencies',
+  data () {
+    return {
+      loading: false,
+      dependencies: null,
+      error: null
+    }
+  },
   created () {
-
+    // fetch the data when the view is created and the data is already being observed
+    this.fetchData()
+  },
+  watch: {
+    // call again the method if the route changes
+    '$route': 'fetchData'
+  },
+  methods: {
+    fetchData () {
+      this.error = this.dependencies = null
+      this.loading = true
+      loadYAML('http://127.0.0.1:27866/api/v1/policy', this, function (data, ctx) {
+        ctx.loading = false
+        ctx.dependencies = data
+        console.log(ctx.dependencies)
+      }, function (err, ctx) {
+        ctx.loading = false
+        ctx.error = err
+      })
+    }
   }
 }
 </script>
