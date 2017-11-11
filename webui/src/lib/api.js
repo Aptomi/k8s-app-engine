@@ -10,7 +10,8 @@ const basePath = 'http://127.0.0.1:27866/api/v1/'
 
 // loads all dependencies
 export function getDependencies (successFunc, errorFunc) {
-  callAPI('policy', function (data) {
+  var handler = ['policy'].join('/')
+  callAPI(handler, function (data) {
     var dependencies = getObjectsByKind(data['objects'], 'dependency')
     for (var idx in dependencies) {
       fetchDependency(dependencies[idx])
@@ -71,22 +72,24 @@ function getObjectsByKind (data, kindFilter) {
 // receives a bare entry with populated fields (namespace, kind, name, generation), loads the corresponding object
 // from the database and populates the corresponding fields in obj
 function fetchObjectProperties (obj) {
-  callAPI('object', function (data) {
-    Vue.set(d, 'user', 'user_test')
-    Vue.set(d, 'contract', 'contract_test')
+  var handler = ['policy', 'gen', obj['generation'], 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
+  callAPI(handler, function (data) {
+    for (var key in data) {
+      Vue.set(obj, key, data[key])
+    }
   }, function (err) {
     // can't fetch object properties
-    Vue.set(d, 'error', 'unable to fetch object properties: ' + err)
+    Vue.set(obj, 'error', 'unable to fetch object properties: ' + err)
   })
 }
 
 // fetches data for a single dependency
 function fetchDependency (d) {
-  callAPI('object', function (data) {
+  var handler = ['dependency_status'].join('/')
+  callAPI(handler, function (data) {
     Vue.set(d, 'status', 'Deployed')
   }, function (err) {
-    Vue.set(d, 'status', 'Crap')
     // can't fetch dependency properties
-    Vue.set(d, 'error', 'unable to fetch dependency properties: ' + err)
+    Vue.set(d, 'status_error', 'unable to fetch dependency status: ' + err)
   })
 }
