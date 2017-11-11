@@ -30,6 +30,33 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 	}
 }
 
+func (api *coreAPI) handlePolicyObjectGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	gen := params.ByName("gen")
+
+	if len(gen) == 0 {
+		gen = strconv.Itoa(int(runtime.LastGen))
+	}
+
+	policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
+	if err != nil {
+		panic(fmt.Sprintf("error while getting requested policy: %s", err))
+	}
+
+	ns := params.ByName("ns")
+	kind := params.ByName("kind")
+	name := params.ByName("name")
+
+	obj, err := policy.GetObject(kind, name, ns)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting object %s/%s/%s in policy #%s", ns, kind, name, gen))
+	}
+	if obj == nil {
+		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+	}
+
+	api.contentType.Write(writer, request, obj)
+}
+
 // PolicyUpdateResultObject is an informational data structure with Kind and Constructor for PolicyUpdateResult
 var PolicyUpdateResultObject = &runtime.Info{
 	Kind:        "policy-update-result",

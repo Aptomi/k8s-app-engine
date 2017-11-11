@@ -24,6 +24,7 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy", api.handlePolicyGet)
 	router.GET("/api/v1/policy/gen/:gen", api.handlePolicyGet)
+	router.GET("/api/v1/policy/gen/:gen/object/:ns/:kind/:name", api.handlePolicyObjectGet)
 	router.POST("/api/v1/policy", api.handlePolicyUpdate)
 
 	router.GET("/api/v1/endpoints", api.handleEndpointsGet)
