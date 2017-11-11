@@ -4,6 +4,13 @@
       <va-navibar></va-navibar>
       <va-slider :slideMenuItems="slideMenuItems"></va-slider>
       <va-content-wrap></va-content-wrap>
+
+      <!-- Main Footer -->
+      <footer class="main-footer">
+        <!-- Default to the left -->
+        <strong>Copyright &copy; 2017 <a href="http://aptomi.io">Aptomi</a>.</strong> All rights reserved.
+      </footer>
+
       <Modal></Modal>
     </div>
   </div>

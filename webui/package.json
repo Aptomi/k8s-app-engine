@@ -1,8 +1,7 @@
 {
-  "name": "vue2-admin-lte",
-  "version": "0.4.2",
-  "description": "adminLTE to vuejs v2.x converting project",
-  "author": "devjin0617 <devjin0617@gmail.com>",
+  "name": "aptomi-ui",
+  "version": "0.0.1",
+  "description": "Aptomi UI",
   "scripts": {
     "dev-server": "node build/dev-server.js",
     "dev": "npm-run-all --parallel dev-server",
@@ -12,26 +11,6 @@
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/devjin0617/vue2-admin-lte"
-  },
-  "keywords": [
-    "admin-lte",
-    "vue2-admin-lte",
-    "vue-admin-lte",
-    "vuejs",
-    "vue.js",
-    "jquery",
-    "bootstrap",
-    "vue-jquery",
-    "vue-bootstrap",
-    "front-end"
-  ],
-  "bugs": {
-    "url": "https://github.com/devjin0617/vue2-admin-lte/issues"
-  },
-  "hompage": "https://github.com/devjin0617/vue2-admin-lte#readme",
   "dependencies": {
     "admin-lte": "^2.3.11",
     "axios": "^0.15.3",
