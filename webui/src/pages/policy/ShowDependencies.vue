@@ -108,26 +108,7 @@
 </template>
 
 <script>
-const yaml = require('js-yaml')
-
-function loadYAML (path, successFunc, errorFunc) {
-  var xhr = new XMLHttpRequest()
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        successFunc(yaml.safeLoad(xhr.responseText))
-      } else {
-        if (xhr.statusText) {
-          errorFunc(xhr.status + ' ' + xhr.statusText)
-        } else {
-          errorFunc('unable to load data from ' + path)
-        }
-      }
-    }
-  }
-  xhr.open('GET', path, true)
-  xhr.send()
-}
+import { callAPI } from 'lib/api.js'
 
 export default {
   name: 'show-dependencies',
@@ -165,7 +146,7 @@ export default {
         // console.log('Error: ' + err)
       }, this)
 
-      loadYAML('http://127.0.0.1:27866/api/v1/policy', fetchSuccess, fetchError)
+      callAPI('policy', fetchSuccess, fetchError)
     }
   }
 }
