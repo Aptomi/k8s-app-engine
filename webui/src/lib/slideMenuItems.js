@@ -14,7 +14,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Objects',
         router: {
-          name: 'Sample'
+          name: 'ShowObjects'
         }
       },
       {

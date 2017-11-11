@@ -8,13 +8,57 @@ const basePath = process.env.API_BASEPATH
  * Exported functions, which can be used in pages/components
  */
 
+// returns the list of namespaces, given all policy objects
+export function getNamespaces (policyObjects) {
+  const namespaces = []
+  for (const ns in policyObjects) {
+    namespaces.push(ns)
+  }
+  return namespaces
+}
+
+// filters the list of objects by a given namespace and/or kind
+export function filterObjects (policyObjects, nsFilter = null, kindFilter = null) {
+  const result = []
+  for (const ns in policyObjects) {
+    if (nsFilter === null || ns === nsFilter) {
+      for (const kind in policyObjects[ns]) {
+        if (kindFilter === null || kind === kindFilter) {
+          for (const name in policyObjects[ns][kind]) {
+            const entry = {
+              'namespace': ns,
+              'kind': kind,
+              'name': name,
+              'generation': policyObjects[ns][kind][name]
+            }
+            result.push(entry)
+          }
+        }
+      }
+    }
+  }
+  return result
+}
+
+// loads all policy objects (map[namespace][kind][name] -> generation)
+export async function getPolicyObjects (successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy'].join('/')
+  callAPI(handler, function (data) {
+    successFunc(data['objects'])
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 // loads all dependencies
 export async function getDependencies (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['policy'].join('/')
   callAPI(handler, function (data) {
-    const dependencies = getObjectsByKind(data['objects'], 'dependency')
+    const dependencies = filterObjects(data['objects'], null, 'dependency')
     for (const idx in dependencies) {
+      fetchObjectProperties(dependencies[idx])
       fetchDependency(dependencies[idx])
     }
     successFunc(dependencies)
@@ -31,6 +75,27 @@ export async function getEndpoints (successFunc, errorFunc) {
     successFunc(data['endpoints'])
   }, function (err) {
     errorFunc(err)
+  })
+}
+
+// receives a bare entry with populated fields (namespace, kind, name, generation), loads the corresponding object
+// from the database and populates the corresponding fields in obj
+export async function fetchObjectProperties (obj, successFunc = null, errorFunc = null) {
+  const handler = ['policy', 'gen', obj['generation'], 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
+  callAPI(handler, function (data) {
+    for (const key in data) {
+      Vue.set(obj, key, data[key])
+    }
+    Vue.set(obj, 'yaml', yaml.safeDump(data))
+    if (errorFunc != null) {
+      successFunc(obj)
+    }
+  }, function (err) {
+    // can't fetch object properties
+    Vue.set(obj, 'error', 'unable to fetch object properties: ' + err)
+    if (errorFunc != null) {
+      errorFunc(err)
+    }
   })
 }
 
@@ -66,42 +131,6 @@ function callAPI (handler, successFunc, errorFunc) {
   }
   xhr.open('GET', path, true)
   xhr.send()
-}
-
-// receives a map[namespace][kind][name] -> generation and returns the list of objects with a given kind
-function getObjectsByKind (data, kindFilter) {
-  const result = []
-  for (const ns in data) {
-    for (const kind in data[ns]) {
-      if (kind === kindFilter) {
-        for (const name in data[ns][kind]) {
-          const entry = {
-            'namespace': ns,
-            'kind': kind,
-            'name': name,
-            'generation': data[ns][kind][name]
-          }
-          fetchObjectProperties(entry)
-          result.push(entry)
-        }
-      }
-    }
-  }
-  return result
-}
-
-// receives a bare entry with populated fields (namespace, kind, name, generation), loads the corresponding object
-// from the database and populates the corresponding fields in obj
-function fetchObjectProperties (obj) {
-  const handler = ['policy', 'gen', obj['generation'], 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
-  callAPI(handler, function (data) {
-    for (const key in data) {
-      Vue.set(obj, key, data[key])
-    }
-  }, function (err) {
-    // can't fetch object properties
-    Vue.set(obj, 'error', 'unable to fetch object properties: ' + err)
-  })
 }
 
 // fetches data for a single dependency

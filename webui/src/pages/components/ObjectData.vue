@@ -1,47 +1,37 @@
 <template>
   <div>
-    <div class="box">
+    <div class="box box-default">
       <div class="box-header">
-        <h3 class="box-title">Endpoints: <b>{{ dependency.namespace }} / {{ dependency.kind }} / {{ dependency.name }}</b></h3>
+        <h3 class="box-title">View Object: <b>{{ obj.namespace }} / {{ obj.kind }} / {{ obj.name }}</b></h3>
       </div>
       <!-- /.box-header -->
       <div class="overlay" v-if="loading">
         <i class="fa fa-refresh fa-spin"></i>
       </div>
-      <div class="box-body table-responsive no-padding">
-        <table class="table table-hover">
-          <thead>
-          <tr>
-            <th>Component</th>
-            <th>URL</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-if="error">
-            <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
-          </tr>
-          <tr v-for="e in endpoints">
-            <td>{{e.component}}</td>
-            <td><a :href="e.url">{{e.url}}</a></td>
-          </tr>
-          </tbody>
-        </table>
+      <!-- /.box-header -->
+      <div class="box-body">
+        <div class="row">
+          <div class="col-md-12">
+            <pre><code class="yaml">{{ obj.yaml }}</code></pre>
+          </div>
+        </div>
+        <!-- /.row -->
       </div>
+
       <!-- /.box-body -->
     </div>
-    <!-- /.box -->
-
   </div>
 </template>
 <script>
-  import { getEndpoints } from 'lib/api.js'
+  import { fetchObjectProperties } from 'lib/api.js'
+  import hljs from 'highlight.js'
+  import 'highlight.js/styles/agate.css'
 
   export default {
     data () {
       // empty data
       return {
         loading: false,
-        endpoints: null,
         error: null
       }
     },
@@ -50,7 +40,7 @@
       this.fetchData()
     },
     props: {
-      'dependency': {
+      'obj': {
         type: Object,
         validator: function (value) {
           return true
@@ -58,17 +48,21 @@
       }
     },
     watch: {
-      'dependency': 'fetchData'
+      'obj': 'fetchData'
     },
     methods: {
       fetchData () {
         this.loading = true
-        this.endpoints = null
         this.error = null
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-          this.endpoints = data
+
+          // highlight
+          $('pre code').each(function (i, block) {
+            block.textContent = data['yaml']
+            hljs.highlightBlock(block)
+          }, this)
         }, this)
 
         const fetchError = $.proxy(function (err) {
@@ -76,10 +70,11 @@
           this.error = err
         }, this)
 
-        getEndpoints(fetchSuccess, fetchError)
+        fetchObjectProperties(this.obj, fetchSuccess, fetchError)
       }
     }
   }
 </script>
 <style>
+
 </style>

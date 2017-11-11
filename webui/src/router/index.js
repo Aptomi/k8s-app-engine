@@ -5,6 +5,7 @@ import Router from 'vue-router'
 import Sample from 'components/Sample.vue'
 
 // Aptomi pages
+import ShowObjects from 'pages/policy/ShowObjects.vue'
 import ShowDependencies from 'pages/policy/ShowDependencies.vue'
 
 // Examples
@@ -40,7 +41,12 @@ export default new Router({
       component: AdvancedElements
     },
     {
-      path: '/Policy/ShowDependencies',
+      path: '/policy/objects',
+      name: 'ShowObjects',
+      component: ShowObjects
+    },
+    {
+      path: '/policy/dependencies',
       name: 'ShowDependencies',
       component: ShowDependencies
     },

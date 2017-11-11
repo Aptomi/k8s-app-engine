@@ -34,7 +34,7 @@ export default {
 
 <style>
 .page-enter-active, .page-leave-active {
-  transition: opacity 0.5s, transform 0.5s;
+  transition: opacity 0s, transform 0s;
 }
 .page-enter, .page-leave-to {
   opacity: 0;
