@@ -9,7 +9,8 @@ const basePath = 'http://127.0.0.1:27866/api/v1/'
  */
 
 // loads all dependencies
-export function getDependencies (successFunc, errorFunc) {
+export async function getDependencies (successFunc, errorFunc) {
+  await sleep(1000)
   var handler = ['policy'].join('/')
   callAPI(handler, function (data) {
     var dependencies = getObjectsByKind(data['objects'], 'dependency')
@@ -22,9 +23,25 @@ export function getDependencies (successFunc, errorFunc) {
   })
 }
 
+// loads all endpoints
+export async function getEndpoints (successFunc, errorFunc) {
+  await sleep(1000)
+  var handler = ['endpoints'].join('/')
+  callAPI(handler, function (data) {
+    successFunc(data['endpoints'])
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 /*
  * Utility/helper functions
  */
+
+// sleeps for a given number of milliseconds
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 // makes an API call to Aptomi
 function callAPI (handler, successFunc, errorFunc) {
