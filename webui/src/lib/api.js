@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
 const yaml = require('js-yaml')
-
+const delayMs = 1000
 const basePath = 'http://127.0.0.1:27866/api/v1/'
 
 /*
@@ -10,7 +10,7 @@ const basePath = 'http://127.0.0.1:27866/api/v1/'
 
 // loads all dependencies
 export async function getDependencies (successFunc, errorFunc) {
-  await sleep(1000)
+  await makeDelay()
   var handler = ['policy'].join('/')
   callAPI(handler, function (data) {
     var dependencies = getObjectsByKind(data['objects'], 'dependency')
@@ -25,7 +25,7 @@ export async function getDependencies (successFunc, errorFunc) {
 
 // loads all endpoints
 export async function getEndpoints (successFunc, errorFunc) {
-  await sleep(1000)
+  await makeDelay()
   var handler = ['endpoints'].join('/')
   callAPI(handler, function (data) {
     successFunc(data['endpoints'])
@@ -39,8 +39,8 @@ export async function getEndpoints (successFunc, errorFunc) {
  */
 
 // sleeps for a given number of milliseconds
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
+function makeDelay () {
+  return new Promise(resolve => setTimeout(resolve, delayMs))
 }
 
 // makes an API call to Aptomi
