@@ -16,6 +16,7 @@
             <table class="table table-hover">
               <thead>
                 <tr>
+                  <th>Namespace</th>
                   <th>Name</th>
                   <th>User</th>
                   <th>Contract</th>
@@ -27,36 +28,16 @@
                 <tr v-if="error">
                   <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
                 </tr>
-                <tr>
-                  <td>alice-stage</td>
-                  <td>Alice</td>
-                  <td>twitter-stats</td>
-                  <td><span class="label label-success">Deployed</span></td>
-                  <td>
-                    <button type="button" class="btn btn-default btn-xs">Show Endpoints</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>bob-stage</td>
-                  <td>Bob</td>
-                  <td>twitter-stats</td>
-                  <td><span class="label label-primary center">Processing</span></td>
-                  <td>
-                  </td>
-                </tr>
-                <tr>
-                  <td>carol-stage</td>
-                  <td>Carol</td>
-                  <td>twitter-stats</td>
-                  <td><span class="label label-danger center">Not Resolved</span></td>
-                  <td>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prod</td>
-                  <td>John</td>
-                  <td>twitter-stats</td>
-                  <td><span class="label label-success">Deployed</span></td>
+                <tr v-for="d in dependencies">
+                  <td>{{d.namespace}}</td>
+                  <td>{{d.name}}</td>
+                  <td v-if="!d.error">{{d.user}}</td><td v-else><span class="label label-danger center">Error</span></td>
+                  <td v-if="!d.error">{{d.contract}}</td><td v-else><span class="label label-danger center">Error</span></td>
+                  <td v-if="!d.error">
+                    <span class="label label-success">{{d.status}}</span>
+                    <!-- <td><span class="label label-primary center">Processing</span></td> -->
+                    <!-- <td><span class="label label-danger center">Not Resolved</span></td> -->
+                  </td><td v-else><span class="label label-danger center">Error</span></td>
                   <td>
                     <button type="button" class="btn btn-default btn-xs">Show Endpoints</button>
                   </td>
@@ -108,7 +89,7 @@
 </template>
 
 <script>
-import { callAPI } from 'lib/api.js'
+import { getDependencies } from 'lib/api.js'
 
 export default {
   name: 'show-dependencies',
@@ -137,16 +118,15 @@ export default {
       var fetchSuccess = $.proxy(function (data) {
         this.loading = false
         this.dependencies = data
-        console.log('Data: ' + data)
+        console.log(data)
       }, this)
 
       var fetchError = $.proxy(function (err) {
         this.loading = false
         this.error = err
-        // console.log('Error: ' + err)
       }, this)
 
-      callAPI('policy', fetchSuccess, fetchError)
+      getDependencies(fetchSuccess, fetchError)
     }
   }
 }
