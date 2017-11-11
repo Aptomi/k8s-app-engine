@@ -97,12 +97,12 @@
         this.dependencies = null
         this.error = null
 
-        var fetchSuccess = $.proxy(function (data) {
+        const fetchSuccess = $.proxy(function (data) {
           this.loading = false
           this.dependencies = data
         }, this)
 
-        var fetchError = $.proxy(function (err) {
+        const fetchError = $.proxy(function (err) {
           this.loading = false
           this.error = err
         }, this)
