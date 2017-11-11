@@ -25,7 +25,7 @@
               </thead>
               <tbody>
                 <tr v-if="error">
-                  <td><span class="label label-danger center">Error: {{ error }}</span></td>
+                  <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
                 </tr>
                 <tr>
                   <td>alice-stage</td>
@@ -110,17 +110,17 @@
 <script>
 const yaml = require('js-yaml')
 
-function loadYAML (path, ctx, success, error) {
+function loadYAML (path, successFunc, errorFunc) {
   var xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        success(yaml.safeLoad(xhr.responseText), ctx)
+        successFunc(yaml.safeLoad(xhr.responseText))
       } else {
         if (xhr.statusText) {
-          error(xhr.statusText, ctx)
+          errorFunc(xhr.status + ' ' + xhr.statusText)
         } else {
-          error('uknown error', ctx)
+          errorFunc('unable to load data from ' + path)
         }
       }
     }
@@ -132,10 +132,11 @@ function loadYAML (path, ctx, success, error) {
 export default {
   name: 'show-dependencies',
   data () {
+    // empty data
     return {
       loading: false,
       dependencies: null,
-      error: null
+      error: 'test'
     }
   },
   created () {
@@ -148,16 +149,23 @@ export default {
   },
   methods: {
     fetchData () {
-      this.error = this.dependencies = null
       this.loading = true
-      loadYAML('http://127.0.0.1:27866/api/v1/policy', this, function (data, ctx) {
-        ctx.loading = false
-        ctx.dependencies = data
-        console.log(ctx.dependencies)
-      }, function (err, ctx) {
-        ctx.loading = false
-        ctx.error = err
-      })
+      this.dependencies = null
+      this.error = null
+
+      var fetchSuccess = $.proxy(function (data) {
+        this.loading = false
+        this.dependencies = data
+        console.log('Data: ' + data)
+      }, this)
+
+      var fetchError = $.proxy(function (err) {
+        this.loading = false
+        this.error = err
+        // console.log('Error: ' + err)
+      }, this)
+
+      loadYAML('http://127.0.0.1:27866/api/v1/policy', fetchSuccess, fetchError)
     }
   }
 }
