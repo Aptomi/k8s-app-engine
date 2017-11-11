@@ -1,7 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Hello from 'components/Hello.vue'
+
+// Components
 import Sample from 'components/Sample.vue'
+
+// Aptomi pages
+import ShowDependencies from 'pages/policy/ShowDependencies.vue'
+
+// Examples
 import DashboardV1 from 'examples/Dashboard.v1.vue'
 import DashboardV2 from 'examples/Dashboard.v2.vue'
 import InfoBoxExample from 'examples/InfoBoxExample'
@@ -30,8 +36,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: Hello
+      name: 'Home',
+      component: AdvancedElements
+    },
+    {
+      path: '/Policy/ShowDependencies',
+      name: 'ShowDependencies',
+      component: ShowDependencies
     },
     {
       path: '/sample',

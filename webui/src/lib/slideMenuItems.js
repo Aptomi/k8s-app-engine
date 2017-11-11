@@ -14,7 +14,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Objects',
         router: {
-          name: 'Hello'
+          name: 'Sample'
         }
       },
       {
@@ -38,7 +38,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Instances',
         router: {
-          name: 'DashboardV2'
+          name: 'ShowDependencies'
         }
       },
       {
@@ -47,6 +47,14 @@ module.exports = [
         name: 'User Roles',
         router: {
           name: 'InfoBoxExample'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'DashboardV2',
+        router: {
+          name: 'DashboardV2'
         }
       },
       {
