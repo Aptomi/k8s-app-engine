@@ -8,8 +8,8 @@
           <img src="/static/img/user-navbar.jpg" class="img-circle" alt="User Image">
         </div>
         <div class="pull-left info">
-          <p>{{ currentUser.name }}</p>
-          <a href="#"><i class="fa fa-circle" :style="`color:${currentUser.state.color}`"></i> {{ currentUser.state.name }}</a>
+          <p>{{ username }}</p>
+          <small><i class="fa fa-circle" style="color:#3c763d"></i> online</small>
         </div>
       </div>
       <!-- search form -->
@@ -46,11 +46,16 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import auth from 'lib/auth'
 import VASlideItem from './components/VASlideItem'
 
 export default {
   name: 'va-slider',
+  data () {
+    return {
+      username: auth.getUsername()
+    }
+  },
   props: {
     slideMenuItems: {
       type: Array,
@@ -59,11 +64,6 @@ export default {
   },
   created () {
 
-  },
-  computed: {
-    ...mapGetters([
-      'currentUser'
-    ])
   },
   components: {
     'va-slide-item': VASlideItem

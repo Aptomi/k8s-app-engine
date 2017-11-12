@@ -12,6 +12,7 @@ export default {
     authenticate(username, password, (res) => {
       if (res.authenticated) {
         localStorage.token = res.token
+        localStorage.username = username
         if (cb) cb(true)
         this.onChange(true)
       } else {
@@ -25,8 +26,13 @@ export default {
     return localStorage.token
   },
 
+  getUsername () {
+    return localStorage.username
+  },
+
   logout (cb) {
     delete localStorage.token
+    delete localStorage.username
     if (cb) cb()
     this.onChange(false)
   },
