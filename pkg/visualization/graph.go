@@ -3,7 +3,6 @@ package visualization
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"sort"
 	"strings"
 )
@@ -41,8 +40,8 @@ func idEscape(id string) string {
 	return strings.NewReplacer("#", "_", ":", "_").Replace(id)
 }
 
-// GetData returns a struct, which can be converted to JSON and fed directly into vis.js as network map
-func (g *Graph) getData() interface{} {
+// GetData returns a struct, which can be fed directly into vis.js as network map
+func (g *Graph) GetData() interface{} {
 	// Sort nodes and edges, so we can get a stable response from API that doesn't change over reloads
 	// This will ensure that UI will show the same layout over refreshes
 	sort.Sort(g.nodes)
@@ -57,7 +56,7 @@ func (g *Graph) getData() interface{} {
 
 // GetDataJSON returns a JSON-formatted byte array, which can be fed directly into vis.js as network map
 func (g *Graph) GetDataJSON() []byte {
-	result, err := json.Marshal(g.getData())
+	result, err := json.Marshal(g.GetData())
 	if err != nil {
 		panic(fmt.Sprintf("Failed to marshal graph to JSON: %s", err))
 	}
@@ -113,15 +112,5 @@ func (g *Graph) addEntry(e graphEntry) {
 		g.edges = append(g.edges, e)
 	} else {
 		panic(fmt.Sprintf("Can't add entry to the graph. Unknown type: %s", e))
-	}
-}
-
-// Save is a temporary method that saves the generated graph in a local JSON file
-func (g *Graph) Save() {
-	// TODO: remove once UI is resurrected
-	data, _ := json.Marshal(g.getData())
-	err := ioutil.WriteFile("../../webui-vis-tmp/output.json", data, 0644)
-	if err != nil {
-		panic(err)
 	}
 }

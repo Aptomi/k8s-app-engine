@@ -6,6 +6,7 @@ import Sample from 'components/Sample.vue'
 
 // Aptomi pages
 import ShowObjects from 'pages/policy/ShowObjects.vue'
+import BrowsePolicy from 'pages/policy/BrowsePolicy.vue'
 import ShowDependencies from 'pages/policy/ShowDependencies.vue'
 
 // Examples
@@ -44,6 +45,11 @@ export default new Router({
       path: '/policy/objects',
       name: 'ShowObjects',
       component: ShowObjects
+    },
+    {
+      path: '/policy/browse',
+      name: 'BrowsePolicy',
+      component: BrowsePolicy
     },
     {
       path: '/policy/dependencies',

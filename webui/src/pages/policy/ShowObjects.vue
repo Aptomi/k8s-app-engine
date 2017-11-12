@@ -38,7 +38,7 @@
 <script>
   import vSelect from 'vue-select'
   import objectData from 'pages/components/ObjectData'
-  import { getPolicyObjects, getNamespaces, filterObjects } from 'lib/api.js'
+  import { getPolicy, getPolicyObjects, getNamespaces, filterObjects } from 'lib/api.js'
 
   export default {
     data () {
@@ -89,7 +89,7 @@
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-          this.policyObjects = data
+          this.policyObjects = getPolicyObjects(data)
         }, this)
 
         const fetchError = $.proxy(function (err) {
@@ -97,7 +97,7 @@
           this.error = err
         }, this)
 
-        getPolicyObjects(fetchSuccess, fetchError)
+        getPolicy(fetchSuccess, fetchError)
       }
     },
     components: {vSelect, objectData}

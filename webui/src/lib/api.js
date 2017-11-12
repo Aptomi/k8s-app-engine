@@ -40,15 +40,36 @@ export function filterObjects (policyObjects, nsFilter = null, kindFilter = null
   return result
 }
 
-// loads all policy objects (map[namespace][kind][name] -> generation)
-export async function getPolicyObjects (successFunc, errorFunc) {
+// loads the policy diagram
+export async function getPolicyDiagram (generation, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['policy'].join('/')
+  const handler = ['policy', 'diagram', 'gen', generation].join('/')
   callAPI(handler, function (data) {
-    successFunc(data['objects'])
+    successFunc(data['data'])
   }, function (err) {
     errorFunc(err)
   })
+}
+
+// loads the latest policy
+export async function getPolicy (successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy'].join('/')
+  callAPI(handler, function (data) {
+    successFunc(data)
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
+// returns policy generation
+export function getPolicyGeneration (policy) {
+  return policy['metadata']['generation']
+}
+
+// returns all policy objects (map[namespace][kind][name] -> generation), given the loaded policy
+export function getPolicyObjects (policy) {
+  return policy['objects']
 }
 
 // loads all dependencies

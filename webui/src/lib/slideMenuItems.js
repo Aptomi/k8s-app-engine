@@ -22,7 +22,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Browser',
         router: {
-          name: 'Sample'
+          name: 'BrowsePolicy'
         }
       },
       {
@@ -30,7 +30,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Audit Log',
         router: {
-          name: 'DashboardV1'
+          name: 'AuditLog'
         }
       },
       {
@@ -45,6 +45,37 @@ module.exports = [
         type: 'item',
         icon: 'fa fa-circle-o',
         name: 'User Roles',
+        router: {
+          name: 'UserRoles'
+        }
+      }
+    ]
+  },
+  {
+    type: 'tree',
+    icon: 'fa fa-dashboard',
+    name: 'OLD',
+    items: [
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Sample',
+        router: {
+          name: 'Sample'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'DashboardV1',
+        router: {
+          name: 'DashboardV1'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'InfoBoxExample',
         router: {
           name: 'InfoBoxExample'
         }

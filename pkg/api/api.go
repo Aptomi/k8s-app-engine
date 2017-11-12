@@ -22,16 +22,30 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 }
 
 func (api *coreAPI) serve(router *httprouter.Router) {
+	// retrieve policy (latest + by a given generation)
 	router.GET("/api/v1/policy", api.handlePolicyGet)
 	router.GET("/api/v1/policy/gen/:gen", api.handlePolicyGet)
+
+	// retrieve specific object from the policy
 	router.GET("/api/v1/policy/gen/:gen/object/:ns/:kind/:name", api.handlePolicyObjectGet)
+
+	// update policy
 	router.POST("/api/v1/policy", api.handlePolicyUpdate)
 
+	// policy diagrams
+	router.GET("/api/v1/policy/diagram", api.handlePolicyDiagram)
+	router.GET("/api/v1/policy/diagram/gen/:gen", api.handlePolicyDiagram)
+
+	// retrieve endpoints
 	router.GET("/api/v1/endpoints", api.handleEndpointsGet)
 
+	// retrieve revision (latest + by a given generation)
 	router.GET("/api/v1/revision", api.handleRevisionGet)
 	router.GET("/api/v1/revision/gen/:gen", api.handleRevisionGet)
+
+	// retrieve revision (given a policy)
 	router.GET("/api/v1/revision/policy/:policy", api.handleRevisionGetByPolicy)
 
+	// return aptomi version
 	router.GET("/version", api.handleVersion)
 }
