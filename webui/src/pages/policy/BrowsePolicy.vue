@@ -25,7 +25,7 @@
             <!-- /.form-group -->
           </div>
           <!-- /.col -->
-          <div class="col-xs-4">
+          <div v-if="false" class="col-xs-4">
             <div class="form-group">
               <label>Namespace</label>
               <v-select placeholder="Select namespace" v-model="selectedNamespace" :options.sync="namespaces"></v-select>
@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <v-diagram v-if="selectedPolicyVersion" :policyGen="selectedPolicyVersion"></v-diagram>
+    <v-diagram v-if="selectedPolicyVersion" :policyGen="selectedPolicyVersion" :policyGenBase="selectedPolicyVersionBaseComputed"></v-diagram>
   </div>
 </template>
 
@@ -59,6 +59,14 @@
         selectedPolicyVersion: null,
         selectedPolicyVersionBase: null,
         selectedNamespace: null
+      }
+    },
+    computed: {
+      selectedPolicyVersionBaseComputed: function () {
+        if (this.compareEnabled) {
+          return this.selectedPolicyVersionBase
+        }
+        return null
       }
     },
     watch: {

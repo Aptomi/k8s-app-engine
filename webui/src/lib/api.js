@@ -51,6 +51,17 @@ export async function getPolicyDiagram (generation, successFunc, errorFunc) {
   })
 }
 
+// loads the policy diagram, comparing two policies
+export async function getPolicyDiagramCompare (generation, generationBase, successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy', 'diagram', 'compare', 'gen', generation, 'genBase', generationBase].join('/')
+  callAPI(handler, function (data) {
+    successFunc(data['data'])
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 // loads the latest policy
 export async function getPolicy (successFunc, errorFunc) {
   await makeDelay()

@@ -35,6 +35,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	// policy diagrams
 	router.GET("/api/v1/policy/diagram", api.handlePolicyDiagram)
 	router.GET("/api/v1/policy/diagram/gen/:gen", api.handlePolicyDiagram)
+	router.GET("/api/v1/policy/diagram/compare/gen/:gen/genBase/:genBase", api.handlePolicyDiagramCompare)
 
 	// retrieve endpoints
 	router.GET("/api/v1/endpoints", api.handleEndpointsGet)

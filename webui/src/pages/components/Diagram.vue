@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-  import { getPolicyDiagram } from 'lib/api.js'
+  import { getPolicyDiagram, getPolicyDiagramCompare } from 'lib/api.js'
   import vis from 'vis'
 
   export default {
@@ -38,10 +38,14 @@
     props: {
       'policyGen': {
         type: String
+      },
+      'policyGenBase': {
+        type: String
       }
     },
     watch: {
-      'policyGen': 'fetchData'
+      'policyGen': 'fetchData',
+      'policyGenBase': 'fetchData'
     },
     methods: {
       fetchData () {
@@ -62,7 +66,11 @@
           console.log(err)
         }, this)
 
-        getPolicyDiagram(this.policyGen, fetchSuccess, fetchError)
+        if (this.policyGenBase) {
+          getPolicyDiagramCompare(this.policyGen, this.policyGenBase, fetchSuccess, fetchError)
+        } else {
+          getPolicyDiagram(this.policyGen, fetchSuccess, fetchError)
+        }
       }
     }
   }
