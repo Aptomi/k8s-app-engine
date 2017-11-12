@@ -88,15 +88,15 @@ func (handler *ContentTypeHandler) Write(writer http.ResponseWriter, request *ht
 // WriteStatus runtime object into the provided response writer using correct content type (taken from provided request)
 // with specified http status
 func (handler *ContentTypeHandler) WriteStatus(writer http.ResponseWriter, request *http.Request, body runtime.Object, status int) {
-	data, err := handler.GetCodec(request.Header).EncodeOne(body)
-	if err != nil {
-		panic(fmt.Sprintf("Error while encoding body of kind: %s", body.GetKind()))
-	}
-
 	writer.Header().Set("Content-Type", handler.GetContentType(request.Header))
 	writer.WriteHeader(status)
 
 	if body != nil {
+		data, err := handler.GetCodec(request.Header).EncodeOne(body)
+		if err != nil {
+			panic(fmt.Sprintf("Error while encoding body of kind: %s", body.GetKind()))
+		}
+
 		_, wErr := fmt.Fprint(writer, string(data))
 		if wErr != nil {
 			panic(fmt.Sprintf("Error while writing body: %s", wErr))

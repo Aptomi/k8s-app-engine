@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="wrapper">
+    <div class="wrapper" v-if="loggedIn">
       <va-navibar></va-navibar>
       <va-slider :slideMenuItems="slideMenuItems"></va-slider>
       <va-content-wrap></va-content-wrap>
@@ -10,6 +10,15 @@
         <!-- Default to the left -->
         <strong>Copyright &copy; 2017 <a href="http://aptomi.io">Aptomi</a>.</strong> All rights reserved.
       </footer>
+
+      <Modal></Modal>
+    </div>
+    <div v-else>
+      <section class="content container-fluid">
+        <transition name="page" mode="out-in">
+          <router-view></router-view>
+        </transition>
+      </section>
 
       <Modal></Modal>
     </div>
@@ -23,15 +32,15 @@ import VAContentWrap from 'ContentWrap.vue'
 import Modal from './components/Modal.vue'
 import store from './vuex/store.js'
 import slideMenuItems from './lib/slideMenuItems.js'
+import auth from 'lib/auth'
 
 export default {
   name: 'app',
   data () {
     return {
-      slideMenuItems: slideMenuItems
+      slideMenuItems: slideMenuItems,
+      loggedIn: auth.loggedIn()
     }
-  },
-  created () {
   },
   components: {
     'va-navibar': VANaviBar,

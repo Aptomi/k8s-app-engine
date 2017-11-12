@@ -36,7 +36,7 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                  <router-link to="/logout" class="btn btn-default btn-flat">Sign out</router-link>
                 </div>
               </li>
             </ul>

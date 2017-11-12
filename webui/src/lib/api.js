@@ -62,6 +62,19 @@ export async function getPolicyDiagramCompare (generation, generationBase, succe
   })
 }
 
+// authenticates the user
+export async function authenticateUser (username, password, successFunc, errorFunc) {
+  const handler = ['user', 'authenticate'].join('/')
+  let formData = new FormData()
+  formData.append('username', username)
+  formData.append('password', password)
+  callAPI(handler, function (data) {
+    successFunc(data)
+  }, function (err) {
+    errorFunc(err)
+  }, formData)
+}
+
 // loads the latest policy
 export async function getPolicy (successFunc, errorFunc) {
   await makeDelay()
@@ -141,7 +154,7 @@ function makeDelay () {
 }
 
 // makes an API call to Aptomi
-function callAPI (handler, successFunc, errorFunc) {
+function callAPI (handler, successFunc, errorFunc, formData = null) {
   const path = basePath + handler
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
@@ -161,8 +174,13 @@ function callAPI (handler, successFunc, errorFunc) {
       }
     }
   }
-  xhr.open('GET', path, true)
-  xhr.send()
+  if (formData == null) {
+    xhr.open('GET', path, true)
+    xhr.send()
+  } else {
+    xhr.open('POST', path, true)
+    xhr.send(formData)
+  }
 }
 
 // fetches data for a single dependency
