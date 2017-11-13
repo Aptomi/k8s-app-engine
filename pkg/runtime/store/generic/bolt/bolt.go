@@ -198,7 +198,11 @@ func (bs *boltStore) save(obj runtime.Storable, updateCurrent bool) (bool, error
 		}
 		if existingObj != nil {
 			versionedObj.SetGeneration(existingObj.GetGeneration())
-			if !updateCurrent && !reflect.DeepEqual(obj, existingObj) {
+			equals, equalsErr := bs.equals(obj, existingObj)
+			if equalsErr != nil {
+				return false, equalsErr
+			}
+			if !updateCurrent && !equals {
 				errGen := bs.setNextGeneration(versionedObj)
 				if errGen != nil {
 					return false, fmt.Errorf("error while calling setNextGeneration(%s): %s", obj, errGen)
@@ -260,6 +264,20 @@ func (bs *boltStore) Delete(key string) error {
 
 		return nil
 	})
+}
+
+func (bs *boltStore) equals(o1 runtime.Object, o2 runtime.Object) (bool, error) {
+	o1bytes, err := bs.codec.EncodeOne(o1)
+	if err != nil {
+		return false, err
+	}
+
+	o2bytes, err := bs.codec.EncodeOne(o2)
+	if err != nil {
+		return false, err
+	}
+
+	return reflect.DeepEqual(o1bytes, o2bytes), nil
 }
 
 // todo replace with adding bytes to []byte
