@@ -37,7 +37,7 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 			return err
 		}
 		existingRules = append(existingRules, rules...)
-		prog.Advance("Istio")
+		prog.Advance()
 	}
 
 	// Process in the right order
@@ -48,7 +48,7 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 			return fmt.Errorf("error while processing Istio Ingress for component '%s': %s", key, err)
 		}
 		desiredRules[key] = rules
-		prog.Advance("Istio")
+		prog.Advance()
 	}
 
 	deleteRules := make([]*istioRouteRule, 0)
@@ -98,7 +98,7 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 			}
 			changed = true
 		}
-		prog.Advance("Istio")
+		prog.Advance()
 	}
 
 	// process deletions all at once
@@ -110,7 +110,7 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 		}
 		changed = true
 	}
-	prog.Advance("Istio")
+	prog.Advance()
 
 	if changed {
 		eventLog.WithFields(event.Fields{}).Infof("Successfully processed Istio rules")

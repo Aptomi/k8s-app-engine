@@ -16,8 +16,8 @@ func (progressNoop *Noop) SetTotal(total int) {
 }
 
 // Advance advances progress indicator by one step
-func (progressNoop *Noop) Advance(stage string) {
-	progressNoop.advanceInternal(stage)
+func (progressNoop *Noop) Advance() {
+	progressNoop.advanceInternal()
 }
 
 // Done should be called once done working with progress indicator

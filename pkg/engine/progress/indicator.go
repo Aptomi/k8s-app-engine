@@ -7,8 +7,8 @@ type Indicator interface {
 	// SetTotal should be called to initialize progress indicator with 'total' steps
 	SetTotal(total int)
 
-	// Advance should be called to advance progress indicator by 1 step, assuming we are located in a certain 'stage'
-	Advance(stage string)
+	// Advance should be called to advance progress indicator by 1 step
+	Advance()
 
 	// Done should be called when you are done using progress indicator (e.g. done, or error happened in the middle)
 	Done()
@@ -21,7 +21,6 @@ type Indicator interface {
 }
 
 type progressCount struct {
-	stage    string
 	current  int
 	total    int
 	finished bool
@@ -35,12 +34,7 @@ func (count *progressCount) getTotalInternal() int {
 	return count.total
 }
 
-func (count *progressCount) getStageInternal() string {
-	return count.stage
-}
-
-func (count *progressCount) advanceInternal(stage string) {
-	count.stage = stage
+func (count *progressCount) advanceInternal() {
 	count.current++
 }
 

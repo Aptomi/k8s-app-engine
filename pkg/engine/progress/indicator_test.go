@@ -28,7 +28,7 @@ func TestProgressNoop(t *testing.T) {
 		for i := 0; i < 200; i++ {
 			expectedPercent := int(math.Floor(float64(i) / 2.0))
 			assert.Equal(t, expectedPercent, progress.GetCompletionPercent(), "Progress indicator should be at 25%")
-			progress.Advance("Main")
+			progress.Advance()
 		}
 
 		// check completion
@@ -43,7 +43,7 @@ func TestProgressNoopOverflow(t *testing.T) {
 	for _, progress := range makeProgressIndicators() {
 		progress.SetTotal(10)
 		for i := 0; i < 200; i++ {
-			progress.Advance("Main")
+			progress.Advance()
 		}
 		assert.Equal(t, 100, progress.GetCompletionPercent(), "Progress indicator should be at 100%")
 		assert.False(t, progress.IsDone(), "Progress indicator should not be finished until marked as such")

@@ -31,7 +31,6 @@ type Revision struct {
 
 // RevisionProgress represents revision applying progress
 type RevisionProgress struct {
-	Stage    string
 	Current  int
 	Total    int
 	Finished bool

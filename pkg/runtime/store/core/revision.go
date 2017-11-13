@@ -112,12 +112,10 @@ func (p *revisionProgressUpdater) save() {
 
 func (p *revisionProgressUpdater) SetTotal(total int) {
 	p.revision.Progress.Total = total
-	p.Advance("Init")
 	p.save()
 }
 
-func (p *revisionProgressUpdater) Advance(stage string) {
-	p.revision.Progress.Stage = stage
+func (p *revisionProgressUpdater) Advance() {
 	p.revision.Progress.Current++
 	p.save()
 }

@@ -35,7 +35,7 @@ func (progressConsole *Console) createProgressBar() {
 	}
 	progressConsole.progressBar = progressConsole.progress.AddBar(progressConsole.getTotalInternal())
 	progressConsole.progressBar.PrependFunc(func(b *uiprogress.Bar) string {
-		return fmt.Sprintf("  [%s: %d/%d]", progressConsole.getStageInternal(), b.Current(), b.Total)
+		return fmt.Sprintf("  [%d/%d]", b.Current(), b.Total)
 	})
 	progressConsole.progressBar.AppendCompleted()
 	progressConsole.progressBar.AppendFunc(func(b *uiprogress.Bar) string {
@@ -52,12 +52,12 @@ func (progressConsole *Console) SetOut(out io.Writer) {
 func (progressConsole *Console) SetTotal(total int) {
 	progressConsole.setTotalInternal(total + 1)
 	progressConsole.createProgressBar()
-	progressConsole.Advance("Init")
+	progressConsole.Advance()
 }
 
 // Advance advances progress indicator by one step
-func (progressConsole *Console) Advance(stage string) {
-	progressConsole.advanceInternal(stage)
+func (progressConsole *Console) Advance() {
+	progressConsole.advanceInternal()
 	progressConsole.progressBar.Incr()
 }
 
