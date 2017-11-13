@@ -12,7 +12,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
-	"github.com/Aptomi/aptomi/pkg/webui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
@@ -21,7 +20,7 @@ import (
 	"time"
 )
 
-// Server is Aptomi server. It serves API and UI calls, as well as does policy enforcement
+// Server is Aptomi server. It serves API calls, as well as does policy resolution & continuous state enforcement
 type Server struct {
 	cfg              *config.Server
 	backgroundErrors chan string
@@ -41,12 +40,12 @@ func NewServer(cfg *config.Server) *Server {
 	return s
 }
 
-// Start initializes Aptomi server, starts serving API/UI, and as well as runs the required background jobs for actual policy enforcement
+// Start initializes Aptomi server, starts serving API, and as well as runs the required background jobs for actual policy enforcement
 func (server *Server) Start() {
 	server.initStore()
 	server.initExternalData()
 
-	// Register UI and API handlers
+	// Register API handlers
 	server.initHTTPServer()
 
 	// Start HTTP server
@@ -92,7 +91,6 @@ func (server *Server) initHTTPServer() {
 	router := httprouter.New()
 
 	api.Serve(router, server.store, server.externalData)
-	webui.Serve(router)
 
 	var handler http.Handler = router
 

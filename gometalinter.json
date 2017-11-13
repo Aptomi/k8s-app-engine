@@ -21,7 +21,6 @@
   ],
   "Cyclo": 20,
   "Exclude": [
-    "vendor",
-    "webui"
+    "vendor"
   ]
 }
