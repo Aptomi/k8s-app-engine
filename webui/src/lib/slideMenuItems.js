@@ -30,7 +30,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Audit Log',
         router: {
-          name: 'AuditLog'
+          name: 'ShowAuditLog'
         }
       },
       {
