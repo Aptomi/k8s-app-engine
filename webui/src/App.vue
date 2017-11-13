@@ -26,10 +26,10 @@
 </template>
 
 <script>
-import VANaviBar from 'NaviBar.vue'
+import VANaviBar from './pages/components/NaviBar'
 import VAMenu from './pages/components/Menu'
 import VAAppContent from 'AppContent.vue'
-import Modal from './components/Modal.vue'
+import Modal from './pages/components/Modal.vue'
 import store from './vuex/store.js'
 import menuItems from './lib/menuItems.js'
 import auth from 'lib/auth'
