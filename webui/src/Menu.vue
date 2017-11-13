@@ -26,7 +26,7 @@
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul data-widget="tree" class="sidebar-menu">
         <va-slide-item
-          v-for="(item,index) in slideMenuItems"
+          v-for="(item,index) in menuItems"
           :data="item"
           :key="index"
           :type="item.type"
@@ -57,7 +57,7 @@ export default {
     }
   },
   props: {
-    slideMenuItems: {
+    menuItems: {
       type: Array,
       default: []
     }

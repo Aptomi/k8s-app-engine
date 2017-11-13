@@ -2,7 +2,7 @@
   <div id="app">
     <div class="wrapper" v-if="loggedIn">
       <va-navibar></va-navibar>
-      <va-slider :slideMenuItems="slideMenuItems"></va-slider>
+      <va-menu :menuItems="menuItems"></va-menu>
       <va-content-wrap></va-content-wrap>
 
       <!-- Main Footer -->
@@ -27,24 +27,24 @@
 
 <script>
 import VANaviBar from 'NaviBar.vue'
-import VASlider from 'Slider.vue'
+import VAMenu from 'Menu.vue'
 import VAContentWrap from 'ContentWrap.vue'
 import Modal from './components/Modal.vue'
 import store from './vuex/store.js'
-import slideMenuItems from './lib/slideMenuItems.js'
+import menuItems from './lib/menuItems.js'
 import auth from 'lib/auth'
 
 export default {
   name: 'app',
   data () {
     return {
-      slideMenuItems: slideMenuItems,
+      menuItems: menuItems,
       loggedIn: auth.loggedIn()
     }
   },
   components: {
     'va-navibar': VANaviBar,
-    'va-slider': VASlider,
+    'va-menu': VAMenu,
     'va-content-wrap': VAContentWrap,
     Modal
   },
