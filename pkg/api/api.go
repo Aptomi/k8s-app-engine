@@ -50,8 +50,9 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/revision", api.handleRevisionGet)
 	router.GET("/api/v1/revision/gen/:gen", api.handleRevisionGet)
 
-	// retrieve revision (given a policy)
+	// retrieve revision(s) (for a given policy)
 	router.GET("/api/v1/revision/policy/:policy", api.handleRevisionGetByPolicy)
+	router.GET("/api/v1/revisions/policy/:policy", api.handleRevisionsGetByPolicy)
 
 	// return aptomi version
 	router.GET("/version", api.handleVersion)

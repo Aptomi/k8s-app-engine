@@ -29,81 +29,28 @@
                   <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
                 </tr>
                 <tr v-for="p in policies">
-                  <td>{{ p.metadata.generation }}</td>
+                  <td>{{ p.generation }}</td>
                   <td>{{ p.createdBy }}</td>
                   <td>{{ p.createdOn }}</td>
-                  <td>
-                    <span class="label label-success">7</span>
-                    <span class="label label-success">8</span>
-                    <span class="label label-danger">9</span>
-                    <span class="label label-success">10</span>
-                    <span class="label label-primary">11</span>
+                  <td class="col-xs-4">
+                    <span v-if="!p['revisions'][0]" class="label label-warning">N/A</span>
+                    <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['progress']['finished'] && !r['progress']['error'], 'label-primary': !r['progress']['finished'] && !r['progress']['error'], 'label-danger': r['progress']['error'] }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
                   </td>
                   <td class="align-middle">
-                    <div class="progress-group">
-                      <div class="progress progress-xs progress-striped active">
+                    <div v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1" class="progress-group">
+                      <div v-if="!r['progress']['finished'] && !r['progress']['error']" class="progress progress-xs progress-striped active">
                         <div class="progress-bar progress-bar-primary" style="width: 40%"></div>
                       </div>
-                      <span class="progress-number"><b>160</b>/200</span>
+                      <span v-if="!r['progress']['finished'] && !r['progress']['error']" class="progress-number"><b>{{r['progress']['current']}}</b>/{{r['progress']['total']}}</span>
+                      <div v-if="r['progress']['finished'] && !r['progress']['error']" class="progress progress-xs active">
+                        <div class="progress-bar progress-bar-success" style="width: 100%"></div>
+                      </div>
+                      <div v-if="r['progress']['error']" class="progress progress-xs active">
+                        <div class="progress-bar progress-bar-danger" style="width: 100%"></div>
+                      </div>
                     </div>
                   </td>
                   <td>{{ p.lastApplied }}</td>
-                  <td>
-                    <div class="btn-group btn-group-xs">
-                      <button type="button" class="btn btn-default btn-flat">Action</button>
-                      <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
-                        <li><a href="#">Browse Policy</a></li>
-                        <li><a href="#">Compare With Previous</a></li>
-                        <li class="divider"></li>
-                        <li><a href="#">View Resolution Log</a></li>
-                        <li><a href="#">View Apply Log</a></li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>Bob</td>
-                  <td>11-7-2014</td>
-                  <td><span class="label label-success center">Success</span></td>
-                  <td>
-                    <div class="progress progress-xs active">
-                      <div class="progress-bar progress-bar-success" style="width: 100%"></div>
-                    </div>
-                  </td>
-                  <td>10 min ago</td>
-                  <td>
-                    <div class="btn-group btn-group-xs">
-                      <button type="button" class="btn btn-default btn-flat">Action</button>
-                      <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                      </button>
-                      <ul class="dropdown-menu" role="menu">
-                        <li><a href="#">Browse Policy</a></li>
-                        <li><a href="#">Compare With Previous</a></li>
-                        <li class="divider"></li>
-                        <li><a href="#">View Resolution Log</a></li>
-                        <li><a href="#">View Apply Log</a></li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>Frank</td>
-                  <td>11-7-2014</td>
-                  <td><span class="label label-danger">Failed</span></td>
-                  <td>
-                    <div class="progress progress-xs active">
-                      <div class="progress-bar progress-bar-danger" style="width: 100%"></div>
-                    </div>
-                  </td>
-                  <td>1 hour ago</td>
                   <td>
                     <div class="btn-group btn-group-xs">
                       <button type="button" class="btn btn-default btn-flat">Action</button>
@@ -135,7 +82,7 @@
 </template>
 
 <script>
-  import {getAllPolicies} from 'lib/api.js'
+  import {getAllPolicies, fetchPolicyRevisions} from 'lib/api.js'
 
   export default {
     data () {
@@ -143,12 +90,19 @@
       return {
         loading: false,
         policies: null,
-        error: null
+        error: null,
+        interval: null
       }
     },
     created () {
       // fetch the data when the view is created and the data is already being observed
       this.fetchData()
+      this.interval = setInterval($.proxy(function () {
+        // continue to fetch progress information for the most recent policy
+        if (this.policies != null && this.policies.length > 0) {
+          fetchPolicyRevisions(this.policies[0])
+        }
+      }, this), 5000)
     },
     methods: {
       fetchData () {
@@ -168,6 +122,9 @@
 
         getAllPolicies(fetchSuccess, fetchError)
       }
+    },
+    beforeDestroy: function () {
+      clearInterval(this.interval)
     }
   }
 </script>

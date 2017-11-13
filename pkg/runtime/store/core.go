@@ -27,6 +27,7 @@ type Policy interface {
 type Revision interface {
 	GetRevision(gen runtime.Generation) (*engine.Revision, error)
 	GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error)
+	GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error)
 	NewRevision(policyGen runtime.Generation) (*engine.Revision, error)
 	SaveRevision(revision *engine.Revision) error
 	UpdateRevision(revision *engine.Revision) error

@@ -51,6 +51,24 @@ func (ds *defaultStore) GetFirstRevisionForPolicy(policyGen runtime.Generation) 
 	return result, nil
 }
 
+// GetAllRevisionsForPolicy returns all revisions for the specified policy generation
+func (ds *defaultStore) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
+	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*engine.Revision{}
+	for _, revisionObj := range revisionObjs {
+		revision := revisionObj.(*engine.Revision)
+		if revision.Policy == policyGen {
+			result = append(result, revision)
+		}
+	}
+
+	return result, nil
+}
+
 // NewRevision returns new Revision for specified policy generation
 func (ds *defaultStore) NewRevision(policyGen runtime.Generation) (*engine.Revision, error) {
 	currRevision, err := ds.GetRevision(runtime.LastGen)
