@@ -3,7 +3,7 @@
     <div class="wrapper" v-if="loggedIn">
       <va-navibar></va-navibar>
       <va-menu :menuItems="menuItems"></va-menu>
-      <va-content-wrap></va-content-wrap>
+      <va-content></va-content>
 
       <!-- Main Footer -->
       <footer class="main-footer">
@@ -28,7 +28,7 @@
 <script>
 import VANaviBar from 'NaviBar.vue'
 import VAMenu from 'Menu.vue'
-import VAContentWrap from 'ContentWrap.vue'
+import VAAppContent from 'AppContent.vue'
 import Modal from './components/Modal.vue'
 import store from './vuex/store.js'
 import menuItems from './lib/menuItems.js'
@@ -45,7 +45,7 @@ export default {
   components: {
     'va-navibar': VANaviBar,
     'va-menu': VAMenu,
-    'va-content-wrap': VAContentWrap,
+    'va-content': VAAppContent,
     Modal
   },
   store
