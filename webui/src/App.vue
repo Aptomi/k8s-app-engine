@@ -27,7 +27,7 @@
 
 <script>
 import VANaviBar from 'NaviBar.vue'
-import VAMenu from 'Menu.vue'
+import VAMenu from './pages/components/Menu'
 import VAAppContent from 'AppContent.vue'
 import Modal from './components/Modal.vue'
 import store from './vuex/store.js'

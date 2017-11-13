@@ -33,7 +33,6 @@
 
 <script>
 export default {
-  name: 'va-slide-item',
   props: {
     type: {
       type: String,

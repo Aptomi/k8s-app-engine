@@ -25,7 +25,7 @@
       <!-- /.search form -->
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul data-widget="tree" class="sidebar-menu">
-        <va-slide-item
+        <menu-item
           v-for="(item,index) in menuItems"
           :data="item"
           :key="index"
@@ -38,7 +38,7 @@
           :router="item.router"
           :link="item.link"
         >
-        </va-slide-item>
+        </menu-item>
       </ul>
     </section>
     <!-- /.sidebar -->
@@ -47,10 +47,9 @@
 
 <script>
 import auth from 'lib/auth'
-import VASlideItem from './components/VASlideItem'
+import MenuItem from './MenuItem'
 
 export default {
-  name: 'va-slider',
   data () {
     return {
       username: auth.getUsername()
@@ -66,7 +65,7 @@ export default {
 
   },
   components: {
-    'va-slide-item': VASlideItem
+    'menu-item': MenuItem
   }
 }
 </script>

@@ -50,7 +50,6 @@
 import auth from 'lib/auth'
 
 export default {
-  name: 'va-navibar',
   data () {
     return {
       username: auth.getUsername()
