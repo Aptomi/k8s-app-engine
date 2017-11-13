@@ -259,7 +259,10 @@ func (bs *boltStore) Delete(key string) error {
 				return fmt.Errorf("deleting versioned objects isn't implmeneted")
 			}
 
-			bucket.Delete(k)
+			err = bucket.Delete(k)
+			if err != nil {
+				return fmt.Errorf("error while deleting object with key: %s", k)
+			}
 		}
 
 		return nil
