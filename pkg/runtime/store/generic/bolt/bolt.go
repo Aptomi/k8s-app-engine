@@ -235,7 +235,31 @@ func (bs *boltStore) save(obj runtime.Storable, updateCurrent bool) (bool, error
 }
 
 func (bs *boltStore) Delete(key string) error {
-	panic("implement me")
+	// todo support deleting version objects, potentially we don't want to remove any object, just mark as deleted
+
+	return bs.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(objectsBucket)
+		if bucket == nil {
+			return fmt.Errorf("bucket not found: %s", objectsBucket)
+		}
+
+		c := bucket.Cursor()
+		prefixBytes := []byte(key + boltSeparator)
+		for k, v := c.Seek(prefixBytes); k != nil && bytes.HasPrefix(k, prefixBytes); k, v = c.Next() {
+			baseObj, err := bs.codec.DecodeOne(v)
+			if err != nil {
+				return err
+			}
+			_, ok := baseObj.(runtime.Versioned)
+			if ok {
+				return fmt.Errorf("deleting versioned objects isn't implmeneted")
+			}
+
+			bucket.Delete(k)
+		}
+
+		return nil
+	})
 }
 
 // todo replace with adding bytes to []byte
