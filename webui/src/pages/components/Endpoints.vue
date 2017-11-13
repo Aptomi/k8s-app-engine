@@ -20,6 +20,9 @@
           <tr v-if="error">
             <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
           </tr>
+          <tr v-if="!endpoints">
+            <td>No Endpoints Available</td>
+          </tr>
           <tr v-for="e in endpoints">
             <td>{{e.component}}</td>
             <td><a :href="e.url">{{e.url}}</a></td>
