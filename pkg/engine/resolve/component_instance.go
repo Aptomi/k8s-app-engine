@@ -227,3 +227,7 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 
 	return nil
 }
+
+func KeyForComponentKey(componentKey string) string {
+	return runtime.KeyFromParts(runtime.SystemNS, ComponentInstanceObject.Kind, componentKey)
+}

@@ -3,6 +3,7 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -46,7 +47,7 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 func (a *DeleteAction) updateActualState(context *action.Context) error {
 	// delete component from the actual state
 	delete(context.ActualState.ComponentInstanceMap, a.ComponentKey)
-	err := context.ActualStateUpdater.Delete(a.ComponentKey)
+	err := context.ActualStateUpdater.Delete(resolve.KeyForComponentKey(a.ComponentKey))
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
 	}
