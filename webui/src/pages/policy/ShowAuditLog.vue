@@ -98,9 +98,16 @@
       // fetch the data when the view is created and the data is already being observed
       this.fetchData()
       this.interval = setInterval($.proxy(function () {
-        // continue to fetch progress information for the most recent policy
-        if (this.policies != null && this.policies.length > 0) {
-          fetchPolicyRevisions(this.policies[0])
+        // continue to fetch progress information for all the recent policies (unprocessed policies ... last policy with revisions)
+        if (this.policies != null) {
+          for (const idx in this.policies) {
+            const p = this.policies[idx]
+            const hasRevisions = (p['revisions'] != null) && (p['revisions'].length > 0)
+            fetchPolicyRevisions(p)
+            if (hasRevisions) {
+              break
+            }
+          }
         }
       }, this), 5000)
     },
