@@ -1,4 +1,5 @@
-import Vue from 'vue'
+const async = true
+const sync = false
 
 const yaml = require('js-yaml')
 const delayMs = 1000
@@ -44,7 +45,7 @@ export function filterObjects (policyObjects, nsFilter = null, kindFilter = null
 export async function getPolicyDiagram (generation, successFunc, errorFunc) {
   await makeDelay()
   const handler = ['policy', 'diagram', 'gen', generation].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     successFunc(data['data'])
   }, function (err) {
     errorFunc(err)
@@ -55,7 +56,7 @@ export async function getPolicyDiagram (generation, successFunc, errorFunc) {
 export async function getPolicyDiagramCompare (generation, generationBase, successFunc, errorFunc) {
   await makeDelay()
   const handler = ['policy', 'diagram', 'compare', 'gen', generation, 'genBase', generationBase].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     successFunc(data['data'])
   }, function (err) {
     errorFunc(err)
@@ -66,7 +67,7 @@ export async function getPolicyDiagramCompare (generation, generationBase, succe
 export async function getUsersAndRoles (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['user', 'roles'].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     successFunc(data['data'])
   }, function (err) {
     errorFunc(err)
@@ -79,7 +80,7 @@ export async function authenticateUser (username, password, successFunc, errorFu
   let formData = new FormData()
   formData.append('username', username)
   formData.append('password', password)
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     successFunc(data)
   }, function (err) {
     errorFunc(err)
@@ -90,7 +91,7 @@ export async function authenticateUser (username, password, successFunc, errorFu
 export async function getPolicy (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['policy'].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     successFunc(data)
   }, function (err) {
     errorFunc(err)
@@ -101,7 +102,7 @@ export async function getPolicy (successFunc, errorFunc) {
 export async function getAllPolicies (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['policy'].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     // here we retrieved just the latest policy and we know its generation, so let's retrieve everything else
     const policies = []
     let lastGen = getPolicyGeneration(data)
@@ -129,7 +130,7 @@ export function getPolicyObjects (policy) {
 export async function getDependencies (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['policy'].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     const dependencies = filterObjects(data['objects'], null, 'dependency')
     for (const idx in dependencies) {
       fetchObjectProperties(dependencies[idx])
@@ -145,31 +146,47 @@ export async function getDependencies (successFunc, errorFunc) {
 export async function getEndpoints (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['endpoints'].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, async, function (data) {
     successFunc(data['endpoints'])
   }, function (err) {
     errorFunc(err)
   })
 }
 
+/*
+ * Helpers to synchronously fetch missing data. Those are required because our API cannot return data in
+ * a single call. So we have to make multiple calls.
+ */
+
 // receives a bare entry with populated fields (namespace, kind, name, generation), loads the corresponding object
 // from the database and populates the corresponding fields in obj
-export async function fetchObjectProperties (obj, successFunc = null, errorFunc = null) {
+export function fetchObjectProperties (obj, successFunc = null, errorFunc = null) {
   const handler = ['policy', 'gen', obj['generation'], 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
-  callAPI(handler, function (data) {
+  callAPI(handler, sync, function (data) {
     for (const key in data) {
-      Vue.set(obj, key, data[key])
+      obj[key] = data[key]
     }
-    Vue.set(obj, 'yaml', yaml.safeDump(data))
-    if (errorFunc != null) {
+    obj['yaml'] = yaml.safeDump(data)
+    if (successFunc != null) {
       successFunc(obj)
     }
   }, function (err) {
     // can't fetch object properties
-    Vue.set(obj, 'error', 'unable to fetch object properties: ' + err)
+    obj['error'] = 'unable to fetch object properties: ' + err
     if (errorFunc != null) {
       errorFunc(err)
     }
+  })
+}
+
+// fetches data for a single dependency
+function fetchDependency (d) {
+  const handler = ['dependency_status'].join('/')
+  callAPI(handler, sync, function (data) {
+    d['status'] = 'Deployed'
+  }, function (err) {
+    // can't fetch dependency properties
+    d['status_error'] = 'unable to fetch dependency status: ' + err
   })
 }
 
@@ -183,7 +200,7 @@ function makeDelay () {
 }
 
 // makes an API call to Aptomi
-function callAPI (handler, successFunc, errorFunc, formData = null) {
+function callAPI (handler, isAsync, successFunc, errorFunc, formData = null) {
   const path = basePath + handler
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
@@ -204,21 +221,11 @@ function callAPI (handler, successFunc, errorFunc, formData = null) {
     }
   }
   if (formData == null) {
-    xhr.open('GET', path, true)
+    xhr.open('GET', path, isAsync)
     xhr.send()
   } else {
-    xhr.open('POST', path, true)
+    xhr.open('POST', path, isAsync)
     xhr.send(formData)
   }
 }
 
-// fetches data for a single dependency
-function fetchDependency (d) {
-  const handler = ['dependency_status'].join('/')
-  callAPI(handler, function (data) {
-    Vue.set(d, 'status', 'Deployed')
-  }, function (err) {
-    // can't fetch dependency properties
-    Vue.set(d, 'status_error', 'unable to fetch dependency status: ' + err)
-  })
-}
