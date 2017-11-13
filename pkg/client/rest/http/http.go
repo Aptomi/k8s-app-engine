@@ -77,33 +77,28 @@ func (client *httpClient) request(method string, path string, expected *runtime.
 	req.Header.Set("Content-Type", codec.Default)
 	req.Header.Set("User-Agent", "aptomictl")
 
-	fmt.Println("Request:", req)
-
 	resp, err := client.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close() // nolint: errcheck
 
-	// todo(slukjanov): process response - check status and print returned data
-	fmt.Println("Response:", resp)
-
 	respData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(fmt.Sprintf("Error while reading bytes from response Body: %s", err))
+		return nil, fmt.Errorf("error while reading bytes from response Body: %s", err)
 	}
 
-	// todo bad logging
-	fmt.Println("Response data:\n" + string(respData))
+	if len(respData) == 0 {
+		return nil, fmt.Errorf("empty response")
+	}
 
 	obj, err := client.contentType.GetCodec(resp.Header).DecodeOne(respData)
 	if err != nil {
-		panic(fmt.Sprintf("Error while unmarshalling response: %s", err))
+		return nil, fmt.Errorf("error while unmarshalling response: %s", err)
 	}
 
 	if expected != nil && obj.GetKind() != expected.Kind {
-		// todo handle
-		panic("very bad")
+		return nil, fmt.Errorf("received object kind %s doesn't match expected %s", obj.GetKind(), expected.Kind)
 	}
 
 	return obj, nil

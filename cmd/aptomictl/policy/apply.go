@@ -5,9 +5,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
+	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
+	"github.com/Aptomi/aptomi/pkg/util/retry"
 	"github.com/mattn/go-zglob"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -47,23 +49,24 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 
 			fmt.Println("Waiting for the first revision with updated policy to be applied")
 
-			// todo limit retries by time ~ 10 mins
-			for {
-				// todo configurable
-				time.Sleep(1 * time.Second)
-
-				rev, revErr := client.Revision().ShowByPolicy(result.PolicyGeneration)
+			var rev *engine.Revision
+			interval := 10 * time.Second
+			finished := retry.Do(60, interval, func() bool {
+				var revErr error
+				rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
 				if revErr != nil {
-					fmt.Println("Error while getting revision for applied policy")
-					continue
+					fmt.Printf("Error while getting revision for applied policy: %s, retrying in %s\n", revErr, interval)
+					return false
 				}
 
 				// todo print progress
 
-				if rev.Progress.Finished {
-					fmt.Println(rev)
-					break
-				}
+				return rev.Progress.Finished
+			})
+
+			if finished {
+				// todo pretty print
+				fmt.Println("Success! Policy applied", rev)
 			}
 		},
 	}

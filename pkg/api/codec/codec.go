@@ -35,8 +35,8 @@ func NewContentTypeHandler(reg *runtime.Registry) *ContentTypeHandler {
 
 // GetCodecByContentType returns runtime codec for provided content type that should be used
 func (handler *ContentTypeHandler) GetCodecByContentType(contentType string) runtime.Codec {
-	codec := handler.codecs[contentType]
-	if codec == nil {
+	codec, exist := handler.codecs[contentType]
+	if codec == nil || !exist {
 		panic(fmt.Sprintf("Codec not found for content type: %s", contentType))
 	}
 
