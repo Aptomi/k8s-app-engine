@@ -5,7 +5,7 @@ import './lib/script'
 
 import Vue from 'vue'
 import App from './App'
-import router from './router'
+import router from './lib/router'
 import EventBus from './lib/eventBus.js'
 import axios from 'axios'
 
