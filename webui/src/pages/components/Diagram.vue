@@ -63,7 +63,6 @@
         const fetchError = $.proxy(function (err) {
           this.loading = false
           this.error = err
-          console.log(err)
         }, this)
 
         if (this.policyGenBase) {

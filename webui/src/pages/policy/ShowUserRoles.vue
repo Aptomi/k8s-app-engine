@@ -73,7 +73,6 @@
         this.error = null
 
         const fetchSuccess = $.proxy(function (data) {
-          console.log(data)
           this.loading = false
           this.users = data
         }, this)

@@ -97,6 +97,24 @@ export async function getPolicy (successFunc, errorFunc) {
   })
 }
 
+// loads all policies and returns revision information for each and every of them
+export async function getAllPolicies (successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy'].join('/')
+  callAPI(handler, function (data) {
+    // here we retrieved just the latest policy and we know its generation, so let's retrieve everything else
+    const policies = []
+    let lastGen = getPolicyGeneration(data)
+    for (let i = 1; i <= lastGen; i++) {
+      // policy = getPolicy
+      policies.push(data)
+    }
+    successFunc(policies)
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 // returns policy generation
 export function getPolicyGeneration (policy) {
   return policy['metadata']['generation']
