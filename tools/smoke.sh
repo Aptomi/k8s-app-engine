@@ -44,7 +44,7 @@ db:
   connection: ${CONF_DIR}/db.bolt
 
 helm:
-  chartsdir: /tmp
+  chartsDir: /tmp
 
 enforcer:
   disabled: true

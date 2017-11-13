@@ -1,20 +1,17 @@
 package apply
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 	"time"
 )
@@ -43,7 +40,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
-		MockPluginFailOnComponent(),
+		mockRegistryFailOnComponent(),
 		actions,
 		progress.NewNoop(),
 	)
@@ -76,7 +73,7 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
-		MockPluginFailOnComponent(bDesired.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
+		mockRegistryFailOnComponent(bDesired.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
 		actions,
 		progress.NewNoop(),
 	)
@@ -112,7 +109,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
-		MockPluginFailOnComponent(),
+		mockRegistryFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions,
 		progress.NewNoop(),
 	)
@@ -158,7 +155,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesiredNext.External(),
-		MockPluginFailOnComponent(),
+		mockRegistryFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState, 0).Actions,
 		progress.NewNoop(),
 	)
@@ -197,7 +194,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesiredNext.External(),
-		MockPluginFailOnComponent(),
+		mockRegistryFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState, 0).Actions,
 		progress.NewNoop(),
 	)
@@ -306,68 +303,9 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func MockPluginFailOnComponent(failComponents ...string) plugin.Registry {
-	return &testRegistry{&testPlugin{failComponents}}
-}
-
-type testRegistry struct {
-	*testPlugin
-}
-
-func (reg *testRegistry) GetDeployPlugin(codeType string) (plugin.DeployPlugin, error) {
-	return reg.testPlugin, nil
-}
-
-func (reg *testRegistry) GetPostProcessingPlugins() []plugin.PostProcessPlugin {
-	return []plugin.PostProcessPlugin{reg.testPlugin}
-}
-
-type testPlugin struct {
-	failComponents []string
-}
-
-func (p *testPlugin) Cleanup() error {
-	return nil
-}
-
-func (p *testPlugin) GetSupportedCodeTypes() []string {
-	return []string{}
-}
-
-func (p *testPlugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Infof("[+] %s", deployName)
-	for _, s := range p.failComponents {
-		if strings.Contains(deployName, s) {
-			return fmt.Errorf("apply failed for component: %s", deployName)
-		}
+func mockRegistryFailOnComponent(failComponents ...string) plugin.Registry {
+	return &plugin.MockRegistry{
+		DeployPlugin:      &plugin.MockDeployPluginFailComponents{FailComponents: failComponents},
+		PostProcessPlugin: &plugin.MockPostProcessPlugin{},
 	}
-	return nil
-}
-
-func (p *testPlugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Infof("[*] %s", deployName)
-	for _, s := range p.failComponents {
-		if strings.Contains(deployName, s) {
-			return fmt.Errorf("update failed for component: %s", deployName)
-		}
-	}
-	return nil
-}
-
-func (p *testPlugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Infof("[-] %s", deployName)
-	for _, s := range p.failComponents {
-		if strings.Contains(deployName, s) {
-			return fmt.Errorf("delete failed for component: %s", deployName)
-		}
-	}
-	return nil
-}
-
-func (p *testPlugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
-	return make(map[string]string), nil
-}
-
-func (p *testPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
-	return nil
 }

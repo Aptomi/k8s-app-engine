@@ -105,19 +105,29 @@ func (server *Server) enforce() error {
 	//deltaDiagram := visualization.NewDiagramDelta(desiredPolicy, desiredState, actualPolicy, actualState, externalData)
 	//visualization.CreateImage(...) for all diagrams
 
-	// Build plugins
-	helmIstio := helm.NewPlugin(server.cfg.Helm)
-	plugins := plugin.NewRegistry(
-		[]plugin.DeployPlugin{helmIstio},
-		[]plugin.PostProcessPlugin{helmIstio},
-	)
+	// Build plugin registry
+	var pluginRegistry plugin.Registry
+	if server.cfg.Enforcer.Noop {
+		log.Infof("Applying changes in noop mode (sleep per action = %d seconds)", server.cfg.Enforcer.NoopSleep)
+		pluginRegistry = &plugin.MockRegistry{
+			DeployPlugin:      &plugin.MockDeployPlugin{SleepTime: time.Second * time.Duration(server.cfg.Enforcer.NoopSleep)},
+			PostProcessPlugin: &plugin.MockPostProcessPlugin{},
+		}
+	} else {
+		log.Infof("Applying changes")
+		helmIstio := helm.NewPlugin(server.cfg.Helm)
+		pluginRegistry = plugin.NewRegistry(
+			[]plugin.DeployPlugin{helmIstio},
+			[]plugin.PostProcessPlugin{helmIstio},
+		)
+	}
 
 	actualPolicy, err := server.getActualPolicy()
 	if err != nil {
 		return fmt.Errorf("error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, plugins, stateDiff.Actions, server.store.GetRevisionProgressUpdater(nextRevision))
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, server.store.GetRevisionProgressUpdater(nextRevision))
 	resolution, eventLog, err := applier.Apply()
 
 	eventLog.Save(&event.HookConsole{})

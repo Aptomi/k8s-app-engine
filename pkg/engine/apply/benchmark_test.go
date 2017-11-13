@@ -413,7 +413,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		externalData,
-		MockPluginFailOnComponent("fail-components-like-these"),
+		mockRegistryFailOnComponent("fail-components-like-these"),
 		actions,
 		progress.NewNoop(),
 	)
