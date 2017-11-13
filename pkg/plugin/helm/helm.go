@@ -196,7 +196,7 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 	}
 
 	// Check all corresponding istio ingresses
-	ingresses, err := kubeClient.Extensions().Ingresses(cluster.Config.Namespace).List(options)
+	ingresses, err := kubeClient.ExtensionsV1beta1().Ingresses(cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}

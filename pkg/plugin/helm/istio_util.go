@@ -21,7 +21,7 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, 
 		return nil, err
 	}
 
-	coreClient := client.Core()
+	coreClient := client.CoreV1()
 
 	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector().String()
 	options := meta.ListOptions{LabelSelector: selector}
@@ -33,7 +33,7 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, 
 	}
 
 	// Check all corresponding Istio ingresses
-	ingresses, err := client.Extensions().Ingresses(cluster.Config.Namespace).List(options)
+	ingresses, err := client.ExtensionsV1beta1().Ingresses(cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster) (string, error) {
 			return "", err
 		}
 
-		coreClient := client.Core()
+		coreClient := client.CoreV1()
 
 		selector := labels.Set{"app": "istio"}.AsSelector().String()
 		options := meta.ListOptions{LabelSelector: selector}
