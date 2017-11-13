@@ -36,7 +36,7 @@ func runACLTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
 	globalRules.addRule(rules...)
 	resolver := NewACLResolver(globalRules)
 	for _, tc := range testCases {
-		roleMap, err := resolver.getUserRoleMap(tc.user)
+		roleMap, err := resolver.GetUserRoleMap(tc.user)
 		if !assert.NoError(t, err, "User role map should be retrieved successfully") {
 			continue
 		}

@@ -46,7 +46,7 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'User Roles',
         router: {
-          name: 'UserRoles'
+          name: 'ShowUserRoles'
         }
       }
     ]

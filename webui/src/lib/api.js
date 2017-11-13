@@ -62,6 +62,17 @@ export async function getPolicyDiagramCompare (generation, generationBase, succe
   })
 }
 
+// loads all users and their roles
+export async function getUsersAndRoles (successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['user', 'roles'].join('/')
+  callAPI(handler, function (data) {
+    successFunc(data['data'])
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 // authenticates the user
 export async function authenticateUser (username, password, successFunc, errorFunc) {
   const handler = ['user', 'authenticate'].join('/')

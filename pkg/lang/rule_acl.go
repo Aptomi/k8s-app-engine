@@ -48,6 +48,20 @@ type Privileges struct {
 	GlobalObjects map[string]*Privilege
 }
 
+// Returns privileges for a given object
+func (privileges *Privileges) getObjectPrivileges(obj Base) *Privilege {
+	var result *Privilege
+	if obj.GetNamespace() == runtime.SystemNS {
+		result = privileges.GlobalObjects[obj.GetKind()]
+	} else {
+		result = privileges.NamespaceObjects[obj.GetKind()]
+	}
+	if result == nil {
+		return noAccess
+	}
+	return result
+}
+
 // Privilege is a unit of privilege for any single given object
 type Privilege struct {
 	// View indicates whether or not a user can view an object (R)

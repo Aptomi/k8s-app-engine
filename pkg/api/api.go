@@ -25,6 +25,9 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	// authenticate user
 	router.POST("/api/v1/user/authenticate", api.authenticateUser)
 
+	// get all users and their roles
+	router.GET("/api/v1/user/roles", api.handleUserRoles)
+
 	// retrieve policy (latest + by a given generation)
 	router.GET("/api/v1/policy", api.handlePolicyGet)
 	router.GET("/api/v1/policy/gen/:gen", api.handlePolicyGet)

@@ -87,10 +87,6 @@
     components: {
       'endpoints': Endpoints
     },
-    watch: {
-      // call again the method if the route changes
-      '$route': 'fetchData'
-    },
     methods: {
       fetchData () {
         this.loading = true

@@ -27,6 +27,14 @@
           <!-- /.col -->
         </div>
         <!-- /.row -->
+
+        <div class="row" v-if="error">
+          <div class="col-xs-12">
+            <span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i>
+          </div>
+        </div>
+        <!-- /.row -->
+
       </div>
     </div>
 

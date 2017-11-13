@@ -3,7 +3,6 @@ package lang
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"sync"
 )
 
@@ -26,7 +25,7 @@ func NewACLResolver(globalRules *GlobalRules) *ACLResolver {
 
 // GetUserPrivileges is a main method which determines privileges that a given user has for a given object
 func (resolver *ACLResolver) GetUserPrivileges(user *User, obj Base) (*Privilege, error) {
-	roleMap, err := resolver.getUserRoleMap(user)
+	roleMap, err := resolver.GetUserRoleMap(user)
 	if err != nil {
 		return nil, err
 	}
@@ -42,26 +41,12 @@ func (resolver *ACLResolver) GetUserPrivileges(user *User, obj Base) (*Privilege
 	return nobody.Privileges.getObjectPrivileges(obj), nil
 }
 
-// Returns privileges for a given object
-func (privileges *Privileges) getObjectPrivileges(obj Base) *Privilege {
-	var result *Privilege
-	if obj.GetNamespace() == runtime.SystemNS {
-		result = privileges.GlobalObjects[obj.GetKind()]
-	} else {
-		result = privileges.NamespaceObjects[obj.GetKind()]
-	}
-	if result == nil {
-		return noAccess
-	}
-	return result
-}
-
-// Returns the map role ID -> to which namespaces this role applies
+// GetUserRoleMap returns the map role ID -> to which namespaces this role applies, for a given user.
 // Note that user may have multiple roles at the same time. E.g.
 // - domain admin (i.e. for all namespaces within Aptomi domain)
 // - namespace admin for a set of given namespaces
 // - service consumer for a set of given namespaces
-func (resolver *ACLResolver) getUserRoleMap(user *User) (map[string]map[string]bool, error) {
+func (resolver *ACLResolver) GetUserRoleMap(user *User) (map[string]map[string]bool, error) {
 	roleMapCached, ok := resolver.roleMapCache.Load(user.Name)
 	if ok {
 		return roleMapCached.(map[string]map[string]bool), nil

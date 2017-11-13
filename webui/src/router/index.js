@@ -15,6 +15,7 @@ import Login from 'pages/auth/Login.vue'
 import ShowObjects from 'pages/policy/ShowObjects.vue'
 import BrowsePolicy from 'pages/policy/BrowsePolicy.vue'
 import ShowDependencies from 'pages/policy/ShowDependencies.vue'
+import ShowUserRoles from 'pages/policy/ShowUserRoles.vue'
 
 // Examples
 import DashboardV1 from 'examples/Dashboard.v1.vue'
@@ -62,6 +63,11 @@ const router = new Router({
       path: '/policy/dependencies',
       name: 'ShowDependencies',
       component: ShowDependencies
+    },
+    {
+      path: '/policy/users',
+      name: 'ShowUserRoles',
+      component: ShowUserRoles
     },
     {
       path: '/sample',
