@@ -168,7 +168,7 @@ export function fetchObjectProperties (obj, successFunc = null, errorFunc = null
     for (const key in data) {
       obj[key] = data[key]
     }
-    obj['yaml'] = yaml.safeDump(data)
+    obj['yaml'] = yaml.safeDump(data, {'lineWidth': 160})
     if (successFunc != null) {
       successFunc(obj)
     }
