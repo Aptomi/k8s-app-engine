@@ -43,8 +43,9 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy/diagram/gen/:gen", api.handlePolicyDiagram)
 	router.GET("/api/v1/policy/diagram/compare/gen/:gen/genBase/:genBase", api.handlePolicyDiagramCompare)
 
-	// retrieve endpoints
+	// retrieve endpoints (all + by dependency)
 	router.GET("/api/v1/endpoints", api.handleEndpointsGet)
+	router.GET("/api/v1/endpoints/dependency/:ns/:name", api.handleEndpointsGet)
 
 	// retrieve revision (latest + by a given generation)
 	router.GET("/api/v1/revision", api.handleRevisionGet)

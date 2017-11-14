@@ -145,9 +145,9 @@ export async function getDependencies (successFunc, errorFunc) {
 }
 
 // loads all endpoints
-export async function getEndpoints (successFunc, errorFunc) {
+export async function getEndpoints (d, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['endpoints'].join('/')
+  const handler = ['endpoints', 'dependency', d['metadata']['namespace'], d['metadata']['name']].join('/')
   callAPI(handler, async, function (data) {
     successFunc(data['list'])
   }, function (err) {

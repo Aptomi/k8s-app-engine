@@ -83,7 +83,7 @@
           this.error = err
         }, this)
 
-        getEndpoints(fetchSuccess, fetchError)
+        getEndpoints(this.dependency, fetchSuccess, fetchError)
       }
     }
   }
