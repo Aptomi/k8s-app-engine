@@ -16,7 +16,7 @@
               <thead>
                 <tr>
                   <th>Version</th>
-                  <th>Created By</th>
+                  <th>Who</th>
                   <th>When</th>
                   <th>Apply Revisions</th>
                   <th>Apply Status</th>
@@ -30,8 +30,8 @@
                 </tr>
                 <tr v-for="p in policies">
                   <td>{{ p['metadata']['generation'] }}</td>
-                  <td>{{ p['metadata']['createdby'] }}</td>
-                  <td>{{ p['metadata']['createdat'] | formatDateAgo }} <small>({{ p['metadata']['createdat'] | formatDate }})</small></td>
+                  <td>{{ p['metadata']['updatedby'] }}</td>
+                  <td>{{ p['metadata']['updatedat'] | formatDateAgo }} <small>({{ p['metadata']['updatedat'] | formatDate }})</small></td>
                   <td class="col-xs-4">
                     <span v-if="!p['revisions'][0]" class="label label-warning">N/A</span>
                     <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'success', 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
