@@ -50,7 +50,13 @@
                       </div>
                     </div>
                   </td>
-                  <td><span v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1">{{ r['appliedat'] | formatDateAgo }}</span></td>
+                  <td v-if="p['revisions'].length == 0">
+                    Never applied
+                  </td>
+                  <td v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1">
+                    {{ r['appliedat'] | formatDateAgo }}
+                    <small>({{ r['appliedat'] | formatDate }})</small>
+                  </td>
                   <td>
                     <div class="btn-group btn-group-xs">
                       <button type="button" class="btn btn-default btn-flat">Action</button>
