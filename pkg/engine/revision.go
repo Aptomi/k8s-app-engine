@@ -2,6 +2,7 @@ package engine
 
 import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"time"
 )
 
 // RevisionName is the name of the only revision that exists in DB (but with many generations)
@@ -35,8 +36,9 @@ type Revision struct {
 	// Policy represents generation of the corresponding policy
 	Policy runtime.Generation
 
-	Status   string
-	Progress RevisionProgress
+	Status    string
+	Progress  RevisionProgress
+	AppliedAt time.Time
 }
 
 // RevisionProgress represents revision applying progress

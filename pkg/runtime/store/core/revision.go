@@ -8,6 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	log "github.com/Sirupsen/logrus"
 	"math"
+	"time"
 )
 
 // GetRevision returns Revision for specified generation
@@ -147,6 +148,8 @@ func (p *revisionProgressUpdater) Done(success bool) {
 		status = engine.RevisionStatusError
 	}
 	p.revision.Status = status
+
+	p.revision.AppliedAt = time.Now()
 
 	p.save()
 }
