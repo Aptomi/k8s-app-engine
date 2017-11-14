@@ -73,11 +73,11 @@ type ComponentInstance struct {
 		These fields get populated during apply and desired -> actual state reconciliation
 	*/
 
-	// CreatedOn is when this component instance was created
-	CreatedOn time.Time
+	// CreatedAt is when this component instance was created
+	CreatedAt time.Time
 
-	// UpdatedOn is the last time when this component instance was updated
-	UpdatedOn time.Time
+	// UpdatedAt is the last time when this component instance was updated
+	UpdatedAt time.Time
 
 	// Endpoints represents all URLs that could be used to access deployed service
 	Endpoints map[string]string
@@ -120,7 +120,7 @@ func (instance *ComponentInstance) GetName() string {
 
 // GetRunningTime returns the total lifetime of a component instance (since it was launched till now)
 func (instance *ComponentInstance) GetRunningTime() time.Duration {
-	return time.Since(instance.CreatedOn)
+	return time.Since(instance.CreatedAt)
 }
 
 func (instance *ComponentInstance) addDependency(dependencyKey string) {
@@ -183,12 +183,12 @@ func (instance *ComponentInstance) addEdgeOut(dstKey string) {
 }
 
 // UpdateTimes updates component creation and update times
-func (instance *ComponentInstance) UpdateTimes(createdOn time.Time, updatedOn time.Time) {
-	if time.Time.IsZero(instance.CreatedOn) || (!time.Time.IsZero(createdOn) && createdOn.Before(instance.CreatedOn)) {
-		instance.CreatedOn = createdOn
+func (instance *ComponentInstance) UpdateTimes(createdAt time.Time, updatedAt time.Time) {
+	if time.Time.IsZero(instance.CreatedAt) || (!time.Time.IsZero(createdAt) && createdAt.Before(instance.CreatedAt)) {
+		instance.CreatedAt = createdAt
 	}
-	if !time.Time.IsZero(updatedOn) && updatedOn.After(instance.UpdatedOn) {
-		instance.UpdatedOn = updatedOn
+	if !time.Time.IsZero(updatedAt) && updatedAt.After(instance.UpdatedAt) {
+		instance.UpdatedAt = updatedAt
 	}
 }
 

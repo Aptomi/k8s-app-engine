@@ -44,7 +44,7 @@ func (a *AttachDependencyAction) updateActualState(context *action.Context) erro
 
 	// preserve previous create and update date before overwriting
 	desired := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	desired.UpdateTimes(actual.CreatedOn, actual.UpdatedOn)
+	desired.UpdateTimes(actual.CreatedAt, actual.UpdatedAt)
 
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = desired
 

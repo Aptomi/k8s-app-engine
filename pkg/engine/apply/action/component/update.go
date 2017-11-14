@@ -46,9 +46,9 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 
 func (a *UpdateAction) updateActualState(context *action.Context) error {
 	// preserve previous creation date before overwriting
-	prevCreatedOn := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedOn
+	prevCreatedAt := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedAt
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	instance.UpdateTimes(prevCreatedOn, time.Now())
+	instance.UpdateTimes(prevCreatedAt, time.Now())
 
 	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
 	err := context.ActualStateUpdater.Save(instance)

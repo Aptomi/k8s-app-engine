@@ -289,8 +289,8 @@ type componentTimes struct {
 func getTimes(t *testing.T, key string, u2 *resolve.PolicyResolution) componentTimes {
 	t.Helper()
 	return componentTimes{
-		created: getInstanceInternal(t, key, u2).CreatedOn,
-		updated: getInstanceInternal(t, key, u2).UpdatedOn,
+		created: getInstanceInternal(t, key, u2).CreatedAt,
+		updated: getInstanceInternal(t, key, u2).UpdatedAt,
 	}
 }
 

@@ -112,7 +112,7 @@ func (n serviceInstanceNode) getID() string {
 
 func (n serviceInstanceNode) getLabel() string {
 	timeRunning := "<i>not running</i>"
-	if !n.instance.CreatedOn.IsZero() {
+	if !n.instance.CreatedAt.IsZero() {
 		timeRunning = fmt.Sprintf("running: <i>%s</i>" + html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))
 	}
 	return fmt.Sprintf(
