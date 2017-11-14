@@ -28,6 +28,9 @@
               <tr v-if="error">
                 <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
               </tr>
+              <tr v-if="!dependencies">
+                <td>No Dependencies Declared</td>
+              </tr>
               <tr v-for="d in dependencies">
                 <td>{{d.namespace}}</td>
                 <td>{{d.name}}</td>

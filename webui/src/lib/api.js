@@ -2,7 +2,7 @@ const async = true
 const sync = false
 
 const yaml = require('js-yaml')
-const delayMs = 1000
+const delayMs = 0
 const basePath = process.env.API_BASEPATH
 
 /*
@@ -162,7 +162,7 @@ export async function getEndpoints (successFunc, errorFunc) {
 // receives a bare entry with populated fields (namespace, kind, name, generation), loads the corresponding object
 // from the database and populates the corresponding fields in obj
 export function fetchObjectProperties (obj, successFunc = null, errorFunc = null) {
-  const handler = ['policy', 'gen', obj['generation'], 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
+  const handler = ['policy', 'gen', '0', 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
   callAPI(handler, sync, function (data) {
     for (const key in data) {
       obj[key] = data[key]
