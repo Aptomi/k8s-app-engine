@@ -100,8 +100,8 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runti
 
 	if changed {
 		// update metadata before saving policy data (to capture who and when edited the policy)
-		policyData.Metadata.CreatedAt = time.Now()
-		policyData.Metadata.CreatedBy = performedBy
+		policyData.Metadata.UpdatedAt = time.Now()
+		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
 		_, err = ds.store.Save(policyData)

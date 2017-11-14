@@ -29,8 +29,8 @@ type PolicyData struct {
 // PolicyDataMetadata is the metadata for PolicyData object that includes generation
 type PolicyDataMetadata struct {
 	Generation runtime.Generation
-	CreatedAt  time.Time
-	CreatedBy  string
+	UpdatedAt  time.Time
+	UpdatedBy  string
 }
 
 // GetName returns PolicyData name
