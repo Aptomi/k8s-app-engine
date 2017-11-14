@@ -54,6 +54,8 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/revision/policy/:policy", api.handleRevisionGetByPolicy)
 	router.GET("/api/v1/revisions/policy/:policy", api.handleRevisionsGetByPolicy)
 
+	router.DELETE("/api/v1/actualstate", api.handleActualStateReset)
+
 	// return aptomi version
 	router.GET("/version", api.handleVersion)
 }

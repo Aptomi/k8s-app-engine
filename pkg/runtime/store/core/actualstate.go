@@ -48,3 +48,22 @@ func (updater *actualStateUpdater) Save(obj runtime.Storable) error {
 func (updater *actualStateUpdater) Delete(key string) error {
 	return updater.store.Delete(key)
 }
+
+func (ds *defaultStore) ResetActualState() error {
+	instances, err := ds.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
+	if err != nil {
+		return fmt.Errorf("error while getting all component instances: %s", err)
+	}
+
+	for _, instanceObj := range instances {
+		if instance, ok := instanceObj.(*resolve.ComponentInstance); ok {
+			key := runtime.KeyForStorable(instance)
+			deleteErr := ds.store.Delete(key)
+			if deleteErr != nil {
+				return deleteErr
+			}
+		}
+	}
+
+	return nil
+}

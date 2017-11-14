@@ -38,4 +38,5 @@ type Revision interface {
 type ActualState interface {
 	GetActualState() (*resolve.PolicyResolution, error)
 	GetActualStateUpdater() actual.StateUpdater
+	ResetActualState() error
 }
