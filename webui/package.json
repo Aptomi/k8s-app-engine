@@ -29,7 +29,7 @@
     "vue": "^2.5.3",
     "vue-router": "^2.8.1",
     "vuex": "^2.2.1",
-    "vue-select": "^2.3.0",
+    "vue-multiselect": "^2.0.6",
     "vue-body-class": "^2.0.0-beta.2"
   },
   "devDependencies": {

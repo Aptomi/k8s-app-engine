@@ -12,7 +12,8 @@
           <div class="col-xs-4">
             <div class="form-group">
               <label>Namespace</label>
-              <v-select placeholder="Select namespace" v-model="selectedNamespace" :options.sync="namespaces"></v-select>
+              <!-- :multiple="false" :allowempty="false"  -->
+              <v-select placeholder="Select namespace" v-model="selectedNamespace" :options.sync="namespaces" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
             <!-- /.form-group -->
           </div>
@@ -20,7 +21,7 @@
           <div class="col-xs-8">
             <div class="form-group">
               <label>Object</label>
-              <v-select placeholder="Select object" v-model="selectedObject" :options.sync="objectList"></v-select>
+              <v-select placeholder="Select object" v-model="selectedObject" :options.sync="objectList" label="label" track-by="label" group-label="kind" group-values="list" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
             <!-- /.form-group -->
           </div>
@@ -44,7 +45,7 @@
 </template>
 
 <script>
-  import vSelect from 'vue-select'
+  import vSelect from 'vue-multiselect'
   import objectData from 'pages/components/ObjectData'
   import { getPolicy, getPolicyObjects, getNamespaces, filterObjects } from 'lib/api.js'
 
@@ -72,16 +73,32 @@
       selectedNamespace: function (ns) {
         // once namespace is selected, create the list of objects for the second dropdown
         this.selectedObject = null
-        this.objectList = filterObjects(this.policyObjects, ns)
-        for (const idx in this.objectList) {
-          let obj = this.objectList[idx]
+        this.filteredObjects = filterObjects(this.policyObjects, ns)
+
+        // group objects by kind
+        let byKind = {}
+        for (const idx in this.filteredObjects) {
+          let obj = this.filteredObjects[idx]
           obj['label'] = [obj['kind'], obj['name']].join('/')
+          if (!(obj['kind'] in byKind)) {
+            byKind[obj['kind']] = []
+          }
+          byKind[obj['kind']].push(obj)
+        }
+
+        // add them to the object list
+        this.objectList = []
+        for (const kind in byKind) {
+          this.objectList.push({
+            'kind': kind,
+            'list': byKind[kind]
+          })
         }
 
         // select first object
-        if (this.objectList.length > 0) {
+        if (this.filteredObjects.length > 0) {
           // select first namespace
-          this.selectedObject = this.objectList[0]
+          this.selectedObject = this.filteredObjects[0]
         }
       }
     },
@@ -108,9 +125,11 @@
         getPolicy(fetchSuccess, fetchError)
       }
     },
-    components: {vSelect, objectData}
+    components: {
+      vSelect,
+      objectData
+    }
   }
-
 </script>
 
 <style>

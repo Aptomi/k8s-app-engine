@@ -12,7 +12,7 @@
           <div class="col-xs-2">
             <div class="form-group">
               <label>Policy Version</label>
-              <v-select placeholder="Select Policy Version" v-model="selectedPolicyVersion" :options.sync="policyVersions"></v-select>
+              <v-select placeholder="Select Policy Version" v-model="selectedPolicyVersion" :options.sync="policyVersions" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
             <!-- /.form-group -->
           </div>
@@ -20,7 +20,7 @@
           <div class="col-xs-2">
             <div class="form-group">
               <input type="checkbox" id="checkbox" v-model="compareEnabled"> <label>Compare Against</label>
-              <v-select v-if="compareEnabled" placeholder="Select Policy Version" v-model="selectedPolicyVersionBase" :options.sync="policyVersions"></v-select>
+              <v-select v-if="compareEnabled" placeholder="Select Policy Version" v-model="selectedPolicyVersionBase" :options.sync="policyVersions" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
             <!-- /.form-group -->
           </div>
@@ -51,7 +51,7 @@
 </template>
 
 <script>
-  import vSelect from 'vue-select'
+  import vSelect from 'vue-multiselect'
   import vDiagram from 'pages/components/Diagram'
   import { getPolicy, getPolicyGeneration, getPolicyObjects, getNamespaces } from 'lib/api.js'
 
@@ -123,7 +123,10 @@
         getPolicy(fetchSuccess, fetchError)
       }
     },
-    components: {vSelect, vDiagram}
+    components: {
+      vSelect,
+      vDiagram
+    }
   }
 
 </script>
