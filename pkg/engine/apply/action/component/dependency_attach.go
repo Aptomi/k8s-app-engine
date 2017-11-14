@@ -21,10 +21,10 @@ type AttachDependencyAction struct {
 }
 
 // NewAttachDependencyAction creates new AttachDependencyAction
-func NewAttachDependencyAction(revision runtime.Generation, componentKey string, dependencyID string) *AttachDependencyAction {
+func NewAttachDependencyAction(componentKey string, dependencyID string) *AttachDependencyAction {
 	return &AttachDependencyAction{
 		TypeKind:     AttachDependencyActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(revision, AttachDependencyActionObject.Kind, componentKey, dependencyID),
+		Metadata:     action.NewMetadata(AttachDependencyActionObject.Kind, componentKey, dependencyID),
 		ComponentKey: componentKey,
 		DependencyID: dependencyID,
 	}

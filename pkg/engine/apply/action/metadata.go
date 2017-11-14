@@ -7,17 +7,15 @@ import (
 
 // Metadata is an object metadata for all state update actions
 type Metadata struct {
-	Name     string
-	Revision runtime.Generation
+	Name string
 }
 
 // NewMetadata creates new Metadata
-func NewMetadata(revision runtime.Generation, kind string, keys ...string) *Metadata {
+func NewMetadata(kind string, keys ...string) *Metadata {
 	keysStr := strings.Join(keys, runtime.KeySeparator)
-	name := strings.Join([]string{revision.String(), kind, keysStr}, runtime.KeySeparator)
+	name := strings.Join([]string{kind, keysStr}, runtime.KeySeparator)
 	return &Metadata{
-		Name:     name,
-		Revision: revision,
+		Name: name,
 	}
 }
 

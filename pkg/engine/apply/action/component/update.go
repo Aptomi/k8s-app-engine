@@ -23,10 +23,10 @@ type UpdateAction struct {
 }
 
 // NewUpdateAction creates new UpdateAction
-func NewUpdateAction(revision runtime.Generation, componentKey string) *UpdateAction {
+func NewUpdateAction(componentKey string) *UpdateAction {
 	return &UpdateAction{
 		TypeKind:     UpdateActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(revision, UpdateActionObject.Kind, componentKey),
+		Metadata:     action.NewMetadata(UpdateActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
 }

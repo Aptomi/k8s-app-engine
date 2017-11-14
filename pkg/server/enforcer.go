@@ -71,12 +71,12 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("unable to get curr revision: %s", err)
 	}
 
+	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
+
 	nextRevision, err := server.store.NewRevision(desiredPolicyGen)
 	if err != nil {
 		return fmt.Errorf("unable to get next revision: %s", err)
 	}
-
-	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
 
 	// policy changed while no actions needed to achieve desired state
 	if len(stateDiff.Actions) <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {

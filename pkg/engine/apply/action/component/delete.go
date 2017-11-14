@@ -23,10 +23,10 @@ type DeleteAction struct {
 }
 
 // NewDeleteAction creates new DeleteAction
-func NewDeleteAction(revision runtime.Generation, componentKey string) *DeleteAction {
+func NewDeleteAction(componentKey string) *DeleteAction {
 	return &DeleteAction{
 		TypeKind:     DeleteActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(revision, DeleteActionObject.Kind, componentKey),
+		Metadata:     action.NewMetadata(DeleteActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
 }

@@ -21,9 +21,9 @@ type DetachDependencyAction struct {
 }
 
 // NewDetachDependencyAction creates new DetachDependencyAction
-func NewDetachDependencyAction(revision runtime.Generation, componentKey string, dependencyID string) *DetachDependencyAction {
+func NewDetachDependencyAction(componentKey string, dependencyID string) *DetachDependencyAction {
 	return &DetachDependencyAction{
-		Metadata:     action.NewMetadata(revision, DetachDependencyActionObject.Kind, componentKey, dependencyID),
+		Metadata:     action.NewMetadata(DetachDependencyActionObject.Kind, componentKey, dependencyID),
 		ComponentKey: componentKey,
 		DependencyID: dependencyID,
 	}

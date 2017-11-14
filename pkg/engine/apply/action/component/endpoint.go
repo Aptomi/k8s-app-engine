@@ -22,10 +22,10 @@ type EndpointsAction struct {
 }
 
 // NewEndpointsAction creates new EndpointsAction
-func NewEndpointsAction(revision runtime.Generation, componentKey string) *EndpointsAction {
+func NewEndpointsAction(componentKey string) *EndpointsAction {
 	return &EndpointsAction{
 		TypeKind:     EndpointsActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(revision, EndpointsActionObject.Kind, componentKey),
+		Metadata:     action.NewMetadata(EndpointsActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
 }

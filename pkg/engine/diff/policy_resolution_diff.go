@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/global"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // PolicyResolutionDiff represents a difference between two policy resolution data structs (actual and desired states)
@@ -18,20 +17,17 @@ type PolicyResolutionDiff struct {
 
 	// Actions is a generated, ordered list of actions that need to be executed in order to get from an actual state to the desired state
 	Actions []action.Base
-
-	Revision runtime.Generation
 }
 
 // NewPolicyResolutionDiff calculates difference between two given policy resolution structs (actual and desired states).
 // It iterates over all component instances and figures out which component instances have to be instantiated (new
 // consumers appeared and they didn't exist before), which component instances have to be updated (e.g. parameters changed), which component
 // instances have to be destroyed (that have no consumers left), and so on.
-func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.PolicyResolution, revision runtime.Generation) *PolicyResolutionDiff {
+func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.PolicyResolution) *PolicyResolutionDiff {
 	result := &PolicyResolutionDiff{
-		Prev:     prev,
-		Next:     next,
-		Actions:  []action.Base{},
-		Revision: revision,
+		Prev:    prev,
+		Next:    next,
+		Actions: []action.Base{},
 	}
 	result.compareAndProduceActions()
 	return result
@@ -83,12 +79,12 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		// see if a component needs to be instantiated
 		if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
 			componentChanged = true
-			actions[instanceKey] = append(actions[instanceKey], component.NewCreateAction(diff.Revision, instanceKey))
+			actions[instanceKey] = append(actions[instanceKey], component.NewCreateAction(instanceKey))
 		}
 
 		// see if a component needs to be destructed
 		if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
-			actions[instanceKey] = append(actions[instanceKey], component.NewDeleteAction(diff.Revision, instanceKey))
+			actions[instanceKey] = append(actions[instanceKey], component.NewDeleteAction(instanceKey))
 		}
 
 		// see if a component needs to be updated
@@ -97,14 +93,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 			if !sameParams {
 				componentChanged = true
 
-				actions[instanceKey] = appendUpdateAction(actions[instanceKey], updateActions, component.NewUpdateAction(diff.Revision, instanceKey))
+				actions[instanceKey] = appendUpdateAction(actions[instanceKey], updateActions, component.NewUpdateAction(instanceKey))
 
 				// if it has a parent service, indicate that it basically gets updated as well
 				// this is required for adjusting update/creation times of a service with changed component
 				// this may produce duplicate "update" actions for the parent service
 				if nextInstance.Metadata.Key.IsComponent() {
 					serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
-					actions[serviceKey] = appendUpdateAction(actions[serviceKey], updateActions, component.NewUpdateAction(diff.Revision, serviceKey))
+					actions[serviceKey] = appendUpdateAction(actions[serviceKey], updateActions, component.NewUpdateAction(serviceKey))
 				}
 			}
 		}
@@ -113,7 +109,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		for dependencyID := range depKeysPrev {
 			if !depKeysNext[dependencyID] {
 				componentChanged = true
-				actions[instanceKey] = append(actions[instanceKey], component.NewDetachDependencyAction(diff.Revision, instanceKey, dependencyID))
+				actions[instanceKey] = append(actions[instanceKey], component.NewDetachDependencyAction(instanceKey, dependencyID))
 			}
 		}
 
@@ -121,12 +117,12 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		for dependencyID := range depKeysNext {
 			if !depKeysPrev[dependencyID] {
 				componentChanged = true
-				actions[instanceKey] = append(actions[instanceKey], component.NewAttachDependencyAction(diff.Revision, instanceKey, dependencyID))
+				actions[instanceKey] = append(actions[instanceKey], component.NewAttachDependencyAction(instanceKey, dependencyID))
 			}
 		}
 
 		if componentChanged {
-			endpointsActions = append(endpointsActions, component.NewEndpointsAction(diff.Revision, instanceKey))
+			endpointsActions = append(endpointsActions, component.NewEndpointsAction(instanceKey))
 		}
 	}
 
@@ -150,6 +146,6 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 
 	// call a global post-processing action
 	if len(diff.Actions) > 0 {
-		diff.Actions = append(diff.Actions, global.NewPostProcessAction(diff.Revision))
+		diff.Actions = append(diff.Actions, global.NewPostProcessAction())
 	}
 }

@@ -31,7 +31,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 	desiredState := resolvePolicy(t, bDesired)
 
 	// process all actions
-	actions := diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions
+	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
 
 	applier := NewEngineApply(
 		bDesired.Policy(),
@@ -65,7 +65,7 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 	desiredState := resolvePolicy(t, bDesired)
 
 	// process all actions (and make component fail deployment)
-	actions := diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions
+	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
 	applier := NewEngineApply(
 		bDesired.Policy(),
 		desiredState,
@@ -110,7 +110,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
 		mockRegistryFailOnComponent(),
-		diff.NewPolicyResolutionDiff(desiredState, actualState, 0).Actions,
+		diff.NewPolicyResolutionDiff(desiredState, actualState).Actions,
 		progress.NewNoop(),
 	)
 
@@ -156,7 +156,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		bDesiredNext.External(),
 		mockRegistryFailOnComponent(),
-		diff.NewPolicyResolutionDiff(desiredStateNext, actualState, 0).Actions,
+		diff.NewPolicyResolutionDiff(desiredStateNext, actualState).Actions,
 		progress.NewNoop(),
 	)
 
@@ -195,7 +195,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		bDesiredNext.External(),
 		mockRegistryFailOnComponent(),
-		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState, 0).Actions,
+		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState).Actions,
 		progress.NewNoop(),
 	)
 

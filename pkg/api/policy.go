@@ -139,12 +139,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState))
 	}
 
-	nextRevision, err := api.store.NewRevision(desiredPolicyGen)
-	if err != nil {
-		panic(fmt.Sprintf("Unable to get next revision: %s", err))
-	}
-
-	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState, nextRevision.GetGeneration())
+	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
 
 	actions := make([]string, len(stateDiff.Actions))
 	for idx, action := range stateDiff.Actions {

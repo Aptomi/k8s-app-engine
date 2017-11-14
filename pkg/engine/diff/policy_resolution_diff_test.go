@@ -19,7 +19,7 @@ func TestDiffEmpty(t *testing.T) {
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should be empty
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, 0, 0, 0, 0, 0, 0, 0)
 }
 
@@ -33,7 +33,7 @@ func TestDiffComponentCreationAndAttachDependency(t *testing.T) {
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should contain instantiated component
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, 2, 0, 0, 2, 0, 2, 1)
 
 	// add another dependency
@@ -42,7 +42,7 @@ func TestDiffComponentCreationAndAttachDependency(t *testing.T) {
 	resolvedNextAgain := resolvePolicy(t, b)
 
 	// component should not be instantiated again (it's already there), just new dependency should be attached
-	diffAgain := NewPolicyResolutionDiff(resolvedNextAgain, resolvedNext, 0)
+	diffAgain := NewPolicyResolutionDiff(resolvedNextAgain, resolvedNext)
 	verifyDiff(t, diffAgain, 0, 0, 0, 2, 0, 2, 1)
 }
 
@@ -56,7 +56,7 @@ func TestDiffComponentUpdate(t *testing.T) {
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should contain instantiated component
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, 2, 0, 0, 2, 0, 2, 1)
 
 	// update dependency
@@ -64,7 +64,7 @@ func TestDiffComponentUpdate(t *testing.T) {
 	resolvedNextAgain := resolvePolicy(t, b)
 
 	// component should be updated
-	diffAgain := NewPolicyResolutionDiff(resolvedNextAgain, resolvedNext, 0)
+	diffAgain := NewPolicyResolutionDiff(resolvedNextAgain, resolvedNext)
 	verifyDiff(t, diffAgain, 0, 0, 2, 0, 0, 1, 1)
 }
 
@@ -78,14 +78,14 @@ func TestDiffComponentDelete(t *testing.T) {
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should contain instantiated component
-	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev, 0)
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, 2, 0, 0, 2, 0, 2, 1)
 
 	// resolve empty policy
 	resolvedEmpty := resolvePolicy(t, builder.NewPolicyBuilder())
 
 	// diff should contain destructed component
-	diffAgain := NewPolicyResolutionDiff(resolvedEmpty, resolvedNext, 0)
+	diffAgain := NewPolicyResolutionDiff(resolvedEmpty, resolvedNext)
 	verifyDiff(t, diffAgain, 0, 2, 0, 0, 2, 2, 1)
 }
 

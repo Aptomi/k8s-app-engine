@@ -20,10 +20,10 @@ type PostProcessAction struct {
 }
 
 // NewPostProcessAction creates new PostProcessAction
-func NewPostProcessAction(revision runtime.Generation) *PostProcessAction {
+func NewPostProcessAction() *PostProcessAction {
 	return &PostProcessAction{
 		TypeKind: PostProcessActionObject.GetTypeKind(),
-		Metadata: action.NewMetadata(revision, PostProcessActionObject.Kind),
+		Metadata: action.NewMetadata(PostProcessActionObject.Kind),
 	}
 }
 
