@@ -8,9 +8,22 @@ import App from './App'
 import router from './lib/router'
 import EventBus from './lib/eventBus.js'
 import axios from 'axios'
+import moment from 'moment'
 
 Vue.prototype.$bus = EventBus
 Vue.prototype.$http = axios
+
+Vue.filter('formatDateAgo', function (value) {
+  if (value) {
+    return moment(String(value)).fromNow()
+  }
+})
+
+Vue.filter('formatDate', function (value) {
+  if (value) {
+    return moment(String(value)).format('MM/DD/YYYY hh:mm:ss')
+  }
+})
 
 /* eslint-disable no-new */
 new Vue({

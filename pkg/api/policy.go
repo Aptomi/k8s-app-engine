@@ -99,7 +99,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 
 	// todo(slukjanov): handle deleted
 	deleted := make([]runtime.Key, 0)
-	changed, policyData, err := api.store.UpdatePolicy(objects, deleted)
+	changed, policyData, err := api.store.UpdatePolicy(objects, deleted, user.Name)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}

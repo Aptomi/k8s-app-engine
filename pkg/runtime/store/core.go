@@ -20,7 +20,7 @@ type Core interface {
 type Policy interface {
 	GetPolicy(runtime.Generation) (*lang.Policy, runtime.Generation, error)
 	GetPolicyData(runtime.Generation) (*engine.PolicyData, error)
-	UpdatePolicy(updated []lang.Base, deleted []runtime.Key) (changed bool, data *engine.PolicyData, err error)
+	UpdatePolicy(updated []lang.Base, deleted []runtime.Key, performedBy string) (changed bool, data *engine.PolicyData, err error)
 }
 
 // Revision represents database operations for Revision object

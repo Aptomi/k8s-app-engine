@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"time"
 )
 
 // PolicyDataObject is an informational data structure with Kind and Constructor for PolicyData
@@ -28,6 +29,8 @@ type PolicyData struct {
 // PolicyDataMetadata is the metadata for PolicyData object that includes generation
 type PolicyDataMetadata struct {
 	Generation runtime.Generation
+	CreatedAt  time.Time
+	CreatedBy  string
 }
 
 // GetName returns PolicyData name

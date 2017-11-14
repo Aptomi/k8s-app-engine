@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"time"
 )
 
 // GetPolicyData retrieves PolicyData given its generation
@@ -61,7 +62,7 @@ func (ds *defaultStore) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime
 }
 
 // UpdatePolicy updates a list of changed objects in the underlying data store
-func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runtime.Key) (bool, *engine.PolicyData, error) {
+func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runtime.Key, performedBy string) (bool, *engine.PolicyData, error) {
 	// todo(slukjanov): handle deleted
 
 	// we should process only a single policy update request at once
@@ -98,6 +99,11 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runti
 	}
 
 	if changed {
+		// update metadata before saving policy data (to capture who and when edited the policy)
+		policyData.Metadata.CreatedAt = time.Now()
+		policyData.Metadata.CreatedBy = performedBy
+
+		// save policy data
 		_, err = ds.store.Save(policyData)
 		if err != nil {
 			return false, nil, err

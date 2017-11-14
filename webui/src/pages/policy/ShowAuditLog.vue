@@ -17,7 +17,7 @@
                 <tr>
                   <th>Version</th>
                   <th>Created By</th>
-                  <th>Date</th>
+                  <th>When</th>
                   <th>Apply Revisions</th>
                   <th>Apply Status</th>
                   <th>Last Applied</th>
@@ -29,9 +29,9 @@
                   <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
                 </tr>
                 <tr v-for="p in policies">
-                  <td>{{ p.generation }}</td>
-                  <td>{{ p.createdBy }}</td>
-                  <td>{{ p.createdOn }}</td>
+                  <td>{{ p['metadata']['generation'] }}</td>
+                  <td>{{ p['metadata']['createdby'] }}</td>
+                  <td>{{ p['metadata']['createdat'] | formatDateAgo }} <small>({{ p['metadata']['createdat'] | formatDate }})</small></td>
                   <td class="col-xs-4">
                     <span v-if="!p['revisions'][0]" class="label label-warning">N/A</span>
                     <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['progress']['finished'] && !r['progress']['error'], 'label-primary': !r['progress']['finished'] && !r['progress']['error'], 'label-danger': r['progress']['error'] }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
@@ -103,7 +103,7 @@
           for (const idx in this.policies) {
             const p = this.policies[idx]
             const hasRevisions = (p['revisions'] != null) && (p['revisions'].length > 0)
-            fetchPolicyRevisions(p)
+            fetchPolicyRevisions(p['metadata']['generation'], p)
             if (hasRevisions) {
               break
             }

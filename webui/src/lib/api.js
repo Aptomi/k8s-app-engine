@@ -107,8 +107,9 @@ export async function getAllPolicies (successFunc, errorFunc) {
     const policies = []
     let lastGen = getPolicyGeneration(data)
     for (let i = lastGen; i > 0; i--) {
-      let p = {'generation': i}
-      fetchPolicyRevisions(p)
+      let p = {}
+      fetchPolicy(i.toString(), p)
+      fetchPolicyRevisions(i.toString(), p)
       policies.push(p)
     }
     successFunc(policies)
@@ -192,13 +193,25 @@ function fetchDependency (d) {
 }
 
 // fetches policy revisions for a given policy
-export function fetchPolicyRevisions (p) {
-  const handler = ['revisions', 'policy', p['generation']].join('/')
+export function fetchPolicyRevisions (generation, p) {
+  const handler = ['revisions', 'policy', generation].join('/')
   callAPI(handler, sync, function (data) {
     p['revisions'] = data['data']
   }, function (err) {
     // can't fetch policy revisions
     p['revisions'] = [err]
+  })
+}
+
+// loads the latest policy
+export function fetchPolicy (generation, p) {
+  const handler = ['policy', 'gen', generation].join('/')
+  callAPI(handler, sync, function (data) {
+    for (const idx in data) {
+      p[idx] = data[idx]
+    }
+  }, function (err) {
+    p['error'] = err
   })
 }
 
