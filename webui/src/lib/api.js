@@ -136,7 +136,7 @@ export async function getDependencies (successFunc, errorFunc) {
     const dependencies = filterObjects(data['objects'], null, 'dependency')
     for (const idx in dependencies) {
       fetchObjectProperties(dependencies[idx])
-      fetchDependency(dependencies[idx])
+      fetchDependencyStatus(dependencies[idx])
     }
     successFunc(dependencies)
   }, function (err) {
@@ -181,11 +181,11 @@ export function fetchObjectProperties (obj, successFunc = null, errorFunc = null
   })
 }
 
-// fetches data for a single dependency
-function fetchDependency (d) {
-  const handler = ['dependency_status'].join('/')
+// fetches status for a single dependency
+function fetchDependencyStatus (d) {
+  const handler = ['policy', 'dependency', d['metadata']['namespace'], d['metadata']['name'], 'status'].join('/')
   callAPI(handler, sync, function (data) {
-    d['status'] = 'Deployed'
+    d['status'] = data['data']
   }, function (err) {
     // can't fetch dependency properties
     d['status_error'] = 'unable to fetch dependency status: ' + err

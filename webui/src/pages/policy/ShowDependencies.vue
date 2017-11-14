@@ -39,13 +39,11 @@
                 <td v-if="!d.error">{{d.contract}}</td>
                 <td v-else><span class="label label-danger center">Error</span></td>
                 <td v-if="!d.status_error">
-                  <span class="label label-success">{{d.status}}</span>
-                  <!-- <td><span class="label label-primary center">Processing</span></td> -->
-                  <!-- <td><span class="label label-danger center">Not Resolved</span></td> -->
+                  <span class="label" v-bind:class="{ 'label-success': d['status'] === 'Deployed', 'label-warning': d['status'] !== 'Deployed'}">{{d.status}}</span>
                 </td>
                 <td v-else><span class="label label-danger center">Error</span></td>
                 <td>
-                  <button type="button" class="btn btn-default btn-xs" @click="showEndpointsForDependency = d">Show
+                  <button v-if="d['status'] === 'Deployed'" type="button" class="btn btn-default btn-xs" @click="showEndpointsForDependency = d">Show
                     Endpoints
                   </button>
                 </td>
