@@ -23,9 +23,13 @@
           <tr v-if="!endpoints">
             <td>No Endpoints Available</td>
           </tr>
-          <tr v-for="e in endpoints">
-            <td>{{e.component}}</td>
-            <td><a :href="e.url">{{e.url}}</a></td>
+          <tr v-for="e, key in endpoints">
+            <td>{{ key }}</td>
+            <td>
+              <ul v-for="url, proto in e">
+                <li><a :href="url">{{proto}} - {{ url }}</a></li>
+              </ul>
+            </td>
           </tr>
           </tbody>
         </table>

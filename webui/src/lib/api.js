@@ -148,7 +148,7 @@ export async function getEndpoints (successFunc, errorFunc) {
   await makeDelay()
   const handler = ['endpoints'].join('/')
   callAPI(handler, async, function (data) {
-    successFunc(data['endpoints'])
+    successFunc(data['list'])
   }, function (err) {
     errorFunc(err)
   })
