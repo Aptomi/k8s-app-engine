@@ -78,11 +78,11 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 			depKeysNext = nextInstance.DependencyKeys
 		}
 
-		createOrUpdate := false
+		componentChanged := false
 
 		// see if a component needs to be instantiated
 		if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
-			createOrUpdate = true
+			componentChanged = true
 			actions[instanceKey] = append(actions[instanceKey], component.NewCreateAction(diff.Revision, instanceKey))
 		}
 
@@ -95,7 +95,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		if len(depKeysPrev) > 0 && len(depKeysNext) > 0 {
 			sameParams := prevInstance.CalculatedCodeParams.DeepEqual(nextInstance.CalculatedCodeParams)
 			if !sameParams {
-				createOrUpdate = true
+				componentChanged = true
 
 				actions[instanceKey] = appendUpdateAction(actions[instanceKey], updateActions, component.NewUpdateAction(diff.Revision, instanceKey))
 
@@ -112,6 +112,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		// see if a user needs to be detached from a component
 		for dependencyID := range depKeysPrev {
 			if !depKeysNext[dependencyID] {
+				componentChanged = true
 				actions[instanceKey] = append(actions[instanceKey], component.NewDetachDependencyAction(diff.Revision, instanceKey, dependencyID))
 			}
 		}
@@ -119,11 +120,12 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		// see if a user needs to be attached to a component
 		for dependencyID := range depKeysNext {
 			if !depKeysPrev[dependencyID] {
+				componentChanged = true
 				actions[instanceKey] = append(actions[instanceKey], component.NewAttachDependencyAction(diff.Revision, instanceKey, dependencyID))
 			}
 		}
 
-		if createOrUpdate {
+		if componentChanged {
 			endpointsActions = append(endpointsActions, component.NewEndpointsAction(diff.Revision, instanceKey))
 		}
 	}
