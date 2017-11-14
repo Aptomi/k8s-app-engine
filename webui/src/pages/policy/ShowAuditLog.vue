@@ -50,7 +50,7 @@
                       </div>
                     </div>
                   </td>
-                  <td v-if="p['revisions'].length == 0">
+                  <td v-if="p['revisions'].length <= 0">
                     Never applied
                   </td>
                   <td v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1">
