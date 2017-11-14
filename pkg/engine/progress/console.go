@@ -62,7 +62,7 @@ func (progressConsole *Console) Advance() {
 }
 
 // Done should be called once done working with progress indicator
-func (progressConsole *Console) Done() {
+func (progressConsole *Console) Done(success bool) {
 	progressConsole.doneInternal()
 	progressConsole.progress.Stop()
 }

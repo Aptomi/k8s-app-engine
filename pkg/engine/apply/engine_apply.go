@@ -85,7 +85,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error)
 	}
 
 	// Finalize progress indicator
-	apply.progress.Done()
+	apply.progress.Done(!foundErrors)
 
 	// Return error if there's been at least one error
 	if foundErrors {

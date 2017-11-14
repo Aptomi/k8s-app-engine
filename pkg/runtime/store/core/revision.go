@@ -89,6 +89,7 @@ func (ds *defaultStore) NewRevision(policyGen runtime.Generation) (*engine.Revis
 			Generation: gen,
 		},
 		Policy: policyGen,
+		Status: engine.RevisionStatusInProgress,
 	}, nil
 }
 
@@ -138,14 +139,20 @@ func (p *revisionProgressUpdater) Advance() {
 	p.save()
 }
 
-func (p *revisionProgressUpdater) Done() {
+func (p *revisionProgressUpdater) Done(success bool) {
 	p.revision.Progress.Current = p.revision.Progress.Total
-	p.revision.Progress.Finished = true
+
+	status := engine.RevisionStatusSuccess
+	if !success {
+		status = engine.RevisionStatusError
+	}
+	p.revision.Status = status
+
 	p.save()
 }
 
 func (p *revisionProgressUpdater) IsDone() bool {
-	return p.revision.Progress.Finished
+	return p.revision.Status != engine.RevisionStatusInProgress
 }
 
 func (p *revisionProgressUpdater) GetCompletionPercent() int {

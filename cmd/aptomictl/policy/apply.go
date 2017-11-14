@@ -61,12 +61,18 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 
 				// todo print progress
 
-				return rev.Progress.Finished
+				return rev.Status != engine.RevisionStatusInProgress
 			})
 
-			if finished {
+			if !finished {
+				// todo pretty print
+				fmt.Println("Wait for revision apply timedout", rev)
+			} else if rev.Status == engine.RevisionStatusSuccess {
 				// todo pretty print
 				fmt.Println("Success! Policy applied", rev)
+			} else if rev.Status == engine.RevisionStatusError {
+				// todo pretty print
+				fmt.Println("Revision apply failed for policy", rev)
 			}
 		},
 	}

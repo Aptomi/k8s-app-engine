@@ -16,7 +16,7 @@
               <thead>
                 <tr>
                   <th>Version</th>
-                  <th>Who</th>
+                  <th>Created By</th>
                   <th>When</th>
                   <th>Apply Revisions</th>
                   <th>Apply Status</th>
@@ -30,22 +30,22 @@
                 </tr>
                 <tr v-for="p in policies">
                   <td>{{ p['metadata']['generation'] }}</td>
-                  <td>{{ p['metadata']['updatedby'] }}</td>
-                  <td>{{ p['metadata']['updatedat'] | formatDateAgo }} <small>({{ p['metadata']['updatedat'] | formatDate }})</small></td>
+                  <td>{{ p['metadata']['createdby'] }}</td>
+                  <td>{{ p['metadata']['createdat'] | formatDateAgo }} <small>({{ p['metadata']['createdat'] | formatDate }})</small></td>
                   <td class="col-xs-4">
                     <span v-if="!p['revisions'][0]" class="label label-warning">N/A</span>
-                    <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['progress']['finished'] && !r['progress']['error'], 'label-primary': !r['progress']['finished'] && !r['progress']['error'], 'label-danger': r['progress']['error'] }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
+                    <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'success', 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
                   </td>
                   <td class="align-middle">
                     <div v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1" class="progress-group">
-                      <div v-if="!r['progress']['finished'] && !r['progress']['error']" class="progress progress-xs progress-striped active">
+                      <div v-if="r['status'] === 'inprogress'" class="progress progress-xs progress-striped active">
                         <div class="progress-bar progress-bar-primary" style="width: 40%"></div>
                       </div>
-                      <span v-if="!r['progress']['finished'] && !r['progress']['error']" class="progress-number"><b>{{r['progress']['current']}}</b>/{{r['progress']['total']}}</span>
-                      <div v-if="r['progress']['finished'] && !r['progress']['error']" class="progress progress-xs active">
+                      <span v-if="r['status'] === 'inprogress'" class="progress-number"><b>{{r['progress']['current']}}</b>/{{r['progress']['total']}}</span>
+                      <div v-if="r['status'] === 'success'" class="progress progress-xs active">
                         <div class="progress-bar progress-bar-success" style="width: 100%"></div>
                       </div>
-                      <div v-if="r['progress']['error']" class="progress progress-xs active">
+                      <div v-if="r['status'] === 'error'" class="progress progress-xs active">
                         <div class="progress-bar progress-bar-danger" style="width: 100%"></div>
                       </div>
                     </div>

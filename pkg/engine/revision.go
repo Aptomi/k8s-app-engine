@@ -18,6 +18,12 @@ var RevisionObject = &runtime.Info{
 // RevisionKey is the default key for the Revision object (there is only one Revision exists but with multiple generations)
 var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, RevisionObject.Kind, runtime.EmptyName)
 
+const (
+	RevisionStatusInProgress = "inprogress"
+	RevisionStatusSuccess    = "success"
+	RevisionStatusError      = "error"
+)
+
 // Revision is a "milestone" in applying
 type Revision struct {
 	runtime.TypeKind `yaml:",inline"`
@@ -26,14 +32,14 @@ type Revision struct {
 	// Policy represents generation of the corresponding policy
 	Policy runtime.Generation
 
+	Status   string
 	Progress RevisionProgress
 }
 
 // RevisionProgress represents revision applying progress
 type RevisionProgress struct {
-	Current  int
-	Total    int
-	Finished bool
+	Current int
+	Total   int
 }
 
 // GetName returns Revision name
