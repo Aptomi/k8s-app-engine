@@ -128,13 +128,13 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int, componentEndpoints int, clusters int) {
 	t.Helper()
 	cnt := struct {
-		create    int
-		update    int
-		delete    int
-		attach    int
-		detach    int
-		endpoints int
-		clusters  int
+		create      int
+		update      int
+		delete      int
+		attach      int
+		detach      int
+		endpoints   int
+		postprocess int
 	}{}
 	s := []string{}
 	for _, act := range diff.Actions {
@@ -152,7 +152,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 		case *component.EndpointsAction:
 			cnt.endpoints++
 		case *global.PostProcessAction:
-			cnt.clusters++
+			cnt.postprocess++
 		default:
 			t.Fatalf("Incorrect action type: %T", act)
 		}
@@ -165,7 +165,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 	ok = ok && assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
 	ok = ok && assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
 	ok = ok && assert.Equal(t, componentEndpoints, cnt.endpoints, "Diff: component endpoints")
-	ok = ok && assert.Equal(t, clusters, cnt.clusters, "Diff: all clusters post processing")
+	ok = ok && assert.Equal(t, clusters, cnt.postprocess, "Diff: post processing")
 
 	if !ok {
 		t.Logf("Log of diff actions: %s", s)
