@@ -57,6 +57,13 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
 func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			apply.progress.Done(false)
+			panic(err)
+		}
+	}()
+
 	// initialize progress indicator
 	apply.progress.SetTotal(len(apply.actions))
 
