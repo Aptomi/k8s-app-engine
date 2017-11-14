@@ -30,7 +30,7 @@ func (api *coreAPI) handleUserRoles(writer http.ResponseWriter, request *http.Re
 		aclResolver = lang.NewACLResolver(lang.NewGlobalRules())
 	}
 
-	data := make(map[string]interface{})
+	data := make(map[string]map[string]map[string]bool)
 	users := api.externalData.UserLoader.LoadUsersAll().Users
 	for _, user := range users {
 		roleMap, errRoleMap := aclResolver.GetUserRoleMap(user)
