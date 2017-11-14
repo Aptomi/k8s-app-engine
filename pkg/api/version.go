@@ -25,5 +25,5 @@ var currentVersion = &Version{
 }
 
 func (api *coreAPI) handleVersion(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	api.contentType.Write(writer, request, currentVersion)
+	api.contentType.WriteOne(writer, request, currentVersion)
 }

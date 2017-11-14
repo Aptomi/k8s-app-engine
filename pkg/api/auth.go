@@ -30,8 +30,8 @@ func (api *coreAPI) authenticateUser(writer http.ResponseWriter, request *http.R
 	password := request.PostFormValue("password")
 	user, err := api.externalData.UserLoader.Authenticate(username, password)
 	if user == nil || err != nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusUnauthorized)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusUnauthorized)
 	} else {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusOK)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusOK)
 	}
 }

@@ -21,9 +21,9 @@ func (api *coreAPI) handleRevisionGet(writer http.ResponseWriter, request *http.
 	}
 
 	if revision == nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	} else {
-		api.contentType.Write(writer, request, revision)
+		api.contentType.WriteOne(writer, request, revision)
 	}
 }
 
@@ -40,9 +40,9 @@ func (api *coreAPI) handleRevisionGetByPolicy(writer http.ResponseWriter, reques
 	}
 
 	if revision == nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	} else {
-		api.contentType.Write(writer, request, revision)
+		api.contentType.WriteOne(writer, request, revision)
 	}
 }
 
@@ -67,8 +67,8 @@ func (api *coreAPI) handleRevisionsGetByPolicy(writer http.ResponseWriter, reque
 	}
 
 	if revisions == nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	} else {
-		api.contentType.Write(writer, request, &revisionsWrapper{Data: revisions})
+		api.contentType.WriteOne(writer, request, &revisionsWrapper{Data: revisions})
 	}
 }

@@ -79,15 +79,15 @@ func (handler *ContentTypeHandler) Read(request *http.Request) []runtime.Object 
 	return objects
 }
 
-// Write runtime object into the provided response writer using correct content type (taken from provided request)
+// WriteOne runtime object into the provided response writer using correct content type (taken from provided request)
 // with default http status (200 OK)
-func (handler *ContentTypeHandler) Write(writer http.ResponseWriter, request *http.Request, body runtime.Object) {
-	handler.WriteStatus(writer, request, body, http.StatusOK)
+func (handler *ContentTypeHandler) WriteOne(writer http.ResponseWriter, request *http.Request, body runtime.Object) {
+	handler.WriteOneWithStatus(writer, request, body, http.StatusOK)
 }
 
-// WriteStatus runtime object into the provided response writer using correct content type (taken from provided request)
+// WriteOneWithStatus runtime object into the provided response writer using correct content type (taken from provided request)
 // with specified http status
-func (handler *ContentTypeHandler) WriteStatus(writer http.ResponseWriter, request *http.Request, body runtime.Object, status int) {
+func (handler *ContentTypeHandler) WriteOneWithStatus(writer http.ResponseWriter, request *http.Request, body runtime.Object, status int) {
 	writer.Header().Set("Content-Type", handler.GetContentType(request.Header))
 	writer.WriteHeader(status)
 

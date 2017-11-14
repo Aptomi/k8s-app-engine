@@ -30,7 +30,7 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	}
 
 	graph := visualization.NewGraphBuilder(policy, nil, nil).Policy(visualization.PolicyCfgDefault)
-	api.contentType.Write(writer, request, &graphWrapper{Data: graph.GetData()})
+	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }
 
 func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -57,5 +57,5 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 	graphBase := visualization.NewGraphBuilder(policyBase, nil, nil).Policy(visualization.PolicyCfgDefault)
 
 	graph.CalcDelta(graphBase)
-	api.contentType.Write(writer, request, &graphWrapper{Data: graph.GetData()})
+	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }

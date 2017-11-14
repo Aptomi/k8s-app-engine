@@ -24,9 +24,9 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 	}
 
 	if policyData == nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	} else {
-		api.contentType.Write(writer, request, policyData)
+		api.contentType.WriteOne(writer, request, policyData)
 	}
 }
 
@@ -51,10 +51,10 @@ func (api *coreAPI) handlePolicyObjectGet(writer http.ResponseWriter, request *h
 		panic(fmt.Sprintf("error while getting object %s/%s/%s in policy #%s", ns, kind, name, gen))
 	}
 	if obj == nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	}
 
-	api.contentType.Write(writer, request, obj)
+	api.contentType.WriteOne(writer, request, obj)
 }
 
 // PolicyUpdateResultObject is an informational data structure with Kind and Constructor for PolicyUpdateResult
@@ -105,7 +105,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	}
 
 	if !changed {
-		api.contentType.Write(writer, request, &PolicyUpdateResult{
+		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: currentPolicyGeneration,
 			Actions:          nil,
@@ -151,7 +151,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		actions[idx] = action.GetName()
 	}
 
-	api.contentType.Write(writer, request, &PolicyUpdateResult{
+	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 		PolicyGeneration: desiredPolicyGen,
 		Actions:          actions,

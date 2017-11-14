@@ -53,7 +53,7 @@ func (api *coreAPI) handleEndpointsGet(writer http.ResponseWriter, request *http
 		}
 	}
 
-	api.contentType.Write(writer, request, &Endpoints{
+	api.contentType.WriteOne(writer, request, &Endpoints{
 		TypeKind: EndpointsObject.GetTypeKind(),
 		List:     endpoints,
 	})

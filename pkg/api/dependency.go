@@ -32,7 +32,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		panic(fmt.Sprintf("error while getting object %s/%s/%s in policy #%s", ns, kind, name, gen))
 	}
 	if obj == nil {
-		api.contentType.WriteStatus(writer, request, nil, http.StatusNotFound)
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	}
 
 	// once dependency is loaded, we need to find its state in the actual state
@@ -58,5 +58,5 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		status = "Not Deployed"
 	}
 
-	api.contentType.Write(writer, request, &dependencyStatusWrapper{Data: status})
+	api.contentType.WriteOne(writer, request, &dependencyStatusWrapper{Data: status})
 }

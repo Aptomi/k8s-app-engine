@@ -32,7 +32,7 @@ func (h *panicHandler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 
 			serverErr := api.NewServerError(fmt.Sprintf("%s", err))
 
-			h.contentType.WriteStatus(writer, request, serverErr, http.StatusInternalServerError)
+			h.contentType.WriteOneWithStatus(writer, request, serverErr, http.StatusInternalServerError)
 		}
 	}()
 

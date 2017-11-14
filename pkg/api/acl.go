@@ -39,5 +39,5 @@ func (api *coreAPI) handleUserRoles(writer http.ResponseWriter, request *http.Re
 		}
 		data[user.Name] = roleMap
 	}
-	api.contentType.Write(writer, request, &userRolesWrapper{Data: data})
+	api.contentType.WriteOne(writer, request, &userRolesWrapper{Data: data})
 }
