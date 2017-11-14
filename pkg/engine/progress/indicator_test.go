@@ -34,7 +34,7 @@ func TestProgressNoop(t *testing.T) {
 		// check completion
 		assert.Equal(t, 100, progress.GetCompletionPercent(), "Progress indicator should be at 100%")
 		assert.False(t, progress.IsDone(), "Progress indicator should not be finished yet")
-		progress.Done()
+		progress.Done(true)
 		assert.True(t, progress.IsDone(), "Progress indicator should be finished")
 	}
 }
@@ -47,7 +47,7 @@ func TestProgressNoopOverflow(t *testing.T) {
 		}
 		assert.Equal(t, 100, progress.GetCompletionPercent(), "Progress indicator should be at 100%")
 		assert.False(t, progress.IsDone(), "Progress indicator should not be finished until marked as such")
-		progress.Done()
+		progress.Done(true)
 	}
 }
 
@@ -55,7 +55,7 @@ func TestProgressNoopZeroLen(t *testing.T) {
 	for _, progress := range makeProgressIndicators() {
 		progress.SetTotal(0)
 		assert.False(t, progress.IsDone(), "Progress indicator should not be finished yet")
-		progress.Done()
+		progress.Done(true)
 		assert.True(t, progress.IsDone(), "Progress indicator should be finished")
 	}
 }
