@@ -19,9 +19,12 @@ var RevisionObject = &runtime.Info{
 var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, RevisionObject.Kind, runtime.EmptyName)
 
 const (
+	// RevisionStatusInProgress represents Revision status with apply in progress
 	RevisionStatusInProgress = "inprogress"
-	RevisionStatusSuccess    = "success"
-	RevisionStatusError      = "error"
+	// RevisionStatusSuccess represents Revision status with apply successfully finished
+	RevisionStatusSuccess = "success"
+	// RevisionStatusError represents Revision status with apply finished with error
+	RevisionStatusError = "error"
 )
 
 // Revision is a "milestone" in applying
