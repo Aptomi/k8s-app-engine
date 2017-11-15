@@ -34,3 +34,14 @@ type ClusterConfig struct {
 	TillerNamespace string `validate:"omitempty"`
 	Namespace       string `validate:"required"`
 }
+
+// MakeCopy makes a shallow copy of the Cluster struct
+func (cluster *Cluster) MakeCopy() *Cluster {
+	return &Cluster{
+		TypeKind: cluster.TypeKind,
+		Metadata: cluster.Metadata,
+		Type:     cluster.Type,
+		Labels:   cluster.Labels,
+		Config:   cluster.Config,
+	}
+}
