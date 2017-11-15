@@ -28,7 +28,7 @@
               <tr v-if="error">
                 <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
               </tr>
-              <tr v-if="!dependencies">
+              <tr v-if="Object.keys(dependencies).length <= 0">
                 <td>No Dependencies Declared</td>
               </tr>
               <tr v-for="d in dependencies">
