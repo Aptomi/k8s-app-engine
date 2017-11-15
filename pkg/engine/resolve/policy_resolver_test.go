@@ -348,8 +348,9 @@ const (
 
 func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult int, expectedLogMessage string) *PolicyResolution {
 	t.Helper()
-	resolver := NewPolicyResolver(builder.Policy(), builder.External())
-	result, eventLog, err := resolver.ResolveAllDependencies()
+	eventLog := event.NewLog("test-resolve", false)
+	resolver := NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
+	result, err := resolver.ResolveAllDependencies()
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Policy resolution status (success vs. error)") {
 		// print log into stdout and exit

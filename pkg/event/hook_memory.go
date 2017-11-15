@@ -4,7 +4,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-// HookMemory implements event log hook, which buffers all event log entries in memory
+// HookMemory implements event log hook, which buffers all event log entries in hookMemory
 type HookMemory struct {
 	entries []*logrus.Entry
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/visualization"
 	"github.com/julienschmidt/httprouter"
@@ -40,8 +41,9 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 		graph = graphBuilder.Policy(visualization.PolicyCfgDefault)
 	case "desired":
 		// show instances in desired state
-		resolver := resolve.NewPolicyResolver(policy, api.externalData)
-		state, _, _ := resolver.ResolveAllDependencies()
+		// todo: add request id to the event log scope
+		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog("api-policy-diagram", true))
+		state, _ := resolver.ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 	case "actual":
@@ -86,13 +88,15 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		graph.CalcDelta(graphBase)
 	case "desired":
 		// show instances in desired state (diff)
-		resolver := resolve.NewPolicyResolver(policy, api.externalData)
-		state, _, _ := resolver.ResolveAllDependencies()
+		// todo: add request id to the event log scope
+		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog("api-policy-diagram", true))
+		state, _ := resolver.ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
-		resolverBase := resolve.NewPolicyResolver(policyBase, api.externalData)
-		stateBase, _, _ := resolverBase.ResolveAllDependencies()
+		// todo: add request id to the event log scope
+		resolverBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog("api-policy-diagram", true))
+		stateBase, _ := resolverBase.ResolveAllDependencies()
 		graphBuilderBase := visualization.NewGraphBuilder(policyBase, stateBase, api.externalData)
 		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 

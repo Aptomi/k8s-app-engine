@@ -129,11 +129,10 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	}
 
 	// todo we should resolve before saving policy => add Mutex for this method to make sure it's safe
-	resolver := resolve.NewPolicyResolver(desiredPolicy, api.externalData)
-	desiredState, eventLog, err := resolver.ResolveAllDependencies()
-
-	// todo save to log with clear prefix
-	eventLog.Save(&event.HookConsole{})
+	// todo: add request id to the event log scope
+	eventLog := event.NewLog("api-policy-update", true)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, api.externalData, eventLog)
+	desiredState, err := resolver.ResolveAllDependencies()
 
 	if err != nil {
 		panic(fmt.Sprintf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState))

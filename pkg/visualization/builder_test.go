@@ -2,6 +2,7 @@ package visualization
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -17,8 +18,9 @@ func TestVisualizationDiagram(t *testing.T) {
 	resolutionEmpty := resolve.NewPolicyResolution()
 
 	// unit test policy resolved revision
-	resolver := resolve.NewPolicyResolver(b.Policy(), b.External())
-	resolutionNew, _, err := resolver.ResolveAllDependencies()
+	eventLog := event.NewLog("test-resolve", false)
+	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
+	resolutionNew, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		t.FailNow()
 	}

@@ -57,10 +57,11 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData)
-	desiredState, eventLog, err := resolver.ResolveAllDependencies()
+	eventLog := event.NewLog("enforce-resolve", true)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, eventLog)
+	desiredState, err := resolver.ResolveAllDependencies()
 	if err != nil {
-		eventLog.Save(&event.HookConsole{})
+		// todo save eventlog
 		return fmt.Errorf("cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
 
@@ -85,7 +86,8 @@ func (server *Server) enforce() error {
 	}
 	// todo
 	log.Infof("Changes")
-	eventLog.Save(&event.HookConsole{}) // only print log if there are changes
+
+	// todo save eventlog (if there were changes?)
 
 	// todo if policy gen changed, we still need to save revision but with progress == done
 
@@ -128,10 +130,12 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual policy: %s", err)
 	}
 
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, server.store.GetRevisionProgressUpdater(nextRevision))
-	resolution, eventLog, err := applier.Apply()
+	// todo add enforcement # to scope
+	eventLog = event.NewLog("enforce-apply", true)
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, eventLog, server.store.GetRevisionProgressUpdater(nextRevision))
+	resolution, err := applier.Apply()
 
-	eventLog.Save(&event.HookConsole{})
+	// todo save eventlog
 
 	if err != nil {
 		return fmt.Errorf("error while applying new revision: %s", err)

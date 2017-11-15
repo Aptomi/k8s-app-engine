@@ -79,7 +79,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *
 		labels.AddLabels(user.Labels)
 	}
 
-	eventLog := event.NewLog()
+	eventLog := event.NewLog(resolver.eventLog.GetScope(), false)
 	return &resolutionNode{
 		resolved: false,
 
@@ -110,7 +110,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *
 
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
-	eventLog := event.NewLog()
+	eventLog := event.NewLog(node.eventLog.GetScope(), false)
 	return &resolutionNode{
 		resolved: false,
 

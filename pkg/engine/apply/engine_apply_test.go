@@ -42,6 +42,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		bDesired.External(),
 		mockRegistryFailOnComponent(),
 		actions,
+		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
@@ -75,6 +76,7 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 		bDesired.External(),
 		mockRegistryFailOnComponent(bDesired.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
 		actions,
+		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
@@ -111,6 +113,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		bDesired.External(),
 		mockRegistryFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredState, actualState).Actions,
+		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
@@ -157,6 +160,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		bDesiredNext.External(),
 		mockRegistryFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState).Actions,
+		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
@@ -196,6 +200,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		bDesiredNext.External(),
 		mockRegistryFailOnComponent(),
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState).Actions,
+		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
@@ -246,8 +251,9 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolution {
 	t.Helper()
-	resolver := resolve.NewPolicyResolver(b.Policy(), b.External())
-	result, eventLog, err := resolver.ResolveAllDependencies()
+	eventLog := event.NewLog("test-resolve", false)
+	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
+	result, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
@@ -259,22 +265,22 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 
 func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, expectedMessage string) *resolve.PolicyResolution {
 	t.Helper()
-	actualState, eventLog, err := apply.Apply()
+	actualState, err := apply.Apply()
 
 	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
 		// print log into stdout and exit
 		hook := &event.HookConsole{}
-		eventLog.Save(hook)
+		apply.eventLog.Save(hook)
 		t.FailNow()
 	}
 
 	if expectedResult == ResError {
 		// check for error messages
 		verifier := event.NewLogVerifier(expectedMessage, expectedResult == ResError)
-		eventLog.Save(verifier)
+		apply.eventLog.Save(verifier)
 		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of messages containing words: "+expectedMessage) {
 			hook := &event.HookConsole{}
-			eventLog.Save(hook)
+			apply.eventLog.Save(hook)
 			t.FailNow()
 		}
 	}

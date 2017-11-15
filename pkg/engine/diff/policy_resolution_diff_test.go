@@ -115,8 +115,9 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.PolicyResolution {
 	t.Helper()
-	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External())
-	result, eventLog, err := resolver.ResolveAllDependencies()
+	eventLog := event.NewLog("test-resolve", false)
+	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
+	result, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)

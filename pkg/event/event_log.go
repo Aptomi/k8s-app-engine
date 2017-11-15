@@ -20,23 +20,36 @@ type attachedObjects struct {
 type Log struct {
 	logger     *logrus.Logger
 	attachedTo *attachedObjects
-	hook       *HookMemory
+	hookMemory *HookMemory
+	scope      string
+	log        bool
 }
 
 // NewLog creates a new instance of event log.
 // Initially it just buffers all entries and doesn't write them.
 // It needs to buffer all entries, so that the context can be later attached to them
 // before they get serialized and written to an external source
-func NewLog() *Log {
-	logger := logrus.New()
-	logger.Level = logrus.DebugLevel
-	logger.Out = ioutil.Discard
-	hook := &HookMemory{}
-	logger.Hooks.Add(hook)
+func NewLog(scope string, log bool) *Log {
+	logger := &logrus.Logger{
+		Out:       ioutil.Discard,
+		Formatter: new(logrus.TextFormatter),
+		Hooks:     make(logrus.LevelHooks),
+		Level:     logrus.DebugLevel,
+	}
+
+	hookMemory := &HookMemory{}
+	logger.Hooks.Add(hookMemory)
+
+	if log {
+		logger.Hooks.Add(&HookLogger{})
+	}
+
 	return &Log{
 		logger:     logger,
 		attachedTo: &attachedObjects{},
-		hook:       hook,
+		hookMemory: hookMemory,
+		scope:      scope,
+		log:        log,
 	}
 }
 
@@ -46,6 +59,16 @@ func fieldValue(data interface{}) interface{} {
 		return runtime.KeyForStorable(baseObject)
 	}
 	return data
+}
+
+// GetScope returns scope for event log
+func (eventLog *Log) GetScope() string {
+	return eventLog.scope
+}
+
+// IsLog returns true if current event log writes logs on the go
+func (eventLog *Log) IsLog() bool {
+	return eventLog.log
 }
 
 // WithFields creates a new log entry with a given set of fields
@@ -63,6 +86,10 @@ func (eventLog *Log) WithFields(fields Fields) *logrus.Entry {
 		}
 	}
 
+	if len(eventLog.scope) > 0 {
+		fields["scope"] = eventLog.scope
+	}
+
 	return eventLog.logger.WithFields(logrus.Fields(fields))
 }
 
@@ -74,7 +101,14 @@ func (eventLog *Log) AttachTo(object interface{}) {
 
 // Append adds entries to the event logs
 func (eventLog *Log) Append(that *Log) {
-	eventLog.hook.entries = append(eventLog.hook.entries, that.hook.entries...)
+	if eventLog.IsLog() && !that.IsLog() {
+		logger := &HookLogger{}
+		for _, entry := range that.hookMemory.entries {
+			logger.Fire(entry)
+		}
+	}
+
+	eventLog.hookMemory.entries = append(eventLog.hookMemory.entries, that.hookMemory.entries...)
 }
 
 // LogError logs an error. Errors with details are processed specially, their details get unfolded as record fields
@@ -99,7 +133,7 @@ func (eventLog *Log) LogWarning(err error) {
 
 // Save takes all buffered event log entries and saves them
 func (eventLog *Log) Save(hook logrus.Hook) {
-	for _, e := range eventLog.hook.entries {
+	for _, e := range eventLog.hookMemory.entries {
 		e.Data["attachedTo"] = eventLog.attachedTo
 		err := hook.Fire(e)
 		if err != nil {

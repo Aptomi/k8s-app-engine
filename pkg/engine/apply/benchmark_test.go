@@ -415,6 +415,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistryFailOnComponent("fail-components-like-these"),
 		actions,
+		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
@@ -428,8 +429,9 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 
 func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
 	t.Helper()
-	resolver := resolve.NewPolicyResolver(policy, externalData)
-	result, eventLog, err := resolver.ResolveAllDependencies()
+	eventLog := event.NewLog("test-resolve", false)
+	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
+	result, err := resolver.ResolveAllDependencies()
 	if !assert.NoError(t, err, "Policy should be resolved without errors") {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)

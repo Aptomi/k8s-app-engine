@@ -53,14 +53,14 @@ type PolicyResolver struct {
 }
 
 // NewPolicyResolver creates a new policy resolver
-func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *PolicyResolver {
+func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLog *event.Log) *PolicyResolver {
 	return &PolicyResolver{
 		policy:          policy,
 		externalData:    externalData,
 		expressionCache: expression.NewCache(),
 		templateCache:   template.NewCache(),
 		resolution:      NewPolicyResolution(),
-		eventLog:        event.NewLog(),
+		eventLog:        eventLog,
 	}
 }
 
@@ -69,11 +69,11 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data) *Policy
 // It resolves all recorded service consumption declarations ("<user> needs <contract> with <labels>"), calculating
 // which component have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
 // it can be rendered by the engine diff/apply by deploying/configuring required components/containers in the cloud.
-func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *event.Log, error) {
+func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, error) {
 	// Run policy validation before resolution, just in case
 	err := resolver.policy.Validate()
 	if err != nil {
-		return nil, resolver.eventLog, err
+		return nil, err
 	}
 
 	// Allocate semaphore
@@ -103,7 +103,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *ev
 
 	// See if there were any errors
 	if errFound > 0 {
-		return nil, resolver.eventLog, fmt.Errorf("errors occurred during policy resolution: %d", errFound)
+		return nil, fmt.Errorf("errors occurred during policy resolution: %d", errFound)
 	}
 
 	// Once all components are resolved, print information about them into event log
@@ -114,7 +114,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, *ev
 		}
 	}
 
-	return resolver.resolution, resolver.eventLog, nil
+	return resolver.resolution, nil
 }
 
 // Resolves a single dependency

@@ -36,7 +36,7 @@ type EngineApply struct {
 // NewEngineApply creates an instance of EngineApply
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base, progress progress.Indicator) *EngineApply {
+func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base, eventLog *event.Log, progress progress.Indicator) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,
 		desiredState:       desiredState,
@@ -46,7 +46,7 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 		externalData:       externalData,
 		plugins:            plugins,
 		actions:            actions,
-		eventLog:           event.NewLog(),
+		eventLog:           eventLog,
 		progress:           progress,
 	}
 }
@@ -56,7 +56,7 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 // As actions get executed, they will instantiate/update/delete components according to the resolved
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
-func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error) {
+func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			apply.progress.Done(false)
@@ -98,9 +98,9 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *event.Log, error)
 	if foundErrors {
 		err := fmt.Errorf("one or more errors occurred while running actions")
 		apply.eventLog.LogError(err)
-		return apply.actualState, apply.eventLog, err
+		return apply.actualState, err
 	}
 
 	// No errors occurred
-	return apply.actualState, apply.eventLog, nil
+	return apply.actualState, nil
 }
