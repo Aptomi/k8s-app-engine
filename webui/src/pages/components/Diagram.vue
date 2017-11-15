@@ -244,6 +244,6 @@
     border: 1px solid #444444;
     font: 12pt arial;
     width: 100%;
-    height: 800px;
+    height: 70vh;
   }
 </style>
