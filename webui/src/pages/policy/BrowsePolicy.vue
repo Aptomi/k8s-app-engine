@@ -26,7 +26,7 @@
           <!-- /.col -->
           <div class="col-xs-3">
             <div class="form-group" v-if="selectedMode['mode'] !== 'actual'">
-              <input type="checkbox" id="checkbox" v-model="compareEnabled"> <label>Compare Against</label>
+              <input type="checkbox" id="checkbox" v-model="compareEnabled"> <label>Compare With</label>
               <v-select v-if="compareEnabled" placeholder="Select Policy Version" v-model="selectedPolicyVersionBase" :options.sync="policyVersions" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
             <!-- /.form-group -->
@@ -65,24 +65,34 @@
   export default {
     data () {
       return {
-        compareEnabled: false,
         loading: false,
         policy: null,
         error: null,
         policyVersions: [],
         namespaces: [],
-        selectedMode: null,
-        selectedPolicyVersion: null,
-        selectedPolicyVersionBase: null,
-        selectedNamespace: null,
-        modes: [
+        selectedMode: this.inMode,
+        selectedPolicyVersion: this.inPolicyVersion,
+        compareEnabled: this.inCompareEnabled,
+        selectedPolicyVersionBase: this.inPolicyVersionBase,
+        selectedNamespace: this.inNamespace
+      }
+    },
+    computed: {
+      modes: function () {
+        return [
           { name: 'Policy', mode: 'policy' },
           { name: 'Desired State', mode: 'desired' },
           { name: 'Actual State', mode: 'actual' }
         ]
-      }
-    },
-    computed: {
+      },
+      inModeComputed: function () {
+        for (const idx in this.modes) {
+          if (this.modes[idx]['mode'] === this.inMode) {
+            return this.modes[idx]
+          }
+        }
+        return this.modes[0]
+      },
       selectedPolicyVersionBaseComputed: function () {
         if (this.compareEnabled) {
           return this.selectedPolicyVersionBase
@@ -90,14 +100,33 @@
         return null
       }
     },
+    props: {
+      'inMode': {
+        type: String
+      },
+      'inPolicyVersion': {
+        type: String
+      },
+      'inCompareEnabled': {
+        type: Boolean
+      },
+      'inPolicyVersionBase': {
+        type: String
+      },
+      'inNamespace': {
+        type: String
+      }
+    },
     watch: {
+      compareEnabled: function (data) {
+        // one checkbox is checked, pre-select policy version to compare with
+        if (data) {
+          this.selectedPolicyVersionBase = (this.selectedPolicyVersion - 1).toString()
+        }
+      },
       policy: function (data) {
         // once policy is loaded, create the list of namespaces for the dropdown
         this.namespaces = getNamespaces(getPolicyObjects(data))
-        if (this.namespaces.length > 0) {
-          // select first namespace
-          this.selectedNamespace = this.namespaces[0]
-        }
 
         // once policy is loaded, create the list of versions for the dropdown
         const generation = getPolicyGeneration(data)
@@ -106,16 +135,26 @@
           this.policyVersions.push(i.toString())
         }
 
-        // pre-select dropdown values
-        this.selectedPolicyVersion = this.policyVersions[0]
-        if (this.policyVersions.length > 1) {
-          this.selectedPolicyVersionBase = this.policyVersions[1]
+        if (this.policyVersions.length > 0) {
+          // pre-select dropdown values -> policy version
+          if (this.selectedPolicyVersion == null) {
+            this.selectedPolicyVersion = this.policyVersions[0]
+          }
+        }
+
+        // pre-select dropdown values -> namespace
+        if (this.namespaces.length > 0) {
+          if (this.selectedNamespace == null) {
+            this.selectedNamespace = this.namespaces[0]
+          }
         }
       }
     },
     created () {
+      // pre-select dropdown values -> mode
+      this.selectedMode = this.inModeComputed
+
       // fetch the data when the view is created and the data is already being observed
-      this.selectedMode = this.modes[0]
       this.fetchPolicy()
     },
     methods: {

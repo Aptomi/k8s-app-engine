@@ -2,6 +2,10 @@
   <div>
 
     <div class="box box-default">
+      <div class="box-header">
+        <h3 class="box-title">{{ title }}</h3>
+      </div>
+
       <div class="overlay" v-if="loading">
         <i class="fa fa-refresh fa-spin"></i>
       </div>
@@ -29,6 +33,25 @@
       return {
         loading: false,
         error: null
+      }
+    },
+    computed: {
+      title: function () {
+        if (this.mode === 'policy') {
+          if (!this.policyGenBase) {
+            return 'Showing policy #' + this.policyGen
+          } else {
+            return 'Comparing policy #' + this.policyGen + ' with #' + this.policyGenBase
+          }
+        } else if (this.mode === 'desired') {
+          if (!this.policyGenBase) {
+            return 'Showing desired state #' + this.policyGen
+          } else {
+            return 'Comparing desired state #' + this.policyGen + ' with #' + this.policyGenBase
+          }
+        } else {
+          return 'Showing actual state #' + this.policyGen
+        }
       }
     },
     created () {

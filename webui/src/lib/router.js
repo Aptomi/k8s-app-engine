@@ -42,7 +42,8 @@ const router = new Router({
         {
           path: 'browse',
           name: 'BrowsePolicy',
-          component: BrowsePolicy
+          component: BrowsePolicy,
+          props: true
         },
         {
           path: 'dependencies',

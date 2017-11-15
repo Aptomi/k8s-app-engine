@@ -64,8 +64,8 @@
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
                       <ul class="dropdown-menu" style="left: auto !important; right: 0 !important;">
-                        <li><a href="#">Browse Policy</a></li>
-                        <li><a href="#">Compare With Previous</a></li>
+                        <li><router-link :to="{ name: 'BrowsePolicy', params: { inMode: 'policy', inPolicyVersion: p['metadata']['generation'].toString() }}">Browse Policy</router-link></li>
+                        <li><router-link :to="{ name: 'BrowsePolicy', params: { inMode: 'policy', inPolicyVersion: p['metadata']['generation'].toString(), inCompareEnabled: true, inPolicyVersionBase: (p['metadata']['generation'] - 1).toString() }}">Compare With Previous</router-link></li>
                         <li class="divider"></li>
                         <li><a href="#">View Resolution Log</a></li>
                         <li><a href="#">View Apply Log</a></li>
