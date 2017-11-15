@@ -56,7 +56,7 @@
                   <td v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1">
                     <div v-if="r['status'] !== 'inprogress'">{{ r['appliedat'] | formatDateAgo }}</div>
                   </td>
-                  <td>
+                  <td class="col-xs-1">
                     <div class="btn-group btn-group-xs" style="position: absolute">
                       <button type="button" class="btn btn-default btn-flat">Action</button>
                       <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">
