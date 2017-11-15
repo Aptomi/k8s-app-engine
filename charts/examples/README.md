@@ -9,4 +9,8 @@ our examples. Usual changes:
 
 List of charts and their initial locations (with repo git sha if available)
 
-* TBD
+* Istio
+    * Version: 0.2.7-chart6
+    * Repo: https://github.com/kubernetes/charts
+    * Commit: 65181acc03ea03fb47d264d03f7ea3ffd2aa32c7
+    * License: Apache License 2.0
