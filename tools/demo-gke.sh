@@ -35,7 +35,7 @@ function main() {
 
     # TODO(slukjanov): should we load params from config file?
     # defaults
-    k8s_version=1.6.11-gke.0
+    k8s_version=1.8.2-gke.0
     disk_size=100
 
     cluster_big_name=cluster-us-west
@@ -56,8 +56,6 @@ function main() {
     firewall_rules_name=demo-firewall-open-all
     firewall_rules="--allow tcp"
 
-    helm_tiller_image="frostman/kubernetes-helm-tiller:2.3.1"
-
     demo_namespace=demo
     # end of defaults
 
@@ -76,13 +74,13 @@ function main() {
         gke_cluster_wait_alive $cluster_big_name $cluster_big_region
         gke_cluster_kubectl_setup $cluster_big_name $cluster_big_region $demo_namespace
         k8s_alive $cluster_big_name
-        helm_init $cluster_big_name $helm_tiller_image
+        helm_init $cluster_big_name
 
         # wait until small cluster is alive and setup
         gke_cluster_wait_alive $cluster_small_name $cluster_small_region
         gke_cluster_kubectl_setup $cluster_small_name $cluster_small_region $demo_namespace
         k8s_alive $cluster_small_name
-        helm_init $cluster_small_name $helm_tiller_image
+        helm_init $cluster_small_name
 
         log "Final check for k8s and helm alive"
         k8s_alive $cluster_big_name 1>/dev/null 2>/dev/null
@@ -416,10 +414,12 @@ function helm_cleanup() {
 
 function helm_init() {
     name="$1"
-    helm_tiller_image="$2"
 
     if ! helm_alive $name ; then
-        if ! helm --kube-context $name init 2>/dev/null ; then
+        kubectl --context $name -n kube-system create sa tiller
+        kubectl --context $name create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+        if ! helm --kube-context $name init --service-account tiller 2>/dev/null ; then
             log "Helm init failed in cluster $name"
             exit 1
         fi
