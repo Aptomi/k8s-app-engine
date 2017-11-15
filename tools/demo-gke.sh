@@ -100,8 +100,8 @@ function main() {
         gke_cluster_wait_deleted $cluster_big_name $cluster_big_region
         gke_cluster_wait_deleted $cluster_small_name $cluster_small_region
     elif [ "cleanup" == "$1" ]; then
-        helm_cleanup $cluster_big_name
-        helm_cleanup $cluster_small_name
+        helm_cleanup $cluster_big_name $demo_namespace
+        helm_cleanup $cluster_small_name $demo_namespace
     else
         log "Unsupported command '$1'"
         exit 1
@@ -402,11 +402,35 @@ function helm_alive() {
 
 function helm_cleanup() {
     name="$1"
+    namespace="$2"
+
+    kubectl --context $name delete ns $namespace || true
 
     if [[ $(helm --kube-context $1 list --all -q | wc -l) -ge 1 ]]; then
         if ! helm --kube-context $1 delete --purge $(helm --kube-context $1 list --all -q); then
             return 1
         fi
+    fi
+
+    retries=0
+    # retry for 5 minutes
+    until [ ${retries} -ge 60 ] ; do
+        sleep 5
+
+        log "Waiting for namespace $namespace to be deleted"
+
+        if ! kubectl get ns $namespace; then
+            break
+        fi
+
+        retries=$[${retries}+1]
+    done
+
+    if ! kubectl get ns $namespace; then
+        log "Namespace $namespace deleted"
+    else
+        log "Namespace $namespace not deleted after 5 minutes, fail"
+        exit 1
     fi
 
     return 0
