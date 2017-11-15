@@ -54,4 +54,11 @@ export default {
 
 <style>
 
+  .multiselect__option--selected.multiselect__option--highlight {
+    background: #41B883;
+  }
+  .multiselect__option--selected.multiselect__option--highlight:after {
+    background: #41B883;
+  }
+
 </style>
