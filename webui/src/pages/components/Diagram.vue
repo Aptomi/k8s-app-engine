@@ -36,6 +36,9 @@
       this.fetchData()
     },
     props: {
+      'mode': {
+        type: String
+      },
       'policyGen': {
         type: String
       },
@@ -44,6 +47,7 @@
       }
     },
     watch: {
+      'mode': 'fetchData',
       'policyGen': 'fetchData',
       'policyGenBase': 'fetchData'
     },
@@ -66,9 +70,9 @@
         }, this)
 
         if (this.policyGenBase) {
-          getPolicyDiagramCompare(this.policyGen, this.policyGenBase, fetchSuccess, fetchError)
+          getPolicyDiagramCompare(this.mode, this.policyGen, this.policyGenBase, fetchSuccess, fetchError)
         } else {
-          getPolicyDiagram(this.policyGen, fetchSuccess, fetchError)
+          getPolicyDiagram(this.mode, this.policyGen, fetchSuccess, fetchError)
         }
       }
     }

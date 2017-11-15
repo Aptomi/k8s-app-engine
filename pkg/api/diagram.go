@@ -2,11 +2,13 @@ package api
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/visualization"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type graphWrapper struct {
@@ -18,6 +20,7 @@ func (g *graphWrapper) GetKind() string {
 }
 
 func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	mode := params.ByName("mode")
 	gen := params.ByName("gen")
 
 	if len(gen) == 0 {
@@ -29,11 +32,32 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
 
-	graph := visualization.NewGraphBuilder(policy, nil, nil).Policy(visualization.PolicyCfgDefault)
+	var graph *visualization.Graph
+	switch strings.ToLower(mode) {
+	case "policy":
+		// show just policy
+		graphBuilder := visualization.NewGraphBuilder(policy, nil, nil)
+		graph = graphBuilder.Policy(visualization.PolicyCfgDefault)
+	case "desired":
+		// show instances in desired state
+		resolver := resolve.NewPolicyResolver(policy, api.externalData)
+		state, _, _ := resolver.ResolveAllDependencies()
+		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+	case "actual":
+		// show instances in actual state
+		state, _ := api.store.GetActualState()
+		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+	default:
+		panic("uknown mode: " + mode)
+	}
+
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }
 
 func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	mode := params.ByName("mode")
 	gen := params.ByName("gen")
 	if len(gen) == 0 {
 		gen = strconv.Itoa(int(runtime.LastGen))
@@ -53,9 +77,41 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
 
-	graph := visualization.NewGraphBuilder(policy, nil, nil).Policy(visualization.PolicyCfgDefault)
-	graphBase := visualization.NewGraphBuilder(policyBase, nil, nil).Policy(visualization.PolicyCfgDefault)
+	var graph *visualization.Graph
+	switch strings.ToLower(mode) {
+	case "policy":
+		// show just policy diff
+		graph = visualization.NewGraphBuilder(policy, nil, nil).Policy(visualization.PolicyCfgDefault)
+		graphBase := visualization.NewGraphBuilder(policyBase, nil, nil).Policy(visualization.PolicyCfgDefault)
+		graph.CalcDelta(graphBase)
+	case "desired":
+		// show instances in desired state (diff)
+		resolver := resolve.NewPolicyResolver(policy, api.externalData)
+		state, _, _ := resolver.ResolveAllDependencies()
+		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
-	graph.CalcDelta(graphBase)
+		resolverBase := resolve.NewPolicyResolver(policyBase, api.externalData)
+		stateBase, _, _ := resolverBase.ResolveAllDependencies()
+		graphBuilderBase := visualization.NewGraphBuilder(policyBase, stateBase, api.externalData)
+		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+
+		graph.CalcDelta(graphBase)
+	case "actual":
+		// show instances in actual state (diff)
+		state, _ := api.store.GetActualState()
+
+		// show instances in desired state (diff)
+		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+
+		graphBuilderBase := visualization.NewGraphBuilder(policyBase, state, api.externalData)
+		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+
+		graph.CalcDelta(graphBase)
+	default:
+		panic("uknown mode: " + mode)
+	}
+
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }

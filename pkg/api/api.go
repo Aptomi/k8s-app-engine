@@ -39,9 +39,9 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.POST("/api/v1/policy", api.handlePolicyUpdate)
 
 	// policy diagrams
-	router.GET("/api/v1/policy/diagram", api.handlePolicyDiagram)
-	router.GET("/api/v1/policy/diagram/gen/:gen", api.handlePolicyDiagram)
-	router.GET("/api/v1/policy/diagram/compare/gen/:gen/genBase/:genBase", api.handlePolicyDiagramCompare)
+	router.GET("/api/v1/policy/diagram/mode/:mode", api.handlePolicyDiagram)
+	router.GET("/api/v1/policy/diagram/mode/:mode/gen/:gen", api.handlePolicyDiagram)
+	router.GET("/api/v1/policy/diagram/compare/mode/:mode/gen/:gen/genBase/:genBase", api.handlePolicyDiagramCompare)
 
 	// retrieve dependency along with its status
 	router.GET("/api/v1/policy/dependency/:ns/:name/status", api.handleDependencyStatusGet)

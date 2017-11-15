@@ -9,7 +9,14 @@
 
       <div class="box-body">
         <div class="row">
-          <div class="col-xs-2">
+          <div class="col-xs-3">
+            <div class="form-group">
+              <label>Show</label>
+              <v-select placeholder="Select Mode" v-model="selectedMode" :options="modes" track-by="mode" label="name" :searchable="false" :allow-empty="false" deselect-label="Selected"></v-select>
+            </div>
+            <!-- /.form-group -->
+          </div>
+          <div class="col-xs-3">
             <div class="form-group">
               <label>Policy Version</label>
               <v-select placeholder="Select Policy Version" v-model="selectedPolicyVersion" :options.sync="policyVersions" :allow-empty="false" deselect-label="Selected"></v-select>
@@ -17,15 +24,15 @@
             <!-- /.form-group -->
           </div>
           <!-- /.col -->
-          <div class="col-xs-2">
-            <div class="form-group">
+          <div class="col-xs-3">
+            <div class="form-group" v-if="selectedMode['mode'] !== 'actual'">
               <input type="checkbox" id="checkbox" v-model="compareEnabled"> <label>Compare Against</label>
               <v-select v-if="compareEnabled" placeholder="Select Policy Version" v-model="selectedPolicyVersionBase" :options.sync="policyVersions" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
             <!-- /.form-group -->
           </div>
           <!-- /.col -->
-          <div v-if="false" class="col-xs-4">
+          <div v-if="false" class="col-xs-3">
             <div class="form-group">
               <label>Namespace</label>
               <v-select placeholder="Select namespace" v-model="selectedNamespace" :options.sync="namespaces"></v-select>
@@ -46,7 +53,7 @@
       </div>
     </div>
 
-    <v-diagram v-if="selectedPolicyVersion" :policyGen="selectedPolicyVersion" :policyGenBase="selectedPolicyVersionBaseComputed"></v-diagram>
+    <v-diagram v-if="selectedPolicyVersion" :mode="selectedMode['mode']" :policyGen="selectedPolicyVersion" :policyGenBase="selectedPolicyVersionBaseComputed"></v-diagram>
   </div>
 </template>
 
@@ -64,9 +71,15 @@
         error: null,
         policyVersions: [],
         namespaces: [],
+        selectedMode: null,
         selectedPolicyVersion: null,
         selectedPolicyVersionBase: null,
-        selectedNamespace: null
+        selectedNamespace: null,
+        modes: [
+          { name: 'Policy', mode: 'policy' },
+          { name: 'Desired State', mode: 'desired' },
+          { name: 'Actual State', mode: 'actual' }
+        ]
       }
     },
     computed: {
@@ -102,6 +115,7 @@
     },
     created () {
       // fetch the data when the view is created and the data is already being observed
+      this.selectedMode = this.modes[0]
       this.fetchPolicy()
     },
     methods: {

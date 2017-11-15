@@ -42,9 +42,9 @@ export function filterObjects (policyObjects, nsFilter = null, kindFilter = null
 }
 
 // loads the policy diagram
-export async function getPolicyDiagram (generation, successFunc, errorFunc) {
+export async function getPolicyDiagram (mode, generation, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['policy', 'diagram', 'gen', generation].join('/')
+  const handler = ['policy', 'diagram', 'mode', mode, 'gen', generation].join('/')
   callAPI(handler, async, function (data) {
     successFunc(data['data'])
   }, function (err) {
@@ -53,9 +53,9 @@ export async function getPolicyDiagram (generation, successFunc, errorFunc) {
 }
 
 // loads the policy diagram, comparing two policies
-export async function getPolicyDiagramCompare (generation, generationBase, successFunc, errorFunc) {
+export async function getPolicyDiagramCompare (mode, generation, generationBase, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['policy', 'diagram', 'compare', 'gen', generation, 'genBase', generationBase].join('/')
+  const handler = ['policy', 'diagram', 'compare', 'mode', mode, 'gen', generation, 'genBase', generationBase].join('/')
   callAPI(handler, async, function (data) {
     successFunc(data['data'])
   }, function (err) {
