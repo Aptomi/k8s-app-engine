@@ -419,14 +419,14 @@ function helm_cleanup() {
 
         log "Waiting for namespace $namespace to be deleted"
 
-        if ! kubectl get ns $namespace; then
+        if ! kubectl --context $name get ns $namespace; then
             break
         fi
 
         retries=$[${retries}+1]
     done
 
-    if ! kubectl get ns $namespace; then
+    if ! kubectl --context $name get ns $namespace; then
         log "Namespace $namespace deleted"
     else
         log "Namespace $namespace not deleted after 5 minutes, fail"
