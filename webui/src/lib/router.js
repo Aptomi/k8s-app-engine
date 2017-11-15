@@ -17,6 +17,10 @@ import ShowAuditLog from 'pages/policy/ShowAuditLog.vue'
 
 Vue.use(Router)
 
+const Passthrough = {
+  template: '<router-view></router-view>'
+}
+
 const router = new Router({
   mode: 'history',
   routes: [
@@ -26,29 +30,71 @@ const router = new Router({
       redirect: '/policy/objects'
     },
     {
-      path: '/policy/objects',
-      name: 'ShowObjects',
-      component: ShowObjects
+      path: '/policy',
+      name: 'Policy',
+      component: Passthrough,
+      children: [
+        {
+          path: 'objects',
+          name: 'ShowObjects',
+          component: ShowObjects
+        },
+        {
+          path: 'browse',
+          name: 'BrowsePolicy',
+          component: BrowsePolicy
+        },
+        {
+          path: 'dependencies',
+          name: 'ShowDependencies',
+          component: ShowDependencies
+        },
+        {
+          path: 'users',
+          name: 'ShowUserRoles',
+          component: ShowUserRoles
+        },
+        {
+          path: 'audit',
+          name: 'ShowAuditLog',
+          component: ShowAuditLog
+        }
+      ]
     },
     {
-      path: '/policy/browse',
-      name: 'BrowsePolicy',
-      component: BrowsePolicy
-    },
-    {
-      path: '/policy/dependencies',
-      name: 'ShowDependencies',
-      component: ShowDependencies
-    },
-    {
-      path: '/policy/users',
-      name: 'ShowUserRoles',
-      component: ShowUserRoles
-    },
-    {
-      path: '/policy/audit',
-      name: 'ShowAuditLog',
-      component: ShowAuditLog
+      path: '/help',
+      name: 'Help',
+      component: Passthrough,
+      children: [
+        {
+          path: 'website',
+          name: 'Website',
+          beforeEnter (to, from, next) {
+            window.location.href = 'http://aptomi.io'
+          }
+        },
+        {
+          path: 'documentation',
+          name: 'Documentation',
+          beforeEnter (to, from, next) {
+            window.location.href = 'https://godoc.org/github.com/Aptomi/aptomi'
+          }
+        },
+        {
+          path: 'slack',
+          name: 'Slack',
+          beforeEnter (to, from, next) {
+            window.location.href = 'https://slack.aptomi.io'
+          }
+        },
+        {
+          path: 'github',
+          name: 'Github',
+          beforeEnter (to, from, next) {
+            window.location.href = 'https://github.com/Aptomi/aptomi'
+          }
+        }
+      ]
     },
     {
       path: '/login',

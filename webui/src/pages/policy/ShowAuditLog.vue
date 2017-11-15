@@ -5,7 +5,7 @@
       <div class="col-xs-12">
         <div class="box">
           <div class="box-header">
-            <h3 class="box-title">Policy</h3>
+            <h3 class="box-title">Audit Log</h3>
           </div>
           <!-- /.box-header -->
           <div class="overlay" v-if="loading">

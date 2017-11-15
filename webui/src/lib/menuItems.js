@@ -59,9 +59,17 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
+        name: 'Web Site',
+        router: {
+          name: 'Website'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
         name: 'Documentation',
         router: {
-          name: 'AdvancedElements'
+          name: 'Documentation'
         }
       },
       {
@@ -69,7 +77,15 @@ module.exports = [
         icon: 'fa fa-circle-o',
         name: 'Slack',
         router: {
-          name: 'AdvancedElements'
+          name: 'Slack'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Github',
+        router: {
+          name: 'Github'
         }
       }
     ]
