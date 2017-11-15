@@ -39,15 +39,15 @@
                   <td class="align-middle">
                     <div v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1" class="progress-group">
                       <div v-if="r['status'] === 'inprogress'" class="progress progress-xs progress-striped active">
-                        <div class="progress-bar progress-bar-primary" style="width: 40%"></div>
+                        <div class="progress-bar progress-bar-primary" v-bind:style="{ width: percent(r) + '%' }"></div>
                       </div>
-                      <span v-if="r['status'] === 'inprogress'" class="progress-number"><b>{{r['progress']['current']}}</b>/{{r['progress']['total']}}</span>
                       <div v-if="r['status'] === 'success'" class="progress progress-xs active">
                         <div class="progress-bar progress-bar-success" style="width: 100%"></div>
                       </div>
                       <div v-if="r['status'] === 'error'" class="progress progress-xs active">
                         <div class="progress-bar progress-bar-danger" style="width: 100%"></div>
                       </div>
+                      <span class="progress-number"><b>{{ percent(r) }}%</b> ({{r['progress']['current']}}/{{r['progress']['total']}})</span>
                     </div>
                   </td>
                   <td v-if="p['revisions'].length <= 0">
@@ -117,6 +117,9 @@
       }, this), 5000)
     },
     methods: {
+      percent (r) {
+        return Math.round(100.0 * r['progress']['current'] / r['progress']['total'])
+      },
       fetchData () {
         this.loading = true
         this.policies = null
