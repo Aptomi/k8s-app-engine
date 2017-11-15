@@ -87,7 +87,7 @@
 </template>
 
 <script>
-  import {getAllPolicies, fetchPolicyRevisions} from 'lib/api.js'
+  import {getAllPolicies, fetchPolicy, fetchPolicyRevisions} from 'lib/api.js'
 
   export default {
     data () {
@@ -103,6 +103,21 @@
       // fetch the data when the view is created and the data is already being observed
       this.fetchData()
       this.interval = setInterval($.proxy(function () {
+        // if there are no policies, keep refreshing data
+        if (this.policies == null || this.policies.length <= 0) {
+          this.fetchData()
+          return
+        }
+
+        // if recent policy has changed, then re-fetch the data
+        let pCur = this.policies[0]
+        let pNext = {}
+        fetchPolicy(0, pNext)
+        if (pCur['metadata']['generation'] !== pNext['metadata']['generation']) {
+          this.fetchData()
+          return
+        }
+
         // continue to fetch progress information for all the recent policies (unprocessed policies ... last policy with revisions)
         if (this.policies != null) {
           for (const idx in this.policies) {
