@@ -60,10 +60,9 @@ func (server *Server) enforce() error {
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData)
 	desiredState, eventLog, err := resolver.ResolveAllDependencies()
 	if err != nil {
+		eventLog.Save(&event.HookConsole{})
 		return fmt.Errorf("cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
 	}
-
-	eventLog.Save(&event.HookConsole{})
 
 	// todo think about initial state when there is no revision at all
 	currRevision, err := server.store.GetRevision(runtime.LastGen)
@@ -86,6 +85,8 @@ func (server *Server) enforce() error {
 	}
 	// todo
 	log.Infof("Changes")
+	eventLog.Save(&event.HookConsole{}) // only print log if there are changes
+
 	// todo if policy gen changed, we still need to save revision but with progress == done
 
 	// todo remove debug log
