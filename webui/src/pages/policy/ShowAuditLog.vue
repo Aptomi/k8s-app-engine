@@ -57,13 +57,13 @@
                     <div v-if="r['status'] !== 'inprogress'">{{ r['appliedat'] | formatDateAgo }}</div>
                   </td>
                   <td>
-                    <div class="btn-group btn-group-xs">
+                    <div class="btn-group btn-group-xs" style="position: absolute">
                       <button type="button" class="btn btn-default btn-flat">Action</button>
                       <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">
                         <span class="caret"></span>
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
-                      <ul class="dropdown-menu" role="menu">
+                      <ul class="dropdown-menu" style="left: auto !important; right: 0 !important;">
                         <li><a href="#">Browse Policy</a></li>
                         <li><a href="#">Compare With Previous</a></li>
                         <li class="divider"></li>
