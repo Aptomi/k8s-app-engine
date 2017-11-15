@@ -34,7 +34,7 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 func (a *EndpointsAction) Apply(context *action.Context) error {
 	// skip if it wasn't processed (doesn't exist in actual state)
 	if context.ActualState.ComponentInstanceMap[a.ComponentKey] == nil {
-		return fmt.Errorf("can't get endpoints of component instance that doesn't present in actual state: %s", a.ComponentKey)
+		return nil
 	}
 
 	err := a.processEndpoints(context)
