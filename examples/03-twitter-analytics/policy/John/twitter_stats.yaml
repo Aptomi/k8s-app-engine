@@ -12,9 +12,6 @@
     - name: analytics_pipeline
       contract: analytics_pipeline
 
-    - name: istio
-      contract: istio
-
     # Publisher (Twitter Streaming API -> kafka)
     - name: tweepub
       code:
