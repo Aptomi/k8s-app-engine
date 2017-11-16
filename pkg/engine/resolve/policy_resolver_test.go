@@ -174,9 +174,11 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 			"address": fmt.Sprintf("{{ .Discovery.%s.url }}", component1.Name),
 			"nested": util.NestedParameterMap{
 				"param": util.NestedParameterMap{
-					"name1": "value1",
-					"name2": "123456789",
-					"name3": "{{ .Labels.cluster }}",
+					"name1":    "value1",
+					"name2":    "123456789",
+					"name3":    "{{ .Labels.cluster }}",
+					"nameBool": true,
+					"nameInt":  5,
 				},
 			},
 		},
@@ -209,6 +211,8 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	assert.Equal(t, "value1", instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name1"], "Code parameter should be calculated correctly")
 	assert.Equal(t, "123456789", instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name2"], "Code parameter should be calculated correctly")
 	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name3"], "Code parameter should be calculated correctly")
+	assert.Equal(t, true, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["nameBool"], "Code parameter should be calculated correctly (bool)")
+	assert.Equal(t, 5, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["nameInt"], "Code parameter should be calculated correctly (int)")
 }
 
 func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {

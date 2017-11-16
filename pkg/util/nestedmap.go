@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"github.com/d4l3k/messagediff"
 	"reflect"
-	"strconv"
 )
 
 // NestedParameterMap is a nested map of parameters, which allows to work with maps [string][string]...[string] -> string, int, bool values
@@ -47,15 +46,15 @@ func put(src interface{}, dst NestedParameterMap, key string) {
 		return
 	}
 	if srcInt, ok := src.(int); ok {
-		dst[key] = strconv.Itoa(srcInt)
+		dst[key] = srcInt
 		return
 	}
 	if srcBool, ok := src.(bool); ok {
-		dst[key] = strconv.FormatBool(srcBool)
+		dst[key] = srcBool
 		return
 	}
 
-	panic("Invalid type in map, can't convert to NestedParameterMap")
+	panic("invalid type in NestedParameterMap (expected string, int, or bool)")
 }
 
 // MakeCopy makes a shallow copy of parameter structure
@@ -141,6 +140,18 @@ func processParameterTreeNode(node interface{}, parameters *template.Parameters,
 		return nil
 	}
 
+	// If it's a int, put as is
+	if valueInt, ok := node.(int); ok {
+		result[key] = valueInt
+		return nil
+	}
+
+	// If it's a bool, put as is
+	if valueBool, ok := node.(bool); ok {
+		result[key] = valueBool
+		return nil
+	}
+
 	// If it's a map, process it recursively
 	if paramsMap, ok := node.(NestedParameterMap); ok {
 		if len(key) > 0 {
@@ -157,5 +168,5 @@ func processParameterTreeNode(node interface{}, parameters *template.Parameters,
 	}
 
 	// Unknown type, return an error
-	return fmt.Errorf("expected string or NestedParameterMap, but found %v", node)
+	return fmt.Errorf("invalid type in NestedParameterMap (expected string, int, or bool): %v", node)
 }
