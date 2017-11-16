@@ -1,0 +1,32 @@
+{{- if .Values.namenode.ui.ingress.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "hdfs-ui-fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "hdfs-ui-fullname" . }}
+  annotations:
+{{ toYaml .Values.namenode.ui.ingress.annotations | indent 4 }}
+spec:
+  {{- if .Values.namenode.ui.ingress.tls.enabled }}
+  tls:
+    - hosts:
+      {{- range .Values.namenode.ui.ingress.hosts }}
+      - {{ . }}
+      {{- end }}
+      secretName: {{ .Values.namenode.ui.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    {{- $ctx := . }}
+    {{- range .Values.namenode.ui.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - backend:
+              serviceName: {{ template "hdfs-ui-fullname" $ctx }}
+              servicePort: {{ $.Values.namenode.ui.port }}
+    {{- end -}}
+{{- end -}}

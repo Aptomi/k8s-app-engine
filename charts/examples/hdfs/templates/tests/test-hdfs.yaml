@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ printf "hdfs-test-%s" .Release.Name | trunc 55 | trimSuffix "-" }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: zk-test
+      image: {{ .Values.namenode.image.repository }}{{ .Values.namenode.image.name }}:{{ .Values.namenode.image.tag }}
+      imagePullPolicy: {{ .Values.namenode.image.pullPolicy }}
+      command:
+        - bash
+        - -c
+        - >
+          echo "test" > /tmp/test &&
+          path="/test-{{ randAlphaNum 10 }}" &&
+          hadoop fs -fs hdfs://{{ template "namenode-address" . }} -put /tmp/test "$path" &&
+          content=$(hadoop fs -fs hdfs://{{ template "namenode-address" . }} -cat "$path") &&
+          if [ "test" != "$content" ]; then
+              echo "File content in hdfs didn't match content of local file" &&
+              exit 1
+          fi &&
+          hadoop fs -fs hdfs://{{ template "namenode-address" . }} -rm "$path" &&
+          rm /tmp/test
+  restartPolicy: Never

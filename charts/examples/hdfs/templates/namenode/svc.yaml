@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "namenode-fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "namenode-fullname" . }}
+spec:
+  ports:
+  - port: {{ .Values.namenode.port }}
+    name: port
+  clusterIP: None
+  selector:
+    app: {{ template "namenode-fullname" . }}

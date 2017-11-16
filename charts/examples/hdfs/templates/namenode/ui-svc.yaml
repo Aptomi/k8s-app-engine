@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "hdfs-ui-fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "hdfs-ui-fullname" . }}
+{{- if .Values.namenode.ui.service.annotations }}
+  annotations:
+{{ toYaml .Values.namenode.ui.service.annotations | indent 4}}
+{{- end }}
+spec:
+  ports:
+  - port: {{ .Values.namenode.ui.port }}
+    name: webui
+    {{- if eq .Values.namenode.ui.service.type "NodePort" }}
+    {{- if .Values.namenode.ui.service.nodePort }}
+    nodePort: {{ .Values.namenode.ui.service.nodePort }}
+    {{- end -}}
+    {{- end }}
+  selector:
+    app: {{ template "namenode-fullname" . }}
+  type: "{{ .Values.namenode.ui.service.type }}"
+{{- if eq .Values.namenode.ui.service.type "LoadBalancer" }}
+  {{- if .Values.namenode.ui.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.namenode.ui.service.loadBalancerIP }}
+  {{- end -}}
+  {{- if .Values.namenode.ui.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{- range .Values.namenode.ui.service.loadBalancerSourceRanges }}
+  - {{ . }}
+  {{- end }}
+  {{- end -}}
+{{- end -}}
