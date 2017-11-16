@@ -1,0 +1,49 @@
+{{ range $i, $idx := until (int .Values.spark.master.replicas) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "master-fullname" $ }}-{{ $idx }}
+  labels:
+    heritage: {{ $.Release.Service | quote }}
+    release: {{ $.Release.Name | quote }}
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
+    app: {{ template "master-fullname" $ }}
+spec:
+  type: {{ $.Values.service.type }}
+  ports:
+    - name: rpc
+      port: {{ $.Values.spark.master.rpcPort }}
+      {{- if eq $.Values.service.type "NodePort" }}
+      {{- if $.Values.spark.master.rpcNodePort }}
+      nodePort: {{ $.Values.spark.master.rpcNodePort }}
+      {{- end }}
+      {{- end }}
+    - name: webui
+      port: {{ $.Values.spark.master.webuiPort }}
+      {{- if eq $.Values.service.type "NodePort" }}
+      {{- if $.Values.spark.master.webuiNodePort }}
+      nodePort: {{ $.Values.spark.master.webuiNodePort }}
+      {{- end }}
+      {{- end }}
+    - name: rest
+      port: {{ $.Values.spark.master.restPort }}
+      {{- if eq $.Values.service.type "NodePort" }}
+      {{- if $.Values.spark.master.restNodePort }}
+      nodePort: {{ $.Values.spark.master.restNodePort }}
+      {{- end }}
+      {{- end }}
+  selector:
+    app: {{ template "master-fullname" $ }}-{{ $idx }}
+  {{- if eq $.Values.service.type "LoadBalancer" }}
+  {{- if $.Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ $.Values.service.loadBalancerIP }}
+  {{- end }}
+  {{- if $.Values.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- range $.Values.service.loadBalancerSourceRanges }}
+    - {{ . }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+---
+{{ end }}

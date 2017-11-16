@@ -1,0 +1,30 @@
+Spark chart has been deployed.
+
+Internal URL:
+    spark: {{ template "spark-address" . }}
+
+External URL:
+{{ if .Values.ingress.enabled -}}
+{{ if .Values.ingress.tls.enabled }}
+{{- range .Values.ingress.hosts }}
+    spark: https://{{ . }}/webui
+{{- end -}}
+{{- else }}
+{{- range .Values.ingress.hosts }}
+    spark: http://{{ . }}/webui
+{{- end -}}
+{{- end }}
+{{- else -}}
+{{- if contains "NodePort" .Values.service.type -}}
+To get the Spark URL to visit by running these commands in the same shell:
+
+    export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+    export SPARK_NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[1].nodePort}" services {{ template "master-fullname" . }})
+    echo http://$NODE_IP:$SPARK_NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type -}}
+NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+You can watch the status of it by running in the same shell 'kubectl get svc --namespace {{ .Release.Namespace }} -w {{ template "master-fullname" . }} {{ template "zeppelin-fullname" . }}'
+    export SPARK_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "master-fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    echo http://$SPARK_IP:{{ .Values.spark.master.webuiPort }}
+{{- end -}}
+{{- end -}}
