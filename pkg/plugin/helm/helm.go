@@ -144,12 +144,8 @@ func (plugin *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params
 	client := kubeClient.CoreV1()
 
 	releaseName := getHelmReleaseName(deployName)
-	_, chartName, _, err := getHelmReleaseInfo(params)
-	if err != nil {
-		return nil, err
-	}
 
-	selector := labels.Set{"release": releaseName, "chart": chartName}.AsSelector().String()
+	selector := labels.Set{"release": releaseName}.AsSelector().String()
 	options := meta.ListOptions{LabelSelector: selector}
 
 	endpoints := make(map[string]string)
