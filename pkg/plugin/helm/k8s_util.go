@@ -136,7 +136,7 @@ func (cache *clusterCache) createKubeClusterRoleBinding(client kubernetes.Interf
 		},
 		Subjects: []rbacapi.Subject{{
 			Kind:      "ServiceAccount",
-			Name:      "tiller",
+			Name:      "tiller-" + namespace,
 			Namespace: namespace,
 		}},
 	}
