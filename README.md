@@ -1,4 +1,4 @@
-![aptomi Logo](aptomi-logo-new.png)
+![Aptomi Logo](aptomi-logo-new.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi?refresh)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
 [![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi%20-%20tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
@@ -31,6 +31,7 @@ designed to work with any container runtime and container orchestration technolo
 - [Dev Guide](#dev-guide)
   - [Building From Source](#building-from-source)
   - [Tests & Code Validation](#tests--code-validation)
+  - [Web UI](#web-ui)
   - [How to contribute](#how-to-contribute)
   - [Roadmap](#roadmap)
 
@@ -58,14 +59,15 @@ designed to work with any container runtime and container orchestration technolo
   - *Personal* development instances of *MyApp* can only be running *from 7am to 11pm* and should be terminated overnight 
     for all developers
 - **Insights & Contextual visibility**
-  - Understand what services are running, why they were instantiated, visualize dependencies and impact of changes. No
+  - UI to understand what services are running, why they were instantiated, visualize dependencies and impact of changes. No
     need to deal with thousands of individual containers
-    
+    ![Aptomi UI](aptomi-ui.png) 
+        
 ## Where Aptomi is located in the stack
 Aptomi sits in between CI/CD and container orchestration. Being in deployment path for applications, it can apply
 higher-level policy rules (see examples above) and configure the underlying infrastructure components accordingly. 
 
-![aptomi Logo](aptomi-stack.png) 
+![Aptomi Stack](aptomi-stack.png) 
 
 ## User Guide
 
@@ -149,8 +151,18 @@ Command     | Action          | Description
 ```make fmt```  | Re-format code | Re-formats all code according to Go standards
 ```make lint``` | Examine code | Run linters to examine Go source code and reports suspicious constructs
 
-### WebUI
-It's work in progress now and initially based on https://github.com/devjin0617/vue2-admin-lte 
+### Web UI
+Source code is available in [webui](webui)
+
+Command     | Action
+------------|----------
+```npm install```  | Install dependencies
+```npm run dev``` | Serve with hot reload at localhost:8080
+```npm run build``` | Build for production with minification
+```npm run build --report``` | Build for production and view the bundle analyzer report
+```npm run unit``` | Run unit tests: *coming soon*
+```npm run e2e``` | Run e2e tests: *coming soon*
+```npm run test``` | Run all tests: *coming soon*
 
 ### How to contribute
 Report a bug. Send us a pull request.
