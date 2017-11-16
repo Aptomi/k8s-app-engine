@@ -16,35 +16,38 @@ import (
 var helmCodeTypes = []string{"helm", "aptomi/code/kubernetes-helm"}
 
 // GetSupportedCodeTypes returns all code types for which this plugin is registered to
-func (p *Plugin) GetSupportedCodeTypes() []string {
+func (plugin *Plugin) GetSupportedCodeTypes() []string {
 	return helmCodeTypes
 }
 
 // Create implements creation of a new component instance in the cloud by deploying a Helm chart
-func (p *Plugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
+func (plugin *Plugin) Create(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	return plugin.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
 // Update implements update of an existing component instance in the cloud by updating parameters of a helm chart
-func (p *Plugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	return p.createOrUpdate(cluster, deployName, params, eventLog, true)
+func (plugin *Plugin) Update(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	return plugin.createOrUpdate(cluster, deployName, params, eventLog, true)
 }
 
-func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
-	cache, err := p.getCache(cluster, eventLog)
+func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
+	cache, err := plugin.getClusterCache(cluster, eventLog)
 	if err != nil {
 		return err
 	}
 
-	releaseName := helmReleaseName(deployName)
-	chartName, err := helmChartName(params)
+	releaseName := getHelmReleaseName(deployName)
+	chartRepo, chartName, chartVersion, err := getHelmReleaseInfo(params)
 	if err != nil {
 		return err
 	}
 
-	helmClient := cache.newHelmClient(cluster)
+	helmClient, err := cache.newHelmClient(eventLog)
+	if err != nil {
+		return err
+	}
 
-	chartPath, err := p.getValidChartPath(chartName)
+	chartPath, err := plugin.fetchChart(chartRepo, chartName, chartVersion)
 	if err != nil {
 		return err
 	}
@@ -90,15 +93,18 @@ func (p *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, params
 }
 
 // Destroy implements destruction of an existing component instance in the cloud by running "helm delete" on the corresponding helm chart
-func (p *Plugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	cache, err := p.getCache(cluster, eventLog)
+func (plugin *Plugin) Destroy(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	cache, err := plugin.getClusterCache(cluster, eventLog)
 	if err != nil {
 		return err
 	}
 
-	releaseName := helmReleaseName(deployName)
+	releaseName := getHelmReleaseName(deployName)
 
-	helmClient := cache.newHelmClient(cluster)
+	helmClient, err := cache.newHelmClient(eventLog)
+	if err != nil {
+		return err
+	}
 
 	eventLog.WithFields(event.Fields{
 		"release": releaseName,
@@ -109,9 +115,9 @@ func (p *Plugin) Destroy(cluster *lang.Cluster, deployName string, params util.N
 }
 
 // Cleanup implements cleanup phase for the Helm plugin. It closes all created and cached Tiller tunnels.
-func (p *Plugin) Cleanup() error {
+func (plugin *Plugin) Cleanup() error {
 	var err error
-	p.cache.Range(func(key, value interface{}) bool {
+	plugin.cache.Range(func(key, value interface{}) bool {
 		if c, ok := value.(*clusterCache); ok {
 			c.tillerTunnel.Close()
 		} else {
@@ -124,21 +130,21 @@ func (p *Plugin) Cleanup() error {
 
 // Endpoints returns map from port type to url for all services of the current chart
 // TODO: reduce cyclomatic complexity
-func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) { // nolint: gocyclo
-	cache, err := p.getCache(cluster, eventLog)
+func (plugin *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) { // nolint: gocyclo
+	cache, err := plugin.getClusterCache(cluster, eventLog)
 	if err != nil {
 		return nil, err
 	}
 
-	_, kubeClient, err := cache.newKubeClient(cluster)
+	_, kubeClient, err := cache.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
 
 	client := kubeClient.CoreV1()
 
-	releaseName := helmReleaseName(deployName)
-	chartName, err := helmChartName(params)
+	releaseName := getHelmReleaseName(deployName)
+	_, chartName, _, err := getHelmReleaseInfo(params)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +160,7 @@ func (p *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params util
 		return nil, err
 	}
 
-	kubeHost, err := cache.getKubeExternalAddress(cluster, eventLog)
+	kubeHost, err := cache.getKubeExternalAddress()
 	if err != nil {
 		return nil, err
 	}

@@ -1,51 +1,17 @@
 package helm
 
 import (
-	"errors"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/lang"
+	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	api "k8s.io/client-go/pkg/api/v1"
+	rbacapi "k8s.io/client-go/pkg/apis/rbac/v1beta1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/helm/pkg/helm/portforwarder"
 )
 
-func (cache *clusterCache) setupTillerConnection(cluster *lang.Cluster, eventLog *event.Log) error {
-	cache.lock.Lock()
-	defer cache.lock.Unlock()
-
-	if len(cache.tillerHost) > 0 {
-		// todo(slukjanov): verify that tunnel is still alive??
-		// connection already set up, skip
-		return nil
-	}
-
-	config, client, err := cache.newKubeClient(cluster)
-	if err != nil {
-		return err
-	}
-
-	tillerNamespace := cluster.Config.TillerNamespace
-	if tillerNamespace == "" {
-		tillerNamespace = "kube-system"
-	}
-	tunnel, err := portforwarder.New(tillerNamespace, client, config)
-	if err != nil {
-		return err
-	}
-
-	cache.tillerTunnel = tunnel
-	cache.tillerHost = fmt.Sprintf("localhost:%d", tunnel.Local)
-
-	eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port: %d", tunnel.Local)
-
-	return nil
-}
-
-func (cache *clusterCache) getK8sClientConfig(cluster *lang.Cluster) (*rest.Config, error) {
+func (cache *clusterCache) getK8sClientConfig() (*rest.Config, error) {
 	rules := clientcmd.NewDefaultClientConfigLoadingRules()
 
 	/*
@@ -54,7 +20,7 @@ func (cache *clusterCache) getK8sClientConfig(cluster *lang.Cluster) (*rest.Conf
 		}
 	*/
 
-	kubeContext := cluster.Config.KubeContext
+	kubeContext := cache.cluster.Config.KubeContext
 	overrides := &clientcmd.ConfigOverrides{}
 	if len(kubeContext) > 0 {
 		overrides.CurrentContext = kubeContext
@@ -63,14 +29,14 @@ func (cache *clusterCache) getK8sClientConfig(cluster *lang.Cluster) (*rest.Conf
 
 	clientConf, err := conf.ClientConfig()
 	if err != nil {
-		return nil, fmt.Errorf("could not get kubernetes config for cluster %s: %s", cluster.Name, err)
+		return nil, fmt.Errorf("could not get kubernetes config for cluster %s: %s", cache.cluster.Name, err)
 	}
 
 	return clientConf, nil
 }
 
-func (cache *clusterCache) newKubeClient(cluster *lang.Cluster) (*rest.Config, kubernetes.Interface, error) {
-	conf, err := cache.getK8sClientConfig(cluster)
+func (cache *clusterCache) newKubeClient() (*rest.Config, kubernetes.Interface, error) {
+	conf, err := cache.getK8sClientConfig()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -83,7 +49,7 @@ func (cache *clusterCache) newKubeClient(cluster *lang.Cluster) (*rest.Config, k
 	return conf, client, nil
 }
 
-func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLog *event.Log) (string, error) {
+func (cache *clusterCache) getKubeExternalAddress() (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 
@@ -91,9 +57,9 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 		return cache.kubeExternalAddress, nil
 	}
 
-	_, client, err := cache.newKubeClient(cluster)
+	_, client, err := cache.newKubeClient()
 	if err != nil {
-		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", cluster.Name, err)
+		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", cache.cluster.Name, err)
 	}
 
 	nodes, err := client.CoreV1().Nodes().List(meta.ListOptions{})
@@ -101,7 +67,7 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 		return "", err
 	}
 	if len(nodes.Items) == 0 {
-		return "", fmt.Errorf("no nodes found for k8s cluster %s, it's critical eror", cluster.Name)
+		return "", fmt.Errorf("no nodes found for k8s cluster %s, it's critical eror", cache.cluster.Name)
 	}
 
 	returnFirst := func(addrType api.NodeAddressType) string {
@@ -123,10 +89,58 @@ func (cache *clusterCache) getKubeExternalAddress(cluster *lang.Cluster, eventLo
 		addr = returnFirst(api.NodeHostName)
 	}
 	if addr == "" {
-		return "", errors.New("couldn't find external IP for cluster")
+		return "", fmt.Errorf("couldn't find external IP for cluster: %s", cache.cluster.Name)
 	}
 
 	cache.kubeExternalAddress = addr
 
 	return addr, nil
+}
+
+func (cache *clusterCache) ensureKubeNamespace(client kubernetes.Interface, namespace string) error {
+	_, err := client.CoreV1().Namespaces().Get(namespace, meta.GetOptions{})
+	if err != nil && errors.IsNotFound(err) {
+		ns := &api.Namespace{
+			ObjectMeta: meta.ObjectMeta{
+				Name: namespace,
+			},
+		}
+		_, createErr := client.CoreV1().Namespaces().Create(ns)
+		if createErr != nil {
+			return createErr
+		}
+	}
+
+	return nil
+}
+
+func (cache *clusterCache) createKubeServiceAccount(client kubernetes.Interface, namespace string) error {
+	sa := &api.ServiceAccount{
+		ObjectMeta: meta.ObjectMeta{
+			Name: "tiller-" + namespace,
+		},
+	}
+	_, err := client.CoreV1().ServiceAccounts(namespace).Create(sa)
+
+	return err
+}
+
+func (cache *clusterCache) createKubeClusterRoleBinding(client kubernetes.Interface, namespace string) error {
+	crb := &rbacapi.ClusterRoleBinding{
+		ObjectMeta: meta.ObjectMeta{
+			Name: "tiller-" + namespace,
+		},
+		RoleRef: rbacapi.RoleRef{
+			Kind: "ClusterRole",
+			Name: "cluster-admin",
+		},
+		Subjects: []rbacapi.Subject{{
+			Kind:      "ServiceAccount",
+			Name:      "tiller",
+			Namespace: namespace,
+		}},
+	}
+	_, err := client.RbacV1beta1().ClusterRoleBindings().Create(crb)
+
+	return err
 }

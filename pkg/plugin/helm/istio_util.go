@@ -15,8 +15,8 @@ import (
 	"strings"
 )
 
-func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
-	_, client, err := cache.newKubeClient(cluster)
+func (cache *clusterCache) getHTTPServicesForHelmRelease(releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
+	_, client, err := cache.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
@@ -27,13 +27,13 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, 
 	options := meta.ListOptions{LabelSelector: selector}
 
 	// Check all corresponding services
-	services, err := coreClient.Services(cluster.Config.Namespace).List(options)
+	services, err := coreClient.Services(cache.cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check all corresponding Istio ingresses
-	ingresses, err := client.ExtensionsV1beta1().Ingresses(cluster.Config.Namespace).List(options)
+	ingresses, err := client.ExtensionsV1beta1().Ingresses(cache.cluster.Config.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(cluster *lang.Cluster, 
 	return nil, nil
 }
 
-func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) ([]*istioRouteRule, error) {
+func (plugin *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) ([]*istioRouteRule, error) {
 	instance := resolution.ComponentInstanceMap[componentKey]
 	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
@@ -66,7 +66,7 @@ func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, poli
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
-	cache, err := p.getCache(cluster, eventLog)
+	cache, err := plugin.getClusterCache(cluster, eventLog)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +77,13 @@ func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, poli
 	}
 	// todo(slukjanov) check code type before moving forward, only helm supported
 	if !allows && component != nil && component.Code != nil {
-		releaseName := helmReleaseName(instance.GetDeployName())
-		chartName, err := helmChartName(instance.CalculatedCodeParams)
+		releaseName := getHelmReleaseName(instance.GetDeployName())
+		_, chartName, _, err := getHelmReleaseInfo(instance.CalculatedCodeParams)
 		if err != nil {
 			return nil, err
 		}
 
-		services, err := cache.getHTTPServicesForHelmRelease(cluster, releaseName, chartName, eventLog)
+		services, err := cache.getHTTPServicesForHelmRelease(releaseName, chartName, eventLog)
 		if err != nil {
 			return nil, err
 		}
@@ -100,11 +100,11 @@ func (p *Plugin) getDesiredIstioRouteRulesForComponent(componentKey string, poli
 	return nil, nil
 }
 
-func (cache *clusterCache) getExistingIstioRouteRulesForCluster(cluster *lang.Cluster) ([]*istioRouteRule, error) {
+func (cache *clusterCache) getExistingIstioRouteRulesForCluster() ([]*istioRouteRule, error) {
 	cmd := "get route-rules"
-	rulesStr, err := cache.runIstioCmd(cmd, cluster)
+	rulesStr, err := cache.runIstioCmd(cmd, cache.cluster)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get route-rules in cluster '%s' by running '%s': %s", cluster.Name, cmd, err)
+		return nil, fmt.Errorf("failed to get route-rules in cluster '%s' by running '%s': %s", cache.cluster.Name, cmd, err)
 	}
 
 	rules := make([]*istioRouteRule, 0)
@@ -113,7 +113,7 @@ func (cache *clusterCache) getExistingIstioRouteRulesForCluster(cluster *lang.Cl
 		if ruleName == "" {
 			continue
 		}
-		rules = append(rules, &istioRouteRule{ruleName, cluster, cache})
+		rules = append(rules, &istioRouteRule{ruleName, cache.cluster, cache})
 	}
 
 	return rules, nil
@@ -152,13 +152,13 @@ func (rule *istioRouteRule) destroy() error {
 	return nil
 }
 
-func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster) (string, error) {
+func (cache *clusterCache) getIstioSvc() (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 
 	istioSvc := cache.istioSvc
 	if len(istioSvc) == 0 {
-		_, client, err := cache.newKubeClient(cluster)
+		_, client, err := cache.newKubeClient()
 		if err != nil {
 			return "", err
 		}
@@ -168,7 +168,7 @@ func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster) (string, error) {
 		selector := labels.Set{"app": "istio"}.AsSelector().String()
 		options := meta.ListOptions{LabelSelector: selector}
 
-		pods, err := coreClient.Pods(cluster.Namespace).List(options)
+		pods, err := coreClient.Pods(cache.cluster.Namespace).List(options)
 		if err != nil {
 			return "", err
 		}
@@ -192,7 +192,7 @@ func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster) (string, error) {
 		}
 
 		if running {
-			services, err := coreClient.Services(cluster.Namespace).List(options)
+			services, err := coreClient.Services(cache.cluster.Namespace).List(options)
 			if err != nil {
 				return "", err
 			}
@@ -219,7 +219,7 @@ func (cache *clusterCache) getIstioSvc(cluster *lang.Cluster) (string, error) {
 }
 
 func (cache *clusterCache) runIstioCmd(cmd string, cluster *lang.Cluster) (string, error) {
-	istioSvc, err := cache.getIstioSvc(cluster)
+	istioSvc, err := cache.getIstioSvc()
 	if err != nil {
 		return "", err
 	}

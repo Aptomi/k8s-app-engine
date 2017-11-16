@@ -12,7 +12,7 @@ import (
 // Process is a action which gets called only once. It manages all Istio rules across all clusters, making sure they
 // are up to date by creating/deleting/updating rules if/as needed
 // TODO: reduce cyclomatic complexity
-func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error { // nolint: gocyclo
+func (plugin *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error { // nolint: gocyclo
 	// todo(slukjanov): do something with progress
 	prog := progress.NewNoop()
 
@@ -28,11 +28,11 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 
 	for _, clusterObj := range policy.GetObjectsByKind(lang.ClusterObject.Kind) {
 		cluster := clusterObj.(*lang.Cluster)
-		cache, err := p.getCache(cluster, eventLog)
+		cache, err := plugin.getClusterCache(cluster, eventLog)
 		if err != nil {
 			return err
 		}
-		rules, err := cache.getExistingIstioRouteRulesForCluster(cluster)
+		rules, err := cache.getExistingIstioRouteRulesForCluster()
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func (p *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResoluti
 	// Process in the right order
 	desiredRules := make(map[string][]*istioRouteRule)
 	for _, key := range resolution.ComponentProcessingOrder {
-		rules, err := p.getDesiredIstioRouteRulesForComponent(key, policy, resolution, externalData, eventLog)
+		rules, err := plugin.getDesiredIstioRouteRulesForComponent(key, policy, resolution, externalData, eventLog)
 		if err != nil {
 			return fmt.Errorf("error while processing Istio Ingress for component '%s': %s", key, err)
 		}

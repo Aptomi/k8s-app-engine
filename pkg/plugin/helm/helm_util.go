@@ -2,40 +2,37 @@ package helm
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"github.com/mattn/go-zglob"
+	"github.com/Aptomi/aptomi/pkg/util/retry"
+	"io/ioutil"
+	"k8s.io/helm/cmd/helm/installer"
 	"k8s.io/helm/pkg/helm"
-	"path/filepath"
+	"k8s.io/helm/pkg/helm/portforwarder"
+	"k8s.io/helm/pkg/kube"
+	"k8s.io/helm/pkg/repo"
 	"strings"
 )
 
-func (cache *clusterCache) newHelmClient(cluster *lang.Cluster) *helm.Client {
-	return helm.NewClient(helm.Host(cache.tillerHost))
-}
-
-func (p *Plugin) getValidChartPath(chartName string) (string, error) {
-	pattern := filepath.Join(p.cfg.ChartsDir, "**", chartName+".tgz")
-	files, err := zglob.Glob(pattern)
-	if err != nil {
-		return "", fmt.Errorf("error while searching chart %s file: %s", chartName, err)
-	}
-	fileName, err := util.EnsureSingleFile(files)
-	if err != nil {
-		return "", fmt.Errorf("error while doing chart '%s' lookup: %s", chartName, err)
-	}
-	return fileName, nil
-}
-
-func helmChartName(params util.NestedParameterMap) (string, error) {
-	if chartName, ok := params["chartName"].(string); ok {
-		return chartName, nil
+func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, version string, err error) {
+	repository, ok := params["chartRepo"].(string)
+	if !ok {
+		err = fmt.Errorf("chartRepo is a mandatory paraneter")
+		return
 	}
 
-	return "", fmt.Errorf("no chartName in params")
+	name, ok = params["chartName"].(string)
+	if !ok {
+		err = fmt.Errorf("chartName is a mandatory paraneter")
+		return
+	}
+
+	version = params["chartVersion"].(string)
+
+	return
 }
 
-func helmReleaseName(deployName string) string {
+func getHelmReleaseName(deployName string) string {
 	return strings.ToLower(util.EscapeName(deployName))
 }
 
@@ -46,11 +43,143 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 		return false, err
 	}
 
-	for _, rel := range resp.Releases {
-		if rel.Name == name {
+	for _, release := range resp.Releases {
+		if release.Name == name {
 			return true, nil
 		}
 	}
 
 	return false, nil
+}
+
+func (cache *clusterCache) newHelmClient(eventLog *event.Log) (*helm.Client, error) {
+	if err := cache.ensureTillerTunnel(eventLog); err != nil {
+		return nil, err
+	}
+
+	return helm.NewClient(helm.Host(cache.tillerHost)), nil
+}
+
+func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
+	cache.lock.Lock()
+	defer cache.lock.Unlock()
+
+	if len(cache.tillerHost) > 0 {
+		// todo(slukjanov): verify that tunnel is still alive??
+		// connection already set up, skip
+		return nil
+	}
+
+	var tunnelErr error
+	ok := retry.Do(120, 5, func() bool {
+		cache.tillerTunnel, tunnelErr = cache.newTillerTunnel()
+
+		if tunnelErr != nil {
+			if strings.Contains(tunnelErr.Error(), "could not find tiller") {
+				err := cache.setupTiller(eventLog)
+				if err != nil {
+					tunnelErr = err
+					return false
+				}
+			}
+
+			return false
+		}
+
+		port := cache.tillerTunnel.Local
+		cache.tillerHost = fmt.Sprintf("localhost:%d", port)
+		eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port: %d", port)
+
+		return true
+	})
+
+	if !ok {
+		if tunnelErr != nil {
+			return tunnelErr
+		}
+
+		return fmt.Errorf("tiller tunnel creation timeout for cluster: %s", cache.cluster.Name)
+	}
+
+	return nil
+}
+
+func (cache *clusterCache) newTillerTunnel() (*kube.Tunnel, error) {
+	config, client, err := cache.newKubeClient()
+	if err != nil {
+		return nil, err
+	}
+
+	tillerNamespace := cache.cluster.Config.TillerNamespace
+	if tillerNamespace == "" {
+		tillerNamespace = "kube-system"
+	}
+
+	return portforwarder.New(tillerNamespace, client, config)
+}
+
+func (cache *clusterCache) setupTiller(eventLog *event.Log) error {
+	_, client, err := cache.newKubeClient()
+	if err != nil {
+		return err
+	}
+
+	tillerNamespace := cache.cluster.Config.TillerNamespace
+	if tillerNamespace == "" {
+		tillerNamespace = "kube-system"
+	}
+
+	err = cache.ensureKubeNamespace(client, tillerNamespace)
+	if err != nil {
+		return err
+	}
+
+	err = cache.createKubeServiceAccount(client, tillerNamespace)
+	if err != nil {
+		return err
+	}
+
+	err = cache.createKubeClusterRoleBinding(client, tillerNamespace)
+	if err != nil {
+		return err
+	}
+
+	return installer.Install(client, &installer.Options{
+		Namespace:      tillerNamespace,
+		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.6.2",
+		ServiceAccount: "tiller-" + tillerNamespace,
+	})
+}
+
+func (plugin *Plugin) fetchChart(repository, name, version string) (string, error) {
+	chartURL, err := repo.FindChartInRepoURL(
+		repository, name, version,
+		"", "", "",
+		newGetterProviders(),
+	)
+	if err != nil {
+		return "", fmt.Errorf("error while getting chart url in repo: %s", err)
+	}
+
+	chartFile, err := ioutil.TempFile("charts", name)
+	if err != nil {
+		return "", fmt.Errorf("error while creating temp file for downloading chart: %s", err)
+	}
+
+	chartGetter, err := newHTTPGetter(chartURL, "", "", "")
+	if err != nil {
+		return "", fmt.Errorf("error while creating chart downloader: %s", err)
+	}
+
+	resp, err := chartGetter.Get(chartURL)
+	if err != nil {
+		return "", fmt.Errorf("error while downloading chart: %s", err)
+	}
+
+	_, err = chartFile.Write(resp.Bytes())
+	if err != nil {
+		return "", fmt.Errorf("error while writing downloaded chart to the temp file")
+	}
+
+	return chartFile.Name(), nil
 }
