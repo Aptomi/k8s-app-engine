@@ -163,7 +163,7 @@ func (plugin *Plugin) fetchChart(repository, name, version string) (string, erro
 		return "", fmt.Errorf("error while getting chart url in repo: %s", err)
 	}
 
-	chartFile, err := ioutil.TempFile("charts", name)
+	chartFile, err := ioutil.TempFile("", name)
 	if err != nil {
 		return "", fmt.Errorf("error while creating temp file for downloading chart: %s", err)
 	}
