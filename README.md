@@ -104,7 +104,7 @@ Example    | Description  | Diagram
 ![Aptomi Enforcement](images/aptomi-enforcement.png)
 
 #### Language
-TODO: picture
+![Aptomi Language](images/aptomi-language.png)
 
 ### Aptomi language
 TODO: policy documentation 
