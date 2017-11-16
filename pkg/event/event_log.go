@@ -104,7 +104,10 @@ func (eventLog *Log) Append(that *Log) {
 	if eventLog.IsLog() && !that.IsLog() {
 		logger := &HookLogger{}
 		for _, entry := range that.hookMemory.entries {
-			logger.Fire(entry)
+			err := logger.Fire(entry)
+			if err != nil {
+				logrus.Panicf("error while firing events during appending event logs: %s", err)
+			}
 		}
 	}
 
