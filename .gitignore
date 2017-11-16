@@ -17,6 +17,10 @@ webui-vis-tmp/output.json
 
 .idea
 
+requirements.lock
+*.tgz
+dist
+
 # ignore downloaded helm charts
 *.tgz
 
