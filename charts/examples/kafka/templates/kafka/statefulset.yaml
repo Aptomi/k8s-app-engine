@@ -1,0 +1,190 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: {{ template "kafka-fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "kafka-fullname" . }}
+spec:
+  serviceName: {{ template "kafka-fullname" . }}
+  replicas: {{ .Values.replicas }}
+  template:
+    metadata:
+      labels:
+        release: "{{ .Release.Name }}"
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app: {{ template "kafka-fullname" . }}
+      annotations:
+        {{- if .Values.prometheusExporter.enabled }}
+        prometheus.io/scrape: "true"
+        {{- end }}
+    spec:
+      initContainers:
+      {{- if ne .Values.persistence.type "emptyDir" }}
+      - name: set-perm
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - chown -R 1000:1000 /var/lib/kafka
+        volumeMounts:
+        - mountPath: /var/lib/kafka
+          name: datadir
+      {{- end }}
+      {{- if .Values.zookeeper.deployChart }}
+      - name: wait-for-zk
+        image: '{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}'
+        imagePullPolicy: '{{ .Values.image.pullPolicy }}'
+        command:
+        - sh
+        - -c
+        - 'waitForZK.sh {{ .Values.zookeeper.replicas }} {{ template "zookeeper-fullname" . }}'
+      {{- end }}
+      {{- if eq .Values.antiAffinity "hard"}}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: ["{{ template "kafka-fullname" . }}"]
+            topologyKey: kubernetes.io/hostname
+      {{- else if eq .Values.antiAffinity "soft"}}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: ["{{ template "kafka-fullname" . }}"]
+              topologyKey: kubernetes.io/hostname
+      {{- end}}
+      containers:
+      - name: kafka
+        image: "{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        {{- if .Values.prometheusExporter.enabled }}
+        - containerPort: 7071
+          name: jmx
+        {{- end }}
+        - containerPort: {{.Values.port}}
+          name: port
+        env:
+        - name: KAFKA_PORT
+          value: "{{ .Values.port }}"
+        - name: ZK_CONNECT
+        {{- if .Values.zookeeper.serviceCatalog.enabled }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.zookeeper.serviceCatalog.secretName }}
+              key: zookeeper
+        {{- else }}
+          value: "{{ template "zk-address" . }}"
+        {{- end }}
+        - name: KAFKA_HEAP_OPTS
+          value: "-Xmx{{ .Values.heapSize }} -Xms{{ .Values.heapSize }}"
+        {{- if .Values.prometheusExporter.enabled }}
+        - name: KAFKA_OPTS
+          value: "-javaagent:/opt/kafka/jmx_prometheus_javaagent-0.9.jar=7071:/opt/kafka/configmap/kafka-jmx.yml"
+        {{- end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        command:
+        - entrypoint.sh
+        readinessProbe:
+          exec:
+            command:
+              - /check_status.py
+          initialDelaySeconds: {{ .Values.probeInitialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probeTimeoutSeconds }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.port | int }}
+          initialDelaySeconds: {{ .Values.probeInitialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probeTimeoutSeconds }}
+        volumeMounts:
+        {{- if .Values.configFiles  }}
+        {{- range $name, $content := .Values.configFiles  }}
+        - name: configs
+          mountPath: /opt/kafka/config/{{ $name }}
+          subPath: {{ $name }}
+        {{- end  }}
+        {{- end  }}
+        {{- if .Values.prometheusExporter.enabled }}
+        - name: kafka-jmx
+          mountPath: /opt/kafka/configmap
+        {{- end }}
+        - name: datadir
+          mountPath: /var/lib/kafka
+        {{- if .Values.logCollector.enabled }}
+        - name: logdir
+          mountPath: /opt/kafka/logs
+        {{- end }}
+      {{- if .Values.logCollector.enabled }}
+      - name: filebeat
+        image: "{{ .Values.logCollector.image.repository }}{{ .Values.logCollector.image.name }}:{{ .Values.logCollector.image.tag }}"
+        imagePullPolicy: {{ .Values.logCollector.image.pullPolicy | quote }}
+        volumeMounts:
+        - name: filebeat-config
+          mountPath: /etc/filebeat
+        - name: logdir
+          mountPath: /opt/kafka/logs
+        command:
+          - "filebeat"
+          - "-c"
+          - "/etc/filebeat/filebeat.yml"
+          - "-e"
+          - "-d"
+          - "\"*\""
+      {{- end }}
+      volumes:
+      {{- if .Values.configFiles  }}
+      - name: configs
+        configMap:
+          name: {{ template "kafka-fullname" . }}
+      {{- end  }}
+      {{- if .Values.prometheusExporter.enabled }}
+      - name: kafka-jmx
+        configMap:
+          name: {{ printf "kafka-jmx-%s" .Release.Name | trunc 55 | trimSuffix "-" }}
+      {{- end }}
+      {{- if eq .Values.persistence.type "emptyDir" }}
+      - name: datadir
+        emptyDir: {}
+      {{- else if eq .Values.persistence.type "hostPath" }}
+      - name: datadir
+        hostPath:
+          path: "{{ .Values.persistence.hostPath }}"
+      {{- end }}
+      {{- if .Values.logCollector.enabled }}
+      - name: filebeat-config
+        configMap:
+          name: {{ printf "kafka-fb-%s" .Release.Name | trunc 55 }}
+          items:
+            - key: filebeat-yml
+              path: filebeat.yml
+      - name: logdir
+        emptyDir: {}
+      {{- end }}
+  {{- if eq .Values.persistence.type "PersistentVolumeClaim" }}
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+      {{- if .Values.persistence.storageClass }}
+      annotations:
+        volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass }}
+      {{- end }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.volumeSize }}
+  {{- end }}

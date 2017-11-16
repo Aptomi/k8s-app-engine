@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ printf "kafka-test-%s" .Release.Name | trunc 55 | trimSuffix "-" }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: kafka-test
+      image: {{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      command:
+        - bash
+        - -c
+        - >
+          topic="test-{{ randAlphaNum 10 }}" &&
+          /opt/kafka/bin/kafka-topics.sh --create --zookeeper {{ template "zk-address" . }} --replication-factor {{ .Values.replicas }} --partitions 1 --topic $topic &&
+          /opt/kafka/bin/kafka-verifiable-producer.sh --broker-list {{ template "kafka.address" . }} --topic $topic --max-messages 10 &&
+          /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server {{ template "kafka.address" . }} --topic $topic --from-beginning --max-messages 10
+  restartPolicy: Never
