@@ -129,6 +129,8 @@ func (cache *clusterCache) setupTiller(eventLog *event.Log) error {
 		tillerNamespace = "kube-system"
 	}
 
+	eventLog.WithFields(event.Fields{}).Debugf("Setting up tiller in cluster %s namespace %s", cache.cluster.Name, tillerNamespace)
+
 	err = cache.ensureKubeNamespace(client, tillerNamespace)
 	if err != nil {
 		return err
