@@ -15,3 +15,8 @@ List of charts and their initial locations (with repo git sha if available)
     * Repo: https://github.com/kubernetes/charts
     * Commit: 65181acc03ea03fb47d264d03f7ea3ffd2aa32c7
     * License: Apache License 2.0
+
+* HDFS, Kafka, Spark, TweePub, TweeTics, TweeViz, ZooKeeper
+    * Repo: https://github.com/Mirantis/k8s-apps
+    * Commit: Ic0653fa8351b332b8987f37aa10461223e009c33
+    * License: Apache License 2.0
