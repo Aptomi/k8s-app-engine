@@ -104,9 +104,9 @@ TODO: policy documentation
 
 ### Building From Source
 Building Aptomi from source and running integration tests is a very straightforward process. All you need is Go (ideally 1.9.1) and a couple of external packages:
+* docker - to run Aptomi in container, as well as to run sample LDAP server with user data
+* npm - to build UI, as well as automatically generate table of contents in README.md 
 * telnet - for the script which runs smoke tests
-* docker - to run provided LDAP server with sample user data
-* npm - to automatically generate TOC in README.md 
 
 Check out Aptomi source code from the repo:
 ```
