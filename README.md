@@ -1,4 +1,4 @@
-![Aptomi Logo](aptomi-logo-new.png)
+![Aptomi Logo](images/aptomi-logo-new.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi?refresh)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
 [![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi%20-%20tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
@@ -26,7 +26,10 @@ designed to work with any container runtime and container orchestration technolo
   - [Installation](#installation)
   - [Configuring LDAP](#configuring-ldap)
   - [Getting Started & Examples](#getting-started--examples)
-  - [How It Works](#how-it-works)
+  - [Architecture & How It Works](#architecture--how-it-works)
+    - [Components](#components)
+    - [State Enforcement](#state-enforcement)
+    - [Language](#language)
   - [Aptomi language](#aptomi-language)
 - [Dev Guide](#dev-guide)
   - [Building From Source](#building-from-source)
@@ -61,13 +64,13 @@ designed to work with any container runtime and container orchestration technolo
 - **Insights & Contextual visibility**
   - UI to understand what services are running, why they were instantiated, visualize dependencies and impact of changes. No
     need to deal with thousands of individual containers
-    ![Aptomi UI](aptomi-ui.png) 
+    ![Aptomi UI](images/aptomi-ui.png) 
         
 ## Where Aptomi is located in the stack
 Aptomi sits in between CI/CD and container orchestration. Being in deployment path for applications, it can apply
 higher-level policy rules (see examples above) and configure the underlying infrastructure components accordingly. 
 
-![Aptomi Stack](aptomi-stack.png) 
+![Aptomi Stack](images/aptomi-stack.png) 
 
 ## User Guide
 
@@ -92,10 +95,16 @@ Example    | Description  | Diagram
 [examples/02](examples/02) | Description of Example 2 | [Diagram for example #2](examples/02/diagram.png)
 [examples/03-twitter-analytics](examples/03-twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Diagram for example #3](examples/03-twitter-analytics/diagram.png)
 
-### How It Works
-TODO: architecture diagrams
-TODO: client/server
-TODO: how policy enforcement works
+### Architecture & How It Works
+
+#### Components
+![Aptomi Components](images/aptomi-components.png) 
+
+#### State Enforcement
+![Aptomi Enforcement](images/aptomi-enforcement.png)
+
+#### Language
+TODO: picture
 
 ### Aptomi language
 TODO: policy documentation 
