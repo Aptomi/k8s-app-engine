@@ -11,11 +11,14 @@
 
     - name: hdfs
       discovery:
-        url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}"
+        url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}:8020"
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartName: hdfs-1.0.0
+          chartRepo: http://aptomi.io/charts/examples
+          chartName: hdfs
+          chartVersion: 2.3.0
+
           cluster: "{{ .Labels.cluster }}"
 
           datanode:

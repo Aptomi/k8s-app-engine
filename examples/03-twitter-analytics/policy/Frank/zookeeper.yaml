@@ -15,7 +15,10 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartName: zookeeper-1.0.0
+          chartRepo: http://aptomi.io/charts/examples
+          chartName: zookeeper
+          chartVersion: 1.7.0
+
           cluster: "{{ .Labels.cluster }}"
 
           replicas: 1

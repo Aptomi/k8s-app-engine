@@ -14,11 +14,14 @@
 
     - name: spark
       discovery:
-        url: "spark-master-{{ .Discovery.instance }}-0.spark-master-{{ .Discovery.instance }}:7077"
+        url: "spark-master-{{ .Discovery.instance }}-0:7077"
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartName: spark-1.0.0
+          chartRepo: http://aptomi.io/charts/examples
+          chartName: spark
+          chartVersion: 3.0.3
+
           cluster: "{{ .Labels.cluster }}"
 
           spark:
@@ -30,8 +33,10 @@
               executorMemory: "2g"
 
           zookeeper:
-            externalAddress: "{{ .Discovery.zookeeper.zookeeper.url }}"
+            addresses:
+              zookeeper: "{{ .Discovery.zookeeper.zookeeper.url }}"
             path: "/{{ .Discovery.service.instanceId }}"
+
       dependencies:
         - zookeeper
 

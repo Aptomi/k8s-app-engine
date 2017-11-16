@@ -17,7 +17,10 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartName: tweepub-1.0.0
+          chartRepo: http://aptomi.io/charts/examples
+          chartName: tweepub
+          chartVersion: 2.2.0
+
           cluster: "{{ .Labels.cluster }}"
 
           # Pass labels to publisher application
@@ -30,8 +33,10 @@
 
           # Tell publisher where to put messages (kafka connection url & topic)
           kafka:
-            externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
+            addresses:
+              kafka: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
             topic: "tweepub-{{ .Discovery.service.instanceId }}"
+
       dependencies:
         - analytics_pipeline
 
@@ -40,21 +45,29 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartName: tweetics-0.1.0
+          chartRepo: http://aptomi.io/charts/examples
+          chartName: tweetics
+          chartVersion: 2.3.1
+
           cluster: "{{ .Labels.cluster }}"
 
           zookeeper:
-            externalAddress: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
+            addresses:
+              zookeeper: "{{ .Discovery.analytics_pipeline.kafka.zookeeper.zookeeper.url }}"
 
           kafka:
-            externalAddress: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
+            addresses:
+              kafka:  "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
             topic: "tweepub-{{ .Discovery.service.instanceId }}"
 
           spark:
-            externalAddress: "{{ .Discovery.analytics_pipeline.spark.spark.url }}"
+            addresses:
+              spark: "{{ .Discovery.analytics_pipeline.spark.spark.url }}"
+            batchDuration: 5
 
           hdfs:
-            externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
+            addresses:
+              namenode: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
             path: "/twitter-{{ .Discovery.service.instanceId }}/results"
       dependencies:
         - analytics_pipeline
@@ -64,7 +77,10 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartName: tweeviz-0.1.0
+          chartRepo: http://aptomi.io/charts/examples
+          chartName: tweeviz
+          chartVersion: 2.2.1
+
           cluster: "{{ .Labels.cluster }}"
 
           image:
@@ -77,8 +93,10 @@
           header: Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})
 
           hdfs:
-            externalAddress: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
+            addresses:
+              namenode: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
             path: "/twitter-{{ .Discovery.service.instanceId }}"
+
       dependencies:
         - analytics_pipeline
 
