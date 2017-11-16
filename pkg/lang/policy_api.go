@@ -16,7 +16,7 @@ type APIPolicyNamespace struct {
 }
 
 // APIPolicy returns Policy representation for API filtered for specific user
-func (view *Policy) APIPolicy() *APIPolicy {
+func (policy *Policy) APIPolicy() *APIPolicy {
 	// TODO; implement
 	return &APIPolicy{}
 }
