@@ -1,1 +1,0 @@
-# Global IT Operator

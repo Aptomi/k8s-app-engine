@@ -1,123 +1,80 @@
 # Demo scenario
 
-1. Explain initial state
-    - No services have been defined
-    - Aptomi only knows about 2 kubernetes clusters (us-east and us-west) and 5 users
+In this example there are 2 services:
+- analytics_pipeline- it consists of kafka, spark, hdfs, zookeeper and is offered in two different contexts
+  - *stage*: in sharing all consumers of analytics_pipeline get to share the same instance
+  - *production*: a single production instance with more memory, better replicas count, etc 
+- twitter_stats - it depends on analytics_pipeline and consists of 3 components (publisher, stats, ui).
+  It gets data from Twitter in real time, calculates top hashtags using an external analytics_pipeline service and displays
+  results on a web page.  
 
-2. Frank is an Service Ops guy
-    - He just recently started using Aptomi. He quickly described services that he owns
-        - kafka, spark, zookeeper, hdfs
-        - analytics-pipeline, which is a service we will focus on. It's a service that embeds the other 4 under one umbrella
-    - He specified "service definitions"
-        - Where docker container images are
-    - He defined "contexts for his service"
-        - Context is our secret sauce
-        - It describes who the service is for and how resources are allocated/shared
-    - In this case Frank offers analytics-pipeline in 2 contexts
-      - for it ops (who control production instance)
-          - for them the service will run in cluster-us-east
-      - for developers (who will share instance of this service)
-          - for them the service will run in cluster-us-west
-    - enabled = true in Frank/analytics_pipeline/service.analytics_pipeline.yaml
-    - Show UI - audit log
-    - Show UI - delta picture
-    - New service definition has been published to aptomi
-        - analytics pipeline, all its dependencies, and contexts
+These services have different owners, who can fully control how their services get offered and shared:
+- Frank defined analytics_pipeline
+- John defined twitter_stats
+- Alice, Bob, Carol are services consumers and/or code contributors
+- Sam is a domain admin for Aptomi
 
-3. John is another Service Ops guy. He comes and defines twitter-stats service in Aptomi
-    - John's service relies on Frank's service analytics-pipeline
-      - and it contains additional components for reading/processing/visualizing messages from twitter stream
-    - John offers twitter-stats in 2 contexts as well
-      - for it ops (who control production instance)
-          - for them the service will run in cluster-us-east. same as Frank's
-      - for developers
-          - for them the service will run in cluster-us-west
-          - but when they request an instance, every developer will get its own instance of twitter-stats
-          - as opposed to sharing it
-    - enabled = true in John/twitter_stats/service.twitter_stats.yaml
-    - Show UI - audit log
-    - Show UI - delta picture
-    - New service definition has been published to aptomi
+This example illustrates a few important things that Aptomi does:
+1. Service definitions & instantiation
+    - Service owners publish their services and fully define how they get offered & shares to others
+    - Implementation details are abstracted away from consumers, so they can consume other services without knowing the inner-workings
+1. Service update
+    - Change parameter/label with a single command and re-apply only the required delta 
+1. Service reuse
+    - Alice and Bob share the same instance of analytics_pipeline in staging
+1. Policy & rules
+    - Different people have different access rights within Aptomi object model
+    - Aptomi can allocate instances with different parameters in different clusters (e.g. based on consumer identity)
 
-4. At this point Aptomi just has service definitions and nothing has been instantiated yet
-    - Now let's have some consumers declare dependencies on the services defined by John and Frank
+# Instructions
 
-[PAUSE / SEE IF SOMEONE HAS ANY QUESTIONS]
+1. First of all, bootstrap Aptomi on behalf on Sam (domain admin) to import k8s clusters and rules. ACL rules are defined in such
+a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob/Carol are service consumers
+    ```
+    aptomictl policy apply --username Sam --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/Sam
+    ```
+1. Import analytics_pipeline service definition on behalf of Frank
+    ```
+    aptomictl policy apply --username Frank --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/Frank
+    ```
+1. Import analytics_pipeline service definition on behalf of John
+    ```
+    aptomictl policy apply --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/John
+    ```
+1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
+that in Aptomi UI.
+    [TODO]
 
-5. Declaring dependencies (Prod)
-    - Production
-        - let Ops team to instantiate twitter-stats service in production
-    - enabled = true in John/dependencies.john-ts.yaml
-    - Show UI - audit log
-    - Show UI - delta picture
-    - Show containers on k8s
+1. Now let's have consumers declare 'dependencies' on the services defined by John and Frank. John requests an instance
+    ```
+    aptomictl apply policy --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    ```
+    Aptomi allocates a production instance in cluster [TODO]:
+    [TODO] picture
+    [TODO] delta
 
-6. Declaring dependencies (Dev)
-    - Developers
-        - let Alice to instantiate twitter-stats service
-            - Alice tests a new web app code for visualizing data from twitter
-            - enabled = true in Alice/dependencies.alice-stage-ts.yaml
-        - let Bob instantiate twitter-stats service
-            - enabled = true in Bob/dependencies.bob-stage-ts.yaml
-        - Note
-            - neither Alice or Bob define the specifics (where this service should run, whether they want to share an instance or not, etc)
-            - Alice & Bob just declare their intents (saying "I want to consume this service"). Aptomi makes all allocation decisions for them
-            - Implementation details are abstracted away from the consumer. The way how service is allocated is controlled by a service owner via contexts.
-    - Show UI - audit log
-    - Show UI - delta picture
-    - Show containers on k8s
+1. Alice and Bob request instances
+    ```
+    aptomictl policy apply --username Alice --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy apply --username Bob --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
+    ```
+    Alice tests a change. Bob looks at Mexico.
+    Aptomi allocates staging instances in cluster [TODO]:
+    [TODO] picture
+    [TODO] delta
 
-7. Now, what happened exactly
-    - Show global view
-    - From the standpoint of consumer
-        - Alice: started to consume the service
-        - All dependencies got magically allocated for them
-    - From the standpoint of service owner
-        - Frank: seeing that his analytics_pipeline service got allocated 2 times (per the rules he defined)
-        - Show Home Page
-        - Show Policy Explorer (e.g. service view from the standpoint of zookeeper)
-    - John is seeing that his twitter_stats service got allocated to 3 consumers (per the rules he defined)
-        - Show Home Page
-        - Show Policy Explorer (twitter stats that he OWNS)
-        - Show Policy Explorer (twitter stats that he RUNS)
-    - Show that everything got deployed and working
-        - John opens production endpoints for twitter stats
-        - Alice opens dev endpoints for twitter stats (different visualization)
-        - Bob opens dev endpoints for twitter stats (standard visualization, but Mexico)
-        - (!) Leave production endpoint with twitter stats opened in browser
+1. If everything got deployed successfully, then you should be able to see 
+    [TODO] delta
 
-[PAUSE / SEE IF SOMEONE HAS ANY QUESTIONS]
+1. Demonstrating update on a running instance of twitter stats in production. Alice removes her dependency and asks John to update production instance
+    ```
+    aptomictl policy delete --username Alice --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    [TODO] change parameter
+    aptomictl policy apply --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    ```
 
-6. Now that we know the concepts, let's show some of the more advanced functionality
-    - updating a service
-    - not allowing certain users/teams to consume a service
-    - blocking access to a service
-
-7. Updating production instance of twitter stats
-    - Now let's say Alice is happy with her change and this change needs to be rolled out to production
-    - There is no way Alice can deploy to production directly by herself
-        - Aptomi will actually never allow that, because of the global rule Dev -> only Dev cluster
-        - Show rule
-        - So Alice has to ask John, who owns production instance
-    - So Alice gets rid of her instance
-        - enabled = false in Alice/dependencies.alice-stage-ts.yaml
-    - John promotes new version of visualization app to production
-        - tsvisimage: demo-v62 in John/dependencies.john-ts.yaml
-
-8. Show rejected access. Carol tries to get her service twitter_stats
-   - enabled = true in Carol/dependencies.carol-stage-ts.yaml
-   - Nothing will get allocated because of the global rule
-   - Show Carol's home page
-   - Show Policy Explorer
-   - Show Rule Log
-
-9. Bob gets marked as "deactivated"
-   - deactivated = true in LDAP
-   - make a dummy check-in into Github (to generate a commit)
-   - Loses access to his instance (via Istio)
-
-10. Show Rules on home page from Sam's point of view
-   - What rules get applied where
-
-11. That concludes the demo
-   - This was 100% live, deployed from scratch on Google Cloud
+1. Demonstrating rejecting instantiation of a service
+    ```
+    aptomictl policy apply --username Carol --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
+    ```
+ 
