@@ -23,3 +23,4 @@ List of charts and their initial locations (with repo git sha if available)
     * Changes:
         * changed requirements repo to aptomi examples
         * dependent charts deployment disabled by default
+        * tweetics running job with --total-executor-cores 2  --executor-memory 512M
