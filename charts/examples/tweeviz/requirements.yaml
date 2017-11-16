@@ -1,0 +1,9 @@
+dependencies:
+- name: hdfs
+  version: ^2.x
+  repository: http://aptomi.io/charts/examples
+  condition: hdfs.deployChart
+- name: cassandra
+  version: ^1.x
+  repository: http://aptomi.io/charts/examples
+  condition: cassandra.deployChart

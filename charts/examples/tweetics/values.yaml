@@ -1,0 +1,71 @@
+# Default values for tweetics.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: mirantisworkloads/
+  name: tweetics
+  tag: 1.3.0
+  pullPolicy: IfNotPresent
+
+# Filter out hashtags with less then specified count
+minHashtagCounts: 0
+storage: "hdfs" # hdfs or cassandra
+
+zookeeper:
+  # if disabled, subchart will not be deployed
+  deployChart: false
+  # these addresses will be used if subchart deployment is disabled
+  # Required
+  addresses:
+    zookeeper: ""
+
+kafka:
+  # if disabled, subchart will not be deployed
+  deployChart: false
+  # these addresses will be used if subchart deployment is disabled
+  addresses:
+    kafka: ""
+  # Kafka topic name
+  topic: twitter-stream
+  zookeeper:
+    deployChart: false
+    # Required
+    addresses:
+      zookeeper: ""
+
+spark:
+  # if disabled, subchart will not be deployed
+  deployChart: false
+  # these addresses will be used if subchart deployment is disabled
+  addresses:
+    spark: ""
+  # Spark streaming batch duration
+  batchDuration: 5
+  zookeeper:
+    deployChart: false
+    # Required
+    externalAddress: ""
+  javaOpts: ""
+
+hdfs:
+  # if disabled, subchart will not be deployed
+  deployChart: false
+  # these addresses will be used if subchart deployment is disabled
+  addresses:
+    namenode: ""
+  path: /demo
+
+cassandra:
+  deployChart: false
+  addresses:
+    cassandra: ""
+  keyspace: "mirantis"
+  table: "tweetics"
+
+resources:
+  #requests:
+  #  cpu: 100m
+  #  memory: 512Mi
+  #limits:
+  #  cpu: 100m
+  #  memory: 512Mi

@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "tweetics.fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "tweetics.fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "tweetics.fullname" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - "bash"
+          - "-c"
+          - "spark-submit --driver-java-options \"{{ .Values.spark.javaOpts }}\" --master spark://{{ template "tweetics.spark-address" . }} --total-executor-cores 2  --executor-memory 512M {{- if eq .Values.storage "cassandra"}} --conf=spark.cassandra.connection.host={{ template "tweetics.cassandra-address" . }} {{- end }} --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.1.0,datastax:spark-cassandra-connector:2.0.3-s_2.11 spark_hashtags_count.py spark://{{ template "tweetics.spark-address" . }} {{ template "tweetics.zk-address" . }} {{ .Values.kafka.topic }} {{ .Values.minHashtagCounts }} {{ .Values.spark.batchDuration }} {{ .Values.storage }} {{ template "tweetics-storage" . }}"
+        resources:
+{{ toYaml .Values.resources | indent 12 }}

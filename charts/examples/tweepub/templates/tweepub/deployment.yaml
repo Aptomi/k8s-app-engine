@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: HTTPS_PROXY
+          value: "{{ .Values.twitter.httpsProxy }}"
+        - name: TWEEPUB_APP_KEY
+          value: "{{ .Values.twitter.appKey }}"
+        - name: TWEEPUB_APP_SECRET
+          value: "{{ .Values.twitter.appSecret }}"
+        - name: TWEEPUB_TOKEN_KEY
+          value: "{{ .Values.twitter.tokenKey }}"
+        - name: TWEEPUB_TOKEN_SECRET
+          value: "{{ .Values.twitter.tokenSecret }}"
+        - name: TWEEPUB_FOLLOW
+          value: "{{ .Values.twitter.follow }}"
+        - name: TWEEPUB_TRACK
+          value: "{{ .Values.twitter.track }}"
+        - name: TWEEPUB_LOCATIONS
+          value: "{{ .Values.twitter.locations }}"
+        - name: TWEEPUB_LANGUAGES
+          value: "{{ .Values.twitter.languages }}"
+        {{ if eq .Values.storage "kafka" }}
+        - name: TWEEPUB_KAFKA
+          value: {{ template "kafka-address" . }}
+        - name: TWEEPUB_TOPIC
+          value: "{{ .Values.kafka.topic }}"
+        {{ else }}
+        - name: TWEEPUB_HDFS
+          value: {{ template "tweepub.hdfs-address" . }}
+        - name: TWEEPUB_PATH
+          value: "{{ .Values.hdfs.path }}"
+        {{ end }}
+        resources:
+{{ toYaml .Values.resources | indent 12 }}

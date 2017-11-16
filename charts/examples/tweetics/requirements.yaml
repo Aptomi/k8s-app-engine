@@ -1,0 +1,21 @@
+dependencies:
+- name: zookeeper
+  version: ^1.x
+  repository: http://aptomi.io/charts/examples
+  condition: zookeeper.deployChart
+- name: kafka
+  version: ^1.x
+  repository: http://aptomi.io/charts/examples
+  condition: kafka.deployChart
+- name: spark
+  version: ^3.x
+  repository: http://aptomi.io/charts/examples
+  condition: spark.deployChart
+- name: hdfs
+  version: ^2.x
+  repository: http://aptomi.io/charts/examples
+  condition: hdfs.deployChart
+- name: cassandra
+  version: ^1.x
+  repository: http://aptomi.io/charts/examples
+  condition: cassandra.deployChart
