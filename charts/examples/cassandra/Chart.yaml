@@ -1,0 +1,5 @@
+description: A Helm chart for Kubernetes
+name: cassandra
+version: 1.5.1
+icon: https://upload.wikimedia.org/wikipedia/commons/5/5e/Cassandra_logo.svg
+appVersion: 3.11.0

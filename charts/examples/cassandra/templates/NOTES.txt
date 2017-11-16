@@ -1,0 +1,9 @@
+Cassandra chart has been deployed.
+
+Internal URL:
+  cassandra: {{ template "cassandra.address" . }}
+
+Connect to database:
+  cqlsh {{ template "cassandra.fullname" . }}
+Run simple test:
+  helm test {{ .Release.Name }}
