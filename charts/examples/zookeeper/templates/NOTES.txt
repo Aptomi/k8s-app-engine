@@ -1,0 +1,4 @@
+ZooKeeper chart has been deployed.
+
+Internal URL:
+    zookeeper: {{ template "zookeeper.address" . }}

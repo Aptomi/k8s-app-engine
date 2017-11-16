@@ -1,0 +1,16 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "zk-fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "zk-fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "zk-fullname" . }}
+  {{- if .Values.minAvailable }}
+  minAvailable: {{ .Values.minAvailable }}
+  {{- end}}

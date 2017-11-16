@@ -1,0 +1,31 @@
+{{ if .Values.logCollector.enabled }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ printf "zk-fb-%s" .Release.Name | trunc 55 | trimSuffix "-" }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app: {{ template "zk-fullname" . }}
+data:
+  filebeat-yml: |-
+    filebeat.prospectors:
+      - input_type: log
+        paths:
+          - "/var/log/zookeeper/*.log"
+        fields:
+          log_host: "zookeeper"
+        multiline:
+          pattern: '^[[:space:]]+|^Caused by:'
+          negate: false
+          match: after
+    output.logstash:
+      hosts:
+      {{- range .Values.logCollector.logstashHost }}
+      - {{ . | quote }}
+      {{- end }}
+    path:
+      data: "/usr/share/filebeat/data"
+      home: "/usr/share/filebeat"
+{{ end }}
