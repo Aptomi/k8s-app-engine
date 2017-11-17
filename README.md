@@ -24,8 +24,10 @@ designed to work with any container runtime and container orchestration technolo
 - [Where Aptomi is located in the stack](#where-aptomi-is-located-in-the-stack)
 - [User Guide](#user-guide)
   - [Installation](#installation)
-  - [Configuring LDAP](#configuring-ldap)
-  - [Getting Started & Examples](#getting-started--examples)
+  - [Getting Started](#getting-started)
+    - [Configuring LDAP](#configuring-ldap)
+    - [Creating k8s Clusters](#creating-k8s-clusters)
+    - [Running Examples](#running-examples)
   - [Architecture & How It Works](#architecture--how-it-works)
     - [Components](#components)
     - [State Enforcement](#state-enforcement)
@@ -77,7 +79,9 @@ higher-level policy rules (see examples above) and configure the underlying infr
 ### Installation
 TODO: "go get", script, docker container? it needs to have clients, etc
 
-### Configuring LDAP
+### Getting Started
+
+#### Configuring LDAP
 Aptomi needs to be configured with user data source in order to enable UI login and retrieve labels/properties for the users. It's recommended to
 start with LDAP, which is also required by Aptomi examples and smoke tests.
 1. LDAP Server with sample users is provided in a docker container. To download and start it, run:
@@ -86,10 +90,15 @@ start with LDAP, which is also required by Aptomi examples and smoke tests.
     ```
 2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed, follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect
 
-### Getting Started & Examples
-Obviously, you will need k8s cluster to deploy the examples. Two k8s clusters would be even better, to take full advantage of Aptomi rule engine.
-If you don't have k8s clusters set up, follow [these instructions](examples/README.md) and run the [provided script](tools/demo-gke.sh) to create them in Google Cloud.
+#### Creating k8s Clusters
+You need to have access to a k8s cluster in order to deploy services from the provided examples. Two k8s clusters will enable you to
+take full advantage of Aptomi rule and policy engine.
+1. If you don't have k8s clusters set up, follow [these instructions](examples/README.md) and run the provided script to create them in Google Cloud.
+    ```
+    ./tools/demo-gke.sh up
+    ```
 
+#### Running Examples
 Once Aptomi is installed and k8s clusters are set up, you can get started by running the following examples:
 
 Example    | Description  | Diagram
