@@ -20,7 +20,7 @@
           <tr v-if="error">
             <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
           </tr>
-          <tr v-if="Object.keys(endpoints).length <= 0">
+          <tr v-if="endpoints == null || endpoints.length <= 0">
             <td>No Endpoints Available</td>
           </tr>
           <tr v-for="e, key in endpoints">
