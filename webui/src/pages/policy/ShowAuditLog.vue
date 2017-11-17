@@ -133,6 +133,9 @@
     },
     methods: {
       percent (r) {
+        if (r['progress']['total'] <= 0) {
+          return 0
+        }
         return Math.round(100.0 * r['progress']['current'] / r['progress']['total'])
       },
       fetchData () {
