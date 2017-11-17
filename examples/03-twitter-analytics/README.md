@@ -1,12 +1,14 @@
 # Demo scenario
 
-In this example there are 2 services:
+In this example there are 2 main services:
 - analytics_pipeline- it consists of kafka, spark, hdfs, zookeeper and is offered in two different contexts
   - *stage*: in sharing all consumers of analytics_pipeline get to share the same instance
   - *production*: a single production instance with more memory, better replicas count, etc 
 - twitter_stats - it depends on analytics_pipeline and consists of 3 components (publisher, stats, ui).
   It gets data from Twitter in real time, calculates top hashtags using an external analytics_pipeline service and displays
   results on a web page.  
+
+![Diagram](diagram.png)
 
 These services have different owners, who can fully control how their services get offered and shared:
 - Frank defined analytics_pipeline
@@ -44,6 +46,19 @@ a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
 that in Aptomi UI.
     [TODO]
+
+1. Now, we need to provide user secrets, so twitter_stats component can pull data over Twitter Streaming API. Create 3
+applications in [Twitter Application Management Console](https://apps.twitter.com)
+    ![Twitter App Create](twitter-app-create.png)
+    
+    Generate keys and access tokens for them:
+    ![Twitter Create Tokens](twitter-create-tokens.png)
+    
+    Once done, copy secrets.yaml and enter the created keys/tokens into it:
+   ```
+   cp examples/03-twitter-analytics/_external/secrets/secrets.{yaml.template,yaml}
+   vi examples/03-twitter-analytics/_external/secrets/secrets.yaml
+   ```
 
 1. Now let's have consumers declare 'dependencies' on the services defined by John and Frank. John requests an instance
     ```
