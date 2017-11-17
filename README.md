@@ -78,9 +78,12 @@ higher-level policy rules (see examples above) and configure the underlying infr
 TODO: "go get", script, docker container? it needs to have clients, etc
 
 ### Configuring LDAP
-Aptomi needs to be configured with user data source in order to retrieve their labels/properties. It's recommended to
+Aptomi needs to be configured with user data source in order to enable UI login and retrieve labels/properties for the users. It's recommended to
 start with LDAP, which is also required by Aptomi examples and smoke tests.
-1. LDAP Server with sample users is provided in a docker container. It's very easy to build and run it, just follow the instructions in [ldap-docker](tools/ldap-docker)
+1. LDAP Server with sample users is provided in a docker container. To download and start it, run:
+    ```
+    ./tools/demo-ldap.sh
+    ```
 2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed, follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect
 
 ### Getting Started & Examples
