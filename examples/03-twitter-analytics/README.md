@@ -47,7 +47,7 @@ that in Aptomi UI.
 
 1. Now let's have consumers declare 'dependencies' on the services defined by John and Frank. John requests an instance
     ```
-    aptomictl apply policy --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    aptomictl policy apply --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
     ```
     Aptomi allocates a production instance in cluster [TODO]:
     [TODO] picture
