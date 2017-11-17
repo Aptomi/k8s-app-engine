@@ -5,18 +5,18 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
+	"github.com/patrickmn/go-cache"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 // SecretLoaderFromDir allows to load secrets for users from a given directory
 type SecretLoaderFromDir struct {
-	once sync.Once
-
-	baseDir       string
-	cachedSecrets map[string]map[string]string
+	baseDir string
+	cache   *cache.Cache
 }
 
 // UserSecrets represents a single user secret (user name and a map of secrets)
@@ -29,34 +29,47 @@ type UserSecrets struct {
 func NewSecretLoaderFromDir(baseDir string) SecretLoader {
 	return &SecretLoaderFromDir{
 		baseDir: baseDir,
+		cache:   cache.New(time.Minute, time.Minute),
 	}
 }
 
 // LoadSecretsAll loads all secrets
 func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string {
-	// Right now this can be called concurrently by the engine, so it needs to be thread safe
-	loader.once.Do(func() {
-		loader.cachedSecrets = make(map[string]map[string]string)
+	// this can be called concurrently by the engine, so it needs to be thread safe
+	cachedSecrets, _ := loader.cache.Get("secrets")
+	if cachedSecrets != nil {
+		return cachedSecrets.(map[string]map[string]string)
+	}
 
-		if len(loader.baseDir) == 0 {
-			log.Warnf("Skip loading secrets because baseDir not specified")
-			return
-		}
+	// synchronize and retrieve secrets
+	mutex := sync.Mutex{}
+	mutex.Lock()
+	defer func() { mutex.Unlock() }()
 
-		pattern := filepath.Join(loader.baseDir, "**", "secrets*.yaml")
-		files, err := zglob.Glob(pattern)
-		if err != nil {
-			panic(fmt.Errorf("error while searching secrets files"))
+	// retrieve secrets
+	result := make(map[string]map[string]string)
+
+	if len(loader.baseDir) == 0 {
+		log.Warnf("Skip loading secrets because baseDir not specified")
+		return result
+	}
+
+	pattern := filepath.Join(loader.baseDir, "**", "secrets*.yaml")
+	files, err := zglob.Glob(pattern)
+	if err != nil {
+		panic(fmt.Errorf("error while searching secrets files"))
+	}
+
+	sort.Strings(files)
+	for _, f := range files {
+		secrets := loadUserSecretsFromFile(f)
+		for _, secret := range secrets {
+			result[strings.ToLower(secret.User)] = secret.Secrets
 		}
-		sort.Strings(files)
-		for _, f := range files {
-			secrets := loadUserSecretsFromFile(f)
-			for _, secret := range secrets {
-				loader.cachedSecrets[strings.ToLower(secret.User)] = secret.Secrets
-			}
-		}
-	})
-	return loader.cachedSecrets
+	}
+
+	loader.cache.Set("secrets", result, cache.DefaultExpiration)
+	return result
 }
 
 // LoadSecretsByUserName loads secrets for a single user

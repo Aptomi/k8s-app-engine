@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/ldap.v2"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // UserLoaderFromLDAP allows aptomi to load users from LDAP
 type UserLoaderFromLDAP struct {
-	once sync.Once
-
 	cfg                  config.LDAP
-	users                *lang.GlobalUsers
+	cache                *cache.Cache
 	domainAdminOverrides map[string]bool
 }
 
@@ -24,35 +24,43 @@ type UserLoaderFromLDAP struct {
 func NewUserLoaderFromLDAP(cfg config.LDAP, domainAdminOverrides map[string]bool) UserLoader {
 	return &UserLoaderFromLDAP{
 		cfg:                  cfg,
+		cache:                cache.New(time.Minute, time.Minute),
 		domainAdminOverrides: domainAdminOverrides,
 	}
 }
 
 // LoadUsersAll loads all users
 func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
-	// Right now this can be called concurrently by the engine, so it needs to be thread safe
-	loader.once.Do(func() {
-		loader.users = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
-		ldapUsers, err := loader.ldapSearch()
-		if err != nil {
-			// we need user data, but they cannot be loaded from LDAP. for now, let's panic
-			panic(err)
+	// this can be called concurrently by the engine, so it needs to be thread safe
+	cachedUsers, _ := loader.cache.Get("ldapUsers")
+	if cachedUsers != nil {
+		return cachedUsers.(*lang.GlobalUsers)
+	}
+
+	// synchronize and retrieve users
+	mutex := sync.Mutex{}
+	mutex.Lock()
+	defer func() { mutex.Unlock() }()
+
+	result := &lang.GlobalUsers{Users: make(map[string]*lang.User)}
+	ldapUsers, err := loader.ldapSearch()
+	if err != nil {
+		// we need user data, but they cannot be loaded from LDAP. for now, let's panic
+		panic(err)
+	}
+	for _, u := range ldapUsers {
+		result.Users[strings.ToLower(u.Name)] = u
+		if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
+			u.Admin = true
 		}
-		for _, u := range ldapUsers {
-			u.Name = strings.ToLower(u.Name)
-			loader.users.Users[u.Name] = u
-			if _, exist := loader.domainAdminOverrides[u.Name]; exist {
-				u.Admin = true
-			}
-		}
-	})
-	return loader.users
+	}
+	loader.cache.Set("ldapUsers", result, cache.DefaultExpiration)
+	return result
 }
 
 // LoadUserByName loads a single user by name
 func (loader *UserLoaderFromLDAP) LoadUserByName(name string) *lang.User {
-	name = strings.ToLower(name)
-	return loader.LoadUsersAll().Users[name]
+	return loader.LoadUsersAll().Users[strings.ToLower(name)]
 }
 
 // Authenticate should authenticate a user by username/password.
@@ -146,7 +154,6 @@ func (loader *UserLoaderFromLDAP) ldapAuthenticate(name, password string) (*lang
 
 func (loader *UserLoaderFromLDAP) userFromLDAPEntry(entry *ldap.Entry) *lang.User {
 	name := entry.GetAttributeValue(loader.cfg.LabelToAttributes["name"])
-	name = strings.ToLower(name)
 	user := &lang.User{
 		Name:   name,
 		Labels: make(map[string]string),

@@ -20,8 +20,7 @@ func NewUserLoaderMock() *UserLoaderMock {
 
 // AddUser adds a user into the mock structure
 func (loader *UserLoaderMock) AddUser(user *lang.User) {
-	user.Name = strings.ToLower(user.Name)
-	loader.users.Users[user.Name] = user
+	loader.users.Users[strings.ToLower(user.Name)] = user
 }
 
 // LoadUsersAll loads all users

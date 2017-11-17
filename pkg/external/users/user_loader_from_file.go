@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // UserLoaderFromFile allows aptomi to load users from a file
 type UserLoaderFromFile struct {
-	once sync.Once
-
 	fileName             string
-	users                *lang.GlobalUsers
+	cache                *cache.Cache
 	domainAdminOverrides map[string]bool
 }
 
@@ -23,31 +23,39 @@ type UserLoaderFromFile struct {
 func NewUserLoaderFromFile(fileName string, domainAdminOverrides map[string]bool) UserLoader {
 	return &UserLoaderFromFile{
 		fileName:             fileName,
+		cache:                cache.New(time.Minute, time.Minute),
 		domainAdminOverrides: domainAdminOverrides,
 	}
 }
 
 // LoadUsersAll loads all users
 func (loader *UserLoaderFromFile) LoadUsersAll() *lang.GlobalUsers {
-	// Right now this can be called concurrently by the engine, so it needs to be thread safe
-	loader.once.Do(func() {
-		loader.users = &lang.GlobalUsers{Users: make(map[string]*lang.User)}
-		t := loadUsersFromFile(loader.fileName)
-		for _, u := range t {
-			u.Name = strings.ToLower(u.Name)
-			loader.users.Users[u.Name] = u
-			if _, exist := loader.domainAdminOverrides[u.Name]; exist {
-				u.Admin = true
-			}
+	// this can be called concurrently by the engine, so it needs to be thread safe
+	cachedUsers, _ := loader.cache.Get("users")
+	if cachedUsers != nil {
+		return cachedUsers.(*lang.GlobalUsers)
+	}
+
+	// synchronize and retrieve users
+	mutex := sync.Mutex{}
+	mutex.Lock()
+	defer func() { mutex.Unlock() }()
+
+	result := &lang.GlobalUsers{Users: make(map[string]*lang.User)}
+	userList := loadUsersFromFile(loader.fileName)
+	for _, u := range userList {
+		result.Users[strings.ToLower(u.Name)] = u
+		if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
+			u.Admin = true
 		}
-	})
-	return loader.users
+	}
+	loader.cache.Set("users", result, cache.DefaultExpiration)
+	return result
 }
 
 // LoadUserByName loads a single user by name
 func (loader *UserLoaderFromFile) LoadUserByName(name string) *lang.User {
-	name = strings.ToLower(name)
-	return loader.LoadUsersAll().Users[name]
+	return loader.LoadUsersAll().Users[strings.ToLower(name)]
 }
 
 // Authenticate should authenticate a user by username/password.

@@ -1,5 +1,5 @@
-hash: 0f71d341665165ba2a9e50752676d25fd687a247e1610a332617b2b96bf34551
-updated: 2017-11-10T18:46:52.62788144-08:00
+hash: 390cb48cbe16a1b0b3e10b105970c1c95ea6f26eaf9c362e695e432ea401966f
+updated: 2017-11-16T21:31:30.338509-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -218,6 +218,8 @@ imports:
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/naoina/go-stringutil
   version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
+- name: github.com/patrickmn/go-cache
+  version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pelletier/go-toml
@@ -283,10 +285,17 @@ imports:
   subpackages:
   - bcrypt
   - blowfish
+  - cast5
   - curve25519
   - ed25519
   - ed25519/internal/edwards25519
   - openpgp
+  - openpgp/armor
+  - openpgp/clearsign
+  - openpgp/elgamal
+  - openpgp/errors
+  - openpgp/packet
+  - openpgp/s2k
   - ssh
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
@@ -339,7 +348,7 @@ imports:
 - name: gopkg.in/asn1-ber.v1
   version: 379148ca0225df7a432012b8df0355c2a2063ac0
 - name: gopkg.in/go-playground/validator.v9
-  version: 1304298bf10d085adec514b076772a79c9cadb6b
+  version: 61caf9d3038e1af346dbf5c2e16f6678e1548364
   subpackages:
   - translations/en
 - name: gopkg.in/inf.v0
@@ -369,15 +378,24 @@ imports:
 - name: k8s.io/helm
   version: be3ae4ea91b2960be98c07e8f73754e67e87963c
   subpackages:
+  - cmd/helm/installer
   - pkg/chartutil
+  - pkg/getter
   - pkg/helm
+  - pkg/helm/environment
+  - pkg/helm/helmpath
   - pkg/helm/portforwarder
   - pkg/ignore
   - pkg/kube
+  - pkg/plugin
   - pkg/proto/hapi/chart
   - pkg/proto/hapi/release
   - pkg/proto/hapi/services
   - pkg/proto/hapi/version
+  - pkg/provenance
+  - pkg/repo
+  - pkg/tlsutil
+  - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
   version: bebdeb749f1fa3da9e1312c4b08e439c404b3136

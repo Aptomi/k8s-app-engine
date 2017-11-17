@@ -13,9 +13,9 @@ func TestUserLoaderFromFile(t *testing.T) {
 	users := userLoader.LoadUsersAll()
 	assert.Equal(t, 3, len(users.Users), "Correct number of users should be loaded")
 
-	names := []string{"alice", "bob", "carol"}
+	names := []string{"Alice", "Bob", "Carol"}
 	for _, name := range names {
-		assert.Equal(t, name, users.Users[name].Name, "%s user should be loaded", name)
+		assert.Equal(t, name, users.Users[strings.ToLower(name)].Name, "%s user should be loaded", name)
 	}
 
 	// load user by name (not case sensitive). check user labels

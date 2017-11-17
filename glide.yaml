@@ -36,6 +36,8 @@ import:
   version: ^0.1.0
   subpackages:
   - cmp
+- package: github.com/patrickmn/go-cache
+  version: ^2.1.0
 - package: gopkg.in/go-playground/validator.v9
   version: ^9.7.0
 - package: github.com/go-playground/universal-translator
