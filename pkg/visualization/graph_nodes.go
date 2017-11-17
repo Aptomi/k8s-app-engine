@@ -111,15 +111,14 @@ func (n serviceInstanceNode) getID() string {
 }
 
 func (n serviceInstanceNode) getLabel() string {
-	timeRunning := "<i>not running</i>"
+	timeRunning := ""
 	if !n.instance.CreatedAt.IsZero() {
-		timeRunning = fmt.Sprintf("running: <i>%s</i>" + html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))
+		timeRunning = fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))
 	}
 	return fmt.Sprintf(
 		`<b>%s</b>
 			context: <i>%s</i>
-			cluster: <i>%s</i>
-			%s`,
+			cluster: <i>%s</i>%s`,
 		html.EscapeString(n.service.Name),
 		html.EscapeString(n.instance.Metadata.Key.ContextNameWithKeys),
 		html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]),
