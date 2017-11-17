@@ -58,14 +58,14 @@ func init() {
 func preRun(command *cobra.Command, args []string) {
 	err := common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
 	if err != nil {
-		panic(fmt.Sprintf("error while reading config"))
+		panic(fmt.Sprintf("error while loading config: %s", err))
 	}
 }
 
 func defaultConfigDir() string {
 	home, err := homedir.Dir()
 	if err != nil {
-		panic(fmt.Sprintf("Can't find home dir: %s", err))
+		panic(fmt.Sprintf("can't find home dir: %s", err))
 	}
 
 	return path.Join(home, ".aptomi")
