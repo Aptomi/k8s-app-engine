@@ -129,7 +129,7 @@ If you are on macOS, install brew, install [Docker For Mac](https://docs.docker.
 brew install telnet docker npm
 ```
 
-Install Helm, Istio, Kubectl clients:
+Install Helm, Kubectl clients:
 ```
 ./tools/install-clients.sh
 ```
