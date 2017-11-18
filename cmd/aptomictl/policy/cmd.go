@@ -16,6 +16,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 	cmd.AddCommand(
 		newShowCommand(cfg),
 		newApplyCommand(cfg),
+		newDeleteCommand(cfg),
 	)
 
 	return cmd

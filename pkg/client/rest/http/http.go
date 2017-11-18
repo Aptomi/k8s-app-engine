@@ -17,6 +17,7 @@ type Client interface {
 	GET(path string, expected *runtime.Info) (runtime.Object, error)
 	POST(path string, expected *runtime.Info, body runtime.Object) (runtime.Object, error)
 	POSTSlice(path string, expected *runtime.Info, body []runtime.Object) (runtime.Object, error)
+	DELETESlice(path string, expected *runtime.Info, body []runtime.Object) (runtime.Object, error)
 }
 
 type httpClient struct {
@@ -65,6 +66,20 @@ func (client *httpClient) POSTSlice(path string, expected *runtime.Info, body []
 	}
 
 	return client.request(http.MethodPost, path, expected, bodyData)
+}
+
+func (client *httpClient) DELETESlice(path string, expected *runtime.Info, body []runtime.Object) (runtime.Object, error) {
+	var bodyData io.Reader
+
+	if body != nil {
+		data, err := client.contentType.GetCodecByContentType(codec.Default).EncodeMany(body)
+		if err != nil {
+			return nil, fmt.Errorf("error while encoding body for delete request: %s", err)
+		}
+		bodyData = bytes.NewBuffer(data)
+	}
+
+	return client.request(http.MethodDelete, path, expected, bodyData)
 }
 
 func (client *httpClient) request(method string, path string, expected *runtime.Info, body io.Reader) (runtime.Object, error) {

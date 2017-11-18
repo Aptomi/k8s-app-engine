@@ -40,7 +40,15 @@ func (client *policyClient) Apply(updated []runtime.Object) (*api.PolicyUpdateRe
 	return response.(*api.PolicyUpdateResult), nil
 }
 
-func (client *policyClient) Delete(deleted []string) (*api.PolicyUpdateResult, error) {
-	// todo(slukjanov): implement policy delete handling
-	panic("implement me")
+func (client *policyClient) Delete(updated []runtime.Object) (*api.PolicyUpdateResult, error) {
+	response, err := client.httpClient.DELETESlice("/policy", api.PolicyUpdateResultObject, updated)
+	if err != nil {
+		return nil, err
+	}
+
+	if serverError, ok := response.(*api.ServerError); ok {
+		return nil, fmt.Errorf("server error: %s", serverError.Error)
+	}
+
+	return response.(*api.PolicyUpdateResult), nil
 }

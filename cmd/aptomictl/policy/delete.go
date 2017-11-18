@@ -11,25 +11,25 @@ import (
 	"time"
 )
 
-func newApplyCommand(cfg *config.Client) *cobra.Command {
+func newDeleteCommand(cfg *config.Client) *cobra.Command {
 	paths := make([]string, 0)
 	var wait bool
 
 	cmd := &cobra.Command{
-		Use:   "apply",
-		Short: "apply policy files",
-		Long:  "apply policy files long",
+		Use:   "delete",
+		Short: "delete policy files",
+		Long:  "delete policy files long",
 
 		Run: func(cmd *cobra.Command, args []string) {
 			allObjects, err := readFiles(paths)
 			if err != nil {
-				panic(fmt.Sprintf("Error while reading policy files for applying: %s", err))
+				panic(fmt.Sprintf("Error while reading policy files for deleting: %s", err))
 			}
 
 			client := rest.New(cfg, http.NewClient(cfg))
-			result, err := client.Policy().Apply(allObjects)
+			result, err := client.Policy().Delete(allObjects)
 			if err != nil {
-				panic(fmt.Sprintf("Error while applying policy: %s", err))
+				panic(fmt.Sprintf("Error while deleting policy: %s", err))
 			}
 
 			// todo(slukjanov): replace with -o yaml / json / etc handler
@@ -39,7 +39,7 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 				return
 			}
 
-			fmt.Println("Waiting for the first revision with updated policy to be applied")
+			fmt.Println("Waiting for the first revision with updated policy to be deleted")
 
 			var rev *engine.Revision
 			interval := 10 * time.Second
@@ -47,7 +47,7 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 				var revErr error
 				rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
 				if revErr != nil {
-					fmt.Printf("Error while getting revision for applied policy: %s, retrying in %s\n", revErr, interval)
+					fmt.Printf("Error while getting revision for deleted policy: %s, retrying in %s\n", revErr, interval)
 					return false
 				}
 
@@ -58,19 +58,19 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 
 			if !finished {
 				// todo pretty print
-				fmt.Println("Wait for revision apply timedout", rev)
+				fmt.Println("Wait for revision delete timedout", rev)
 			} else if rev.Status == engine.RevisionStatusSuccess {
 				// todo pretty print
-				fmt.Println("Success! Policy applied", rev)
+				fmt.Println("Success! Policy deleted", rev)
 			} else if rev.Status == engine.RevisionStatusError {
 				// todo pretty print
-				fmt.Println("Revision apply failed for policy", rev)
+				fmt.Println("Revision delete failed for policy", rev)
 			}
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files, dirs with policy to apply")
-	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until first revision with updated policy will be fully applied")
+	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files, dirs with policy to delete")
+	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until first revision with updated policy will be fully deleted")
 
 	return cmd
 }

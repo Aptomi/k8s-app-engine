@@ -18,7 +18,7 @@ type Core interface {
 type Policy interface {
 	Show(gen runtime.Generation) (*engine.PolicyData, error)
 	Apply([]runtime.Object) (*api.PolicyUpdateResult, error)
-	Delete([]string) (*api.PolicyUpdateResult, error)
+	Delete([]runtime.Object) (*api.PolicyUpdateResult, error)
 }
 
 // Endpoints is the interface for getting info about endpoints
