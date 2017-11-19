@@ -78,42 +78,48 @@ higher-level policy rules (see examples above) and configure the underlying infr
 ## User Guide
 
 ### Installation
-Since Aptomi is under actively development right now, the best way to install Aptomi is to build is from source. It's a very
+Aptomi is under active development right now, so the best way to install Aptomi is to build it from source. It's a very
 straightforward process and it will ensure you have the latest version from master that likely passes all unit and integration
-steps. Follow [Building From Source](#building-from-source) instructions to build the binaries. 
+tests. Follow [Building From Source](#building-from-source) instructions to build the binaries. 
 
 ### Getting Started
 
 #### Configuring LDAP
-Aptomi needs to be configured with user data source in order to enable UI login and retrieve labels/properties for the users. It's recommended to
+Aptomi needs to be configured with user data source in order to enable UI login and make policy decisions based on users' labels/properties. It's recommended to
 start with LDAP, which is also required by Aptomi examples and smoke tests.
 1. LDAP Server with sample users is provided in a docker container. To download and start it, run:
     ```
     ./tools/demo-ldap.sh
     ```
-2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed, follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect
+2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed,
+follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect to LDAP and browse it
 
 #### Creating k8s Clusters
-You need to have access to a k8s cluster in order to deploy services from the provided examples. Two k8s clusters will enable you to
-take full advantage of Aptomi rule and policy engine.
+You need to have access to k8s cluster in order to deploy services from the provided examples. Two k8s clusters will enable you to
+take full advantage of Aptomi policy engine and use cluster-based rules.
 1. If you don't have k8s clusters set up, follow [these instructions](examples/README.md) and run the provided script to create them in Google Cloud.
     ```
     ./tools/demo-gke.sh up
     ```
 
 #### Starting Aptomi
-1. Assuming you built Aptomi binaries already, create config for the server and start it:
-```
-sudo cp examples/config/server.yaml /etc/aptomi/config.yaml
-aptomi server
-```
+1. Assuming Aptomi binaries are built already, create config for the server and start it:
+    ```
+    sudo cp examples/config/server.yaml /etc/aptomi/config.yaml
+    aptomi server
+    ```
 
-2. Create config for the client and make sure it can connect to the server
-```
-mkdir ~/.aptomi
-cp examples/config/client.yaml ~/.aptomi/config.yaml
-aptomictl -u Sam policy show
-```
+2. Create config for the client and make sure it can connect to the server:
+    ```
+    mkdir ~/.aptomi
+    cp examples/config/client.yaml ~/.aptomi/config.yaml
+    aptomictl -u Sam policy show
+    ```
+    You should be able to see:
+    ```
+    &{{policy} {1 2017-11-19 00:00:05.613151 -0800 PST aptomi} map[]}
+    ```
+    
 
 #### Running Examples
 Once Aptomi is up and running and k8s clusters are set up, you can get started by running the following examples:
@@ -141,8 +147,9 @@ TODO: policy documentation
 ## Dev Guide
 
 ### Building From Source
-Building Aptomi from source and running integration tests is a very straightforward process. All you need is Go (the latest 1.9.x) and a couple of external packages:
+In order to build Aptomi from source you will need Go (the latest 1.9.x) and a couple of external dependencies:
 * docker - to run Aptomi in container, as well as to run sample LDAP server with user data
+* glide - all Go dependencies for Aptomi are managed via [Glide](https://glide.sh/)
 * npm - to build UI, as well as automatically generate table of contents in README.md 
 * telnet - for the script which runs smoke tests
 
@@ -153,9 +160,9 @@ cd $GOPATH/src/github.com/Aptomi
 git clone git@github.com:Aptomi/aptomi.git
 ```
 
-If you are on macOS, install brew, install [Docker For Mac](https://docs.docker.com/docker-for-mac/install/) and run: 
+If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](https://docs.docker.com/docker-for-mac/install/), then run: 
 ```
-brew install telnet docker npm
+brew install go glide docker npm telnet
 ```
 
 Install Helm, Kubectl clients:
@@ -163,13 +170,11 @@ Install Helm, Kubectl clients:
 ./tools/install-clients.sh
 ```
 
-All Go dependencies are managed using [Glide](https://glide.sh/). The following command will fetch all dependencies defined in `glide.lock` into a local "vendor" folder:
+In order to build Aptomi, you must first tell Glide to fetch all of its dependencies. It will read the list of
+dependencies defined in `glide.lock` and fetch them into a local "vendor" folder. After that, you must run Go to
+build and install the binaries. There are convenient Makefile targets for both, run them:
 ```
 make vendor 
-```
-
-To build and install the binaries:
-```
 make install
 ```
 
