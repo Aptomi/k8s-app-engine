@@ -33,15 +33,15 @@ This example illustrates a few important things that Aptomi does:
 1. First of all, bootstrap Aptomi on behalf on Sam (domain admin) to import k8s clusters and rules. ACL rules are defined in such
 a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob/Carol are service consumers
     ```
-    aptomictl policy apply --username Sam --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/Sam
+    aptomictl policy apply --username Sam -f examples/03-twitter-analytics/policy/Sam
     ```
 1. Import analytics_pipeline service definition on behalf of Frank
     ```
-    aptomictl policy apply --username Frank --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/Frank
+    aptomictl policy apply --username Frank -f examples/03-twitter-analytics/policy/Frank
     ```
 1. Import analytics_pipeline service definition on behalf of John
     ```
-    aptomictl policy apply --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/John
+    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/John
     ```
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
 that in Aptomi UI.
@@ -62,7 +62,7 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
 1. Now let's have consumers declare 'dependencies' on the services defined by John and Frank. John requests an instance
     ```
-    aptomictl policy apply --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
     ```
     Aptomi allocates a production instance in cluster [TODO]:
     [TODO] picture
@@ -70,8 +70,8 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
 1. Alice and Bob request instances
     ```
-    aptomictl policy apply --username Alice --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
-    aptomictl policy apply --username Bob --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
+    aptomictl policy apply --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy apply --username Bob -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
     ```
     Alice tests a change. Bob looks at Mexico.
     Aptomi allocates staging instances in cluster [TODO]:
@@ -83,13 +83,13 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
 1. Demonstrating update on a running instance of twitter stats in production. Alice removes her dependency and asks John to update production instance
     ```
-    aptomictl policy delete --username Alice --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy delete --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
     [TODO] change parameter
-    aptomictl policy apply --username John --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
     ```
 
 1. Demonstrating rejecting instantiation of a service
     ```
-    aptomictl policy apply --username Carol --config /etc/aptomi/config.yaml -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
+    aptomictl policy apply --username Carol -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
     ```
  
