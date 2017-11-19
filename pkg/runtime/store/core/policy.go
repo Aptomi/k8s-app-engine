@@ -63,9 +63,7 @@ func (ds *defaultStore) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime
 }
 
 // UpdatePolicy updates a list of changed objects in the underlying data store
-func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runtime.Key, performedBy string) (bool, *engine.PolicyData, error) {
-	// todo(slukjanov): handle deleted
-
+func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
 	// we should process only a single policy update request at once
 	ds.policyChangeLock.Lock()
 	defer ds.policyChangeLock.Unlock()
@@ -121,4 +119,36 @@ func (ds *defaultStore) InitPolicy() error {
 	// save policy data
 	_, err := ds.store.Save(initialPolicyData)
 	return err
+}
+
+// DeleteFromPolicy deletes provided objects from policy
+func (ds *defaultStore) DeleteFromPolicy(deleted []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
+	// we should process only a single policy update request at once
+	ds.policyChangeLock.Lock()
+	defer ds.policyChangeLock.Unlock()
+
+	policyData, err := ds.GetPolicyData(runtime.LastGen)
+	if err != nil {
+		return false, nil, err
+	}
+
+	changed := false
+	for _, obj := range deleted {
+		if policyData.Remove(obj) {
+			changed = true
+		}
+	}
+
+	if changed {
+		policyData.Metadata.UpdatedAt = time.Now()
+		policyData.Metadata.UpdatedBy = performedBy
+
+		// save policy data
+		_, err = ds.store.Save(policyData)
+		if err != nil {
+			return false, nil, err
+		}
+	}
+
+	return changed, policyData, nil
 }
