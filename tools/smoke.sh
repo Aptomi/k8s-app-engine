@@ -8,7 +8,11 @@ fi
 set -eou pipefail
 
 CONF_DIR=$(mktemp -d)
-POLICY_DIR="examples/03-twitter-analytics"
+POLICY_DIR=$(mktemp -d)
+
+# copy policy over, create secrets
+cp -R "examples/03-twitter-analytics/" $POLICY_DIR
+cp ${POLICY_DIR}/_external/secrets/secrets.{yaml.template,yaml}
 
 function cleanup() {
     stop_server
@@ -42,9 +46,6 @@ api:
 
 db:
   connection: ${CONF_DIR}/db.bolt
-
-helm:
-  chartsDir: /tmp
 
 enforcer:
   disabled: true

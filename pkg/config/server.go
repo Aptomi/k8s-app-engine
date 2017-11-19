@@ -49,7 +49,6 @@ func (cfg *LDAP) GetAttributes() []string {
 
 // Helm represents configs for Helm plugin
 type Helm struct {
-	ChartsDir string `validate:"required,dir"`
 }
 
 // DB represents configs for DB
