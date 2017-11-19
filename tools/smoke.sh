@@ -11,7 +11,7 @@ CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
 
 # copy policy over, create secrets
-cp -R "examples/03-twitter-analytics/" $POLICY_DIR
+cp -R examples/03-twitter-analytics/* $POLICY_DIR
 cp ${POLICY_DIR}/_external/secrets/secrets.{yaml.template,yaml}
 
 function cleanup() {
