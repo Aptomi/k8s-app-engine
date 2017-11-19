@@ -67,3 +67,18 @@ func (policyData *PolicyData) Add(obj lang.Base) {
 	}
 	byKind[obj.GetName()] = obj.GetGeneration()
 }
+
+func (policyData *PolicyData) Remove(obj lang.Base) bool {
+	byNs, exist := policyData.Objects[obj.GetNamespace()]
+	if !exist {
+		return false
+	}
+	byKind, exist := byNs[obj.GetKind()]
+	if !exist {
+		return false
+	}
+	_, exist = byKind[obj.GetName()]
+	delete(byKind, obj.GetName())
+
+	return exist
+}
