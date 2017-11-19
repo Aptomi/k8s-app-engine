@@ -49,24 +49,32 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	return nil
 }
 
-func (policyNamespace *PolicyNamespace) removeObject(obj Base) error {
+func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
-		delete(policyNamespace.Services, obj.GetName())
+		if _, exist := policyNamespace.Services[obj.GetName()]; exist {
+			delete(policyNamespace.Services, obj.GetName())
+			return true
+		}
 	case ContractObject.Kind:
-		delete(policyNamespace.Contracts, obj.GetName())
+		if _, exist := policyNamespace.Contracts[obj.GetName()]; exist {
+			delete(policyNamespace.Contracts, obj.GetName())
+			return true
+		}
 	case ClusterObject.Kind:
-		delete(policyNamespace.Clusters, obj.GetName())
+		if _, exist := policyNamespace.Clusters[obj.GetName()]; exist {
+			delete(policyNamespace.Clusters, obj.GetName())
+			return true
+		}
 	case RuleObject.Kind:
-		policyNamespace.Rules.removeRule(obj.(*Rule))
+		return policyNamespace.Rules.removeRule(obj.(*Rule))
 	case ACLRuleObject.Kind:
-		policyNamespace.ACLRules.removeRule(obj.(*Rule))
+		return policyNamespace.ACLRules.removeRule(obj.(*Rule))
 	case DependencyObject.Kind:
-		policyNamespace.Dependencies.removeDependency(obj.(*Dependency))
-	default:
-		return fmt.Errorf("not supported by PolicyNamespace.removeObject(): unknown kind %s", kind)
+		return policyNamespace.Dependencies.removeDependency(obj.(*Dependency))
 	}
-	return nil
+
+	return false
 }
 
 func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {

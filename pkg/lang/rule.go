@@ -88,8 +88,14 @@ func (globalRules *GlobalRules) addRule(rules ...*Rule) {
 	globalRules.Rules = append(globalRules.Rules, rules...)
 }
 
-func (globalRules *GlobalRules) removeRule(rules ...*Rule) {
+func (globalRules *GlobalRules) removeRule(rules ...*Rule) bool {
+	deleted := false
+
 	for _, rule := range rules {
+		if _, exist := globalRules.RuleMap[rule.GetName()]; exist {
+			deleted = true
+		}
+
 		delete(globalRules.RuleMap, rule.GetName())
 	}
 
@@ -103,6 +109,8 @@ func (globalRules *GlobalRules) removeRule(rules ...*Rule) {
 	}
 
 	globalRules.Rules = newRules
+
+	return deleted
 }
 
 // GetRulesSortedByWeight returns all rules sorted by weight
