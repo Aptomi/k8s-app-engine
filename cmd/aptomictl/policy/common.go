@@ -1,5 +1,17 @@
 package policy
 
+import (
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
+	"github.com/mattn/go-zglob"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"sort"
+)
+
 func readFiles(policyPaths []string) ([]runtime.Object, error) {
 	policyReg := runtime.NewRegistry().Append(lang.PolicyObjects...)
 	codec := yaml.NewCodec(policyReg)
