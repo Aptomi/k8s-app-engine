@@ -1,0 +1,31 @@
+debug: true
+
+api:
+  host: 127.0.0.1
+  port: 27866
+
+db:
+  connection: /etc/aptomi/db.bolt
+
+domainAdminOverrides:
+  Sam: true
+
+users:
+  ldap:
+    - host: localhost
+      port: 10389
+      basedn: "o=aptomiOrg"
+      filter: "(&(objectClass=organizationalPerson))"
+      filterbyname: "(&(objectClass=organizationalPerson)(cn=%s))"
+      labeltoattributes:
+        name: cn
+        description: description
+        global_ops: isglobalops
+        is_operator: isoperator
+        mail: mail
+        team: team
+        org: o
+        short-description: role
+        deactivated: deactivated
+
+secretsDir: examples/

@@ -77,7 +77,9 @@ higher-level policy rules (see examples above) and configure the underlying infr
 ## User Guide
 
 ### Installation
-TODO: "go get", script, docker container? it needs to have clients, etc
+Since Aptomi is under actively development right now, the best way to install Aptomi is to build is from source. It's a very
+straightforward process and it will ensure you have the latest version from master that likely passes all unit and integration
+steps. Follow [Building From Source](#building-from-source) instructions to build the binaries. 
 
 ### Getting Started
 
@@ -98,8 +100,22 @@ take full advantage of Aptomi rule and policy engine.
     ./tools/demo-gke.sh up
     ```
 
+#### Starting Aptomi
+1. Assuming you built Aptomi binaries already, create config for the server and start it:
+```
+sudo cp examples/config/server.yaml /etc/aptomi/config.yaml
+aptomi server
+```
+
+2. Create config for the client and make sure it can connect to the server
+```
+mkdir ~/.aptomi
+cp examples/config/client.yaml ~/.aptomi/config.yaml
+aptomictl -u Sam policy show
+```
+
 #### Running Examples
-Once Aptomi is installed and k8s clusters are set up, you can get started by running the following examples:
+Once Aptomi is up and running and k8s clusters are set up, you can get started by running the following examples:
 
 Example    | Description  | Diagram
 -----------|--------------|--------------
@@ -146,14 +162,14 @@ Install Helm, Kubectl clients:
 ./tools/install-clients.sh
 ```
 
-All Go dependencies are managed using [Glide](https://glide.sh/). The following command will fetch all dependencies defined in `glide.lock` and put them into "vendor" folder:
+All Go dependencies are managed using [Glide](https://glide.sh/). The following command will fetch all dependencies defined in `glide.lock` into a local "vendor" folder:
 ```
 make vendor 
 ```
 
-To build the binary:
+To build and install the binaries:
 ```
-make 
+make install
 ```
 
 ### Tests & Code Validation
