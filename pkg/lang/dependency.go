@@ -53,3 +53,25 @@ func (globalDependencies GlobalDependencies) addDependency(dependency *Dependenc
 	globalDependencies.DependencyMap[dependency.GetName()] = dependency
 	globalDependencies.DependenciesByContract[dependency.Contract] = append(globalDependencies.DependenciesByContract[dependency.Contract], dependency)
 }
+
+func (globalDependencies GlobalDependencies) removeDependency(deleteDep *Dependency) bool {
+	delete(globalDependencies.DependencyMap, deleteDep.GetName())
+
+	byContract, ok := globalDependencies.DependenciesByContract[deleteDep.Contract]
+	if !ok {
+		return false
+	}
+
+	newByContract := make([]*Dependency, 0)
+	for _, dep := range byContract {
+		if dep.GetName() != deleteDep.GetName() {
+			newByContract = append(newByContract, dep)
+		}
+	}
+
+	deleted := len(byContract) != len(newByContract)
+
+	globalDependencies.DependenciesByContract[deleteDep.Contract] = newByContract
+
+	return deleted
+}
