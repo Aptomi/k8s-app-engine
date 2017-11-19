@@ -37,6 +37,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 
 	// update policy
 	router.POST("/api/v1/policy", api.handlePolicyUpdate)
+	router.DELETE("/api/v1/policy", api.handlePolicyDelete)
 
 	// policy diagrams
 	router.GET("/api/v1/policy/diagram/mode/:mode", api.handlePolicyDiagram)

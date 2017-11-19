@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -78,7 +79,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Verify ACL for updated objects
-	currentPolicy, currentPolicyGeneration, err := api.store.GetPolicy(runtime.LastGen)
+	currentPolicy, _, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("Error while loading current policy: %s", err))
 	}
@@ -98,17 +99,50 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
 
-	// todo(slukjanov): handle deleted
-	deleted := make([]runtime.Key, 0)
-	changed, policyData, err := api.store.UpdatePolicy(objects, deleted, user.Name)
+	changed, policyData, err := api.store.UpdatePolicy(objects, user.Name)
 	if err != nil {
 		panic(fmt.Sprintf("Error while updating policy: %s", err))
 	}
 
+	api.getPolicyUpdateResult(writer, request, changed, policyData)
+}
+
+func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	objects := api.readLang(request)
+
+	user := api.getUserRequired(request)
+
+	// Verify ACL for updated objects
+	currentPolicy, _, err := api.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		panic(fmt.Sprintf("Error while loading current policy: %s", err))
+	}
+	for _, obj := range objects {
+		errManage := currentPolicy.View(user).ManageObject(obj)
+		if errManage != nil {
+			panic(fmt.Sprintf("Error while removing object from policy: %s", errManage))
+		}
+		currentPolicy.RemoveObject(obj)
+	}
+
+	err = currentPolicy.Validate()
+	if err != nil {
+		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
+	}
+
+	changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
+	if err != nil {
+		panic(fmt.Sprintf("Error while deleting from policy: %s", err))
+	}
+
+	api.getPolicyUpdateResult(writer, request, changed, policyData)
+}
+
+func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *http.Request, changed bool, policyData *engine.PolicyData) {
 	if !changed {
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-			PolicyGeneration: currentPolicyGeneration,
+			PolicyGeneration: policyData.GetGeneration(),
 			Actions:          nil,
 		})
 
