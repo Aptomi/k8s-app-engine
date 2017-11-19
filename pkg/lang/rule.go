@@ -80,12 +80,29 @@ func NewGlobalRules() *GlobalRules {
 	}
 }
 
-func (globalRules *GlobalRules) addRule(rule ...*Rule) {
-	for _, r := range rule {
+func (globalRules *GlobalRules) addRule(rules ...*Rule) {
+	for _, r := range rules {
 		globalRules.RuleMap[r.GetName()] = r
 	}
 
-	globalRules.Rules = append(globalRules.Rules, rule...)
+	globalRules.Rules = append(globalRules.Rules, rules...)
+}
+
+func (globalRules *GlobalRules) removeRule(rules ...*Rule) {
+	for _, rule := range rules {
+		delete(globalRules.RuleMap, rule.GetName())
+	}
+
+	newRules := make([]*Rule, 0)
+	for _, rule := range globalRules.Rules {
+		for _, deleteRule := range rules {
+			if rule.Name != deleteRule.Name {
+				newRules = append(newRules, rule)
+			}
+		}
+	}
+
+	globalRules.Rules = newRules
 }
 
 // GetRulesSortedByWeight returns all rules sorted by weight

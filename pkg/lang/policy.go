@@ -59,6 +59,17 @@ func (policy *Policy) AddObject(obj Base) error {
 	return policyNamespace.addObject(obj)
 }
 
+// RemoveObject removes an object into the policy. When you add objects to the policy, they get added to the corresponding
+// Namespace. If error occurs (e.g. object has an unknown kind) then the error will be returned
+func (policy *Policy) RemoveObject(obj Base) error {
+	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
+	if !ok {
+		return nil
+	}
+
+	return policyNamespace.removeObject(obj)
+}
+
 // GetObjectsByKind returns all objects in a policy with a given kind, across all namespaces
 func (policy *Policy) GetObjectsByKind(kind string) []Base {
 	result := []Base{}

@@ -30,7 +30,6 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 }
 
 func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
-	// add object
 	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
 		policyNamespace.Services[obj.GetName()] = obj.(*Service)
@@ -46,6 +45,26 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 		policyNamespace.Dependencies.addDependency(obj.(*Dependency))
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
+	}
+	return nil
+}
+
+func (policyNamespace *PolicyNamespace) removeObject(obj Base) error {
+	switch kind := obj.GetKind(); kind {
+	case ServiceObject.Kind:
+		delete(policyNamespace.Services, obj.GetName())
+	case ContractObject.Kind:
+		delete(policyNamespace.Contracts, obj.GetName())
+	case ClusterObject.Kind:
+		delete(policyNamespace.Clusters, obj.GetName())
+	case RuleObject.Kind:
+		policyNamespace.Rules.removeRule(obj.(*Rule))
+	case ACLRuleObject.Kind:
+		policyNamespace.ACLRules.removeRule(obj.(*Rule))
+	case DependencyObject.Kind:
+		policyNamespace.Dependencies.removeDependency(obj.(*Dependency))
+	default:
+		return fmt.Errorf("not supported by PolicyNamespace.removeObject(): unknown kind %s", kind)
 	}
 	return nil
 }
