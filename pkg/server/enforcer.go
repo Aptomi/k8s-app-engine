@@ -102,12 +102,6 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while saving new revision: %s", err)
 	}
 
-	// todo generate diagrams
-	//prefDiagram := visualization.NewDiagram(actualPolicy, actualState, externalData)
-	//newDiagram := visualization.NewDiagram(desiredPolicy, desiredState, externalData)
-	//deltaDiagram := visualization.NewDiagramDelta(desiredPolicy, desiredState, actualPolicy, actualState, externalData)
-	//visualization.CreateImage(...) for all diagrams
-
 	// Build plugin registry
 	var pluginRegistry plugin.Registry
 	if server.cfg.Enforcer.Noop {
