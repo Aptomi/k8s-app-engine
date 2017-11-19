@@ -23,8 +23,6 @@ func logError(err interface{}) {
 }
 
 func (server *Server) enforceLoop() error {
-	// todo create initial Policy and Revision before anything else (and remove checks from all other places, make sure API not running before that?)
-
 	for {
 		err := server.enforce()
 		if err != nil {
@@ -46,10 +44,9 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting desiredPolicy: %s", err)
 	}
 
-	// skip policy enforcement if no policy found
+	// if policy is not found, it means it somehow was not initialized correctly. let's return error
 	if desiredPolicy == nil {
-		// todo log
-		return nil
+		return fmt.Errorf("desiredPolicy is nil, does not exist in the store")
 	}
 
 	actualState, err := server.store.GetActualState()

@@ -12,6 +12,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
@@ -45,6 +46,9 @@ func (server *Server) Start() {
 	server.initStore()
 	server.initExternalData()
 
+	// See if initialization needs to happen on the first run
+	server.initOnFirstRun()
+
 	// Register API handlers
 	server.initHTTPServer()
 
@@ -61,6 +65,21 @@ func (server *Server) Start() {
 	}
 
 	server.wait()
+}
+func (server *Server) initOnFirstRun() {
+	policy, _, err := server.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting latest policy: %s", err))
+	}
+
+	// if policy does not exist, let's create the first version (it should be created here, before we start API and enforcer)
+	if policy == nil {
+		log.Infof("Policy not found in the store (likely, it's a first run of Aptomi server). Creating empty policy")
+		err := server.store.InitPolicy()
+		if err != nil {
+			panic(fmt.Sprintf("error while creating empty policy: %s", err))
+		}
+	}
 }
 
 func (server *Server) initExternalData() {

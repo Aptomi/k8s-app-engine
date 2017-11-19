@@ -24,34 +24,35 @@ func (ds *defaultStore) GetPolicyData(gen runtime.Generation) (*engine.PolicyDat
 	return data, nil
 }
 
+// getPolicyFromData() returns Policy converted from PolicyData.
+// if PolicyData is nil, it will return nil
 func (ds *defaultStore) getPolicyFromData(policyData *engine.PolicyData) (*lang.Policy, runtime.Generation, error) {
-	policy := lang.NewPolicy()
+	if policyData == nil {
+		return nil, runtime.LastGen, nil
+	}
 
-	// in case of first version of policy, we just need to have empty policy
-	if policyData != nil {
-		if policyData.Objects != nil {
-			for ns, kindNameGen := range policyData.Objects {
-				for kind, nameGen := range kindNameGen {
-					for name, gen := range nameGen {
-						obj, errStore := ds.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
-						if errStore != nil {
-							return nil, 0, errStore
-						}
-						errPolicy := policy.AddObject(obj)
-						if errPolicy != nil {
-							return nil, runtime.LastGen, errPolicy
-						}
+	policy := lang.NewPolicy()
+	if policyData.Objects != nil {
+		for ns, kindNameGen := range policyData.Objects {
+			for kind, nameGen := range kindNameGen {
+				for name, gen := range nameGen {
+					obj, errStore := ds.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
+					if errStore != nil {
+						return nil, 0, errStore
+					}
+					errPolicy := policy.AddObject(obj)
+					if errPolicy != nil {
+						return nil, runtime.LastGen, errPolicy
 					}
 				}
 			}
 		}
-		return policy, policyData.GetGeneration(), nil
 	}
-
-	return policy, 0, nil
+	return policy, policyData.GetGeneration(), nil
 }
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
+// if there is no policy yet (Aptomi not initialized), it will return nil
 func (ds *defaultStore) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
 	// todo should we use RWMutex for get/update policy?
 	policyData, err := ds.GetPolicyData(gen)
@@ -73,19 +74,11 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runti
 	if err != nil {
 		return false, nil, err
 	}
-
-	changed := false
-
-	// it could happen only for the fist time
 	if policyData == nil {
-		policyData = &engine.PolicyData{
-			TypeKind: engine.PolicyDataObject.GetTypeKind(),
-			Metadata: engine.PolicyDataMetadata{Generation: runtime.FirstGen},
-			Objects:  make(map[string]map[string]map[string]runtime.Generation),
-		}
-		changed = true
+		panic(fmt.Sprintf("Cannot retrieve last policy from the store, policyData is nil"))
 	}
 
+	changed := false
 	for _, updatedObj := range updatedObjects {
 		var changedObj bool
 		changedObj, err = ds.store.Save(updatedObj)
@@ -111,4 +104,21 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, deleted []runti
 	}
 
 	return changed, policyData, err
+}
+
+// init policy initializes policy (on the first run of Aptomi)
+func (ds *defaultStore) InitPolicy() error {
+	// create and save
+	initialPolicyData := &engine.PolicyData{
+		TypeKind: engine.PolicyDataObject.GetTypeKind(),
+		Metadata: engine.PolicyDataMetadata{
+			Generation: runtime.FirstGen,
+			UpdatedAt:  time.Now(),
+			UpdatedBy:  "aptomi",
+		},
+		Objects: make(map[string]map[string]map[string]runtime.Generation),
+	}
+	// save policy data
+	_, err := ds.store.Save(initialPolicyData)
+	return err
 }

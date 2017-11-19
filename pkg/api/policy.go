@@ -24,6 +24,7 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 	}
 
 	if policyData == nil {
+		// policy with the given generation not found
 		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	} else {
 		api.contentType.WriteOne(writer, request, policyData)
