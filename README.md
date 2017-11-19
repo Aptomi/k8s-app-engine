@@ -27,6 +27,7 @@ designed to work with any container runtime and container orchestration technolo
   - [Getting Started](#getting-started)
     - [Configuring LDAP](#configuring-ldap)
     - [Creating k8s Clusters](#creating-k8s-clusters)
+    - [Starting Aptomi](#starting-aptomi)
     - [Running Examples](#running-examples)
   - [Architecture & How It Works](#architecture--how-it-works)
     - [Components](#components)
