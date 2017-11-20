@@ -48,7 +48,7 @@ db:
   connection: ${CONF_DIR}/db.bolt
 
 enforcer:
-  disabled: true
+  noop: true
 
 domainAdminOverrides:
   Sam: true
@@ -93,3 +93,7 @@ if aptomictl policy --username Alice --config ${CONF_DIR} apply -f ${POLICY_DIR}
 fi
 
 aptomictl policy --username Sam --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>${CONF_DIR}/client.log
+
+sleep 10
+
+# todo(slukjanov): check exit code of the aptomi server (probably add "&& exit 1")
