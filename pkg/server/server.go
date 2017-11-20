@@ -29,6 +29,8 @@ type Server struct {
 	externalData *external.Data
 	store        store.Core
 	httpServer   *http.Server
+
+	enforcementIdx uint
 }
 
 // NewServer creates a new Aptomi Server

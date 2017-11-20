@@ -33,6 +33,8 @@ func (server *Server) enforceLoop() error {
 }
 
 func (server *Server) enforce() error {
+	server.enforcementIdx++
+
 	defer func() {
 		if err := recover(); err != nil {
 			logError(err)
@@ -54,7 +56,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	eventLog := event.NewLog("enforce-resolve", true)
+	eventLog := event.NewLog(fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, eventLog)
 	desiredState, err := resolver.ResolveAllDependencies()
 	if err != nil {
@@ -77,21 +79,14 @@ func (server *Server) enforce() error {
 
 	// policy changed while no actions needed to achieve desired state
 	if len(stateDiff.Actions) <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
-		// todo
-		log.Infof("No changes")
+		log.Infof("(enforce-%d) No changes, policy gen %d", server.enforcementIdx, desiredPolicyGen)
 		return nil
 	}
-	// todo
-	log.Infof("Changes")
+	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.enforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, len(stateDiff.Actions))
 
 	// todo save eventlog (if there were changes?)
 
 	// todo if policy gen changed, we still need to save revision but with progress == done
-
-	// todo remove debug log
-	for _, action := range stateDiff.Actions {
-		fmt.Println(action)
-	}
 
 	// Save revision
 	err = server.store.SaveRevision(nextRevision)
@@ -102,13 +97,13 @@ func (server *Server) enforce() error {
 	// Build plugin registry
 	var pluginRegistry plugin.Registry
 	if server.cfg.Enforcer.Noop {
-		log.Infof("Applying changes in noop mode (sleep per action = %d seconds)", server.cfg.Enforcer.NoopSleep)
+		log.Infof("(enforce-%d) Applying changes in noop mode (sleep per action = %d seconds)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
 		pluginRegistry = &plugin.MockRegistry{
 			DeployPlugin:      &plugin.MockDeployPlugin{SleepTime: time.Second * time.Duration(server.cfg.Enforcer.NoopSleep)},
 			PostProcessPlugin: &plugin.MockPostProcessPlugin{},
 		}
 	} else {
-		log.Infof("Applying changes")
+		log.Infof("(enforce-%d) Applying changes", server.enforcementIdx)
 		helmIstio := helm.NewPlugin(server.cfg.Helm)
 		pluginRegistry = plugin.NewRegistry(
 			[]plugin.DeployPlugin{helmIstio},
@@ -121,17 +116,16 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual policy: %s", err)
 	}
 
-	// todo add enforcement # to scope
-	eventLog = event.NewLog("enforce-apply", true)
+	eventLog = event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, eventLog, server.store.GetRevisionProgressUpdater(nextRevision))
-	resolution, err := applier.Apply()
+	_, err = applier.Apply()
 
 	// todo save eventlog
 
 	if err != nil {
 		return fmt.Errorf("error while applying new revision: %s", err)
 	}
-	log.Infof("Applied new revision with resolution: %v", resolution)
+	log.Infof("(enforce-%d) New revision %d successfully applied, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentProcessingOrder))
 
 	return nil
 }
