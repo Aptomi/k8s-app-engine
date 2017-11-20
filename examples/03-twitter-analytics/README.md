@@ -39,7 +39,7 @@ a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob
     ```
     aptomictl policy apply --username Frank -f examples/03-twitter-analytics/policy/Frank
     ```
-1. Import analytics_pipeline service definition on behalf of John
+1. Import twitter_stats service definition on behalf of John
     ```
     aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/John
     ```

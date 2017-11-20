@@ -105,6 +105,7 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
 #### Starting Aptomi
 1. Assuming Aptomi binaries are built already, create config for the server and start it:
     ```
+    mkdir /etc/aptomi
     sudo cp examples/config/server.yaml /etc/aptomi/config.yaml
     aptomi server
     ```
@@ -119,7 +120,13 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     ```
     &{{policy} {1 2017-11-19 00:00:05.613151 -0800 PST aptomi} map[]}
     ```
-    
+
+3. Start UI
+    ```
+    cd webui
+    npm install && npm run dev
+    ```
+    If you have issues building or starting UI, please see [Web UI](#web-ui) section
 
 #### Running Examples
 Once Aptomi is up and running and k8s clusters are set up, you can get started by running the following examples:
@@ -153,16 +160,16 @@ In order to build Aptomi from source you will need Go (the latest 1.9.x) and a c
 * npm - to build UI, as well as automatically generate table of contents in README.md 
 * telnet - for the script which runs smoke tests
 
-Check out Aptomi source code from the repo:
-```
-mkdir $GOPATH/src/github.com/Aptomi
-cd $GOPATH/src/github.com/Aptomi
-git clone git@github.com:Aptomi/aptomi.git
-```
-
 If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](https://docs.docker.com/docker-for-mac/install/), then run: 
 ```
 brew install go glide docker npm telnet
+```
+
+Check out Aptomi source code from the repo:
+```
+mkdir -p $GOPATH/src/github.com/Aptomi
+cd $GOPATH/src/github.com/Aptomi
+git clone https://github.com/Aptomi/aptomi.git
 ```
 
 Install Helm, Kubectl clients:
@@ -196,6 +203,9 @@ Command     | Action          | Description
 
 ### Web UI
 Source code is available in [webui](webui)
+
+Make sure you have latest `node` and `npm`. We have tested with node v8.9.1 and npm 5.5.1 and it's
+known to work with these.
 
 Command     | Action
 ------------|----------
