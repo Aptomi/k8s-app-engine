@@ -82,10 +82,14 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
     [TODO] delta
 
 1. Demonstrating update on a running instance of twitter stats in production. Alice removes her dependency and asks John to update production instance
+    Removing Alice's dependency:
     ```
     aptomictl policy delete --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
-    [TODO] change parameter
-    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    ```
+    Changing John's dependency:
+    ```
+    sed -e 's/demo-v61/demo-v62/g' examples/03-twitter-analytics/policy/john-prod-ts.yaml > examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
+    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
     ```
 
 1. Demonstrating rejecting instantiation of a service
