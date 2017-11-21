@@ -6,7 +6,7 @@
   criteria:
     require-all:
       - org == 'it' && is_operator
-      - in(service.Labels.type, 'analytics', 'dev-apps', 'service-mesh')
+      - in(service.Labels.type, 'analytics', 'dev-apps')
   actions:
     change-labels:
       set:
@@ -20,7 +20,7 @@
   criteria:
     require-all:
       - org == 'dev'
-      - in(service.Labels.type, 'analytics', 'dev-apps', 'service-mesh')
+      - in(service.Labels.type, 'analytics', 'dev-apps')
   actions:
     change-labels:
       set:
@@ -36,14 +36,3 @@
       - team == 'mobile-dev'
   actions:
     dependency: reject
-
-- kind: rule
-  metadata:
-    namespace: main
-    name: reject_traffic_for_deactivated_users
-  weight: 4000
-  criteria:
-    require-all:
-      - deactivated
-  actions:
-    ingress: reject
