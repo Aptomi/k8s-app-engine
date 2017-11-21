@@ -40,17 +40,17 @@ type Rule struct {
 // field is defined, then the corresponding action will be processed
 type RuleActions struct {
 	// ChangeLabels defines how labels should be transformed
-	ChangeLabels LabelOperations `yaml:"change-labels" validate:"omitempty,labelOperations"`
+	ChangeLabels LabelOperations `yaml:"change-labels,omitempty" validate:"omitempty,labelOperations"`
 
 	// Dependency defines whether dependency should be rejected
-	Dependency DependencyAction `validate:"omitempty,allowReject"`
+	Dependency DependencyAction `yaml:"dependency,omitempty" validate:"omitempty,allowReject"`
 
 	// Ingress defines whether ingress traffic should be rejected
-	Ingress IngressAction `validate:"omitempty,allowReject"`
+	Ingress IngressAction `yaml:"ingress,omitempty" validate:"omitempty,allowReject"`
 
 	// AddRole field is only relevant for ACL rules (have to keep it in this class due to the lack of generics).
 	// Key in the map is role ID, while value is a set of comma-separated namespaces to which this role applies
-	AddRole map[string]string `yaml:"add-role" validate:"omitempty,addRoleNS"`
+	AddRole map[string]string `yaml:"add-role,omitempty" validate:"omitempty,addRoleNS"`
 }
 
 // Matches returns true if a rule matches

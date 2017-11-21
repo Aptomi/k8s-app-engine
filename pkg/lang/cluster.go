@@ -22,7 +22,7 @@ type Cluster struct {
 	Type string `validate:"clustertype"`
 
 	// Labels is a set of labels attached to the cluster
-	Labels map[string]string `validate:"omitempty,labels"`
+	Labels map[string]string `yaml:"labels,omitempty" validate:"omitempty,labels"`
 
 	// Config for a given cluster type
 	Config ClusterConfig `validate:"required"`

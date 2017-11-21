@@ -26,7 +26,7 @@ type Service struct {
 	Metadata         `validate:"required"`
 
 	// Labels is a set of labels attached to the service
-	Labels map[string]string `validate:"omitempty,labels"`
+	Labels map[string]string `yaml:"labels,omitempty" validate:"omitempty,labels"`
 
 	// Components is the list of components service consists of
 	Components []*ServiceComponent `validate:"dive"`
@@ -48,18 +48,18 @@ type ServiceComponent struct {
 	// Contract, if not empty, denoted that the component points to another contract as a dependency. Meaning that
 	// a service needs to have another service running as its dependency (e.g. 'wordpress' service needs a 'database'
 	// contract). This dependency will be fulfilled at policy resolution time.
-	Contract string `validate:"omitempty"`
+	Contract string `yaml:"contract,omitempty" validate:"omitempty"`
 
 	// Code, if not empty, means that component is a code that can be instantiated with certain parameters (e.g. docker
 	// container image)
-	Code *Code `validate:"omitempty"`
+	Code *Code `yaml:"code,omitempty" validate:"omitempty"`
 
 	// Discovery is a map of discovery parameters that this component exposes to other services
-	Discovery util.NestedParameterMap `validate:"omitempty,templateNestedMap"`
+	Discovery util.NestedParameterMap `yaml:"discovery,omitempty" validate:"omitempty,templateNestedMap"`
 
 	// Dependencies is cross-component dependencies within a service. Component may need other components within that
 	// service to run, before it gets instantiated
-	Dependencies []string `validate:"dive,identifier"`
+	Dependencies []string `yaml:"dependencies,omitempty" validate:"dive,identifier"`
 }
 
 // Code with type and parameters, used to instantiate/update/delete component instances

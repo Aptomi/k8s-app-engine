@@ -25,7 +25,7 @@ type Contract struct {
 
 	// ChangeLabels defines how current set of labels will get changed/transformed in case
 	// the contract gets matched
-	ChangeLabels LabelOperations `yaml:"change-labels" validate:"labelOperations"`
+	ChangeLabels LabelOperations `yaml:"change-labels,omitempty" validate:"labelOperations"`
 
 	// Contexts contains an ordered list of contexts within a contract. When allocating an instance, Aptomi will pick
 	// and instantiate the first context which matches the criteria
@@ -45,7 +45,7 @@ type Context struct {
 
 	// ChangeLabels defines how current set of labels will get changed/transformed in case
 	// the context gets matched
-	ChangeLabels LabelOperations `yaml:"change-labels" validate:"labelOperations"`
+	ChangeLabels LabelOperations `yaml:"change-labels,omitempty" validate:"labelOperations"`
 
 	// Allocation defines how the context will get allocated (which service to allocate and which unique key to use)
 	Allocation *Allocation `validate:"required"`
@@ -65,7 +65,7 @@ type Allocation struct {
 	// instances created by Aptomi. For example, if key is set to {{.User.Labels.team}}, it will get dynamically
 	// resolved into a user's team name. And, since users from different teams will have different keys, every team
 	// will get their own service instance from Aptomi
-	Keys []string `validate:"dive,template"`
+	Keys []string `yaml:"keys,omitempty" validate:"dive,template"`
 }
 
 // Matches checks if context criteria is satisfied

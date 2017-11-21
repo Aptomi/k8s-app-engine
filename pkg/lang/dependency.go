@@ -28,7 +28,7 @@ type Dependency struct {
 	Contract string `validate:"required"`
 
 	// Labels which are provided by the user.
-	Labels map[string]string `validate:"omitempty,labels"`
+	Labels map[string]string `yaml:"labels,omitempty" validate:"omitempty,labels"`
 }
 
 // GlobalDependencies represents the list of global dependencies (see the definition above)

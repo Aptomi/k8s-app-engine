@@ -20,13 +20,13 @@ import (
 // criteria without any clauses always evaluates to true
 type Criteria struct {
 	// RequireAll follows 'AND' logic
-	RequireAll []string `yaml:"require-all" validate:"dive,expression"`
+	RequireAll []string `yaml:"require-all,omitempty" validate:"dive,expression"`
 
 	// RequireAny follows 'OR' logic
-	RequireAny []string `yaml:"require-any" validate:"dive,expression"`
+	RequireAny []string `yaml:"require-any,omitempty" validate:"dive,expression"`
 
 	// RequireNone follows 'AND NOT'
-	RequireNone []string `yaml:"require-none" validate:"dive,expression"`
+	RequireNone []string `yaml:"require-none,omitempty" validate:"dive,expression"`
 }
 
 // Returns whether criteria evaluates to "true", given a set of parameters for its expressions and a cache
