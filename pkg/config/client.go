@@ -6,10 +6,11 @@ import (
 
 // Client is the aptomictl config representation
 type Client struct {
-	Debug bool `validate:"-"`
-	API   API  `validate:"required"`
-	Auth  Auth `validate:"required"`
-	HTTP  HTTP `validate:"required"`
+	Debug  bool   `validate:"-"`
+	Output string `validate:"required"`
+	API    API    `validate:"required"`
+	Auth   Auth   `validate:"required"`
+	HTTP   HTTP   `validate:"required"`
 }
 
 // HTTP is the config for low level HTTP client
