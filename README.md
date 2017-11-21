@@ -80,7 +80,9 @@ higher-level policy rules (see examples above) and configure the underlying infr
 ### Installation
 Aptomi is under active development right now, so the best way to install Aptomi is to build it from source. It's a very
 straightforward process and it will ensure you have the latest version from master that likely passes all unit and integration
-tests. Follow [Building From Source](#building-from-source) instructions to build the binaries. 
+tests. Follow [Building From Source](#building-from-source) instructions to build the binaries.
+
+Very soon you will be able to download Aptomi packaged into a Docker container.
 
 ### Getting Started
 
@@ -155,14 +157,15 @@ TODO: policy documentation
 
 ### Building From Source
 In order to build Aptomi from source you will need Go (the latest 1.9.x) and a couple of external dependencies:
-* docker - to run Aptomi in container, as well as to run sample LDAP server with user data
 * glide - all Go dependencies for Aptomi are managed via [Glide](https://glide.sh/)
+* docker - to run Aptomi in container, as well as to run sample LDAP server with user data
+* kubernetes-cli and kubernetes-helm for using Kubernetes with Helm
 * npm - to build UI, as well as automatically generate table of contents in README.md 
 * telnet - for the script which runs smoke tests
 
 If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](https://docs.docker.com/docker-for-mac/install/), then run: 
 ```
-brew install go glide docker npm telnet
+brew install go glide docker kubernetes-cli kubernetes-helm npm telnet
 ```
 
 Check out Aptomi source code from the repo:
