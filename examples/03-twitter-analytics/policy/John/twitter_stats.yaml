@@ -19,7 +19,7 @@
         params:
           chartRepo: http://aptomi.io/charts/examples
           chartName: tweepub
-          chartVersion: 2.2.0
+          chartVersion: 2.3.0
 
           cluster: "{{ .Labels.cluster }}"
 
@@ -79,14 +79,14 @@
         params:
           chartRepo: http://aptomi.io/charts/examples
           chartName: tweeviz
-          chartVersion: 2.2.1
+          chartVersion: 2.3.0
 
           cluster: "{{ .Labels.cluster }}"
 
           image:
-            repository: frostman/
+            repository: aptomi/
             name: tweeviz
-            tag: "{{ .Labels.tsvisimage }}"
+            tag: "v1.2.0-{{ .Labels.tsvisimage }}"
 
           topListSize: "{{ .Labels.display_top_hashtags }}"
 
