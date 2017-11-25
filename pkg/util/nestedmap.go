@@ -92,6 +92,24 @@ func (src NestedParameterMap) ToString() string {
 	return yaml.SerializeObject(src)
 }
 
+// GetString returns string located by provided key
+func (src NestedParameterMap) GetString(key string, defaultValue string) (string, error) {
+	value, exist := src[key]
+	if !exist {
+		return defaultValue, nil
+	}
+
+	str, ok := value.(string)
+	if !ok {
+		return "", fmt.Errorf("value for key %s isn't string", key)
+	}
+	if len(str) == 0 {
+		return defaultValue, nil
+	}
+
+	return str, nil
+}
+
 const (
 	// ModeCompile just compiles all text templates on parameter tree without evaluating
 	ModeCompile = iota
