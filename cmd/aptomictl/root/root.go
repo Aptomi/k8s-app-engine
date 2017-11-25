@@ -43,6 +43,8 @@ func init() {
 
 	common.AddDefaultFlags(Command, EnvPrefix)
 
+	common.AddStringFlag(Command, "output", "output", "o", "text", EnvPrefix+"_OUTPUT", "Output format. One of: text (default), json, yaml")
+
 	common.AddStringFlag(Command, "auth.username", "username", "u", "", EnvPrefix+"_USERNAME", "Username")
 	common.AddDurationFlag(Command, "http.timeout", "timeout", "", 15*time.Second, EnvPrefix+"_TIMEOUT", "HTTP Timeout")
 
