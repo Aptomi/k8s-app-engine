@@ -1,4 +1,0 @@
-apiVersion: v1
-description: A Helm chart for TweeViz - Visualizing stream processed tweets
-name: tweeviz
-version: 2.2.1

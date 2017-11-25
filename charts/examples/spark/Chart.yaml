@@ -1,5 +1,0 @@
-name: spark
-version: 3.0.3
-description: Fast and general-purpose cluster computing system.
-appVersion: 2.2.0
-icon: http://spark.apache.org/images/spark-logo-trademark.png

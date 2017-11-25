@@ -1,5 +1,0 @@
-name: kafka
-version: 1.6.0
-description: Apache Kafka is publish-subscribe messaging rethought as a distributed commit log.
-appVersion: 0.11.0.0
-icon: https://kafka.apache.org/images/logo.png

@@ -1,5 +1,0 @@
-dependencies:
-- name: zookeeper
-  version: ^1.x
-  repository: http://aptomi.io/charts/examples
-  condition: zookeeper.deployChart
