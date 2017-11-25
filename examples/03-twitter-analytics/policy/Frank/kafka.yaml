@@ -18,7 +18,7 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartRepo: http://aptomi.io/charts/examples
+          chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: kafka
           chartVersion: 1.6.0
 
@@ -28,6 +28,7 @@
           antiAffinity: "soft"
 
           zookeeper:
+            deployChart: false
             addresses:
               zookeeper: "{{ .Discovery.zookeeper.zookeeper.url }}"
 

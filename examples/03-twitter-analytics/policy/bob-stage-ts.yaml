@@ -5,6 +5,6 @@
   user: Bob
   contract: twitter_stats
   labels:
-      tsvisimage: demo1
+      tsvisimage: demo11
       # Mexico
       locations: -119.883662,13.301958,-91.780634,27.018021

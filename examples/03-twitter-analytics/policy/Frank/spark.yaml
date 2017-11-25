@@ -18,7 +18,7 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartRepo: http://aptomi.io/charts/examples
+          chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: spark
           chartVersion: 3.0.3
 
@@ -33,6 +33,7 @@
               executorMemory: "2g"
 
           zookeeper:
+            deployChart: false
             addresses:
               zookeeper: "{{ .Discovery.zookeeper.zookeeper.url }}"
             path: "/{{ .Discovery.service.instanceId }}"

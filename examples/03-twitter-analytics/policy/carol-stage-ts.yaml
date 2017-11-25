@@ -5,6 +5,6 @@
   user: Carol
   contract: twitter_stats
   labels:
-      tsvisimage: demo1
+      tsvisimage: demo11
       # San Francisco, Boston, New York
       locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41

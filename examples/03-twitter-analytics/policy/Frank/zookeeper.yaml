@@ -15,7 +15,7 @@
       code:
         type: aptomi/code/kubernetes-helm
         params:
-          chartRepo: http://aptomi.io/charts/examples
+          chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: zookeeper
           chartVersion: 1.7.0
 
