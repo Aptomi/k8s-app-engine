@@ -134,7 +134,7 @@ func (rule *istioRouteRule) create() error {
 	content += "    simpleTimeout:\n"
 	content += "      timeout: 1ms\n"
 
-	ruleFileName := util.WriteTempFile("istio-rule", content)
+	ruleFileName := util.WriteTempFile("istio-rule", []byte(content))
 	defer os.Remove(ruleFileName) // nolint: errcheck
 
 	out, err := rule.cache.runIstioCmd("create -f "+ruleFileName, rule.Cluster)
@@ -234,7 +234,7 @@ func (cache *clusterCache) runIstioCmd(cmd string, cluster *lang.Cluster) (strin
 	content += "istioctl --configAPIService " + istioSvc + " --namespace " + cluster.Namespace + " "
 	content += cmd + "\n"
 
-	cmdFileName := util.WriteTempFile("istioctl-cmd", content)
+	cmdFileName := util.WriteTempFile("istioctl-cmd", []byte(content))
 	defer os.Remove(cmdFileName) // nolint: errcheck
 
 	out, err := util.RunCmd("bash", cmdFileName)
