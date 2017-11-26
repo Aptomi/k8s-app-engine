@@ -13,8 +13,10 @@ import (
 	"sync"
 )
 
-// ThreadPoolSize is the number of threads for policy evaluation and processing
-var ThreadPoolSize = sysruntime.NumCPU()
+// MaxConcurrentGoRoutines is the number of concurrently running goroutines for policy evaluation and processing.
+// We don't necessarily want to run a lot of them due to CPU/memory constraints and due to the fact that there is minimal
+// io wait time in policy processing (goroutines are mostly busy doing calculations as opposed to waiting).
+var MaxConcurrentGoRoutines = sysruntime.NumCPU()
 
 // PolicyResolver is a core of Aptomi for policy resolution and translating all service consumption declarations
 // into a single PolicyResolution object which represents desired state of components running in a cloud.
@@ -77,7 +79,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, err
 	}
 
 	// Allocate semaphore
-	var semaphore = make(chan int, ThreadPoolSize)
+	var semaphore = make(chan int, MaxConcurrentGoRoutines)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))
 
