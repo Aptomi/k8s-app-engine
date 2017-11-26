@@ -114,7 +114,7 @@ func (loader *UserLoaderFromLDAP) ldapAuthenticate(name, password string) (*lang
 	defer l.Close()
 
 	// Start TLS
-	err = l.StartTLS(&tls.Config{InsecureSkipVerify: true})
+	err = l.StartTLS(&tls.Config{InsecureSkipVerify: true}) // nolint: gas
 	if err != nil {
 		return nil, err
 	}

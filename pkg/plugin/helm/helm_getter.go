@@ -31,7 +31,7 @@ func (g *httpGetter) Get(href string) (*bytes.Buffer, error) {
 	}
 
 	_, err = io.Copy(buf, resp.Body)
-	resp.Body.Close() // nolint: errcheck
+	resp.Body.Close() // nolint: errcheck,gas
 	return buf, err
 }
 
