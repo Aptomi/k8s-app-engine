@@ -45,7 +45,7 @@ func AddDefaultFlags(command *cobra.Command, envPrefix string) {
 	AddBoolFlag(command, "debug", "debug", "d", false, envPrefix+"_DEBUG", "Debug level")
 
 	AddStringFlag(command, "api.schema", "schema", "", "http", envPrefix+"_SCHEMA", "Server API schema")
-	AddStringFlag(command, "api.host", "host", "", "127.0.0.1", envPrefix+"_HOST", "Server API host")
+	AddStringFlag(command, "api.host", "host", "", "0.0.0.0", envPrefix+"_HOST", "Server API host")
 	AddStringFlag(command, "api.port", "port", "", "27866", envPrefix+"_PORT", "Server API port")
 	AddStringFlag(command, "api.apiPrefix", "api-prefix", "", "api/v1", envPrefix+"_API_PREFIX", "Server API prefix")
 }
