@@ -1,0 +1,6 @@
+/.idea
+/vendor
+/webui/dist
+/webui/node_modules
+/aptomi
+/aptomictl
