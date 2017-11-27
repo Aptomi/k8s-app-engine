@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/pmezard/go-difflib/difflib"
 	"gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,13 +58,13 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 		return err
 	}
 
-	if create {
-		exists, errRelease := findHelmRelease(helmClient, releaseName)
-		if errRelease != nil {
-			return fmt.Errorf("error while looking for Helm release %s: %s", releaseName, errRelease)
-		}
+	currRelease, err := helmClient.ReleaseContent(releaseName)
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		return fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
+	}
 
-		if exists {
+	if create {
+		if currRelease != nil {
 			// If a release already exists, let's just go ahead and update it
 			eventLog.WithFields(event.Fields{}).Infof("Release '%s' already exists. Updating it", releaseName)
 		} else {
@@ -87,7 +88,31 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 		"params":  string(helmParams),
 	}).Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
-	_, err = helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
+	newRelease, err := helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
+
+	diff, err := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
+		A:        difflib.SplitLines(currRelease.Release.Manifest),
+		B:        difflib.SplitLines(newRelease.Release.Manifest),
+		FromFile: "Previous",
+		ToFile:   "Current",
+		Context:  3,
+	})
+	if err != nil {
+		return fmt.Errorf("error while calculating diff between chart manifests for Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+	}
+
+	if len(diff) == 0 {
+		diff = "without changes"
+	} else {
+		diff = "with diff: \n\n" + diff
+	}
+
+	eventLog.WithFields(event.Fields{
+		"release": releaseName,
+		"chart":   chartName,
+		"path":    chartPath,
+		"params":  string(helmParams),
+	}).Debugf("Updated Helm release '%s', chart '%s', cluster: '%s' %s", releaseName, chartName, cluster.Name, diff)
 
 	return err
 }
