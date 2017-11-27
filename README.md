@@ -106,8 +106,8 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     ```
 
 #### Starting Aptomi
-1. Download the latest release of Aptomi from https://github.com/Aptomi/aptomi/releases .
-    It comes with server and client binaries as well as examples and tools. Unpack it into some directory:
+1. Download the latest release of Aptomi from [releases](https://github.com/Aptomi/aptomi/releases).
+    It comes with server and client binaries as well as examples directory and needed tools. Unpack it into some directory:
     ```
     TODO:
     ```
