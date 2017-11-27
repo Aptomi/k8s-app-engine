@@ -58,8 +58,7 @@ a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob
     aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/John
     ```
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
-that in Aptomi UI.
-    [TODO]
+that in Aptomi UI under "Policy Browser"
 
 1. Now, we need to provide user secrets, so twitter_stats component can pull data over Twitter Streaming API. Create 3
 applications in [Twitter Application Management Console](https://apps.twitter.com)
@@ -78,36 +77,60 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
     ```
     aptomictl policy apply --wait --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
     ```
-    Aptomi allocates a production instance in cluster [TODO]:
-    [TODO] picture
-    [TODO] delta
+
+    Aptomi allocates dedicated production instance in cluster `cluster-us-east` according to the rule `analytics_prod_goes_to_us_east` defined in [rules.yaml](policy/Sam/rules.yaml).
+    It instantiates all required services according to the service graph and deploys them to the corresponding k8s cluster.
+    You can navigate to "Policy Browser", select "Desired State" and inspect how allocation was performed and which services got instantiated.
+    Also, on the "Instances" tab, you can retrieve all endpoints for the deployed service.
+
+    To check deployment progress, you can run the following command and wait for "1/1" status for pods:
+    ```
+    watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods
+    ```
+
 
 1. Alice and Bob request instances
     ```
     aptomictl policy apply --wait --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
     aptomictl policy apply --wait --username Bob -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
     ```
-    Alice tests a change. Bob looks at Mexico.
-    Aptomi allocates staging instances in cluster [TODO]:
-    [TODO] picture
-    [TODO] delta
+    We are assuming that Alice is a developer and she wants to test a different version of visualization code for twitter-stats.
+    Bob is just a service consumer that wants to instantiate the same service, but look at the tweets from Mexico.
+
+    Aptomi allocates those service instances in cluster `cluster-us-west` according to the rule `analytics_stage_goes_to_us_west` defined in [rules.yaml](policy/Sam/rules.yaml).
+    Moreover, those services are sharing the same analytics pipeline, as you can see in UI under "Policy Browser" in "Desired State".
+    Similarly, on the "Instances" tab, you can retrieve all endpoints for the deployed services.
+
+    To check deployment progress, you can run the following command and wait for "1/1" status for pods:
+    ```
+    watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods
+    ```
 
 1. If everything got deployed successfully, then you should be able to see 
-    [TODO] delta
+   - running *production* instance of twitter stats in `cluster-us-east` (managed by John)
+   - running *staging* instance of twitter stats in `cluster-us-west` (Alice's version with new look & feel)
+   - running *staging* instance of twitter stats in `cluster-us-west` (Bob's version with tweets from Mexico)
 
-1. Demonstrating update on a running instance of twitter stats in production. Alice removes her dependency and asks John to update production instance
-    Removing Alice's dependency:
+   If you open tweeviz HTTP endpoints, you will be able to see tweets coming in real-time over Twitter Streaming API, getting processed through analytics-pipeline, and displayed on the web.
+
+1. Now, let's demonstrate an update of a running instance of in production.
+    Alice can never deploy to production cluster according to the rules defined in Aptomi, so Alice tells Aptomi to tear down her staging instance and asks John to update production instance.
+
+    Alice removes her twitter-stats instance which runs in staging:
     ```
     aptomictl policy delete --wait --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
     ```
-    Changing John's dependency:
+    John changes label for twitter-stats instance which runs in production:
     ```
     sed -e 's/demo11/demo12/g' examples/03-twitter-analytics/policy/john-prod-ts.yaml > examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
     aptomictl policy apply --wait --username John -f examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
     ```
 
-1. Demonstrating rejecting instantiation of a service
+    After that, if you reload tweeviz HTTP endpoints in the browser, you will see that:
+    - Alice's stating version is no longer available
+    - John's production version runs a new look & feel that Alice was testing
+
+1. Carol belongs to 'mobile-dev' team, so she cannot instantiate any services according to the rule `reject_dependency_for_mobile_dev_users` defined in [rules.yaml](policy/Sam/rules.yaml).
     ```
     aptomictl policy apply --wait --username Carol -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
     ```
- 
