@@ -36,22 +36,6 @@ func getHelmReleaseName(deployName string) string {
 	return strings.ToLower(util.EscapeName(deployName))
 }
 
-func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
-	// todo(slukjanov): use release list filter
-	resp, err := helmClient.ListReleases()
-	if err != nil {
-		return false, err
-	}
-
-	for _, release := range resp.Releases {
-		if release.Name == name {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 func (cache *clusterCache) newHelmClient(eventLog *event.Log) (*helm.Client, error) {
 	return helm.NewClient(helm.Host(cache.tillerHost)), nil
 }
