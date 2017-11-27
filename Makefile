@@ -17,6 +17,7 @@ else
 endif
 	${GO} build -o bin/protoc-gen-go ./vendor/github.com/golang/protobuf/protoc-gen-go
 	tools/setup-apimachinery.sh
+	cd webui; npm install
 
 .PHONY: profile-engine
 profile-engine:
@@ -68,8 +69,13 @@ test-loop:
 smoke: install alltest
 	tools/smoke.sh
 
+.PHONY: embed-ui
+embed-ui: prepare_filebox
+	cd webui; npm run build
+	fileb0x webui/b0x.yaml
+
 .PHONY: build
-build:
+build: embed-ui
 	${GO} build ${GOFLAGS} -v -i ./...
 	${GO} build ${GOFLAGS} -v -i -o aptomi github.com/Aptomi/aptomi/cmd/aptomi
 	${GO} build ${GOFLAGS} -v -i -o aptomictl github.com/Aptomi/aptomi/cmd/aptomictl
@@ -140,6 +146,14 @@ HAS_GOVERALLS := $(shell command -v goveralls)
 prepare_goveralls:
 ifndef HAS_GOVERALLS
 	go get -u -v github.com/mattn/goveralls
+endif
+
+HAS_FILEBOX := $(shell command -v fileb0x)
+
+.PHONY: prepare_filebox
+prepare_filebox:
+ifndef HAS_FILEBOX
+	go get -u -v github.com/UnnoTed/fileb0x
 endif
 
 .PHONY: w-dep

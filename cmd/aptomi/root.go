@@ -32,9 +32,14 @@ var (
 func init() {
 	viper.SetEnvPrefix(envPrefix)
 
+	// add common flags (shared between server and client)
 	common.AddDefaultFlags(aptomiCmd, envPrefix)
 
+	// add server-specific flags
 	common.AddStringFlag(aptomiCmd, "db.connection", "db", "", "/etc/aptomi/db.bolt", envPrefix+"_DB_CONN", "DB connection string")
+	common.AddStringFlag(aptomiCmd, "ui.schema", "ui-schema", "", "http", envPrefix+"_SCHEMA", "Server UI schema")
+	common.AddStringFlag(aptomiCmd, "ui.host", "ui-host", "", "127.0.0.1", envPrefix+"_HOST", "Server UI host")
+	common.AddStringFlag(aptomiCmd, "ui.port", "ui-port", "", "8080", envPrefix+"_PORT", "Server UI port")
 
 	aptomiCmd.AddCommand(common.Version)
 }

@@ -21,6 +21,7 @@
   ],
   "Cyclo": 20,
   "Exclude": [
-    "vendor"
+    "vendor",
+    "pkg/server/ui"
   ]
 }

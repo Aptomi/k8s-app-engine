@@ -4,6 +4,10 @@ api:
   host: 0.0.0.0
   port: 27866
 
+ui:
+  host: 0.0.0.0
+  port: 8080
+
 db:
   connection: /etc/aptomi/db.bolt
 

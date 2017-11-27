@@ -1,5 +1,5 @@
-hash: 390cb48cbe16a1b0b3e10b105970c1c95ea6f26eaf9c362e695e432ea401966f
-updated: 2017-11-16T21:31:30.338509-08:00
+hash: 9aa4707a358103efbde33209ca3da8feab5e3957fb267d7714699bef4230047b
+updated: 2017-11-26T17:11:12.989872363-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -280,6 +280,8 @@ imports:
   subpackages:
   - codec
   - codec/codecgen
+- name: github.com/UnnoTed/fileb0x
+  version: 541cb8da1731f2b7ea0d89d018ce5fede91c0507
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:
@@ -354,7 +356,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ldap.v2
-  version: 8168ee085ee43257585e50c6441aadf54ecb2c9f
+  version: bb7a9ca6e4fbc2129e3db588a34bc970ffe811a9
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
@@ -398,7 +400,7 @@ imports:
   - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
-  version: bebdeb749f1fa3da9e1312c4b08e439c404b3136
+  version: 15ea8ac863f13cf2a3496cd056b3d5a763a25c34
   subpackages:
   - cmd/kubeadm/app/apis/kubeadm
   - federation/apis/federation

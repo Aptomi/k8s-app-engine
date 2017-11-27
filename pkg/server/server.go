@@ -12,6 +12,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
+	"github.com/Aptomi/aptomi/pkg/server/ui"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
@@ -28,7 +29,9 @@ type Server struct {
 
 	externalData *external.Data
 	store        store.Core
-	httpServer   *http.Server
+
+	apiServer *http.Server
+	uiServer  *http.Server
 
 	enforcementIdx uint
 }
@@ -48,27 +51,19 @@ func (server *Server) Start() {
 	server.initStore()
 	server.initExternalData()
 
-	// See if initialization needs to happen on the first run
-	server.initOnFirstRun()
+	// See if policy initialization needs to happen on the first run
+	server.initPolicyOnFirstRun()
 
-	// Register API handlers
-	server.initHTTPServer()
+	// Start API, UI and Enforcer
+	server.startAPIServer()
+	server.startUIServer()
+	server.startEnforcer()
 
-	// Start HTTP server
-	server.runInBackground("HTTP Server", true, func() {
-		panic(server.httpServer.ListenAndServe())
-	})
-
-	// Start policy enforcement job
-	if !server.cfg.Enforcer.Disabled {
-		server.runInBackground("Policy Enforcer", true, func() {
-			panic(server.enforceLoop())
-		})
-	}
-
+	// Wait for jobs to complete (it essentially hangs forever)
 	server.wait()
 }
-func (server *Server) initOnFirstRun() {
+
+func (server *Server) initPolicyOnFirstRun() {
 	policy, _, err := server.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting latest policy: %s", err))
@@ -108,7 +103,7 @@ func (server *Server) initStore() {
 	server.store = core.NewStore(b)
 }
 
-func (server *Server) initHTTPServer() {
+func (server *Server) startAPIServer() {
 	router := httprouter.New()
 
 	api.Serve(router, server.store, server.externalData)
@@ -122,10 +117,55 @@ func (server *Server) initHTTPServer() {
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
 
-	server.httpServer = &http.Server{
+	server.apiServer = &http.Server{
 		Handler:      handler,
 		Addr:         server.cfg.API.ListenAddr(),
 		WriteTimeout: 5 * time.Second,
 		ReadTimeout:  30 * time.Second,
+	}
+
+	// Start HTTP server
+	server.runInBackground("HTTP Server / API", true, func() {
+		panic(server.apiServer.ListenAndServe())
+	})
+}
+
+func (server *Server) startUIServer() {
+	if len(server.cfg.UI.Host) <= 0 || server.cfg.UI.Port <= 0 {
+		log.Infof("UI configuration not defined. UI will not be served")
+		return
+	}
+
+	router := httprouter.New()
+	router.ServeFiles("/*filepath", ui.HTTP)
+
+	var handler http.Handler = router
+
+	// todo write to logrus
+	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
+	handler = cors.Default().Handler(handler)
+	handler = middleware.NewPanicHandler(handler)
+	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
+	// todo(slukjanov): add compression handler and compress by default in client
+
+	server.uiServer = &http.Server{
+		Handler:      handler,
+		Addr:         server.cfg.UI.ListenAddr(),
+		WriteTimeout: 5 * time.Second,
+		ReadTimeout:  30 * time.Second,
+	}
+
+	// Start HTTP server
+	server.runInBackground("HTTP Server / UI", true, func() {
+		panic(server.uiServer.ListenAndServe())
+	})
+}
+
+func (server *Server) startEnforcer() {
+	// Start policy enforcement job
+	if !server.cfg.Enforcer.Disabled {
+		server.runInBackground("Policy Enforcer", true, func() {
+			panic(server.enforceLoop())
+		})
 	}
 }

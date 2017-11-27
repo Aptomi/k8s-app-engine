@@ -22,7 +22,7 @@ const Passthrough = {
 }
 
 const router = new Router({
-  mode: 'history',
+  mode: 'hash',
   routes: [
     {
       path: '/',
@@ -106,7 +106,7 @@ const router = new Router({
       path: '/logout',
       beforeEnter (to, from, next) {
         auth.logout()
-        window.location.href = '/login'
+        window.location.href = '/'
       }
     }
   ],

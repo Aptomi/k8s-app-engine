@@ -4,6 +4,7 @@ package config
 type Server struct {
 	Debug                bool            `validate:"-"`
 	API                  API             `validate:"required"`
+	UI                   UI              `validate:"omitempty"` // if UI is not defined, then UI will not be started
 	DB                   DB              `validate:"required"`
 	Helm                 Helm            `validate:"required"`
 	Users                UserSources     `validate:"required"`
