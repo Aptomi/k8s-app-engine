@@ -129,6 +129,7 @@ func (cache *clusterCache) setupTiller(eventLog *event.Log) error {
 		return err
 	}
 
+	// todo wait until tiller available
 	return installer.Install(client, &installer.Options{
 		Namespace:      cache.tillerNamespace,
 		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.6.2",
