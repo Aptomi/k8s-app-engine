@@ -78,11 +78,11 @@ higher-level policy rules (see examples above) and configure the underlying infr
 ## User Guide
 
 ### Installation
-Aptomi is under active development right now, so the best way to install Aptomi is to build it from source. It's a very
-straightforward process and it will ensure you have the latest version from master that likely passes all unit and integration
-tests. Follow [Building From Source](#building-from-source) instructions to build the binaries.
+The best way to install Aptomi is to download its latest release, which contains compiled server and client binaries for various platforms:
+- Aptomi Server is an all-in-one binary with embedded DB store, which serves API requests, runs UI, as well as does deployment and continuous state enforcement
+- Aptomi Client is a client for talking to Aptomi Server. It allows end-users of Aptomi to feed YAML files into Aptomi Server over REST API
 
-Very soon you will be able to download Aptomi packaged into a Docker container.
+You can run those binaries locally.
 
 ### Getting Started
 
