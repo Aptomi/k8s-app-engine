@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-// Server is Aptomi server. It serves API calls, as well as does policy resolution & continuous state enforcement
+// Server is Aptomi server. It serves UI front-end, API calls, as well as does policy resolution & continuous state enforcement
 type Server struct {
 	cfg              *config.Server
 	backgroundErrors chan string
@@ -46,7 +46,8 @@ func NewServer(cfg *config.Server) *Server {
 	return s
 }
 
-// Start initializes Aptomi server, starts serving API, and as well as runs the required background jobs for actual policy enforcement
+// Start initializes Aptomi server, starts API & UI processing, and as well as runs the required background jobs for
+// continuous policy resolution and state enforcement
 func (server *Server) Start() {
 	server.initStore()
 	server.initExternalData()
@@ -69,7 +70,7 @@ func (server *Server) initPolicyOnFirstRun() {
 		panic(fmt.Sprintf("error while getting latest policy: %s", err))
 	}
 
-	// if policy does not exist, let's create the first version (it should be created here, before we start API and enforcer)
+	// if policy does not exist, let's create the first version (it should be created here, before we start the server)
 	if policy == nil {
 		log.Infof("Policy not found in the store (likely, it's a first run of Aptomi server). Creating empty policy")
 		err := server.store.InitPolicy()
