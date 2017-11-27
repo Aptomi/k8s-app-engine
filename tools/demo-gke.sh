@@ -104,7 +104,7 @@ function main() {
         helm_cleanup $cluster_small_name $demo_namespace
     elif [ "kubeconfig" == "$1" ]; then
         gke_cluster_kubeconfig $cluster_big_name $cluster_big_region $demo_namespace
-        gke_cluster_kubeconfig $cluster_big_name $cluster_big_region $demo_namespace
+        gke_cluster_kubeconfig $cluster_small_name $cluster_small_region $demo_namespace
     else
         log "Unsupported command '$1'"
         exit 1
