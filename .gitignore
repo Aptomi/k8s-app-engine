@@ -1,5 +1,3 @@
-.goreleaser.yml
-
 bin
 /aptomi
 /aptomictl

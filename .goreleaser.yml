@@ -1,0 +1,59 @@
+project_name: aptomi
+
+builds:
+  - binary: aptomi
+    main: ./cmd/aptomi/
+
+    env:
+      - CGO_ENABLED=0
+    flags: -v -i
+    ldflags: -s -w -X github.com/Aptomi/aptomi/pkg/version.gitVersion={{.Version}} -X github.com/Aptomi/aptomi/pkg/version.gitCommit={{.Commit}} -X github.com/Aptomi/aptomi/pkg/version.buildDate={{.Date}}
+
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - "386"
+    ignore:
+      - goos: darwin
+        goarch: 386
+
+    hooks:
+      pre: make embed-ui
+
+  - binary: aptomictl
+    main: ./cmd/aptomictl/
+
+    env:
+      - CGO_ENABLED=0
+    flags: -v -i
+    ldflags: -s -w -X github.com/Aptomi/aptomi/pkg/version.gitVersion={{.Version}} -X github.com/Aptomi/aptomi/pkg/version.gitCommit={{.Commit}} -X github.com/Aptomi/aptomi/pkg/version.buildDate={{.Date}}
+
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - "386"
+    ignore:
+      - goos: darwin
+        goarch: 386
+
+archive:
+  format: tar.gz
+  wrap_in_directory: true
+
+  files:
+    - LICENSE
+    - README.md
+    - CHANGELOG*
+    - examples/**/*
+    - tools/demo-*
+
+release:
+  name_template: '{{.Tag}}'
+  prerelease: true
+  github:
+    owner: Aptomi
+    name: aptomi
