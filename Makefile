@@ -75,12 +75,22 @@ embed-ui: prepare_filebox
 	cd webui; npm run build
 	fileb0x webui/b0x.yaml
 
+#
+# IMPORTANT
+#
+# Make sure to update .goreleaser.yml if doing any changes to build process
+#
 .PHONY: build
 build: embed-ui
 	${GO} build ${GOFLAGS} -v -i ./...
 	${GO} build ${GOFLAGS} -v -i -o aptomi github.com/Aptomi/aptomi/cmd/aptomi
 	${GO} build ${GOFLAGS} -v -i -o aptomictl github.com/Aptomi/aptomi/cmd/aptomictl
 
+#
+# IMPORTANT
+#
+# Make sure to update .goreleaser.yml if doing any changes to install process
+#
 .PHONY: install
 install: build
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomi
