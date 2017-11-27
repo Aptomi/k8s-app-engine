@@ -74,7 +74,7 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 				"params":  string(helmParams),
 			}).Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
-			_, err = helmClient.InstallRelease(chartPath, cluster.Config.Namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
+			_, err = helmClient.InstallRelease(chartPath, cache.namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
 
 			return err
 		}
@@ -136,7 +136,7 @@ func (plugin *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params
 		return nil, err
 	}
 
-	_, kubeClient, err := cache.newKubeClient()
+	kubeClient, err := cache.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func (plugin *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params
 	endpoints := make(map[string]string)
 
 	// Check all corresponding services
-	services, err := client.Services(cluster.Config.Namespace).List(options)
+	services, err := client.Services(cache.namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (plugin *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params
 	}
 
 	// Find Istio Ingress service (how ingress itself exposed)
-	service, err := client.Services(cluster.Config.Namespace).Get("istio-ingress", meta.GetOptions{})
+	service, err := client.Services(cache.namespace).Get("istio-ingress", meta.GetOptions{})
 	if err != nil {
 		// return if there is no Istio deployed
 		if k8serrors.IsNotFound(err) {
@@ -198,7 +198,7 @@ func (plugin *Plugin) Endpoints(cluster *lang.Cluster, deployName string, params
 	}
 
 	// Check all corresponding istio ingresses
-	ingresses, err := kubeClient.ExtensionsV1beta1().Ingresses(cluster.Config.Namespace).List(options)
+	ingresses, err := kubeClient.ExtensionsV1beta1().Ingresses(cache.namespace).List(options)
 	if err != nil {
 		return nil, err
 	}

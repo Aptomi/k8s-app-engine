@@ -16,7 +16,7 @@ import (
 )
 
 func (cache *clusterCache) getHTTPServicesForHelmRelease(releaseName string, chartName string, eventLog *event.Log) ([]string, error) {
-	_, client, err := cache.newKubeClient()
+	client, err := cache.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
@@ -27,13 +27,13 @@ func (cache *clusterCache) getHTTPServicesForHelmRelease(releaseName string, cha
 	options := meta.ListOptions{LabelSelector: selector}
 
 	// Check all corresponding services
-	services, err := coreClient.Services(cache.cluster.Config.Namespace).List(options)
+	services, err := coreClient.Services(cache.namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check all corresponding Istio ingresses
-	ingresses, err := client.ExtensionsV1beta1().Ingresses(cache.cluster.Config.Namespace).List(options)
+	ingresses, err := client.ExtensionsV1beta1().Ingresses(cache.namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (cache *clusterCache) getIstioSvc() (string, error) {
 
 	istioSvc := cache.istioSvc
 	if len(istioSvc) == 0 {
-		_, client, err := cache.newKubeClient()
+		client, err := cache.newKubeClient()
 		if err != nil {
 			return "", err
 		}

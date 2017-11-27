@@ -308,11 +308,8 @@ func makeCluster(clusterType, ns string) *Cluster {
 			Namespace: ns,
 			Name:      "cluster",
 		},
-		Type: clusterType,
-		Config: ClusterConfig{
-			KubeContext: "value",
-			Namespace:   "value",
-		},
+		Type:   clusterType,
+		Config: "something",
 	}
 }
 

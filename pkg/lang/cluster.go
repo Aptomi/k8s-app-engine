@@ -1,7 +1,9 @@
 package lang
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"gopkg.in/yaml.v2"
 )
 
 // ClusterObject is an informational data structure with Kind and Constructor for Cluster
@@ -25,14 +27,22 @@ type Cluster struct {
 	Labels map[string]string `yaml:"labels,omitempty" validate:"omitempty,labels"`
 
 	// Config for a given cluster type
-	Config ClusterConfig `validate:"required"`
+	Config interface{} `validate:"required"`
 }
 
-// ClusterConfig defines config for a k8s cluster with Helm
-type ClusterConfig struct {
-	KubeContext     string `validate:"required"`
-	TillerNamespace string `validate:"omitempty"`
-	Namespace       string `validate:"required"`
+// ParseConfigInto parses cluster config into provided object
+func (cluster *Cluster) ParseConfigInto(obj interface{}) error {
+	data, err := yaml.Marshal(cluster.Config)
+	if err != nil {
+		return fmt.Errorf("error while marshaling cluster config into bytes using yaml: %s", err)
+	}
+
+	err = yaml.Unmarshal(data, obj)
+	if err != nil {
+		return fmt.Errorf("error while unmarshaling cluster config into provided object: %s", err)
+	}
+
+	return nil
 }
 
 // MakeCopy makes a shallow copy of the Cluster struct

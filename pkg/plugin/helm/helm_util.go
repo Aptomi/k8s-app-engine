@@ -53,17 +53,10 @@ func findHelmRelease(helmClient *helm.Client, name string) (bool, error) {
 }
 
 func (cache *clusterCache) newHelmClient(eventLog *event.Log) (*helm.Client, error) {
-	if err := cache.ensureTillerTunnel(eventLog); err != nil {
-		return nil, err
-	}
-
 	return helm.NewClient(helm.Host(cache.tillerHost)), nil
 }
 
 func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
-	cache.lock.Lock()
-	defer cache.lock.Unlock()
-
 	if len(cache.tillerHost) > 0 {
 		// todo(slukjanov): verify that tunnel is still alive??
 		// connection already set up, skip
@@ -105,51 +98,41 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 }
 
 func (cache *clusterCache) newTillerTunnel() (*kube.Tunnel, error) {
-	config, client, err := cache.newKubeClient()
+	client, err := cache.newKubeClient()
 	if err != nil {
 		return nil, err
 	}
 
-	tillerNamespace := cache.cluster.Config.TillerNamespace
-	if tillerNamespace == "" {
-		tillerNamespace = "kube-system"
-	}
-
-	return portforwarder.New(tillerNamespace, client, config)
+	return portforwarder.New(cache.tillerNamespace, client, cache.kubeConfig)
 }
 
 func (cache *clusterCache) setupTiller(eventLog *event.Log) error {
-	_, client, err := cache.newKubeClient()
+	client, err := cache.newKubeClient()
 	if err != nil {
 		return err
 	}
 
-	tillerNamespace := cache.cluster.Config.TillerNamespace
-	if tillerNamespace == "" {
-		tillerNamespace = "kube-system"
-	}
+	eventLog.WithFields(event.Fields{}).Debugf("Setting up tiller in cluster %s namespace %s", cache.cluster.Name, cache.tillerNamespace)
 
-	eventLog.WithFields(event.Fields{}).Debugf("Setting up tiller in cluster %s namespace %s", cache.cluster.Name, tillerNamespace)
-
-	err = cache.ensureKubeNamespace(client, tillerNamespace)
+	err = cache.ensureKubeNamespace(client, cache.tillerNamespace)
 	if err != nil {
 		return err
 	}
 
-	err = cache.createKubeServiceAccount(client, tillerNamespace)
+	err = cache.createKubeServiceAccount(client, cache.tillerNamespace)
 	if err != nil {
 		return err
 	}
 
-	err = cache.createKubeClusterRoleBinding(client, tillerNamespace)
+	err = cache.createKubeClusterRoleBinding(client, cache.tillerNamespace)
 	if err != nil {
 		return err
 	}
 
 	return installer.Install(client, &installer.Options{
-		Namespace:      tillerNamespace,
+		Namespace:      cache.tillerNamespace,
 		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.6.2",
-		ServiceAccount: "tiller-" + tillerNamespace,
+		ServiceAccount: "tiller-" + cache.tillerNamespace,
 	})
 }
 

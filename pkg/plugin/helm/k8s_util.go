@@ -7,57 +7,26 @@ import (
 	"k8s.io/client-go/kubernetes"
 	api "k8s.io/client-go/pkg/api/v1"
 	rbacapi "k8s.io/client-go/pkg/apis/rbac/v1beta1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
-func (cache *clusterCache) getK8sClientConfig() (*rest.Config, error) {
-	rules := clientcmd.NewDefaultClientConfigLoadingRules()
-
-	/*
-		if len(cluster.Config.KubeConfig) > 0 {
-			rules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: cluster.Config.KubeConfig}
-		}
-	*/
-
-	kubeContext := cache.cluster.Config.KubeContext
-	overrides := &clientcmd.ConfigOverrides{}
-	if len(kubeContext) > 0 {
-		overrides.CurrentContext = kubeContext
-	}
-	conf := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
-
-	clientConf, err := conf.ClientConfig()
+func (cache *clusterCache) newKubeClient() (kubernetes.Interface, error) {
+	client, err := kubernetes.NewForConfig(cache.kubeConfig)
 	if err != nil {
-		return nil, fmt.Errorf("could not get kubernetes config for cluster %s: %s", cache.cluster.Name, err)
+		return nil, fmt.Errorf("could not get kubernetes client: %s", err)
 	}
 
-	return clientConf, nil
-}
-
-func (cache *clusterCache) newKubeClient() (*rest.Config, kubernetes.Interface, error) {
-	conf, err := cache.getK8sClientConfig()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	client, err := kubernetes.NewForConfig(conf)
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not get kubernetes client: %s", err)
-	}
-
-	return conf, client, nil
+	return client, nil
 }
 
 func (cache *clusterCache) getKubeExternalAddress() (string, error) {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 
-	if len(cache.kubeExternalAddress) > 0 {
-		return cache.kubeExternalAddress, nil
+	if len(cache.externalAddress) > 0 {
+		return cache.externalAddress, nil
 	}
 
-	_, client, err := cache.newKubeClient()
+	client, err := cache.newKubeClient()
 	if err != nil {
 		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", cache.cluster.Name, err)
 	}
@@ -92,7 +61,7 @@ func (cache *clusterCache) getKubeExternalAddress() (string, error) {
 		return "", fmt.Errorf("couldn't find external IP for cluster: %s", cache.cluster.Name)
 	}
 
-	cache.kubeExternalAddress = addr
+	cache.externalAddress = addr
 
 	return addr, nil
 }

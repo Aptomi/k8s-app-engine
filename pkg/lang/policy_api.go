@@ -52,7 +52,7 @@ func (view *PolicyView) filterCluster(cluster *Cluster) *Cluster {
 	if view.ViewObject(cluster) == nil {
 		// if user can only view cluster, return stripped down information about the cluster
 		result := cluster.MakeCopy()
-		result.Config = ClusterConfig{}
+		result.Config = "hidden"
 		return result
 	}
 
