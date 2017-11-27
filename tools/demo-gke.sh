@@ -29,7 +29,7 @@ export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
 function main() {
     if [ "$#" -ne "1" ]; then
         echo "ERROR: (demo-gke.sh) Too few arguments"
-        echo "Usage: demo-gke.sh <up | down | cleanup>"
+        echo "Usage: demo-gke.sh <up | down | cleanup | kubeconfig >"
         exit 1
     fi
 
@@ -102,6 +102,9 @@ function main() {
     elif [ "cleanup" == "$1" ]; then
         helm_cleanup $cluster_big_name $demo_namespace
         helm_cleanup $cluster_small_name $demo_namespace
+    elif [ "kubeconfig" == "$1" ]; then
+        gke_cluster_kubeconfig $cluster_big_name $cluster_big_region $demo_namespace
+        gke_cluster_kubeconfig $cluster_big_name $cluster_big_region $demo_namespace
     else
         log "Unsupported command '$1'"
         exit 1
@@ -295,7 +298,39 @@ function gke_cluster_kubectl_setup() {
         fi
 
         kubectl config set-context $name --cluster=$cluster --user=$user --namespace=$namespace
+        kubectl config delete-context $kcfg_name
         log "Kubeconfig context '$name' (alias for '$context') successfully added"
+    else
+        log "Can't get credentials for cluster $(cluster_log_name)"
+        exit 1
+    fi
+}
+
+function gke_cluster_kubeconfig() {
+    name="$1"
+    zone="$2"
+    namespace="$3"
+
+    project="$(gcloud config get-value project 2>/dev/null)"
+
+    cfg_file="$(mktemp)"
+    if KUBECONFIG=${cfg_file} gke get-credentials $1 --zone $2 2>/dev/null ; then
+        kcfg_name="gke_${project}_${zone}_${name}"
+        context=$kcfg_name
+        user="$(kcfg_user_of_context $context)"
+        cluster="$(kcfg_cluster_of_context $context)"
+
+        if [[ -z "$user" || -z "$cluster" ]]; then
+            log "Failed getting user or cluster for installed context '$context'"
+            exit 1
+        fi
+
+        env KUBECONFIG=${cfg_file} kubectl config set-context $name --cluster=$cluster --user=$user --namespace=$namespace &>/dev/null
+        env KUBECONFIG=${cfg_file} kubectl config use-context $name &>/dev/null
+        env KUBECONFIG=${cfg_file} kubectl config delete-context $kcfg_name &>/dev/null
+        log "Kubeconfig for cluster ${name} successfully retrieved"
+
+        echo -e "\n\n$(cat $cfg_file)\n\n"
     else
         log "Can't get credentials for cluster $(cluster_log_name)"
         exit 1
