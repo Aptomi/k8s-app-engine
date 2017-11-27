@@ -10,9 +10,10 @@ set -eou pipefail
 CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
 
-# copy policy over, create secrets
+# copy policy over, create secrets and clusters from templates
 cp -R examples/03-twitter-analytics/* $POLICY_DIR
-cp ${POLICY_DIR}/_external/secrets/secrets.{yaml.template,yaml}
+cp ${POLICY_DIR}/_external/secrets/secrets.yaml.template ${CONF_DIR}/secrets.yaml
+cp ${POLICY_DIR}/policy/Sam/clusters.{yaml.template,yaml}
 
 function cleanup() {
     stop_server
@@ -71,7 +72,7 @@ users:
         short-description: role
         deactivated: deactivated
 
-secretsDir: ${POLICY_DIR}
+secretsDir: ${CONF_DIR}
 EOL
 
 aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
