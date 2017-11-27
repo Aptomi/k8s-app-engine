@@ -5,8 +5,11 @@
     name: cluster-us-east
   type: kubernetes
   config:
-    kubecontext: cluster-us-east
-    namespace: demo
+#    context: cluster-us-east
+#    namespace: demo
+#    tillernamespace: kube-system
+
+    kubeconfig: PUT_KUBE_CONFIG_FOR_CLUSTER_HERE
 
 # Cluster definition for us-west
 - kind: cluster
@@ -15,5 +18,4 @@
     name: cluster-us-west
   type: kubernetes
   config:
-    kubecontext: cluster-us-west
-    namespace: demo
+    kubeconfig: PUT_KUBE_CONFIG_FOR_CLUSTER_HERE
