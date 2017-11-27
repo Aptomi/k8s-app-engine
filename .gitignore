@@ -15,6 +15,9 @@ profile*
 
 webui-vis-tmp/output.json
 
+examples/03-twitter-analytics/policy/Sam/clusters.yaml
+clusters.yaml
+
 .idea
 
 requirements.lock
