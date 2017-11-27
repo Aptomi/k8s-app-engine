@@ -42,17 +42,16 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 			fmt.Println("Waiting for the first revision with updated policy to be deleted")
 
 			var rev *engine.Revision
-			interval := 10 * time.Second
+			interval := 5 * time.Second
 			finished := retry.Do(60, interval, func() bool {
 				var revErr error
 				rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
 				if revErr != nil {
-					fmt.Printf("Error while getting revision for deleted policy: %s, retrying in %s\n", revErr, interval)
+					fmt.Printf("Can't get revision for applied policy: %s, retrying in %s\n", revErr, interval)
 					return false
 				}
 
-				// todo print progress
-
+				fmt.Printf("Applying changes: %d out of %d total\n", rev.Progress.Current, rev.Progress.Total)
 				return rev.Status != engine.RevisionStatusInProgress
 			})
 

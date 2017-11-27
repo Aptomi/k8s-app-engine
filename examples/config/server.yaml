@@ -16,7 +16,7 @@ domainAdminOverrides:
 
 users:
   ldap:
-    - host: localhost
+    - host: 127.0.0.1
       port: 10389
       basedn: "o=aptomiOrg"
       filter: "(&(objectClass=organizationalPerson))"
@@ -32,4 +32,4 @@ users:
         short-description: role
         deactivated: deactivated
 
-secretsDir: examples/
+secretsDir: /etc/aptomi/

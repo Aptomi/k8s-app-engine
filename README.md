@@ -105,14 +105,26 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     ```
 
 #### Starting Aptomi
-1. Assuming Aptomi binaries are built already, create config for the server and start it:
+1. Clone Aptomi repository, so that you have access to YAML files used in examples:
+    ```
+    cd ~/
+    git clone https://github.com/Aptomi/aptomi.git
+    cd aptomi
+    ```
+
+1. Download the latest release of Aptomi. It comes with server and client binaries. Unpack it into Aptomi directory:
+    ```
+    TODO:
+    ```
+
+1. Create config for Aptomi server and start it. It will serve API and UI :
     ```
     mkdir /etc/aptomi
     sudo cp examples/config/server.yaml /etc/aptomi/config.yaml
     aptomi server
     ```
 
-2. Create config for the client and make sure it can connect to the server:
+1. Create config for Aptomi client and make sure it can connect to the server:
     ```
     mkdir ~/.aptomi
     cp examples/config/client.yaml ~/.aptomi/config.yaml
@@ -123,12 +135,8 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     &{{policy} {1 2017-11-19 00:00:05.613151 -0800 PST aptomi} map[]}
     ```
 
-3. Start UI
-    ```
-    cd webui
-    npm install && npm run dev
-    ```
-    If you have issues building or starting UI, please see [Web UI](#web-ui) section
+1. Open Web UI and log in (use 'sam:sam', it's a user from sample LDAP server running locally in a container)
+    [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 
 #### Running Examples
 Once Aptomi is up and running and k8s clusters are set up, you can get started by running the following examples:

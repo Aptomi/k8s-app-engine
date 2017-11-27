@@ -5,10 +5,6 @@
     name: cluster-us-east
   type: kubernetes
   config:
-#    context: cluster-us-east
-#    namespace: demo
-#    tillernamespace: kube-system
-
     kubeconfig:
       PUT_KUBE_CONFIG_FOR_CLUSTER_HERE
 

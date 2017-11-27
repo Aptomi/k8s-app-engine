@@ -13,6 +13,11 @@ import (
 // are up to date by creating/deleting/updating rules if/as needed
 // TODO: reduce cyclomatic complexity
 func (plugin *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error { // nolint: gocyclo
+	// Do not run Istio
+	if true {
+		return nil
+	}
+
 	// todo(slukjanov): do something with progress
 	prog := progress.NewNoop()
 

@@ -31,7 +31,21 @@ This example illustrates a few important things that Aptomi does:
 # Instructions
 
 1. First of all, bootstrap Aptomi on behalf on Sam (domain admin) to import k8s clusters and rules. ACL rules are defined in such
-a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob/Carol are service consumers
+a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob/Carol are service consumers.
+
+    To feed cluster information into Aptomi, copy clusters template file and enter kubecontext configuration into it:
+    ```
+    cp examples/03-twitter-analytics/policy/Sam/clusters.{yaml.template,yaml}
+    vi examples/03-twitter-analytics/policy/Sam/clusters.yaml
+    ```
+
+    If you are using the provided `./tools/demo-gke.sh` script, get clusters configuration by running the following command and paste output into clusters.yaml.
+    Make sure to (1) copy config for each cluster separately, (2) put us-east -> us-east and us-west -> us-west correctly:
+    ```
+    ./tools/demo-gke.sh kubeconfig
+    ```
+
+    Upload the list of clusters and ACL rules into Aptomi using CLI:
     ```
     aptomictl policy apply --username Sam -f examples/03-twitter-analytics/policy/Sam
     ```
@@ -56,13 +70,13 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
     
     Once done, copy secrets.yaml and enter the created keys/tokens into it:
    ```
-   cp examples/03-twitter-analytics/_external/secrets/secrets.{yaml.template,yaml}
-   vi examples/03-twitter-analytics/_external/secrets/secrets.yaml
+   cp examples/03-twitter-analytics/_external/secrets/secrets.yaml.template /etc/aptomi/secrets.yaml
+   vi /etc/aptomi/secrets.yaml
    ```
 
 1. Now let's have consumers declare 'dependencies' on the services defined by John and Frank. John requests an instance
     ```
-    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    aptomictl policy apply --wait --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
     ```
     Aptomi allocates a production instance in cluster [TODO]:
     [TODO] picture
@@ -70,8 +84,8 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
 1. Alice and Bob request instances
     ```
-    aptomictl policy apply --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
-    aptomictl policy apply --username Bob -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
+    aptomictl policy apply --wait --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy apply --wait --username Bob -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
     ```
     Alice tests a change. Bob looks at Mexico.
     Aptomi allocates staging instances in cluster [TODO]:
@@ -84,16 +98,16 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 1. Demonstrating update on a running instance of twitter stats in production. Alice removes her dependency and asks John to update production instance
     Removing Alice's dependency:
     ```
-    aptomictl policy delete --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy delete --wait --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
     ```
     Changing John's dependency:
     ```
-    sed -e 's/demo-v61/demo-v62/g' examples/03-twitter-analytics/policy/john-prod-ts.yaml > examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
-    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
+    sed -e 's/demo11/demo12/g' examples/03-twitter-analytics/policy/john-prod-ts.yaml > examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
+    aptomictl policy apply --wait --username John -f examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
     ```
 
 1. Demonstrating rejecting instantiation of a service
     ```
-    aptomictl policy apply --username Carol -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
+    aptomictl policy apply --wait --username Carol -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
     ```
  
