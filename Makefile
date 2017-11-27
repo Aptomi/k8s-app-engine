@@ -71,6 +71,7 @@ smoke: install alltest
 
 .PHONY: embed-ui
 embed-ui: prepare_filebox
+	rm -rf pkg/server/ui/*b0x*
 	cd webui; npm run build
 	fileb0x webui/b0x.yaml
 
