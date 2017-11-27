@@ -109,7 +109,14 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
 1. Download the latest release of Aptomi from [releases](https://github.com/Aptomi/aptomi/releases).
     It comes with server and client binaries as well as examples directory and needed tools. Unpack it into some directory:
     ```
-    TODO:
+    export aptomi_version=X.Y.Z
+    export aptomi_os=darwin # or linux
+    export aptomi_arch=amd64 # or 386
+    export aptomi_name=aptomi_${aptomi_version}_${aptomi_os}_${aptomi_arch}
+
+    wget https://github.com/Aptomi/aptomi/releases/download/v${aptomi_version}/${aptomi_name}.tar.gz
+    tar xzf ${aptomi_name}.tar.gz
+    cd ${aptomi_name}
     ```
 
 1. Create config for Aptomi server and start it. It will serve API and UI :
