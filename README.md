@@ -89,12 +89,13 @@ You can run those binaries locally.
 #### Configuring LDAP
 Aptomi needs to be configured with user data source in order to enable UI login and make policy decisions based on users' labels/properties. It's recommended to
 start with LDAP, which is also required by Aptomi examples and smoke tests.
-1. LDAP Server with sample users is provided in a docker container. To download and start it, run:
+
+1. LDAP Server with sample users is provided in a docker container. To download and start the published LDAP server image, run:
     ```
     ./tools/demo-ldap.sh
     ```
-2. It's also recommended to download and install [Apache Directory Studio](http://directory.apache.org/studio/) for browsing LDAP. Once installed,
-follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect to LDAP and browse it
+2. Even though it's not required, you may want to download and install [Apache Directory Studio](http://directory.apache.org/studio/) to familiarize yourself with the user data in provided in sample LDAP server. Once installed,
+follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect to LDAP and browse it. Use default credentials given in the manual.
 
 #### Creating k8s Clusters
 You need to have access to k8s cluster in order to deploy services from the provided examples. Two k8s clusters will enable you to
