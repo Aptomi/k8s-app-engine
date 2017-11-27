@@ -1,5 +1,5 @@
-hash: 9aa4707a358103efbde33209ca3da8feab5e3957fb267d7714699bef4230047b
-updated: 2017-11-26T17:11:12.989872363-08:00
+hash: 6f51d441a402b2ed4902facd3880b9be40609478885ff4a54994a493e4da1b60
+updated: 2017-11-27T02:35:07.961383028-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -228,6 +228,10 @@ imports:
   version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/sftp
   version: 4d0e916071f68db74f8a73926335f809396d6b42
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -309,6 +313,8 @@ imports:
   - internal/timeseries
   - lex/httplex
   - trace
+  - webdav
+  - webdav/internal/xml
 - name: golang.org/x/oauth2
   version: 3c3a985cb79f52a3190fbc056984415ca6763d01
 - name: golang.org/x/sys
@@ -400,7 +406,7 @@ imports:
   - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
-  version: 15ea8ac863f13cf2a3496cd056b3d5a763a25c34
+  version: b13f2fd682d56eab7a6a2b5a1cab1a3d2c8bdd55
   subpackages:
   - cmd/kubeadm/app/apis/kubeadm
   - federation/apis/federation
@@ -582,10 +588,6 @@ imports:
   subpackages:
   - sortorder
 testImports:
-- name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
-  subpackages:
-  - difflib
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:

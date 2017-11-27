@@ -121,3 +121,5 @@ import:
 - package: github.com/rs/cors
   version: ^1.2.0
 - package: github.com/UnnoTed/fileb0x
+- package: github.com/pmezard/go-difflib
+  version: ~1.0.0
