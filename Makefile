@@ -1,4 +1,4 @@
-GIT_VERSION=$(shell git describe --tags --long --dirty)
+GIT_VERSION=dev-$(shell git describe --tags --long --dirty)
 GIT_COMMIT=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GOENV=CGO_ENABLED=0
@@ -96,6 +96,10 @@ install: build
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomi
 	${GO} install -v ${GOFLAGS} github.com/Aptomi/aptomi/cmd/aptomictl
 
+.PHONY: release
+release: prepare_goreleaser
+	goreleaser --rm-dist
+
 .PHONY: fmt
 fmt:
 	${GO} fmt ./...
@@ -165,6 +169,14 @@ HAS_FILEBOX := $(shell command -v fileb0x)
 prepare_filebox:
 ifndef HAS_FILEBOX
 	go get -u -v github.com/UnnoTed/fileb0x
+endif
+
+HAS_GORELEASER := $(shell command -v goreleaser)
+
+.PHONY: prepare_goreleaser
+prepare_goreleaser:
+ifndef HAS_GORELEASER
+	go get -u -v github.com/goreleaser/goreleaser
 endif
 
 .PHONY: w-dep
