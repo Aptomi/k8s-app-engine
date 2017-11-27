@@ -89,6 +89,9 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 	}).Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
 	newRelease, err := helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
+	if err != nil {
+		return err
+	}
 
 	diff, err := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
 		A:        difflib.SplitLines(currRelease.Release.Manifest),
