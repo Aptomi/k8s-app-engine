@@ -106,14 +106,8 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     ```
 
 #### Starting Aptomi
-1. Clone Aptomi repository, so that you have access to YAML files used in examples:
-    ```
-    cd ~/
-    git clone https://github.com/Aptomi/aptomi.git
-    cd aptomi
-    ```
-
-1. Download the latest release of Aptomi. It comes with server and client binaries. Unpack it into Aptomi directory:
+1. Download the latest release of Aptomi from https://github.com/Aptomi/aptomi/releases .
+    It comes with server and client binaries as well as examples and tools. Unpack it into some directory:
     ```
     TODO:
     ```
