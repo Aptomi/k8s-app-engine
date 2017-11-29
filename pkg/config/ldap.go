@@ -25,6 +25,6 @@ func (cfg *LDAP) GetAttributes() []string {
 	for _, attr := range cfg.LabelToAttributes {
 		result = append(result, attr)
 	}
-	sort.Slice(result, func(i, j int) bool { return result[i] < result[j] })
+	sort.Strings(result)
 	return result
 }
