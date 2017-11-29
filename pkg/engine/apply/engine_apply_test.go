@@ -250,7 +250,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	)
 	contract := b.AddContract(service, b.CriteriaTrue())
 
-	// add rules to allow all dependencies
+	// add rule to set cluster
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
 
