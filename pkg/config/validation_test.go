@@ -1,14 +1,17 @@
 package config
 
 import (
+	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
 type testStruct struct {
-	Host      string `validate:"required,hostname|ip"`
-	Port      int    `validate:"required,min=1,max=65535"`
-	ChartsDir string `validate:"required,dir"`
+	Host     string `validate:"required,hostname|ip"`
+	Port     int    `validate:"required,min=1,max=65535"`
+	SomeDir  string `validate:"required,dir"`
+	SomeFile string `validate:"omitempty,file"`
 }
 
 func (t *testStruct) IsDebug() bool {
@@ -20,89 +23,100 @@ func displayErrorMessages() bool {
 }
 
 func TestConfigValidation(t *testing.T) {
+	tmpFile := util.WriteTempFile("unittest", []byte("unittest"))
+	defer os.Remove(tmpFile) // nolint: errcheck
+
 	tests := []struct {
-		name   string
 		config Base
 		result bool
 	}{
 		{
-			"success-0.0.0.0:80",
 			&testStruct{
-				Host:      "0.0.0.0",
-				Port:      80,
-				ChartsDir: "/tmp",
+				Host:    "0.0.0.0",
+				Port:    80,
+				SomeDir: "/tmp",
 			},
 			true,
 		},
 		{
-			"success-0.0.0.0:80",
 			&testStruct{
-				Host:      "0.0.0.0",
-				Port:      80,
-				ChartsDir: "",
+				Host:    "0.0.0.0",
+				Port:    80,
+				SomeDir: "",
 			},
 			false,
 		},
 		{
-			"success-0.0.0.0:80",
 			&testStruct{
-				Host:      "0.0.0.0",
-				Port:      80,
-				ChartsDir: "/nonexistingdirectoryinroot",
+				Host:    "0.0.0.0",
+				Port:    80,
+				SomeDir: "/nonexistingdirectoryinroot",
 			},
 			false,
 		},
 		{
-			"success-127.0.0.1:8080",
 			&testStruct{
-				Host:      "127.0.0.1",
-				Port:      8080,
-				ChartsDir: "/tmp",
+				Host:    "127.0.0.1",
+				Port:    8080,
+				SomeDir: "/tmp",
 			},
 			true,
 		},
 		{
-			"success-10.20.30.40:65080",
 			&testStruct{
-				Host:      "10.20.30.40",
-				Port:      65080,
-				ChartsDir: "/tmp",
+				Host:    "10.20.30.40",
+				Port:    65080,
+				SomeDir: "/tmp",
 			},
 			true,
 		},
 		{
-			"success-demo.aptomi.io:65080",
 			&testStruct{
-				Host:      "demo.aptomi.io",
-				Port:      65080,
-				ChartsDir: "/tmp",
+				Host:    "demo.aptomi.io",
+				Port:    65080,
+				SomeDir: "/tmp",
 			},
 			true,
 		},
 		{
-			"fail-0.0.0.0:0",
 			&testStruct{
-				Host:      "0.0.0.0",
-				Port:      0,
-				ChartsDir: "/tmp",
+				Host:    "0.0.0.0",
+				Port:    0,
+				SomeDir: "/tmp",
 			},
 			false,
 		},
 		{
-			"fail-0.0.0.0:-1",
 			&testStruct{
-				Host:      "0.0.0.0",
-				Port:      -1,
-				ChartsDir: "/tmp",
+				Host:    "0.0.0.0",
+				Port:    -1,
+				SomeDir: "/tmp",
 			},
 			false,
 		},
 		{
-			"fail-:80",
 			&testStruct{
-				Host:      "",
-				Port:      80,
-				ChartsDir: "/tmp",
+				Host:    "",
+				Port:    80,
+				SomeDir: "/tmp",
+			},
+			false,
+		},
+		{
+			&testStruct{
+				Host:     "0.0.0.0",
+				Port:     80,
+				SomeDir:  "/tmp",
+				SomeFile: tmpFile,
+			},
+			true,
+		},
+		{
+			&testStruct{
+				Host:     "0.0.0.0",
+				Port:     80,
+				SomeDir:  "/tmp",
+				SomeFile: tmpFile + ".non-existing",
 			},
 			false,
 		},
@@ -111,8 +125,11 @@ func TestConfigValidation(t *testing.T) {
 		val := NewValidator(test.config)
 		err := val.Validate()
 		failed := !assert.Equal(t, test.result, err == nil, "Validation test case failed: %s", test.config)
-		if err != nil && (displayErrorMessages() || failed) {
-			t.Log(err)
+		if err != nil {
+			msg := err.Error()
+			if displayErrorMessages() || failed {
+				t.Log(msg)
+			}
 		}
 	}
 }

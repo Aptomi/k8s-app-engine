@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 )
 
-// WriteTempFile creates a temporary file and returns its name
-// todo remove temp files when no more needed
+// WriteTempFile creates a temporary file, writes given data into it and returns its name.
+// It's up to a caller to delete the created temporary file by calling os.Remove() on its name.
 func WriteTempFile(prefix string, data []byte) string {
 	tmpFile, err := ioutil.TempFile("", "aptomi-"+prefix)
 	if err != nil {
