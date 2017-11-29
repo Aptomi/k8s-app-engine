@@ -60,7 +60,7 @@ func (apply *EngineApply) Apply() (res *resolve.PolicyResolution, resErr error) 
 	// error count while applying changes
 	foundErrors := false
 
-	// make sure we are converting panics to errors
+	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
 			res = apply.actualState
