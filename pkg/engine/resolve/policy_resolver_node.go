@@ -70,15 +70,8 @@ type resolutionNode struct {
 	path []string
 }
 
-// Creates a new resolution node as a starting point for resolving a particular dependency
-func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *resolutionNode {
-	// combining user labels and dependency labels
-	user := resolver.externalData.UserLoader.LoadUserByName(dependency.User)
-	labels := lang.NewLabelSet(dependency.Labels)
-	if user != nil {
-		labels.AddLabels(user.Labels)
-	}
-
+// Creates a new empty resolution node
+func (resolver *PolicyResolver) newResolutionNode() *resolutionNode {
 	eventLog := event.NewLog(resolver.eventLog.GetScope(), false)
 	return &resolutionNode{
 		resolved: false,
@@ -89,16 +82,7 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *
 
 		resolution: NewPolicyResolution(),
 
-		depth:      0,
-		dependency: dependency,
-		user:       user,
-
-		// we start with the namespace & contract specified in the dependency
-		namespace:    dependency.Namespace,
-		contractName: dependency.Contract,
-
-		// start with the generated set of labels
-		labels: labels,
+		depth: 0,
 
 		// empty discovery tree
 		discoveryTreeNode: util.NestedParameterMap{},
@@ -106,6 +90,25 @@ func (resolver *PolicyResolver) newResolutionNode(dependency *lang.Dependency) *
 		// empty path
 		path: []string{},
 	}
+}
+
+// Initialized a newly created resolution node as a starting point for resolving a particular dependency.
+// Adds dependency and user labels into it.
+func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, dependency *lang.Dependency) {
+	// combine user labels and dependency labels
+	node.labels = lang.NewLabelSet(dependency.Labels)
+	user := resolver.externalData.UserLoader.LoadUserByName(dependency.User)
+	if user != nil {
+		node.labels.AddLabels(user.Labels)
+	}
+
+	// populate user, dependency
+	node.dependency = dependency
+	node.user = user
+
+	// start with the namespace & contract specified in the dependency
+	node.namespace = dependency.Namespace
+	node.contractName = dependency.Contract
 }
 
 // Creates a new resolution node (as we are processing dependency on another service)

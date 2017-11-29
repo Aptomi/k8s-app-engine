@@ -120,26 +120,48 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, err
 }
 
 // Resolves a single dependency
-func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (*resolutionNode, error) {
-	// create resolution node and resolve it
-	node := resolver.newResolutionNode(d)
-	return node, resolver.resolveNode(node)
+func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *resolutionNode, resolveErr error) {
+	// create new resolution node
+	node = resolver.newResolutionNode()
+
+	// make sure we are converting panics into errors
+	defer func() {
+		if err := recover(); err != nil {
+			resolveErr = fmt.Errorf("panic: %s", err)
+			node.eventLog.LogError(resolveErr)
+		}
+	}()
+
+	// populate resolution node with data (e.g. put initial set of labels from user & dependency)
+	resolver.initResolutionNode(node, d)
+
+	// resolve it
+	resolveErr = resolver.resolveNode(node)
+	return node, resolveErr
 }
 
 // Combines resolution data into the overall state of the world
 func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr error) error {
+	// put a lock
 	resolver.combineMutex.Lock()
 
-	// aggregate logs in the end
+	// aggregate logs in the end, especially if resolutionErr occurred
 	defer func() {
-		for _, eventLog := range node.eventLogsCombined {
-			resolver.eventLog.Append(eventLog)
+		if node != nil {
+			for _, eventLog := range node.eventLogsCombined {
+				resolver.eventLog.Append(eventLog)
+			}
 		}
 		resolver.combineMutex.Unlock()
 	}()
 
 	// if there was a resolution error, return it
 	if resolutionErr != nil {
+		return resolutionErr
+	}
+
+	// if node is nil (likely, panic happened), return
+	if node == nil {
 		return resolutionErr
 	}
 

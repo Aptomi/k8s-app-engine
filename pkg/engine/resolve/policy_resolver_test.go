@@ -22,7 +22,7 @@ func TestPolicyResolverContract(t *testing.T) {
 		b.Criteria("label2 == 'value2'", "true", "false"),
 	)
 
-	// add rules to allow all dependencies
+	// add rule to set cluster
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -89,7 +89,7 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	contract2 := b.AddContract(service2, b.Criteria("label2 == 'value2'", "true", "false"))
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
 
-	// add rules to allow all dependencies
+	// add rule to set cluster
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -128,7 +128,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	contract2.Contexts[0].ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra3", "labelValue3")
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
 
-	// add rules to allow all dependencies
+	// add rule to set cluster
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
@@ -339,6 +339,30 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	instance2 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d2), resolution)
 	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
 	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
+}
+
+func TestPolicyResolverInternalPanic(t *testing.T) {
+	b := builder.NewPolicyBuilder()
+	b.PanicWhenLoadingUsers()
+
+	// create a service with two contexts within a contract
+	service := b.AddService()
+	b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+	contract := b.AddContract(service, b.CriteriaTrue())
+
+	// add rule to set cluster
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+
+	// add multiple dependencies
+	dList := []*lang.Dependency{}
+	for i := 0; i < 10; i++ {
+		dList = append(dList, b.AddDependency(b.AddUser(), contract))
+	}
+
+	// policy resolution should result in an error
+	resolution := resolvePolicy(t, b, ResError, "panic from mock user loader")
+	assert.Nil(t, resolution, "Policy should not be resolved when panic occurred")
 }
 
 /*

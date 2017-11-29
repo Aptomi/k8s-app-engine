@@ -83,6 +83,11 @@ func (builder *PolicyBuilder) AddUser() *lang.User {
 	return result
 }
 
+// PanicWhenLoadingUsers tells mock user loader to start panicking when loading users
+func (builder *PolicyBuilder) PanicWhenLoadingUsers() {
+	builder.users.SetPanic(true)
+}
+
 // AddUserDomainAdmin creates a new user who is a domain admin and adds it to the policy
 func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
 	return builder.AddUser()
