@@ -11,15 +11,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/helm"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/Sirupsen/logrus"
-	"runtime/debug"
 	"time"
 )
 
 func logError(err interface{}) {
 	log.Errorf("Error while enforcing policy: %s", err)
-
-	// todo make configurable
-	debug.PrintStack()
 }
 
 func (server *Server) enforceLoop() error {
