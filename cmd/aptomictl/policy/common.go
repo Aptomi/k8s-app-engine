@@ -13,6 +13,10 @@ import (
 )
 
 func readFiles(policyPaths []string) ([]runtime.Object, error) {
+	if len(policyPaths) <= 0 {
+		return nil, fmt.Errorf("policy file path is not specified")
+	}
+
 	policyReg := runtime.NewRegistry().Append(lang.PolicyObjects...)
 	codec := yaml.NewCodec(policyReg)
 
