@@ -40,7 +40,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
-		mockRegistryFailOnComponent(),
+		mockRegistryFailOnComponent(false),
 		actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -57,14 +57,20 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 }
 
 func TestApplyComponentCreateFailure(t *testing.T) {
+	checkComponentCreateFail(t, false)
+}
+
+func TestApplyComponentCreatePanic(t *testing.T) {
+	checkComponentCreateFail(t, true)
+}
+
+func checkComponentCreateFail(t *testing.T, failAsPanic bool) {
 	// resolve empty policy
 	bActual := builder.NewPolicyBuilder()
 	actualState := resolvePolicy(t, bActual)
-
 	// resolve full policy
 	bDesired := makePolicyBuilder()
 	desiredState := resolvePolicy(t, bDesired)
-
 	// process all actions (and make component fail deployment)
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
 	applier := NewEngineApply(
@@ -74,17 +80,23 @@ func TestApplyComponentCreateFailure(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
-		mockRegistryFailOnComponent(bDesired.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
+		mockRegistryFailOnComponent(failAsPanic, bDesired.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
 		actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
-
 	// check actual state
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResError, 2, "apply failed for component")
+
+	// each plugin action fails independently
+	errCnt := 2
+	if failAsPanic {
+		// panic inside a plugin results in a single error
+		errCnt = 1
+	}
+	actualState = applyAndCheck(t, applier, ResError, errCnt, "failed by plugin mock for component")
 
 	// check that actual state got updated (service component exists, but no child components got deployed)
 	assert.Equal(t, 1, len(actualState.ComponentInstanceMap), "Actual state should not be empty after apply()")
@@ -111,7 +123,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesired.External(),
-		mockRegistryFailOnComponent(),
+		mockRegistryFailOnComponent(false),
 		diff.NewPolicyResolutionDiff(desiredState, actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -158,7 +170,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesiredNext.External(),
-		mockRegistryFailOnComponent(),
+		mockRegistryFailOnComponent(false),
 		diff.NewPolicyResolutionDiff(desiredStateNext, actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -198,7 +210,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		bDesiredNext.External(),
-		mockRegistryFailOnComponent(),
+		mockRegistryFailOnComponent(false),
 		diff.NewPolicyResolutionDiff(desiredStateAfterUpdate, actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -309,9 +321,12 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func mockRegistryFailOnComponent(failComponents ...string) plugin.Registry {
+func mockRegistryFailOnComponent(failAsPanic bool, failComponents ...string) plugin.Registry {
 	return &plugin.MockRegistry{
-		DeployPlugin:      &plugin.MockDeployPluginFailComponents{FailComponents: failComponents},
+		DeployPlugin: &plugin.MockDeployPluginFailComponents{
+			FailComponents: failComponents,
+			FailAsPanic:    failAsPanic,
+		},
 		PostProcessPlugin: &plugin.MockPostProcessPlugin{},
 	}
 }

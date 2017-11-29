@@ -70,7 +70,11 @@ func (p *MockDeployPlugin) Endpoints(cluster *lang.Cluster, deployName string, p
 // MockDeployPluginFailComponents is a mock plugin which does nothing, except fails component actions if their name contains
 // one of the given strings
 type MockDeployPluginFailComponents struct {
+	// FailComponents is a list of substrings to search in component names. When found, the corresponding component will be failed
 	FailComponents []string
+
+	// FailAsPanic, if set to true, will panic on matching components. Otherwise it will return an error
+	FailAsPanic bool
 }
 
 // Cleanup does nothing
@@ -88,7 +92,7 @@ func (p *MockDeployPluginFailComponents) Create(cluster *lang.Cluster, deployNam
 	eventLog.WithFields(event.Fields{}).Infof("[+] %s", deployName)
 	for _, s := range p.FailComponents {
 		if strings.Contains(deployName, s) {
-			return fmt.Errorf("apply failed for component: %s", deployName)
+			return p.fail("create", deployName)
 		}
 	}
 	return nil
@@ -99,7 +103,7 @@ func (p *MockDeployPluginFailComponents) Update(cluster *lang.Cluster, deployNam
 	eventLog.WithFields(event.Fields{}).Infof("[*] %s", deployName)
 	for _, s := range p.FailComponents {
 		if strings.Contains(deployName, s) {
-			return fmt.Errorf("update failed for component: %s", deployName)
+			return p.fail("update", deployName)
 		}
 	}
 	return nil
@@ -110,10 +114,18 @@ func (p *MockDeployPluginFailComponents) Destroy(cluster *lang.Cluster, deployNa
 	eventLog.WithFields(event.Fields{}).Infof("[-] %s", deployName)
 	for _, s := range p.FailComponents {
 		if strings.Contains(deployName, s) {
-			return fmt.Errorf("delete failed for component: %s", deployName)
+			return p.fail("delete", deployName)
 		}
 	}
 	return nil
+}
+
+func (p *MockDeployPluginFailComponents) fail(action string, deployName string) error {
+	msg := fmt.Sprintf("%s failed by plugin mock for component '%s' (panic = %t)", action, deployName, p.FailAsPanic)
+	if p.FailAsPanic {
+		panic(msg)
+	}
+	return fmt.Errorf(msg)
 }
 
 // Endpoints always returns an empty set of endpoints

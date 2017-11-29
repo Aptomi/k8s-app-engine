@@ -56,19 +56,22 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 // As actions get executed, they will instantiate/update/delete components according to the resolved
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
-func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
+func (apply *EngineApply) Apply() (res *resolve.PolicyResolution, resErr error) {
+	// error count while applying changes
+	foundErrors := false
+
+	// make sure we are converting panics to errors
 	defer func() {
 		if err := recover(); err != nil {
+			res = apply.actualState
+			resErr = fmt.Errorf("panic: %s", err)
+			apply.eventLog.LogError(resErr)
 			apply.progress.Done(false)
-			panic(err)
 		}
 	}()
 
 	// initialize progress indicator
 	apply.progress.SetTotal(len(apply.actions))
-
-	// error count while applying changes
-	foundErrors := false
 
 	// process all actions
 	context := action.NewContext(
