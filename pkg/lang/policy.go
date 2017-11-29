@@ -48,7 +48,7 @@ func (policy *Policy) View(user *User) *PolicyView {
 	return NewPolicyView(policy, user)
 }
 
-// AddObject adds an object into the policy. When you add objects to the policy, they get added to the corresponding
+// AddObject adds a given object into the policy. When you add objects to the policy, they get added to the corresponding
 // Namespace. If error occurs (e.g. object has an unknown kind) then the error will be returned
 func (policy *Policy) AddObject(obj Base) error {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
@@ -59,7 +59,7 @@ func (policy *Policy) AddObject(obj Base) error {
 	return policyNamespace.addObject(obj)
 }
 
-// RemoveObject removes an object into the policy. It returns true is something was removed.
+// RemoveObject removes a given object from the policy. Returns true if removed and false if nothing got removed.
 func (policy *Policy) RemoveObject(obj Base) bool {
 	policyNamespace, ok := policy.Namespace[obj.GetNamespace()]
 	if !ok {
