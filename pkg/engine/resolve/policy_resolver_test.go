@@ -355,9 +355,8 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 	// add multiple dependencies
-	dList := []*lang.Dependency{}
 	for i := 0; i < 10; i++ {
-		dList = append(dList, b.AddDependency(b.AddUser(), contract))
+		b.AddDependency(b.AddUser(), contract)
 	}
 
 	// policy resolution should result in an error
