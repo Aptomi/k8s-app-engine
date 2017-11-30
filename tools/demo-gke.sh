@@ -317,8 +317,8 @@ function gke_cluster_kubeconfig() {
     if KUBECONFIG=${cfg_file} gke get-credentials $1 --zone $2 2>/dev/null ; then
         kcfg_name="gke_${project}_${zone}_${name}"
         context=$kcfg_name
-        user="$(kcfg_user_of_context $context)"
-        cluster="$(kcfg_cluster_of_context $context)"
+        user="$(KUBECONFIG=${cfg_file} kcfg_user_of_context $context)"
+        cluster="$(KUBECONFIG=${cfg_file} kcfg_cluster_of_context $context)"
 
         if [[ -z "$user" || -z "$cluster" ]]; then
             log "Failed getting user or cluster for installed context '$context'"
