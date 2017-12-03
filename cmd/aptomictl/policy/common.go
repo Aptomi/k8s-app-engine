@@ -49,9 +49,9 @@ func readLangFromFiles(policyPaths []string) ([]runtime.Object, error) {
 			}
 
 			key := runtime.KeyForStorable(langObj)
-			//if firstFile := objectFile[key]; len(firstFile) > 0 {
-			//	return nil, fmt.Errorf("duplicate object with key %s detected in file %s (first occurrence is in file %s)", key, file, firstFile)
-			//}
+			if firstFile := objectFile[key]; len(firstFile) > 0 {
+				return nil, fmt.Errorf("duplicate object with key %s detected in file %s (first occurrence is in file %s)", key, file, firstFile)
+			}
 			objectFile[key] = file
 		}
 
