@@ -21,7 +21,7 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 		Long:  "delete policy files long",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			allObjects, err := readFiles(paths)
+			allObjects, err := readLangFromFiles(paths)
 			if err != nil {
 				panic(fmt.Sprintf("Error while reading policy files for deleting: %s", err))
 			}

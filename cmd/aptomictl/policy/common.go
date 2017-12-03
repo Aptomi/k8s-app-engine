@@ -12,7 +12,7 @@ import (
 	"sort"
 )
 
-func readFiles(policyPaths []string) ([]runtime.Object, error) {
+func readLangFromFiles(policyPaths []string) ([]runtime.Object, error) {
 	if len(policyPaths) <= 0 {
 		return nil, fmt.Errorf("policy file path is not specified")
 	}
@@ -26,6 +26,7 @@ func readFiles(policyPaths []string) ([]runtime.Object, error) {
 	}
 
 	allObjects := make([]runtime.Object, 0)
+	objectFile := make(map[string]string)
 	for _, file := range files {
 		data, readErr := ioutil.ReadFile(file)
 		if readErr != nil {
@@ -41,6 +42,17 @@ func readFiles(policyPaths []string) ([]runtime.Object, error) {
 			if !lang.IsPolicyObject(obj) {
 				return nil, fmt.Errorf("only policy objects could be applied but got: %s", obj.GetKind())
 			}
+
+			langObj, ok := obj.(lang.Base)
+			if !ok {
+				return nil, fmt.Errorf("only policy objects could be applied but got: %s (can't cast to lang.Base)", obj.GetKind())
+			}
+
+			key := runtime.KeyForStorable(langObj)
+			//if firstFile := objectFile[key]; len(firstFile) > 0 {
+			//	return nil, fmt.Errorf("duplicate object with key %s detected in file %s (first occurrence is in file %s)", key, file, firstFile)
+			//}
+			objectFile[key] = file
 		}
 
 		allObjects = append(allObjects, objects...)
