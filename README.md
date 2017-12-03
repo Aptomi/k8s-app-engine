@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Aptomi/aptomi/badge.svg)](https://coveralls.io/github/Aptomi/aptomi)
 [![Godoc](https://godoc.org/github.com/Aptomi/aptomi?status.svg)](https://godoc.org/github.com/Aptomi/aptomi)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)]()
-[![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](https://slack.aptomi.io)
+[![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
 [Aptomi](http://aptomi.io) simplifies roll-out, operation and control of complex container-based applications. Instead of dealing with
 thousands of individual containers, Dev and Ops can now talk services. Service-based approach enables Dev to move
@@ -243,4 +243,4 @@ We will soon publish the list of items for Q4 2017 and Q1 2018. In the meantime,
 [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11) is a good place to look at the roadmap items
 which are being considered.
 
-If you have any questions, please contact us on Slack.
+If you have any questions, please contact us on [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io).
