@@ -1,5 +1,4 @@
-// eslint-disable-next-line
-import 'expose-loader?$!expose-loader?jQuery!jquery'
+import 'jquery'
 
 import 'jquery-slimscroll'
 import 'jquery-ui/ui/widgets/sortable.js'
