@@ -2,7 +2,6 @@ package runtime
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 )
 
 // Registry contains a map of objects info structures by their kind
@@ -50,12 +49,12 @@ func (reg *Registry) validateInfo(info *Info) {
 	obj := info.New()
 	if _, ok := obj.(Storable); info.Storable && !ok {
 		panic(fmt.Sprintf("Kind '%s' registered as Storable but doesn't implement corresponding interface", kind))
-	} else if !info.Storable && ok {
+	} /* else if !info.Storable && ok {
 		log.Debugf("Kind '%s' registered as non-Storable but implements corresponding interface", kind)
-	}
+	} */
 	if _, ok := obj.(Versioned); info.Versioned && !ok {
 		panic(fmt.Sprintf("Kind '%s' registered as Versioned but doesn't implement corresponding interface", kind))
-	} else if !info.Versioned && ok {
+	} /* else if !info.Versioned && ok {
 		log.Debugf("Kind '%s' registered as non-Versioned but implements corresponding interface", kind)
-	}
+	} */
 }
