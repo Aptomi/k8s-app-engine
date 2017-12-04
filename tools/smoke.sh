@@ -97,4 +97,8 @@ aptomictl policy --username Sam --config ${CONF_DIR} apply -f ${POLICY_DIR}/poli
 
 sleep 10
 
-# todo(slukjanov): check exit code of the aptomi server (probably add "&& exit 1")
+SERVER_RUNNING=`ps | grep aptomi | grep "${SERVER_PID}" || true`
+if [ -z "$SERVER_RUNNING" ]; then
+    echo "Server not running after all tests"
+    exit 1
+fi
