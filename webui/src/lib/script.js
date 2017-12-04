@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import 'expose-loader?$!expose-loader?jQuery!jquery'
 
 import 'jquery-slimscroll'

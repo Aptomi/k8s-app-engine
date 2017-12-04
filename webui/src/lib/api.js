@@ -253,4 +253,3 @@ function callAPI (handler, isAsync, successFunc, errorFunc, formData = null) {
     xhr.send(formData)
   }
 }
-

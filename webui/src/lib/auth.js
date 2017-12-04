@@ -5,6 +5,7 @@ export default {
   login (username, password, cb) {
     cb = arguments[arguments.length - 1]
     if (localStorage.token) {
+      // eslint-disable-next-line
       if (cb) cb(true)
       this.onChange(true)
       return
@@ -13,9 +14,11 @@ export default {
       if (res.authenticated) {
         localStorage.token = res.token
         localStorage.username = username
+        // eslint-disable-next-line
         if (cb) cb(true)
         this.onChange(true)
       } else {
+        // eslint-disable-next-line
         if (cb) cb(false)
         this.onChange(false)
       }
@@ -47,6 +50,7 @@ export default {
 function authenticate (username, password, cb) {
   setTimeout(() => {
     const fetchSuccess = $.proxy(function (data) {
+      // eslint-disable-next-line
       cb({
         authenticated: true,
         token: Math.random().toString(36).substring(7)
@@ -54,6 +58,7 @@ function authenticate (username, password, cb) {
     }, this)
 
     const fetchError = $.proxy(function () {
+      // eslint-disable-next-line
       cb({ authenticated: false })
     }, this)
 
