@@ -16,7 +16,7 @@ const (
 	JSON = "json"
 )
 
-func Format(cfg config.Client, list bool, objs ...runtime.Displayable) ([]byte, error) {
+func Format(cfg *config.Client, list bool, objs ...runtime.Displayable) ([]byte, error) {
 	switch strings.ToLower(cfg.Output) {
 	case Text:
 		return textMarshal(list, objs)
@@ -31,8 +31,8 @@ func Format(cfg config.Client, list bool, objs ...runtime.Displayable) ([]byte, 
 
 func textMarshal(list bool, objs []runtime.Displayable) ([]byte, error) {
 	table := uitable.New()
-	table.MaxColWidth = 80
-	table.Wrap = true // wrap columns
+	table.MaxColWidth = 120
+	table.Wrap = true
 
 	defaultColumns := objs[0].GetDefaultColumns()
 	columns := make([]interface{}, len(defaultColumns))
