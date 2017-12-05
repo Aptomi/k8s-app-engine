@@ -21,9 +21,17 @@ func Format(cfg *config.Client, list bool, objs ...runtime.Displayable) ([]byte,
 	case Text:
 		return textMarshal(list, objs)
 	case YAML:
-		return yaml.Marshal(objs)
+		if list {
+			return yaml.Marshal(objs)
+		} else {
+			return yaml.Marshal(objs[0])
+		}
 	case JSON:
-		return json.Marshal(objs)
+		if list {
+			return json.Marshal(objs)
+		} else {
+			return json.Marshal(objs[0])
+		}
 	}
 
 	panic(fmt.Sprintf("%s output format not supported", cfg.Output))
