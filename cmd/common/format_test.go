@@ -10,7 +10,7 @@ import (
 )
 
 func TestFormat_Text(t *testing.T) {
-	cfg := config.Client{Output: Text}
+	cfg := &config.Client{Output: Text}
 	result := &api.PolicyUpdateResult{
 		PolicyGeneration: 42,
 		Actions: []string{
@@ -27,8 +27,6 @@ func TestFormat_Text(t *testing.T) {
 
 	assert.Nil(t, err, "Format should work without error")
 
-	assert.Equal(t, `Policy Generation	Expected Actions
-42               	action-component-create
-			action-component-update
-			action-component-delete`, string(data), "Format should return expected table")
+	assert.Equal(t, "Policy Generation\tExpected Actions       \n42               \taction-component-create\n                 \taction-component-update\n                 \taction-component-delete",
+		string(data), "Format should return expected table")
 }
