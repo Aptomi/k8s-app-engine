@@ -2,6 +2,7 @@ package policy
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
@@ -32,8 +33,11 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 				panic(fmt.Sprintf("Error while deleting policy: %s", err))
 			}
 
-			// todo(slukjanov): replace with -o yaml / json / etc handler
-			fmt.Println(result)
+			data, err := common.Format(cfg, false, result)
+			if err != nil {
+				panic(fmt.Sprintf("Error while formating policy update result: %s", err))
+			}
+			fmt.Println(string(data))
 
 			if !wait {
 				return

@@ -33,13 +33,10 @@ func newApplyCommand(cfg *config.Client) *cobra.Command {
 				panic(fmt.Sprintf("Error while applying policy: %s", err))
 			}
 
-			// todo(slukjanov): replace with -o yaml / json / etc handler
 			data, err := common.Format(cfg, false, result)
 			if err != nil {
 				panic(fmt.Sprintf("Error while formating policy update result: %s", err))
 			}
-
-			// print result to stdout
 			fmt.Println(string(data))
 
 			if !wait {
