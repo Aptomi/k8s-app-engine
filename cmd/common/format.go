@@ -11,11 +11,15 @@ import (
 )
 
 const (
+	// Text is the plain text format (table) representation of object(s)
 	Text = "text"
+	// YAML format is just yaml marshaled object(s)
 	YAML = "yaml"
+	// JSON format is just json marshaled object(s)
 	JSON = "json"
 )
 
+// Format returns string format for provided objects based on the output config
 func Format(cfg *config.Client, list bool, objs ...runtime.Displayable) ([]byte, error) {
 	switch strings.ToLower(cfg.Output) {
 	case Text:
@@ -23,15 +27,13 @@ func Format(cfg *config.Client, list bool, objs ...runtime.Displayable) ([]byte,
 	case YAML:
 		if list {
 			return yaml.Marshal(objs)
-		} else {
-			return yaml.Marshal(objs[0])
 		}
+		return yaml.Marshal(objs[0])
 	case JSON:
 		if list {
 			return json.Marshal(objs)
-		} else {
-			return json.Marshal(objs[0])
 		}
+		return json.Marshal(objs[0])
 	}
 
 	panic(fmt.Sprintf("%s output format not supported", cfg.Output))

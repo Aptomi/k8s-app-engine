@@ -76,10 +76,12 @@ type PolicyUpdateResult struct {
 	Actions          []string
 }
 
+// GetDefaultColumns returns default set of columns to be displayed
 func (result *PolicyUpdateResult) GetDefaultColumns() []string {
 	return []string{"Policy Generation", "Expected Actions"}
 }
 
+// AsColumns returns PolicyUpdateResult representation as columns
 func (result *PolicyUpdateResult) AsColumns() map[string]string {
 	return map[string]string{
 		"Policy Generation": result.PolicyGeneration.String(),
