@@ -91,6 +91,10 @@ func filterImportantActionKeys(actions []string) []string {
 	filtered := make([]string, 0)
 
 	for _, action := range actions {
+		if strings.HasSuffix(action, "#root") {
+			continue
+		}
+
 		split := strings.Split(action, runtime.KeySeparator)
 		if len(split) < 1 {
 			panic(fmt.Sprintf("Action key consists of less then 1 part: %s", action))
