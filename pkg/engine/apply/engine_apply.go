@@ -60,16 +60,6 @@ func (apply *EngineApply) Apply() (res *resolve.PolicyResolution, resErr error) 
 	// error count while applying changes
 	foundErrors := false
 
-	// make sure we are converting panics into errors
-	defer func() {
-		if err := recover(); err != nil {
-			res = apply.actualState
-			resErr = fmt.Errorf("panic: %s", err)
-			apply.eventLog.LogError(resErr)
-			apply.progress.Done(false)
-		}
-	}()
-
 	// initialize progress indicator
 	apply.progress.SetTotal(len(apply.actions))
 
@@ -86,7 +76,7 @@ func (apply *EngineApply) Apply() (res *resolve.PolicyResolution, resErr error) 
 	)
 	for _, act := range apply.actions {
 		apply.progress.Advance()
-		err := act.Apply(context)
+		err := apply.executeAction(act, context)
 		if err != nil {
 			err = fmt.Errorf("error while applying action '%s': %s", act, err)
 			apply.eventLog.LogError(err)
@@ -106,4 +96,15 @@ func (apply *EngineApply) Apply() (res *resolve.PolicyResolution, resErr error) 
 
 	// No errors occurred
 	return apply.actualState, nil
+}
+
+func (apply *EngineApply) executeAction(action action.Base, context *action.Context) (errResult error) {
+	// make sure we are converting panics into errors
+	defer func() {
+		if err := recover(); err != nil {
+			errResult = fmt.Errorf("panic: %s", err)
+		}
+	}()
+
+	return action.Apply(context)
 }

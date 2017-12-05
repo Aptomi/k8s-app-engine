@@ -57,14 +57,14 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 }
 
 func TestApplyComponentCreateFailure(t *testing.T) {
-	checkComponentCreateFail(t, false)
+	checkApplyComponentCreateFail(t, false)
 }
 
 func TestApplyComponentCreatePanic(t *testing.T) {
-	checkComponentCreateFail(t, true)
+	checkApplyComponentCreateFail(t, true)
 }
 
-func checkComponentCreateFail(t *testing.T, failAsPanic bool) {
+func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 	// resolve empty policy
 	bActual := builder.NewPolicyBuilder()
 	actualState := resolvePolicy(t, bActual)
@@ -88,12 +88,10 @@ func checkComponentCreateFail(t *testing.T, failAsPanic bool) {
 	// check actual state
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
-	// check that policy apply finished with expected results
-
-	// each plugin action fails independently
+	// error happens in plugin -> one error gets logged by the action, then it gets logged again by apply engine
 	errCnt := 2
 	if failAsPanic {
-		// panic inside a plugin results in a single error
+		// panic happens in plugin -> it gets caught by the engine and gets logged only once
 		errCnt = 1
 	}
 	actualState = applyAndCheck(t, applier, ResError, errCnt, "failed by plugin mock for component")
