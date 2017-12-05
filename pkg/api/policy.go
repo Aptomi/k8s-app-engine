@@ -3,13 +3,16 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -71,6 +74,35 @@ type PolicyUpdateResult struct {
 	runtime.TypeKind `yaml:",inline"`
 	PolicyGeneration runtime.Generation
 	Actions          []string
+}
+
+func (result *PolicyUpdateResult) GetDefaultColumns() []string {
+	return []string{"Policy Generation", "Expected Actions"}
+}
+
+func (result *PolicyUpdateResult) AsColumns() map[string]string {
+	return map[string]string{
+		"Policy Generation": result.PolicyGeneration.String(),
+		"Expected Actions":  strings.Join(filterImportantActionKeys(result.Actions), "\n"),
+	}
+}
+
+func filterImportantActionKeys(actions []string) []string {
+	filtered := make([]string, 0)
+
+	for _, action := range actions {
+		split := strings.Split(action, runtime.KeySeparator)
+		if len(split) < 1 {
+			panic(fmt.Sprintf("Action key consists of less then 1 part: %s", action))
+		}
+		key := split[0]
+
+		if util.StringContainsAny(key, component.CreateActionObject.Kind, component.UpdateActionObject.Kind, component.DeleteActionObject.Kind) {
+			filtered = append(filtered, action)
+		}
+	}
+
+	return filtered
 }
 
 func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
