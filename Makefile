@@ -112,19 +112,19 @@ clean:
 .PHONY: lint
 lint: prepare_gometalinter
 ifdef JENKINS_HOME
-	${GOENV} gometalinter --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
+	${GOENV} gometalinter.v2 --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
 else
-	${GOENV} gometalinter --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
+	${GOENV} gometalinter.v2 --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
 endif
 
-HAS_GOMETALINTER := $(shell command -v gometalinter)
+HAS_GOMETALINTER := $(shell command -v gometalinter.v2)
 
 .PHONY: prepare_gometalinter
 prepare_gometalinter:
 ifndef HAS_GOMETALINTER
-	go get -u -v -d github.com/alecthomas/gometalinter && \
-	go install -v github.com/alecthomas/gometalinter && \
-	gometalinter --install --update
+	go get -u -v -d gopkg.in/alecthomas/gometalinter.v2 && \
+	go install -v gopkg.in/alecthomas/gometalinter.v2 && \
+	gometalinter.v2 --install --update
 endif
 
 .PHONY: toc
