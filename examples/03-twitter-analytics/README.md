@@ -39,10 +39,75 @@ a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob
     vi examples/03-twitter-analytics/policy/Sam/clusters.yaml
     ```
 
-    If you are using the provided `./tools/demo-gke.sh` script, get clusters configuration by running the following command and paste output into clusters.yaml.
+    If you are using the provided `./tools/demo-gke.sh` script, get clusters configuration by running the following command and paste output into `clusters.yaml`.
     Make sure to (1) copy config for each cluster separately, (2) put us-east -> us-east and us-west -> us-west correctly:
     ```
     ./tools/demo-gke.sh kubeconfig
+    ```
+
+    The edited `clusters.yaml` should look like this before uploading it into Aptomi:
+    ```
+    # Cluster definition for us-east
+    - kind: cluster
+      metadata:
+        namespace: system
+        name: cluster-us-east
+      type: kubernetes
+      config:
+        kubeconfig:
+          apiVersion: v1
+          clusters:
+          - cluster:
+              certificate-authority-data: ...
+              server: ...
+            name: gke_bright-torus-169502_us-east1-c_cluster-us-east
+          contexts:
+          - context:
+              cluster: gke_bright-torus-169502_us-east1-c_cluster-us-east
+              namespace: demo
+              user: gke_bright-torus-169502_us-east1-c_cluster-us-east
+            name: cluster-us-east
+          current-context: cluster-us-east
+          kind: Config
+          preferences: {}
+          users:
+          - name: gke_bright-torus-169502_us-east1-c_cluster-us-east
+            user:
+              client-certificate-data: ...
+              client-key-data: ...
+              password: ...
+              username: ...
+
+    # Cluster definition for us-west
+    - kind: cluster
+      metadata:
+        namespace: system
+        name: cluster-us-west
+      type: kubernetes
+      config:
+        kubeconfig:
+          apiVersion: v1
+          clusters:
+          - cluster:
+              certificate-authority-data: ...
+              server: ...
+            name: gke_bright-torus-169502_us-west1-c_cluster-us-west
+          contexts:
+          - context:
+              cluster: gke_bright-torus-169502_us-west1-c_cluster-us-west
+              namespace: demo
+              user: gke_bright-torus-169502_us-west1-c_cluster-us-west
+            name: cluster-us-west
+          current-context: cluster-us-west
+          kind: Config
+          preferences: {}
+          users:
+          - name: gke_bright-torus-169502_us-west1-c_cluster-us-west
+            user:
+              client-certificate-data: ...
+              client-key-data: ...
+              password: ...
+              username: ...
     ```
 
     Upload the list of clusters and ACL rules into Aptomi using CLI:
