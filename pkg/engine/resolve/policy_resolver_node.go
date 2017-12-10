@@ -80,7 +80,7 @@ func (resolver *PolicyResolver) newResolutionNode() *resolutionNode {
 		eventLog:          eventLog,
 		eventLogsCombined: []*event.Log{eventLog},
 
-		resolution: NewPolicyResolution(),
+		resolution: NewPolicyResolution(true),
 
 		depth: 0,
 

@@ -9,7 +9,7 @@ import (
 )
 
 func (ds *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
-	actualState := resolve.NewPolicyResolution()
+	actualState := resolve.NewPolicyResolution(false)
 
 	instances, err := ds.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
 	if err != nil {
@@ -20,7 +20,6 @@ func (ds *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 		if instance, ok := instanceObj.(*resolve.ComponentInstance); ok {
 			key := instance.GetKey()
 			actualState.ComponentInstanceMap[key] = instance
-			actualState.ComponentProcessingOrder = append(actualState.ComponentProcessingOrder, key)
 		}
 	}
 

@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
+	"runtime/debug"
 )
 
 // EngineApply executes actions to get from an actual state to desired state
@@ -17,7 +18,6 @@ type EngineApply struct {
 	// References to desired/actual objects
 	desiredPolicy      *lang.Policy
 	desiredState       *resolve.PolicyResolution
-	actualPolicy       *lang.Policy
 	actualState        *resolve.PolicyResolution
 	actualStateUpdater actual.StateUpdater
 	externalData       *external.Data
@@ -36,11 +36,10 @@ type EngineApply struct {
 // NewEngineApply creates an instance of EngineApply
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base, eventLog *event.Log, progress progress.Indicator) *EngineApply {
+func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base, eventLog *event.Log, progress progress.Indicator) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,
 		desiredState:       desiredState,
-		actualPolicy:       actualPolicy,
 		actualState:        actualState,
 		actualStateUpdater: actualStateUpdater,
 		externalData:       externalData,
@@ -67,7 +66,6 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
 	context := action.NewContext(
 		apply.desiredPolicy,
 		apply.desiredState,
-		apply.actualPolicy,
 		apply.actualState,
 		apply.actualStateUpdater,
 		apply.externalData,
@@ -102,7 +100,7 @@ func (apply *EngineApply) executeAction(action action.Base, context *action.Cont
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
-			errResult = fmt.Errorf("panic: %s", err)
+			errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
 		}
 	}()
 

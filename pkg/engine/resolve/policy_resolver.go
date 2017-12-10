@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	sysruntime "runtime"
+	"runtime/debug"
 	"sync"
 )
 
@@ -61,7 +62,7 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLo
 		externalData:    externalData,
 		expressionCache: expression.NewCache(),
 		templateCache:   template.NewCache(),
-		resolution:      NewPolicyResolution(),
+		resolution:      NewPolicyResolution(true),
 		eventLog:        eventLog,
 	}
 }
@@ -127,7 +128,7 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
-			resolveErr = fmt.Errorf("panic: %s", err)
+			resolveErr = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
 			node.eventLog.LogError(resolveErr)
 		}
 	}()
@@ -171,7 +172,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.DependencyInstanceMap[runtime.KeyForStorable(node.dependency)] = node.serviceKey.GetKey()
+	resolver.resolution.dependencyInstanceMap[runtime.KeyForStorable(node.dependency)] = node.serviceKey.GetKey()
 
 	// append component instance data
 	err := resolver.resolution.AppendData(node.resolution)

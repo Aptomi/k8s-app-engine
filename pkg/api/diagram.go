@@ -53,7 +53,7 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 			// since we are not storing dependency keys, calculate them on the fly for actual state
 			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog("api-policy-diagram", true))
 			desiredState, _ := resolver.ResolveAllDependencies()
-			state.DependencyInstanceMap = desiredState.DependencyInstanceMap
+			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
 		}
 
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
@@ -115,7 +115,7 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 			// since we are not storing dependency keys, calculate them on the fly for actual state
 			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog("api-policy-diagram", true))
 			desiredState, _ := resolver.ResolveAllDependencies()
-			state.DependencyInstanceMap = desiredState.DependencyInstanceMap
+			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
 		}
 
 		// show instances in desired state (diff)

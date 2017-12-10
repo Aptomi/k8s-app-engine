@@ -21,7 +21,7 @@ func (plugin *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyRes
 	// todo(slukjanov): do something with progress
 	prog := progress.NewNoop()
 
-	if len(resolution.ComponentProcessingOrder) == 0 {
+	if len(resolution.GetComponentProcessingOrder()) == 0 {
 		return nil
 	}
 
@@ -47,7 +47,7 @@ func (plugin *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyRes
 
 	// Process in the right order
 	desiredRules := make(map[string][]*istioRouteRule)
-	for _, key := range resolution.ComponentProcessingOrder {
+	for _, key := range resolution.GetComponentProcessingOrder() {
 		rules, err := plugin.getDesiredIstioRouteRulesForComponent(key, policy, resolution, externalData, eventLog)
 		if err != nil {
 			return fmt.Errorf("error while processing Istio Ingress for component '%s': %s", key, err)
@@ -60,7 +60,7 @@ func (plugin *Plugin) Process(policy *lang.Policy, resolution *resolve.PolicyRes
 	createRules := make(map[string][]*istioRouteRule)
 
 	// populate createRules, to make sure we will get correct number of entries for progress indicator
-	for _, key := range resolution.ComponentProcessingOrder {
+	for _, key := range resolution.GetComponentProcessingOrder() {
 		createRules[key] = make([]*istioRouteRule, 0)
 	}
 

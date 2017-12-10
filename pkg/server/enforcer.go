@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/helm"
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -108,13 +107,8 @@ func (server *Server) enforce() error {
 		)
 	}
 
-	actualPolicy, err := server.getActualPolicy()
-	if err != nil {
-		return fmt.Errorf("error while getting actual policy: %s", err)
-	}
-
 	eventLog = event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualPolicy, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, eventLog, server.store.GetRevisionProgressUpdater(nextRevision))
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, eventLog, server.store.GetRevisionProgressUpdater(nextRevision))
 	_, err = applier.Apply()
 
 	// todo save eventlog
@@ -122,26 +116,7 @@ func (server *Server) enforce() error {
 	if err != nil {
 		return fmt.Errorf("error while applying new revision: %s", err)
 	}
-	log.Infof("(enforce-%d) New revision %d successfully applied, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentProcessingOrder))
+	log.Infof("(enforce-%d) New revision %d successfully applied, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.GetComponentProcessingOrder()))
 
 	return nil
-}
-
-func (server *Server) getActualPolicy() (*lang.Policy, error) {
-	currRevision, err := server.store.GetRevision(runtime.LastGen)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get current revision: %s", err)
-	}
-
-	// it's just a first revision
-	if currRevision == nil {
-		return lang.NewPolicy(), nil
-	}
-
-	actualPolicy, _, err := server.store.GetPolicy(currRevision.Policy)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get actual policy: %s", err)
-	}
-
-	return actualPolicy, nil
 }

@@ -91,12 +91,12 @@ func (policy *Policy) GetObject(kind string, locator string, currentNs string) (
 		ns = parts[0]
 		name = parts[1]
 	} else {
-		return nil, fmt.Errorf("can't parse policy object locator: '%s'", locator)
+		return nil, fmt.Errorf("can't parse policy object locator for kind '%s': '%s' (parts = %d)", kind, locator, len(parts))
 	}
 
 	policyNS, ok := policy.Namespace[ns]
 	if !ok {
-		return nil, fmt.Errorf("namespace '%s' doesn't exist, but referenced in locator '%s'", ns, locator)
+		return nil, fmt.Errorf("namespace '%s' has no objects, but trying to look up '%s': '%s'", ns, kind, locator)
 	}
 
 	return policyNS.getObject(kind, name)

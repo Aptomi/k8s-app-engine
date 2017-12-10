@@ -52,10 +52,10 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 
 	// merge all instance keys from prev and next
 	allKeys := make(map[string]bool)
-	for key := range diff.Prev.ComponentInstanceMap {
+	for key := range diff.Next.ComponentInstanceMap {
 		allKeys[key] = true
 	}
-	for key := range diff.Next.ComponentInstanceMap {
+	for key := range diff.Prev.ComponentInstanceMap {
 		allKeys[key] = true
 	}
 
@@ -126,15 +126,8 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		}
 	}
 
-	// Generate actions in the right order
-	for _, key := range diff.Next.ComponentProcessingOrder {
-		actionList, found := actions[key]
-		if found {
-			diff.Actions = append(diff.Actions, actionList...)
-			delete(actions, key)
-		}
-	}
-	for _, key := range diff.Prev.ComponentProcessingOrder {
+	// generate actions in the right order, dictated by desired state
+	for _, key := range diff.Next.GetComponentProcessingOrder() {
 		actionList, found := actions[key]
 		if found {
 			diff.Actions = append(diff.Actions, actionList...)
@@ -142,9 +135,16 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() { // nolint: gocycl
 		}
 	}
 
+	// if there are actions left (deleted components, not present in desired state), process them explicitly
+	for key, actionList := range actions {
+		diff.Actions = append(diff.Actions, actionList...)
+		delete(actions, key)
+	}
+
+	// explicitly add all endpoint actions to the end of the list
 	diff.Actions = append(diff.Actions, endpointsActions...)
 
-	// call a global post-processing action
+	// explicitly add global post-processing action
 	if len(diff.Actions) > 0 {
 		diff.Actions = append(diff.Actions, global.NewPostProcessAction())
 	}

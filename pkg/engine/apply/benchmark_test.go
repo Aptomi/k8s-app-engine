@@ -396,8 +396,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 
 	timeStart := time.Now()
 
-	actualPolicy := lang.NewPolicy()
-	actualState := resolvePolicyBenchmark(t, actualPolicy, externalData, false)
+	actualState := resolvePolicyBenchmark(t, lang.NewPolicy(), externalData, false)
 	desiredState := resolvePolicyBenchmark(t, desiredPolicy, externalData, true)
 
 	// process all actions
@@ -406,7 +405,6 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
-		actualPolicy,
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		externalData,
@@ -421,7 +419,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)
 
-	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), len(desiredState.DependencyInstanceMap), len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), len(desiredState.GetDependencyInstanceMap()), len(actualState.ComponentInstanceMap))
 }
 
 func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
@@ -435,7 +433,7 @@ func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *ext
 		panic("Policy resolution error")
 	}
 
-	if expectedNonEmpty && len(result.DependencyInstanceMap) <= 0 {
+	if expectedNonEmpty && len(result.GetDependencyInstanceMap()) <= 0 {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()

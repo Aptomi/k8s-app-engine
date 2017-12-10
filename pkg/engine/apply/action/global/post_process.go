@@ -32,7 +32,6 @@ func (a *PostProcessAction) Apply(context *action.Context) error {
 	for _, plugin := range context.Plugins.GetPostProcessingPlugins() {
 		err := plugin.Process(context.DesiredPolicy, context.DesiredState, context.ExternalData, context.EventLog)
 		if err != nil {
-			context.EventLog.LogError(err)
 			return fmt.Errorf("error while running post processing action: %s", err)
 		}
 	}

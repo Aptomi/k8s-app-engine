@@ -18,7 +18,7 @@ type dependencyNode struct {
 }
 
 func (n dependencyNode) getGroup() string {
-	serviceKey := n.b.resolution.DependencyInstanceMap[runtime.KeyForStorable(n.dependency)]
+	serviceKey := n.b.resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(n.dependency)]
 	if len(serviceKey) > 0 {
 		return "dependency"
 	}

@@ -36,8 +36,8 @@ func TestPolicyResolverContract(t *testing.T) {
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d1), "Dependency should be resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d2), "Dependency should be resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency should be resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency should be resolved")
 
 	// check instance 1
 	instance1 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component, resolution)
@@ -76,7 +76,7 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 
 	// policy resolution should be completed successfully
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d), "Dependency should be resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d), "Dependency should be resolved")
 }
 
 func TestPolicyResolverPartialMatching(t *testing.T) {
@@ -106,8 +106,8 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that only first dependency got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d1), "Dependency with full set of labels should be resolved")
-	assert.NotContains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(d2), "Dependency with partial labels should not be resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency with full set of labels should be resolved")
+	assert.NotContains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency with partial labels should not be resolved")
 }
 
 func TestPolicyResolverCalculatedLabels(t *testing.T) {
@@ -142,7 +142,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
 
 	// check that dependency got resolved
-	assert.Contains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(dependency), "Dependency should be resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Dependency should be resolved")
 
 	// check labels for the end service (service2/contract2)
 	serviceInstance := getInstanceByParams(t, cluster, contract2, contract2.Contexts[0], nil, service2, nil, resolution)
@@ -224,7 +224,7 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 
 	// dependency declared by non-existing consumer should not trigger a critical error
 	resolution := resolvePolicy(t, b, ResSuccess, "non-existing user")
-	assert.NotContains(t, resolution.DependencyInstanceMap, runtime.KeyForStorable(dependency), "Dependency should not be resolved")
+	assert.NotContains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Dependency should not be resolved")
 }
 
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
@@ -401,9 +401,9 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult 
 
 func getInstanceByDependencyKey(t *testing.T, dependencyID string, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
-	key := resolution.DependencyInstanceMap[dependencyID]
+	key := resolution.GetDependencyInstanceMap()[dependencyID]
 	if !assert.NotZero(t, len(key), "Dependency %s should be resolved", dependencyID) {
-		t.Log(resolution.DependencyInstanceMap)
+		t.Log(resolution.GetDependencyInstanceMap())
 		t.FailNow()
 	}
 	instance, ok := resolution.ComponentInstanceMap[key]
