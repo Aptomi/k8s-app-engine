@@ -32,28 +32,19 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 
 // Apply applies the action
 func (a *EndpointsAction) Apply(context *action.Context) error {
-	// skip if it wasn't processed (doesn't exist in actual state)
+	// skip component for some reason doesn't exist in actual state
+	// this might happen if, for example, it the corresponding component got destroyed by a prior delete action
 	if context.ActualState.ComponentInstanceMap[a.ComponentKey] == nil {
 		return nil
 	}
 
 	err := a.processEndpoints(context)
 	if err != nil {
-		context.EventLog.LogError(err)
-		return fmt.Errorf("errors while getting endpoints '%s': %s", a.ComponentKey, err)
+		return fmt.Errorf("error while getting endpoints '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	return a.updateActualState(context)
-}
-
-func (a *EndpointsAction) updateActualState(context *action.Context) error {
-	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	err := context.ActualStateUpdater.Save(instance)
-	if err != nil {
-		return fmt.Errorf("error while update actual state: %s", err)
-	}
-	return nil
+	return updateComponentInActualState(a.ComponentKey, context)
 }
 
 func (a *EndpointsAction) processEndpoints(context *action.Context) error {

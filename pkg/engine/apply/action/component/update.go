@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"time"
 )
 
 // UpdateActionObject is an informational data structure with Kind and Constructor for the action
@@ -36,26 +35,11 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 	// update in the cloud
 	err := a.processDeployment(context)
 	if err != nil {
-		context.EventLog.LogError(err)
 		return fmt.Errorf("error while updating component '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	return a.updateActualState(context)
-}
-
-func (a *UpdateAction) updateActualState(context *action.Context) error {
-	// preserve previous creation date before overwriting
-	prevCreatedAt := context.ActualState.ComponentInstanceMap[a.ComponentKey].CreatedAt
-	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	instance.UpdateTimes(prevCreatedAt, time.Now())
-
-	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	err := context.ActualStateUpdater.Save(instance)
-	if err != nil {
-		return fmt.Errorf("error while update actual state: %s", err)
-	}
-	return nil
+	return updateActualStateFromDesired(a.ComponentKey, context, false, true, false)
 }
 
 func (a *UpdateAction) processDeployment(context *action.Context) error {

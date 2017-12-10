@@ -1,7 +1,6 @@
 package component
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
@@ -32,26 +31,5 @@ func NewAttachDependencyAction(componentKey string, dependencyID string) *Attach
 
 // Apply applies the action
 func (a *AttachDependencyAction) Apply(context *action.Context) error {
-	return a.updateActualState(context)
-}
-
-func (a *AttachDependencyAction) updateActualState(context *action.Context) error {
-	actual := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	// in case if create component instance failed or deleted there will be no component instance in actual state
-	if actual == nil {
-		return nil
-	}
-
-	// preserve previous create and update date before overwriting
-	desired := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	desired.UpdateTimes(actual.CreatedAt, actual.UpdatedAt)
-
-	context.ActualState.ComponentInstanceMap[a.ComponentKey] = desired
-
-	err := context.ActualStateUpdater.Save(desired)
-	if err != nil {
-		return fmt.Errorf("error while update actual state: %s", err)
-	}
-
-	return nil
+	return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
 }

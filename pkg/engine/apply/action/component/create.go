@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"time"
 )
 
 // CreateActionObject is an informational data structure with Kind and Constructor for the action
@@ -36,28 +35,11 @@ func (a *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud
 	err := a.processDeployment(context)
 	if err != nil {
-		context.EventLog.LogError(err)
 		return fmt.Errorf("error while creating component '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	return a.updateActualState(context)
-}
-
-func (a *CreateAction) updateActualState(context *action.Context) error {
-	// get instance from desired state
-	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-
-	// update creation and update times
-	instance.UpdateTimes(time.Now(), time.Now())
-
-	// copy it over to the actual state
-	context.ActualState.ComponentInstanceMap[a.ComponentKey] = instance
-	err := context.ActualStateUpdater.Save(instance)
-	if err != nil {
-		return fmt.Errorf("error while update actual state: %s", err)
-	}
-	return nil
+	return updateActualStateFromDesired(a.ComponentKey, context, true, true, true)
 }
 
 func (a *CreateAction) processDeployment(context *action.Context) error {

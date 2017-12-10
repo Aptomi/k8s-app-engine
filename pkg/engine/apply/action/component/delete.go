@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -36,27 +35,16 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 	// delete from cloud
 	err := a.processDeployment(context)
 	if err != nil {
-		context.EventLog.LogError(err)
 		return fmt.Errorf("error while deleting component '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	return a.updateActualState(context)
-}
-
-func (a *DeleteAction) updateActualState(context *action.Context) error {
-	// delete component from the actual state
-	delete(context.ActualState.ComponentInstanceMap, a.ComponentKey)
-	err := context.ActualStateUpdater.Delete(resolve.KeyForComponentKey(a.ComponentKey))
-	if err != nil {
-		return fmt.Errorf("error while update actual state: %s", err)
-	}
-	return nil
+	return deleteComponentFromActualState(a.ComponentKey, context)
 }
 
 func (a *DeleteAction) processDeployment(context *action.Context) error {
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	serviceObj, err := context.ActualPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return err
 	}
