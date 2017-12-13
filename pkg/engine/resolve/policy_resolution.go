@@ -164,12 +164,14 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 			return fmt.Errorf("service '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.GetKey())
 		}
 
-		// verify that component within a service exists
-		service := serviceObj.(*lang.Service)
-		component, found := service.GetComponentsMap()[componentKey.ComponentName]
-		if component == nil || !found {
-			// component instance points to non-existing component within a service, meaning this component instance is now orphan
-			return fmt.Errorf("component '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.ComponentName, componentKey.GetKey())
+		if componentKey.ComponentName != componentRootName {
+			// verify that component within a service exists
+			service := serviceObj.(*lang.Service)
+			component, found := service.GetComponentsMap()[componentKey.ComponentName]
+			if component == nil || !found {
+				// component instance points to non-existing component within a service, meaning this component instance is now orphan
+				return fmt.Errorf("component '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.ComponentName, componentKey.GetKey())
+			}
 		}
 
 		// verify that cluster exists
