@@ -95,7 +95,7 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 			continue
 		}
 
-		return nil, fmt.Errorf("path doesn't exist or no YAML files found under: %s")
+		return nil, fmt.Errorf("path doesn't exist or no YAML files found under: %s", policyPath)
 	}
 
 	sort.Strings(allFiles)
