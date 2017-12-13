@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -123,4 +124,60 @@ func (resolution *PolicyResolution) GetDependencyInstanceMap() map[string]string
 func (resolution *PolicyResolution) SetDependencyInstanceMap(dMap map[string]string) {
 	// TODO: we actually need to start saving dependencyInstanceMap into the store. after that we can delete this method
 	resolution.dependencyInstanceMap = dMap
+}
+
+// Validate checks that the state is valid, meaning that all objects references are valid. It takes all the instances
+// and verifies that all services exist, all clusters exist, etc
+func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
+	// dependencies point to existing contracts
+	// cannot delete contract without deleting dependencies pointing to it
+
+	// component instances point to valid entitis
+	for _, instance := range resolution.ComponentInstanceMap {
+		componentKey := instance.Metadata.Key
+
+		// verify that contract exists
+		contractObj, err := policy.GetObject(lang.ContractObject.Kind, componentKey.ContractName, componentKey.Namespace)
+		if contractObj == nil || err != nil {
+			// component instance points to non-existing contract, meaning this component instance is now orphan
+			return fmt.Errorf("contract '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ContractName, componentKey.GetKey())
+		}
+
+		// verify that context within a contract exists
+		contract := contractObj.(*lang.Contract)
+		contextExists := false
+		for _, context := range contract.Contexts {
+			if context.Name == componentKey.ContextName {
+				contextExists = true
+				break
+			}
+		}
+		if !contextExists {
+			// component instance points to non-existing context within a contract, meaning this component instance is now orphan
+			return fmt.Errorf("context '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ContractName, componentKey.ContextName, componentKey.GetKey())
+		}
+
+		// verify that service exists
+		serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, componentKey.ServiceName, componentKey.Namespace)
+		if serviceObj == nil || err != nil {
+			// component instance points to non-existing service, meaning this component instance is now orphan
+			return fmt.Errorf("service '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.GetKey())
+		}
+
+		// verify that component within a service exists
+		service := serviceObj.(*lang.Service)
+		component, found := service.GetComponentsMap()[componentKey.ComponentName]
+		if component == nil || !found {
+			// component instance points to non-existing component within a service, meaning this component instance is now orphan
+			return fmt.Errorf("component '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.ComponentName, componentKey.GetKey())
+		}
+
+		// verify that cluster exists
+		clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, componentKey.ClusterName, runtime.SystemNS)
+		if clusterObj == nil || err != nil {
+			// component instance points to non-existing cluster, meaning this component instance is now orphan
+			return fmt.Errorf("cluster '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ClusterName, componentKey.GetKey())
+		}
+	}
+	return nil
 }

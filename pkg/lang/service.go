@@ -74,8 +74,7 @@ type Code struct {
 	Params util.NestedParameterMap `validate:"omitempty,templateNestedMap"`
 }
 
-// GetComponentsMap lazily initializes and returns a map of name -> component
-// This should be thread safe
+// GetComponentsMap lazily initializes and returns a map of name -> component, while being thread-safe
 func (service *Service) GetComponentsMap() map[string]*ServiceComponent {
 	service.componentsMapOnce.Do(func() {
 		// Put all components into map

@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // PolicyNamespace describes a specific namespace within Aptomi policy.
@@ -112,7 +113,7 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 	return result
 }
 
-func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (Base, error) {
+func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (runtime.Object, error) {
 	var ok bool
 	var result Base
 	switch kind {

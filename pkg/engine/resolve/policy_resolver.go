@@ -117,6 +117,9 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, err
 		}
 	}
 
+	// Validate resolution, just in case
+	resolver.resolution.Validate(resolver.policy)
+
 	return resolver.resolution, nil
 }
 

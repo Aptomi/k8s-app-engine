@@ -168,6 +168,16 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
 
+	actualState, err := api.store.GetActualState()
+	if err != nil {
+		panic(fmt.Sprintf("Error while getting actual state: %s", err))
+	}
+
+	err = actualState.Validate(currentPolicy)
+	if err != nil {
+		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
+	}
+
 	changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
 	if err != nil {
 		panic(fmt.Sprintf("Error while deleting from policy: %s", err))
