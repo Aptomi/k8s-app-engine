@@ -9,6 +9,7 @@ set -eou pipefail
 
 CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
+POLICY_DIR_TMP=$(mktemp -d)
 
 # copy policy over, create secrets and clusters from templates
 cp -R examples/03-twitter-analytics/* $POLICY_DIR
@@ -32,8 +33,7 @@ function free_port() {
 function stop_server() {
     echo "Stopping server..."
     kill ${SERVER_PID} &>/dev/null || true
-    [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
-    [[ -e "${CONF_DIR}/client.log" ]] && awk '{print "[[CLIENT]] " $0}' ${CONF_DIR}/client.log || echo "No client log found."
+    [[ -e "${CONF_DIR}/server.log" ]] && echo "Server log location: ${CONF_DIR}/server.log" || echo "No server log found."
 }
 
 APTOMI_PORT=$(free_port)
@@ -93,9 +93,20 @@ if aptomictl policy --username Alice --config ${CONF_DIR} apply -f ${POLICY_DIR}
     exit 1
 fi
 
-aptomictl policy --username Sam --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>${CONF_DIR}/client.log
+aptomictl policy apply --wait --username Sam --config ${CONF_DIR} -f ${POLICY_DIR}/policy/Sam
+aptomictl policy apply --wait --username Frank --config ${CONF_DIR} -f ${POLICY_DIR}/policy/Frank
+aptomictl policy apply --wait --username John --config ${CONF_DIR} -f ${POLICY_DIR}/policy/John
+aptomictl policy apply --wait --username John --config ${CONF_DIR} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
+aptomictl policy apply --wait --username Alice --config ${CONF_DIR} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+aptomictl policy apply --wait --username Bob --config ${CONF_DIR} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+aptomictl policy delete --wait --username Alice --config ${CONF_DIR} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
+aptomictl policy apply --wait --username John --config ${CONF_DIR} -f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
+aptomictl policy apply --wait --username Carol --config ${CONF_DIR} -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
+aptomictl policy delete --wait --username Sam --config ${CONF_DIR} -f "${POLICY_DIR}/policy/*-ts.yaml"
+aptomictl policy delete --wait --username Sam --config ${CONF_DIR} -f ${POLICY_DIR}/policy
 
-sleep 10
+sleep 1
 
 SERVER_RUNNING=`ps | grep aptomi | grep "${SERVER_PID}" || true`
 if [ -z "$SERVER_RUNNING" ]; then
