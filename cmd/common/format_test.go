@@ -19,7 +19,7 @@ func TestFormat_Text(t *testing.T) {
 		result := makePolicyUpdateResult(true)
 		data, err := Format(cfg, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 41 -> 42  \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
+		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 41 -> 42  \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
 			string(data), "Format should return expected table")
 		// fmt.Println(string(data))
 	}
@@ -28,7 +28,7 @@ func TestFormat_Text(t *testing.T) {
 		result := makePolicyUpdateResult(false)
 		data, err := Format(cfg, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 42 (none) \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
+		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 42 (none) \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
 			string(data), "Format should return expected table")
 		// fmt.Println(string(data))
 	}

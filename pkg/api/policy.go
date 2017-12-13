@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -104,14 +105,17 @@ func (result *PolicyUpdateResult) AsColumns() map[string]string {
 
 func filterImportantActionKeys(actions []string) []string {
 	filtered := make([]string, 0)
+
+	// remove #root, keep only create/update/delete actions
 	importantActionKinds := map[string]string{
 		component.CreateActionObject.Kind: "[+]",
 		component.UpdateActionObject.Kind: "[*]",
 		component.DeleteActionObject.Kind: "[-]",
 	}
+
 	for _, action := range actions {
 		if strings.HasSuffix(action, "#root") {
-			continue
+			action = strings.TrimSuffix(action, "#root")
 		}
 
 		for kind, kindShort := range importantActionKinds {
@@ -122,7 +126,52 @@ func filterImportantActionKeys(actions []string) []string {
 		}
 	}
 
-	return filtered
+	// sort
+	sort.Strings(filtered)
+
+	// shorten children
+	result := make([]string, 0)
+	for idx := 0; idx < len(filtered); {
+		// skip empty entries, just in case
+		if len(filtered[idx]) <= 0 {
+			idx++
+			continue
+		}
+
+		// move into result, if result is empty
+		if len(result) == 0 {
+			result = append(result, filtered[idx])
+			idx++
+			continue
+		}
+
+		// add directly if there is no need to shorten children
+		if !strings.HasPrefix(filtered[idx], result[len(result)-1]) {
+			result = append(result, filtered[idx])
+			idx++
+			continue
+		}
+
+		// process the block of strings/children and shorten them
+		shorts := make([]string, 0)
+		for idx < len(filtered) && strings.HasPrefix(filtered[idx], result[len(result)-1]) {
+			// remove prefix
+			short := strings.TrimPrefix(filtered[idx], result[len(result)-1])
+			// remove #
+			if strings.HasPrefix(short, "#") {
+				short = strings.TrimPrefix(short, "#")
+			}
+			// pad it
+			if len(short) > 0 {
+				shorts = append(shorts, short)
+			}
+			idx++
+		}
+
+		result = append(result, "\t -> "+strings.Join(shorts, ", "))
+	}
+
+	return result
 }
 
 func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
