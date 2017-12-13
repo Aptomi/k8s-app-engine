@@ -8,7 +8,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
@@ -73,38 +72,53 @@ var PolicyUpdateResultObject = &runtime.Info{
 type PolicyUpdateResult struct {
 	runtime.TypeKind `yaml:",inline"`
 	PolicyGeneration runtime.Generation
+	PolicyChanged    bool
 	Actions          []string
 }
 
 // GetDefaultColumns returns default set of columns to be displayed
 func (result *PolicyUpdateResult) GetDefaultColumns() []string {
-	return []string{"Policy Generation", "Expected Actions"}
+	return []string{"Policy Changes", "Instance Changes"}
 }
 
 // AsColumns returns PolicyUpdateResult representation as columns
 func (result *PolicyUpdateResult) AsColumns() map[string]string {
+	var policyChangesStr string
+	if result.PolicyChanged {
+		policyChangesStr = fmt.Sprintf("Gen %d -> %d", result.PolicyGeneration-1, result.PolicyGeneration)
+	} else {
+		policyChangesStr = fmt.Sprintf("Gen %d (none)", result.PolicyGeneration)
+	}
+	var instanceChangesStr string
+	filteredActions := filterImportantActionKeys(result.Actions)
+	if len(filteredActions) > 0 {
+		instanceChangesStr = strings.Join(filteredActions, "\n")
+	} else {
+		instanceChangesStr = "(none)"
+	}
 	return map[string]string{
-		"Policy Generation": result.PolicyGeneration.String(),
-		"Expected Actions":  strings.Join(filterImportantActionKeys(result.Actions), "\n"),
+		"Policy Changes":   policyChangesStr,
+		"Instance Changes": instanceChangesStr,
 	}
 }
 
 func filterImportantActionKeys(actions []string) []string {
 	filtered := make([]string, 0)
-
+	importantActionKinds := map[string]string{
+		component.CreateActionObject.Kind: "[+]",
+		component.UpdateActionObject.Kind: "[*]",
+		component.DeleteActionObject.Kind: "[-]",
+	}
 	for _, action := range actions {
 		if strings.HasSuffix(action, "#root") {
 			continue
 		}
 
-		split := strings.Split(action, runtime.KeySeparator)
-		if len(split) < 1 {
-			panic(fmt.Sprintf("Action key consists of less then 1 part: %s", action))
-		}
-		key := split[0]
-
-		if util.StringContainsAny(key, component.CreateActionObject.Kind, component.UpdateActionObject.Kind, component.DeleteActionObject.Kind) {
-			filtered = append(filtered, action)
+		for kind, kindShort := range importantActionKinds {
+			if strings.HasPrefix(action, kind+runtime.KeySeparator) {
+				actionStr := kindShort + " " + strings.TrimPrefix(action, kind+runtime.KeySeparator)
+				filtered = append(filtered, actionStr)
+			}
 		}
 	}
 
@@ -187,16 +201,6 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 }
 
 func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *http.Request, changed bool, policyData *engine.PolicyData) {
-	if !changed {
-		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-			PolicyGeneration: policyData.GetGeneration(),
-			Actions:          nil,
-		})
-
-		return
-	}
-
 	desiredPolicyGen := policyData.GetGeneration()
 	desiredPolicy, _, err := api.store.GetPolicy(desiredPolicyGen)
 	if err != nil {
@@ -232,6 +236,7 @@ func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *h
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 		PolicyGeneration: desiredPolicyGen,
+		PolicyChanged:    changed,
 		Actions:          actions,
 	})
 }

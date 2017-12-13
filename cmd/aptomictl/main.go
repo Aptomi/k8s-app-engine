@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/root"
 	"github.com/Sirupsen/logrus"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -14,10 +14,12 @@ func main() {
 	defer func() {
 		if err := recover(); err != nil {
 			logrus.Fatalf("%s", err)
+			os.Exit(1)
 		}
 	}()
 
 	if err := root.Command.Execute(); err != nil {
-		panic(fmt.Errorf("error while executing command: %s", err))
+		logrus.Fatalf("%s", err)
+		os.Exit(1)
 	}
 }

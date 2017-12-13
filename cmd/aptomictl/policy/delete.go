@@ -6,10 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/engine"
-	"github.com/Aptomi/aptomi/pkg/util/retry"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 func newDeleteCommand(cfg *config.Client) *cobra.Command {
@@ -43,32 +40,7 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 				return
 			}
 
-			fmt.Println("Waiting for the first revision with updated policy to be deleted")
-
-			var rev *engine.Revision
-			interval := 5 * time.Second
-			finished := retry.Do(60, interval, func() bool {
-				var revErr error
-				rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
-				if revErr != nil {
-					fmt.Printf("Can't get revision for applied policy: %s, retrying in %s\n", revErr, interval)
-					return false
-				}
-
-				fmt.Printf("Applying changes: %d out of %d total\n", rev.Progress.Current, rev.Progress.Total)
-				return rev.Status != engine.RevisionStatusInProgress
-			})
-
-			if !finished {
-				// todo pretty print
-				fmt.Println("Wait for revision delete timedout", rev)
-			} else if rev.Status == engine.RevisionStatusSuccess {
-				// todo pretty print
-				fmt.Println("Success! Policy deleted", rev)
-			} else if rev.Status == engine.RevisionStatusError {
-				// todo pretty print
-				fmt.Println("Revision delete failed for policy", rev)
-			}
+			waitForApplyToFinish(client, result)
 		},
 	}
 

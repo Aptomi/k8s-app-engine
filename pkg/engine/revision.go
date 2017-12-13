@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-// RevisionName is the name of the only revision that exists in DB (but with many generations)
-const RevisionName = "revision"
-
 // RevisionObject is Info for Revision
 var RevisionObject = &runtime.Info{
 	Kind:        "revision",

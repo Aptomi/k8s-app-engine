@@ -2,14 +2,20 @@ package policy
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/api"
+	"github.com/Aptomi/aptomi/pkg/client"
+	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
+	"github.com/Aptomi/aptomi/pkg/util/retry"
 	"github.com/mattn/go-zglob"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 func readLangFromFiles(policyPaths []string) ([]runtime.Object, error) {
@@ -106,4 +112,48 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	}
 
 	return allFiles, nil
+}
+
+func waitForApplyToFinish(client client.Core, result *api.PolicyUpdateResult) {
+	fmt.Print("Waiting for updated policy to be applied...")
+	time.Sleep(time.Second)
+
+	var progressBar progress.Indicator
+	var progressLast = 0
+
+	var rev *engine.Revision
+	finished := retry.Do(60, 5*time.Second, func() bool {
+		var revErr error
+		rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
+		if revErr != nil {
+			fmt.Print(".")
+			return false
+		}
+
+		if progressBar == nil {
+			fmt.Println()
+			progressBar = progress.NewConsole()
+			progressBar.SetTotal(rev.Progress.Total)
+		}
+		for progressLast < rev.Progress.Current {
+			progressBar.Advance()
+			progressLast++
+		}
+
+		return rev.Status != engine.RevisionStatusInProgress
+	})
+
+	if !finished {
+		progressBar.Done(false)
+		fmt.Printf("Timeout. Revision %d has not been applied in %d seconds\n", rev.GetGeneration(), 60*5)
+		panic("timeout")
+	} else if rev.Status == engine.RevisionStatusSuccess {
+		progressBar.Done(true)
+		fmt.Printf("Success! Revision %d created and applied\n", rev.GetGeneration())
+	} else if rev.Status == engine.RevisionStatusError {
+		progressBar.Done(false)
+		fmt.Printf("Error. Revision %d failed with an error and has not been fully applied\n", rev.GetGeneration())
+		panic("error")
+	}
+
 }
