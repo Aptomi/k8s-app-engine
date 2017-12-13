@@ -11,6 +11,9 @@ apacheds-*
 coverage*
 profile*
 
+.ui_hash_current
+.ui_hash_previous
+
 /db
 
 webui-vis-tmp/output.json

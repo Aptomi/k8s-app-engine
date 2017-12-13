@@ -71,9 +71,9 @@ smoke: install alltest
 
 .PHONY: embed-ui
 embed-ui: prepare_filebox
-	rm -rf pkg/server/ui/*b0x*
-	cd webui; npm run build
-	fileb0x webui/b0x.yaml
+	find webui -type f | grep -v '/node_modules' | grep -v '/dist' | sort | xargs md5 2>/dev/null | md5 > .ui_hash_current
+	if diff .ui_hash_current .ui_hash_previous; then echo 'No changes in UI. Skipping UI build'; else rm -rf pkg/server/ui/*b0x*; cd webui; npm run build; cd ..; fileb0x webui/b0x.yaml; fi
+	cp .ui_hash_current .ui_hash_previous
 
 #
 # IMPORTANT
@@ -106,7 +106,7 @@ fmt:
 
 .PHONY: clean
 clean:
-	-rm -f aptomi aptomictl
+	-rm -f aptomi aptomictl .ui_hash_current .ui_hash_previous
 	${GO} clean -r -i
 
 .PHONY: lint
