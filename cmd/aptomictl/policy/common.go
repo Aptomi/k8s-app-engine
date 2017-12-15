@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
+	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"io/ioutil"
 	"os"
@@ -106,9 +107,10 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 
 	sort.Strings(allFiles)
 
-	fmt.Println("Applying policy from:")
+	log.Info("Applying policy from:")
+	fmt.Println()
 	for _, policyPath := range allFiles {
-		fmt.Println("  [*] " + policyPath)
+		log.Infof("  [*] %s", policyPath)
 	}
 
 	return allFiles, nil
