@@ -5,7 +5,7 @@ if ! [ -x "$(command -v telnet)" ]; then
   exit 1
 fi
 
-set -eou pipefail
+set -exou pipefail
 
 CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
