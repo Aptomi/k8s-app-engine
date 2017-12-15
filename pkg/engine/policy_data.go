@@ -83,3 +83,17 @@ func (policyData *PolicyData) Remove(obj lang.Base) bool { // nolint: interfacer
 
 	return exist
 }
+
+// GetDefaultColumns returns default set of columns to be displayed
+func (policyData *PolicyData) GetDefaultColumns() []string {
+	return []string{"Policy Version"}
+}
+
+// AsColumns returns PolicyData representation as columns
+func (policyData *PolicyData) AsColumns() map[string]string {
+	result := make(map[string]string)
+
+	result["Policy Version"] = policyData.GetGeneration().String()
+
+	return result
+}
