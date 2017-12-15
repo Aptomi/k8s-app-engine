@@ -108,7 +108,6 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	sort.Strings(allFiles)
 
 	log.Info("Applying policy from:")
-	fmt.Println()
 	for _, policyPath := range allFiles {
 		log.Infof("  [*] %s", policyPath)
 	}
