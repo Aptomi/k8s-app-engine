@@ -86,7 +86,7 @@ SERVER_PID=$!
 
 echo "Server PID: ${SERVER_PID}"
 
-sleep 3
+sleep 1
 
 SERVER_RUNNING=`ps | grep aptomi | grep "${SERVER_PID}" || true`
 if [ -z "$SERVER_RUNNING" ]; then
@@ -94,15 +94,15 @@ if [ -z "$SERVER_RUNNING" ]; then
     exit 1
 fi
 
-if aptomictl policy --username Alice --config ${CONF_DIR} apply -f ${POLICY_DIR}/policy &>/dev/null ; then
-    echo "Alice shouldn't be able to upload policy"
+if aptomictl --config ${CONF_DIR} policy --username Alice apply -f ${POLICY_DIR}/policy &>/dev/null ; then
+    echo "Alice shouldn't be able to upload full policy"
     exit 1
 fi
 
 function check_policy_version() {
     expected="$1"
 
-    actual="$(aptomictl policy show --username Sam --config ${CONF_DIR} -o json | jq .Metadata.Generation)"
+    actual="$(aptomictl --config ${CONF_DIR} policy show --username Sam -o json | jq .Metadata.Generation)"
 
     if [ "$actual" -eq "$expected" ]; then
         echo "Found policy version is equal to expected $actual"
@@ -113,7 +113,7 @@ function check_policy_version() {
     return 1
 }
 
-WAIT_FLAGS="--wait --wait-interval 0.1s --wait-attempts 10"
+WAIT_FLAGS="--wait --wait-interval 0.1s --wait-attempts 20"
 
 # apply full policy (w/o Carol)
 check_policy_version 1
