@@ -2,7 +2,7 @@
   <div id="app">
     <div class="login-box" v-if="!loggedIn">
       <div class="login-logo">
-        <img src="static/img/aptomi-logo.png"/>
+        <img src="/static/img/aptomi-logo.png"/>
       </div>
       <!-- /.login-logo -->
       <div class="login-box-body">
