@@ -99,59 +99,73 @@ if aptomictl --config ${CONF_DIR} policy --username Alice apply -f ${POLICY_DIR}
     exit 1
 fi
 
-function check_policy_version() {
+function check_policy() {
     expected="$1"
+    query="$2"
 
-    actual="$(aptomictl --config ${CONF_DIR} policy show --username Sam -o json | jq .Metadata.Generation)"
+    actual="$(aptomictl --config ${CONF_DIR} policy show --username Sam -o json | jq "$2")"
 
     if [ "$actual" -eq "$expected" ]; then
-        echo "Found policy version is equal to expected $actual"
+        echo "Found value is equal to expected $actual for query $query"
         return 0
     fi
 
-    echo "Expected policy version $expected but found $actual"
+    echo "Expected value $expected but found $actual for $query"
     return 1
+}
+
+function check_policy_version() {
+    check_policy $1 .Metadata.Generation
 }
 
 WAIT_FLAGS="--wait --wait-interval 0.1s --wait-attempts 20"
 
 # apply full policy (w/o Carol)
 check_policy_version 1
-aptomictl policy apply ${WAIT_FLAGS} --username Sam --config ${CONF_DIR} -f ${POLICY_DIR}/policy/Sam
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username Sam -f ${POLICY_DIR}/policy/Sam
 check_policy_version 2
-aptomictl policy apply ${WAIT_FLAGS} --username Frank --config ${CONF_DIR} -f ${POLICY_DIR}/policy/Frank
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username Frank -f ${POLICY_DIR}/policy/Frank
 check_policy_version 3
-aptomictl policy apply ${WAIT_FLAGS} --username John --config ${CONF_DIR} -f ${POLICY_DIR}/policy/John
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username John -f ${POLICY_DIR}/policy/John
 check_policy_version 4
-aptomictl policy apply ${WAIT_FLAGS} --username John --config ${CONF_DIR} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username John -f ${POLICY_DIR}/policy/john-prod-ts.yaml
 check_policy_version 5
-aptomictl policy apply ${WAIT_FLAGS} --username Alice --config ${CONF_DIR} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username Alice -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
 check_policy_version 6
-aptomictl policy apply ${WAIT_FLAGS} --username Bob --config ${CONF_DIR} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username Bob -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
 check_policy_version 7
 
+check_policy 3 ".Objects.main.dependency | length"
+
 # delete Alice's dependency
-aptomictl policy delete ${WAIT_FLAGS} --username Alice --config ${CONF_DIR} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} --username Alice -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
 check_policy_version 8
+check_policy 2 ".Objects.main.dependency | length"
 
 # upgrade prod dependency
 sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
-aptomictl policy apply ${WAIT_FLAGS} --username John --config ${CONF_DIR} -f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username John -f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
 check_policy_version 9
 
 # apply Carol's dependency
-aptomictl policy apply ${WAIT_FLAGS} --username Carol --config ${CONF_DIR} -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} --username Carol -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
 check_policy_version 10
+check_policy 3 ".Objects.main.dependency | length"
 
 # delete all dependencies
-aptomictl policy delete ${WAIT_FLAGS} --username Sam --config ${CONF_DIR} -f "${POLICY_DIR}/policy/*-ts.yaml"
+aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} --username Sam -f "${POLICY_DIR}/policy/*-ts.yaml"
 check_policy_version 11
+check_policy 0 ".Objects.main.dependency | length"
 
 # delete all definitions
-aptomictl policy delete ${WAIT_FLAGS} --username Sam --config ${CONF_DIR} -f ${POLICY_DIR}/policy
+aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} --username Sam -f ${POLICY_DIR}/policy
 check_policy_version 12
-
-aptomictl policy show --username Sam --config ${CONF_DIR} -o json | jq .
+check_policy 0 ".Objects.main.contract | length"
+check_policy 0 ".Objects.main.dependency | length"
+check_policy 0 ".Objects.main.rule | length"
+check_policy 0 ".Objects.main.service | length"
+check_policy 0 ".Objects.system.aclrule | length"
+check_policy 0 ".Objects.system.cluster | length"
 
 sleep 1
 
