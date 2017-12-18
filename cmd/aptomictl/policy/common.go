@@ -115,15 +115,15 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	return allFiles, nil
 }
 
-func waitForApplyToFinish(client client.Core, result *api.PolicyUpdateResult) {
+func waitForApplyToFinish(attempts int, interval time.Duration, client client.Core, result *api.PolicyUpdateResult) {
 	fmt.Print("Waiting for updated policy to be applied...")
-	time.Sleep(time.Second)
+	time.Sleep(interval)
 
 	var progressBar progress.Indicator
 	var progressLast = 0
 
 	var rev *engine.Revision
-	finished := retry.Do(60, 5*time.Second, func() bool {
+	finished := retry.Do(attempts, interval, func() bool {
 		var revErr error
 		rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
 		if revErr != nil {

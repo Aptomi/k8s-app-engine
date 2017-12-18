@@ -7,11 +7,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 func newDeleteCommand(cfg *config.Client) *cobra.Command {
 	paths := make([]string, 0)
 	var wait bool
+	var waitInterval time.Duration
+	var waitAttempts int
 
 	cmd := &cobra.Command{
 		Use:   "delete",
@@ -40,12 +43,14 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 				return
 			}
 
-			waitForApplyToFinish(client, result)
+			waitForApplyToFinish(waitAttempts, waitInterval, client, result)
 		},
 	}
 
 	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files, dirs with policy to delete")
 	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until first revision with updated policy will be fully deleted")
+	cmd.Flags().DurationVar(&waitInterval, "wait-interval", 5*time.Second, "Seconds to sleep between wait attempts")
+	cmd.Flags().IntVar(&waitAttempts, "wait-attempts", 60, "Number of attempts to do before failure while waiting")
 
 	return cmd
 }
