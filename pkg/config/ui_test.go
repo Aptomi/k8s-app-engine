@@ -7,10 +7,7 @@ import (
 
 func TestConfigUI(t *testing.T) {
 	config := &UI{
-		Schema: "http",
-		Host:   "127.0.0.1",
-		Port:   12345,
+		Enable: true,
 	}
-	assert.Equal(t, "http://127.0.0.1:12345", config.URL(), "URL must be correct for UI config")
-	assert.Equal(t, "127.0.0.1:12345", config.ListenAddr(), "ListenAddr must be correct for UI config")
+	assert.Equal(t, true, config.Enable, "UI should be enabled by default")
 }

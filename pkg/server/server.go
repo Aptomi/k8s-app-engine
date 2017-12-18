@@ -30,8 +30,7 @@ type Server struct {
 	externalData *external.Data
 	store        store.Core
 
-	apiServer *http.Server
-	uiServer  *http.Server
+	httpServer *http.Server
 
 	enforcementIdx uint
 }
@@ -56,8 +55,7 @@ func (server *Server) Start() {
 	server.initPolicyOnFirstRun()
 
 	// Start API, UI and Enforcer
-	server.startAPIServer()
-	server.startUIServer()
+	server.startHTTPServer()
 	server.startEnforcer()
 
 	// Wait for jobs to complete (it essentially hangs forever)
@@ -104,10 +102,11 @@ func (server *Server) initStore() {
 	server.store = core.NewStore(b)
 }
 
-func (server *Server) startAPIServer() {
+func (server *Server) startHTTPServer() {
 	router := httprouter.New()
 
 	api.Serve(router, server.store, server.externalData)
+	server.serveUI(router)
 
 	var handler http.Handler = router
 
@@ -118,7 +117,7 @@ func (server *Server) startAPIServer() {
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
 
-	server.apiServer = &http.Server{
+	server.httpServer = &http.Server{
 		Handler:      handler,
 		Addr:         server.cfg.API.ListenAddr(),
 		WriteTimeout: 5 * time.Second,
@@ -127,38 +126,31 @@ func (server *Server) startAPIServer() {
 
 	// Start HTTP server
 	server.runInBackground("HTTP Server / API", true, func() {
-		panic(server.apiServer.ListenAndServe())
+		panic(server.httpServer.ListenAndServe())
 	})
 }
 
-func (server *Server) startUIServer() {
-	if len(server.cfg.UI.Host) <= 0 || server.cfg.UI.Port <= 0 {
-		log.Infof("UI configuration not defined. UI will not be served")
+func (server *Server) serveUI(router *httprouter.Router) {
+	if !server.cfg.UI.Enable {
+		log.Infof("UI isn't enabled. UI will not be served")
 		return
 	}
 
-	router := httprouter.New()
-	router.ServeFiles("/*filepath", ui.HTTP)
+	fileServer := http.FileServer(ui.HTTP)
 
-	var handler http.Handler = router
+	router.GET("/", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+		req.URL.Path = "/"
+		fileServer.ServeHTTP(w, req)
+	})
 
-	// todo write to logrus
-	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
-	handler = cors.Default().Handler(handler)
-	handler = middleware.NewPanicHandler(handler)
-	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
-	// todo(slukjanov): add compression handler and compress by default in client
+	router.GET("/index.html", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+		req.URL.Path = "/"
+		fileServer.ServeHTTP(w, req)
+	})
 
-	server.uiServer = &http.Server{
-		Handler:      handler,
-		Addr:         server.cfg.UI.ListenAddr(),
-		WriteTimeout: 5 * time.Second,
-		ReadTimeout:  30 * time.Second,
-	}
-
-	// Start HTTP server
-	server.runInBackground("HTTP Server / UI", true, func() {
-		panic(server.uiServer.ListenAndServe())
+	router.GET("/static/*filepath", func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+		req.URL.Path = "/static/" + ps.ByName("filepath")
+		fileServer.ServeHTTP(w, req)
 	})
 }
 
