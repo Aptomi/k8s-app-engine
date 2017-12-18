@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 // Server represents configs for the server
 type Server struct {
 	Debug                bool            `validate:"-"`
@@ -36,7 +38,8 @@ type DB struct {
 // Enforcer represents configs for Enforcer background process that periodically gets latest policy, calculating
 // difference between it and actual state and then applying calculated actions.
 type Enforcer struct {
-	Disabled  bool `validate:"-"`
-	Noop      bool `validate:"-"`
-	NoopSleep int  `validate:"-"`
+	Interval  time.Duration `validate:"-"`
+	Disabled  bool          `validate:"-"`
+	Noop      bool          `validate:"-"`
+	NoopSleep int           `validate:"-"`
 }

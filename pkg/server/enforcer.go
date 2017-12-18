@@ -23,7 +23,7 @@ func (server *Server) enforceLoop() error {
 		if err != nil {
 			logError(err)
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(server.cfg.Enforcer.Interval)
 	}
 }
 
