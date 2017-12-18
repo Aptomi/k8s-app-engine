@@ -199,6 +199,9 @@ function gke_cluster_create() {
             --disk-size $disk_size \
             --machine-type $machine_type \
             --num-nodes $num_nodes \
+            --no-enable-cloud-monitoring \
+            --no-enable-cloud-logging \
+            --enable-legacy-authorization \
             --async
     fi
 }
