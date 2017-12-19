@@ -39,6 +39,7 @@ designed to work with any container runtime and container orchestration technolo
   - [Tests & Code Validation](#tests--code-validation)
   - [Web UI](#web-ui)
   - [How to contribute](#how-to-contribute)
+  - [How to release](#how-to-release)
   - [Roadmap](#roadmap)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -237,6 +238,23 @@ List of areas where we could use help:
 - Feedback from Dev & Ops teams on service & rule definitions
 - Adding support for additional cloud providers (AWS ECS, GKE, Docker Datacenter, Mesos)
 - Also, see [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
+
+### How to release
+Use `git tag` and `make release` for creating new release.
+
+1. Create annotated git tag and push it to github repo. Use commit message like `Aptomi v0.1.2`.
+
+```
+git tag -a v0.1.2
+git push origin v0.1.2
+```
+
+1. Create GitHub API token with the `repo` scope selected to upload artifacts to GitHub release page. You can create
+one [here](https://github.com/settings/tokens/new). This token should be added to the environment variables as `GITHUB_TOKEN`.
+
+1. Run `make release`. It'll create everything needed and upload all artifacts to github.
+
+1. Go to https://github.com/Aptomi/aptomi/releases/tag/v0.1.2 and fix changelog / description if needed.
 
 ### Roadmap
 We will soon publish the list of items for Q4 2017 and Q1 2018. In the meantime,
