@@ -172,11 +172,11 @@ In order to build Aptomi from source you will need Go (the latest 1.9.x) and a c
 * docker - to run Aptomi in container, as well as to run sample LDAP server with user data
 * kubernetes-cli and kubernetes-helm for using Kubernetes with Helm
 * npm - to build UI, as well as automatically generate table of contents in README.md 
-* telnet - for the script which runs smoke tests
+* telnet, jq - for the script which runs smoke tests
 
 If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](https://docs.docker.com/docker-for-mac/install/), then run: 
 ```
-brew install go glide docker kubernetes-cli kubernetes-helm npm telnet
+brew install go glide docker kubernetes-cli kubernetes-helm npm telnet jq
 ```
 
 Check out Aptomi source code from the repo:
