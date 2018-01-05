@@ -1,10 +1,10 @@
 {
   "version": 1,
   "width": 164,
-  "height": 69,
+  "height": 30,
   "duration": 1022.535399,
   "command": null,
-  "title": null,
+  "title": "Aptomi twitter_stats example demo",
   "env": {
     "TERM": "xterm-256color",
     "SHELL": "/bin/zsh"
