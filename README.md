@@ -139,7 +139,7 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     ```
 
 1. Open Web UI and log in (use 'sam:sam', it's a user from sample LDAP server running locally in a container)
-    [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
+    [http://localhost:27866/](http://localhost:27866/)
 
 #### Running Examples
 Once Aptomi is up and running and k8s clusters are set up, you can get started by running the following examples:
