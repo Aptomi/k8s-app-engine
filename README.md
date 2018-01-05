@@ -15,6 +15,9 @@ It is particularly useful in environments with multiple teams, clouds and data c
 plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
 designed to work with any container runtime and container orchestration technologies.
 
+## Demo
+[![asciicast](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
+
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
