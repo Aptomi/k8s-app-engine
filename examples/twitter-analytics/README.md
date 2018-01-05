@@ -35,8 +35,8 @@ a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob
 
     To feed cluster information into Aptomi, copy clusters template file and enter kubecontext configuration into it:
     ```
-    cp examples/03-twitter-analytics/policy/Sam/clusters.{yaml.template,yaml}
-    vi examples/03-twitter-analytics/policy/Sam/clusters.yaml
+    cp examples/twitter-analytics/policy/Sam/clusters.{yaml.template,yaml}
+    vi examples/twitter-analytics/policy/Sam/clusters.yaml
     ```
 
     If you are using the provided `./tools/demo-gke.sh` script, get clusters configuration by running the following command and paste output into `clusters.yaml`.
@@ -112,15 +112,15 @@ a way that Sam is a domain admin, John/Frank are namespace admins, and Alice/Bob
 
     Upload the list of clusters and ACL rules into Aptomi using CLI:
     ```
-    aptomictl policy apply --username Sam -f examples/03-twitter-analytics/policy/Sam
+    aptomictl policy apply --username Sam -f examples/twitter-analytics/policy/Sam
     ```
 1. Import analytics_pipeline service definition on behalf of Frank
     ```
-    aptomictl policy apply --username Frank -f examples/03-twitter-analytics/policy/Frank
+    aptomictl policy apply --username Frank -f examples/twitter-analytics/policy/Frank
     ```
 1. Import twitter_stats service definition on behalf of John
     ```
-    aptomictl policy apply --username John -f examples/03-twitter-analytics/policy/John
+    aptomictl policy apply --username John -f examples/twitter-analytics/policy/John
     ```
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
 that in Aptomi UI under "Policy Browser"
@@ -134,13 +134,13 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
     
     Once done, copy secrets.yaml and enter the created keys/tokens into it:
    ```
-   cp examples/03-twitter-analytics/_external/secrets/secrets.yaml.template /etc/aptomi/secrets.yaml
+   cp examples/twitter-analytics/_external/secrets/secrets.yaml.template /etc/aptomi/secrets.yaml
    vi /etc/aptomi/secrets.yaml
    ```
 
 1. Now let's have consumers declare 'dependencies' on the services defined by John and Frank. John requests an instance
     ```
-    aptomictl policy apply --wait --username John -f examples/03-twitter-analytics/policy/john-prod-ts.yaml
+    aptomictl policy apply --wait --username John -f examples/twitter-analytics/policy/john-prod-ts.yaml
     ```
 
     Aptomi allocates dedicated production instance in cluster `cluster-us-east` according to the rule `analytics_prod_goes_to_us_east` defined in [rules.yaml](policy/Sam/rules.yaml).
@@ -156,8 +156,8 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
 1. Alice and Bob request instances
     ```
-    aptomictl policy apply --wait --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
-    aptomictl policy apply --wait --username Bob -f examples/03-twitter-analytics/policy/bob-stage-ts.yaml
+    aptomictl policy apply --wait --username Alice -f examples/twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy apply --wait --username Bob -f examples/twitter-analytics/policy/bob-stage-ts.yaml
     ```
     We are assuming that Alice is a developer and she wants to test a different version of visualization code for twitter-stats.
     Bob is just a service consumer that wants to instantiate the same service, but look at the tweets from Mexico.
@@ -183,12 +183,12 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
     Alice removes her twitter-stats instance which runs in staging:
     ```
-    aptomictl policy delete --wait --username Alice -f examples/03-twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy delete --wait --username Alice -f examples/twitter-analytics/policy/alice-stage-ts.yaml
     ```
     John changes label for twitter-stats instance which runs in production:
     ```
-    sed -e 's/demo11/demo12/g' examples/03-twitter-analytics/policy/john-prod-ts.yaml > examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
-    aptomictl policy apply --wait --username John -f examples/03-twitter-analytics/policy/john-prod-ts-changed.yaml
+    sed -e 's/demo11/demo12/g' examples/twitter-analytics/policy/john-prod-ts.yaml > examples/twitter-analytics/policy/john-prod-ts-changed.yaml
+    aptomictl policy apply --wait --username John -f examples/twitter-analytics/policy/john-prod-ts-changed.yaml
     ```
 
     After that, if you reload tweeviz HTTP endpoints in the browser, you will see that:
@@ -197,5 +197,5 @@ applications in [Twitter Application Management Console](https://apps.twitter.co
 
 1. Carol belongs to 'mobile-dev' team, so she cannot instantiate any services according to the rule `reject_dependency_for_mobile_dev_users` defined in [rules.yaml](policy/Sam/rules.yaml).
     ```
-    aptomictl policy apply --wait --username Carol -f examples/03-twitter-analytics/policy/carol-stage-ts.yaml
+    aptomictl policy apply --wait --username Carol -f examples/twitter-analytics/policy/carol-stage-ts.yaml
     ```

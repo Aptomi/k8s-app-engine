@@ -46,7 +46,7 @@ designed to work with any container runtime and container orchestration technolo
 
 ## Features & Benefits
 - **Easy way to deploy and manage complex applications**
-  - See [example](examples/03-twitter-analytics/diagram.png) of a multi-service application based entirely on containers
+  - See [example](examples/twitter-analytics/diagram.png) of a multi-service application based entirely on containers
 - **Run on top of any container platform**
   - k8s, OpenShift (with support coming for AWS ECS, GKE, Docker Datacenter, Mesos)
 - **Friendly for Dev and Ops**
@@ -148,7 +148,7 @@ Example    | Description  | Diagram
 -----------|--------------|--------------
 [examples/01](examples/01) | Description of Example 1 | [Diagram for example #1](examples/01/diagram.png)  
 [examples/02](examples/02) | Description of Example 2 | [Diagram for example #2](examples/02/diagram.png)
-[examples/03-twitter-analytics](examples/03-twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Diagram for example #3](examples/03-twitter-analytics/diagram.png)
+[examples/twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Diagram](examples/twitter-analytics/diagram.png)
 
 ### Architecture & How It Works
 

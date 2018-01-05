@@ -17,7 +17,7 @@ POLICY_DIR=$(mktemp -d)
 POLICY_DIR_TMP=$(mktemp -d)
 
 # copy policy over, create secrets and clusters from templates
-cp -R examples/03-twitter-analytics/* $POLICY_DIR
+cp -R examples/twitter-analytics/* $POLICY_DIR
 cp ${POLICY_DIR}/_external/secrets/secrets.yaml.template ${CONF_DIR}/secrets.yaml
 cp ${POLICY_DIR}/policy/Sam/clusters.{yaml.template,yaml}
 
