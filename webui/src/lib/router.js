@@ -85,7 +85,7 @@ const router = new Router({
           path: 'slack',
           name: 'Slack',
           beforeEnter (to, from, next) {
-            window.location.href = 'https://slack.aptomi.io'
+            window.location.href = 'http://slack.aptomi.io'
           }
         },
         {
