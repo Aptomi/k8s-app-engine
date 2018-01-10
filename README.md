@@ -7,16 +7,24 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)]()
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
-[Aptomi](http://aptomi.io) simplifies roll-out, operation and control of complex container-based applications. Instead of dealing with
-thousands of individual containers, Dev and Ops can now talk services. Service-based approach enables Dev to move
-faster, while providing control and insights/contextual visibility to Ops.
+[Aptomi](http://aptomi.io) simplifies roll-out, operation and control of container-based applications on k8s. It introduces a
+service-centric abstraction that allows Dev and Ops to collaborate asynchronously.  It enables teams to create and operate services,
+share them across the organization, and fully control their lifecycle. Changes and updates are executed with a goal of minimizing
+disruptive impact on depending services.
 
 It is particularly useful in environments with multiple teams, clouds and data centers, where intent-based management
 plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
 designed to work with any container runtime and container orchestration technologies.
 
+![What is Aptomi](images/aptomi-what-is.png)
+
 ## Demo
+
+### Asciinema
 [![asciicast](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
+
+### Youtube (more detailed)
+[![youtube](http://img.youtube.com/vi/HL4RwoBnuTc/0.jpg)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
 
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -48,14 +56,15 @@ designed to work with any container runtime and container orchestration technolo
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features & Benefits
-- **Easy way to deploy and manage complex applications**
-  - See [example](examples/twitter-analytics/diagram.png) of a multi-service application based entirely on containers
-- **Run on top of any container platform**
+- **Easy way to deploy and manage applications**
+  - See [example](examples/twitter-analytics/diagram.png) of a multi-service application for k8s
+- **Designed to run on top of any container platform**
   - k8s, OpenShift (with support coming for AWS ECS, GKE, Docker Datacenter, Mesos)
 - **Friendly for Dev and Ops**
-  - Keep using your existing application templates (Helm, k8s YAMLs, ksonnet, Ansible, etc)
-  - Speak services, not containers. Collaborate between orgs and rely on services published by other teams
-  - Easy changes to the running code -- seconds to propagate updated parameters, relocate the whole stack to another cluster, restrict access, etc
+  - Think applications and services, not infrastructure primitives
+  - Keep using your existing application templates (Helm, Ksonnet, k8s YAMLs, etc)
+  - Make real-time changes to the running code (change parameters, relocate the whole application w/ dependencies to another cluster, restrict access, etc)
+  - Minimizes disruption impact of change on depending services
 - **Continuous state enforcement**
   - Desired state of all services is rendered as a system and continuously validated/enforced 
   - Built-in service discovery ensures all dependencies always are up to date    
@@ -187,11 +196,6 @@ Check out Aptomi source code from the repo:
 mkdir -p $GOPATH/src/github.com/Aptomi
 cd $GOPATH/src/github.com/Aptomi
 git clone https://github.com/Aptomi/aptomi.git
-```
-
-Install Helm, Kubectl clients:
-```
-./tools/install-clients.sh
 ```
 
 In order to build Aptomi, you must first tell Glide to fetch all of its dependencies. It will read the list of
