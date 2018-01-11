@@ -158,9 +158,9 @@ Once Aptomi is up and running and k8s clusters are set up, you can get started b
 
 Example    | Description  | Diagram
 -----------|--------------|--------------
-[examples/01](examples/01) | Description of Example 1 | [Diagram for example #1](examples/01/diagram.png)  
-[examples/02](examples/02) | Description of Example 2 | [Diagram for example #2](examples/02/diagram.png)
-[examples/twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, 2 k8s clusters | [Diagram](examples/twitter-analytics/diagram.png)
+[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple components, 2 k8s clusters | [Diagram](examples/twitter-analytics/diagram.png)
+
+More examples are coming.
 
 ### Architecture & How It Works
 
