@@ -200,6 +200,8 @@ For example, this would mean that each team will receive its own dedicated insta
           - "{{ .User.Labels.Team }}"
 ```
 
+When fulfilling a contract, Aptomi will process all contexts within that contract one by one and find the first matching context. Once context is selected, labels will be changed according to the `change-labels` section and service allocation will be done according to the corresponding "allocation" section within the context.
+
 ## Cluster
 
 [Cluster](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Cluster) is an entity which defines a cluster in Aptomi where containers can be deployed. Even though Aptomi is focused on k8s, it's designed to support
