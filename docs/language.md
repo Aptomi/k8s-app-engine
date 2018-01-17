@@ -43,6 +43,61 @@ When defining any object in Aptomi, you must specify the essential metadata:
 
 ## ACL
 
+Before using Aptomi for the first time, it's required to set up [access control rights](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#ACLRule) for Aptomi **domain** and **namespaces** for different users/teams.
+
+There are three built-in user roles in Aptomi:
+* **domain admin** - has full access rights to all Aptomi namespaces, including `system` namespace
+  * Domain admin can change global ACL, global list of rules and global list of clusters, which all reside in `system` namespace
+  * Domain admin can define and publish services, contracts, dependencies, rules in any namespace
+* **namespace admin** - has full access rights for a given list of Aptomi namespaces
+  * Namespace admin can only view, but not manage objects in `system` namespace
+  * Namespace admin can define and publish services, contracts, dependencies, rules in a given set of Aptomi namespaces
+* **service consumer** - can only consume services in a given list of Aptomi namespaces
+  * Service consumer has view only access for all namespaces
+  * Service consumer can declare dependencies (and therefore consume services) in a given list of Aptomi namespaces
+
+For example, this would promote all users with 'global_ops == true' label into domain admins:
+```yaml
+- kind: aclrule
+  metadata:
+    namespace: system
+    name: domain_admins
+  criteria:
+    require-all:
+      - global_ops
+  actions:
+    add-role:
+      domain-admin: '*'
+```
+
+This would promote all users with 'is_operator == true' label into namespace admins for namespace 'main':
+```yaml
+- kind: aclrule
+  metadata:
+    namespace: system
+    name: namespace_admins_for_main
+  criteria:
+    require-all:
+      - is_operator
+  actions:
+    add-role:
+      namespace-admin: main
+```
+
+This would make all users with 'org == dev' label into service consumers for namespace 'main':
+```yaml
+- kind: aclrule
+  metadata:
+    namespace: system
+    name: service_consumers_for_main
+  criteria:
+    require-all:
+      - org == 'dev'
+  actions:
+    add-role:
+      service-consumer: main
+```
+
 ## Service
 
 [Service](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Service) is an entity that you would use to define structure of your application and its dependencies.
@@ -355,8 +410,8 @@ It's also possible to have an empty criteria without any clauses (or even omit `
 All text templates used in Aptomi should follow the syntax of [text/template](https://golang.org/pkg/text/template/) and must evaluate to string.
 
 The most common use of text templates in Aptomi is code & discovery parameters inside a service:
-* **code parameters** allow to
-* **discovery parameters** allow to
+* **code parameters** - allow to pass parameters into Helm charts, substituting variables with calculated label values
+* **discovery parameters** - allow components to expose their discovery parameters to other services/components, substituting variables with calculated label values
 
 You can reference the following variables in text templates:
 
