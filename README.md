@@ -44,7 +44,6 @@ designed to work with any container runtime and container orchestration technolo
     - [Components](#components)
     - [State Enforcement](#state-enforcement)
     - [Language](#language)
-  - [Aptomi language](#aptomi-language)
 - [Dev Guide](#dev-guide)
   - [Building From Source](#building-from-source)
   - [Tests & Code Validation](#tests--code-validation)
@@ -173,8 +172,7 @@ More examples are coming.
 #### Language
 ![Aptomi Language](images/aptomi-language.png)
 
-### Aptomi language
-TODO: policy documentation 
+See [language documentation](docs/language.md)
 
 ## Dev Guide
 

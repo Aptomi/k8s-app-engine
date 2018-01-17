@@ -130,6 +130,7 @@ endif
 .PHONY: toc
 toc: prepare_doctoc
 	doctoc README.md
+	doctoc docs/language.md
 
 HAS_DOCTOC := $(shell command -v doctoc)
 
