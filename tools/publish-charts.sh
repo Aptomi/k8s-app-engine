@@ -5,10 +5,11 @@ set -eux
 CHARTS=${PWD}/charts
 DIST=${PWD}/charts-dist
 
-#helm repo add aptomi http://aptomi.io/charts
+helm repo add aptomi http://aptomi.io/charts
+helm repo update
+
 rm -rf ${DIST} || true
-mkdir ${DIST}
-#git clone git@github.com:Aptomi/charts.git ${DIST}
+git clone git@github.com:Aptomi/charts.git ${DIST}
 
 for dir in ${CHARTS}/*/; do
     pushd ${dir}
@@ -23,7 +24,7 @@ pushd ${DIST}
         helm package ${dir}
     done
 
-    helm repo index --url http://aptomi.io/charts .
+    helm repo index --url http://aptomi.io/charts --merge index.yaml .
     git add -f *tgz index.yaml
     git commit -a -m "Charts updated at $(date)"
     git push
