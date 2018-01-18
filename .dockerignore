@@ -1,6 +1,12 @@
 /.idea
+/charts
+/cmd
+/dist
+/examples
+/images
+/pkg
+/tools
 /vendor
-/webui/dist
-/webui/node_modules
-/aptomi
+/webui
+
 /aptomictl
