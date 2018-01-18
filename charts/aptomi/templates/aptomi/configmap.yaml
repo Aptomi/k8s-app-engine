@@ -1,0 +1,41 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app: {{ template "fullname" . }}
+data:
+  aptomi-config: |-
+    debug: true
+
+    api:
+      host: 0.0.0.0
+
+    enforcer:
+      disabled: false
+
+    secretsDir: /etc/aptomi/
+
+    domainAdminOverrides:
+      Sam: true
+
+    users:
+      ldap:
+        - host: localhost
+          port: 10389
+          basedn: "o=aptomiOrg"
+          filter: "(&(objectClass=organizationalPerson))"
+          filterbyname: "(&(objectClass=organizationalPerson)(cn=%s))"
+          labeltoattributes:
+            name: cn
+            description: description
+            global_ops: isglobalops
+            is_operator: isoperator
+            mail: mail
+            team: team
+            org: o
+            short-description: role
+            deactivated: deactivated

@@ -1,0 +1,31 @@
+# Default values for aptomi.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: aptomi/
+  name: aptomi
+  tag: 0.1.2
+  pullPolicy: Always # IfNotPresent
+
+port: 27866
+
+probeInitialDelaySeconds: 5
+probePeriodSeconds: 15
+
+resources:
+  #requests:
+  #  cpu: 100m
+  #  memory: 512Mi
+  #limits:
+  #  cpu: 100m
+  #  memory: 512Mi
+
+service:
+  type: NodePort # or ClusterIP or LoadBalancer
+
+  nodePort: ""
+
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+
+  annotations: {}

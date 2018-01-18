@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "fullname" . }}
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: aptomi-config
+          mountPath: /etc/aptomi
+        readinessProbe:
+          exec:
+            command: [ "/bin/sh", "-ce", "wget -O - -T {{ .Values.probePeriodSeconds }} -q localhost:{{ .Values.port }}/version | grep gitversion" ]
+          initialDelaySeconds: {{ .Values.probeInitialDelaySeconds }}
+          periodSeconds: {{ .Values.probePeriodSeconds }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+      volumes:
+        - name: aptomi-config
+          configMap:
+            name: {{ template "fullname" . }}
+            items:
+              - key: aptomi-config
+                path: config.yml
