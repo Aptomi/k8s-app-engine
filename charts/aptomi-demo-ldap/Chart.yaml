@@ -1,0 +1,4 @@
+description: A Helm chart for Aptomi demo LDAP server
+name: aptomi-demo-ldap
+version: 0.1.2-chart1
+appVersion: 0.1.2
