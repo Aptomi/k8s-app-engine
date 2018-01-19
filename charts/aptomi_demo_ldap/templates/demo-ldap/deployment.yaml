@@ -18,7 +18,7 @@ spec:
         app: {{ template "aptomi_demo_ldap.fullname" . }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: "aptomi-demo-ldap"
         image: "{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         readinessProbe:
