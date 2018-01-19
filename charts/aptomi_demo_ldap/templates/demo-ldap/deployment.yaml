@@ -1,12 +1,12 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "aptomi_demo_ldap.fullname" . }}
   labels:
     heritage: "{{ .Release.Service }}"
     release: "{{ .Release.Name }}"
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    app: {{ template "fullname" . }}
+    app: {{ template "aptomi_demo_ldap.fullname" . }}
 spec:
   replicas: 1
   strategy:
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+        app: {{ template "aptomi_demo_ldap.fullname" . }}
     spec:
       containers:
       - name: {{ .Chart.Name }}
