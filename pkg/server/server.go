@@ -71,9 +71,9 @@ func (server *Server) initPolicyOnFirstRun() {
 	// if policy does not exist, let's create the first version (it should be created here, before we start the server)
 	if policy == nil {
 		log.Infof("Policy not found in the store (likely, it's a first run of Aptomi server). Creating empty policy")
-		err := server.store.InitPolicy()
-		if err != nil {
-			panic(fmt.Sprintf("error while creating empty policy: %s", err))
+		initErr := server.store.InitPolicy()
+		if initErr != nil {
+			panic(fmt.Sprintf("error while creating empty policy: %s", initErr))
 		}
 	}
 }
