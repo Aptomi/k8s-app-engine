@@ -14,6 +14,8 @@ spec:
       maxUnavailable: 0
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/aptomi/configmap.yaml") . | sha256sum }}
       labels:
         app: {{ template "fullname" . }}
     spec:
