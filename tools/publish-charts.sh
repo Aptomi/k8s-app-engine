@@ -29,3 +29,5 @@ pushd ${DIST}
     git commit -a -m "Charts updated at $(date)"
     git push
 popd
+
+rm -rf ${DIST}
