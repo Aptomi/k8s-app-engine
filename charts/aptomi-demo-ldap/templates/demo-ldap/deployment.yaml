@@ -21,5 +21,10 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        readinessProbe:
+          exec:
+            command: [ "/bin/sh", "-ce", "ldapsearch -h localhost -p 10389 -D uid=admin,ou=system -w secret" ]
+          initialDelaySeconds: {{ .Values.probeInitialDelaySeconds }}
+          periodSeconds: {{ .Values.probePeriodSeconds }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
