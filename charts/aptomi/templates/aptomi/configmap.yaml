@@ -22,10 +22,11 @@ data:
     domainAdminOverrides:
       Sam: true
 
+    {{ if .Values.demoLDAP.deployChart }}
     users:
       ldap:
-        - host: localhost
-          port: 10389
+        - host: {{ printf "aptomi-demo-ldap-%s" .Release.Name  | trunc 55 | trimSuffix "-" }}
+          port: {{ .Values.aptomi_demo_ldap.port }}
           basedn: "o=aptomiOrg"
           filter: "(&(objectClass=organizationalPerson))"
           filterbyname: "(&(objectClass=organizationalPerson)(cn=%s))"
@@ -39,3 +40,4 @@ data:
             org: o
             short-description: role
             deactivated: deactivated
+    {{ end }}
