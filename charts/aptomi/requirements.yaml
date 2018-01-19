@@ -1,0 +1,5 @@
+dependencies:
+- name: aptomi-demo-ldap
+  version: ^1
+  repository: http://aptomi.io/charts
+  condition: demoLDAP.deployChart
