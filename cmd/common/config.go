@@ -68,7 +68,7 @@ func processConfigAbsPath(viper *vp.Viper, path string) error {
 			viper.SetConfigFile(path)
 		}
 	} else if os.IsNotExist(err) {
-		return fmt.Errorf("specified config path %s doesn't exists: %s", path, err)
+		return fmt.Errorf("specified config path %s doesn't exist: %s", path, err)
 	} else {
 		return fmt.Errorf("error while processing specified config path %s: %s", path, err)
 	}

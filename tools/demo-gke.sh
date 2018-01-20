@@ -257,7 +257,7 @@ function gke_cluster_delete() {
     zone="$2"
 
     if ! gke_cluster_exists $name $zone ; then
-        log "Cluster $(cluster_log_name) doesn't exists"
+        log "Cluster $(cluster_log_name) doesn't exist"
     else
         log "Deleting cluster $(cluster_log_name)"
 
@@ -387,7 +387,7 @@ function gke_firewall_delete() {
     name="$1"
 
     if ! gke_firewall_exists ; then
-        log "Firewall rules '$name' doesn't exists"
+        log "Firewall rules '$name' doesn't exist"
     else
         log "Deleting firewall rules '$name'"
 
@@ -400,7 +400,7 @@ function gke_firewall_delete() {
     fi
 }
 
-#################### K8s healt check
+#################### K8s health check
 
 function k8s_alive() {
     name="$1"
