@@ -60,6 +60,7 @@ archive:
 
 dockers:
   - binary: aptomi
+    dockerfile: Dockerfile
     image: aptomi/aptomi
     tag_templates:
       - "{{ .Major }}"
@@ -68,6 +69,7 @@ dockers:
       - latest
 
   - binary: aptomictl
+    dockerfile: Dockerfile.client
     image: aptomi/aptomictl
     tag_templates:
       - "{{ .Major }}"
