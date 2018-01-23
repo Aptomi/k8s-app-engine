@@ -96,6 +96,23 @@ The best way to install Aptomi is to download its latest release, which contains
 
 You can run those binaries locally.
 
+Additionally you can download binary using `go get -u gopkg.in/Aptomi/aptomi.v0/cmd/aptomictl` command.
+Make sure that your `$GOPATH/bin` is in the `$PATH` to use it.
+You can rerun this command to update your client.
+
+And finally it's possible just to use dockerized client in a following way:
+
+```bash
+# just run docker run directly:
+docker run -it --rm -v "$HOME/.aptomi/":"/root/.aptomi" aptomi/aptomictl:0 policy show
+
+# or add alias for it:
+alias aptomictl='docker run -it --rm -v "$HOME/.aptomi/":"/root/.aptomi" aptomi/aptomictl:0'
+
+# to update client you'll need to run:
+docker pull aptomi/aptomictl:0
+```
+
 ### Getting Started
 
 #### Configuring LDAP
