@@ -36,3 +36,11 @@ service:
   loadBalancerSourceRanges: []
 
   annotations: {}
+
+persistence:
+  type: emptyDir # or hostPath or PersistentVolumeClaim
+
+  #storageClass: ""
+  volumeSize: 10Gi
+
+  hostPath: ""

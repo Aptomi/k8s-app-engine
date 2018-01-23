@@ -10,8 +10,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    rollingUpdate:
-      maxUnavailable: 0
+    type: Recreate
   template:
     metadata:
       annotations:
@@ -26,6 +25,8 @@ spec:
         volumeMounts:
         - name: aptomi-config
           mountPath: /etc/aptomi
+        - name: aptomi-db
+          mountPath: /etc/aptomi/data
         readinessProbe:
           exec:
             command: [ "/bin/sh", "-ce", "wget -O - -T {{ .Values.probePeriodSeconds }} -q localhost:{{ .Values.port }}/version | grep gitversion" ]
@@ -42,3 +43,13 @@ spec:
                 path: config.yml
               - key: aptomi-secrets
                 path: secrets.yaml
+        - name: aptomi-db
+        {{- if eq .Values.persistence.type "PersistentVolumeClaim" }}
+          persistentVolumeClaim:
+            claimName: {{ template "fullname" . }}
+        {{- else if eq .Values.persistence.type "emptyDir" }}
+          emptyDir: {}
+        {{- else if eq .Values.persistence.type "hostPath" }}
+          hostPath:
+            path: "{{ .Values.persistence.hostPath }}"
+        {{- end }}
