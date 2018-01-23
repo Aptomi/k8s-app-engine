@@ -32,3 +32,6 @@ service:
   loadBalancerSourceRanges: []
 
   annotations: {}
+
+secrets:
+# |

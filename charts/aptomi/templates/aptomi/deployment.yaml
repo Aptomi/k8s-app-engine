@@ -40,3 +40,5 @@ spec:
             items:
               - key: aptomi-config
                 path: config.yml
+              - key: aptomi-secrets
+                path: secrets.yaml

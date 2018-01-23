@@ -41,3 +41,5 @@ data:
             short-description: role
             deactivated: deactivated
     {{ end }}
+  aptomi-secrets: |
+{{ toYaml .Values.secrets | indent 4 }}
