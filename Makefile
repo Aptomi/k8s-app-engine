@@ -99,6 +99,7 @@ install: build
 .PHONY: release
 release: prepare_goreleaser
 	goreleaser --rm-dist
+	tools/publish-charts.sh
 
 .PHONY: fmt
 fmt:
