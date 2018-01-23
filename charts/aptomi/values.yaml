@@ -7,6 +7,10 @@ image:
   tag: 0.1.2
   pullPolicy: Always # IfNotPresent
 
+# Aptomi secrets to be deployed (plain text)
+secrets:
+# |
+
 demoLDAP:
   deployChart: false
 
@@ -32,6 +36,3 @@ service:
   loadBalancerSourceRanges: []
 
   annotations: {}
-
-secrets:
-# |
