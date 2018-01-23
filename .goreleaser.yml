@@ -1,5 +1,12 @@
 project_name: aptomi
 
+release:
+  name_template: '{{.Tag}}'
+  prerelease: true
+  github:
+    owner: Aptomi
+    name: aptomi
+
 builds:
   - binary: aptomi
     main: ./cmd/aptomi/
@@ -51,9 +58,19 @@ archive:
     - examples/**/*
     - tools/demo-*
 
-release:
-  name_template: '{{.Tag}}'
-  prerelease: true
-  github:
-    owner: Aptomi
-    name: aptomi
+dockers:
+  - binary: aptomi
+    image: aptomi/aptomi
+    tag_templates:
+      - "{{ .Major }}"
+      - "{{ .Major }}.{{ .Minor }}"
+      - "{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - latest
+
+  - binary: aptomictl
+    image: aptomi/aptomictl
+    tag_templates:
+      - "{{ .Major }}"
+      - "{{ .Major }}.{{ .Minor }}"
+      - "{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - latest
