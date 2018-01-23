@@ -1,5 +1,5 @@
 description: A Helm chart for Aptomi
 name: aptomi
-version: 0.1.2-chart1
+version: 0.1.4-chart1
 icon: https://raw.githubusercontent.com/Aptomi/aptomi/master/images/aptomi-logo-new.png
-appVersion: 0.1.2
+appVersion: 0.1.4

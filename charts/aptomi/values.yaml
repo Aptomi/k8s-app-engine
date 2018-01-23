@@ -4,7 +4,7 @@
 image:
   repository: aptomi/
   name: aptomi
-  tag: 0.1.2
+  tag: 0.1.4
   pullPolicy: Always # IfNotPresent
 
 # Aptomi secrets to be deployed (plain text)
