@@ -2,7 +2,7 @@ project_name: aptomi
 
 release:
   name_template: '{{.Tag}}'
-  prerelease: true
+  prerelease: false
   github:
     owner: Aptomi
     name: aptomi
