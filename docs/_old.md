@@ -63,33 +63,3 @@ follow these [step-by-step instructions](http://directory.apache.org/apacheds/ba
     ```
     &{{policy} {1 2017-11-19 00:00:05.613151 -0800 PST aptomi} map[]}
     ```
-
-
-# Starting LDAP container
-
-* Prerequisites - docker
-
-You must start a supplied LDAP container locally, so you can run through the examples provided with Aptomi:
-```bash
-docker run --name aptomi-ldap-demo -d -p 10389:10389 aptomi/ldap-demo:latest
-```
-
-Ensure that status of LDAP container is "Up":
-```bash
-docker ps -a
-```
-
-# Common Issues
-
-## Status of LDAP container is "Exited"
-If the status of LDAP container is "Exited", then you likely have an issue with Docker itself not properly working on your machine.
-You can still look at the logs of LDAP container, but you will likely find a one-liner error there:
-```bash
-docker logs aptomi-ldap-demo
-```
-
-## Unable to login into UI (check username/password)
-Likely there is a connection issue to LDAP. Check Aptomi server logs for:
-```
-ERRO[0000] Error while serving request: LDAP Result Code 200 "Network Error": dial tcp [::1]:10389: getsockopt: connection refused
-```

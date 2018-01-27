@@ -96,7 +96,7 @@ Installation Mode     | Aptomi / UI | App Deployment | Description
 [Compact](docs/install_compact.md) | *Yes (local)* | *Yes* | Aptomi binaries will be installed on a local machine. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
 [Kubernetes](docs/install_kubernetes.md) | *Yes (in k8s)* | *Yes* | Aptomi itself will be deployed on k8s in a container. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
 
-You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and will NOT perform any app deployment to k8s:
+You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will **NOT** have LDAP support, will use a fake executor and thus will **NOT** perform any app deployment to k8s:
 
 Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
