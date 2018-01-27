@@ -150,8 +150,8 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
 
 1. Create config for Aptomi server and start it. It will serve API and UI :
     ```
-    mkdir /etc/aptomi
-    sudo cp examples/config/server.yaml /etc/aptomi/config.yaml
+    mkdir /var/lib/aptomi
+    sudo cp examples/config/server.yaml /var/lib/aptomi/config.yaml
     aptomi server
     ```
 
