@@ -199,7 +199,7 @@ enforcer:
 users:
   file:
     - ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
-  ldap:
+  ldap-disabled:
     - host: localhost
       port: 10389
       basedn: "o=aptomiOrg"
