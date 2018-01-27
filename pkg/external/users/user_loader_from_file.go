@@ -46,7 +46,7 @@ func (loader *UserLoaderFromFile) LoadUsersAll() *lang.GlobalUsers {
 	for _, u := range userList {
 		result.Users[strings.ToLower(u.Name)] = u
 		if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
-			u.Admin = true
+			u.DomainAdmin = true
 		}
 	}
 	loader.cache.Set("users", result, cache.DefaultExpiration)

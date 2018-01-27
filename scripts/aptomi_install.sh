@@ -9,8 +9,7 @@ APTOMI_SERVER_CONFIG_DIR="/etc/aptomi"
 APTOMI_CLIENT_CONFIG_DIR="$HOME/.aptomi"
 APTOMI_DB_DIR="/var/lib/aptomi"
 
-# TODO: this will need to be removed once https://github.com/Aptomi/aptomi/issues/216 is fixed
-APTOMI_CLIENT_AUTH_STR='--username dummy'
+APTOMI_CLIENT_AUTH_STR='--username admin'
 
 SCRIPT_NAME=`basename "$0"`
 REPO_NAME='Aptomi/aptomi'
@@ -188,7 +187,7 @@ function create_server_config() {
 debug: true
 
 api:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 27866
 
 db:
@@ -197,10 +196,9 @@ db:
 enforcer:
   interval: 5s
 
-domainAdminOverrides:
-  Sam: true
-
 users:
+  file:
+    - ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
   ldap:
     - host: localhost
       port: 10389
@@ -220,6 +218,19 @@ users:
 EOL
         run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
         run_as_root cp ${TMP_DIR}/config.yaml ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
+    fi
+
+    log_sub "Creating built-in users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml$COLOR_RESET"
+    if [ -f ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml ]; then
+        log_warn "Built-in for Aptomi server already exists. Keeping existing list of users"
+    else
+        cat >${TMP_DIR}/users_builtin.yaml <<EOL
+- name: admin
+  passwordhash: "\$2a\$10\$2eh0YI/gzj2UdxN8j52NseQW54BsZ5cUGhFstblR1D8UOGMUCwuMm"
+  domainadmin: true
+EOL
+        run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
+        run_as_root cp ${TMP_DIR}/users_builtin.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
     fi
 
     log_sub "Creating directory for Aptomi server database: $COLOR_GREEN${APTOMI_DB_DIR}$COLOR_RESET"
@@ -282,6 +293,7 @@ function test_aptomi() {
     fi
 
     # Run 'aptomictl version' and remove leading whitespaces
+    # TODO: $APTOMI_CLIENT_AUTH_STR will need to be removed from here once https://github.com/Aptomi/aptomi/issues/216 is fixed
     local CLIENT_VERSION_OUTPUT=$(aptomictl $APTOMI_CLIENT_AUTH_STR version 2>/dev/null | grep 'git commit')
     CLIENT_VERSION_OUTPUT="$(echo -e "${CLIENT_VERSION_OUTPUT}" | sed -e 's/^[[:space:]]*//')"
     if [ ! -z "${CLIENT_VERSION_OUTPUT}" ]; then

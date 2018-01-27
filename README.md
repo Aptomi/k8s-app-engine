@@ -1,10 +1,12 @@
 ![Aptomi Logo](images/aptomi-logo-new.png)
 
+[![Release](https://img.shields.io/github/release/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/releases/latest)
+[![License](https://img.shields.io/github/license/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/LICENSE.md)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Aptomi/aptomi)](https://goreportcard.com/report/github.com/Aptomi/aptomi)
 [![Build Status](https://ci.aptomi.io/buildStatus/icon?job=aptomi%20-%20tests)](https://ci.aptomi.io/job/aptomi%20-%20tests/)
 [![Coverage Status](https://coveralls.io/repos/github/Aptomi/aptomi/badge.svg)](https://coveralls.io/github/Aptomi/aptomi)
 [![Godoc](https://godoc.org/github.com/Aptomi/aptomi?status.svg)](https://godoc.org/github.com/Aptomi/aptomi)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)]()
+[![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/commits/master)
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
 [Aptomi](http://aptomi.io) simplifies roll-out, operation and control of container-based applications on k8s. It introduces a
@@ -33,17 +35,14 @@ designed to work with any container runtime and container orchestration technolo
 
 - [Features & Benefits](#features--benefits)
 - [Where Aptomi is located in the stack](#where-aptomi-is-located-in-the-stack)
-- [User Guide](#user-guide)
+- [Quickstart](#quickstart)
   - [Installation](#installation)
-  - [Getting Started](#getting-started)
-    - [Configuring LDAP](#configuring-ldap)
-    - [Creating k8s Clusters](#creating-k8s-clusters)
-    - [Starting Aptomi](#starting-aptomi)
-    - [Running Examples](#running-examples)
-  - [Architecture & How It Works](#architecture--how-it-works)
-    - [Components](#components)
-    - [State Enforcement](#state-enforcement)
-    - [Language](#language)
+  - [Preparing k8s Clusters](#preparing-k8s-clusters)
+  - [Running Examples](#running-examples)
+- [Architecture & How It Works](#architecture--how-it-works)
+  - [Components](#components)
+  - [State Enforcement](#state-enforcement)
+  - [Language](#language)
 - [Dev Guide](#dev-guide)
   - [Building From Source](#building-from-source)
   - [Tests & Code Validation](#tests--code-validation)
@@ -87,46 +86,21 @@ higher-level policy rules (see examples above) and configure the underlying infr
 
 ![Aptomi Stack](images/aptomi-stack.png) 
 
-## User Guide
+## Quickstart
 
 ### Installation
-The best way to install Aptomi is to download its latest release, which contains compiled server and client binaries for various platforms:
-- Aptomi Server is an all-in-one binary with embedded DB store, which serves API requests, runs UI, as well as does deployment and continuous state enforcement
-- Aptomi Client is a client for talking to Aptomi Server. It allows end-users of Aptomi to feed YAML files into Aptomi Server over REST API
+There are several ways to install Aptomi. You may pick one that suits your needs the best:
 
-You can run those binaries locally.
+Installation Mode     | Aptomi / UI | App Deployment | Description
+----------------------|--------------------|----------------|-------------
+[Concepts](docs/install_concepts.md) | *Yes (local)* | *No* | This is **NOT** a fully functional installation. Use this only if you want get familiar with Aptomi concepts, API and UI. Aptomi binaries will be installed on a local machine, it will be pre-uploaded with an example, while the actual engine for deploying apps to k8s will be disabled.
+[Compact](docs/install_compact.md) | *Yes (local)* | *Yes* | Aptomi binaries will be installed on a local machine. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
+[Kubernetes](docs/install_kubernetes.md) | *Yes (in k8s)* | *Yes* | Aptomi itself will be deployed on k8s in a container. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
 
-Additionally you can download binary using `go get -u gopkg.in/Aptomi/aptomi.v0/cmd/aptomictl` command.
-Make sure that your `$GOPATH/bin` is in the `$PATH` to use it.
-You can rerun this command to update your client.
+### Preparing k8s Clusters
 
-And finally it's possible just to use dockerized client in a following way:
+TODO: ...
 
-```bash
-# just run docker run directly:
-docker run -it --rm -v "$HOME/.aptomi/":"/root/.aptomi" aptomi/aptomictl:0 policy show
-
-# or add alias for it:
-alias aptomictl='docker run -it --rm -v "$HOME/.aptomi/":"/root/.aptomi" aptomi/aptomictl:0'
-
-# to update client you'll need to run:
-docker pull aptomi/aptomictl:0
-```
-
-### Getting Started
-
-#### Configuring LDAP
-Aptomi needs to be configured with user data source in order to enable UI login and make policy decisions based on users' labels/properties. It's recommended to
-start with LDAP, which is also required by Aptomi examples and smoke tests.
-
-1. LDAP Server with sample users is provided in a docker container. To download and start the published LDAP server image, run:
-    ```
-    ./tools/demo-ldap.sh
-    ```
-2. Even though it's not required, you may want to download and install [Apache Directory Studio](http://directory.apache.org/studio/) to familiarize yourself with the user data in provided in sample LDAP server. Once installed,
-follow these [step-by-step instructions](http://directory.apache.org/apacheds/basic-ug/1.4.2-changing-admin-password.html) to connect to LDAP and browse it. Use default credentials given in the manual.
-
-#### Creating k8s Clusters
 You need to have access to k8s cluster in order to deploy services from the provided examples. Two k8s clusters will enable you to
 take full advantage of Aptomi policy engine and use cluster-based rules.
 1. If you don't have k8s clusters set up, follow [these instructions](examples/README.md) and run the provided script to create them in Google Cloud.
@@ -134,42 +108,10 @@ take full advantage of Aptomi policy engine and use cluster-based rules.
     ./tools/demo-gke.sh up
     ```
 
-#### Starting Aptomi
-1. Download the latest release of Aptomi from [releases](https://github.com/Aptomi/aptomi/releases).
-    It comes with server and client binaries as well as examples directory and needed tools. Unpack it into some directory:
-    ```
-    export aptomi_version=X.Y.Z
-    export aptomi_os=darwin # or linux
-    export aptomi_arch=amd64 # or 386
-    export aptomi_name=aptomi_${aptomi_version}_${aptomi_os}_${aptomi_arch}
+### Running Examples
 
-    wget https://github.com/Aptomi/aptomi/releases/download/v${aptomi_version}/${aptomi_name}.tar.gz
-    tar xzf ${aptomi_name}.tar.gz
-    cd ${aptomi_name}
-    ```
+TODO: ...
 
-1. Create config for Aptomi server and start it. It will serve API and UI :
-    ```
-    mkdir /var/lib/aptomi
-    sudo cp examples/config/server.yaml /var/lib/aptomi/config.yaml
-    aptomi server
-    ```
-
-1. Create config for Aptomi client and make sure it can connect to the server:
-    ```
-    mkdir ~/.aptomi
-    cp examples/config/client.yaml ~/.aptomi/config.yaml
-    aptomictl -u Sam policy show
-    ```
-    You should be able to see:
-    ```
-    &{{policy} {1 2017-11-19 00:00:05.613151 -0800 PST aptomi} map[]}
-    ```
-
-1. Open Web UI and log in (use 'sam:sam', it's a user from sample LDAP server running locally in a container)
-    [http://localhost:27866/](http://localhost:27866/)
-
-#### Running Examples
 Once Aptomi is up and running and k8s clusters are set up, you can get started by running the following examples:
 
 Example    | Description  | Diagram
@@ -178,15 +120,15 @@ Example    | Description  | Diagram
 
 More examples are coming.
 
-### Architecture & How It Works
+## Architecture & How It Works
 
-#### Components
+### Components
 ![Aptomi Components](images/aptomi-components.png) 
 
-#### State Enforcement
+### State Enforcement
 ![Aptomi Enforcement](images/aptomi-enforcement.png)
 
-#### Language
+### Language
 ![Aptomi Language](images/aptomi-language.png)
 
 See [language documentation](docs/language.md)

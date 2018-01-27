@@ -357,9 +357,9 @@ func (loader *UserLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
 		userMap := make(map[string]*lang.User)
 		for i := 0; i < loader.users; i++ {
 			user := &lang.User{
-				Name:   "user-" + strconv.Itoa(i),
-				Labels: loader.labels,
-				Admin:  true,
+				Name:        "user-" + strconv.Itoa(i),
+				Labels:      loader.labels,
+				DomainAdmin: true,
 			}
 			userMap[user.Name] = user
 		}

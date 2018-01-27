@@ -12,10 +12,10 @@ type User struct {
 	// Labels is a set of 'name'->'value' string labels, attached to the user
 	Labels map[string]string
 
-	// Admin is a special bool flag, which allows to mark certain users as domain admins. It's useful for Aptomi
+	// DomainAdmin is a special bool flag, which allows to mark certain users as domain admins. It's useful for Aptomi
 	// bootstrap process, when someone needs to upload ACL rules into Aptomi (but his role is not defined in ACL,
 	// because ACL list is empty when Aptomi is first installed)
-	Admin bool
+	DomainAdmin bool
 }
 
 // GlobalUsers contains the map of users by their name

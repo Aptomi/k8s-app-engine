@@ -53,7 +53,7 @@ func (resolver *ACLResolver) GetUserRoleMap(user *User) (map[string]map[string]b
 	}
 
 	result := NewRuleActionResult(NewLabelSet(make(map[string]string)))
-	if user.Admin {
+	if user.DomainAdmin {
 		// this user is explicitly specified as domain admin
 		result.RoleMap[domainAdmin.ID] = make(map[string]bool)
 		result.RoleMap[domainAdmin.ID][namespaceAll] = true

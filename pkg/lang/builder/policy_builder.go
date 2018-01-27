@@ -75,9 +75,9 @@ func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Cont
 // AddUser creates a new user who can consume services from the 'main' namespace and adds it to the policy
 func (builder *PolicyBuilder) AddUser() *lang.User {
 	result := &lang.User{
-		Name:   util.RandomID(builder.random, idLength),
-		Labels: map[string]string{},
-		Admin:  true, // this will ensure that this user can consume services
+		Name:        util.RandomID(builder.random, idLength),
+		Labels:      map[string]string{},
+		DomainAdmin: true, // this will ensure that this user can consume services
 	}
 	builder.users.AddUser(result)
 	return result

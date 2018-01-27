@@ -167,7 +167,7 @@ func TestAclResolverAdminUser(t *testing.T) {
 	var rules = []*ACLRule{}
 	testCases := []aclTestCase{
 		{
-			user:      &User{Name: "1", Admin: true},
+			user:      &User{Name: "1", DomainAdmin: true},
 			role:      domainAdmin,
 			namespace: namespaceAll,
 			expected:  true,

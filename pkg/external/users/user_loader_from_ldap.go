@@ -51,7 +51,7 @@ func (loader *UserLoaderFromLDAP) LoadUsersAll() *lang.GlobalUsers {
 	for _, u := range ldapUsers {
 		result.Users[strings.ToLower(u.Name)] = u
 		if _, exist := loader.domainAdminOverrides[strings.ToLower(u.Name)]; exist {
-			u.Admin = true
+			u.DomainAdmin = true
 		}
 	}
 	loader.cache.Set("ldapUsers", result, cache.DefaultExpiration)
