@@ -320,7 +320,8 @@ function test_aptomi() {
     fi
 
     log_sub "Stopping aptomi server (PID: ${SERVER_PID})"
-    kill ${SERVER_PID} &>/dev/null || true
+    kill ${SERVER_PID} 2>/dev/null
+    wait ${SERVER_PID} 2>/dev/null
 }
 
 # Initial checks
