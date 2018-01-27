@@ -92,7 +92,7 @@ function verify_supported_platform() {
 }
 
 function get_latest_release() {
-    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub API
+    curl --silent "https://api.github.com/repos/$REPO_NAME/releases/latest" | # Get latest release from GitHub API
     grep '"tag_name":' |                                              # Filter out tag_name line
     sed -E 's/.*"([^"]+)".*/\1/'                                      # Parse out JSON value
 }
@@ -103,7 +103,7 @@ function download_and_install_release() {
     local VERSION=$3
 
     if [ -z "${VERSION}" ]; then
-        log_err "Unable to get the latest release from GitHub"
+        log_err "Unable to get the latest release from GitHub (https://api.github.com/repos/$REPO_NAME/releases/latest)"
         exit 1
     fi
     log_sub "Version: $COLOR_GREEN$VERSION$COLOR_RESET"
@@ -345,7 +345,7 @@ verify_supported_platform $ARCH $OS
 
 # Download the latest release from GitHub and install it
 log "Installing the latest release from GitHub"
-VERSION=$(get_latest_release $REPO_NAME)
+VERSION=$(get_latest_release)
 download_and_install_release $ARCH $OS $VERSION
 
 # Set up server and client locally on the same host
