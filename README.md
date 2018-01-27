@@ -93,9 +93,14 @@ There are several ways to install Aptomi. You may pick one that suits your needs
 
 Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
-[Concepts](docs/install_concepts.md) | *Yes (local)* | *No* | This is **NOT** a fully functional installation. Use this only if you want get familiar with Aptomi concepts, API and UI. Aptomi binaries will be installed on a local machine, it will be pre-uploaded with an example, while the actual engine for deploying apps to k8s will be disabled.
 [Compact](docs/install_compact.md) | *Yes (local)* | *Yes* | Aptomi binaries will be installed on a local machine. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
 [Kubernetes](docs/install_kubernetes.md) | *Yes (in k8s)* | *Yes* | Aptomi itself will be deployed on k8s in a container. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
+
+You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and will NOT perform any app deployment to k8s:
+
+Installation Mode     | Aptomi / UI | App Deployment | Description
+----------------------|--------------------|----------------|-------------
+[Concepts](docs/install_concepts.md) | *Yes (local)* | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI. Aptomi binaries will be installed on a local machine, it will be pre-uploaded with an example, while the actual engine for deploying apps to k8s **will be disabled**. Thus, it's not a fully functional installation
 
 ### Preparing k8s Clusters
 
