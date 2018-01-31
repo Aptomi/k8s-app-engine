@@ -10,12 +10,12 @@
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
 [Aptomi](http://aptomi.io) simplifies roll-out, operation and control of container-based applications on k8s. It introduces a
-service-centric abstraction that allows Dev and Ops to collaborate asynchronously.  It enables teams to create and operate services,
-share them across the organization, and fully control their lifecycle. Changes and updates are executed with a goal of minimizing
-disruptive impact on depending services.
+**service-centric abstraction** that allows Dev and Ops to collaborate asynchronously. It enables teams to create and operate services,
+share them across the organization, fully control their lifecycle while enforcing Ops/Governance policies. Changes and updates are executed
+with a goal of minimizing disruptive impact on depending services.
 
 It is particularly useful in environments with multiple teams, clouds and data centers, where intent-based management
-plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
+plays an important role in running large application infrastructure. Aptomi’s current focus is **Kubernetes**, but it's
 designed to work with any container runtime and container orchestration technologies.
 
 ![What is Aptomi](images/aptomi-what-is.png)
@@ -34,7 +34,6 @@ designed to work with any container runtime and container orchestration technolo
 
 
 - [Features & Benefits](#features--benefits)
-- [Where Aptomi is located in the stack](#where-aptomi-is-located-in-the-stack)
 - [Quickstart](#quickstart)
   - [Installation](#installation)
   - [Preparing k8s Clusters](#preparing-k8s-clusters)
@@ -54,21 +53,18 @@ designed to work with any container runtime and container orchestration technolo
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features & Benefits
-- **Easy way to deploy and manage applications**
-  - See [example](examples/twitter-analytics/diagram.png) of a multi-service application for k8s
-- **Designed to run on top of any container platform**
-  - k8s, OpenShift (with support coming for AWS ECS, GKE, Docker Datacenter, Mesos)
-- **Friendly for Dev and Ops**
-  - Think applications and services, not infrastructure primitives
-  - Keep using your existing application templates (Helm, Ksonnet, k8s YAMLs, etc)
-  - Make real-time changes to the running code (change parameters, relocate the whole application w/ dependencies to another cluster, restrict access, etc)
-  - Minimizes disruption impact of change on depending services
-- **Continuous state enforcement**
-  - Desired state of all services is rendered as a system and continuously validated/enforced 
-  - Built-in service discovery ensures all dependencies always are up to date    
+- **Deploy and manage container-based applications with ease**
+  - Dev and Ops think applications and services, not infrastructure primitives and thousands of containers
+  - Built-in service discovery ensures all dependencies always are up to date
+  - No need to change existing application templates (Helm, Ksonnet, k8s YAMLs, etc)
+  - Run on k8s, OpenShift (support for AWS ECS, GKE, Docker Datacenter, Mesos is pluggable)
 - **Lazy allocation of resources**
-  - Containers are running only when needed (i.e. when someone declared an intent to consume the corresponding service)
-- **Flexible rule engine. *See examples of user-defined rules:***
+  - Containers are only running when the corresponding service has consumers
+- **Continuous state enforcement**
+  - Desired state of all services is rendered as a DAG system and continuously validated/enforced
+  - Changes/rules can be enforced at any time (change service parameters, relocate the whole application w/ dependencies to another cluster, restrict access, etc)
+  - Disruption impact of change on depending services is minimized
+- **Flexible rule engine**. Examples:
   - *Production Instances* get deployed to *us-west*, *Staging Instances* get deployed to *us-west*
   - *Web* and *Mobile* teams always share the same *small* flavor of *Analytics* service in *Staging*, while 
     *Healthcare* team gets a dedicated *high-performance* instance of the same service
@@ -76,15 +72,8 @@ designed to work with any container runtime and container orchestration technolo
   - *Personal* development instances of *MyApp* can only be running *from 7am to 11pm* and should be terminated overnight 
     for all developers
 - **Insights & Contextual visibility**
-  - UI to understand what services are running, why they were instantiated, visualize dependencies and impact of changes. No
-    need to deal with thousands of individual containers
-    ![Aptomi UI](images/aptomi-ui.png) 
-        
-## Where Aptomi is located in the stack
-Aptomi sits in between CI/CD and container orchestration. Being in deployment path for applications, it can apply
-higher-level policy rules (see examples above) and configure the underlying infrastructure components accordingly. 
-
-![Aptomi Stack](images/aptomi-stack.png) 
+  - UI to explore services instances, see why services got instantiated, visualize dependencies and impact of changes
+    ![Aptomi UI](images/aptomi-ui.png)
 
 ## Quickstart
 
