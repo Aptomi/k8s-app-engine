@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
+	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/patrickmn/go-cache"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"strings"
 	"sync"
@@ -67,7 +67,7 @@ func (loader *UserLoaderFromFile) Authenticate(name, password string) (*lang.Use
 		return nil, fmt.Errorf("user '%s' does not exist", name)
 	}
 
-	if !comparePasswords(user.PasswordHash, password) {
+	if !util.ComparePasswords(user.PasswordHash, password) {
 		return nil, fmt.Errorf("incorrect password")
 	}
 
@@ -82,18 +82,4 @@ func (loader *UserLoaderFromFile) Summary() string {
 // Loads users from file
 func loadUsersFromFile(fileName string) []*lang.User {
 	return *yaml.LoadObjectFromFileDefaultEmpty(fileName, &[]*lang.User{}).(*[]*lang.User)
-}
-
-// Returns salted hash from the password (only used to generate user passwords)
-func hashAndSalt(password string) string { // nolint: deadcode, megacheck
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err)
-	}
-	return string(hash)
-}
-
-// Verifies hashed password
-func comparePasswords(hashedPassword string, password string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) == nil
 }

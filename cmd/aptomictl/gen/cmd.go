@@ -15,6 +15,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 
 	cmd.AddCommand(
 		newClusterCommand(cfg),
+		newUserCommand(cfg),
 	)
 
 	return cmd
