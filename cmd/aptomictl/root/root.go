@@ -51,7 +51,7 @@ func init() {
 
 	// Add sub commands
 	Command.AddCommand(
-		common.Version,
+		common.NewVersionCommand(&Config.Output),
 		endpoints.NewCommand(Config),
 		policy.NewCommand(Config),
 		revision.NewCommand(Config),
