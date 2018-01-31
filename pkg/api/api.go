@@ -63,4 +63,5 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 
 	// return aptomi version
 	router.GET("/version", api.handleVersion)
+	router.GET("/api/v1/version", api.handleVersion)
 }
