@@ -197,7 +197,6 @@ enforcer:
 users:
   file:
     - ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
-  file:
     - ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
   ldap-disabled:
     - host: localhost
