@@ -9,8 +9,6 @@ APTOMI_SERVER_CONFIG_DIR="/etc/aptomi"
 APTOMI_CLIENT_CONFIG_DIR="$HOME/.aptomi"
 APTOMI_DB_DIR="/var/lib/aptomi"
 
-APTOMI_CLIENT_AUTH_STR='--username admin'
-
 SCRIPT_NAME=`basename "$0"`
 REPO_NAME='Aptomi/aptomi'
 
@@ -267,6 +265,9 @@ debug: true
 api:
   host: 127.0.0.1
   port: 27866
+
+auth:
+  username: admin
 EOL
         run_as_root mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
         run_as_root cp ${TMP_DIR}/config.yaml ${APTOMI_CLIENT_CONFIG_DIR}/config.yaml
@@ -293,23 +294,12 @@ function test_aptomi() {
     fi
 
     # Run 'aptomi version' and remove leading whitespaces
-    local SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null | grep 'git commit')
+    local SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null | grep 'Git Version')
     SERVER_VERSION_OUTPUT="$(echo -e "${SERVER_VERSION_OUTPUT}" | sed -e 's/^[[:space:]]*//')"
     if [ ! -z "${SERVER_VERSION_OUTPUT}" ]; then
-        log_sub "Running 'aptomi version': ${COLOR_GREEN}OK${COLOR_RESET} ($SERVER_VERSION_OUTPUT)"
+        log_sub "Running 'aptomi version': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
         log_err "Failed to parse output of 'aptomi version'"
-        exit 1
-    fi
-
-    # Run 'aptomictl version' and remove leading whitespaces
-    # TODO: $APTOMI_CLIENT_AUTH_STR will need to be removed from here once https://github.com/Aptomi/aptomi/issues/216 is fixed
-    local CLIENT_VERSION_OUTPUT=$(aptomictl $APTOMI_CLIENT_AUTH_STR version 2>/dev/null | grep 'git commit')
-    CLIENT_VERSION_OUTPUT="$(echo -e "${CLIENT_VERSION_OUTPUT}" | sed -e 's/^[[:space:]]*//')"
-    if [ ! -z "${CLIENT_VERSION_OUTPUT}" ]; then
-        log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET} ($CLIENT_VERSION_OUTPUT)"
-    else
-        log_err "Failed to parse output of 'aptomictl version'"
         exit 1
     fi
 
@@ -332,8 +322,18 @@ function test_aptomi() {
         exit 1
     fi
 
+    # Run client to show the version
+    local CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null | grep 'Git Version' | wc -l)
+    CLIENT_VERSION_OUTPUT="$(echo -e "${CLIENT_VERSION_OUTPUT}" | sed -e 's/^[[:space:]]*//')"
+    if [ $CLIENT_VERSION_OUTPUT -eq 2 ]; then
+        log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET}"
+    else
+        log_err "Failed to parse output of 'aptomictl version'"
+        exit 1
+    fi
+
     # Run client to show the policy
-    local CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl $APTOMI_CLIENT_AUTH_STR policy show 2>/dev/null | grep 'Policy Version')
+    local CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null | grep 'Policy Version')
     if [ ! -z "${CLIENT_POLICY_SHOW_OUTPUT}" ]; then
         log_sub "Running 'aptomictl policy show': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
