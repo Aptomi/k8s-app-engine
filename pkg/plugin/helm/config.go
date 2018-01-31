@@ -7,11 +7,11 @@ import (
 
 // Config represents K8s/Helm plugin configuration
 type Config struct {
-	Namespace       string
-	TillerNamespace string
-	Local           bool
-	Context         string
-	KubeConfig      interface{} // it's just a kubeconfig, we don't need to parse it
+	Namespace       string      `yaml:",omitempty"`
+	TillerNamespace string      `yaml:",omitempty"`
+	Local           bool        `yaml:",omitempty"`
+	Context         string      `yaml:",omitempty"`
+	KubeConfig      interface{} `yaml:",omitempty"` // it's just a kubeconfig, we don't need to parse it
 }
 
 func (cache *clusterCache) initConfig(cluster *lang.Cluster) error {

@@ -15,9 +15,15 @@ import (
 )
 
 func initKubeConfig(config *Config, cluster *lang.Cluster) (*rest.Config, string, error) {
-	data, err := yaml.Marshal(config.KubeConfig)
-	if err != nil {
-		return nil, "", fmt.Errorf("error while marshaling kube config into bytes: %s", err)
+	var data []byte
+	if strData, ok := config.KubeConfig.(string); ok {
+		data = []byte(strData)
+	} else {
+		yamlData, err := yaml.Marshal(config.KubeConfig)
+		if err != nil {
+			return nil, "", fmt.Errorf("error while marshaling kube config into bytes: %s", err)
+		}
+		data = yamlData
 	}
 
 	// todo make sure temp file removed after kube config created
