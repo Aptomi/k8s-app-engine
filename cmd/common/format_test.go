@@ -17,7 +17,7 @@ func TestFormat_Text(t *testing.T) {
 	{
 		// with policy changes
 		result := makePolicyUpdateResult(true)
-		data, err := Format(cfg, true, result)
+		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
 		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 41 -> 42  \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
 			string(data), "Format should return expected table")
@@ -26,7 +26,7 @@ func TestFormat_Text(t *testing.T) {
 	{
 		// without policy changes
 		result := makePolicyUpdateResult(false)
-		data, err := Format(cfg, true, result)
+		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
 		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 42 (none) \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
 			string(data), "Format should return expected table")
@@ -38,7 +38,7 @@ func TestFormat_Text(t *testing.T) {
 			PolicyGeneration: 42,
 			Actions:          []string{},
 		}
-		data, err := Format(cfg, true, result)
+		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
 		assert.Equal(t, "Policy Changes\tInstance Changes\nGen 42 (none) \t(none)          ",
 			string(data), "Format should return expected table")

@@ -33,7 +33,7 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 				panic(fmt.Sprintf("Error while deleting policy: %s", err))
 			}
 
-			data, err := common.Format(cfg, false, result)
+			data, err := common.Format(cfg.Output, false, result)
 			if err != nil {
 				panic(fmt.Sprintf("Error while formating policy update result: %s", err))
 			}
