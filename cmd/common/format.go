@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/gosuri/uitable"
 	"gopkg.in/yaml.v2"
@@ -20,8 +19,8 @@ const (
 )
 
 // Format returns string format for provided objects based on the output config
-func Format(cfg *config.Client, list bool, objs ...runtime.Displayable) ([]byte, error) {
-	switch strings.ToLower(cfg.Output) {
+func Format(output string, list bool, objs ...runtime.Displayable) ([]byte, error) {
+	switch strings.ToLower(output) {
 	case Text:
 		return textMarshal(list, objs)
 	case YAML:
@@ -36,7 +35,7 @@ func Format(cfg *config.Client, list bool, objs ...runtime.Displayable) ([]byte,
 		return json.Marshal(objs[0])
 	}
 
-	panic(fmt.Sprintf("%s output format not supported", cfg.Output))
+	panic(fmt.Sprintf("%s output format not supported", output))
 }
 
 func textMarshal(list bool, objs []runtime.Displayable) ([]byte, error) {
