@@ -22,10 +22,10 @@ designed to work with any container runtime and container orchestration technolo
 
 ## Demo
 
-### Asciinema
+### Short demo (5 minutes, Asciinema)
 [![asciicast](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
 
-### Youtube (more detailed)
+### Detailed demo (13 minutes, Youtube)
 [![youtube](http://img.youtube.com/vi/HL4RwoBnuTc/0.jpg)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
 
 ## Table of contents
