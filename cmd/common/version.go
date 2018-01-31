@@ -14,7 +14,7 @@ func NewVersionCommand(output *string) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			info := version.GetBuildInfo()
 
-			data, err := Format(*output, false, &info)
+			data, err := Format(*output, false, info)
 			if err != nil {
 				panic(fmt.Sprintf("Error while formating policy: %s", err))
 			}

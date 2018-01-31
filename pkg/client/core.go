@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/version"
 )
 
 // Core is the Core API client interface
@@ -34,5 +35,5 @@ type Revision interface {
 
 // Version is the interface for getting current server version
 type Version interface {
-	Show() (*api.Version, error)
+	Show() (*version.BuildInfo, error)
 }

@@ -1,25 +1,35 @@
 package version
 
+import "github.com/Aptomi/aptomi/pkg/runtime"
+
 var (
 	gitVersion = "0.0.0"                // `git describe --tags --long --dirty` or "no git" if not set
 	gitCommit  = "no git"               // `git rev-parse HEAD` or "no git" if not set
 	buildDate  = "1970-01-01T00:00:00Z" // `date -u +'%Y-%m-%dT%H:%M:%SZ'`, ISO8601 format
 )
 
-// BuildInfo is a struct which contains (version, commit, date) for aptomi binary, so that we know when and how it was built
-type BuildInfo struct {
-	GitVersion string
-	GitCommit  string
-	BuildDate  string
-}
-
 // GetBuildInfo returns BuildInfo for aptomi
-func GetBuildInfo() BuildInfo {
-	return BuildInfo{
+func GetBuildInfo() *BuildInfo {
+	return &BuildInfo{
+		BuildInfoObject.GetTypeKind(),
 		gitVersion,
 		gitCommit,
 		buildDate,
 	}
+}
+
+// BuildInfoObject is an informational data structure with Kind and Constructor for Version
+var BuildInfoObject = &runtime.Info{
+	Kind:        "version",
+	Constructor: func() runtime.Object { return &BuildInfo{} },
+}
+
+// BuildInfo represents version, commit and date for aptomi binary, so that we know when and how it was built
+type BuildInfo struct {
+	runtime.TypeKind `yaml:",inline"`
+	GitVersion       string
+	GitCommit        string
+	BuildDate        string
 }
 
 // GetDefaultColumns returns default set of columns to be displayed
