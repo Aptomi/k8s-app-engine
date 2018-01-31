@@ -157,7 +157,7 @@ function install_binaries_from_archive() {
     # Cut .tar.gz to get the name of the directory inside the archive
     local DIRNAME="${FILENAMEBINARY%.*}"
     DIRNAME="${DIRNAME%.*}"
-    local UNPACKED_PATH="$TMP_DIR/$DIRNAME"
+    UNPACKED_PATH="$TMP_DIR/$DIRNAME"
 
     if [ ! -f $UNPACKED_PATH/aptomi ]; then
         log_err "Binary 'aptomi' not found inside the release"
@@ -199,6 +199,8 @@ enforcer:
 users:
   file:
     - ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
+  file:
+    - ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
   ldap-disabled:
     - host: localhost
       port: 10389
@@ -220,9 +222,9 @@ EOL
         run_as_root cp ${TMP_DIR}/config.yaml ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
     fi
 
-    log_sub "Creating built-in users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml$COLOR_RESET"
+    log_sub "Creating built-in admin users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml$COLOR_RESET"
     if [ -f ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml ]; then
-        log_warn "Built-in for Aptomi server already exists. Keeping existing list of users"
+        log_warn "Built-in admin users for Aptomi server already exist. Keeping it"
     else
         cat >${TMP_DIR}/users_builtin.yaml <<EOL
 - name: admin
@@ -231,6 +233,14 @@ EOL
 EOL
         run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
         run_as_root cp ${TMP_DIR}/users_builtin.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
+    fi
+
+    log_sub "Creating example users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml$COLOR_RESET"
+    if [ -f ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml ]; then
+        log_warn "Example users for Aptomi server already exist. Keeping it"
+    else
+        run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
+        run_as_root cp ${UNPACKED_PATH}/examples/twitter-analytics/_external/users.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
     fi
 
     log_sub "Creating directory for Aptomi server database: $COLOR_GREEN${APTOMI_DB_DIR}$COLOR_RESET"
