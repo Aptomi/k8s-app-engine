@@ -42,7 +42,7 @@ func init() {
 	common.AddBoolFlag(aptomiCmd, "ui.enable", "ui", "", true, envPrefix+"_UI", "Enable server to serve UI")
 	common.AddDurationFlag(aptomiCmd, "enforcer.interval", "enforcer-interval", "", 5*time.Second, envPrefix+"_ENFORCER_INTERVAL", "Enforcer interval")
 
-	aptomiCmd.AddCommand(common.Version)
+	aptomiCmd.AddCommand(common.NewVersionCommand())
 }
 
 func preRun(command *cobra.Command, args []string) {

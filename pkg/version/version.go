@@ -21,3 +21,33 @@ func GetBuildInfo() BuildInfo {
 		buildDate,
 	}
 }
+
+func (buildInfo *BuildInfo) GetDefaultColumns() []string {
+	return []string{"Git Version", "Git Commit", "Build Date"}
+}
+
+func (buildInfo *BuildInfo) AsColumns() map[string]string {
+	result := make(map[string]string)
+
+	result["Git Version"] = buildInfo.GitVersion
+	result["Git Commit"] = buildInfo.GitCommit
+	result["Build Date"] = buildInfo.BuildDate
+
+	return result
+}
+
+/*
+// GetDefaultColumns returns default set of columns to be displayed
+func (policyData *PolicyData) GetDefaultColumns() []string {
+	return []string{"Policy Version"}
+}
+
+// AsColumns returns PolicyData representation as columns
+func (policyData *PolicyData) AsColumns() map[string]string {
+	result := make(map[string]string)
+
+	result["Policy Version"] = policyData.GetGeneration().String()
+
+	return result
+}
+*/
