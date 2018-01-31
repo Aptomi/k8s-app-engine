@@ -66,7 +66,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVarP(&local, "local", "l", false, "Build Aptomi cluster with local kubernetes")
-	cmd.Flags().StringVarP(&sourceContext, "context", "c", "", "Context in kubeconfig to be used for Aptomi cluster creation")
+	cmd.Flags().StringVarP(&sourceContext, "context", "c", "", "Context in kubeconfig to be used for Aptomi cluster creation (run 'kubectl config get-contexts' to get list of available contexts and clusters")
 	cmd.Flags().StringVarP(&clusterName, "name", "n", "", "Name of the Aptomi cluster to create")
 	cmd.Flags().StringVarP(&clusterNamespace, "namespace", "N", "system", "Namespace of the Aptomi cluster to create")
 
