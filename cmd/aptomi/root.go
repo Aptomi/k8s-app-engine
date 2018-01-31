@@ -46,9 +46,11 @@ func init() {
 }
 
 func preRun(command *cobra.Command, args []string) {
-	err := common.ReadConfig(viper.GetViper(), cfg, "/etc/aptomi")
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+	if command.Parent() != nil {
+		err := common.ReadConfig(viper.GetViper(), cfg, "/etc/aptomi")
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
 	}
 }

@@ -61,9 +61,11 @@ func init() {
 }
 
 func preRun(command *cobra.Command, args []string) {
-	err := common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
-	if err != nil {
-		panic(fmt.Sprintf("error while loading config: %s", err))
+	if command.Parent() != nil {
+		err := common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
+		if err != nil {
+			panic(fmt.Sprintf("error while loading config: %s", err))
+		}
 	}
 }
 
