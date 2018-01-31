@@ -40,7 +40,7 @@ func bindFlagEnv(command *cobra.Command, key, flagName, env string) {
 
 // AddDefaultFlags add all the flags that are needed by any aptomi CLI
 func AddDefaultFlags(command *cobra.Command, envPrefix string) {
-	AddStringFlag(command, "config", "config", "c", "", envPrefix+"_CONFIG", "Config file or config dir path")
+	AddStringFlag(command, "config", "config", "", "", envPrefix+"_CONFIG", "Config file or config dir path")
 
 	AddBoolFlag(command, "debug", "debug", "d", false, envPrefix+"_DEBUG", "Debug level")
 
