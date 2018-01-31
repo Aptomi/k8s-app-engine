@@ -10,8 +10,8 @@ import (
 // Name is a user-provided string identifier of an object. Names are usually human readable and must be unique across
 // objects within the same namespace and the same object kind.
 type Metadata struct {
-	Namespace  string             `yaml:",omitempty",validate:"identifier"`
-	Name       string             `yaml:",omitempty",validate:"identifier"`
+	Namespace  string             `yaml:",omitempty" validate:"identifier"`
+	Name       string             `yaml:",omitempty" validate:"identifier"`
 	Generation runtime.Generation `yaml:",omitempty"`
 }
 
