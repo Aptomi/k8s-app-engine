@@ -1,0 +1,27 @@
+#!/bin/bash
+set -eou pipefail
+
+hostname
+
+ls -la
+
+export PATH=$PATH:"$WORKSPACE"/bin
+export GOPATH="$WORKSPACE"
+export GOROOT=/usr/local/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+mkdir -p "$GOPATH/bin"
+
+pushd src/github.com/Aptomi/aptomi
+
+make vendor
+
+tools/demo-ldap.sh
+
+make lint
+
+make smoke
+
+source /jenkins/aptomi-coveralls.io
+make coverage-full coverage-publish
+
+popd
