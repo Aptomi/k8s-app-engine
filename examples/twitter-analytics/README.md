@@ -41,7 +41,7 @@ This example illustrates a few important things that Aptomi does:
  
 1. Upload the list of clusters, user roles and rules into Aptomi using CLI:
     ```
-    aptomictl policy apply --username Sam -f aptomictl policy apply --username Sam -f ~/.aptomi/examples/twitter-analytics/policy/Sam
+    aptomictl policy apply --username Sam -f ~/.aptomi/examples/twitter-analytics/policy/Sam
     ```
 
 1. Import `analytics_pipeline` and `twitter_stats` services  
@@ -80,18 +80,18 @@ that in Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
 
 # Enabling Streaming Data from Twitter
 
-1. Now, we need to provide user secrets, so twitter_stats component can pull data over Twitter Streaming API. Create 3
-applications in [Twitter Application Management Console](https://apps.twitter.com)
+1. Now we can inject Twiter App Tokens into a service, so it can actually pull data over Twitter Streaming API. Create an
+application in [Twitter Application Management Console](https://apps.twitter.com)
     ![Twitter App Create](twitter-app-create.png)
     
-    Generate keys and access tokens for them:
+    Generate keys and access tokens for it:
     ![Twitter Create Tokens](twitter-create-tokens.png)
     
-    Once done, copy secrets.yaml and enter the created keys/tokens into it:
-   ```
-   cp examples/twitter-analytics/_external/secrets/secrets.yaml.template /etc/aptomi/secrets.yaml
-   vi /etc/aptomi/secrets.yaml
-   ```
-
-If you open tweeviz HTTP endpoints, you will be able to see tweets coming in real-time over Twitter Streaming API, getting processed through analytics-pipeline, and displayed on the web.
+    Once done, update `john-prod-ts.yaml`, enter the created keys/tokens into it, and upload:
+    ```
+    cp ~/.aptomi/examples/twitter-analytics/policy/john-prod-{ts.yaml,ts-changed.yaml}
+    vi ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts-changed.yaml
+    aptomictl policy apply --wait --username John -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts-changed.yaml
+    ```
+Now if you open tweeviz HTTP endpoint for John's service, you will be able to see tweets coming in real-time over Twitter Streaming API, processed through analytics-pipeline and displayed on the web.
 
