@@ -26,7 +26,7 @@ designed to work with any container runtime and container orchestration technolo
 [![asciicast](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
 
 ### Detailed demo (13 minutes, Youtube)
-[![youtube](http://img.youtube.com/vi/HL4RwoBnuTc/0.jpg)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
+[![youtube](images/aptomi-demo-youtube.png)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
 
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
