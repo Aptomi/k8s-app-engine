@@ -26,4 +26,7 @@ make smoke
 source /jenkins/aptomi-coveralls.io
 make coverage-full coverage-publish
 
+env DEBUG=yes scripts/aptomi_install.sh
+env DEBUG=yes scripts/aptomi_uninstall_and_clean.sh
+
 popd
