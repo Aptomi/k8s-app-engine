@@ -37,6 +37,12 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 		return err
 	}
 
+	kubeClient, err := cache.newKubeClient()
+	if err != nil {
+		return err
+	}
+	cache.ensureKubeNamespace(kubeClient, cache.namespace)
+
 	releaseName := getHelmReleaseName(deployName)
 	chartRepo, chartName, chartVersion, err := getHelmReleaseInfo(params)
 	if err != nil {
