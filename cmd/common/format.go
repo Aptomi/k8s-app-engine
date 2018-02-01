@@ -35,7 +35,7 @@ func Format(output string, list bool, objs ...runtime.Displayable) ([]byte, erro
 		return json.Marshal(objs[0])
 	}
 
-	panic(fmt.Sprintf("%s output format not supported", output))
+	panic(fmt.Sprintf("output format not supported: %s", output))
 }
 
 func textMarshal(list bool, objs []runtime.Displayable) ([]byte, error) {
