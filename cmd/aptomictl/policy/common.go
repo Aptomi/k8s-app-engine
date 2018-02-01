@@ -19,13 +19,52 @@ import (
 	"time"
 )
 
-func readLangFromFiles(policyPaths []string) ([]runtime.Object, error) {
+func readLangObjects(policyPaths []string) ([]runtime.Object, error) {
+	policyReg := runtime.NewRegistry().Append(lang.PolicyObjects...)
+	codec := yaml.NewCodec(policyReg)
+
+	info, err := os.Stdin.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("error while getting info about stdin")
+	}
+
+	// if used as something | aptomictl
+	if info.Mode()&os.ModeNamedPipe != 0 {
+		return readLangObjectsFromStdin(codec)
+	}
+
+	return readLangObjectsFromFiles(policyPaths, codec)
+}
+
+func readLangObjectsFromStdin(codec runtime.Codec) ([]runtime.Object, error) {
+	log.Info("Applying policy from stdin (or pipe)")
+	data, readErr := ioutil.ReadAll(os.Stdin)
+	if readErr != nil {
+		return nil, fmt.Errorf("error while reading from stdin")
+	}
+
+	objects, decodeErr := codec.DecodeOneOrMany(data)
+	if decodeErr != nil {
+		return nil, fmt.Errorf("can't unmarshal stdin: %s", decodeErr)
+	}
+
+	for _, obj := range objects {
+		if !lang.IsPolicyObject(obj) {
+			return nil, fmt.Errorf("only policy objects could be applied but got: %s", obj.GetKind())
+		}
+
+		if _, ok := obj.(lang.Base); !ok {
+			return nil, fmt.Errorf("only policy objects could be applied but got: %s (can't cast to lang.Base)", obj.GetKind())
+		}
+	}
+
+	return objects, nil
+}
+
+func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runtime.Object, error) {
 	if len(policyPaths) <= 0 {
 		return nil, fmt.Errorf("policy file path is not specified")
 	}
-
-	policyReg := runtime.NewRegistry().Append(lang.PolicyObjects...)
-	codec := yaml.NewCodec(policyReg)
 
 	files, err := findPolicyFiles(policyPaths)
 	if err != nil {
