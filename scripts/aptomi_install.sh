@@ -24,6 +24,8 @@ if [ "yes" == "$DEBUG" ]; then
     set -x
 fi
 
+set -eou pipefail
+
 function check_installed() {
     if ! [ -x "$(command -v $1)" ]; then
         log_err "$1 is not installed" >&2
