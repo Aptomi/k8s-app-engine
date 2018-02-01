@@ -36,7 +36,7 @@ designed to work with any container runtime and container orchestration technolo
 - [Features & Benefits](#features--benefits)
 - [Quickstart](#quickstart)
   - [Installation](#installation)
-  - [Preparing k8s Clusters](#preparing-k8s-clusters)
+  - [Setting up k8s Clusters](#setting-up-k8s-clusters)
   - [Running Examples](#running-examples)
 - [Architecture & How It Works](#architecture--how-it-works)
   - [Components](#components)
@@ -72,39 +72,39 @@ designed to work with any container runtime and container orchestration technolo
   - *Personal* development instances of *MyApp* can only be running *from 7am to 11pm* and should be terminated overnight 
     for all developers
 - **Insights & Contextual visibility**
-  - UI to explore services instances, see why services got instantiated, visualize dependencies and impact of changes
-    ![Aptomi UI](images/aptomi-ui.png)
+  - UI to explore services instances, see why services were instantiated, visualize dependencies and impact of changes
 
 ## Quickstart
 
 ### Installation
-There are several ways to install Aptomi. You may pick one that suits your needs the best:
+There are several ways to install Aptomi. We recommend **Compact** as a starting point, but you may pick one that suits your needs the best:
 
 Installation Mode     | Aptomi | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
-[Compact](docs/install_compact.md) | Local binaries | *Yes* | Aptomi binaries will be installed on a local machine. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
-[Kubernetes](docs/install_kubernetes.md) | Containers on k8s  | *Yes* | Aptomi itself will be deployed on k8s in a container. Apps can be deployed via Aptomi to any local or remote k8s (minikube, docker for mac, GKE, etc)
+[Compact](docs/install_compact.md) | Local binaries | *Yes* | Aptomi binaries will be installed on a local machine
+[Kubernetes](docs/install_kubernetes.md) | Containers on k8s  | *Yes* | Aptomi will be deployed on k8s in container
 
-You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will **NOT** have LDAP support, will use a fake executor and thus will **NOT** perform any app deployment to k8s:
+You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments:
 
 Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
-[Concepts](docs/install_concepts.md) | Local binaries | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI. Aptomi binaries will be installed on a local machine, it will be pre-uploaded with an example, while the actual engine for deploying apps to k8s **will be disabled**
+[Concepts](docs/install_concepts.md) | Local binaries | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI.
 
-### Preparing k8s Clusters
+### Setting up k8s Clusters
 
-TODO: ...
+You need to have access to a k8s cluster in order to deploy services from the provided examples. Two k8s clusters (or two namespaces within the same cluster) will enable you to
+take full advantage of Aptomi policy engine and use rules to deploy to different clusters.
 
-You need to have access to k8s cluster in order to deploy services from the provided examples. Two k8s clusters will enable you to
-take full advantage of Aptomi policy engine and use cluster-based rules.
-1. If you don't have k8s clusters set up, follow [these instructions](examples/README.md) and run the provided script to create them in Google Cloud.
-    ```
-    ./tools/demo-gke.sh up
-    ```
+Kubernetes Cluster | When to use     | How to run
+------------|-----------------|-----------
+Your own    | If you already have k8s cluster set up | TODO: is it required to install Helm? write instructions to create 2 NS
+Google Kubernetes Engine | Useful if you have $300 in free credits @ Google | Use our [script](examples/README.md) to create them
+k8s / Minikube | Local machine with 16GB+ RAM | TODO:
+k8s / Docker For Mac | Local machine with 16GB+ RAM | TODO:
 
 ### Running Examples
 
-Once Aptomi is up, integrated with LDAP, and k8s clusters are set up and prepared, you can get started by running the following examples:
+Once Aptomi server is up and k8s clusters are ready, you can get started by running the following examples:
 
 Example    | Description  | Diagram
 -----------|--------------|--------------
