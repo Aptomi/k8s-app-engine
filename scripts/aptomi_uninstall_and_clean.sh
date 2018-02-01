@@ -40,7 +40,7 @@ function run_as_root() {
 }
 
 log "Uninstalling Aptomi and deleting its data"
-run_as_root killall aptomi
+run_as_root killall aptomi || true
 run_as_root rm -f /usr/local/bin/aptomi
 run_as_root rm -f /usr/local/bin/aptomictl
 run_as_root rm -rf /etc/aptomi
