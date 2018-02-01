@@ -5,6 +5,12 @@
   user: Bob
   contract: twitter_stats
   labels:
-      tsvisimage: demo11
-      # Mexico
-      locations: -119.883662,13.301958,-91.780634,27.018021
+    # Version of visualization code (container image tag)
+    tsvisimage: demo11
+    # Twitter / Location of tweets (Mexico)
+    locations: -119.883662,13.301958,-91.780634,27.018021
+    # Twitter / Tokens
+    appKey: PUT-YOUR-DATA-HERE
+    appSecret: PUT-YOUR-DATA-HERE
+    tokenKey: PUT-YOUR-DATA-HERE
+    tokenSecret: PUT-YOUR-DATA-HERE
