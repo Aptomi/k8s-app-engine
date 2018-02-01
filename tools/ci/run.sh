@@ -1,7 +1,7 @@
 #!/bin/bash
 set -exou pipefail
 
-rm -rf /usr/local/bin/*aptomi* /etc/aptomi /var/lib/aptomi ~/.aptomi
+sudo rm -rf /usr/local/bin/*aptomi* /etc/aptomi /var/lib/aptomi ~/.aptomi
 
 hostname
 
