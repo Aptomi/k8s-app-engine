@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eou pipefail
+set -exou pipefail
 
 rm -rf /usr/local/bin/*aptomi* /etc/aptomi /var/lib/aptomi ~/.aptomi
 
