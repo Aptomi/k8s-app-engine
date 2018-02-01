@@ -268,16 +268,16 @@ api:
 auth:
   username: admin
 EOL
-        run_as_root mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
-        run_as_root cp ${TMP_DIR}/config.yaml ${APTOMI_CLIENT_CONFIG_DIR}/config.yaml
+        mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
+        cp ${TMP_DIR}/config.yaml ${APTOMI_CLIENT_CONFIG_DIR}/config.yaml
     fi
 }
 
 function copy_examples() {
     log_sub "Copying examples into $COLOR_GREEN${APTOMI_CLIENT_CONFIG_DIR}/examples$COLOR_RESET"
 
-    run_as_root mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
-    run_as_root cp -R ${UNPACKED_PATH}/examples ${APTOMI_CLIENT_CONFIG_DIR}/
+    mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
+    cp -R ${UNPACKED_PATH}/examples ${APTOMI_CLIENT_CONFIG_DIR}/
 }
 
 function test_aptomi() {
