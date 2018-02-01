@@ -77,10 +77,12 @@ that in Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
    - running *production* instance of twitter stats in `cluster-us-east` (managed by John)
    - running *staging* instance of twitter stats in `cluster-us-west` (Alice's version with new look & feel)
    - running *staging* instance of twitter stats in `cluster-us-west` (Bob's version)
+   
+Note that production `tweepub` and `tweeviz` (HTTP endpoint) will not be available because Twitter App Tokens have not been injected into them yet.
 
 # Enabling Streaming Data from Twitter
 
-1. Now we can inject Twiter App Tokens into a service, so it can actually pull data over Twitter Streaming API. Create an
+1. If you want a fully functional demo, you can actually inject Twitter App Tokens into John's service instance, so it can pull data over Twitter Streaming API. Create an
 application in [Twitter Application Management Console](https://apps.twitter.com)
     ![Twitter App Create](twitter-app-create.png)
     
