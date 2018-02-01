@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eou pipefail
 
+rm -rf /usr/local/bin/*aptomi* /etc/aptomi /var/lib/aptomi ~/.aptomi
+
 hostname
 
 ls -la
