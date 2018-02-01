@@ -273,6 +273,13 @@ EOL
     fi
 }
 
+function copy_examples() {
+    log_sub "Copying examples into $COLOR_GREEN${APTOMI_CLIENT_CONFIG_DIR}/examples$COLOR_RESET"
+
+    run_as_root mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
+    run_as_root cp -R ${UNPACKED_PATH}/examples ${APTOMI_CLIENT_CONFIG_DIR}/
+}
+
 function test_aptomi() {
     # Verify that Aptomi server is in path
     local APTOMI=`which aptomi`
@@ -372,6 +379,7 @@ download_and_install_release $ARCH $OS $VERSION
 # Set up server and client locally on the same host
 create_server_config
 create_client_config
+copy_examples
 
 # Test Aptomi
 log "Testing Aptomi"
