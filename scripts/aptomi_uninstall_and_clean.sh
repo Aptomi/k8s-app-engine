@@ -14,6 +14,8 @@ COLOR_BLUE='\033[0;34m'
 COLOR_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
+set -eou pipefail
+
 function log() {
     echo -e "$COLOR_BLUE[$(date +"%F %T")] $SCRIPT_NAME $COLOR_RED|$COLOR_RESET" $@$COLOR_GRAY
 }
