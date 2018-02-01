@@ -23,21 +23,17 @@ func readLangObjects(policyPaths []string) ([]runtime.Object, error) {
 	policyReg := runtime.NewRegistry().Append(lang.PolicyObjects...)
 	codec := yaml.NewCodec(policyReg)
 
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, fmt.Errorf("error while getting info about stdin")
-	}
-
-	// if used as something | aptomictl
-	if info.Mode()&os.ModeNamedPipe != 0 {
+	if len(policyPaths) == 1 && policyPaths[0] == "-" {
 		return readLangObjectsFromStdin(codec)
+	} else if len(policyPaths) > 0 {
+		return readLangObjectsFromFiles(policyPaths, codec)
 	}
 
-	return readLangObjectsFromFiles(policyPaths, codec)
+	return nil, fmt.Errorf("policy file path is not specified")
 }
 
 func readLangObjectsFromStdin(codec runtime.Codec) ([]runtime.Object, error) {
-	log.Info("Applying policy from stdin (or pipe)")
+	log.Info("Applying policy from stdin")
 	data, readErr := ioutil.ReadAll(os.Stdin)
 	if readErr != nil {
 		return nil, fmt.Errorf("error while reading from stdin")
@@ -62,10 +58,6 @@ func readLangObjectsFromStdin(codec runtime.Codec) ([]runtime.Object, error) {
 }
 
 func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runtime.Object, error) {
-	if len(policyPaths) <= 0 {
-		return nil, fmt.Errorf("policy file path is not specified")
-	}
-
 	files, err := findPolicyFiles(policyPaths)
 	if err != nil {
 		return nil, fmt.Errorf("error while searching for policy files: %s", err)
