@@ -20,8 +20,6 @@ data:
     enforcer:
       disabled: false
 
-    secretsDir: /etc/aptomi/
-
     domainAdminOverrides:
       Sam: true
 

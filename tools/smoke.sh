@@ -16,9 +16,8 @@ CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
 POLICY_DIR_TMP=$(mktemp -d)
 
-# copy policy over, create secrets and clusters from templates
+# copy policy over, create clusters from templates
 cp -R examples/twitter-analytics/* $POLICY_DIR
-cp ${POLICY_DIR}/_external/secrets/secrets.yaml.template ${CONF_DIR}/secrets.yaml
 cp ${POLICY_DIR}/policy/Sam/clusters.{yaml.template,yaml}
 
 function cleanup() {
@@ -77,8 +76,6 @@ users:
         org: o
         short-description: role
         deactivated: deactivated
-
-secretsDir: ${CONF_DIR}
 EOL
 
 aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &

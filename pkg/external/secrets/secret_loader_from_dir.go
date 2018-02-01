@@ -49,8 +49,8 @@ func (loader *SecretLoaderFromDir) LoadSecretsAll() map[string]map[string]string
 	// retrieve secrets
 	result := make(map[string]map[string]string)
 
-	if len(loader.baseDir) == 0 {
-		log.Warnf("Skip loading secrets because baseDir not specified")
+	if len(loader.baseDir) <= 0 {
+		// log.Warnf("Skip loading secrets because baseDir not specified")
 		return result
 	}
 
