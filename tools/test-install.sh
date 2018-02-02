@@ -10,8 +10,8 @@ function test_install {
     docker run -it --rm \
                     -e DEBUG=yes \
                     -p 27866:27866 \
-                    -v $(PWD)/.aptomi-install-cache:/root/.aptomi-install-cache \
-                    -v $(PWD)/scripts:/scripts \
+                    -v ${PWD}/.aptomi-install-cache:/root/.aptomi-install-cache \
+                    -v ${PWD}/scripts:/scripts \
                     -w /scripts \
                     aptomi/aptomi-test-install:${os} \
                     sh -c "${cmd}"
