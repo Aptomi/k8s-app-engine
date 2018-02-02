@@ -1,7 +1,7 @@
 #!/bin/bash
 set -exou pipefail
 
-rm -rf ${PWD}/.aptomi-install-cache
+rm -rf "${PWD}/.aptomi-install-cache"
 
 function test_install {
     os="$1"
@@ -10,8 +10,8 @@ function test_install {
     docker run --rm \
                     -e DEBUG=yes \
                     -p 27866:27866 \
-                    -v ${PWD}/.aptomi-install-cache:/root/.aptomi-install-cache \
-                    -v ${PWD}/scripts:/scripts \
+                    -v "${PWD}/.aptomi-install-cache":/root/.aptomi-install-cache \
+                    -v "${PWD}"/scripts:/scripts \
                     -w /scripts \
                     aptomi/aptomi-test-install:${os} \
                     sh -c "${cmd}"
