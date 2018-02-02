@@ -77,14 +77,14 @@ designed to work with any container runtime and container orchestration technolo
 ## Quickstart
 
 ### Installation
-There are several ways to install Aptomi. We recommend **Compact** as a starting point, but you may pick one that suits your needs the best:
+There are several ways to install Aptomi. The simplest one is **Compact**, but you may pick one that suits your needs:
 
 Installation Mode     | Aptomi | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
 [Compact](docs/install_compact.md) | Local machine | *Yes* | Aptomi will be installed on a local machine (binaries or in a single Docker container)
 [Kubernetes](docs/install_kubernetes.md) | Container on k8s  | *Yes* | Aptomi will be deployed on k8s in a container
 
-You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments:
+You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments to k8s:
 
 Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
@@ -92,8 +92,8 @@ Installation Mode     | Aptomi / UI | App Deployment | Description
 
 ### Setting up k8s Clusters
 
-You need to have access to a k8s cluster in order to deploy services from the provided examples. Two k8s clusters (or two namespaces within the same cluster) will enable you to
-take full advantage of Aptomi policy engine and use rules to deploy to different clusters.
+You need to have access to 2 k8s clusters (or use two namespaces within the same cluster) in order to deploy services from the provided examples. This allows to
+take full advantage of Aptomi policy engine and use rules to deploy applications to different clusters.
 
 Kubernetes Cluster | When to use     | How to run
 ------------|-----------------|-----------
@@ -106,11 +106,9 @@ k8s / Docker For Mac | Local machine with 16GB+ RAM | TODO:
 
 Once Aptomi server is up and k8s clusters are ready, you can get started by running the following examples:
 
-Example    | Description  | Diagram
------------|--------------|--------------
-[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple components, 2 k8s clusters | [Diagram](examples/twitter-analytics/diagram.png)
-
-More examples are coming.
+Example    | Description
+-----------|------------
+[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, 2 k8s clusters
 
 ## Architecture & How It Works
 
@@ -213,8 +211,6 @@ one [here](https://github.com/settings/tokens/new). This token should be added t
 1. Go to https://github.com/Aptomi/aptomi/releases/tag/v0.1.2 and fix changelog / description if needed.
 
 ### Roadmap
-We will soon publish the list of items for Q4 2017 and Q1 2018. In the meantime,
-[Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11) is a good place to look at the roadmap items
-which are being considered.
+[Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11), as well as weekly project milestones, are good places to look at the roadmap items.
 
 If you have any questions, please contact us on [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io).
