@@ -7,7 +7,9 @@ function test_install {
     os="$1"
     cmd="$2"
 
-    docker run -it --rm -p 27866:27866 \
+    docker run -it --rm \
+                    -e DEBUG=yes \
+                    -p 27866:27866 \
                     -v $(PWD)/.aptomi-install-cache:/root/.aptomi-install-cache \
                     -v $(PWD)/scripts:/scripts \
                     -w /scripts \
@@ -21,3 +23,4 @@ test_install xenial "./aptomi_install.sh --with-example && ./aptomi_uninstall_an
 test_install centos7 "./aptomi_install.sh && ./aptomi_uninstall_and_clean.sh"
 test_install centos7 "./aptomi_install.sh --with-example && ./aptomi_uninstall_and_clean.sh"
 
+echo "All install scripts successfully verified"
