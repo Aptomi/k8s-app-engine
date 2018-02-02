@@ -33,22 +33,23 @@ This example illustrates a few important things that Aptomi does:
 
 # Instructions
 
-1. Generate YAMLs for your k8s clusters. This assumes that you have `cluster-us-east` and `cluster-us-west` contexts defined in kubectl (see `kubectl config get-contexts`).
-    ```
-    aptomictl gen cluster -c cluster-us-east >~/.aptomi/examples/twitter-analytics/policy/Sam/cluster-us-east.yaml
-    aptomictl gen cluster -c cluster-us-west >~/.aptomi/examples/twitter-analytics/policy/Sam/cluster-us-west.yaml
-    ```
- 
-1. Upload the list of clusters, user roles and rules into Aptomi using CLI:
+1. Upload user roles and rules into Aptomi using CLI:
     ```
     aptomictl policy apply --username Sam -f ~/.aptomi/examples/twitter-analytics/policy/Sam
     ```
 
+1. Generate YAMLs for your k8s clusters and upload to Aptomi. This assumes that you have `cluster-us-east` and `cluster-us-west` contexts defined in kubectl (see `kubectl config get-contexts`).
+    ```
+    aptomictl gen cluster -c cluster-us-east | aptomictl policy apply --username Sam -f -
+    aptomictl gen cluster -c cluster-us-west | aptomictl policy apply --username Sam -f -
+    ```
+ 
 1. Import `analytics_pipeline` and `twitter_stats` services  
     ```
     aptomictl policy apply --username Frank -f ~/.aptomi/examples/twitter-analytics/policy/Frank
     aptomictl policy apply --username John -f ~/.aptomi/examples/twitter-analytics/policy/John
     ```
+
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
 that in Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
 
