@@ -12,6 +12,7 @@ import (
 	"k8s.io/helm/pkg/kube"
 	"k8s.io/helm/pkg/repo"
 	"strings"
+	"time"
 )
 
 func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, version string, err error) {
@@ -48,7 +49,10 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 	}
 
 	var tunnelErr error
-	ok := retry.Do(120, 5, func() bool {
+	ok := retry.Do(120, 5*time.Second, func() bool {
+		if cache.tillerTunnel != nil {
+			cache.tillerTunnel.Close()
+		}
 		cache.tillerTunnel, tunnelErr = cache.newTillerTunnel()
 
 		if tunnelErr != nil {
@@ -65,6 +69,19 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 
 		port := cache.tillerTunnel.Local
 		cache.tillerHost = fmt.Sprintf("localhost:%d", port)
+
+		helmClient, err := cache.newHelmClient(eventLog)
+		if err != nil {
+			tunnelErr = fmt.Errorf("can't create helm client for just created k8s tunnel for cluster %s: %s", cache.cluster.Name, err)
+			return false
+		}
+
+		_, err = helmClient.ListReleases(helm.ReleaseListLimit(1))
+		if err != nil {
+			tunnelErr = fmt.Errorf("can't do helm list using just created k8s tunnel for cluster %s: %s", cache.cluster.Name, err)
+			return false
+		}
+
 		eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port %d for cluster %s", port, cache.cluster.Name)
 
 		return true
@@ -103,21 +120,21 @@ func (cache *clusterCache) setupTiller(eventLog *event.Log) error {
 		return err
 	}
 
-	err = cache.createKubeServiceAccount(client, cache.tillerNamespace)
+	saName := "tiller-" + cache.tillerNamespace
+	err = cache.ensureKubeServiceAccount(client, cache.tillerNamespace, saName)
 	if err != nil {
 		return err
 	}
 
-	err = cache.createKubeClusterRoleBinding(client, cache.tillerNamespace)
+	err = cache.ensureKubeAdminClusterRoleBinding(client, cache.tillerNamespace, saName)
 	if err != nil {
 		return err
 	}
 
-	// todo wait until tiller available
 	return installer.Install(client, &installer.Options{
 		Namespace:      cache.tillerNamespace,
 		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.6.2",
-		ServiceAccount: "tiller-" + cache.tillerNamespace,
+		ServiceAccount: saName,
 	})
 }
 

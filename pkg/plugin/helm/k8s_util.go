@@ -129,41 +129,47 @@ func (cache *clusterCache) ensureKubeNamespace(client kubernetes.Interface, name
 			},
 		}
 		_, createErr := client.CoreV1().Namespaces().Create(ns)
-		if createErr != nil {
-			return createErr
-		}
+		return createErr
 	}
-
-	return nil
-}
-
-func (cache *clusterCache) createKubeServiceAccount(client kubernetes.Interface, namespace string) error {
-	sa := &api.ServiceAccount{
-		ObjectMeta: meta.ObjectMeta{
-			Name: "tiller-" + namespace,
-		},
-	}
-	_, err := client.CoreV1().ServiceAccounts(namespace).Create(sa)
 
 	return err
 }
 
-func (cache *clusterCache) createKubeClusterRoleBinding(client kubernetes.Interface, namespace string) error {
-	crb := &rbacapi.ClusterRoleBinding{
-		ObjectMeta: meta.ObjectMeta{
-			Name: "tiller-" + namespace,
-		},
-		RoleRef: rbacapi.RoleRef{
-			Kind: "ClusterRole",
-			Name: "cluster-admin",
-		},
-		Subjects: []rbacapi.Subject{{
-			Kind:      "ServiceAccount",
-			Name:      "tiller-" + namespace,
-			Namespace: namespace,
-		}},
+func (cache *clusterCache) ensureKubeServiceAccount(client kubernetes.Interface, namespace string, name string) error {
+	_, err := client.CoreV1().ServiceAccounts(namespace).Get(name, meta.GetOptions{})
+	if err != nil && errors.IsNotFound(err) {
+		sa := &api.ServiceAccount{
+			ObjectMeta: meta.ObjectMeta{
+				Name: name,
+			},
+		}
+		_, createErr := client.CoreV1().ServiceAccounts(namespace).Create(sa)
+		return createErr
 	}
-	_, err := client.RbacV1beta1().ClusterRoleBindings().Create(crb)
+
+	return err
+}
+
+func (cache *clusterCache) ensureKubeAdminClusterRoleBinding(client kubernetes.Interface, namespace string, name string) error {
+	_, err := client.RbacV1beta1().ClusterRoleBindings().Get(name, meta.GetOptions{})
+	if err != nil && errors.IsNotFound(err) {
+		crb := &rbacapi.ClusterRoleBinding{
+			ObjectMeta: meta.ObjectMeta{
+				Name: name,
+			},
+			RoleRef: rbacapi.RoleRef{
+				Kind: "ClusterRole",
+				Name: "cluster-admin",
+			},
+			Subjects: []rbacapi.Subject{{
+				Kind:      "ServiceAccount",
+				Name:      name,
+				Namespace: namespace,
+			}},
+		}
+		_, createErr := client.RbacV1beta1().ClusterRoleBindings().Create(crb)
+		return createErr
+	}
 
 	return err
 }
