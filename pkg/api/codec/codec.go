@@ -37,7 +37,7 @@ func NewContentTypeHandler(reg *runtime.Registry) *ContentTypeHandler {
 func (handler *ContentTypeHandler) GetCodecByContentType(contentType string) runtime.Codec {
 	codec, exist := handler.codecs[contentType]
 	if codec == nil || !exist {
-		panic(fmt.Sprintf("Codec not found for content type: %s", contentType))
+		return handler.codecs[Default]
 	}
 
 	return codec
@@ -57,7 +57,10 @@ func (handler *ContentTypeHandler) GetCodec(header http.Header) runtime.Codec {
 func (handler *ContentTypeHandler) GetContentType(header http.Header) string {
 	contentType := header.Get("Content-Type")
 	if len(contentType) == 0 {
-		contentType = "application/yaml"
+		contentType = Default
+	}
+	if _, exist := handler.codecs[contentType]; !exist {
+		contentType = Default
 	}
 
 	return contentType
