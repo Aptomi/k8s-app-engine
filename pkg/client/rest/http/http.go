@@ -114,6 +114,15 @@ func (client *httpClient) request(method string, path string, expected *runtime.
 		return nil, fmt.Errorf("error while unmarshalling response: %s", err)
 	}
 
+	if obj.GetKind() == api.ServerErrorObject.Kind {
+		serverErr, ok := obj.(*api.ServerError)
+		if !ok {
+			return nil, fmt.Errorf("server error, but it couldn't be casted to api.ServerError")
+		}
+
+		return nil, fmt.Errorf("server error: %s", serverErr.Error)
+	}
+
 	if expected != nil && obj.GetKind() != expected.Kind {
 		return nil, fmt.Errorf("received object kind %s doesn't match expected %s", obj.GetKind(), expected.Kind)
 	}
