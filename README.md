@@ -81,14 +81,14 @@ There are several ways to install Aptomi. We recommend **Compact** as a starting
 
 Installation Mode     | Aptomi | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
-[Compact](docs/install_compact.md) | Local binaries | *Yes* | Aptomi binaries will be installed on a local machine
-[Kubernetes](docs/install_kubernetes.md) | Containers on k8s  | *Yes* | Aptomi will be deployed on k8s in container
+[Compact](docs/install_compact.md) | Local machine | *Yes* | Aptomi will be installed on a local machine (binaries or in a single Docker container)
+[Kubernetes](docs/install_kubernetes.md) | Container on k8s  | *Yes* | Aptomi will be deployed on k8s in a container
 
 You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments:
 
 Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
-[Concepts](docs/install_concepts.md) | Local binaries | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI.
+[Concepts](docs/install_concepts.md) | Local machine | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI.
 
 ### Setting up k8s Clusters
 
