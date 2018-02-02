@@ -1,7 +1,7 @@
 #!/bin/bash
 set -exou pipefail
 
-rm -rf $(PWD)/.aptomi-install-cache
+rm -rf ${PWD}/.aptomi-install-cache
 
 function test_install {
     os="$1"
