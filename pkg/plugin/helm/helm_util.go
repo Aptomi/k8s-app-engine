@@ -65,7 +65,7 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 
 		port := cache.tillerTunnel.Local
 		cache.tillerHost = fmt.Sprintf("localhost:%d", port)
-		eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port: %d", port)
+		eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port %d for cluster %s", port, cache.cluster.Name)
 
 		return true
 	})
