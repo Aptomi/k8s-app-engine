@@ -12,6 +12,7 @@ var (
 	Objects = runtime.AppendAll([]*runtime.Info{
 		EndpointsObject,
 		PolicyUpdateResultObject,
+		AuthSuccessObject,
 		ServerErrorObject,
 		version.BuildInfoObject,
 	}, lang.PolicyObjects, engine.Objects)
