@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -28,9 +29,10 @@ func (api *coreAPI) getUserRequired(request *http.Request) *lang.User {
 func (api *coreAPI) authenticateUser(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	username := request.PostFormValue("username")
 	password := request.PostFormValue("password")
-	user, err := api.externalData.UserLoader.Authenticate(username, password)
-	if user == nil || err != nil {
-		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusUnauthorized)
+	_, err := api.externalData.UserLoader.Authenticate(username, password)
+	if err != nil {
+		serverErr := NewServerError(fmt.Sprintf("Authentication error: %s", err))
+		api.contentType.WriteOneWithStatus(writer, request, serverErr, http.StatusUnauthorized)
 	} else {
 		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusOK)
 	}
