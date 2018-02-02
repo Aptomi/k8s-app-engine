@@ -7,10 +7,12 @@
 APTOMI_INSTALL_DIR="/usr/local/bin"
 APTOMI_SERVER_CONFIG_DIR="/etc/aptomi"
 APTOMI_CLIENT_CONFIG_DIR="$HOME/.aptomi"
+APTOMI_INSTALL_CACHE="$HOME/.aptomi-install-cache"
 APTOMI_DB_DIR="/var/lib/aptomi"
-
-SCRIPT_NAME=`basename "$0"`
 REPO_NAME='Aptomi/aptomi'
+SCRIPT_NAME=`basename "$0"`
+UPLOAD_EXAMPLE=0
+SERVER_PID=""
 
 COLOR_GRAY='\033[0;37m'
 COLOR_BLUE='\033[0;34m'
@@ -24,7 +26,25 @@ if [ "yes" == "$DEBUG" ]; then
     set -x
 fi
 
+trap "script_done" INT TERM EXIT
+
 set -eou pipefail
+
+function script_done() {
+    local CODE=$?
+
+    if [ ! -z "${SERVER_PID}" ]; then
+        log_sub "Stopping aptomi server (PID: ${SERVER_PID})"
+        kill ${SERVER_PID} >/dev/null 2>&1
+        while ps -p ${SERVER_PID} >/dev/null; do sleep 1; done
+    fi
+
+    if [ ! $CODE -eq 0 ]; then
+        log_err "Script failed"
+    fi
+
+    exit $CODE
+}
 
 function check_installed() {
     if ! [ -x "$(command -v $1)" ]; then
@@ -115,14 +135,23 @@ function download_and_install_release() {
     local URL_BINARY="https://github.com/$REPO_NAME/releases/download/$VERSION/$FILENAMEBINARY"
     local URL_CHECKSUMS="https://github.com/$REPO_NAME/releases/download/$VERSION/$FILENAMECHECKSUMS"
 
-    local TMP_DIR="$(mktemp -dt aptomi-install-files-XXXXXX)"
-    local FILE_BINARY="$TMP_DIR/$FILENAMEBINARY"
-    local FILE_CHECKSUMS="$TMP_DIR/$FILENAMECHECKSUMS"
+    local FILE_BINARY="$APTOMI_INSTALL_CACHE/$FILENAMEBINARY"
+    local FILE_CHECKSUMS="$APTOMI_INSTALL_CACHE/$FILENAMECHECKSUMS"
 
-    log_sub "Downloading: $URL_BINARY"
-    curl -SsL "$URL_BINARY" -o "$FILE_BINARY"
-    log_sub "Downloading: $URL_CHECKSUMS"
-    curl -SsL "$URL_CHECKSUMS" -o "$FILE_CHECKSUMS"
+    mkdir -p $APTOMI_INSTALL_CACHE
+    if [ ! -f $FILE_BINARY ]; then
+        log_sub "Downloading: $URL_BINARY"
+        curl -SsL "$URL_BINARY" -o "$FILE_BINARY"
+    else
+        log_sub "Already downloaded. Using from cache: $FILE_BINARY"
+    fi
+
+    if [ ! -f $FILE_CHECKSUMS ]; then
+        log_sub "Downloading: $URL_CHECKSUMS"
+        curl -SsL "$URL_CHECKSUMS" -o "$FILE_CHECKSUMS"
+    else
+        log_sub "Already downloaded. Using from cache: $FILE_CHECKSUMS"
+    fi
 
     local sum=$(openssl sha1 -sha256 ${FILE_BINARY} | awk '{print $2 xxx}')
     local expected_line=$(cat ${FILE_CHECKSUMS} | grep ${FILENAMEBINARY})
@@ -135,13 +164,13 @@ function download_and_install_release() {
 }
 
 function run_as_root() {
-  local CMD="$*"
+    CMD="$*"
 
-  if [ $EUID -ne 0 ]; then
-    CMD="sudo $CMD"
-  fi
+    if [ $EUID -ne 0 ]; then
+        CMD="sudo $CMD"
+    fi
 
-  $CMD
+    $CMD
 }
 
 function install_binaries_from_archive() {
@@ -194,7 +223,8 @@ db:
   connection: ${APTOMI_DB_DIR}/db.bolt
 
 enforcer:
-  interval: 5s
+  noop: false
+  interval: 2s
 
 users:
   file:
@@ -219,6 +249,17 @@ users:
 EOL
         run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
         run_as_root cp ${TMP_DIR}/config.yaml ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
+
+        # If we are in example mode, disable enforcer
+        if [ $UPLOAD_EXAMPLE -eq 1 ]; then
+            log_sub "Disabling enforcer (as we are running in example mode)"
+
+            if [ $EUID -ne 0 ]; then
+                sudo sed -i.bak -e "s/noop: false/noop: true/" ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
+            else
+                sed -i.bak -e "s/noop: false/noop: true/" ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
+            fi
+        fi
     fi
 
     log_sub "Creating built-in admin users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml$COLOR_RESET"
@@ -321,7 +362,7 @@ function test_aptomi() {
     fi
 
     aptomi server &>${TMP_DIR}/server.log &
-    local SERVER_PID=$!
+    SERVER_PID=$!
     log_sub "Starting 'aptomi server' for testing (PID: ${SERVER_PID})"
     sleep 1
     local SERVER_RUNNING=`ps | grep aptomi | grep "${SERVER_PID}"`
@@ -349,10 +390,52 @@ function test_aptomi() {
         exit 1
     fi
 
-    log_sub "Stopping aptomi server (PID: ${SERVER_PID})"
-    kill ${SERVER_PID} >/dev/null
-    while ps -p ${SERVER_PID} >/dev/null; do sleep 1; done
+    # Upload example, if needed
+    if [ $UPLOAD_EXAMPLE -eq 1 ]; then
+        upload_example
+    fi
 }
+
+function example_run_line() {
+    local CMD="$*"
+
+    # Run command
+    log_sub "${CMD}"
+    ($CMD 1>/dev/null 2>&1)
+}
+
+function upload_example() {
+    log_sub "Uploading example"
+    example_run_line "aptomictl policy apply --wait --username Sam -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/Sam"
+    example_run_line "aptomictl policy apply --wait --username Sam -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/Sam/clusters.yaml.template"
+    example_run_line "aptomictl policy apply --wait --username Frank -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/Frank"
+    example_run_line "aptomictl policy apply --wait --username John -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/John"
+    example_run_line "aptomictl policy apply --wait --username John -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/john-prod-ts.yaml"
+    example_run_line "aptomictl policy apply --wait --username Alice -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/alice-stage-ts.yaml"
+    example_run_line "aptomictl policy apply --wait --username Bob -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/bob-stage-ts.yaml"
+    example_run_line "aptomictl policy apply --wait --username Carol -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/carol-stage-ts.yaml"
+}
+
+function help() {
+    echo "This script installs Aptomi. Accepted CLI arguments are:"
+    echo -e "\t--help: prints this help"
+    echo -e "\t--with-example: imports example after installing and disables enforcer"
+}
+
+# Parsing input arguments (if any)
+export INPUT_ARGUMENTS="$@"
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    '--with-example')
+        UPLOAD_EXAMPLE=1
+        ;;
+    '--help')
+        help
+        exit 0
+        ;;
+  esac
+  shift
+done
 
 # Initial checks
 log "Starting Aptomi install"
