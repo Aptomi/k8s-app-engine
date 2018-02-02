@@ -146,12 +146,8 @@ function download_and_install_release() {
         log_sub "Already downloaded. Using from cache: $FILE_BINARY"
     fi
 
-    if [ ! -f $FILE_CHECKSUMS ]; then
-        log_sub "Downloading: $URL_CHECKSUMS"
-        curl -SsL "$URL_CHECKSUMS" -o "$FILE_CHECKSUMS"
-    else
-        log_sub "Already downloaded. Using from cache: $FILE_CHECKSUMS"
-    fi
+    log_sub "Downloading: $URL_CHECKSUMS"
+    curl -SsL "$URL_CHECKSUMS" -o "$FILE_CHECKSUMS"
 
     local sum=$(openssl sha1 -sha256 ${FILE_BINARY} | awk '{print $2 xxx}')
     local expected_line=$(cat ${FILE_CHECKSUMS} | grep ${FILENAMEBINARY})
