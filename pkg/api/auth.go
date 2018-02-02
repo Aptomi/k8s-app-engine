@@ -19,7 +19,7 @@ func (api *coreAPI) getUserOptional(request *http.Request) *lang.User {
 func (api *coreAPI) getUserRequired(request *http.Request) *lang.User {
 	user := api.getUserOptional(request)
 	if user == nil {
-		panic("Unauthorized or couldn't be loaded")
+		panic("Unauthorized or user couldn't be loaded")
 	}
 
 	return user
