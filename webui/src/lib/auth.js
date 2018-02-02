@@ -50,11 +50,19 @@ export default {
 function authenticate (username, password, cb) {
   setTimeout(() => {
     const fetchSuccess = $.proxy(function (data) {
-      // eslint-disable-next-line
-      cb({
-        authenticated: true,
-        token: Math.random().toString(36).substring(7)
-      })
+      if (data['kind'] === 'auth-success') {
+        // eslint-disable-next-line
+        cb({
+          authenticated: true,
+          token: Math.random().toString(36).substring(7)
+        })
+      } else if (data['kind'] === 'error'){
+        // eslint-disable-next-line
+        cb({ authenticated: false, error: data['error'] })
+      } else {
+        // eslint-disable-next-line
+        cb({ authenticated: false })
+      }
     }, this)
 
     const fetchError = $.proxy(function () {
