@@ -27,11 +27,13 @@ func (api *coreAPI) getUserRequired(request *http.Request) *lang.User {
 	return user
 }
 
+// AuthSuccessObject contains Info for the AuthSuccess type
 var AuthSuccessObject = &runtime.Info{
 	Kind:        "auth-success",
 	Constructor: func() runtime.Object { return &AuthSuccess{} },
 }
 
+// AuthSuccess represents successful authentication
 type AuthSuccess struct {
 	runtime.TypeKind `yaml:",inline"`
 }
