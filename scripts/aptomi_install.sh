@@ -343,12 +343,12 @@ function test_aptomi() {
     fi
 
     # Run 'aptomi version' and remove leading whitespaces
-    local SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null | grep 'Git Version')
-    SERVER_VERSION_OUTPUT="$(echo -e "${SERVER_VERSION_OUTPUT}" | sed -e 's/^[[:space:]]*//')"
-    if [ ! -z "${SERVER_VERSION_OUTPUT}" ]; then
+    local SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null)
+    if [ $? -eq 0 ]; then
         log_sub "Running 'aptomi version': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
-        log_err "Failed to parse output of 'aptomi version'"
+        log_err "Failed to execute 'aptomi version'"
+        log_err $SERVER_VERSION_OUTPUT
         exit 1
     fi
 
@@ -372,21 +372,22 @@ function test_aptomi() {
     fi
 
     # Run client to show the version
-    local CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null | grep 'Git Version' | wc -l)
-    CLIENT_VERSION_OUTPUT="$(echo -e "${CLIENT_VERSION_OUTPUT}" | sed -e 's/^[[:space:]]*//')"
-    if [ $CLIENT_VERSION_OUTPUT -eq 2 ]; then
+    local CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null)
+    if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
-        log_err "Failed to parse output of 'aptomictl version'"
+        log_err "Failed to execute 'aptomictl version'"
+        log_err $CLIENT_VERSION_OUTPUT
         exit 1
     fi
 
     # Run client to show the policy
-    local CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null | grep 'Policy Version')
-    if [ ! -z "${CLIENT_POLICY_SHOW_OUTPUT}" ]; then
+    local CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null)
+    if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl policy show': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
-        log_err "Failed to parse output of 'aptomictl policy show'"
+        log_err "Failed to execute 'aptomictl policy show'"
+        log_err $CLIENT_POLICY_SHOW_OUTPUT
         exit 1
     fi
 
