@@ -7,7 +7,7 @@ function test_install {
     os="$1"
     cmd="$2"
 
-    docker run -it --rm \
+    docker run --rm \
                     -e DEBUG=yes \
                     -p 27866:27866 \
                     -v ${PWD}/.aptomi-install-cache:/root/.aptomi-install-cache \
