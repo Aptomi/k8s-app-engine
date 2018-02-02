@@ -146,6 +146,7 @@ function download_and_install_release() {
         log_sub "Already downloaded. Using from cache: $FILE_BINARY"
     fi
 
+    # Never cache checksum, it'll allow us to verify cached binary
     log_sub "Downloading: $URL_CHECKSUMS"
     curl -SsL "$URL_CHECKSUMS" -o "$FILE_CHECKSUMS"
 
