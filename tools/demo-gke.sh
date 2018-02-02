@@ -74,20 +74,20 @@ function main() {
         gke_cluster_wait_alive $cluster_big_name $cluster_big_region
         gke_cluster_kubectl_setup $cluster_big_name $cluster_big_region $demo_namespace
         k8s_alive $cluster_big_name
-        helm_init $cluster_big_name
+        #helm_init $cluster_big_name
 
         # wait until small cluster is alive and setup
         gke_cluster_wait_alive $cluster_small_name $cluster_small_region
         gke_cluster_kubectl_setup $cluster_small_name $cluster_small_region $demo_namespace
         k8s_alive $cluster_small_name
-        helm_init $cluster_small_name
+        #helm_init $cluster_small_name
 
-        log "Final check for k8s and helm alive"
+        log "Final check for k8s alive" # and helm alive"
         k8s_alive $cluster_big_name 1>/dev/null 2>/dev/null
-        helm_alive $cluster_big_name 1>/dev/null 2>/dev/null
+        #helm_alive $cluster_big_name 1>/dev/null 2>/dev/null
 
         k8s_alive $cluster_small_name 1>/dev/null 2>/dev/null
-        helm_alive $cluster_small_name 1>/dev/null 2>/dev/null
+        #helm_alive $cluster_small_name 1>/dev/null 2>/dev/null
     elif [ "down" == "$1" ]; then
         gke_firewall_delete $firewall_rules_name
 
