@@ -343,7 +343,8 @@ function test_aptomi() {
     fi
 
     # Run 'aptomi version' and remove leading whitespaces
-    local SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null)
+    local SERVER_VERSION_OUTPUT
+    SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null)
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomi version': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
@@ -364,7 +365,7 @@ function test_aptomi() {
     aptomi server &>${TMP_DIR}/server.log &
     SERVER_PID=$!
     log_sub "Starting 'aptomi server' for testing (PID: ${SERVER_PID})"
-    sleep 1
+    sleep 2
     local SERVER_RUNNING=`ps | grep aptomi | grep "${SERVER_PID}"`
     if [ -z "${SERVER_RUNNING}" ]; then
         log_err "Aptomi server failed to start"
@@ -372,7 +373,8 @@ function test_aptomi() {
     fi
 
     # Run client to show the version
-    local CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null)
+    local CLIENT_VERSION_OUTPUT
+    CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null)
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
@@ -382,7 +384,8 @@ function test_aptomi() {
     fi
 
     # Run client to show the policy
-    local CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null)
+    local CLIENT_POLICY_SHOW_OUTPUT
+    CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null)
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl policy show': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
