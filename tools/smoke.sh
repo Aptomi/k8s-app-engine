@@ -10,7 +10,12 @@ if ! [ -x "$(command -v jq)" ]; then
   exit 1
 fi
 
-set -exou pipefail
+set -eou pipefail
+
+DEBUG=${DEBUG:-no}
+if [ "yes" == "$DEBUG" ]; then
+    set -x
+fi
 
 CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
@@ -37,7 +42,10 @@ function free_port() {
 function stop_server() {
     echo "Stopping server..."
     kill ${SERVER_PID} &>/dev/null || true
-    [[ -e "${CONF_DIR}/server.log" ]] && echo "Server log location: ${CONF_DIR}/server.log" || echo "No server log found."
+
+    if [ "yes" == "$DEBUG" ]; then
+        [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
+    fi
 }
 
 APTOMI_PORT=$(free_port)
