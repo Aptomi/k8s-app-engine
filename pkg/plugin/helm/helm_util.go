@@ -18,17 +18,22 @@ import (
 func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, version string, err error) {
 	repository, ok := params["chartRepo"].(string)
 	if !ok {
-		err = fmt.Errorf("chartRepo is a mandatory paraneter")
+		err = fmt.Errorf("chartRepo is a mandatory parameter")
 		return
 	}
 
 	name, ok = params["chartName"].(string)
 	if !ok {
-		err = fmt.Errorf("chartName is a mandatory paraneter")
+		err = fmt.Errorf("chartName is a mandatory parameter")
 		return
 	}
 
-	version = params["chartVersion"].(string)
+	if _, ok := params["chartVersion"]; !ok {
+		// version is optional. this will use the latest
+		version = ""
+	} else {
+		version = params["chartVersion"].(string)
+	}
 
 	return
 }
