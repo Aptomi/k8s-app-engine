@@ -14,13 +14,13 @@ const (
 func evaluate(t *testing.T, templateStr string, expectedResult int, expectedStr string, params *Parameters) {
 	// Check for compilation
 	tmpl, err := NewTemplate(templateStr)
-	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Template compilation (success vs. error): "+templateStr) || expectedResult == ResCompileError {
+	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Template compilation (success vs. error): %s [%s]", templateStr, err) || expectedResult == ResCompileError {
 		return
 	}
 
 	// Check for evaluation
 	resultStr, err := tmpl.Evaluate(params)
-	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Template evaluation (success vs. error): "+templateStr) || expectedResult == ResEvalError {
+	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Template evaluation (success vs. error): %s [%s]", templateStr, err) || expectedResult == ResEvalError {
 		return
 	}
 
@@ -66,10 +66,16 @@ func TestTemplateEvaluation(t *testing.T) {
 	}{
 		// successful evaluation
 		{"test-{{.User.Labels.team}}-{{.Labels.tagname}}", ResSuccess, "test-platform_services-tagvalue"},
+		{"val-{{ default \"abc\" .Labels.tagname }}", ResSuccess, "val-tagvalue"},
+		{"val-{{ default \"abc\" .Labels.missinglabel }}", ResSuccess, "val-abc"},
+		{"val-{{ default .Labels.tagname }}", ResSuccess, "val-tagvalue"},
+		{"val-{{ default .Labels.missinglabel }}", ResSuccess, "val-"},
 
 		// missing fields
 		{"test-{{.User.MissingField}}-{{.MissingObject}}", ResEvalError, ""},
 		{"test-{{.User.Labels.missinglabel}}", ResEvalError, ""},
+		{"{{ default }}", ResEvalError, ""},
+		{"{{ default \"a\" \"b\" \"c\" }}", ResEvalError, ""},
 
 		// cannot be compiled
 		{"{{ bs }}", ResCompileError, ""},
