@@ -12,6 +12,7 @@ APTOMI_DB_DIR="/var/lib/aptomi"
 REPO_NAME='Aptomi/aptomi'
 SCRIPT_NAME=`basename "$0"`
 UPLOAD_EXAMPLE=0
+CLIENT_ONLY=0
 SERVER_PID=""
 
 COLOR_GRAY='\033[0;37m'
@@ -185,17 +186,19 @@ function install_binaries_from_archive() {
     DIRNAME="${DIRNAME%.*}"
     UNPACKED_PATH="$TMP_DIR/$DIRNAME"
 
-    if [ ! -f $UNPACKED_PATH/aptomi ]; then
-        log_err "Binary 'aptomi' not found inside the release"
+    # Install server & create config (only if we are not in CLIENT_ONLY mode)
+    if [ $CLIENT_ONLY -eq 0 ]; then
+        if [ ! -f $UNPACKED_PATH/aptomi ]; then
+            log_err "Binary 'aptomi' not found inside the release"
+        fi
+
+        log_sub "Installing Aptomi server: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomi"
+        run_as_root cp "$UNPACKED_PATH/aptomi" "$APTOMI_INSTALL_DIR"
     fi
 
     if [ ! -f $UNPACKED_PATH/aptomictl ]; then
         log_err "Binary 'aptomictl' not found inside the release"
     fi
-
-    # Install server & create config
-    log_sub "Installing Aptomi server: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomi"
-    run_as_root cp "$UNPACKED_PATH/aptomi" "$APTOMI_INSTALL_DIR"
 
     # Install client & create config
     log_sub "Installing Aptomi client: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomictl$COLOR_RESET"
@@ -203,6 +206,11 @@ function install_binaries_from_archive() {
 }
 
 function create_server_config() {
+    # Skip server installation if we are in CLIENT_ONLY mode
+    if [ $CLIENT_ONLY -eq 1 ]; then
+        return 0
+    fi
+
     local TMP_DIR="$(mktemp -dt aptomi-install-server-config-XXXXXX)"
 
     log_sub "Creating config for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/config.yaml$COLOR_RESET"
@@ -320,7 +328,7 @@ function copy_examples() {
     cp -R ${UNPACKED_PATH}/examples ${APTOMI_CLIENT_CONFIG_DIR}/
 }
 
-function test_aptomi() {
+function test_aptomi_server_in_path() {
     # Verify that Aptomi server is in path
     local APTOMI=`which aptomi`
     if [ "$APTOMI" == "$APTOMI_INSTALL_DIR/aptomi" ]; then
@@ -329,7 +337,9 @@ function test_aptomi() {
         log_warn "Aptomi server: 'which aptomi' returned '$APTOMI', but expected '$APTOMI_INSTALL_DIR/aptomi'"
         exit 1
     fi
+}
 
+function test_aptomi_client_in_path() {
     # Verify that Aptomi client is in path
     local APTOMICTL=`which aptomictl`
     if [ "$APTOMICTL" == "$APTOMI_INSTALL_DIR/aptomictl" ]; then
@@ -338,7 +348,9 @@ function test_aptomi() {
         log_warn "Aptomi client: 'which aptomictl' returned '$APTOMICTL', but expected '$APTOMI_INSTALL_DIR/aptomictl'"
         exit 1
     fi
+}
 
+function test_aptomi_server_version_success() {
     # Run 'aptomi version' and remove leading whitespaces
     local SERVER_VERSION_OUTPUT
     SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null)
@@ -349,9 +361,9 @@ function test_aptomi() {
         log_err $SERVER_VERSION_OUTPUT
         exit 1
     fi
+}
 
-    local TMP_DIR="$(mktemp -dt aptomi-install-server-runtime-XXXXXX)"
-
+function start_aptomi_server() {
     # Start Aptomi server
     local SERVER_RUNNING_PRIOR=`ps | grep aptomi | grep server`
     if [ ! -z "${SERVER_RUNNING_PRIOR}" ]; then
@@ -359,7 +371,7 @@ function test_aptomi() {
         exit 1
     fi
 
-    aptomi server &>${TMP_DIR}/server.log &
+    aptomi server &>/dev/null &
     SERVER_PID=$!
     log_sub "Starting 'aptomi server' for testing (PID: ${SERVER_PID})"
     sleep 2
@@ -368,10 +380,16 @@ function test_aptomi() {
         log_err "Aptomi server failed to start"
         exit 1
     fi
+}
 
+function test_aptomi_client_version_success() {
     # Run client to show the version
     local CLIENT_VERSION_OUTPUT
-    CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null)
+    if [ $CLIENT_ONLY -eq 0 ]; then
+        CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null)
+    else
+        CLIENT_VERSION_OUTPUT=$(aptomictl version --client 2>/dev/null)
+    fi
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
@@ -379,7 +397,9 @@ function test_aptomi() {
         log_err $CLIENT_VERSION_OUTPUT
         exit 1
     fi
+}
 
+function test_aptomi_client_show_policy_success() {
     # Run client to show the policy
     local CLIENT_POLICY_SHOW_OUTPUT
     CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null)
@@ -390,10 +410,26 @@ function test_aptomi() {
         log_err $CLIENT_POLICY_SHOW_OUTPUT
         exit 1
     fi
+}
 
-    # Upload example, if needed
-    if [ $UPLOAD_EXAMPLE -eq 1 ]; then
-        upload_example
+function test_aptomi() {
+    # Test that installed aptomi binaries are in PATH
+    if [ $CLIENT_ONLY -eq 0 ]; then
+        test_aptomi_server_in_path
+        test_aptomi_server_version_success
+        start_aptomi_server
+    fi
+
+    test_aptomi_client_in_path
+    test_aptomi_client_version_success
+
+    if [ $CLIENT_ONLY -eq 0 ]; then
+        test_aptomi_client_show_policy_success
+
+        # Upload example, if needed
+        if [ $UPLOAD_EXAMPLE -eq 1 ]; then
+            upload_example
+        fi
     fi
 }
 
@@ -427,6 +463,9 @@ function help() {
 export INPUT_ARGUMENTS="$@"
 while [[ $# -gt 0 ]]; do
   case $1 in
+    '--client-only')
+        CLIENT_ONLY=1
+        ;;
     '--with-example')
         UPLOAD_EXAMPLE=1
         ;;
