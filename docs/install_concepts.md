@@ -4,13 +4,13 @@
 
 # Installation
 
-## Binaries on local machine
+## Option #1: local binaries
 Install Aptomi locally, pre-populated with an example:
 ```bash
 curl https://raw.githubusercontent.com/Aptomi/aptomi/master/scripts/aptomi_install.sh | bash /dev/stdin --with-example && aptomi server
 ```
 
-## Docker container on a local machine
+## Option #2: docker container
 Alternatively, you can run Aptomi server pre-populated with an example in a Docker container: 
 ```bash
 docker run -it --rm -p 27866:27866 aptomi/aptomi-test-install:xenial sh -c 'curl https://raw.githubusercontent.com/Aptomi/aptomi/master/scripts/aptomi_install.sh | bash /dev/stdin --with-example && aptomi server'
