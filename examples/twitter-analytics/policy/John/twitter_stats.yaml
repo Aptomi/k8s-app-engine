@@ -128,7 +128,7 @@
         set:
           display_top_hashtags: 100
           chart_name: tweepub-fake
-          base_word: "dev-{{ .User.Name }}"
+          base_word: "stage"
       allocation:
         service: twitter_stats
         keys:
