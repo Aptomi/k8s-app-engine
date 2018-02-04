@@ -73,6 +73,20 @@ func (server *Server) enforce() error {
 	desiredState, err := resolver.ResolveAllDependencies()
 	if err != nil {
 		// todo save eventlog
+
+		if currRevision == nil || currRevision.Policy != desiredPolicyGen || currRevision.Status != engine.RevisionStatusError {
+			rev, revErr := server.store.NewRevision(desiredPolicyGen)
+			if revErr != nil {
+				log.Warnf("(enforce-%d) Error while creating revision to record resolution error: %s", server.enforcementIdx, revErr)
+			}
+
+			rev.Status = engine.RevisionStatusError
+			revErr = server.store.SaveRevision(rev)
+			if revErr != nil {
+				log.Warnf("(enforce-%d) Error while saving revision to record resolution error: %s", server.enforcementIdx, revErr)
+			}
+		}
+
 		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
 	}
 
