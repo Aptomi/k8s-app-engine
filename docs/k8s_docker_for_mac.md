@@ -1,8 +1,8 @@
 # k8s @ Docker For Mac
 * k8s will be running on local machine
 * k8s support is only available in [Docker for Mac](https://docs.docker.com/docker-for-mac/install/) 17.12 CE Edge and higher, on the Edge channel.
-* **Note:** support for Kubernetes in Docker For Mac is still early. There is a bug [https://github.com/docker/for-mac/issues/2445](https://github.com/docker/for-mac/issues/2445) that
-  make NodePorts unusable. So you will be able to deploy Aptomi example apps successfully, but **will NOT be able to open any of their endpoints (e.g. HTTP)**.  
+* **Caveat:** support for Kubernetes in Docker For Mac is still early. There is an issue [https://github.com/docker/for-mac/issues/2445](https://github.com/docker/for-mac/issues/2445) with
+  NodePorts. You will be able to deploy Aptomi example apps successfully, but keep in mind that **application endpoints will be accessible via localhost instead of 192.168.65.3 IP advertised by Docker For Mac**.  
 
 # Configuration
 1. Once Docker for Mac is installed, ensure it has enough resources and enable k8s support:

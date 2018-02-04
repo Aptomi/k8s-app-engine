@@ -82,13 +82,13 @@ There are several ways to install Aptomi. The simplest one is **Compact**, but y
 Installation Mode     | Aptomi | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
 [Compact](docs/install_compact.md) | Local machine | *Yes* | Aptomi will be installed on a local machine (binaries or in a single Docker container)
-[Kubernetes](docs/install_kubernetes.md) | Container on k8s  | *Yes* | Aptomi will be deployed on k8s in a container
+[Kubernetes](docs/install_kubernetes.md) | Container on k8s  | *Yes* | Aptomi will be deployed on k8s via Helm chart
 
 You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments to k8s:
 
 Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
-[Concepts](docs/install_concepts.md) | Local machine | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI.
+[Concepts](docs/install_concepts.md) | Local machine | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI. k8s is not required
 
 ### Setting up k8s Clusters
 
@@ -97,7 +97,7 @@ take full advantage of Aptomi policy engine and use rules to deploy applications
 
 Kubernetes Cluster | When to use     | How to run
 ------------|-----------------|-----------
-Your own    | If you already have k8s cluster set up | [Configure Aptomi to use your own k8s cluster](docs/k8s_own.md)
+Your own    | If you already have k8s cluster set up | [Configure Aptomi to use an existing k8s cluster](docs/k8s_own.md)
 Google Kubernetes Engine | Useful if you have a new Google account and free credits | [Configure Aptomi to use GKE](docs/k8s_gke.md)
 k8s / Minikube | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Minikube](docs/k8s_minikube.md)
 k8s / Docker For Mac | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Docker For Mac](docs/k8s_docker_for_mac.md)

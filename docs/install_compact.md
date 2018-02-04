@@ -1,4 +1,4 @@
-# Compact Mode
+# Aptomi Install / Compact Mode
 * Aptomi will be installed on a local machine 
 
 # Installation
@@ -26,4 +26,4 @@ Open UI at [http://localhost:27866/](http://localhost:27866/) and log in as **'a
 
 At this point, most UI screens will be empty. This is expected, as Aptomi has no applications imported yet.
 
-Now you are ready to move on to setting up k8s cluster(s) for deploying your apps.
+Now you are ready to move on to point Aptomi to your k8s cluster(s) and start deploying your apps.

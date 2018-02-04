@@ -1,4 +1,4 @@
-# Concepts Mode
+# Aptomi Install / Concepts Mode
 * Aptomi will be installed on a local machine and pre-populated with an example
 * The part responsible for application deployment **will be disabled**. It means you can explore Aptomi without configuring a k8s cluster, but you won't be able to deploy any apps either
 

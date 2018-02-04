@@ -17,15 +17,15 @@
     
 # Create Clusters
 1. Run the provided script, it will create 2 k8s clusters via GKE API:
-    * ```
-      curl https://raw.githubusercontent.com/Aptomi/aptomi/master/tools/demo-gke.sh | bash /dev/stdin up
-      ```
+    ```
+    curl https://raw.githubusercontent.com/Aptomi/aptomi/master/tools/demo-gke.sh | bash /dev/stdin up
+    ```
       
 1. Generate YAMLs for these k8s clusters and upload them to Aptomi as *cluster-us-east* and *cluster-us-west*:
-    * ```
-      aptomictl gen cluster -c cluster-us-east | aptomictl policy apply --username admin -f -
-      aptomictl gen cluster -c cluster-us-west | aptomictl policy apply --username admin -f -
-      ```
+    ```
+    aptomictl gen cluster -c cluster-us-east | aptomictl policy apply --username admin -f -
+    aptomictl gen cluster -c cluster-us-west | aptomictl policy apply --username admin -f -
+    ```
 
 Now you can move on to running the examples.
 
