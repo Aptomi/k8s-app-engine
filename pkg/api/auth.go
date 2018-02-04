@@ -39,12 +39,14 @@ func (api *coreAPI) handleLogin(writer http.ResponseWriter, request *http.Reques
 	}
 }
 
+// Claims represent Aptomi JWT Claims
 type Claims struct {
 	Name        string `json:"name"`
 	DomainAdmin bool   `json:"admin,omitempty"`
 	jwt.StandardClaims
 }
 
+// Valid checks if claims are valid
 func (claims Claims) Valid() error {
 	if len(claims.Name) == 0 {
 		return fmt.Errorf("token should contain non-empty username")
@@ -93,8 +95,12 @@ func (api *coreAPI) handleAuth(handle httprouter.Handle, admin bool) httprouter.
 	}
 }
 
+// The key type is unexported to prevent collisions with context keys defined in other packages
+type key int
+
 const (
-	ctxUserProperty = "user"
+	// ctxUserKey is the context key for user
+	ctxUserKey key = iota
 )
 
 func (api *coreAPI) checkToken(request *http.Request, admin bool) error {
@@ -123,14 +129,14 @@ func (api *coreAPI) checkToken(request *http.Request, admin bool) error {
 	}
 
 	// store user into the request
-	newRequest := request.WithContext(context.WithValue(request.Context(), ctxUserProperty, user))
+	newRequest := request.WithContext(context.WithValue(request.Context(), ctxUserKey, user))
 	*request = *newRequest
 
 	return nil
 }
 
 func (api *coreAPI) getUserOptional(request *http.Request) *lang.User {
-	val := request.Context().Value(ctxUserProperty)
+	val := request.Context().Value(ctxUserKey)
 	if val == nil {
 		return nil
 	}
