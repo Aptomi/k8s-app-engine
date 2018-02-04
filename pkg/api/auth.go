@@ -115,7 +115,7 @@ func (api *coreAPI) checkToken(request *http.Request, admin bool) error {
 		return fmt.Errorf("token refers to non-existing user: %s", claims.Name)
 	}
 	if user.DomainAdmin != claims.DomainAdmin {
-		return fmt.Errorf("token contains incorrect admin status: %s", claims.DomainAdmin)
+		return fmt.Errorf("token contains incorrect admin status: %t", claims.DomainAdmin)
 	}
 
 	if admin && !user.DomainAdmin {
