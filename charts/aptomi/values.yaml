@@ -4,28 +4,32 @@
 image:
   repository: aptomi/
   name: aptomi
-  tag: 0.1.5
+  tag: latest
   pullPolicy: Always # IfNotPresent
 
-# Aptomi secrets to be deployed (plain text)
-secrets:
-# |
+# Aptomi users to be deployed
+users:
+  # deploy default admin (admin:admin)
+  admin:
+    enabled: false
+    name: admin
+    passwordhash: "$2a$10$JvptTmEPZU08iS5S.A1jfO4gulNt3in5A4FBODhkMqhD4B.1L3dtu"
+    labels: {}
 
-demoLDAP:
-  deployChart: false
+  # deploy users for examples
+  example:
+    enabled: false
+
+  # deploy custom users
+  custom:
+  #  - name: user
+  #    passwordhash: $2a$10$JvptTmEPZU08iS5S.A1jfO4gulNt3in5A4FBODhkMqhD4B.1L3dtu
+  #    domainadmin: true
+  #    labels:
+  #      description: Sam (Global Ops). He controls global rules
+  #      short-description: Global Ops
 
 port: 27866
-
-probeInitialDelaySeconds: 5
-probePeriodSeconds: 15
-
-resources:
-  #requests:
-  #  cpu: 100m
-  #  memory: 512Mi
-  #limits:
-  #  cpu: 100m
-  #  memory: 512Mi
 
 service:
   type: NodePort # or ClusterIP or LoadBalancer
@@ -44,3 +48,14 @@ persistence:
   volumeSize: 10Gi
 
   hostPath: ""
+
+probeInitialDelaySeconds: 5
+probePeriodSeconds: 15
+
+resources:
+  #requests:
+  #  cpu: 100m
+  #  memory: 512Mi
+  #limits:
+  #  cpu: 100m
+  #  memory: 512Mi

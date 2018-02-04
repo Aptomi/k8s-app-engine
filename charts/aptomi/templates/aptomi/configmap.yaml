@@ -15,7 +15,7 @@ data:
       host: 0.0.0.0
 
     db:
-      connection: /etc/aptomi/data/db.bolt
+      connection: /var/lib/aptomi/db.bolt
 
     enforcer:
       disabled: false
@@ -23,24 +23,90 @@ data:
     domainAdminOverrides:
       Sam: true
 
-    {{ if .Values.demoLDAP.deployChart }}
     users:
-      ldap:
-        - host: {{ printf "aptomi-demo-ldap-%s" .Release.Name  | trunc 55 | trimSuffix "-" }}
-          port: {{ .Values.aptomi_demo_ldap.port }}
-          basedn: "o=aptomiOrg"
-          filter: "(&(objectClass=organizationalPerson))"
-          filterbyname: "(&(objectClass=organizationalPerson)(cn=%s))"
-          labeltoattributes:
-            name: cn
-            description: description
-            global_ops: isglobalops
-            is_operator: isoperator
-            mail: mail
-            team: team
-            org: o
-            short-description: role
-            deactivated: deactivated
-    {{ end }}
-  aptomi-secrets: |
-{{ toYaml .Values.secrets | indent 4 }}
+      file:
+        - /etc/aptomi/users.yaml
+  aptomi-users: |
+  {{- if .Values.users.admin.enabled }}
+    - name: {{ .Values.users.admin.name }}
+      passwordhash: {{ .Values.users.admin.passwordhash }}
+      domainadmin: true
+      {{- if .Values.users.admin.labels }}
+      labels:
+{{ toYaml .Values.users.admin.labels | indent 8 }}
+      {{- end }}
+  {{- end }}
+  {{ if .Values.users.example.enabled }}
+    - name: Alice
+      passwordhash: "$2a$10$2p1hqJmWdv8E6K4QLQaMiOXOHQ4UsfFVDnGMSo11KqZ3dWxPlkuc2"
+      labels:
+        description: Alice (Developer/Service Consumer)
+        short-description: Dev
+        org: dev
+        ldapDN: cn=Alice,ou=people,o=aptomiOrg
+        deactivated: false
+
+    - name: Bob
+      passwordhash: "$2a$10$L2n2Wpitgob6J3E9LT0ag.iCD8Z/rZqt.uc0tbD8lxafhxy4vhhSO"
+      labels:
+        description: Bob (Developer/Service Consumer)
+        short-description: Dev
+        org: dev
+        ldapDN: cn=Bob,ou=people,o=aptomiOrg
+        deactivated: false
+
+    - name: Carol
+      passwordhash: "$2a$10$erIEAu0rxHmiaw3n31Nl2O/VD640cGnJ83ju6KfktDN4V0cKh3YdC"
+      labels:
+        description: Carol (Developer/Service Consumer)
+        short-description: Dev
+        org: dev
+        team: mobile-dev
+        ldapDN: cn=Carol,ou=people,o=aptomiOrg
+        deactivated: false
+
+    - name: John
+      passwordhash: "$2a$10$K3VbYVZcSUzPN3a.29Gk3epedR316jyxr5gBU7lbt5oD/52d93Uh2"
+      labels:
+        description: John (Ops for 'twitter-stats' service). He controls its sharing/consumption (prod/stage)
+        short-description: Service Ops
+        org: it
+        is_operator: true
+        team: web-ops-team
+        ldapDN: cn=John,ou=people,o=aptomiOrg
+        deactivated: false
+
+    - name: Frank
+      passwordhash: "$2a$10$t3ud1aJvdJ5WqeUOWEKe2.A5XMvGMN8xCVIC8/zWPmVS.Ft.VW4ZW"
+      labels:
+        description: Frank (Ops for 'analytics-pipeline' service). He controls its sharing/consumption (prod/stage)
+        short-description: Service Ops
+        org: it
+        is_operator: true
+        team: analytics-ops-team
+        ldapDN: cn=Frank,ou=people,o=aptomiOrg
+        deactivated: false
+
+    - name: Sam
+      passwordhash: "$2a$10$ueMP3GtN987cLhOLT59WCe8GzxjsTNltRtkknPvHTLcRHXcTRQFzG"
+      labels:
+        description: Sam (Global Ops). He controls global rules
+        short-description: Global Ops
+        org: it
+        is_operator: true
+        global_ops: true
+        team: global-ops-team
+        ldapDN: cn=Sam,ou=people,o=aptomiOrg
+        deactivated: false
+  {{ end }}
+  {{- range $key, $user := .Values.users.custom }}
+    - name: "{{ $user.name }}"
+      passwordhash: "{{ $user.passwordhash }}"
+      {{- if $user.domainadmin }}
+      domainadmin: {{ $user.domainadmin }}
+      {{- end }}
+      {{- if $user.labels }}
+      labels:
+{{ toYaml $user.labels | indent 8 }}
+      {{ end }}
+  {{- end }}
