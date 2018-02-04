@@ -12,7 +12,7 @@ import (
 )
 
 func newClusterCommand(cfg *config.Client) *cobra.Command {
-	var sourceContext, clusterName, clusterNamespace string
+	var sourceContext, clusterName, k8sNamespace string
 	var local bool
 
 	cmd := &cobra.Command{
@@ -40,7 +40,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				if len(clusterName) == 0 {
 					clusterName = sourceContext
 				}
-				clusterConfig, err = handleKubeConfigCluster(sourceContext)
+				clusterConfig, err = handleKubeConfigCluster(sourceContext, k8sNamespace)
 			}
 			if err != nil {
 				panic(err)
@@ -50,7 +50,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				TypeKind: lang.ClusterObject.GetTypeKind(),
 				Metadata: lang.Metadata{
 					Name:      clusterName,
-					Namespace: clusterNamespace,
+					Namespace: "system",
 				},
 				Type:   "kubernetes",
 				Config: clusterConfig,
@@ -67,13 +67,13 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 
 	cmd.Flags().BoolVarP(&local, "local", "l", false, "Build Aptomi cluster with local kubernetes")
 	cmd.Flags().StringVarP(&sourceContext, "context", "c", "", "Context in kubeconfig to be used for Aptomi cluster creation (run 'kubectl config get-contexts' to get list of available contexts and clusters")
+	cmd.Flags().StringVarP(&k8sNamespace, "namespace", "N", "", "Override k8s namespace in context")
 	cmd.Flags().StringVarP(&clusterName, "name", "n", "", "Name of the Aptomi cluster to create")
-	cmd.Flags().StringVarP(&clusterNamespace, "namespace", "N", "system", "Namespace of the Aptomi cluster to create")
 
 	return cmd
 }
 
-func handleKubeConfigCluster(sourceContext string) (*helm.Config, error) {
+func handleKubeConfigCluster(sourceContext string, overrideNamespace string) (*helm.Config, error) {
 	kubeConfig, err := buildTempKubeConfigWith(sourceContext)
 	if err != nil {
 		return nil, fmt.Errorf("error while building temp kube config with context %s: %s", sourceContext, err)
@@ -81,6 +81,10 @@ func handleKubeConfigCluster(sourceContext string) (*helm.Config, error) {
 
 	clusterConfig := helm.Config{
 		KubeConfig: kubeConfig,
+	}
+
+	if len(overrideNamespace) > 0 {
+		clusterConfig.Namespace = overrideNamespace
 	}
 
 	return &clusterConfig, err
