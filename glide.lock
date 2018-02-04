@@ -1,5 +1,5 @@
-hash: 6f51d441a402b2ed4902facd3880b9be40609478885ff4a54994a493e4da1b60
-updated: 2017-11-27T02:35:07.961383028-08:00
+hash: 9e2b718ccf96eaba299551331fa14e009b99255fd4387f8e5ded8151344e006b
+updated: 2018-02-04T03:06:38.482677263-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -161,6 +161,9 @@ imports:
   - util/strutil
 - name: github.com/gosuri/uitable
   version: 36ee7e946282a3fb1cfecd476ddc9b35d8847e42
+  subpackages:
+  - util/strutil
+  - util/wordwrap
 - name: github.com/hashicorp/golang-lru
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
 - name: github.com/hashicorp/hcl
@@ -197,7 +200,7 @@ imports:
 - name: github.com/Masterminds/semver
   version: 517734cc7d6470c0d07130e40fd40bdeb9bcd3fd
 - name: github.com/Masterminds/sprig
-  version: efda631a76d70875162cdc25ffa0d0164bf69758
+  version: b217b9c388de2cacde4354c536e520c52c055563
 - name: github.com/Masterminds/vcs
   version: 3084677c2c188840777bff30054f2b553729d329
 - name: github.com/mattn/go-isatty
@@ -259,7 +262,7 @@ imports:
 - name: github.com/rs/cors
   version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/satori/go.uuid
-  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/spf13/afero
@@ -270,7 +273,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
@@ -356,7 +359,7 @@ imports:
 - name: gopkg.in/asn1-ber.v1
   version: 379148ca0225df7a432012b8df0355c2a2063ac0
 - name: gopkg.in/go-playground/validator.v9
-  version: 61caf9d3038e1af346dbf5c2e16f6678e1548364
+  version: 3620d3c0694119b61c72071ff5a05a976e97b05a
   subpackages:
   - translations/en
 - name: gopkg.in/inf.v0
@@ -406,7 +409,7 @@ imports:
   - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
-  version: b13f2fd682d56eab7a6a2b5a1cab1a3d2c8bdd55
+  version: 3bda299a6414b4866f179921610d6738206a18fe
   subpackages:
   - cmd/kubeadm/app/apis/kubeadm
   - federation/apis/federation

@@ -50,7 +50,7 @@ import:
   subpackages:
   - context
 - package: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
 - package: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - package: github.com/Masterminds/vcs
