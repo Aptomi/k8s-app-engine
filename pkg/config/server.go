@@ -13,6 +13,7 @@ type Server struct {
 	SecretsDir           string          `validate:"omitempty,dir"` // secrets is not a first-class citizen yet, so it's not required
 	Enforcer             Enforcer        `validate:"required"`
 	DomainAdminOverrides map[string]bool `validate:"-"`
+	Secret               string          `validate:"required"`
 }
 
 // UserSources represents configs for the user loaders that could be file and LDAP loaders
