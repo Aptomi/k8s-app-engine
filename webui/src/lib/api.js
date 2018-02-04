@@ -230,23 +230,27 @@ function callAPI (handler, isAsync, successFunc, errorFunc, formData = null) {
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
+      if (xhr.responseText) {
         try {
-          successFunc(yaml.safeLoad(xhr.responseText))
+          var data = yaml.safeLoad(xhr.responseText)
+          if (data['kind'] === 'error') {
+            errorFunc(data['error'])
+          } else {
+            successFunc(data)
+          }
         } catch (err) {
-          errorFunc('exception occurred: ' + err)
+          errorFunc('error while parsing response: ' + err)
         }
+      } else if (xhr.statusText) {
+        errorFunc(xhr.status + ' ' + xhr.statusText)
       } else {
-        if (xhr.statusText) {
-          errorFunc(xhr.status + ' ' + xhr.statusText)
-        } else {
-          errorFunc('unable to load data from ' + path)
-        }
+        errorFunc('unable to load data from ' + path)
       }
     }
   }
   if (formData == null) {
     xhr.open('GET', path, isAsync)
+    xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token)
     xhr.send()
   } else {
     xhr.open('POST', path, isAsync)

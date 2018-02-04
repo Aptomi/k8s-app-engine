@@ -54,13 +54,7 @@ function authenticate (username, password, cb) {
         // eslint-disable-next-line
         cb({
           authenticated: true,
-          token: Math.random().toString(36).substring(7)
-        })
-      } else if (data['kind'] === 'error') {
-        // eslint-disable-next-line
-        cb({
-          authenticated: false,
-          error: data['error']
+          token: data['token']
         })
       } else {
         // eslint-disable-next-line
@@ -75,7 +69,7 @@ function authenticate (username, password, cb) {
       // eslint-disable-next-line
       cb({
         authenticated: false,
-        error: 'Error communicating with the server (' + err + ')'
+        error: err
       })
     }, this)
 
