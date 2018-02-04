@@ -97,10 +97,12 @@ take full advantage of Aptomi policy engine and use rules to deploy applications
 
 Kubernetes Cluster | When to use     | How to run
 ------------|-----------------|-----------
-Your own    | If you already have k8s cluster set up | TODO: is it required to install Helm? write instructions to create 2 NS
-Google Kubernetes Engine | Useful if you have $300 in free credits @ Google | Use our [script](examples/README.md) to create them
-k8s / Minikube | Local machine with 16GB+ RAM | TODO:
-k8s / Docker For Mac | Local machine with 16GB+ RAM | TODO:
+Your own    | If you already have k8s cluster set up | [Configure Aptomi to use your own k8s cluster](docs/k8s_own.md)
+Google Kubernetes Engine | Useful if you have a new Google account and free credits | [Configure Aptomi to use GKE](docs/k8s_gke.md)
+k8s / Minikube | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Minikube](docs/k8s_minikube.md)
+k8s / Docker For Mac | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Docker For Mac](docs/k8s_docker_for_mac.md)
+
+Having a powerful k8s cluster with good internet connection will definitely provide *better experience* compared to a single-node k8s local cluster. GKE would be one of the best options.
 
 ### Running Examples
 

@@ -38,12 +38,6 @@ This example illustrates a few important things that Aptomi does:
     aptomictl policy apply --username Sam -f ~/.aptomi/examples/twitter-analytics/policy/Sam
     ```
 
-1. Generate YAMLs for your k8s clusters and upload to Aptomi. This assumes that you have `cluster-us-east` and `cluster-us-west` contexts defined in kubectl (see `kubectl config get-contexts`).
-    ```
-    aptomictl gen cluster -c cluster-us-east | aptomictl policy apply --username Sam -f -
-    aptomictl gen cluster -c cluster-us-west | aptomictl policy apply --username Sam -f -
-    ```
- 
 1. Import `analytics_pipeline` and `twitter_stats` services  
     ```
     aptomictl policy apply --username Frank -f ~/.aptomi/examples/twitter-analytics/policy/Frank
@@ -54,25 +48,30 @@ This example illustrates a few important things that Aptomi does:
 that in Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
 
 1. Request production instance of `twitter-stats`, as well as two development instances in staging:
+    
+    Start production instance, wait until it's up (check with `kubectl get pods`): 
     ```
     aptomictl policy apply --wait --username John -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts.yaml
+    ```
+    
+    Start staging instances, wait until they are up (check with `kubectl get pods`): 
+    ```
     aptomictl policy apply --wait --username Alice -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
     aptomictl policy apply --wait --username Bob -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
     aptomictl policy apply --wait --username Carol -f ~/.aptomi/examples/twitter-analytics/policy/carol-stage-ts.yaml
     ```
     
-    You can see that:
-    * Aptomi is allocating production instance for John in `cluster-us-east` (per [rules.yaml](policy/Sam/rules.yaml))
-    * Aptomi is allocating staging instances for Alice & Bob in `cluster-us-west` (per [rules.yaml](policy/Sam/rules.yaml))
-    * Aptomi is not allocating an instance for Carol, as users from 'mobile-dev' are not allowed to consume services (per [rules.yaml](policy/Sam/rules.yaml))
-    * [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State: `analytics pipeline` is shared by both Alice and Bob in staging
-    * [Instances](http://localhost:27866/#/policy/dependencies): you can retrieve endpoints for all deployed services
+    To check deployment progress, you can run `kubectl get pods` and wait for "1/1" status for all created pods
+      * First time deployment will trigger download of all Helm charts/images (1GB+) and caching them in your k8s cluster(s). This can take a while, depending on your internet connection (pods will be in `ContainerCreating` status)
+        * k8s on GKE will give you the best experience (5 min)
+        * running locally on Minikube or Docker For Mac will probably be slower (up to 15-20 min) 
 
-    To check deployment progress, you can run the following command and wait for "1/1" status for pods:
-    ```
-    watch -n1 -d -- kubectl --context cluster-us-east -n demo get pods
-    watch -n1 -d -- kubectl --context cluster-us-west -n demo get pods
-    ```
+    You can observe that:
+      * Aptomi is allocating production instance for John in `cluster-us-east` (per [rules.yaml](policy/Sam/rules.yaml))
+      * Aptomi is allocating staging instances for Alice & Bob in `cluster-us-west` (per [rules.yaml](policy/Sam/rules.yaml))
+      * Aptomi is not allocating an instance for Carol, as users from 'mobile-dev' are not allowed to consume services (per [rules.yaml](policy/Sam/rules.yaml))
+      * [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State: `analytics pipeline` is shared by both Alice and Bob in staging
+      * [Instances](http://localhost:27866/#/policy/dependencies): you can retrieve endpoints for all deployed services
 
 1. If everything got deployed successfully, you should be able to see:
    - running *production* instance of twitter stats in `cluster-us-east` (managed by John)

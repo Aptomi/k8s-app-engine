@@ -26,4 +26,4 @@ Open UI at [http://localhost:27866/](http://localhost:27866/) and log in as **'a
 
 At this point, most UI screens will be empty. This is expected, as Aptomi has no applications imported yet.
 
-Now you are ready to move on to importing the examples and start deploying apps.
+Now you are ready to move on to setting up k8s cluster(s) for deploying your apps.
