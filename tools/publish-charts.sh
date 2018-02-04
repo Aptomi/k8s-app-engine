@@ -21,7 +21,7 @@ done
 
 pushd ${DIST}
     for dir in ${CHARTS}/*/; do
-        helm package ${dir}
+        helm package ../${dir}
     done
 
     helm repo index --url http://aptomi.io/charts --merge index.yaml .
