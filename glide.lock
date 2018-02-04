@@ -1,5 +1,5 @@
-hash: 9e2b718ccf96eaba299551331fa14e009b99255fd4387f8e5ded8151344e006b
-updated: 2018-02-04T03:06:38.482677263-08:00
+hash: 5d350f0f5b17636b8c467247e2cecd63940272f0af67544b67765e5aaea8e96b
+updated: 2018-02-04T03:15:15.884452476-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -277,7 +277,7 @@ imports:
 - name: github.com/spf13/jwalterweatherman
   version: 12bd96e66386c1960ab0f74ced1362f66f552f7b
 - name: github.com/spf13/pflag
-  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
+  version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/technosophos/moniker
