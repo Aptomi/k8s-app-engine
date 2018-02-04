@@ -30,4 +30,6 @@ tools/test-install.sh
 
 tools/publish-docker.sh
 
+tools/publish-charts.sh
+
 popd
