@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/cmd/aptomictl/gen"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/policy"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/revision"
+	"github.com/Aptomi/aptomi/cmd/aptomictl/state"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/version"
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/config"
@@ -55,6 +56,7 @@ func init() {
 		endpoints.NewCommand(Config),
 		policy.NewCommand(Config),
 		revision.NewCommand(Config),
+		state.NewCommand(Config),
 		gen.NewCommand(Config),
 		version.NewCommand(Config),
 	)

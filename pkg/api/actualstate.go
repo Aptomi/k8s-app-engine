@@ -11,4 +11,6 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 	if err != nil {
 		panic(fmt.Sprintf("error while resetting actual state: %s", err))
 	}
+
+	api.handleRevisionGet(writer, request, params)
 }

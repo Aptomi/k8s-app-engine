@@ -28,6 +28,10 @@ func (client *coreClient) Revision() client.Revision {
 	return &revisionClient{client.cfg, client.httpClient}
 }
 
+func (client *coreClient) State() client.State {
+	return &stateClient{client.cfg, client.httpClient}
+}
+
 func (client *coreClient) Version() client.Version {
 	return &versionClient{client.cfg, client.httpClient}
 }

@@ -17,6 +17,7 @@ type Client interface {
 	GET(path string, expected *runtime.Info) (runtime.Object, error)
 	POST(path string, expected *runtime.Info, body runtime.Object) (runtime.Object, error)
 	POSTSlice(path string, expected *runtime.Info, body []runtime.Object) (runtime.Object, error)
+	DELETE(path string, expected *runtime.Info) (runtime.Object, error)
 	DELETESlice(path string, expected *runtime.Info, body []runtime.Object) (runtime.Object, error)
 }
 
@@ -66,6 +67,10 @@ func (client *httpClient) POSTSlice(path string, expected *runtime.Info, body []
 	}
 
 	return client.request(http.MethodPost, path, expected, bodyData)
+}
+
+func (client *httpClient) DELETE(path string, expected *runtime.Info) (runtime.Object, error) {
+	return client.request(http.MethodDelete, path, expected, nil)
 }
 
 func (client *httpClient) DELETESlice(path string, expected *runtime.Info, body []runtime.Object) (runtime.Object, error) {

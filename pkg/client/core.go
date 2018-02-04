@@ -12,6 +12,7 @@ type Core interface {
 	Policy() Policy
 	Endpoints() Endpoints
 	Revision() Revision
+	State() State
 	Version() Version
 }
 
@@ -31,6 +32,11 @@ type Endpoints interface {
 type Revision interface {
 	Show(gen runtime.Generation) (*engine.Revision, error)
 	ShowByPolicy(policyGen runtime.Generation) (*engine.Revision, error)
+}
+
+// State is the interface for resetting Actual State
+type State interface {
+	Reset() (*engine.Revision, error)
 }
 
 // Version is the interface for getting current server version
