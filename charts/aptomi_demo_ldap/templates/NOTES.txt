@@ -1,1 +1,0 @@
-Aptomi demo LDAP chart has been deployed.
