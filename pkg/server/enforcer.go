@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -36,6 +37,22 @@ func (server *Server) enforce() error {
 		}
 	}()
 
+	// todo think about initial state when there is no revision at all
+	currRevision, err := server.store.GetRevision(runtime.LastGen)
+	if err != nil {
+		return fmt.Errorf("unable to get curr revision: %s", err)
+	}
+
+	// Mark last Revision as failed if it wasn't completed
+	if currRevision != nil && currRevision.Status == engine.RevisionStatusInProgress {
+		currRevision.Status = engine.RevisionStatusError
+		revErr := server.store.UpdateRevision(currRevision)
+		if revErr != nil {
+			log.Warnf("(enforce-%d) Error while setting current revision that is in progress to error state: %s", server.enforcementIdx, revErr)
+		}
+		log.Infof("(enforce-%d) Current revision that is in progress was reset to error state", server.enforcementIdx)
+	}
+
 	desiredPolicy, desiredPolicyGen, err := server.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		return fmt.Errorf("error while getting desiredPolicy: %s", err)
@@ -57,12 +74,6 @@ func (server *Server) enforce() error {
 	if err != nil {
 		// todo save eventlog
 		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
-	}
-
-	// todo think about initial state when there is no revision at all
-	currRevision, err := server.store.GetRevision(runtime.LastGen)
-	if err != nil {
-		return fmt.Errorf("unable to get curr revision: %s", err)
 	}
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
