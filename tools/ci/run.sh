@@ -28,4 +28,6 @@ make coverage-full coverage-publish
 
 tools/test-install.sh
 
+tools/publish-docker.sh
+
 popd
