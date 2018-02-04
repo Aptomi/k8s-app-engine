@@ -29,7 +29,7 @@ export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
 function main() {
     if [ "$#" -ne "1" ]; then
         echo "ERROR: (demo-gke.sh) Too few arguments"
-        echo "Usage: demo-gke.sh <up | down | cleanup | kubeconfig >"
+        echo "Usage: demo-gke.sh <up | down | cleanup >"
         exit 1
     fi
 
@@ -38,25 +38,21 @@ function main() {
     k8s_version=1.8.7-gke.0
     disk_size=100
 
-    cluster_big_name=cluster-us-west
-    cluster_small_name=cluster-us-east
-
-    cluster_big_region=us-west1-c
-    cluster_small_region=us-east1-c
-
-    cluster_big_size=1
-    cluster_small_size=1
+    cluster_name=cluster-demo
+    cluster_region=us-west1-c
+    cluster_size=1
 
     # see https://cloud.google.com/compute/pricing#standard_machine_types
-    cluster_big_flavor=n1-standard-8
-    cluster_small_flavor=n1-standard-2
-
-    cluster_disk_size=100
+    cluster_flavor=n1-standard-4
 
     firewall_rules_name=demo-firewall-open-all
     firewall_rules="--allow tcp"
 
-    demo_namespace=demo
+    demo_namespace_west=west
+    demo_namespace_east=east
+
+    context_west=cluster-us-west
+    context_east=cluster-us-east
     # end of defaults
 
     gcloud_check
@@ -65,46 +61,32 @@ function main() {
         gke_firewall_create $firewall_rules_name "$firewall_rules"
 
         # create big cluster
-        gke_cluster_create $cluster_big_name $cluster_big_region $k8s_version $disk_size $cluster_big_flavor $cluster_big_size
+        gke_cluster_create $cluster_name $cluster_region $k8s_version $disk_size $cluster_flavor $cluster_size
 
-        # create small cluster
-        gke_cluster_create $cluster_small_name $cluster_small_region $k8s_version $disk_size $cluster_small_flavor $cluster_small_size
+        # wait until cluster is alive and setup
+        gke_cluster_wait_alive $cluster_name $cluster_region
 
-        # wait until big cluster is alive and setup
-        gke_cluster_wait_alive $cluster_big_name $cluster_big_region
-        gke_cluster_kubectl_setup $cluster_big_name $cluster_big_region $demo_namespace
-        k8s_alive $cluster_big_name
-        #helm_init $cluster_big_name
+        gke_cluster_kubectl_setup $cluster_name $cluster_region $context_east $demo_namespace_east
+        gke_cluster_kubectl_setup $cluster_name $cluster_region $context_west $demo_namespace_west
+        kubectl config use-context $context_east
 
-        # wait until small cluster is alive and setup
-        gke_cluster_wait_alive $cluster_small_name $cluster_small_region
-        gke_cluster_kubectl_setup $cluster_small_name $cluster_small_region $demo_namespace
-        k8s_alive $cluster_small_name
-        #helm_init $cluster_small_name
+        k8s_alive $context_east
+        k8s_alive $context_west
 
-        log "Final check for k8s alive" # and helm alive"
-        k8s_alive $cluster_big_name 1>/dev/null 2>/dev/null
-        #helm_alive $cluster_big_name 1>/dev/null 2>/dev/null
-
-        k8s_alive $cluster_small_name 1>/dev/null 2>/dev/null
-        #helm_alive $cluster_small_name 1>/dev/null 2>/dev/null
     elif [ "down" == "$1" ]; then
         gke_firewall_delete $firewall_rules_name
+        gke_cluster_delete $cluster_name $cluster_region
 
-        gke_cluster_delete $cluster_big_name $cluster_big_region
-        gke_cluster_delete $cluster_small_name $cluster_small_region
+        gke_cluster_kubectl_cleanup $cluster_name $cluster_region
+        kubectl config delete-context $context_east || true
+        kubectl config delete-context $context_west || true
 
-        gke_cluster_kubectl_cleanup $cluster_big_name $cluster_big_region
-        gke_cluster_kubectl_cleanup $cluster_small_name $cluster_small_region
+        gke_cluster_wait_deleted $cluster_name $cluster_region
 
-        gke_cluster_wait_deleted $cluster_big_name $cluster_big_region
-        gke_cluster_wait_deleted $cluster_small_name $cluster_small_region
     elif [ "cleanup" == "$1" ]; then
-        helm_cleanup $cluster_big_name $demo_namespace
-        helm_cleanup $cluster_small_name $demo_namespace
-    elif [ "kubeconfig" == "$1" ]; then
-        gke_cluster_kubeconfig $cluster_big_name $cluster_big_region $demo_namespace
-        gke_cluster_kubeconfig $cluster_small_name $cluster_small_region $demo_namespace
+        helm_cleanup $context_east $demo_namespace_east
+        helm_cleanup $context_west $demo_namespace_west
+
     else
         log "Unsupported command '$1'"
         exit 1
@@ -285,7 +267,8 @@ function kcfg_cluster_of_context() {
 function gke_cluster_kubectl_setup() {
     name="$1"
     zone="$2"
-    namespace="$3"
+    context_name="$3"
+    namespace="$4"
 
     project="$(gcloud config get-value project 2>/dev/null)"
 
@@ -300,9 +283,9 @@ function gke_cluster_kubectl_setup() {
             exit 1
         fi
 
-        kubectl config set-context $name --cluster=$cluster --user=$user --namespace=$namespace
-        kubectl config delete-context $kcfg_name
-        log "Kubeconfig context '$name' (alias for '$context') successfully added"
+        kubectl config set-context $context_name --cluster=$cluster --user=$user --namespace=$namespace 2>/dev/null
+        kubectl config delete-context $kcfg_name 2>/dev/null
+        log "Kubeconfig context '$context_name' (alias for '$context') successfully added"
     else
         log "Can't get credentials for cluster $(cluster_log_name)"
         exit 1
@@ -351,7 +334,6 @@ function gke_cluster_kubectl_cleanup() {
 
     kubectl config unset users.$kcfg_name
 
-    # TODO(slukjanov): Add error checks for it
     kubectl config delete-cluster $kcfg_name || true
     kubectl config delete-context $kcfg_name || true
     kubectl config delete-context $name || true
@@ -405,7 +387,7 @@ function gke_firewall_delete() {
 function k8s_alive() {
     name="$1"
 
-    log "Verifying cluster $name"
+    log "Verifying cluster for context $name"
 
     kubectl --context $name cluster-info | grep dashboard
     kubectl --context $name get ns 1>/dev/null
@@ -415,7 +397,7 @@ function k8s_alive() {
     if [[ $(kubectl --context $name -n kube-system get pods | grep " Running " | wc -l) -ge 3 ]]; then
         return 0
     else
-        log "Cluster $name seems not really alive"
+        log "Cluster for context $name seems not really alive"
     fi
 }
 
