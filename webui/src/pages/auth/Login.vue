@@ -33,7 +33,7 @@
           </div>
           <div class="row" v-if="error">
             <div class="col-xs-12">
-              <p class="error">Unable to log in (check username/password)</p>
+              <p class="error">{{ errorMsg }}</p>
             </div>
           </div>
         </form>
@@ -53,6 +53,7 @@
         username: '',
         password: '',
         error: false,
+        errorMsg: '',
         loggedIn: auth.loggedIn()
       }
     },
@@ -60,9 +61,10 @@
       login () {
         this.error = false
 
-        auth.login(this.username, this.password, loggedIn => {
-          if (!loggedIn) {
+        auth.login(this.username, this.password, (success, err) => {
+          if (!success) {
             this.error = true
+            this.errorMsg = err
           } else {
             window.location.href = '/'
           }

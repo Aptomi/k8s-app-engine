@@ -19,7 +19,7 @@ export default {
         this.onChange(true)
       } else {
         // eslint-disable-next-line
-        if (cb) cb(false)
+        if (cb) cb(false, res.error)
         this.onChange(false)
       }
     })
@@ -56,18 +56,27 @@ function authenticate (username, password, cb) {
           authenticated: true,
           token: Math.random().toString(36).substring(7)
         })
-      } else if (data['kind'] === 'error'){
+      } else if (data['kind'] === 'error') {
         // eslint-disable-next-line
-        cb({ authenticated: false, error: data['error'] })
+        cb({
+          authenticated: false,
+          error: data['error']
+        })
       } else {
         // eslint-disable-next-line
-        cb({ authenticated: false })
+        cb({
+          authenticated: false,
+          error: 'Unexpected response from server (' + data + ')'
+        })
       }
     }, this)
 
-    const fetchError = $.proxy(function () {
+    const fetchError = $.proxy(function (err) {
       // eslint-disable-next-line
-      cb({ authenticated: false })
+      cb({
+        authenticated: false,
+        error: 'Error communicating with the server (' + err + ')'
+      })
     }, this)
 
     authenticateUser(username, password, fetchSuccess, fetchError)
