@@ -88,8 +88,8 @@ func (client *httpClient) request(method string, path string, expected *runtime.
 		return nil, err
 	}
 
-	if len(client.cfg.Auth.Username) > 0 {
-		req.Header.Set("Username", client.cfg.Auth.Username)
+	if len(client.cfg.Auth.Token) > 0 {
+		req.Header.Set("Authorization", "Bearer "+client.cfg.Auth.Token)
 	}
 	req.Header.Set("Content-Type", codec.Default)
 	req.Header.Set("User-Agent", "aptomictl")

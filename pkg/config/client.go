@@ -26,4 +26,5 @@ func (c Client) IsDebug() bool {
 // Auth represents client auth configs
 type Auth struct {
 	Username string `validate:"-"`
+	Token    string `validate:"required"`
 }
