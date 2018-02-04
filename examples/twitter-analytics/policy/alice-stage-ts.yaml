@@ -7,10 +7,3 @@
   labels:
     # New version of visualization code (container image tag)
     tsvisimage: demo12
-    # Twitter / Location of tweets (San Francisco, Boston, New York)
-    locations: -71.4415,41.9860,-70.4747,42.9041,-122.75,36.8,-121.75,37.8,-74,40,-73,41
-    # Twitter / Tokens
-    appKey: PUT-YOUR-DATA-HERE
-    appSecret: PUT-YOUR-DATA-HERE
-    tokenKey: PUT-YOUR-DATA-HERE
-    tokenSecret: PUT-YOUR-DATA-HERE
