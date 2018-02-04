@@ -27,7 +27,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	admin := api.admin
 
 	// authenticate user
-	router.POST("/api/v1/user/authenticate", api.handleLogin)
+	router.POST("/api/v1/user/login", api.handleLogin)
 
 	// get all users and their roles
 	router.GET("/api/v1/user/roles", admin(api.handleUserRoles))

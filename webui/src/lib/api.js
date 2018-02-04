@@ -76,7 +76,7 @@ export async function getUsersAndRoles (successFunc, errorFunc) {
 
 // authenticates the user
 export async function authenticateUser (username, password, successFunc, errorFunc) {
-  const handler = ['user', 'authenticate'].join('/')
+  const handler = ['user', 'login'].join('/')
   let formData = new FormData()
   formData.append('username', username)
   formData.append('password', password)
