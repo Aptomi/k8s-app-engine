@@ -269,10 +269,8 @@ func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *h
 	eventLog := event.NewLog("api-policy-update", true)
 	resolver := resolve.NewPolicyResolver(desiredPolicy, api.externalData, eventLog)
 	desiredState, err := resolver.ResolveAllDependencies()
-
 	if err != nil {
-		// todo - when printing maps with large # of entries, the errors are pretty long and hard to understand. should not write maps here
-		panic(fmt.Sprintf("Cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState))
+		panic(fmt.Sprintf("Cannot resolve desiredPolicy: %s", err))
 	}
 
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
