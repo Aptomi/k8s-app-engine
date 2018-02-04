@@ -1,5 +1,5 @@
-hash: 5d350f0f5b17636b8c467247e2cecd63940272f0af67544b67765e5aaea8e96b
-updated: 2018-02-04T03:15:15.884452476-08:00
+hash: 9d96835f4f3194cc20862c5045e86eb3c2a02ba65f5fb46e2ab31d5c8a4c7bd2
+updated: 2018-02-04T04:46:18.034461751-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -24,7 +24,7 @@ imports:
   subpackages:
   - spew
 - name: github.com/dgrijalva/jwt-go
-  version: 01aeca54ebda6e0fbfafd0a524d234159c05ec20
+  version: dbeaa9332f19a944acb5736b4456cfcc02140e29
 - name: github.com/docker/distribution
   version: 03efb43768979f4d2ea5187bef995656441829e5
   subpackages:

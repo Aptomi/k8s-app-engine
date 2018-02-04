@@ -96,6 +96,7 @@ import:
 - package: github.com/Azure/go-autorest
   version: v8.0.0
 - package: github.com/dgrijalva/jwt-go
+  version: ~3.1.0
 - package: github.com/docker/spdystream
 - package: github.com/go-openapi/analysis
   version: b44dc874b601d9e4e2f6e19140e794ba24bead3b
