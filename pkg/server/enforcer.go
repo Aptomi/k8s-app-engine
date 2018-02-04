@@ -56,8 +56,7 @@ func (server *Server) enforce() error {
 	desiredState, err := resolver.ResolveAllDependencies()
 	if err != nil {
 		// todo save eventlog
-		// todo - when printing maps with large # of entries, the errors are pretty long and hard to understand. should not write maps here
-		return fmt.Errorf("cannot resolve desiredPolicy: %v %v %v", err, desiredState, actualState)
+		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
 	}
 
 	// todo think about initial state when there is no revision at all

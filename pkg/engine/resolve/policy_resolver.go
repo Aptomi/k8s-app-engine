@@ -95,18 +95,21 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, err
 		}(d.(*lang.Dependency))
 	}
 
+	errMsg := ""
+
 	// Wait for all go routines to end
 	errFound := 0
 	for i := 0; i < len(dependencies); i++ {
 		resolveErr := <-errs
 		if resolveErr != nil {
 			errFound++
+			errMsg += "\n - " + resolveErr.Error()
 		}
 	}
 
 	// See if there were any errors
 	if errFound > 0 {
-		return nil, fmt.Errorf("errors occurred during policy resolution: %d", errFound)
+		return nil, fmt.Errorf("%d errors occurred during policy resolution: %s", errFound, errMsg)
 	}
 
 	// Once all components are resolved, print information about them into event log
