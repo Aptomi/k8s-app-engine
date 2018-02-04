@@ -2,8 +2,8 @@
 
 set -eux
 
-CHARTS=${PWD}/charts
-DIST=${PWD}/charts-dist
+CHARTS=./charts
+DIST=./charts-dist
 
 helm repo add aptomi http://aptomi.io/charts
 helm repo update
