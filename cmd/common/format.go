@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	// Default is the default format
+	Default = Text
 	// Text is the plain text format (table) representation of object(s)
 	Text = "text"
 	// YAML format is just yaml marshaled object(s)
