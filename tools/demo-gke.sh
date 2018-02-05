@@ -38,7 +38,7 @@ function main() {
     k8s_version=1.8.7-gke.0
     disk_size=100
 
-    cluster_name=cluster-demo
+    cluster_name=demo-gke
     cluster_region=us-west1-c
     cluster_size=1
 
@@ -48,11 +48,11 @@ function main() {
     firewall_rules_name=demo-firewall-open-all
     firewall_rules="--allow tcp"
 
-    demo_namespace_west=west
-    demo_namespace_east=east
+    context_name=$cluster_name
+    context_namespace=east
 
-    context_west=cluster-us-west
-    context_east=cluster-us-east
+    demo_namespace_east=east
+    demo_namespace_west=west
     # end of defaults
 
     gcloud_check
@@ -66,26 +66,26 @@ function main() {
         # wait until cluster is alive and setup
         gke_cluster_wait_alive $cluster_name $cluster_region
 
-        gke_cluster_kubectl_setup $cluster_name $cluster_region $context_east $demo_namespace_east
-        gke_cluster_kubectl_setup $cluster_name $cluster_region $context_west $demo_namespace_west
-        kubectl config use-context $context_east
+        gke_cluster_kubectl_setup $cluster_name $cluster_region $context_name $context_namespace
+        kubectl config use-context $context_name
 
-        k8s_alive $context_east
-        k8s_alive $context_west
+        k8s_alive $context_name
 
     elif [ "down" == "$1" ]; then
         gke_firewall_delete $firewall_rules_name
         gke_cluster_delete $cluster_name $cluster_region
 
         gke_cluster_kubectl_cleanup $cluster_name $cluster_region
-        kubectl config delete-context $context_east || true
-        kubectl config delete-context $context_west || true
+        kubectl config delete-context $context_name || true
 
         gke_cluster_wait_deleted $cluster_name $cluster_region
 
     elif [ "cleanup" == "$1" ]; then
-        helm_cleanup $context_east $demo_namespace_east
-        helm_cleanup $context_west $demo_namespace_west
+        kubectl --context $context_name delete ns $demo_namespace_east || true
+        kubectl --context $context_name delete ns $demo_namespace_west || true
+
+        helm_cleanup $context_name $demo_namespace_east
+        helm_cleanup $context_name $demo_namespace_west
 
     else
         log "Unsupported command '$1'"
@@ -423,8 +423,6 @@ function helm_alive() {
 function helm_cleanup() {
     name="$1"
     namespace="$2"
-
-    kubectl --context $name delete ns $namespace || true
 
     if [[ $(helm --kube-context $1 list --all -q | wc -l) -ge 1 ]]; then
         if ! helm --kube-context $1 delete --purge $(helm --kube-context $1 list --all -q); then
