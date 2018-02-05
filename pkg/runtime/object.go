@@ -22,6 +22,8 @@ type Versioned interface {
 	SetGeneration(gen Generation)
 }
 
+// Deletable extends Versioned with deleted marker to represent versioned objects that could be marked as deleted,
+// but then created again even with the same content. Best example of such objects is policy objects (and the only for now).
 type Deletable interface {
 	Versioned
 	IsDeleted() bool

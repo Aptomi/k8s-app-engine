@@ -36,10 +36,12 @@ func (meta *Metadata) SetGeneration(generation runtime.Generation) {
 	meta.Generation = generation
 }
 
+// IsDeleted returns if object deleted or not
 func (meta *Metadata) IsDeleted() bool {
 	return meta.Deleted
 }
 
+// SetDeleted sets object deleted flag
 func (meta *Metadata) SetDeleted(deleted bool) {
 	meta.Deleted = deleted
 }

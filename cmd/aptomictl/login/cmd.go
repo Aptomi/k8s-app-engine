@@ -93,7 +93,12 @@ func backupConfigIfDiffers(cfgFile string, newData []byte) {
 	if err != nil {
 		panic(fmt.Sprintf("Error while opening current config file %s: %s", cfgFile, err))
 	}
-	defer func() { _ = cfg.Close() }()
+	defer func() {
+		closeErr := cfg.Close()
+		if closeErr != nil {
+			panic(fmt.Sprintf("Error while closing current config file %s: %s", cfgFile, err))
+		}
+	}()
 
 	data, err := ioutil.ReadAll(cfg)
 	if err != nil {
