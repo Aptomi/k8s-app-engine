@@ -52,6 +52,8 @@ func NewCommand(cfg *config.Client, cfgFile *string) *cobra.Command {
 }
 
 func writeConfig(cfg *config.Client, cfgFile *string) {
+	cleanupDefaultsFromConfig(cfg)
+
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
 		panic(fmt.Sprintf("Error marshaling client config: %s", err))
@@ -62,6 +64,27 @@ func writeConfig(cfg *config.Client, cfgFile *string) {
 	err = ioutil.WriteFile(*cfgFile, data, 0644)
 	if err != nil {
 		panic(fmt.Sprintf("Error while saving config with token to %s: %s", *cfgFile, err))
+	}
+}
+
+func cleanupDefaultsFromConfig(cfg *config.Client) {
+	if cfg.Output == common.Default {
+		cfg.Output = ""
+	}
+	if cfg.API.Schema == common.DefaultApiSchema {
+		cfg.API.Schema = ""
+	}
+	// Keeping API and Port in the config to make it easier to customize
+	/*
+		if cfg.API.Host == common.DefaultApiHost {
+			cfg.API.Host = ""
+		}
+		if cfg.API.Port == common.DefaultApiPort {
+			cfg.API.Port = 0
+		}
+	*/
+	if cfg.API.APIPrefix == common.DefaultApiPrefix {
+		cfg.API.APIPrefix = ""
 	}
 }
 
