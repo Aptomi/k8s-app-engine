@@ -18,11 +18,11 @@ func (api *coreAPI) readLang(request *http.Request) []lang.Base {
 			panic(fmt.Sprintf("Trying to read lang objects while non-lang ones found: %s", obj.GetKind()))
 		}
 
-		key := runtime.KeyForStorable(langObj)
-		if exists[key] {
-			panic(fmt.Sprintf("Duplicate objects with key %s detected in the request", key))
+		objKey := runtime.KeyForStorable(langObj)
+		if exists[objKey] {
+			panic(fmt.Sprintf("Duplicate objects with key %s detected in the request", objKey))
 		}
-		exists[key] = true
+		exists[objKey] = true
 
 		result = append(result, langObj)
 	}
