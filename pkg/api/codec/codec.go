@@ -66,6 +66,15 @@ func (handler *ContentTypeHandler) GetContentType(header http.Header) string {
 	return contentType
 }
 
+func (handler *ContentTypeHandler) ReadOne(request *http.Request) runtime.Object {
+	objects := handler.Read(request)
+	if len(objects) != 1 {
+		panic(fmt.Sprintf("Expected 1 but read %d from request", len(objects)))
+	}
+
+	return objects[0]
+}
+
 // Read runtime object(s) from the provided request using correct content type (taken from the request)
 func (handler *ContentTypeHandler) Read(request *http.Request) []runtime.Object {
 	body, err := ioutil.ReadAll(request.Body)
