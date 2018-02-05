@@ -33,13 +33,9 @@ This example illustrates a few important things that Aptomi does:
 
 # Instructions
 
-1. Upload user roles and rules into Aptomi using CLI:
+1. Upload user roles and rules into Aptomi using CLI, then import `analytics_pipeline` and `twitter_stats` services:
     ```
     aptomictl policy apply --username Sam -f ~/.aptomi/examples/twitter-analytics/policy/Sam
-    ```
-
-1. Import `analytics_pipeline` and `twitter_stats` services  
-    ```
     aptomictl policy apply --username Frank -f ~/.aptomi/examples/twitter-analytics/policy/Frank
     aptomictl policy apply --username John -f ~/.aptomi/examples/twitter-analytics/policy/John
     ```
@@ -49,40 +45,42 @@ that in Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
 
 1. Request production instance of `twitter-stats`, as well as two development instances in staging:
     
-    Start production instance, wait until it's up (check with `kubectl get pods`): 
+    Start production instance, wait until it's up: 
     ```
     aptomictl policy apply --wait --username John -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts.yaml
     ```
     
-    Start staging instances, wait until they are up (check with `kubectl get pods`): 
+    Start staging instances, wait until they are up: 
     ```
     aptomictl policy apply --wait --username Alice -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
     aptomictl policy apply --wait --username Bob -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
-    aptomictl policy apply --wait --username Carol -f ~/.aptomi/examples/twitter-analytics/policy/carol-stage-ts.yaml
+    ```
+        
+    To check deployment progress for prod and stage, you can run `kubectl get pods` and wait for "1/1" status for all created pods:
+    ```
+    watch -n1 -d -- kubectl -n east get pods
+    watch -n1 -d -- kubectl -n west get pods
     ```
     
-    To check deployment progress, you can run `kubectl get pods` and wait for "1/1" status for all created pods
-      * First time deployment will trigger download of all Helm charts/images (1GB+) and caching them in your k8s cluster(s). This can take a while, depending on your internet connection (pods will be in `ContainerCreating` status)
-        * k8s on GKE will give you the best experience (5 min)
-        * running locally on Minikube or Docker For Mac will probably be slower (up to 15-20 min) 
+    Note that first-time deployment will trigger download of all Helm charts/images (1GB+) and caching them in your k8s cluster(s). This can take a while, depending on your internet connection (pods will be in `ContainerCreating` status)
+      * k8s on GKE will give you the best experience (5 min)
+      * running locally on Minikube or Docker For Mac will likely be slower (up to 15-20 min) 
 
     You can observe that:
       * Aptomi is allocating production instance for John in `cluster-us-east` (per [rules.yaml](policy/Sam/rules.yaml))
       * Aptomi is allocating staging instances for Alice & Bob in `cluster-us-west` (per [rules.yaml](policy/Sam/rules.yaml))
-      * Aptomi is not allocating an instance for Carol, as users from 'mobile-dev' are not allowed to consume services (per [rules.yaml](policy/Sam/rules.yaml))
       * [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State: `analytics pipeline` is shared by both Alice and Bob in staging
-      * [Instances](http://localhost:27866/#/policy/dependencies): you can retrieve endpoints for all deployed services
 
-1. If everything got deployed successfully, you should be able to see:
-   - running *production* instance of twitter stats in `cluster-us-east` (managed by John)
-   - running *staging* instance of twitter stats in `cluster-us-west` (Alice's version with new look & feel)
-   - running *staging* instance of twitter stats in `cluster-us-west` (Bob's version)
-   
-Note that production `tweepub` and `tweeviz` (HTTP endpoint) will not be available because Twitter App Tokens have not been injected into them yet.
+1. If everything got deployed successfully, you should be able to see service endpoints under [Instances](http://localhost:27866/#/policy/dependencies) in Aptomi UI
+    * *tweeviz available over HTTP with fake Twitter data source*
+        * running *staging* instance of twitter stats in `cluster-us-west` (Alice's version)
+        * running *staging* instance of twitter stats in `cluster-us-west` (Bob's version)
+    * *tweeviz NOT available yet over HTTP, but will become available showing real Twitter data once you configure Twitter App Tokens* 
+        * running *production* instance of twitter stats in `cluster-us-east` (managed by John)
+          
+# Advanced: Enabling Streaming Data from Twitter
 
-# Enabling Streaming Data from Twitter
-
-1. If you want a fully functional demo, you can actually inject Twitter App Tokens into John's service instance, so it can pull data over Twitter Streaming API. Create an
+1. If you want a truly fully functional demo, you can actually inject Twitter App Tokens into John's service instance, so it can pull data over Twitter Streaming API. Create an
 application in [Twitter Application Management Console](https://apps.twitter.com)
     ![Twitter App Create](twitter-app-create.png)
     

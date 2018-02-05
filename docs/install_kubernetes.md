@@ -3,12 +3,15 @@
 * Aptomi server will be installed in k8s via Helm chart
 * Aptomi client will be installed locally
 
-# Installing & Configuring Helm client
-Our recommendation is to use Helm client 2.6.2 (as 2.8 doesn't  work too well):
+# Installing & Configuring Helm
+Our recommendation is to use Helm 2.6.2:
 
 ```
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash /dev/stdin -v v2.6.2
-helm init --client-only
+kubectl -n kube-system create sa tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller
+helm version                                                                                                      17:26:25  ☁  master ☂ ⚡
 helm repo add aptomi http://aptomi.io/charts
 helm repo update
 ```
@@ -19,11 +22,22 @@ Figure out which context you want to install Aptomi server to (use `kubectl conf
 helm install --kube-context [CONTEXT_NAME] --name aptomi --namespace aptomi aptomi/aptomi --set users.admin.enabled=true,users.example.enabled=true
 ```
 
-Once Aptomi server is deployed, it will tell you the port it listens on: 
+To check deployment progress, run:
+```
+watch -n1 -d -- kubectl -n aptomi get pods
+```
+
+Once Aptomi server is deployed, it will tell you the port it listens on, e.g. 31077: 
 ```
 ==> v1/Service
-NAME           CLUSTER-IP     EXTERNAL-IP  PORT(S)          AGE
-aptomi-aptomi  10.96.102.113  1.2.3.4      27866:56789/TCP  0s
+NAME           CLUSTER-IP    EXTERNAL-IP  PORT(S)          AGE
+aptomi-aptomi  10.31.252.87  <nodes>      27866:31077/TCP  1s
+```
+
+You can also get an external IP by running `kubectl get nodes -o wide`, e.g. 35.227.164.206:
+```
+NAME                                      STATUS    ROLES     AGE       VERSION        EXTERNAL-IP      OS-IMAGE                             KERNEL-VERSION   CONTAINER-RUNTIME
+gke-demo-gke-default-pool-42a191c8-whwg   Ready     <none>    13m       v1.8.7-gke.0   35.227.164.206   Container-Optimized OS from Google   4.4.86+          docker://17.3.2
 ```
 
 Install Aptomi client locally:
@@ -36,8 +50,8 @@ Configure Aptomi client to use deployed Aptomi server and test it:
 vi ~/.aptomi/config.yaml
 
     api:
-      host: 1.2.3.4  <- replace
-      port: 56789    <- replace
+      host: 35.227.164.206  <- replace
+      port: 31077    <- replace
       
 aptomictl version
 aptomictl policy show

@@ -36,7 +36,7 @@ designed to work with any container runtime and container orchestration technolo
 - [Features & Benefits](#features--benefits)
 - [Quickstart](#quickstart)
   - [Installation](#installation)
-  - [Setting up k8s Clusters](#setting-up-k8s-clusters)
+  - [Setting up k8s Cluster](#setting-up-k8s-cluster)
   - [Running Examples](#running-examples)
 - [Architecture & How It Works](#architecture--how-it-works)
   - [Components](#components)
@@ -79,10 +79,10 @@ designed to work with any container runtime and container orchestration technolo
 ### Installation
 There are several ways to install Aptomi. The simplest one is **Compact**, but you may pick one that suits your needs:
 
-Installation Mode     | Aptomi | App Deployment | Description
-----------------------|--------------------|----------------|-------------
-[Compact](docs/install_compact.md) | Local machine | *Yes* | Aptomi will be installed on a local machine (binaries or in a single Docker container)
-[Kubernetes](docs/install_kubernetes.md) | Container on k8s  | *Yes* | Aptomi will be deployed on k8s via Helm chart
+Installation Mode     | Complexity | Aptomi        | App Deployment | Description
+----------------------|------------|---------------|----------------|------------
+[Compact](docs/install_compact.md) | Easy | Local machine | *Yes* | Aptomi will be installed on a local machine (binaries or in a single Docker container)
+[Kubernetes](docs/install_kubernetes.md) | Medium | Container on k8s  | *Yes* | Aptomi will be deployed on k8s via Helm chart
 
 You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments to k8s:
 
@@ -90,10 +90,9 @@ Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
 [Concepts](docs/install_concepts.md) | Local machine | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI. k8s is not required
 
-### Setting up k8s Clusters
+### Setting up k8s Cluster
 
-You need to have access to 2 k8s clusters (or use two namespaces within the same cluster) in order to deploy services from the provided examples. This allows to
-take full advantage of Aptomi policy engine and use rules to deploy applications to different clusters.
+You need to have access a k8s cluster to deploy apps from the provided examples:
 
 Kubernetes Cluster | When to use     | How to run
 ------------|-----------------|-----------
@@ -106,11 +105,11 @@ Having a powerful k8s cluster with good internet connection will definitely prov
 
 ### Running Examples
 
-Once Aptomi server is up and k8s clusters are ready, you can get started by running the following examples:
+Once Aptomi server is up and k8s cluster is ready, you can get started by running the following examples:
 
 Example    | Description
 -----------|------------
-[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, 2 k8s clusters
+[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, multi-cloud
 
 ## Architecture & How It Works
 

@@ -19,12 +19,3 @@
     ```
 
 Now you can move on to running the examples.
-
-# Useful Commands
-
-## View Pods
-Once you deploy Aptomi example apps, you can run `kubectl` to get workloads running on each cluster: 
-```
-watch -n1 -d -- kubectl -n east get pods
-watch -n1 -d -- kubectl -n west get pods
-```
