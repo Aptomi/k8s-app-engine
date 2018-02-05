@@ -425,7 +425,7 @@ function helm_cleanup() {
     namespace="$2"
 
     if [[ $(helm --kube-context $1 list --all -q | wc -l) -ge 1 ]]; then
-        if ! helm --kube-context $1 delete --purge $(helm --kube-context $1 list --all -q); then
+        if ! helm --kube-context $1 delete --purge $(helm --kube-context $name list --all -q --namespace $namespace); then
             return 1
         fi
     fi
