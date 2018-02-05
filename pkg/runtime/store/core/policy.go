@@ -104,7 +104,7 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, performedBy str
 	return changed, policyData, err
 }
 
-// init policy initializes policy (on the first run of Aptomi)
+// InitPolicy initializes policy (on the first run of Aptomi)
 func (ds *defaultStore) InitPolicy() error {
 	// create and save
 	initialPolicyData := &engine.PolicyData{
