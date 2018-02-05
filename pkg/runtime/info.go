@@ -5,6 +5,7 @@ type Info struct {
 	Kind        Kind
 	Storable    bool
 	Versioned   bool
+	Deletable   bool
 	Constructor Constructor
 }
 

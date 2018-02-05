@@ -13,6 +13,7 @@ type Metadata struct {
 	Namespace  string             `yaml:",omitempty" validate:"identifier"`
 	Name       string             `yaml:",omitempty" validate:"identifier"`
 	Generation runtime.Generation `yaml:",omitempty"`
+	Deleted    bool               `yaml:",omitempty"`
 }
 
 // GetNamespace returns object namespace
@@ -33,4 +34,12 @@ func (meta *Metadata) GetGeneration() runtime.Generation {
 // SetGeneration sets object generation
 func (meta *Metadata) SetGeneration(generation runtime.Generation) {
 	meta.Generation = generation
+}
+
+func (meta *Metadata) IsDeleted() bool {
+	return meta.Deleted
+}
+
+func (meta *Metadata) SetDeleted(deleted bool) {
+	meta.Deleted = deleted
 }

@@ -11,6 +11,7 @@ var ContractObject = &runtime.Info{
 	Kind:        "contract",
 	Storable:    true,
 	Versioned:   true,
+	Deletable:   true,
 	Constructor: func() runtime.Object { return &Contract{} },
 }
 

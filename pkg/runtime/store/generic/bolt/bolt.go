@@ -185,6 +185,7 @@ func (bs *boltStore) save(obj runtime.Storable, updateCurrent bool) (bool, error
 	key := runtime.KeyForStorable(obj)
 	boltPath := key
 	updated := false
+
 	if info.Versioned { // todo extract into "Prepare versioned"
 		versionedObj, ok := obj.(runtime.Versioned)
 		if !ok {
@@ -196,6 +197,18 @@ func (bs *boltStore) save(obj runtime.Storable, updateCurrent bool) (bool, error
 		if err != nil {
 			return false, err
 		}
+
+		deletable, ok := obj.(runtime.Deletable)
+		if ok && deletable.IsDeleted() {
+			if !info.Deletable {
+				return false, fmt.Errorf("trying mark object deleted=true that isn't explicitly marked as deletable: %s %s", info.Kind, key)
+			}
+
+			if existingObj == nil {
+				return false, fmt.Errorf("trying to make non-existing in db object with deleted=true: %s %s", info.Kind, key)
+			}
+		}
+
 		if existingObj != nil {
 			versionedObj.SetGeneration(existingObj.GetGeneration())
 			equals, equalsErr := bs.equals(obj, existingObj)

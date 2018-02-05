@@ -12,6 +12,7 @@ var RuleObject = &runtime.Info{
 	Kind:        "rule",
 	Storable:    true,
 	Versioned:   true,
+	Deletable:   true,
 	Constructor: func() runtime.Object { return &Rule{} },
 }
 

@@ -14,6 +14,7 @@ var ACLRuleObject = &runtime.Info{
 	Kind:        "aclrule",
 	Storable:    true,
 	Versioned:   true,
+	Deletable:   true,
 	Constructor: func() runtime.Object { return &ACLRule{} },
 }
 

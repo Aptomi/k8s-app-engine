@@ -21,3 +21,9 @@ type Versioned interface {
 	GetGeneration() Generation
 	SetGeneration(gen Generation)
 }
+
+type Deletable interface {
+	Versioned
+	IsDeleted() bool
+	SetDeleted(bool)
+}

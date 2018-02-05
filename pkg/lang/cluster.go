@@ -11,6 +11,7 @@ var ClusterObject = &runtime.Info{
 	Kind:        "cluster",
 	Storable:    true,
 	Versioned:   true,
+	Deletable:   true,
 	Constructor: func() runtime.Object { return &Cluster{} },
 }
 

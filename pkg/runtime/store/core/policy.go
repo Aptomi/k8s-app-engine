@@ -40,7 +40,11 @@ func (ds *defaultStore) getPolicyFromData(policyData *engine.PolicyData) (*lang.
 					if errStore != nil {
 						return nil, 0, errStore
 					}
-					errPolicy := policy.AddObject(obj)
+					langObj, ok := obj.(lang.Base)
+					if !ok {
+						return nil, 0, fmt.Errorf("can't cast obj %s to lang.Base", runtime.KeyForStorable(obj))
+					}
+					errPolicy := policy.AddObject(langObj)
 					if errPolicy != nil {
 						return nil, runtime.LastGen, errPolicy
 					}
@@ -78,6 +82,10 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, performedBy str
 
 	changed := false
 	for _, updatedObj := range updatedObjects {
+		if updatedObj.IsDeleted() {
+			return false, nil, fmt.Errorf("objects with deleted=true not supported while updating policy: %s", runtime.KeyForStorable(updatedObj))
+		}
+
 		var changedObj bool
 		changedObj, err = ds.store.Save(updatedObj)
 		if err != nil {
@@ -132,14 +140,22 @@ func (ds *defaultStore) DeleteFromPolicy(deleted []lang.Base, performedBy string
 		return false, nil, err
 	}
 
-	changed := false
+	policyChanged := false
 	for _, obj := range deleted {
 		if policyData.Remove(obj) {
-			changed = true
+			policyChanged = true
+		}
+
+		if !obj.IsDeleted() {
+			obj.SetDeleted(true)
+			_, err = ds.store.Save(obj)
+			if err != nil {
+				return false, nil, fmt.Errorf("error while setting deleted=true for %s: %s", runtime.KeyForStorable(obj), err)
+			}
 		}
 	}
 
-	if changed {
+	if policyChanged {
 		policyData.Metadata.UpdatedAt = time.Now()
 		policyData.Metadata.UpdatedBy = performedBy
 
@@ -150,5 +166,5 @@ func (ds *defaultStore) DeleteFromPolicy(deleted []lang.Base, performedBy string
 		}
 	}
 
-	return changed, policyData, nil
+	return policyChanged, policyData, nil
 }

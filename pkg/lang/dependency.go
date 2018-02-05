@@ -9,6 +9,7 @@ var DependencyObject = &runtime.Info{
 	Kind:        "dependency",
 	Storable:    true,
 	Versioned:   true,
+	Deletable:   true,
 	Constructor: func() runtime.Object { return &Dependency{} },
 }
 
