@@ -6,11 +6,11 @@ import (
 
 // Client is the aptomictl config representation
 type Client struct {
-	Debug  bool   `validate:"-"`
-	Output string `validate:"required"`
-	API    API    `validate:"required"`
-	Auth   Auth   `validate:"required"`
-	HTTP   HTTP   `validate:"required"`
+	Debug  bool       `validate:"-"`
+	Output string     `validate:"required"`
+	API    API        `validate:"required"`
+	Auth   ClientAuth `validate:"required"`
+	HTTP   HTTP       `validate:"required"`
 }
 
 // HTTP is the config for low level HTTP client
@@ -23,8 +23,9 @@ func (c Client) IsDebug() bool {
 	return c.Debug
 }
 
-// Auth represents client auth configs
-type Auth struct {
+// ClientAuth represents client auth configs
+type ClientAuth struct {
 	Username string `validate:"-"`
-	Token    string `validate:"required"`
+	Password string `validate:"-"`
+	Token    string `validate:"-"`
 }

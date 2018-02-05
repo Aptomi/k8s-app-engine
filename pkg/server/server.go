@@ -104,7 +104,7 @@ func (server *Server) initStore() {
 func (server *Server) startHTTPServer() {
 	router := httprouter.New()
 
-	api.Serve(router, server.store, server.externalData, server.cfg.Secret)
+	api.Serve(router, server.store, server.externalData, server.cfg.Auth.Secret)
 	server.serveUI(router)
 
 	var handler http.Handler = router
