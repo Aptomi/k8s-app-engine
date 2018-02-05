@@ -32,6 +32,10 @@ func (client *coreClient) State() client.State {
 	return &stateClient{client.cfg, client.httpClient}
 }
 
+func (client *coreClient) User() client.User {
+	return &userClient{client.cfg, client.httpClient}
+}
+
 func (client *coreClient) Version() client.Version {
 	return &versionClient{client.cfg, client.httpClient}
 }

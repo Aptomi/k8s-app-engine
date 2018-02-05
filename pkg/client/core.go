@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/version"
 )
@@ -13,6 +14,7 @@ type Core interface {
 	Endpoints() Endpoints
 	Revision() Revision
 	State() State
+	User() User
 	Version() Version
 }
 
@@ -37,6 +39,11 @@ type Revision interface {
 // State is the interface for resetting Actual State
 type State interface {
 	Reset() (*engine.Revision, error)
+}
+
+// User is the interface for auth and user management
+type User interface {
+	Login(username, password string) (*api.AuthSuccess, error)
 }
 
 // Version is the interface for getting current server version

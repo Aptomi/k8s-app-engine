@@ -22,7 +22,7 @@ type Client interface {
 }
 
 type httpClient struct {
-	contentType *api.ContentTypeHandler
+	contentType *codec.ContentTypeHandler
 	http        *http.Client
 	cfg         *config.Client
 }

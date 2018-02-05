@@ -1,0 +1,27 @@
+package rest
+
+import (
+	"github.com/Aptomi/aptomi/pkg/api"
+	"github.com/Aptomi/aptomi/pkg/client/rest/http"
+	"github.com/Aptomi/aptomi/pkg/config"
+	"github.com/Aptomi/aptomi/pkg/engine"
+)
+
+type userClient struct {
+	cfg        *config.Client
+	httpClient http.Client
+}
+
+func (client *userClient) Login(username, password string) (*api.AuthSuccess, error) {
+	authReq := &api.AuthRequest{
+		TypeKind: api.AuthRequestObject.GetTypeKind(),
+		Username: username,
+		Password: password,
+	}
+	authSuccess, err := client.httpClient.POST("/actualstate", api.AuthSuccessObject, authReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return authSuccess.(*api.AuthSuccess), nil
+}
