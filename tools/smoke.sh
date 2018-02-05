@@ -13,7 +13,9 @@ fi
 set -eou pipefail
 
 DEBUG=${DEBUG:-no}
+DEBUG_MODE=false
 if [ "yes" == "$DEBUG" ]; then
+    DEBUG_MODE=true
     set -x
 fi
 
@@ -51,7 +53,7 @@ function stop_server() {
 APTOMI_PORT=$(free_port)
 
 cat >${CONF_DIR}/config.yaml <<EOL
-debug: true
+debug: ${DEBUG_MODE}
 
 api:
   host: 127.0.0.1
@@ -194,6 +196,37 @@ check_policy 0 ".Objects.main.rule | length"
 check_policy 0 ".Objects.main.service | length"
 check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
+
+login sam
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
+check_policy_version 13
+
+login frank
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
+check_policy_version 14
+
+login john
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
+check_policy_version 15
+
+login john
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
+check_policy_version 16
+
+login alice
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+check_policy_version 17
+
+login bob
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+check_policy_version 18
+
+check_policy 6 ".Objects.main.contract | length"
+check_policy 3 ".Objects.main.dependency | length"
+check_policy 3 ".Objects.main.rule | length"
+check_policy 6 ".Objects.main.service | length"
+check_policy 3 ".Objects.system.aclrule | length"
+check_policy 2 ".Objects.system.cluster | length"
 
 sleep 1
 
