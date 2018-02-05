@@ -66,6 +66,7 @@ func (handler *ContentTypeHandler) GetContentType(header http.Header) string {
 	return contentType
 }
 
+// ReadOne runtime object from the provided request using correct content type (taken from request)
 func (handler *ContentTypeHandler) ReadOne(request *http.Request) runtime.Object {
 	objects := handler.Read(request)
 	if len(objects) != 1 {
