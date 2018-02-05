@@ -4,7 +4,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/engine"
 )
 
 type userClient struct {
@@ -18,7 +17,7 @@ func (client *userClient) Login(username, password string) (*api.AuthSuccess, er
 		Username: username,
 		Password: password,
 	}
-	authSuccess, err := client.httpClient.POST("/actualstate", api.AuthSuccessObject, authReq)
+	authSuccess, err := client.httpClient.POST("/user/login", api.AuthSuccessObject, authReq)
 	if err != nil {
 		return nil, err
 	}

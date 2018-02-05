@@ -3,7 +3,6 @@ package client
 import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/engine"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/version"
 )
