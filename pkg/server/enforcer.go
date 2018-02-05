@@ -46,6 +46,7 @@ func (server *Server) enforce() error {
 	// Mark last Revision as failed if it wasn't completed
 	if currRevision != nil && currRevision.Status == engine.RevisionStatusInProgress {
 		currRevision.Status = engine.RevisionStatusError
+		currRevision.AppliedAt = time.Now()
 		revErr := server.store.UpdateRevision(currRevision)
 		if revErr != nil {
 			log.Warnf("(enforce-%d) Error while setting current revision that is in progress to error state: %s", server.enforcementIdx, revErr)
