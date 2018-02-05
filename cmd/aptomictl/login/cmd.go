@@ -71,19 +71,19 @@ func cleanupDefaultsFromConfig(cfg *config.Client) {
 	if cfg.Output == common.Default {
 		cfg.Output = ""
 	}
-	if cfg.API.Schema == common.DefaultApiSchema {
+	if cfg.API.Schema == common.DefaultAPISchema {
 		cfg.API.Schema = ""
 	}
 	// Keeping API and Port in the config to make it easier to customize
 	/*
-		if cfg.API.Host == common.DefaultApiHost {
+		if cfg.API.Host == common.DefaultAPIHost {
 			cfg.API.Host = ""
 		}
-		if cfg.API.Port == common.DefaultApiPort {
+		if cfg.API.Port == common.DefaultAPIPort {
 			cfg.API.Port = 0
 		}
 	*/
-	if cfg.API.APIPrefix == common.DefaultApiPrefix {
+	if cfg.API.APIPrefix == common.DefaultAPIPrefix {
 		cfg.API.APIPrefix = ""
 	}
 }
@@ -93,7 +93,7 @@ func backupConfigIfDiffers(cfgFile string, newData []byte) {
 	if err != nil {
 		panic(fmt.Sprintf("Error while opening current config file %s: %s", cfgFile, err))
 	}
-	defer cfg.Close()
+	defer func() { _ = cfg.Close() }()
 
 	data, err := ioutil.ReadAll(cfg)
 	if err != nil {

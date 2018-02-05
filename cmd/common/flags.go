@@ -40,14 +40,14 @@ func bindFlagEnv(command *cobra.Command, key, flagName, env string) {
 }
 
 const (
-	// DefaultApiSchema is a default API schema
-	DefaultApiSchema = "http"
-	// DefaultApiHost is a default API host
-	DefaultApiHost = "127.0.0.1"
-	// DefaultApiPort is a default API port
-	DefaultApiPort = 27866
-	// DefaultApiPrefix is a default API prefix
-	DefaultApiPrefix = "api/v1"
+	// DefaultAPISchema is a default API schema
+	DefaultAPISchema = "http"
+	// DefaultAPIHost is a default API host
+	DefaultAPIHost = "127.0.0.1"
+	// DefaultAPIPort is a default API port
+	DefaultAPIPort = 27866
+	// DefaultAPIPrefix is a default API prefix
+	DefaultAPIPrefix = "api/v1"
 )
 
 // AddDefaultFlags add all the flags that are needed by any aptomi CLI
@@ -56,8 +56,8 @@ func AddDefaultFlags(command *cobra.Command, envPrefix string) {
 
 	AddBoolFlag(command, "debug", "debug", "d", false, envPrefix+"_DEBUG", "Debug level")
 
-	AddStringFlag(command, "api.schema", "api-schema", "", DefaultApiSchema, envPrefix+"_SCHEMA", "Server API schema")
-	AddStringFlag(command, "api.host", "api-host", "", DefaultApiHost, envPrefix+"_HOST", "Server API host")
-	AddStringFlag(command, "api.port", "api-port", "", strconv.Itoa(DefaultApiPort), envPrefix+"_PORT", "Server API port")
-	AddStringFlag(command, "api.apiPrefix", "api-prefix", "", DefaultApiPrefix, envPrefix+"_API_PREFIX", "Server API prefix")
+	AddStringFlag(command, "api.schema", "api-schema", "", DefaultAPISchema, envPrefix+"_SCHEMA", "Server API schema")
+	AddStringFlag(command, "api.host", "api-host", "", DefaultAPIHost, envPrefix+"_HOST", "Server API host")
+	AddStringFlag(command, "api.port", "api-port", "", strconv.Itoa(DefaultAPIPort), envPrefix+"_PORT", "Server API port")
+	AddStringFlag(command, "api.apiPrefix", "api-prefix", "", DefaultAPIPrefix, envPrefix+"_API_PREFIX", "Server API prefix")
 }
