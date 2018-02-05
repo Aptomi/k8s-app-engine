@@ -57,6 +57,7 @@ func ReadConfig(viper *vp.Viper, cfg config.Base, defaultConfigDir string) error
 	}
 
 	log.Debugf("Config:\n%s", yaml.SerializeObject(cfg))
+
 	return nil
 }
 

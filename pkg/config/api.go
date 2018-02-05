@@ -4,10 +4,10 @@ import "fmt"
 
 // API represents configs for the API used in both client and server
 type API struct {
-	Schema    string `validate:"required"`
-	Host      string `validate:"required,hostname|ip"`
-	Port      int    `validate:"required,min=1,max=65535"`
-	APIPrefix string `validate:"required"`
+	Schema    string `yaml:",omitempty" validate:"required"`
+	Host      string `yaml:",omitempty" validate:"required,hostname|ip"`
+	Port      int    `yaml:",omitempty" validate:"required,min=1,max=65535"`
+	APIPrefix string `yaml:",omitempty" validate:"required"`
 }
 
 // URL returns server API url to connect to

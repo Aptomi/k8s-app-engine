@@ -11,6 +11,7 @@ import (
 	"github.com/Aptomi/aptomi/cmd/aptomictl/version"
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/config"
+	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -26,6 +27,9 @@ const (
 var (
 	// Config is the global instance of the client config
 	Config = &config.Client{}
+
+	// ConfigFile is the path to config file used to read config
+	ConfigFile = new(string)
 
 	// Command is the main (root) cobra command for aptomictl
 	Command = &cobra.Command{
@@ -53,7 +57,7 @@ func init() {
 
 	// Add sub commands
 	Command.AddCommand(
-		login.NewCommand(Config),
+		login.NewCommand(Config, ConfigFile),
 		endpoints.NewCommand(Config),
 		policy.NewCommand(Config),
 		revision.NewCommand(Config),
@@ -69,6 +73,11 @@ func preRun(command *cobra.Command, args []string) {
 		if err != nil {
 			panic(fmt.Sprintf("error while loading config: %s", err))
 		}
+
+		usedConfigFile := viper.ConfigFileUsed()
+		*ConfigFile = usedConfigFile
+
+		log.Infof("Using config file: %s", usedConfigFile)
 	}
 }
 
