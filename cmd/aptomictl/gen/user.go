@@ -10,7 +10,7 @@ import (
 )
 
 func newUserCommand(cfg *config.Client) *cobra.Command {
-	var userName, userPassword string
+	var username, password string
 
 	cmd := &cobra.Command{
 		Use:   "user",
@@ -18,16 +18,16 @@ func newUserCommand(cfg *config.Client) *cobra.Command {
 		Long:  "gen user long",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(userName) <= 0 {
+			if len(username) <= 0 {
 				panic(fmt.Sprintf("username should be specified"))
 			}
-			if len(userPassword) <= 0 {
+			if len(password) <= 0 {
 				panic(fmt.Sprintf("password should be specified"))
 			}
 
 			user := &lang.User{
-				Name:         userName,
-				PasswordHash: util.HashAndSalt(userPassword),
+				Name:         username,
+				PasswordHash: util.HashAndSalt(password),
 			}
 
 			data, err := yaml.Marshal(user)
@@ -39,12 +39,12 @@ func newUserCommand(cfg *config.Client) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&userName, "name", "", "", "Username")
-	if err := cmd.MarkFlagRequired("name"); err != nil {
+	cmd.Flags().StringVarP(&username, "username", "u", "", "Username")
+	if err := cmd.MarkFlagRequired("username"); err != nil {
 		panic(err)
 	}
-	cmd.Flags().StringVarP(&userPassword, "pass", "", "", "Password")
-	if err := cmd.MarkFlagRequired("pass"); err != nil {
+	cmd.Flags().StringVarP(&password, "password", "p", "", "Password")
+	if err := cmd.MarkFlagRequired("password"); err != nil {
 		panic(err)
 	}
 
