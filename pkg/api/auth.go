@@ -57,8 +57,7 @@ func (api *coreAPI) handleLogin(writer http.ResponseWriter, request *http.Reques
 
 // Claims represent Aptomi JWT Claims
 type Claims struct {
-	Name        string `json:"name"`
-	DomainAdmin bool   `json:"admin,omitempty"`
+	Name string `json:"name"`
 	jwt.StandardClaims
 }
 
@@ -73,8 +72,7 @@ func (claims Claims) Valid() error {
 
 func (api *coreAPI) newToken(user *lang.User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-		Name:        user.Name,
-		DomainAdmin: user.DomainAdmin,
+		Name: user.Name,
 		StandardClaims: jwt.StandardClaims{
 			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(30 * 24 * time.Hour).Unix(),
@@ -91,16 +89,8 @@ func (api *coreAPI) newToken(user *lang.User) string {
 }
 
 func (api *coreAPI) auth(handle httprouter.Handle) httprouter.Handle {
-	return api.handleAuth(handle, false)
-}
-
-func (api *coreAPI) admin(handle httprouter.Handle) httprouter.Handle {
-	return api.handleAuth(handle, true)
-}
-
-func (api *coreAPI) handleAuth(handle httprouter.Handle, admin bool) httprouter.Handle {
 	return func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		err := api.checkToken(request, admin)
+		err := api.checkToken(request)
 		if err != nil {
 			authErr := NewServerError(fmt.Sprintf("Authentication error: %s", err))
 			api.contentType.WriteOneWithStatus(writer, request, authErr, http.StatusUnauthorized)
@@ -119,7 +109,7 @@ const (
 	ctxUserKey key = iota
 )
 
-func (api *coreAPI) checkToken(request *http.Request, admin bool) error {
+func (api *coreAPI) checkToken(request *http.Request) error {
 	token, err := jwtreq.ParseFromRequestWithClaims(request, jwtreq.AuthorizationHeaderExtractor, &Claims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(api.secret), nil
@@ -135,13 +125,6 @@ func (api *coreAPI) checkToken(request *http.Request, admin bool) error {
 	user := api.externalData.UserLoader.LoadUserByName(claims.Name)
 	if user == nil {
 		return fmt.Errorf("token refers to non-existing user: %s", claims.Name)
-	}
-	if user.DomainAdmin != claims.DomainAdmin {
-		return fmt.Errorf("token contains incorrect admin status: %t", claims.DomainAdmin)
-	}
-
-	if admin && !user.DomainAdmin {
-		return fmt.Errorf("admin privileges required")
 	}
 
 	// store user into the request

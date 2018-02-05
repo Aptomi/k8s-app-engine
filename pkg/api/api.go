@@ -24,13 +24,12 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 
 func (api *coreAPI) serve(router *httprouter.Router) {
 	auth := api.auth
-	admin := api.admin
 
 	// authenticate user
 	router.POST("/api/v1/user/login", api.handleLogin)
 
 	// get all users and their roles
-	router.GET("/api/v1/user/roles", admin(api.handleUserRoles))
+	router.GET("/api/v1/user/roles", auth(api.handleUserRoles))
 
 	// retrieve policy (latest + by a given generation)
 	router.GET("/api/v1/policy", auth(api.handlePolicyGet))
@@ -63,7 +62,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/revision/policy/:policy", auth(api.handleRevisionGetByPolicy))
 	router.GET("/api/v1/revisions/policy/:policy", auth(api.handleRevisionsGetByPolicy))
 
-	router.DELETE("/api/v1/actualstate", admin(api.handleActualStateReset))
+	router.DELETE("/api/v1/actualstate", auth(api.handleActualStateReset))
 
 	// return aptomi version
 	router.GET("/version", api.handleVersion)
