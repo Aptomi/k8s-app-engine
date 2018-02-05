@@ -104,6 +104,13 @@ func (server *Server) initStore() {
 func (server *Server) startHTTPServer() {
 	router := httprouter.New()
 
+	if len(server.cfg.Auth.Secret) == 0 {
+		// todo better handle it
+		// set some default insecure secret
+		server.cfg.Auth.Secret = "Shahsh4e cohp8aeT Ifaic3ah ohs4eiSh vee7Qua7 eiCh2iLo eiroh3Ie oeg2ruPu"
+		log.Warnf("The auth.secret not specified in config, using insecure default one")
+	}
+
 	api.Serve(router, server.store, server.externalData, server.cfg.Auth.Secret)
 	server.serveUI(router)
 
