@@ -383,9 +383,9 @@ function test_aptomi_client_version_success() {
     # Run client to show the version
     local CLIENT_VERSION_OUTPUT
     if [ $CLIENT_ONLY -eq 0 ]; then
-        CLIENT_VERSION_OUTPUT=$(aptomictl version 2>/dev/null)
+        CLIENT_VERSION_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} version 2>/dev/null)
     else
-        CLIENT_VERSION_OUTPUT=$(aptomictl version --client 2>/dev/null)
+        CLIENT_VERSION_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} version --client 2>/dev/null)
     fi
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET}"
@@ -399,7 +399,8 @@ function test_aptomi_client_version_success() {
 function test_aptomi_client_show_policy_success() {
     # Run client to show the policy
     local CLIENT_POLICY_SHOW_OUTPUT
-    CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl policy show 2>/dev/null)
+    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u admin -p admin
+    CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy show 2>/dev/null)
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl policy show': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
