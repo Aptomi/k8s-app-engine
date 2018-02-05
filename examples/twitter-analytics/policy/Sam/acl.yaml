@@ -2,7 +2,7 @@
 - kind: aclrule
   metadata:
     namespace: system
-    name: demo_domain_admins_from_ldap
+    name: demo_domain_admins
   criteria:
     require-all:
       - global_ops
@@ -14,7 +14,7 @@
 - kind: aclrule
   metadata:
     namespace: system
-    name: demo_namespace_admins_from_ldap
+    name: demo_namespace_admins
   criteria:
     require-all:
       - is_operator
@@ -26,7 +26,7 @@
 - kind: aclrule
   metadata:
     namespace: system
-    name: demo_service_consumers_from_ldap
+    name: demo_service_consumers
   criteria:
     require-all:
       - org == 'dev'

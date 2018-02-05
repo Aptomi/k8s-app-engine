@@ -23,8 +23,9 @@
       
 2. Import it into Aptomi as two separate clusters *cluster-us-east* and *cluster-us-west* (corresponding to two namespaces `east` and `west` in a local k8s cluster):
     ```
-    aptomictl gen cluster -c demo-gke -n cluster-us-east -N east | aptomictl policy apply --username admin -f -
-    aptomictl gen cluster -c demo-gke -n cluster-us-west -N west | aptomictl policy apply --username admin -f -
+    aptomictl login -u admin -p admin
+    aptomictl gen cluster -c demo-gke -n cluster-us-east -N east | aptomictl policy apply -f -
+    aptomictl gen cluster -c demo-gke -n cluster-us-west -N west | aptomictl policy apply -f -
     ```
 
 Now you can move on to running the examples.

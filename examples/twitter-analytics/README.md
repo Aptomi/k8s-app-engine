@@ -35,9 +35,12 @@ This example illustrates a few important things that Aptomi does:
 
 1. Upload user roles and rules into Aptomi using CLI, then import `analytics_pipeline` and `twitter_stats` services:
     ```
-    aptomictl policy apply --username Sam -f ~/.aptomi/examples/twitter-analytics/policy/Sam
-    aptomictl policy apply --username Frank -f ~/.aptomi/examples/twitter-analytics/policy/Frank
-    aptomictl policy apply --username John -f ~/.aptomi/examples/twitter-analytics/policy/John
+    aptomictl login -u sam -p sam
+    aptomictl policy apply -f ~/.aptomi/examples/twitter-analytics/policy/Sam
+    aptomictl login -u frank -p frank
+    aptomictl policy apply -f ~/.aptomi/examples/twitter-analytics/policy/Frank
+    aptomictl login -u john -p john
+    aptomictl policy apply -f ~/.aptomi/examples/twitter-analytics/policy/John
     ```
 
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
@@ -47,13 +50,16 @@ that in Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
     
     Start production instance, wait until it's up: 
     ```
-    aptomictl policy apply --wait --username John -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts.yaml
+    aptomictl login -u john -p john
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts.yaml
     ```
     
     Start staging instances, wait until they are up: 
     ```
-    aptomictl policy apply --wait --username Alice -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
-    aptomictl policy apply --wait --username Bob -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
+    aptomictl login -u alice -p alice
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl login -u bob -p bob
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
     ```
         
     To check deployment progress for prod and stage, you can run `kubectl get pods` and wait for "1/1" status for all created pods:
@@ -91,7 +97,8 @@ application in [Twitter Application Management Console](https://apps.twitter.com
     ```
     cp ~/.aptomi/examples/twitter-analytics/policy/john-prod-{ts.yaml,ts-changed.yaml}
     vi ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts-changed.yaml
-    aptomictl policy apply --wait --username John -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts-changed.yaml
+    aptomictl login -u john -p john
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts-changed.yaml
     ```
 Now if you open tweeviz HTTP endpoint for John's service, you will be able to see tweets coming in real-time over Twitter Streaming API, processed through analytics-pipeline and displayed on the web.
 

@@ -312,9 +312,6 @@ debug: true
 api:
   host: 127.0.0.1
   port: 27866
-
-auth:
-  username: admin
 EOL
         mkdir -p ${APTOMI_CLIENT_CONFIG_DIR}
         cp ${TMP_DIR}/config.yaml ${APTOMI_CLIENT_CONFIG_DIR}/config.yaml
@@ -434,23 +431,25 @@ function test_aptomi() {
 }
 
 function example_run_line() {
-    local CMD="$*"
+    local USERNAME=$1
+    local CMD="aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy apply --wait -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/$2"
 
     # Run command
     log_sub "${CMD}"
+    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u $USERNAME -p $USERNAME
     ($CMD 1>/dev/null 2>&1)
 }
 
 function upload_example() {
     log_sub "Uploading example"
-    example_run_line "aptomictl policy apply --wait --username Sam -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/Sam"
-    example_run_line "aptomictl policy apply --wait --username Sam -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/Sam/clusters.yaml.template"
-    example_run_line "aptomictl policy apply --wait --username Frank -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/Frank"
-    example_run_line "aptomictl policy apply --wait --username John -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/John"
-    example_run_line "aptomictl policy apply --wait --username John -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/john-prod-ts.yaml"
-    example_run_line "aptomictl policy apply --wait --username Alice -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/alice-stage-ts.yaml"
-    example_run_line "aptomictl policy apply --wait --username Bob -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/bob-stage-ts.yaml"
-    example_run_line "aptomictl policy apply --wait --username Carol -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/twitter-analytics/policy/carol-stage-ts.yaml"
+    example_run_line "sam" "twitter-analytics/policy/Sam"
+    example_run_line "sam" "twitter-analytics/policy/Sam/clusters.yaml.template"
+    example_run_line "frank" "twitter-analytics/policy/Frank"
+    example_run_line "john" "twitter-analytics/policy/John"
+    example_run_line "john" "twitter-analytics/policy/john-prod-ts.yaml"
+    example_run_line "alice" "twitter-analytics/policy/alice-stage-ts.yaml"
+    example_run_line "bob" "twitter-analytics/policy/bob-stage-ts.yaml"
+    example_run_line "carol" "twitter-analytics/policy/carol-stage-ts.yaml"
 }
 
 function help() {
