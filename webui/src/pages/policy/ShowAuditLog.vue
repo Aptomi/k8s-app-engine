@@ -33,7 +33,7 @@
                   <td>{{ p['metadata']['updatedby'] }}</td>
                   <td>{{ p['metadata']['updatedat'] | formatDateAgo }} <small>({{ p['metadata']['updatedat'] | formatDate }})</small></td>
                   <td class="col-xs-4">
-                    <span v-if="p['revisions'] == null || p['revisions'].length <= 0" class="label label-warning">N/A</span>
+                    <!-- <span v-if="p['revisions'] == null || p['revisions'].length <= 0" class="label label-success" style="float:left; margin-right: 2px; margin-bottom: 2px">skipped</span> -->
                     <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'success', 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
                   </td>
                   <td class="align-middle">
