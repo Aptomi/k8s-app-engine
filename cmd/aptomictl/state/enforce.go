@@ -8,21 +8,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newResetCommand(cfg *config.Client) *cobra.Command {
+func newEnforceCommand(cfg *config.Client) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "reset",
-		Short: "state reset",
-		Long:  "state reset long",
+		Use:   "enforce",
+		Short: "state enforce",
+		Long:  "state enforce long",
 
 		Run: func(cmd *cobra.Command, args []string) {
 			rev, err := rest.New(cfg, http.NewClient(cfg)).State().Reset()
 
 			if err != nil {
-				panic(fmt.Sprintf("Error while showing revision: %s", err))
+				panic(fmt.Sprintf("Error while state enforcement: %s", err))
 			}
 
 			// todo(slukjanov): replace with -o yaml / json / etc handler
-			fmt.Println(rev)
+			fmt.Println("Current revision:", rev)
 		},
 	}
 

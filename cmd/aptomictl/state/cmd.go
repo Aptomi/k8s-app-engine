@@ -14,7 +14,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		newResetCommand(cfg),
+		newEnforceCommand(cfg),
 	)
 
 	return cmd
