@@ -1,7 +1,9 @@
 package login
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
@@ -9,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 )
 
 // NewCommand returns instance of cobra command that allows to login into aptomi
@@ -30,14 +33,7 @@ func NewCommand(cfg *config.Client, cfgFile *string) *cobra.Command {
 
 			cfg.Auth.Token = authSuccess.Token
 
-			data, err := yaml.Marshal(cfg)
-			if err != nil {
-				panic(fmt.Sprintf("Error marshaling client config: %s", err))
-			}
-			err = ioutil.WriteFile(*cfgFile, data, 0644)
-			if err != nil {
-				panic(fmt.Sprintf("Error while saving config with token to %s: %s", *cfgFile, err))
-			}
+			writeConfig(cfg, cfgFile)
 
 			log.Infof("Config successfully updated with token")
 		},
@@ -53,4 +49,40 @@ func NewCommand(cfg *config.Client, cfgFile *string) *cobra.Command {
 	}
 
 	return cmd
+}
+
+func writeConfig(cfg *config.Client, cfgFile *string) {
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		panic(fmt.Sprintf("Error marshaling client config: %s", err))
+	}
+
+	backupConfigIfDiffers(*cfgFile, data)
+
+	err = ioutil.WriteFile(*cfgFile, data, 0644)
+	if err != nil {
+		panic(fmt.Sprintf("Error while saving config with token to %s: %s", *cfgFile, err))
+	}
+}
+
+func backupConfigIfDiffers(cfgFile string, newData []byte) {
+	cfg, err := os.Open(cfgFile)
+	if err != nil {
+		panic(fmt.Sprintf("Error while opening current config file %s: %s", cfgFile, err))
+	}
+	defer cfg.Close()
+
+	data, err := ioutil.ReadAll(cfg)
+	if err != nil {
+		panic(fmt.Sprintf("Error while reading current config file %s: %s", cfgFile, err))
+	}
+
+	if !bytes.Equal(data, newData) {
+		backupCfgFile := cfgFile + ".bak"
+		err = ioutil.WriteFile(backupCfgFile, data, 0644)
+		if err != nil {
+			panic(fmt.Sprintf("Error while writing backup of the current config %s: %s", cfgFile, err))
+		}
+		log.Infof("Current config saved to: %s", backupCfgFile)
+	}
 }
