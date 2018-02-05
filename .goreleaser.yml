@@ -76,3 +76,13 @@ dockers:
       - "{{ .Major }}.{{ .Minor }}"
       - "{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
       - latest
+
+brew:
+  homepage: http://aptomi.io
+  skip_upload: true
+  install: |
+    bin.install "aptomi"
+    bin.install "aptomictl"
+  github:
+    owner: aptomi
+    name: aptomi
