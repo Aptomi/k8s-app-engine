@@ -77,14 +77,16 @@ export async function getUsersAndRoles (successFunc, errorFunc) {
 // authenticates the user
 export async function authenticateUser (username, password, successFunc, errorFunc) {
   const handler = ['user', 'login'].join('/')
-  let formData = new FormData()
-  formData.append('username', username)
-  formData.append('password', password)
+  var authReq = {
+    'kind': 'auth-request',
+    'username': username,
+    'password': password
+  }
   callAPI(handler, async, function (data) {
     successFunc(data)
   }, function (err) {
     errorFunc(err)
-  }, formData)
+  }, authReq)
 }
 
 // loads the latest policy
@@ -225,7 +227,7 @@ function makeDelay () {
 }
 
 // makes an API call to Aptomi
-function callAPI (handler, isAsync, successFunc, errorFunc, formData = null) {
+function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
   const path = basePath + handler
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
@@ -248,12 +250,14 @@ function callAPI (handler, isAsync, successFunc, errorFunc, formData = null) {
       }
     }
   }
-  if (formData == null) {
+  if (body == null) {
     xhr.open('GET', path, isAsync)
     xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token)
+    xhr.setRequestHeader('Content-type', 'application/yaml')
     xhr.send()
   } else {
     xhr.open('POST', path, isAsync)
-    xhr.send(formData)
+    xhr.setRequestHeader('Content-type', 'application/yaml')
+    xhr.send(yaml.safeDump(body))
   }
 }
