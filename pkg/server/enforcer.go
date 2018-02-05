@@ -7,8 +7,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/plugin"
-	"github.com/Aptomi/aptomi/pkg/plugin/helm"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/Sirupsen/logrus"
 	"time"
@@ -103,23 +101,13 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while saving new revision: %s", err)
 	}
 
-	// Build plugin registry
-	var pluginRegistry plugin.Registry
 	if server.cfg.Enforcer.Noop {
 		log.Infof("(enforce-%d) Applying changes in noop mode (sleep per action = %d seconds)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
-		pluginRegistry = &plugin.MockRegistry{
-			DeployPlugin:      &plugin.MockDeployPlugin{SleepTime: time.Second * time.Duration(server.cfg.Enforcer.NoopSleep)},
-			PostProcessPlugin: &plugin.MockPostProcessPlugin{},
-		}
 	} else {
 		log.Infof("(enforce-%d) Applying changes", server.enforcementIdx)
-		helmIstio := helm.NewPlugin(server.cfg.Helm)
-		pluginRegistry = plugin.NewRegistry(
-			[]plugin.DeployPlugin{helmIstio},
-			[]plugin.PostProcessPlugin{helmIstio},
-		)
 	}
 
+	pluginRegistry := server.pluginRegistryFactory()
 	eventLog = event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, eventLog, server.store.GetRevisionProgressUpdater(nextRevision))
 	_, err = applier.Apply()

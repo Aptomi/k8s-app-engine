@@ -8,6 +8,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
+	"github.com/Aptomi/aptomi/pkg/plugin"
+	"github.com/Aptomi/aptomi/pkg/plugin/helm"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
@@ -26,8 +28,9 @@ type Server struct {
 	cfg              *config.Server
 	backgroundErrors chan string
 
-	externalData *external.Data
-	store        store.Core
+	externalData          *external.Data
+	store                 store.Core
+	pluginRegistryFactory plugin.RegistryFactory
 
 	httpServer *http.Server
 
@@ -49,6 +52,7 @@ func NewServer(cfg *config.Server) *Server {
 func (server *Server) Start() {
 	server.initStore()
 	server.initExternalData()
+	server.initPluginRegistryFactory()
 
 	// See if policy initialization needs to happen on the first run
 	server.initPolicyOnFirstRun()
@@ -101,6 +105,23 @@ func (server *Server) initStore() {
 	server.store = core.NewStore(b)
 }
 
+func (server *Server) initPluginRegistryFactory() {
+	server.pluginRegistryFactory = func() plugin.Registry {
+		if server.cfg.Enforcer.Noop {
+			return &plugin.MockRegistry{
+				DeployPlugin:      &plugin.MockDeployPlugin{SleepTime: time.Second * time.Duration(server.cfg.Enforcer.NoopSleep)},
+				PostProcessPlugin: &plugin.MockPostProcessPlugin{},
+			}
+		}
+
+		helmK8s := helm.NewPlugin(server.cfg.Helm)
+		return plugin.NewRegistry(
+			[]plugin.DeployPlugin{helmK8s},
+			[]plugin.PostProcessPlugin{helmK8s},
+		)
+	}
+}
+
 func (server *Server) startHTTPServer() {
 	router := httprouter.New()
 
@@ -111,7 +132,7 @@ func (server *Server) startHTTPServer() {
 		log.Warnf("The auth.secret not specified in config, using insecure default one")
 	}
 
-	api.Serve(router, server.store, server.externalData, server.cfg.Auth.Secret)
+	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret)
 	server.serveUI(router)
 
 	var handler http.Handler = router

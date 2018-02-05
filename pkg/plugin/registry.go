@@ -8,6 +8,9 @@ type Registry interface {
 	GetPostProcessingPlugins() []PostProcessPlugin
 }
 
+// RegistryFactory returns plugins registry on demand
+type RegistryFactory func() Registry
+
 type defaultRegistry struct {
 	deployPlugins      map[string]DeployPlugin
 	postProcessPlugins []PostProcessPlugin
