@@ -35,20 +35,15 @@ designed to work with any container runtime and container orchestration technolo
 
 - [Features & Benefits](#features--benefits)
 - [Quickstart](#quickstart)
-  - [Installation](#installation)
-  - [Setting up k8s Cluster](#setting-up-k8s-cluster)
-  - [Running Examples](#running-examples)
-- [Architecture & How It Works](#architecture--how-it-works)
-  - [Components](#components)
+  - [Step #1: Installation](#step-1-installation)
+  - [Step #2: Setting up k8s Cluster](#step-2-setting-up-k8s-cluster)
+  - [Step #3: Running Examples](#step-3-running-examples)
+- [How It Works](#how-it-works)
+  - [Architecture](#architecture)
   - [State Enforcement](#state-enforcement)
   - [Language](#language)
-- [Dev Guide](#dev-guide)
-  - [Building From Source](#building-from-source)
-  - [Tests & Code Validation](#tests--code-validation)
-  - [Web UI](#web-ui)
-  - [How to contribute](#how-to-contribute)
-  - [How to release](#how-to-release)
-  - [Roadmap](#roadmap)
+- [How to contribute](#how-to-contribute)
+- [Roadmap](#roadmap)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -76,7 +71,7 @@ designed to work with any container runtime and container orchestration technolo
 
 ## Quickstart
 
-### Installation
+### Step #1: Installation
 There are several ways to install Aptomi. The simplest one is **Compact**, but you may pick one that suits your needs:
 
 Installation Mode     | Complexity | Aptomi        | App Deployment | Description
@@ -90,7 +85,7 @@ Installation Mode     | Aptomi / UI | App Deployment | Description
 ----------------------|--------------------|----------------|-------------
 [Concepts](docs/install_concepts.md) | Local machine | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI. k8s is not required
 
-### Setting up k8s Cluster
+### Step #2: Setting up k8s Cluster
 
 You need to have access a k8s cluster to deploy apps from the provided examples:
 
@@ -103,7 +98,7 @@ k8s / Docker For Mac | Single-node, local machine with 16GB+ RAM | [Configure Ap
 
 Having a powerful k8s cluster with good internet connection will definitely provide *better experience* compared to a single-node k8s local cluster. GKE would be one of the best options.
 
-### Running Examples
+### Step #3: Running Examples
 
 Once Aptomi server is up and k8s cluster is ready, you can get started by running the following examples:
 
@@ -111,9 +106,9 @@ Example    | Description
 -----------|------------
 [twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, multi-cloud
 
-## Architecture & How It Works
+## How It Works
 
-### Components
+### Architecture
 ![Aptomi Components](images/aptomi-components.png) 
 
 ### State Enforcement
@@ -124,94 +119,18 @@ Example    | Description
 
 See [language documentation](docs/language.md)
 
-## Dev Guide
+## How to contribute
+The very least you can do is to [report a bug](https://github.com/Aptomi/aptomi/issues)!
 
-### Building From Source
-In order to build Aptomi from source you will need Go (the latest 1.9.x) and a couple of external dependencies:
-* glide - all Go dependencies for Aptomi are managed via [Glide](https://glide.sh/)
-* docker - to run Aptomi in container, as well as to run sample LDAP server with user data
-* kubernetes-cli and kubernetes-helm for using Kubernetes with Helm
-* npm - to build UI, as well as automatically generate table of contents in README.md 
-* telnet, jq - for the script which runs smoke tests
+If you want to make a pull request for a bug fix or contribute a feature, see our [Development Guide](docs/dev_guide.md) for how to develop, run and test your code.
 
-If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](https://docs.docker.com/docker-for-mac/install/), then run: 
-```
-brew install go glide docker kubernetes-cli kubernetes-helm npm telnet jq
-```
+In general, we are always looking for feedback on:
+- Aptomi object model - definitions of services, contracts, rules, clusters
+- Pluggability - support for additional label sources (in addition to LDAP), app engines (in addition to Helm), cloud providers
 
-Check out Aptomi source code from the repo:
-```
-mkdir -p $GOPATH/src/github.com/Aptomi
-cd $GOPATH/src/github.com/Aptomi
-git clone https://github.com/Aptomi/aptomi.git
-```
+Contact us on [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io).
 
-In order to build Aptomi, you must first tell Glide to fetch all of its dependencies. It will read the list of
-dependencies defined in `glide.lock` and fetch them into a local "vendor" folder. After that, you must run Go to
-build and install the binaries. There are convenient Makefile targets for both, run them:
-```
-make vendor 
-make install
-```
-
-### Tests & Code Validation
-
-Command    | Action          | LDAP Required
------------|-----------------|--------------
-```make test```    | Unit tests | No
-```make alltest``` | Integration + Unit tests | Yes
-```make smoke```   | Smoke tests + Integration + Unit tests | Yes
-```make profile-engine```   | Profile engine for CPU usage | No
-```make coverage```   | Calculate code coverage by unit tests | No
-```make coverage-full```   | Calculate code coverage by unit & integration tests | Yes
-
-Command     | Action          | Description
-------------|-----------------|--------------
-```make fmt```  | Re-format code | Re-formats all code according to Go standards
-```make lint``` | Examine code | Run linters to examine Go source code and reports suspicious constructs
-
-### Web UI
-Source code is available in [webui](webui)
-
-Make sure you have latest `node` and `npm`. We have tested with node v8.9.1 and npm 5.5.1 and it's
-known to work with these.
-
-Command     | Action
-------------|----------
-```npm install```  | Install dependencies
-```npm run dev``` | Serve with hot reload at localhost:8080
-```npm run build``` | Build for production with minification
-```npm run build --report``` | Build for production and view the bundle analyzer report
-```npm run unit``` | Run unit tests: *coming soon*
-```npm run e2e``` | Run e2e tests: *coming soon*
-```npm run test``` | Run all tests: *coming soon*
-
-### How to contribute
-Report a bug. Send us a pull request.
-
-List of areas where we could use help:
-- Feedback from Dev & Ops teams on service & rule definitions
-- Adding support for additional cloud providers (AWS ECS, GKE, Docker Datacenter, Mesos)
-- Also, see [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11)
-
-### How to release
-Use `git tag` and `make release` for creating new release.
-
-1. Create annotated git tag and push it to github repo. Use commit message like `Aptomi v0.1.2`.
-
-```
-git tag -a v0.1.2
-git push origin v0.1.2
-```
-
-1. Create GitHub API token with the `repo` scope selected to upload artifacts to GitHub release page. You can create
-one [here](https://github.com/settings/tokens/new). This token should be added to the environment variables as `GITHUB_TOKEN`.
-
-1. Run `make release`. It'll create everything needed and upload all artifacts to github.
-
-1. Go to https://github.com/Aptomi/aptomi/releases/tag/v0.1.2 and fix changelog / description if needed.
-
-### Roadmap
+## Roadmap
 [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11), as well as weekly project milestones, are good places to look at the roadmap items.
 
 If you have any questions, please contact us on [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io).
