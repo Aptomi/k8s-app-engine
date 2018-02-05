@@ -24,10 +24,26 @@ type AuthSuccess struct {
 	Token            string
 }
 
+// AuthRequestObject contains Info for the AuthRequest type
+var AuthRequestObject = &runtime.Info{
+	Kind:        "auth-request",
+	Constructor: func() runtime.Object { return &AuthRequest{} },
+}
+
+// AuthRequest represents authentication request
+type AuthRequest struct {
+	runtime.TypeKind `yaml:",inline"`
+	Username         string
+	Password         string
+}
+
 func (api *coreAPI) handleLogin(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	username := request.PostFormValue("username")
-	password := request.PostFormValue("password")
-	user, err := api.externalData.UserLoader.Authenticate(username, password)
+	authReq, ok := api.contentType.ReadOne(request).(*AuthRequest)
+	if !ok {
+		panic(fmt.Sprintf("Unexpected object received: %v", authReq))
+	}
+
+	user, err := api.externalData.UserLoader.Authenticate(authReq.Username, authReq.Password)
 	if err != nil {
 		serverErr := NewServerError(fmt.Sprintf("Authentication error: %s", err))
 		api.contentType.WriteOne(writer, request, serverErr)

@@ -13,6 +13,7 @@ var (
 		EndpointsObject,
 		PolicyUpdateResultObject,
 		AuthSuccessObject,
+		AuthRequestObject,
 		ServerErrorObject,
 		version.BuildInfoObject,
 	}, lang.PolicyObjects, engine.Objects)
