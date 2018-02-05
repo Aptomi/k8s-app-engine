@@ -399,7 +399,7 @@ function test_aptomi_client_version_success() {
 function test_aptomi_client_show_policy_success() {
     # Run client to show the policy
     local CLIENT_POLICY_SHOW_OUTPUT
-    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u admin -p admin
+    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u admin -p admin 2>/dev/null
     CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy show 2>/dev/null)
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl policy show': ${COLOR_GREEN}OK${COLOR_RESET}"
@@ -437,7 +437,7 @@ function example_run_line() {
 
     # Run command
     log_sub "${CMD}"
-    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u $USERNAME -p $USERNAME
+    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u $USERNAME -p $USERNAME 2>/dev/null
     ($CMD 1>/dev/null 2>&1)
 }
 
