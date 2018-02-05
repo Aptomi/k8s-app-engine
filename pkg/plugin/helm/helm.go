@@ -98,6 +98,14 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 		"params":  string(helmParams),
 	}).Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
+	status, err := helmClient.ReleaseStatus(releaseName)
+	if err != nil {
+		return fmt.Errorf("error while getting status of current release %s: %s", releaseName, err)
+	}
+	if status.Namespace != cache.namespace {
+		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, cache.namespace)
+	}
+
 	newRelease, err := helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
 	if err != nil {
 		return err
