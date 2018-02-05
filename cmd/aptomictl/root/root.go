@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/endpoints"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/gen"
+	"github.com/Aptomi/aptomi/cmd/aptomictl/login"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/policy"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/revision"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/state"
@@ -48,11 +49,11 @@ func init() {
 
 	common.AddStringFlag(Command, "output", "output", "o", "text", EnvPrefix+"_OUTPUT", "Output format. One of: text (default), json, yaml")
 
-	common.AddStringFlag(Command, "auth.username", "username", "u", "", EnvPrefix+"_USERNAME", "Username")
 	common.AddDurationFlag(Command, "http.timeout", "timeout", "", 15*time.Second, EnvPrefix+"_TIMEOUT", "HTTP Timeout")
 
 	// Add sub commands
 	Command.AddCommand(
+		login.NewCommand(Config),
 		endpoints.NewCommand(Config),
 		policy.NewCommand(Config),
 		revision.NewCommand(Config),
