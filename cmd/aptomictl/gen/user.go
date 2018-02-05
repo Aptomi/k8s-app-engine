@@ -40,9 +40,13 @@ func newUserCommand(cfg *config.Client) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&userName, "name", "", "", "Username")
-	_ = cmd.MarkFlagRequired("name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		panic(err)
+	}
 	cmd.Flags().StringVarP(&userPassword, "pass", "", "", "Password")
-	_ = cmd.MarkFlagRequired("pass")
+	if err := cmd.MarkFlagRequired("pass"); err != nil {
+		panic(err)
+	}
 
 	return cmd
 }

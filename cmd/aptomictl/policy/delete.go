@@ -48,7 +48,9 @@ func newDeleteCommand(cfg *config.Client) *cobra.Command {
 	}
 
 	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files, dirs with policy to delete")
-	_ = cmd.MarkFlagRequired("policyPaths")
+	if err := cmd.MarkFlagRequired("policyPaths"); err != nil {
+		panic(err)
+	}
 	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until first revision with updated policy will be fully deleted")
 	cmd.Flags().DurationVar(&waitInterval, "wait-interval", 2*time.Second, "Seconds to sleep between wait attempts")
 	cmd.Flags().IntVar(&waitAttempts, "wait-attempts", 150, "Number of attempts to do before failure while waiting")
