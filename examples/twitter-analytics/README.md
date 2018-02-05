@@ -36,11 +36,11 @@ This example illustrates a few important things that Aptomi does:
 1. Upload user roles and rules into Aptomi using CLI, then import `analytics_pipeline` and `twitter_stats` services:
     ```
     aptomictl login -u sam -p sam
-    aptomictl policy apply -f ~/.aptomi/examples/twitter-analytics/policy/Sam
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/Sam
     aptomictl login -u frank -p frank
-    aptomictl policy apply -f ~/.aptomi/examples/twitter-analytics/policy/Frank
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/Frank
     aptomictl login -u john -p john
-    aptomictl policy apply -f ~/.aptomi/examples/twitter-analytics/policy/John
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/John
     ```
 
 1. At this point all service definition have been published to Aptomi, but nothing has been instantiated yet. You can see
