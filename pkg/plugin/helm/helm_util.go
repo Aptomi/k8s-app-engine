@@ -53,6 +53,8 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 		return nil
 	}
 
+	eventLog.WithFields(event.Fields{}).Debugf("Creating k8s tunnel for cluster %s", cache.cluster.Name)
+
 	var tunnelErr error
 	ok := retry.Do(120, 5*time.Second, func() bool {
 		if cache.tillerTunnel != nil {
@@ -65,9 +67,13 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 				err := cache.setupTiller(eventLog)
 				if err != nil {
 					tunnelErr = err
+				} else {
+					// if no error, let's try open tunnel again
 					return false
 				}
 			}
+
+			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error while creating k8s tunnel for cluster %s: %s", cache.cluster.Name, tunnelErr)
 
 			return false
 		}
@@ -78,12 +84,14 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 		helmClient, err := cache.newHelmClient(eventLog)
 		if err != nil {
 			tunnelErr = fmt.Errorf("can't create helm client for just created k8s tunnel for cluster %s: %s", cache.cluster.Name, err)
+			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error: %s", tunnelErr)
 			return false
 		}
 
 		_, err = helmClient.ListReleases(helm.ReleaseListLimit(1))
 		if err != nil {
 			tunnelErr = fmt.Errorf("can't do helm list using just created k8s tunnel for cluster %s: %s", cache.cluster.Name, err)
+			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error: %s", tunnelErr)
 			return false
 		}
 
