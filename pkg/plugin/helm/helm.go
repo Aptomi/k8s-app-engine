@@ -85,7 +85,14 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 				"params":  string(helmParams),
 			}).Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
-			_, err = helmClient.InstallRelease(chartPath, cache.namespace, helm.ReleaseName(releaseName), helm.ValueOverrides(helmParams), helm.InstallReuseName(true))
+			_, err = helmClient.InstallRelease(
+				chartPath,
+				cache.namespace,
+				helm.ReleaseName(releaseName),
+				helm.ValueOverrides(helmParams),
+				helm.InstallReuseName(true),
+				helm.InstallTimeout(int64(cache.pluginConfig.Timeout)),
+			)
 
 			return err
 		}
@@ -106,7 +113,12 @@ func (plugin *Plugin) createOrUpdate(cluster *lang.Cluster, deployName string, p
 		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, cache.namespace)
 	}
 
-	newRelease, err := helmClient.UpdateRelease(releaseName, chartPath, helm.UpdateValueOverrides(helmParams))
+	newRelease, err := helmClient.UpdateRelease(
+		releaseName,
+		chartPath,
+		helm.UpdateValueOverrides(helmParams),
+		helm.UpgradeTimeout(int64(cache.pluginConfig.Timeout)),
+	)
 	if err != nil {
 		return err
 	}
@@ -156,7 +168,11 @@ func (plugin *Plugin) Destroy(cluster *lang.Cluster, deployName string, params u
 		"release": releaseName,
 	}).Infof("Deleting Helm release '%s'", releaseName)
 
-	_, err = helmClient.DeleteRelease(releaseName, helm.DeletePurge(true))
+	_, err = helmClient.DeleteRelease(
+		releaseName,
+		helm.DeletePurge(true),
+		helm.DeleteTimeout(int64(cache.pluginConfig.Timeout)),
+	)
 	return err
 }
 

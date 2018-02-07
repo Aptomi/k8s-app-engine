@@ -40,10 +40,9 @@ func (cache *clusterCache) initConfig(cluster *lang.Cluster) error {
 	}
 
 	if cache.pluginConfig.Timeout == 0 {
-		cache.kubeConfig.Timeout = 10 * time.Second
-	} else {
-		cache.kubeConfig.Timeout = cache.pluginConfig.Timeout
+		cache.pluginConfig.Timeout = 10 * time.Second
 	}
+	cache.kubeConfig.Timeout = cache.pluginConfig.Timeout
 
 	if len(config.Namespace) > 0 {
 		cache.namespace = config.Namespace
