@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
 	"io/ioutil"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/helm/cmd/helm/installer"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
@@ -46,11 +47,31 @@ func (cache *clusterCache) newHelmClient(eventLog *event.Log) (*helm.Client, err
 	return helm.NewClient(helm.Host(cache.tillerHost)), nil
 }
 
+func (cache *clusterCache) preFlightCheck(eventLog *event.Log) error {
+	client, err := cache.newKubeClient()
+	if err != nil {
+		return err
+	}
+
+	// we should be able to list pods in tiller namespace
+	_, err = client.CoreV1().Pods(cache.tillerNamespace).List(meta.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("error while pre-flight check for cluster %s: %s", cache.cluster.Name, err)
+	}
+
+	return nil
+}
+
 func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 	if len(cache.tillerHost) > 0 {
 		// todo(slukjanov): verify that tunnel is still alive??
 		// connection already set up, skip
 		return nil
+	}
+
+	err := cache.preFlightCheck(eventLog)
+	if err != nil {
+		return err
 	}
 
 	eventLog.WithFields(event.Fields{}).Debugf("Creating k8s tunnel for cluster %s", cache.cluster.Name)
@@ -64,9 +85,9 @@ func (cache *clusterCache) ensureTillerTunnel(eventLog *event.Log) error {
 
 		if tunnelErr != nil {
 			if strings.Contains(tunnelErr.Error(), "could not find tiller") {
-				err := cache.setupTiller(eventLog)
-				if err != nil {
-					tunnelErr = err
+				tillerErr := cache.setupTiller(eventLog)
+				if tillerErr != nil {
+					tunnelErr = tillerErr
 				} else {
 					// if no error, let's try open tunnel again
 					return false
