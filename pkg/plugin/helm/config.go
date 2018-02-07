@@ -3,6 +3,7 @@ package helm
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"time"
 )
 
 // Config represents K8s/Helm plugin configuration
@@ -36,6 +37,12 @@ func (cache *clusterCache) initConfig(cluster *lang.Cluster) error {
 	}
 	if err != nil {
 		return err
+	}
+
+	if cache.pluginConfig.Timeout == 0 {
+		cache.kubeConfig.Timeout = 10 * time.Second
+	} else {
+		cache.kubeConfig.Timeout = cache.pluginConfig.Timeout
 	}
 
 	if len(config.Namespace) > 0 {

@@ -1,6 +1,7 @@
 package helm
 
 import (
+	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"k8s.io/client-go/rest"
@@ -9,6 +10,7 @@ import (
 )
 
 type clusterCache struct {
+	pluginConfig    config.Helm
 	cluster         *lang.Cluster
 	config          *Config
 	lock            sync.Mutex // all caching ops should use this lock
@@ -25,7 +27,7 @@ func (plugin *Plugin) getClusterCache(cluster *lang.Cluster, eventLog *event.Log
 	rawCache, loaded := plugin.cache.LoadOrStore(cluster.Name, new(clusterCache))
 	cache := rawCache.(*clusterCache)
 	if !loaded {
-		err := cache.init(cluster, eventLog)
+		err := cache.init(plugin.cfg, cluster, eventLog)
 		if err != nil {
 			return nil, err
 		}
@@ -34,10 +36,11 @@ func (plugin *Plugin) getClusterCache(cluster *lang.Cluster, eventLog *event.Log
 	return cache, nil
 }
 
-func (cache *clusterCache) init(cluster *lang.Cluster, eventLog *event.Log) error {
+func (cache *clusterCache) init(pluginConfig config.Helm, cluster *lang.Cluster, eventLog *event.Log) error {
 	cache.lock.Lock()
 	defer cache.lock.Unlock()
 
+	cache.pluginConfig = pluginConfig
 	err := cache.initConfig(cluster)
 	if err != nil {
 		return err

@@ -29,6 +29,7 @@ func (s Server) IsDebug() bool {
 
 // Helm represents configs for Helm plugin
 type Helm struct {
+	Timeout time.Duration
 }
 
 // DB represents configs for DB
