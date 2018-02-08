@@ -9,13 +9,13 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/commits/master)
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
-[Aptomi](http://aptomi.io) simplifies roll-out, operation and control of container-based applications on k8s. It introduces a
+[Aptomi](http://aptomi.io) simplifies roll-out, operation and control of container-based applications on **Kubernetes**. It introduces a
 **service-centric abstraction** that allows Dev and Ops to collaborate asynchronously. It enables teams to create and operate services,
 share them across the organization, fully control their lifecycle while enforcing Ops/Governance policies. Changes and updates are executed
 with a goal of minimizing disruptive impact on depending services.
 
 It is particularly useful in environments with multiple teams, clouds and data centers, where intent-based management
-plays an important role in running large application infrastructure. Aptomi’s current focus is **Kubernetes**, but it's
+plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
 designed to work with any container runtime and container orchestration technologies.
 
 ![What is Aptomi](images/aptomi-what-is.png)
