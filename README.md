@@ -23,7 +23,7 @@ designed to work with any container runtime and container orchestration technolo
 ## Demo
 
 ### Short demo (5 minutes, Asciinema)
-[![asciicast](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
+[![asciicast](images/aptomi-asciinema.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
 
 ### Detailed demo (13 minutes, Youtube)
 [![youtube](images/aptomi-demo-youtube.png)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
