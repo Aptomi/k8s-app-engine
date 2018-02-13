@@ -9,14 +9,11 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/commits/master)
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
-[Aptomi](http://aptomi.io) simplifies roll-out, operation and control of container-based applications on **Kubernetes**. It introduces a
-**service-centric abstraction** that allows Dev and Ops to collaborate asynchronously. It enables teams to create and operate services,
-share them across the organization, fully control their lifecycle while enforcing Ops/Governance policies. Changes and updates are executed
-with a goal of minimizing disruptive impact on depending services.
+[Aptomi](http://aptomi.io) is a platform for development teams that simplifies roll-out and operation of container-based applications on **Kubernetes**. It introduces a service-centric abstraction, which allows to compose applications from multiple components connected together. It supports components packaged using Helm, ksonnet, k8s YAMLs or any other Kubernetes-friendly way.
 
-It is particularly useful in environments with multiple teams, clouds and data centers, where intent-based management
-plays an important role in running large application infrastructure. Aptomi’s current focus is Kubernetes, but it's
-designed to work with any container runtime and container orchestration technologies.
+Aptomi **application delivery** model becomes especially powerful in a **multi-team** setup, where components owned by different teams must be put together into a service. With ownership boundaries, Dev teams can specify **multi-cluster** and **multi-env** (e.g. dev, stage, prod) service behavior, as well as control lifecycle and updates of their respective services.
+
+It also provides contextual **visibility** into teams and services, allowing to visualize dependencies and impact of changes. 
 
 ![What is Aptomi](images/aptomi-what-is.png)
 
@@ -48,6 +45,7 @@ designed to work with any container runtime and container orchestration technolo
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features & Benefits
+
 - **Deploy and manage container-based applications with ease**
   - Dev and Ops think applications and services, not infrastructure primitives and thousands of containers
   - Built-in service discovery ensures all dependencies always are up to date
