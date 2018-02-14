@@ -11,7 +11,7 @@
 
 [Aptomi](http://aptomi.io) is a platform for development teams that simplifies roll-out and operation of container-based applications on **Kubernetes**. It introduces a service-centric abstraction, which allows to compose applications from multiple components connected together. It supports components packaged using Helm, ksonnet, k8s YAMLs or any other Kubernetes-friendly way.
 
-Aptomi **application delivery** model becomes especially powerful in a **multi-team** setup, where components owned by different teams must be put together into a service. With ownership boundaries, Dev teams can specify **multi-cluster** and **multi-env** (e.g. dev, stage, prod) service behavior, as well as control lifecycle and updates of their respective services.
+Aptomi's approach to **application delivery** becomes especially powerful in a **multi-team** setup, where components owned by different teams must be put together into a service. With ownership boundaries, Dev teams can specify **multi-cluster** and **multi-env** (e.g. dev, stage, prod) service behavior, as well as control lifecycle and updates of their respective services.
 
 It also provides contextual **visibility** into teams and services, allowing to visualize dependencies and impact of changes. 
 
