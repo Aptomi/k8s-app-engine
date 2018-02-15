@@ -6,6 +6,7 @@
 * Leverage intelligent app delivery through Aptomi in CD: *multi-container apps, across multiple envs (dev, stage, prod) and k8s clusters*
 * Stand up new environments quickly: *use one CLI command to deploy the full application, no need to deploy individual containers/charts by hand and hardcode variables*
 * Deliver individual updates to app components: *Aptomi knows which part of an application graph needs to be updated, so the impact of change is known and disruption is minimized*
+* Lazy allocation of resources: *containers are only running when needed, unused environments can be automatically garbage collected*
 
 ## For Helm Chart Developers
 
