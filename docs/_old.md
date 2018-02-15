@@ -1,26 +1,4 @@
-# Installation
-The best way to install Aptomi is to download its latest release, which contains compiled server and client binaries for various platforms:
-- Aptomi Server is an all-in-one binary with embedded DB store, which serves API requests, runs UI, as well as does deployment and continuous state enforcement
-- Aptomi Client is a client for talking to Aptomi Server. It allows end-users of Aptomi to feed YAML files into Aptomi Server over REST API
 
-You can run those binaries locally.
-
-Additionally you can download binary using `go get -u gopkg.in/Aptomi/aptomi.v0/cmd/aptomictl` command.
-Make sure that your `$GOPATH/bin` is in the `$PATH` to use it.
-You can rerun this command to update your client.
-
-And finally it's possible just to use dockerized client in a following way:
-
-```bash
-# just run docker run directly:
-docker run -it --rm -v "$HOME/.aptomi/":"/root/.aptomi" aptomi/aptomictl:0 policy show
-
-# or add alias for it:
-alias aptomictl='docker run -it --rm -v "$HOME/.aptomi/":"/root/.aptomi" aptomi/aptomictl:0'
-
-# to update client you'll need to run:
-docker pull aptomi/aptomictl:0
-```
 
 # Configuring LDAP
 Aptomi needs to be configured with user data source in order to enable UI login and make policy decisions based on users' labels/properties. It's recommended to
