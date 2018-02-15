@@ -30,7 +30,7 @@ It also provides contextual **visibility** into teams and services, allowing to 
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Features & Benefits](#features--benefits)
+- [Why Aptomi](#why-aptomi)
 - [Quickstart](#quickstart)
   - [Step #1: Installation](#step-1-installation)
   - [Step #2: Setting up k8s Cluster](#step-2-setting-up-k8s-cluster)
@@ -44,28 +44,12 @@ It also provides contextual **visibility** into teams and services, allowing to 
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Features & Benefits
+## Why Aptomi
 
-- **Deploy and manage container-based applications with ease**
-  - Dev and Ops think applications and services, not infrastructure primitives and thousands of containers
-  - Built-in service discovery ensures all dependencies always are up to date
-  - No need to change existing application templates (Helm, Ksonnet, k8s YAMLs, etc)
-  - Run on k8s, OpenShift (support for AWS ECS, GKE, Docker Datacenter, Mesos is pluggable)
-- **Lazy allocation of resources**
-  - Containers are only running when the corresponding service has consumers
-- **Continuous state enforcement**
-  - Desired state of all services is rendered as a DAG system and continuously validated/enforced
-  - Changes/rules can be enforced at any time (change service parameters, relocate the whole application w/ dependencies to another cluster, restrict access, etc)
-  - Disruption impact of change on depending services is minimized
-- **Flexible rule engine**. Examples:
-  - *Production Instances* get deployed to *us-west*, *Staging Instances* get deployed to *us-west*
-  - *Web* and *Mobile* teams always share the same *small* flavor of *Analytics* service in *Staging*, while 
-    *Healthcare* team gets a dedicated *high-performance* instance of the same service
-  - *Development* teams can never deploy to *Production*
-  - *Personal* development instances of *MyApp* can only be running *from 7am to 11pm* and should be terminated overnight 
-    for all developers
-- **Insights & Contextual visibility**
-  - UI to explore services instances, see why services were instantiated, visualize dependencies and impact of changes
+* Why would I want to use Aptomi [as a Developer](docs/benefits.md#for-developers)
+* Why would I want to use Aptomi [as an Operator](docs/benefits.md#for-operators)
+* How does Aptomi fit into [CI/CD model with Spinnaker/Jenkins](docs/benefits.md#how-aptomi-fits-into-cicd-jenkins-spinnaker)
+* Why would I want to use Aptomi [if I'm already implementing Kubernetes/OpenShift](docs/benefits.md#why-would-i-want-to-use-aptomi-if-im-already-implementing-kubernetesopenshift)
 
 ## Quickstart
 
