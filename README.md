@@ -37,7 +37,6 @@ It also provides contextual **visibility** into teams and services, allowing to 
   - [Step #3: Running Examples](#step-3-running-examples)
 - [How It Works](#how-it-works)
   - [Architecture](#architecture)
-  - [State Enforcement](#state-enforcement)
   - [Language](#language)
 - [How to contribute](#how-to-contribute)
 - [Roadmap](#roadmap)
@@ -93,8 +92,7 @@ Example    | Description
 ### Architecture
 ![Aptomi Components](images/aptomi-components.png) 
 
-### State Enforcement
-![Aptomi Enforcement](images/aptomi-enforcement.png)
+See [artchitecture documentation](docs/architecture.md)
 
 ### Language
 ![Aptomi Language](images/aptomi-language.png)
