@@ -35,6 +35,7 @@ It also provides contextual **visibility** into teams and services, allowing to 
   - [Step #1: Installation](#step-1-installation)
   - [Step #2: Setting up k8s Cluster](#step-2-setting-up-k8s-cluster)
   - [Step #3: Running Examples](#step-3-running-examples)
+  - [Step #4: Send us a note on Slack](#step-4-send-us-a-note-on-slack)
 - [How It Works](#how-it-works)
   - [Architecture](#architecture)
   - [Language](#language)
@@ -87,6 +88,10 @@ Example    | Description
 -----------|------------
 [twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, multi-cloud
 
+### Step #4: Send us a note on Slack
+
+Let us know your feedback on #general in [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io). If you ran into issues, we will help get them resolved. 
+
 ## How It Works
 
 ### Architecture
@@ -104,11 +109,7 @@ The very least you can do is to [report a bug](https://github.com/Aptomi/aptomi/
 
 If you want to make a pull request for a bug fix or contribute a feature, see our [Development Guide](docs/dev_guide.md) for how to develop, run and test your code.
 
-In general, we are always looking for feedback on:
-- Aptomi object model - definitions of services, contracts, rules, clusters
-- Pluggability - support for additional label sources (in addition to LDAP), app engines (in addition to Helm), cloud providers
-
-Contact us on [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io).
+We are always looking for feedback on how to make Aptomi better. Join our Slack to discuss [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io).
 
 ## Roadmap
 [Feature Backlog](https://github.com/Aptomi/aptomi/milestone/11), as well as weekly project milestones, are good places to look at the roadmap items.
