@@ -14,6 +14,8 @@ SCRIPT_NAME=`basename "$0"`
 UPLOAD_EXAMPLE=0
 CLIENT_ONLY=0
 SERVER_PID=""
+APTOMI_INSTALLED_SERVER_VERSION=""
+APTOMI_INSTALLED_CLIENT_VERSION=""
 
 COLOR_GRAY='\033[0;37m'
 COLOR_BLUE='\033[0;34m'
@@ -41,7 +43,7 @@ function script_done() {
     fi
 
     if [ ! $CODE -eq 0 ]; then
-        log_err "Script failed"
+        log_err "Script failed (set DEBUG=yes environment variable and run again)"
     fi
 
     exit $CODE
@@ -63,7 +65,7 @@ function log_sub() {
 }
 
 function log_warn() {
-    echo -e "$COLOR_BLUE[$(date +"%F %T")] $SCRIPT_NAME $COLOR_RED|$COLOR_RESET $COLOR_YELLOW - WARNING:" $@$COLOR_GRAY
+    echo -e "$COLOR_BLUE[$(date +"%F %T")] $SCRIPT_NAME $COLOR_RED|$COLOR_RESET$COLOR_YELLOW - " $@$COLOR_GRAY
 }
 
 function log_err() {
@@ -101,7 +103,7 @@ function verify_supported_platform() {
         log_err "Unable to detect platform: architecture=$ARCH, os=$OS"
         exit 1
     fi
-    log_sub "Detected: architecture=$COLOR_GREEN$ARCH$COLOR_RESET, os=$COLOR_GREEN$OS$COLOR_RESET"
+    log_sub "Architecture=$COLOR_GREEN$ARCH$COLOR_RESET, os=$COLOR_GREEN$OS$COLOR_RESET"
 
     local supported="darwin_amd64\nlinux_386\nlinux_amd64"
     if ! echo "${supported}" | grep -q "${OS}_${ARCH}"; then
@@ -114,7 +116,7 @@ function verify_supported_platform() {
 function get_latest_release() {
     curl --silent "https://api.github.com/repos/$REPO_NAME/releases/latest" | # Get latest release from GitHub API
     grep '"tag_name":' |                                              # Filter out tag_name line
-    sed -E 's/.*"([^"]+)".*/\1/'                                      # Parse out JSON value
+    sed -E 's/.*"v([^"]+)".*/\1/'                                      # Parse out JSON value
 }
 
 function download_and_install_release() {
@@ -126,15 +128,13 @@ function download_and_install_release() {
         log_err "Unable to get the latest release from GitHub (https://api.github.com/repos/$REPO_NAME/releases/latest)"
         exit 1
     fi
-    log_sub "Version: $COLOR_GREEN$VERSION$COLOR_RESET"
+    log_sub "Latest Version: $COLOR_GREEN$VERSION$COLOR_RESET"
 
-    local VERSIONWITHOUTV=${VERSION:1:${#VERSION}}
+    local FILENAMEBINARY="aptomi_${VERSION}_${OS}_${ARCH}.tar.gz"
 
-    local FILENAMEBINARY="aptomi_${VERSIONWITHOUTV}_${OS}_${ARCH}.tar.gz"
-
-    local FILENAMECHECKSUMS="aptomi_${VERSIONWITHOUTV}_checksums.txt"
-    local URL_BINARY="https://github.com/$REPO_NAME/releases/download/$VERSION/$FILENAMEBINARY"
-    local URL_CHECKSUMS="https://github.com/$REPO_NAME/releases/download/$VERSION/$FILENAMECHECKSUMS"
+    local FILENAMECHECKSUMS="aptomi_${VERSION}_checksums.txt"
+    local URL_BINARY="https://github.com/$REPO_NAME/releases/download/v$VERSION/$FILENAMEBINARY"
+    local URL_CHECKSUMS="https://github.com/$REPO_NAME/releases/download/v$VERSION/$FILENAMECHECKSUMS"
 
     local FILE_BINARY="$APTOMI_INSTALL_CACHE/$FILENAMEBINARY"
     local FILE_CHECKSUMS="$APTOMI_INSTALL_CACHE/$FILENAMECHECKSUMS"
@@ -144,7 +144,7 @@ function download_and_install_release() {
         log_sub "Downloading: $URL_BINARY"
         curl -SsL "$URL_BINARY" -o "$FILE_BINARY"
     else
-        log_sub "Already downloaded. Using from cache: $FILE_BINARY"
+        log_sub "Already downloaded. Using from cache: $APTOMI_INSTALL_CACHE"
     fi
 
     # Never cache checksum, it'll allow us to verify cached binary
@@ -158,7 +158,7 @@ function download_and_install_release() {
         exit 1
     fi
 
-    install_binaries_from_archive $FILE_BINARY $FILENAMEBINARY
+    install_binaries_from_archive $FILE_BINARY $FILENAMEBINARY $VERSION
 }
 
 function run_as_root() {
@@ -174,10 +174,11 @@ function run_as_root() {
 function install_binaries_from_archive() {
     local FILE_BINARY=$1
     local FILENAMEBINARY=$2
+    local VERSION=$3
     local TMP_DIR="$(mktemp -dt aptomi-install-unpacked-XXXXXX)"
 
     # Unpack the archive
-    log "Installing Aptomi"
+    log "Installing/Updating Aptomi"
     log_sub "Unpacking $FILENAMEBINARY"
     tar xf "$FILE_BINARY" -C "$TMP_DIR"
 
@@ -186,23 +187,37 @@ function install_binaries_from_archive() {
     DIRNAME="${DIRNAME%.*}"
     UNPACKED_PATH="$TMP_DIR/$DIRNAME"
 
-    # Install server & create config (only if we are not in CLIENT_ONLY mode)
+    # Install server (only if we are not in CLIENT_ONLY mode)
     if [ $CLIENT_ONLY -eq 0 ]; then
         if [ ! -f $UNPACKED_PATH/aptomi ]; then
             log_err "Binary 'aptomi' not found inside the release"
         fi
 
-        log_sub "Installing Aptomi server: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomi"
-        run_as_root cp "$UNPACKED_PATH/aptomi" "$APTOMI_INSTALL_DIR"
+        if [ -z $APTOMI_INSTALLED_SERVER_VERSION ]; then
+            log_sub "Installing Aptomi server: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomi"
+            run_as_root cp "$UNPACKED_PATH/aptomi" "$APTOMI_INSTALL_DIR"
+        elif [ $APTOMI_INSTALLED_SERVER_VERSION != $VERSION ]; then
+            log_sub "Updating Aptomi server: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomi$COLOR_RESET ($COLOR_GREEN$APTOMI_INSTALLED_SERVER_VERSION$COLOR_RESET -> $COLOR_GREEN$VERSION$COLOR_RESET)"
+            run_as_root cp "$UNPACKED_PATH/aptomi" "$APTOMI_INSTALL_DIR"
+        else
+            log_sub "Aptomi server is already at the required version. Skipping install"
+        fi
     fi
 
     if [ ! -f $UNPACKED_PATH/aptomictl ]; then
         log_err "Binary 'aptomictl' not found inside the release"
     fi
 
-    # Install client & create config
-    log_sub "Installing Aptomi client: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomictl$COLOR_RESET"
-    run_as_root cp "$UNPACKED_PATH/aptomictl" "$APTOMI_INSTALL_DIR"
+    # Install client
+    if [ -z $APTOMI_INSTALLED_CLIENT_VERSION ]; then
+        log_sub "Installing Aptomi client: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomictl$COLOR_RESET"
+        run_as_root cp "$UNPACKED_PATH/aptomictl" "$APTOMI_INSTALL_DIR"
+    elif [ $APTOMI_INSTALLED_CLIENT_VERSION != $VERSION ]; then
+        log_sub "Updating Aptomi client: $COLOR_GREEN${APTOMI_INSTALL_DIR}/aptomi$COLOR_RESET ($COLOR_GREEN$APTOMI_INSTALLED_CLIENT_VERSION$COLOR_RESET -> $COLOR_GREEN$VERSION$COLOR_RESET)"
+        run_as_root cp "$UNPACKED_PATH/aptomictl" "$APTOMI_INSTALL_DIR"
+    else
+        log_sub "Aptomi client is already at the required version. Skipping install"
+    fi
 }
 
 function create_server_config() {
@@ -213,10 +228,10 @@ function create_server_config() {
 
     local TMP_DIR="$(mktemp -dt aptomi-install-server-config-XXXXXX)"
 
-    log_sub "Creating config for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/config.yaml$COLOR_RESET"
     if [ -f ${APTOMI_SERVER_CONFIG_DIR}/config.yaml ]; then
-        log_warn "Config for Aptomi server already exists. Keeping existing config"
+        log_warn "Config for Aptomi server already exists. Keeping ${APTOMI_SERVER_CONFIG_DIR}/config.yaml"
     else
+        log_sub "Creating config for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/config.yaml$COLOR_RESET"
         cat >${TMP_DIR}/config.yaml <<EOL
 debug: true
 
@@ -267,10 +282,10 @@ EOL
         fi
     fi
 
-    log_sub "Creating built-in admin users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml$COLOR_RESET"
     if [ -f ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml ]; then
-        log_warn "Built-in admin users for Aptomi server already exist. Keeping it"
+        log_warn "Built-in admin users for Aptomi server already exist. Keeping ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml"
     else
+        log_sub "Creating built-in admin users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml$COLOR_RESET"
         cat >${TMP_DIR}/users_builtin.yaml <<EOL
 - name: admin
   passwordhash: "\$2a\$10\$2eh0YI/gzj2UdxN8j52NseQW54BsZ5cUGhFstblR1D8UOGMUCwuMm"
@@ -280,18 +295,18 @@ EOL
         run_as_root cp ${TMP_DIR}/users_builtin.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml
     fi
 
-    log_sub "Creating example users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml$COLOR_RESET"
     if [ -f ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml ]; then
-        log_warn "Example users for Aptomi server already exist. Keeping it"
+        log_warn "Example users for Aptomi server already exist. Keeping ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml"
     else
+        log_sub "Creating example users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml$COLOR_RESET"
         run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
         run_as_root cp ${UNPACKED_PATH}/examples/twitter-analytics/_external/users.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
     fi
 
-    log_sub "Creating directory for Aptomi server database: $COLOR_GREEN${APTOMI_DB_DIR}$COLOR_RESET"
     if [ -d ${APTOMI_DB_DIR} ]; then
-        log_warn "Directory for Aptomi server database already exists. Keeping it"
+        log_warn "Aptomi server database directory already exists. Keeping data under ${APTOMI_DB_DIR}"
     else
+        log_sub "Creating Aptomi server database directory: $COLOR_GREEN${APTOMI_DB_DIR}$COLOR_RESET"
         run_as_root mkdir -p ${APTOMI_DB_DIR}
     fi
 
@@ -301,11 +316,10 @@ EOL
 function create_client_config() {
     local TMP_DIR="$(mktemp -dt aptomi-install-client-config-XXXXXX)"
 
-    log_sub "Creating config for Aptomi client: $COLOR_GREEN${APTOMI_CLIENT_CONFIG_DIR}/config.yaml$COLOR_RESET"
-
     if [ -f ${APTOMI_CLIENT_CONFIG_DIR}/config.yaml ]; then
-        log_warn "Config for Aptomi client already exists. Keeping existing config"
+        log_warn "Config for Aptomi client already exists. Keeping ${APTOMI_CLIENT_CONFIG_DIR}/config.yaml"
     else
+        log_sub "Creating config for Aptomi client: $COLOR_GREEN${APTOMI_CLIENT_CONFIG_DIR}/config.yaml$COLOR_RESET"
         cat >${TMP_DIR}/config.yaml <<EOL
 debug: true
 
@@ -349,26 +363,61 @@ function test_aptomi_client_in_path() {
 
 function test_aptomi_server_version_success() {
     # Run 'aptomi version' and remove leading whitespaces
-    local SERVER_VERSION_OUTPUT
-    SERVER_VERSION_OUTPUT=$(aptomi version 2>/dev/null)
-    if [ $? -eq 0 ]; then
-        log_sub "Running 'aptomi version': ${COLOR_GREEN}OK${COLOR_RESET}"
-    else
-        log_err "Failed to execute 'aptomi version'"
-        log_err $SERVER_VERSION_OUTPUT
+    local SERVER_VERSION_OUTPUT=$(get_aptomi_server_version)
+    if [ "$SERVER_VERSION_OUTPUT" != "$VERSION" ]; then
+        log_err "Failed to verify 'aptomi version': got '$SERVER_VERSION_OUTPUT' instead of '$VERSION'"
         exit 1
+    else
+        log_sub "Running 'aptomi version': ${COLOR_GREEN}${SERVER_VERSION_OUTPUT}${COLOR_RESET}"
+    fi
+}
+
+function is_aptomi_server_running() {
+    local SERVER_RUNNING_PRIOR=`ps | grep aptomi | grep server`
+    if [ ! -z "${SERVER_RUNNING_PRIOR}" ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+function get_aptomi_server_version() {
+    if [ -f ${APTOMI_INSTALL_DIR}/aptomi ]; then
+        ${APTOMI_INSTALL_DIR}/aptomi version --short 2>/dev/null | grep 'Server Version:' | sed -E 's/[a-zA-Z ]*: (.*)/\1/'
+    fi
+}
+
+function get_aptomi_client_version() {
+    if [ -f ${APTOMI_INSTALL_DIR}/aptomictl ]; then
+        ${APTOMI_INSTALL_DIR}/aptomictl version --client --short 2>/dev/null | grep 'Client Version:' | sed -E 's/[a-zA-Z ]*: (.*)/\1/'
+    fi
+}
+
+function check_aptomi_install_status() {
+    APTOMI_INSTALLED_SERVER_VERSION=$(get_aptomi_server_version)
+    if [ -z "${APTOMI_INSTALLED_SERVER_VERSION}" ]; then
+        log_sub "Aptomi Server: ${COLOR_YELLOW}not installed${COLOR_RESET}"
+    else
+        log_sub "Aptomi Server: ${COLOR_GREEN}${APTOMI_INSTALLED_SERVER_VERSION}${COLOR_RESET} in ${APTOMI_INSTALL_DIR}/aptomi"
+    fi
+
+    APTOMI_INSTALLED_CLIENT_VERSION=$(get_aptomi_client_version)
+    if [ -z "${APTOMI_INSTALLED_CLIENT_VERSION}" ]; then
+        log_sub "Aptomi Client: ${COLOR_YELLOW}not installed${COLOR_RESET}"
+    else
+        log_sub "Aptomi Client: ${COLOR_GREEN}${APTOMI_INSTALLED_CLIENT_VERSION}${COLOR_RESET} in ${APTOMI_INSTALL_DIR}/aptomictl"
     fi
 }
 
 function start_aptomi_server() {
-    # Start Aptomi server
-    local SERVER_RUNNING_PRIOR=`ps | grep aptomi | grep server`
-    if [ ! -z "${SERVER_RUNNING_PRIOR}" ]; then
+    local RUNNING=$(is_aptomi_server_running)
+    if [ $RUNNING -eq 1 ]; then
         log_err "Aptomi server already running. Can't run another instance for testing (may want to use 'killall aptomi')"
         exit 1
     fi
 
-    aptomi server &>/dev/null &
+    # Start Aptomi server
+    ${APTOMI_INSTALL_DIR}/aptomi server &>/dev/null &
     SERVER_PID=$!
     log_sub "Starting 'aptomi server' for testing (PID: ${SERVER_PID})"
     sleep 2
@@ -381,26 +430,20 @@ function start_aptomi_server() {
 
 function test_aptomi_client_version_success() {
     # Run client to show the version
-    local CLIENT_VERSION_OUTPUT
-    if [ $CLIENT_ONLY -eq 0 ]; then
-        CLIENT_VERSION_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} version 2>/dev/null)
-    else
-        CLIENT_VERSION_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} version --client 2>/dev/null)
-    fi
-    if [ $? -eq 0 ]; then
-        log_sub "Running 'aptomictl version': ${COLOR_GREEN}OK${COLOR_RESET}"
-    else
-        log_err "Failed to execute 'aptomictl version'"
-        log_err $CLIENT_VERSION_OUTPUT
+    local CLIENT_VERSION_OUTPUT=$(get_aptomi_client_version)
+    if [ "$CLIENT_VERSION_OUTPUT" != "$VERSION" ]; then
+        log_err "Failed to verify 'aptomictl version': got '$CLIENT_VERSION_OUTPUT' instead of '$VERSION'"
         exit 1
+    else
+        log_sub "Running 'aptomictl version': ${COLOR_GREEN}${CLIENT_VERSION_OUTPUT}${COLOR_RESET}"
     fi
 }
 
 function test_aptomi_client_show_policy_success() {
     # Run client to show the policy
     local CLIENT_POLICY_SHOW_OUTPUT
-    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u admin -p admin 2>/dev/null
-    CLIENT_POLICY_SHOW_OUTPUT=$(aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy show 2>/dev/null)
+    ${APTOMI_INSTALL_DIR}/aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u admin -p admin 2>/dev/null
+    CLIENT_POLICY_SHOW_OUTPUT=$(${APTOMI_INSTALL_DIR}/aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy show 2>/dev/null)
     if [ $? -eq 0 ]; then
         log_sub "Running 'aptomictl policy show': ${COLOR_GREEN}OK${COLOR_RESET}"
     else
@@ -433,12 +476,16 @@ function test_aptomi() {
 
 function example_run_line() {
     local USERNAME=$1
-    local CMD="aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy apply --wait -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/$2"
 
-    # Run command
-    log_sub "${CMD}"
-    aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u $USERNAME -p $USERNAME 2>/dev/null
-    ($CMD 1>/dev/null 2>&1)
+    # Run login command
+    local CMD_LOGIN="aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} login -u $USERNAME -p $USERNAME"
+    log_sub "${CMD_LOGIN}"
+    ${APTOMI_INSTALL_DIR}/$CMD_LOGIN 1>/dev/null 2>&1
+
+    # Run actual command
+    local CMD_RUN="aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy apply --wait -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/$2"
+    log_sub "${CMD_RUN}"
+    ${APTOMI_INSTALL_DIR}/$CMD_RUN 1>/dev/null 2>&1
 }
 
 function upload_example() {
@@ -491,13 +538,14 @@ check_installed 'cat'
 check_installed 'ps'
 
 # Detect platform and verify that it's supported
-log "Detecting platform"
+log "Checking environment"
 ARCH=$(get_arch)
 OS=$(get_os)
 verify_supported_platform $ARCH $OS
+check_aptomi_install_status
 
 # Download the latest release from GitHub and install it
-log "Installing the latest release from GitHub"
+log "Checking the latest release on GitHub"
 VERSION=$(get_latest_release)
 download_and_install_release $ARCH $OS $VERSION
 
