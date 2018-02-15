@@ -13,7 +13,7 @@ import (
 
 // NewCommand returns instance of cobra command that shows version from version package (injected at build tome)
 func NewCommand(cfg *config.Client) *cobra.Command {
-	var client, server bool
+	var client, server, short bool
 
 	cmd := &cobra.Command{
 		Use:   "version",
@@ -26,34 +26,42 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 
 			if client {
 				info := version.GetBuildInfo()
+				if short {
+					fmt.Println("Client Version:", info.GitVersion)
+				} else {
+					data, err := common.Format(cfg.Output, false, info)
+					if err != nil {
+						panic(fmt.Sprintf("Error while formating policy: %s", err))
+					}
 
-				data, err := common.Format(cfg.Output, false, info)
-				if err != nil {
-					panic(fmt.Sprintf("Error while formating policy: %s", err))
+					log.Infof("Client: ")
+					fmt.Println(string(data))
 				}
-
-				log.Infof("Client: ")
-				fmt.Println(string(data))
 			}
 			if server {
-				info, err := rest.New(cfg, http.NewClient(cfg)).Version().Show()
-				if err != nil {
-					panic(fmt.Sprintf("Error while getting server version: %s", err))
+				info, infoErr := rest.New(cfg, http.NewClient(cfg)).Version().Show()
+				if infoErr != nil {
+					panic(fmt.Sprintf("Error while getting server version: %s", infoErr))
 				}
 
-				data, err := common.Format(cfg.Output, false, info)
-				if err != nil {
-					panic(fmt.Sprintf("Error while formating server version: %s", err))
-				}
+				if short {
+					fmt.Println("Server Version:", info.GitVersion)
+				} else {
+					data, err := common.Format(cfg.Output, false, info)
+					if err != nil {
+						panic(fmt.Sprintf("Error while formating server version: %s", err))
+					}
 
-				log.Infof("Server: ")
-				fmt.Println(string(data))
+					log.Infof("Server: ")
+					fmt.Println(string(data))
+				}
 			}
 		},
 	}
 
 	cmd.Flags().BoolVarP(&client, "client", "c", false, "Show client version")
 	cmd.Flags().BoolVarP(&server, "server", "s", false, "Show server version")
+	cmd.Flags().BoolVarP(&short, "short", "", false, "Print just the version number")
 
 	return cmd
 }
