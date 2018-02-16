@@ -63,20 +63,22 @@ It also provides contextual **visibility** into teams and services, allowing to 
 ### Step #1: Installation
 There are several ways to install Aptomi. The simplest one is **Compact**, but you may pick one that suits your needs:
 
-Installation Mode     | Complexity | Aptomi        | App Deployment | Description
-----------------------|------------|---------------|----------------|------------
-[Compact](docs/install_compact.md) | Easy | Local machine | *Yes* | Aptomi will be installed on a local machine (binaries or in a single Docker container)
-[Kubernetes](docs/install_kubernetes.md) | Medium | Container on k8s  | *Yes* | Aptomi will be deployed on k8s via Helm chart
+Installation Mode     | Complexity | Description
+----------------------|------------|-------------
+[Compact](docs/install_compact.md) | Easy | Aptomi will be installed on a local machine (binaries or in a single Docker container)
+[Kubernetes](docs/install_kubernetes.md) | Medium | Aptomi will be deployed on k8s via Helm chart
 
-You can also install it in a stripped-down mode, mostly to explore concepts and look at API/UI. It will use a fake executor and thus will **NOT** be able to perform any app deployments to k8s:
+You can also install it in a stripped-down mode with fake executor:
 
-Installation Mode     | Aptomi / UI | App Deployment | Description
-----------------------|--------------------|----------------|-------------
-[Concepts](docs/install_concepts.md) | Local machine | *No* | Use this only if you want get familiar with Aptomi concepts, API and UI. k8s is not required
+Installation Mode     | Complexity | Description
+----------------------|------------|-------------
+[Concepts](docs/install_concepts.md) | Easy | Use this only if you want get familiar with Aptomi concepts, API and UI. App deployment to k8s is **DISABLED**
 
 ### Step #2: Setting up k8s Cluster
 
-You need to have access a k8s cluster to deploy apps from the provided examples:
+You need to have access a k8s cluster to deploy apps from the provided examples.
+
+Having a powerful k8s cluster with good internet connection will definitely provide *better experience* compared to a local single-node k8s cluster. We consider GKE as the best option if you don't have your own k8s cluster.
 
 Kubernetes Cluster | When to use     | How to run
 ------------|-----------------|-----------
@@ -84,8 +86,6 @@ Your own    | If you already have k8s cluster set up | [Configure Aptomi to use 
 Google Kubernetes Engine | Useful if you have a new Google account and free credits | [Configure Aptomi to use GKE](docs/k8s_gke.md)
 k8s / Minikube | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Minikube](docs/k8s_minikube.md)
 k8s / Docker For Mac | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Docker For Mac](docs/k8s_docker_for_mac.md)
-
-Having a powerful k8s cluster with good internet connection will definitely provide *better experience* compared to a single-node k8s local cluster. GKE would be one of the best options.
 
 ### Step #3: Running Examples
 
