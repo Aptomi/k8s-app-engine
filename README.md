@@ -1,3 +1,5 @@
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20Aptomi,%20intelligent%20service%20delivery%20platform%20for%20Kubernetes%20(http://aptomi.io)&url=https://github.com/Aptomi/aptomi&via=_aptomi&hashtags=kubernetes,docker,go,containers,microservices,helm,ops,dev,devops,cicd,continuousdelivery,software)
+
 ![Aptomi Logo](images/aptomi-logo-new.png)
 
 [![Release](https://img.shields.io/github/release/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/releases/latest)
