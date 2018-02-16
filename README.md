@@ -20,10 +20,17 @@ It also provides contextual **visibility** into teams and services, allowing to 
 ## Demo
 
 ### Short demo (5 minutes, Asciinema)
-[![asciicast](images/aptomi-asciinema.png)](https://asciinema.org/a/k8ZpQTazoSaDV24fiLbG7DfT9?speed=2)
+[![asciicast](images/aptomi-asciinema.png)](https://asciinema.org/a/163258)
 
 ### Detailed demo (13 minutes, Youtube)
 [![youtube](images/aptomi-demo-youtube.png)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
+
+### Asciinema Demos
+* Aptomi: installation - https://asciinema.org/a/163250
+* Aptomi: point to Kubernetes cluster - https://asciinema.org/a/163252
+* Aptomi: defining & running applications - https://asciinema.org/a/163258
+* Aptomi: updating a service instance - https://asciinema.org/a/163262
+* Aptomi: deleting service instances - https://asciinema.org/a/163269
 
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

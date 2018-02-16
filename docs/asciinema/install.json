@@ -1,0 +1,538 @@
+{
+  "version": 1,
+  "width": 181,
+  "height": 42,
+  "duration": 38.312913,
+  "command": null,
+  "title": null,
+  "env": {
+    "TERM": "xterm-256color",
+    "SHELL": "/bin/zsh"
+  },
+  "stdout": [
+    [
+      0.284051,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000133,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.210657,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:30:31\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      3.1e-05,
+      "\u001b[?1h\u001b=\u001b[?2004h"
+    ],
+    [
+      1.751394,
+      "# Start Aptomi server in a Docker container (adding -d to run in detached mode)"
+    ],
+    [
+      0.885089,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.9e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001027,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      5.5e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.174914,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:30:34\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      7.2e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "docker run -d -it --rm -p 27866:27866 aptomi/aptomi-test-install:xenial sh -c 'curl https://raw.githubusercontent.com/Aptomi/aptomi/master/scripts/aptomi_install.sh | bash && aptomi server'\u001b[K"
+    ],
+    [
+      1.692694,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.5e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000779,
+      "\u001b]2;docker run -d -it --rm -p 27866:27866 aptomi/aptomi-test-install:xenial sh -c\u0007\u001b]1;docker\u0007"
+    ],
+    [
+      0.33698,
+      "a0494764d76d3ee49cd0da31f5aa1be5811152032be4f1b14054e7c9b8ef5a87\r\n"
+    ],
+    [
+      0.37611,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000406,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.150643,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:30:47\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      2.2e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.4e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Verify it's up and running"
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001573,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000113,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.9e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.174828,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:30:54\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      9.7e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.6e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "docker logs"
+    ],
+    [
+      0.249479,
+      " "
+    ],
+    [
+      2.0,
+      "a0494764d76d3ee49cd0da31f5aa1be5811152032be4f1b14054e7c9b8ef5a87"
+    ],
+    [
+      1.432047,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      5.4e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001001,
+      "\u001b]2;docker logs a0494764d76d3ee49cd0da31f5aa1be5811152032be4f1b14054e7c9b8ef5a87\u0007\u001b]1;docker\u0007"
+    ],
+    [
+      0.07144,
+      "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\r\r\n                                 Dload  Upload   Total   Spent    Left  Speed\r\r\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100 18899  100 18899    0     0  61438      0 --:--:-- --:--:-- --:--:-- 61360\r\r\n\u001b[0;34m[2018-02-15 22:30:54] bash \u001b[0;31m|\u001b[0m Starting Aptomi install\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:54] bash \u001b[0;31m|\u001b[0m Checking environment\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:54] bash \u001b[0;31m|\u001b[0m -  Architecture=\u001b[0;92mamd64\u001b[0m, os=\u001b[0;92mlinux\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:54] bash \u001b[0;31m|\u001b[0m -  Aptomi Server: \u001b[0;93mnot installed\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:54] bash \u001b[0;31m|\u001b[0m -  Aptomi Client: \u001b[0;93mnot installed\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:54] bash \u001b[0;31m|\u001b[0m Checking the latest release on GitHub\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:55] bash \u001b[0;31m|\u001b[0m -  Latest Versio"
+    ],
+    [
+      4.1e-05,
+      "n: \u001b[0;92m0.1.10\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:30:55] bash \u001b[0;31m|\u001b[0m -  Downloading: https://github.com/Aptomi/aptomi/releases/download/v0.1.10/aptomi_0.1.10_linux_amd64.tar.gz\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:00] bash \u001b[0;31m|\u001b[0m -  Downloading: https://github.com/Aptomi/aptomi/releases/download/v0.1.10/aptomi_0.1.10_checksums.txt\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:01] bash \u001b[0;31m|\u001b[0m Installing/Updating Aptomi\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:01] bash \u001b[0;31m|\u001b[0m -  Unpacking aptomi_0.1.10_linux_amd64.tar.gz\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Installing Aptomi server: \u001b[0;92m/usr/local/bin/aptomi\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Installing Aptomi client: \u001b[0;92m/usr/local/bin/aptomictl\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Creating config for Aptomi server: \u001b[0;92m/etc/aptomi/config.yaml\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Creating built-in admin users for Aptomi server: \u001b[0;92m/etc/aptomi/user"
+    ],
+    [
+      6.3e-05,
+      "s_builtin.yaml\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Creating example users for Aptomi server: \u001b[0;92m/etc/aptomi/users_example.yaml\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Creating Aptomi server database directory: \u001b[0;92m/var/lib/aptomi\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Creating config for Aptomi client: \u001b[0;92m/root/.aptomi/config.yaml\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Copying examples into \u001b[0;92m/root/.aptomi/examples\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m Testing Aptomi\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Aptomi server: \u001b[0;92mOK\u001b[0m (which aptomi -> /usr/local/bin/aptomi)\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Running 'aptomi version': \u001b[0;92m0.1.10\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:02] bash \u001b[0;31m|\u001b[0m -  Starting 'aptomi server' for testing (PID: 111)\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:04] bash \u001b[0;31m|\u001b[0m -  Aptomi client: \u001b[0;"
+    ],
+    [
+      7e-05,
+      "92mOK\u001b[0m (which aptomictl -> /usr/local/bin/aptomictl)\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:04] bash \u001b[0;31m|\u001b[0m -  Running 'aptomictl version': \u001b[0;92m0.1.10\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:05] bash \u001b[0;31m|\u001b[0m -  Running 'aptomictl policy show': \u001b[0;92mOK\u001b[0m\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:05] bash \u001b[0;31m|\u001b[0m Done\u001b[0;37m\r\r\n\u001b[0;34m[2018-02-15 22:31:05] bash \u001b[0;31m|\u001b[0m -  Stopping aptomi server (PID: 111)\u001b[0;37m\r\r\n\u001b[37mDEBU\u001b[0m[0000] Config:\r\r\ndebug: true\r\r\napi:\r\r\n  schema: http\r\r\n  host: 0.0.0.0\r\r\n  port: 27866\r\r\n  apiprefix: api/v1\r\r\nui:\r\r\n  enable: true\r\r\ndb:\r\r\n  connection: /var/lib/aptomi/db.bolt\r\r\nhelm:\r\r\n  timeout: 0s\r\r\nusers:\r\r\n  ldap: []\r\r\n  file:\r\r\n  - /etc/aptomi/users_builtin.yaml\r\r\n  - /etc/aptomi/users_example.yaml\r\r\nsecretsdir: \"\"\r\r\nenforcer:\r\r\n  interval: 2s\r\r\n  disabled: false\r\r\n  noop: false\r\r\n  noopsleep: 0\r\r\ndomainadminoverrides: {}\r\r\nauth:\r\r\n  secret: \"\"\r\r\n \r\r\n\u001b[33mWARN\u001b[0m[0000] The auth.secret not specified in config, using insecure default one \r\r\n\u001b[34mINFO\u001b[0m[0000] (enfor"
+    ],
+    [
+      0.000229,
+      "ce-1) No changes, policy gen 1         \r\r\n\u001b[34mINFO\u001b[0m[0002] (enforce-2) No changes, policy gen 1         \r\r\n"
+    ],
+    [
+      0.003888,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      9.9e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.172435,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:31:01\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000295,
+      "\u001b[?1h\u001b=\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "c"
+    ],
+    [
+      0.047467,
+      "\bcl"
+    ],
+    [
+      0.072107,
+      "e"
+    ],
+    [
+      0.119707,
+      "a"
+    ],
+    [
+      0.088171,
+      "r"
+    ],
+    [
+      0.191132,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.4e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001097,
+      "\u001b]2;clear\u0007\u001b]1;clear\u0007"
+    ],
+    [
+      0.003723,
+      "\u001b[H\u001b[2J"
+    ],
+    [
+      0.000331,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.00011,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.4e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.158253,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:31:09\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      3e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      0.621438,
+      "# Install Aptomi client locally"
+    ],
+    [
+      0.935529,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.5e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000739,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      8e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.4e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.186641,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:31:10\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000126,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "curl https://raw.githubusercontent.com/Aptomi/aptomi/master/scripts/aptomi_install.sh | bash /dev/stdin --client-only"
+    ],
+    [
+      1.885196,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      5.2e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001144,
+      "\u001b]2;curl  | bash /dev/stdin --client-only\u0007\u001b]1;curl\u0007"
+    ],
+    [
+      0.008198,
+      "  % Total    % Received % Xferd  Average "
+    ],
+    [
+      3.2e-05,
+      "Speed   Time    Time     Time  Current\r\n                                 Dload  U"
+    ],
+    [
+      2e-05,
+      "pload   Total   Spent"
+    ],
+    [
+      1.8e-05,
+      "    Left  Speed\r\n"
+    ],
+    [
+      1.6e-05,
+      "\r  0     0    0 "
+    ],
+    [
+      1.5e-05,
+      "    0    0    "
+    ],
+    [
+      1.5e-05,
+      " 0      0      "
+    ],
+    [
+      1.5e-05,
+      "0 --:--:-- --:"
+    ],
+    [
+      2.2e-05,
+      "--:-- --:--:--     0"
+    ],
+    [
+      0.118725,
+      "\r100 18899  100 18899    0     0   "
+    ],
+    [
+      3.4e-05,
+      "155k      0 --:--:-- --:--:-- --:--:--  156k\r\n"
+    ],
+    [
+      0.018789,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m Starting Aptomi install\u001b[0;37m\r\n"
+    ],
+    [
+      0.012052,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m Checking environment\u001b[0;37m\r\n"
+    ],
+    [
+      0.012946,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m -  Architecture=\u001b[0;92mamd64\u001b[0m, os=\u001b[0;92mdarwin\u001b[0m\u001b[0;37m\r\n"
+    ],
+    [
+      0.009349,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m -  Aptomi Server: \u001b[0;93mnot installed\u001b[0m\u001b[0;37m\r\n"
+    ],
+    [
+      0.092616,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m -  Aptomi Client: \u001b[0;92m0.1.10\u001b[0m in /usr/local/bin/aptomictl\u001b[0;37m\r\n"
+    ],
+    [
+      0.002957,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m Checking the latest release on GitHub\u001b[0;37m\r\n"
+    ],
+    [
+      0.319805,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m -  Latest Version: \u001b[0;92m0.1.10\u001b[0m\u001b[0;37m\r\n"
+    ],
+    [
+      0.005192,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m -  Already downloaded. Using from cache: /Users/ralekseenkov/.aptomi-install-cache\u001b[0;37m\r\n"
+    ],
+    [
+      0.002736,
+      "\u001b[0;34m[2018-02-15 14:31:16] stdin \u001b[0;31m|\u001b[0m -  Downloading: https://github.com/Aptomi/aptomi/releases/download/v0.1.10/aptomi_0.1.10_checksums.txt\u001b[0;37m\r\n"
+    ],
+    [
+      0.961662,
+      "\u001b[0;34m[2018-02-15 14:31:17] stdin \u001b[0;31m|\u001b[0m Installing/Updating Aptomi\u001b[0;37m\r\n"
+    ],
+    [
+      0.002775,
+      "\u001b[0;34m[2018-02-15 14:31:17] stdin \u001b[0;31m|\u001b[0m -  Unpacking aptomi_0.1.10_darwin_amd64.tar.gz\u001b[0;37m\r\n"
+    ],
+    [
+      0.407827,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m -  Aptomi client is already at the required version. Skipping install\u001b[0;37m\r\n"
+    ],
+    [
+      0.007102,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m\u001b[0;93m -  Config for Aptomi client already exists. Keeping /Users/ralekseenkov/.aptomi/config.yaml\u001b[0;37m\r\n"
+    ],
+    [
+      0.00294,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m -  Copying examples into \u001b[0;92m/Users/ralekseenkov/.aptomi/examples\u001b[0m\u001b[0;37m\r\n"
+    ],
+    [
+      0.01387,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m Testing Aptomi\u001b[0;37m\r\n"
+    ],
+    [
+      0.00563,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m -  Aptomi client: \u001b[0;92mOK\u001b[0m (which aptomictl -> /usr/local/bin/aptomictl)\u001b[0;37m\r\n"
+    ],
+    [
+      0.097188,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m -  Running 'aptomictl version': \u001b[0;92m0.1.10\u001b[0m\u001b[0;37m\r\n"
+    ],
+    [
+      0.002803,
+      "\u001b[0;34m[2018-02-15 14:31:18] stdin \u001b[0;31m|\u001b[0m Done\u001b[0;37m\r\n"
+    ],
+    [
+      0.000604,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      7.3e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.9e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.122194,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:31:18\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      4.1e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.4e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Verify Aptomi client can talk to Aptomi server"
+    ],
+    [
+      0.228036,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      2.3e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000704,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000118,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.171436,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:31:24\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.8e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      2.6e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl version"
+    ],
+    [
+      1.074853,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000724,
+      "\u001b]2;aptomictl version\u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.113498,
+      "\u001b[37mDEBU\u001b[0m[0000] Config:\r\ndebug: true\r\noutput: text\r\napi:\r\n  schema: http\r\n  host: 127.0.0.1\r\n  port: 27866\r\n  apiprefix: api/v1\r\nhttp:\r\n  timeout: 15s\r\n \r\n\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      2.7e-05,
+      "\u001b[34mINFO\u001b[0m[0000] Client:                                      \r\nGit Version\tGit Commit                              \tBuild Date          \r\n0.1.10     \tc97a4f220edfb38461a2921d9b9cb006f457c52c\t2018-02-15T21:43:11Z\r\n"
+    ],
+    [
+      0.002204,
+      "\u001b[34mINFO\u001b[0m[0000] Server:                                      \r\nGit Version\tGit Commit                              \tBuild Date          \r\n0.1.10     \tc97a4f220edfb38461a2921d9b9cb006f457c52c\t2018-02-15T21:42:59Z\r\n"
+    ],
+    [
+      0.002979,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.00074,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.130501,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[148C\u001b[32m14:31:29\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      2.4e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      7.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?2004l\r\r\n"
+    ]
+  ]
+}
