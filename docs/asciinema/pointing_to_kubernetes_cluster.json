@@ -1,0 +1,438 @@
+{
+  "version": 1,
+  "width": 181,
+  "height": 42,
+  "duration": 37.001307,
+  "command": null,
+  "title": null,
+  "env": {
+    "TERM": "xterm-256color",
+    "SHELL": "/bin/zsh"
+  },
+  "stdout": [
+    [
+      0.288062,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000324,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.150646,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:47:12\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      3.5e-05,
+      "\u001b[?1h\u001b=\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Figure out which Kubernetes cluster you want to point Aptomi to"
+    ],
+    [
+      1.371087,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      6.6e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001193,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      4.4e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      0.000164,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.172775,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:47:17\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      2.8e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.6e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "kubectl config get-contexts"
+    ],
+    [
+      0.688341,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      2.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000776,
+      "\u001b]2;kubectl config get-contexts\u0007\u001b]1;kubectl\u0007"
+    ],
+    [
+      0.120522,
+      "CURRENT   NAME                 CLUSTER                                       AUTHINFO                                      NAMESPACE\r\n          demo-gke             gke_bright-torus-169502_us-west1-c_demo-gke   gke_bright-torus-169502_us-west1-c_demo-gke   east\r\n          docker-for-desktop   docker-for-desktop-cluster                    docker-for-desktop                            \r\n*         k8s-home-ctx         k8s-home                                "
+    ],
+    [
+      3.2e-05,
+      "      k8s-sergey-user                               \r\n"
+    ],
+    [
+      0.00248,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      8.7e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      3.5e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.146096,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:47:21\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      4.1e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.2e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Let’s tell Aptomi to use ‘k8s-home-ctx’"
+    ],
+    [
+      1.500916,
+      "\u001b[?1l\u001b>\u001b[?2004l"
+    ],
+    [
+      3.7e-05,
+      "\r\r\n"
+    ],
+    [
+      0.002305,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      4.7e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      0.000142,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.161969,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:47:54\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      6e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      8.8e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Log in using a built-in user in aptomictl. It will authenticate and cache the received token "
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      6.2e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000709,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      8.6e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      3.6e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.139321,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:48:58\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      4.8e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.3e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl login -u admin -p admin"
+    ],
+    [
+      1.004789,
+      "\u001b[?1l\u001b>\u001b[?2004l"
+    ],
+    [
+      3.7e-05,
+      "\r\r\n"
+    ],
+    [
+      0.001031,
+      "\u001b]2;aptomictl login -u admin -p admin\u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.142646,
+      "\u001b[37mDEBU\u001b[0m[0000] Config:\r\ndebug: true\r\noutput: text\r\napi:\r\n  schema: http\r\n  host: 127.0.0.1\r\n  port: 27866\r\n  apiprefix: api/v1\r\nhttp:\r\n  timeout: 15s\r\n \r\n\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      0.078456,
+      "\u001b[34mINFO\u001b[0m[0000] Current config saved to: /Users/ralekseenkov/.aptomi/config.yaml.bak \r\n"
+    ],
+    [
+      0.000175,
+      "\u001b[34mINFO\u001b[0m[0000] Config successfully updated with token       \r\n"
+    ],
+    [
+      0.002341,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000205,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.144061,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:49:03\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      2.7e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      0.000123,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Now, define ‘cluster-us-east’ in Aptomi (which will point to context ‘k8s-home-ctx’, namespace ‘east’)"
+    ],
+    [
+      0.729545,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000716,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      4.4e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      0.000104,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.16729,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:49:16\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      2.3e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      9.5e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl gen cluster -c k8s-home-ctx -n cluster-us-east -N east | aptomictl policy apply -f -"
+    ],
+    [
+      1.408494,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.002121,
+      "\u001b]2;aptomictl gen cluster -c k8s-home-ctx -n cluster-us-east -N east | aptomictl \u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.145806,
+      "\u001b[37mDEBU\u001b[0m[0000] Config:\r\ndebug: true\r\noutput: text\r\napi:\r\n  schema: http\r\n  host: 127.0.0.1\r\n  port: 27866\r\n  apiprefix: api/v1\r\nauth:\r\n  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJleHAiOjE1MjEzMjY5NTEsImlhdCI6MTUxODczNDk1MX0.RhHiKFZA6NUxCgA6tZ8xgVQuLN8xqrxtmiaKGaH3yPU\r\nhttp:\r\n  timeout: 15s\r\n \r\n\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n\u001b[34mINFO\u001b[0m[0000] Applying policy from stdin                   \r\n"
+    ],
+    [
+      0.000648,
+      "\u001b[37mDEBU\u001b[0m[0000] Config:\r\ndebug: true\r\noutput: text\r\napi:\r\n  schema: http\r\n  host: 127.0.0.1\r\n  port: 27866\r\n  apiprefix: api/v1\r\nauth:\r\n  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJleHAiOjE1MjEzMjY5NTEsImlhdCI6MTUxODczNDk1MX0.RhHiKFZA6NUxCgA6tZ8xgVQuLN8xqrxtmiaKGaH3yPU\r\nhttp:\r\n  timeout: 15s\r\n \r\n\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      0.023709,
+      "Policy Changes\tInstance Changes\r\nGen 1 -> 2    \t(none)          \r\n"
+    ],
+    [
+      0.002651,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.00019,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.162701,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:49:25\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      7.7e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      8.8e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Now, define another cluster ’cluster-us-west’ in Aptomi (which will point to context ‘k8s-home-ctx’, namespace ‘west’)"
+    ],
+    [
+      0.952071,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000667,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      6.4e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.8e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.171525,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:49:52\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      4.3e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.6e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl gen cluster -c k8s-home-ctx -n cluster-us-west -N west | aptomictl policy apply -f -"
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001401,
+      "\u001b]2;aptomictl gen cluster -c k8s-home-ctx -n cluster-us-west -N west | aptomictl \u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.153502,
+      "\u001b[37mDEBU\u001b[0m[0000] Config:\r\ndebug: true\r\noutput: text\r\napi:\r\n  schema: http\r\n  host: 127.0.0.1\r\n  port: 27866\r\n  apiprefix: api/v1\r\nauth:\r\n  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJleHAiOjE1MjEzMjY5NTEsImlhdCI6MTUxODczNDk1MX0.RhHiKFZA6NUxCgA6tZ8xgVQuLN8xqrxtmiaKGaH3yPU\r\nhttp:\r\n  timeout: 15s\r\n \r\n\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      0.008787,
+      "\u001b[37mDEBU\u001b[0m[0000] Config:\r\ndebug: true\r\noutput: text\r\napi:\r\n  schema: http\r\n  host: 127.0.0.1\r\n  port: 27866\r\n  apiprefix: api/v1\r\nauth:\r\n  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYWRtaW4iLCJleHAiOjE1MjEzMjY5NTEsImlhdCI6MTUxODczNDk1MX0.RhHiKFZA6NUxCgA6tZ8xgVQuLN8xqrxtmiaKGaH3yPU\r\nhttp:\r\n  timeout: 15s\r\n \r\n\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n\u001b[34mINFO\u001b[0m[0000] Applying policy from stdin                   \r\n"
+    ],
+    [
+      0.035806,
+      "Policy Changes\tInstance Changes\r\nGen 2 -> 3    \t(none)          \r\n"
+    ],
+    [
+      0.00745,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.194541,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:50:06\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      2.4e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      6.3e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Now Aptomi knows about ‘cluster-us-east’ & ‘cluster-us-west’ and will be able to deploy apps to these envs/clusters"
+    ],
+    [
+      0.517482,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      6.1e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001005,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000161,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      4.9e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.144418,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[146C\u001b[32m14:50:33\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      3.2e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      1.8e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?2004l\r\r\n"
+    ]
+  ]
+}

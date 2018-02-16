@@ -1,0 +1,1074 @@
+{
+  "version": 1,
+  "width": 181,
+  "height": 42,
+  "duration": 294.052553,
+  "command": null,
+  "title": null,
+  "env": {
+    "TERM": "xterm-256color",
+    "SHELL": "/bin/zsh"
+  },
+  "stdout": [
+    [
+      0.266968,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.162911,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m"
+    ],
+    [
+      6.7e-05,
+      "\u001b[K\u001b[144C\u001b[32m16:08:06\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000257,
+      "\u001b[?1h\u001b=\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Let’s say consumer Alice doesn’t need her service instance anymore"
+    ],
+    [
+      0.493948,
+      "\u001b[?1l\u001b>\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000727,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      3.7e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.142909,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:08:13\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000135,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      2.6e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      1.4721,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000804,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000292,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.161648,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:08:14\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000133,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      7.3e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# So she deletes her dependency on the service `twitter_stats`"
+    ],
+    [
+      0.196838,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.5e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000907,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000124,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      6.2e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.165852,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:08:23\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.8e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.9e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl login -u alice -p alice"
+    ],
+    [
+      0.578671,
+      "\u001b[?1l\u001b>\u001b[?2004l"
+    ],
+    [
+      4.8e-05,
+      "\r\r\n"
+    ],
+    [
+      0.000824,
+      "\u001b]2;aptomictl login -u alice -p alice\u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.116265,
+      "\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      0.082427,
+      "\u001b[34mINFO\u001b[0m[0000] Current config saved to: /Users/ralekseenkov/.aptomi/config.yaml.bak \r\n"
+    ],
+    [
+      5.7e-05,
+      "\u001b[34mINFO\u001b[0m[0000] Config successfully updated with token       \r\n"
+    ],
+    [
+      0.002396,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000164,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.145194,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:08:39\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      9.1e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml"
+    ],
+    [
+      1.246147,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.2e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000764,
+      "\u001b]2;aptomictl policy delete --wait -f \u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.150284,
+      "\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      4.9e-05,
+      "\u001b[34mINFO\u001b[0m[0000] Applying policy from:                        \r\n"
+    ],
+    [
+      4.2e-05,
+      "\u001b[34mINFO\u001b[0m[0000]   [*] /Users/ralekseenkov/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml \r\n"
+    ],
+    [
+      0.095231,
+      "Policy Changes\tInstance Changes                                  \r\nGen 10 -> 11  \t[-] cluster-us-west#main#twitter_stats#stage#Alice\r\n              \t\t -> analytics_pipeline, tweepub, tweetics, tweeviz\r\nWaiting for updated policy to be applied..."
+    ],
+    [
+      2.0,
+      "\r\n[Applying changes]\r\n"
+    ],
+    [
+      1.002156,
+      "  [16/45] [======================>---------------------------------------------]  36%   Time: 0s\r\n"
+    ],
+    [
+      1.000172,
+      "\u001b[2K\u001b[1A  [16/45] [======================>---------------------------------------------]  36%   Time: 0s\r\n"
+    ],
+    [
+      1.001372,
+      "\u001b[2K\u001b[1A  [16/45] [======================>---------------------------------------------]  36%   Time: 0s\r\n"
+    ],
+    [
+      1.000314,
+      "\u001b[2K\u001b[1A  [16/45] [======================>---------------------------------------------]  36%   Time: 0s\r\n"
+    ],
+    [
+      1.004695,
+      "\u001b[2K\u001b[1A  [18/45] [==========================>-----------------------------------------]  40%   Time: 6s\r\n"
+    ],
+    [
+      1.004856,
+      "\u001b[2K\u001b[1A  [18/45] [==========================>-----------------------------------------]  40%   Time: 6s\r\n"
+    ],
+    [
+      1.004957,
+      "\u001b[2K\u001b[1A  [20/45] [=============================>--------------------------------------]  44%   Time: 8s\r\n"
+    ],
+    [
+      0.005537,
+      "\u001b[2K\u001b[1A  [45/45] [====================================================================] 100%   Time: 12s\r\nSuccess! Revision 11 created and applied\r\n"
+    ],
+    [
+      0.003089,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000149,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.140744,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:09:00\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      9.2e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.7e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      2.9e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.002821,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      2.8e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      1.9e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.163496,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:09:11\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      7e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4.4e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      0.338732,
+      "kubectl -n west get pods"
+    ],
+    [
+      0.111729,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      2.5e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000645,
+      "\u001b]2;kubectl -n west get pods\u0007\u001b]1;kubectl\u0007"
+    ],
+    [
+      0.358711,
+      "NAME                                                              READY     STATUS        RESTARTS   AGE\r\nhdfs-datanode-main-hdfs-stage-hdfs-0                              1/1       Running       0          54m\r\nhdfs-namenode-main-hdfs-stage-hdfs-0                              1/1       Running       0          54m\r\nkafka-main-kafka-stage-kafka-0                                    1/1       Running       2          55m\r\nspark-master-main-spark-stage-spark-0-d969b75b9-sz9p9"
+    ],
+    [
+      3e-05,
+      "             1/1       Running       0          54m\r\nspark-worker-main-spark-stage-spark-7b4899ff97-vrg6v              1/1       Running       0          54m\r\ntweepub-fake-main-twitter-stats-stage-alice-tweepub-9f6499l79jl   1/1       Terminating   8          54m\r\ntweepub-fake-main-twitter-stats-stage-bob-tweepub-7bccdd7fcck9g   1/1       Running       7          54m\r\ntweetics-main-twitter-stats-stage-bob-tweetics-68cbf5d974-rgm6k   1/1       Running       0          54m\r\ntweeviz-main-twitter-stats-stage-alice-tweeviz-68484b9d49-nwbqb   1/1       Terminating   0          54m"
+    ],
+    [
+      1.5e-05,
+      "\r\ntweeviz-main-twitter-stats-stage-bob-tweeviz-75674b9594-qd7g9     1/1       Running       0          54m\r\nzk-main-zookeeper-stage-zookeeper-0                               "
+    ],
+    [
+      1.6e-05,
+      "1/1       Running       0          54m\r\n"
+    ],
+    [
+      0.005091,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000196,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.188346,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:09:12\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.0001,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      6.9e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000722,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000134,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      3.9e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.171297,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:09:17\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      3e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.5e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# You can see that Alice’s instances in staging are being terminated"
+    ],
+    [
+      0.653187,
+      "\u001b[?1l\u001b>\u001b[?2004l"
+    ],
+    [
+      2.7e-05,
+      "\r\r\n"
+    ],
+    [
+      0.000656,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      6.9e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      3e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.175754,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:09:44\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000102,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Bob’s `twitter_stats` instance is still running. And Aptomi knows `analytics_pipeline` instance still needs to be around because Bob is still using it\u001b[K"
+    ],
+    [
+      1.361831,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000884,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      4.9e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      3.6e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.142945,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:11:18\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      9.5e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4.2e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.003667,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      9.6e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.9e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.165773,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:11:35\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      9.8e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      0.11226,
+      "kubectl -n west get pods"
+    ],
+    [
+      0.672107,
+      "\u001b[?1l\u001b>\u001b[?2004l"
+    ],
+    [
+      4.8e-05,
+      "\r\r\n"
+    ],
+    [
+      0.000919,
+      "\u001b]2;kubectl -n west get pods\u0007\u001b]1;kubectl\u0007"
+    ],
+    [
+      0.39183,
+      "NAME                                                              READY     STATUS    RESTARTS   AGE\r\nhdfs-datanode-main-hdfs-stage-hdfs-0                              1/1       Running   0          57m\r\nhdfs-namenode-main-hdfs-stage-hdfs-0                              1/1       Running   0          57m\r\nkafka-main-kafka-stage-kafka-0                                    1/1       Running   2          57m\r\nspark-master-main-spark-stage-spark-0-d969b75b9-sz9p9             1/1       "
+    ],
+    [
+      3.1e-05,
+      "Running   0          57m\r\nspark-worker-main-spark-stage-spark-7b4899ff97-vrg6v              1/1       Running   0          57m\r\ntweepub-fake-main-twitter-stats-stage-bob-tweepub-7bccdd7fcck9g   1/1       Running   8          56m\r\ntweetics-main-twitter-stats-stage-bob-tweetics-68cbf5d974-rgm6k   1/1       Running   0          56m\r\ntweeviz-main-twitter-stats-stage-bob-tweeviz-75674b9594-qd7g9     1/1       Running   0          56m\r\nzk-main-zookeeper-stage-zookeeper-0                               1/1       Running   0          57m\r\n"
+    ],
+    [
+      0.005014,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000254,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.150649,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:11:36\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.4e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      2.9e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      1.613004,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      6.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001914,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000137,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.8e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.168717,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:11:38\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.2e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.4e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# Now, let’s say Bob deletes his dependency as well"
+    ],
+    [
+      0.182358,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000965,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000159,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      4.4e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.14102,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:12:11\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000208,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      2.9e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl login -u bob -p bob"
+    ],
+    [
+      0.135746,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.9e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001045,
+      "\u001b]2;aptomictl login -u bob -p bob\u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.098555,
+      "\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      0.084815,
+      "\u001b[34mINFO\u001b[0m[0000] Current config saved to: /Users/ralekseenkov/.aptomi/config.yaml.bak \r\n"
+    ],
+    [
+      5.7e-05,
+      "\u001b[34mINFO\u001b[0m[0000] Config successfully updated with token       \r\n"
+    ],
+    [
+      0.004065,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.164464,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:12:15\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000121,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml"
+    ],
+    [
+      1.650639,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.9e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.001058,
+      "\u001b]2;aptomictl policy delete --wait -f \u0007\u001b]1;aptomictl\u0007"
+    ],
+    [
+      0.135828,
+      "\u001b[34mINFO\u001b[0m[0000] Using config file: /Users/ralekseenkov/.aptomi/config.yaml \r\n"
+    ],
+    [
+      4.9e-05,
+      "\u001b[34mINFO\u001b[0m[0000] Applying policy from:                        \r\n"
+    ],
+    [
+      3.1e-05,
+      "\u001b[34mINFO\u001b[0m[0000]   [*] /Users/ralekseenkov/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml \r\n"
+    ],
+    [
+      0.093199,
+      "Policy Changes\tInstance Changes                                  \r\nGen 11 -> 12  \t[-] cluster-us-west#main#analytics_pipeline#stage \r\n              \t\t -> hdfs, kafka, spark                            \r\n              \t[-] cluster-us-west#main#hdfs#stage               \r\n              \t\t -> hdfs                                          \r\n              \t[-] cluster-us-west#main#kafka#stage              \r\n              \t\t -> kafka, zookeeper                              \r\n              \t[-] cluster-us-west#main#spark#stage              \r\n              \t\t -> spark, zookeeper                              \r\n              \t[-] cluster-us-west#main#twitter_stats#stage#Bob  \r\n              \t\t -> analytics_pipeline, tweepub, tweetics, tweeviz\r\n              \t[-] cluster-us-west#main#zookeeper#stage          \r\n              \t\t -> zookeeper                                     \r\nWaiting for updated policy to be applied..."
+    ],
+    [
+      2.0,
+      "\r\n[Applying changes]\r\n"
+    ],
+    [
+      1.000319,
+      "  [8/59] [=======>------------------------------------------------------------]  14%   Time: 0s\r\n"
+    ],
+    [
+      1.001044,
+      "\u001b[2K\u001b[1A  [8/59] [=======>------------------------------------------------------------]  14%   Time: 0s\r\n"
+    ],
+    [
+      1.00136,
+      "\u001b[2K\u001b[1A  [8/59] [=======>------------------------------------------------------------]  14%   Time: 0s\r\n"
+    ],
+    [
+      1.000709,
+      "\u001b[2K\u001b[1A  [10/59] [=========>----------------------------------------------------------]  17%   Time: 8s\r\n"
+    ],
+    [
+      1.00051,
+      "\u001b[2K\u001b[1A  [10/59] [=========>----------------------------------------------------------]  17%   Time: 8s\r\n"
+    ],
+    [
+      1.000485,
+      "\u001b[2K\u001b[1A  [10/59] [=========>----------------------------------------------------------]  17%   Time: 8s\r\n"
+    ],
+    [
+      1.000316,
+      "\u001b[2K\u001b[1A  [20/59] [=====================>----------------------------------------------]  34%   Time: 2m16s\r\n"
+    ],
+    [
+      1.001343,
+      "\u001b[2K\u001b[1A  [20/59] [=====================>----------------------------------------------]  34%   Time: 2m16s\r\n"
+    ],
+    [
+      1.001254,
+      "\u001b[2K\u001b[1A  [20/59] [=====================>----------------------------------------------]  34%   Time: 2m16s\r\n"
+    ],
+    [
+      1.000831,
+      "\u001b[2K\u001b[1A  [28/59] [===============================>------------------------------------]  47%   Time: 2m54s\r\n"
+    ],
+    [
+      1.000174,
+      "\u001b[2K\u001b[1A  [28/59] [===============================>------------------------------------]  47%   Time: 2m54s\r\n"
+    ],
+    [
+      1.001446,
+      "\u001b[2K\u001b[1A  [32/59] [===================================>--------------------------------]  54%   Time: 2m56s\r\n"
+    ],
+    [
+      1.00096,
+      "\u001b[2K\u001b[1A  [32/59] [===================================>--------------------------------]  54%   Time: 2m56s\r\n"
+    ],
+    [
+      1.001308,
+      "\u001b[2K\u001b[1A  [32/59] [===================================>--------------------------------]  54%   Time: 2m56s\r\n"
+    ],
+    [
+      1.001469,
+      "\u001b[2K\u001b[1A  [32/59] [===================================>--------------------------------]  54%   Time: 2m56s\r\n"
+    ],
+    [
+      1.00031,
+      "\u001b[2K\u001b[1A  [34/59] [======================================>-----------------------------]  58%   Time: 3m34s\r\n"
+    ],
+    [
+      1.000776,
+      "\u001b[2K\u001b[1A  [34/59] [======================================>-----------------------------]  58%   Time: 3m34s\r\n"
+    ],
+    [
+      0.378392,
+      "\u001b[2K\u001b[1A  [59/59] [====================================================================] 100%   Time: 3m36s\r\nSuccess! Revision 12 created and applied\r\n"
+    ],
+    [
+      0.003213,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000125,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.16238,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:16:05\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.0001,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      2.5e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      1.762589,
+      "\u001b[?1l\u001b>\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.003446,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      3.1e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.170502,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:16:06\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.1e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      0.674076,
+      "kubectl -n west get pods"
+    ],
+    [
+      0.362716,
+      "\u001b[?1l\u001b>\u001b[?2004l"
+    ],
+    [
+      3.9e-05,
+      "\r\r\n"
+    ],
+    [
+      0.000961,
+      "\u001b]2;kubectl -n west get pods\u0007\u001b]1;kubectl\u0007"
+    ],
+    [
+      0.321013,
+      "NAME                                                              READY     STATUS        RESTARTS   AGE\r\ntweepub-fake-main-twitter-stats-stage-bob-tweepub-7bccdd7fcck9g   1/1       Terminating   8          1h\r\n"
+    ],
+    [
+      0.004882,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000115,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.155707,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:16:08\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.6e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      5.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      0.000673,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000484,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000116,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      3.4e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.179049,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:16:11\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      6.2e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4.1e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# You can see that Aptomi terminated Bob’s instance of `twitter_stats`"
+    ],
+    [
+      0.496031,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4.8e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000852,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000117,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      4.5e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.144615,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:16:36\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      6e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4.2e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# But `analytics_pipeline` service has no more consumers as both dependencies have been deleted. So Aptomi terminated it as well"
+    ],
+    [
+      0.206492,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      4e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000886,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      7e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.141832,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:18:03\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      8.8e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      7.2e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "kubectl -n west get pods"
+    ],
+    [
+      0.100622,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.003369,
+      "\u001b]2;kubectl -n west get pods\u0007\u001b]1;kubectl\u0007"
+    ],
+    [
+      0.234601,
+      "No resources found.\r\n"
+    ],
+    [
+      0.003691,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000269,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.160225,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:18:15\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      6.9e-05,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      4.5e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      0.970785,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      2.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000522,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      9.1e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.3e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.168778,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:18:16\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000195,
+      "\u001b[?1h\u001b=\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# So staging environment is now completely clean"
+    ],
+    [
+      0.148727,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.7e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000834,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      0.000153,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.159174,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:18:44\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000139,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      8.8e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "# In the future, you will be able to specify operational policies around services (e.g. garbage collect/terminate unused services right away, terminate after 30 days, or don’t terminate at all)\u001b[K"
+    ],
+    [
+      1.112169,
+      "\u001b[?1l\u001b>"
+    ],
+    [
+      3.6e-05,
+      "\u001b[?2004l\r\r\n"
+    ],
+    [
+      0.000794,
+      "\u001b[1m\u001b[7m%\u001b[27m\u001b[1m\u001b[0m                                                                                                                                                                                    \r \r"
+    ],
+    [
+      7.8e-05,
+      "\u001b]2;ralekseenkov@MacBook-Pro-4: ~/go/src/github.com/Aptomi/aptomi\u0007"
+    ],
+    [
+      2.5e-05,
+      "\u001b]1;..Aptomi/aptomi\u0007"
+    ],
+    [
+      0.175445,
+      "\r\u001b[0m\u001b[27m\u001b[24m\u001b[J\u001b[35m[aptomi] \u001b[00m\u001b[K\u001b[144C\u001b[32m16:20:16\u001b[00m \u001b[35m ☁  \u001b[31mmaster\u001b[33m ☂\u001b[00m\u001b[00m\u001b[31m ✖\u001b[36m ✚\u001b[36m ✭\u001b[00m\u001b[00m\u001b[171D"
+    ],
+    [
+      0.000135,
+      "\u001b[?1h\u001b="
+    ],
+    [
+      3.7e-05,
+      "\u001b[?2004h"
+    ],
+    [
+      2.0,
+      "\u001b[?2004l\r\r\n"
+    ]
+  ]
+}
