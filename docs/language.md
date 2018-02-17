@@ -22,7 +22,7 @@
 
 # Concepts
 * A single Aptomi instance is called Aptomi **domain**
-* Within a domain, there are multiple **namespaces** and there is always a special `system` namespace
+* There can be multiple **namespaces** within a domain, including a special `system` namespace
 * Namespaces can have different **access rights** for different groups of users. So one typical use of namespaces would be to
   allocate one namespace (or a set of namespaces) for each team within an organization, where the corresponding team will have
   full control over defining its applications
@@ -110,11 +110,11 @@ Service can have also have labels attached to it. You can refer to those labels 
 
 When defining a **code component**, you must define the following fields:
 * `name` - component name unique within the service
-* `code` - section which describes application component that needs to be instantiated and manager
+* `code` - section which describes application component that needs to be instantiated and managed
     * `type` - right now the only supported code type is [aptomi/code/kubernetes-helm](https://helm.sh/), which is Helm package manager for k8s. But Aptomi is completely
       pluggable and allows developers to use their favorite framework for packaging applications. It can support applications manifests defined via ksonnet, k8s YAMLs and more.
 * `discovery` - every component can expose arbitrary discovery information about itself in a form of labels to other components.
-* `dependencies` - other components within the service, which current component depends on. It helps Aptomi to process discovery information and propagage parameters
+* `dependencies` - other components within the service, which current component depends on. It helps Aptomi to process discovery information and propagate parameters
   in the right order, as well as controls correct instantiation/destruction order of application components.
 
 For example, here is how you would define an application which consists of Wordpress and MySQL database:
@@ -153,10 +153,10 @@ For example, here is how you would define an application which consists of Wordp
         url: "mysql-{{ .Discovery.instance }}:3306"
 ```
 
-For Helm plugin, you are required to the following parameters under "params" section in `code`, while the rest of the parameters will be passed "as is" to the instantiated Helm chart:
+For Helm plugin, you need to provide the following parameters under "params" section in `code`, while the rest of the parameters will be passed "as is" to the instantiated Helm chart:
 * `chartRepo` - URL of repository with Helm charts
 * `chartName` - name of the Helm chart
-* `chartVersion` - version of the Helm chart
+* `chartVersion` - *(optional)* version of the Helm chart. if not specified, the latest version will be used
 * `cluster` - name of the cluster to which the code will be deployed
 
 Every parameter under "params" section can be a fixed value or an expression which can refer to various labels.
@@ -167,8 +167,9 @@ Once a service is defined, it has to be exposed through a [contract](https://god
 Contract represents a consumable service. When someone wants to consume an instance of a service, it has to be done through a contract. When
 a service depends on another service instance, this dependency has to be dependency on a contract as well.
 
-Contracts allow you to control how service will be allocated for consumers based on a certain criteria. It can resolve to different
-service instances based on type of the environment (e.g. 'dev' vs. 'prod'), based on properties of a consumer (e.g. which 'team' consumer belongs to),
+Contract has a number of contexts, which define different implementations of that contract. Each context allows you to define specific implementation and criteria under which it will be picked.
+It means that a contract will be fulfilled via one of the defined contexts at runtime, based on the defined criteria. Different parameters/services can be picked based on
+based on type of the environment (e.g. 'dev' vs. 'prod'), based on properties of a consumer (e.g. which 'team' consumer belongs to),
 based on time of the day, or any other labels/properties. It can also control whether the service instance will be dedicated or shared.
 
 For example, a team responsible for running databases can define a contract for "sql-database" and its specific implementations:
@@ -262,7 +263,7 @@ When fulfilling a contract, Aptomi will process all contexts within that contrac
 [Cluster](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Cluster) is an entity which defines a cluster in Aptomi where containers can be deployed. Even though Aptomi is focused on k8s, it's designed to support
 multiple cluster types (e.g. Docker Swarm, Apache Mesos and others). Cluster type is defined via `type` attribute.
 
-Clusters are global to Aptomi and must always be defined in `system` namespace.
+Clusters are global to Aptomi and must be always defined in `system` namespace.
 
 A typical definition of k8s cluster looks like:
 ```yaml
@@ -278,7 +279,7 @@ A typical definition of k8s cluster looks like:
 
 ## Dependency
 
-Defining a service and a contract only publishes a service into Aptomi, but it does not trigger instantiation/deployment by itself.
+Defining a service and a contract only publishes a service into Aptomi, but it does not trigger instantiation/deployment of that service.
 In order to request an instance, one must create a [Dependency](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Dependency) object in Aptomi.
 
 When creating a dependency, one must specify `who` (or `what`) is making a request, which `contract` is being requested, and what set of initial labels is passed to Aptomi.
@@ -295,11 +296,11 @@ For example, here is how **Alice** would request a **wordpress**:
       label1: value1
 ```
 
-Since all of the rules in Aptomi are label-based, you can create a policy to make intelligent decisions based on the initial set of labels being passed, as well as transform those labels.
+Since Aptomi rules all label-based, you can create a policy to make intelligent decisions based on the initial set of labels being passed, as well as transform those labels.
 
 ## Rule
 
-A lot of intelligence in Aptomi comes from ability to define [rules](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Rule), which get evaluated in runtime during state enforcement.
+One of the most powerful features of Aptomi is ability to define [rules](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Rule), which get evaluated in runtime during state enforcement.
 
 Rules can be **global** (defined in `system` namespace) as well as **local** (defined within a given namespace).
 
@@ -314,7 +315,7 @@ A rule has a criteria and an action. If a criteria evaluates to true, then an ac
 A typical and most commonly used rule action in Aptomi is to change a label. For example, by changing a system-level label called `cluster`, you can control into which cluster the code will get deployed to. Deploying
 code without setting `cluster` label will result in an error, because Aptomi won't have a way of knowing where the code should be deployed.
 
-For example, this will rule will tell Aptomi to always deploy services with **blog** label to cluster **cluster-us-east**:
+For example, this rule will tell Aptomi to always deploy services with **blog** label to cluster **cluster-us-east**:
 ```yaml
 - kind: rule
   metadata:
@@ -350,7 +351,7 @@ Here is another rule that will not allow users from **dev** team to instantiate 
 Aptomi policy processing is based entirely on labels. When a dependency is requested, an initial set of labels is formed by combining labels of the requester (e.g. user labels) and a given dependency. Throughout processing,
 these labels can be transformed using `change-labels` directives and accessed at any time in expressions and templates.
 
-So, for example, one way of leveraging this would be to:
+One way of leveraging this, for example, would be to:
 * define a service, contract and two contexts
 * set label 'replicas' to value '1' in dev context
 * set label 'replicas' to value '3' in production context
@@ -387,7 +388,7 @@ Here is how one would use [change-labels](https://godoc.org/github.com/Aptomi/ap
 ```
 
 ## Expressions
-All expressions used in Aptomi should follow the syntax of [Knetic/govaluate](https://github.com/Knetic/govaluate) and must evaluate to bool.
+All expressions used in Aptomi should follow [Knetic/govaluate](https://github.com/Knetic/govaluate) syntax and must evaluate to bool.
 
 You can reference the following variables in expressions:
 * labels - you can reference any label by specifying its name, e.g. `team` will return a value of a label with name 'team'
@@ -407,7 +408,7 @@ If a section is absent, it will be skipped. So it's perfectly fine to have a cri
 It's also possible to have an empty criteria without any clauses (or even omit `criteria` construct all together). In this case an empty criteria is always considered to be 'true'.
 
 ## Templates
-All text templates used in Aptomi should follow the syntax of [text/template](https://golang.org/pkg/text/template/) and must evaluate to string.
+All text templates used in Aptomi should follow [text/template](https://golang.org/pkg/text/template/) syntax and must evaluate to string.
 
 The most common use of text templates in Aptomi is code & discovery parameters inside a service:
 * **code parameters** - allow to pass parameters into Helm charts, substituting variables with calculated label values
