@@ -30,6 +30,9 @@ tools/test-install.sh
 
 tools/publish-docker.sh
 
+docker rmi $(docker images --filter "dangling=true" -q --no-trunc) || true
+docker rmi $(docker images | grep "none" | awk '/ / { print $3 }') || true
+
 tools/publish-charts.sh
 
 popd
