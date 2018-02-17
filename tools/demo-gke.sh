@@ -35,7 +35,6 @@ function main() {
 
     # TODO(slukjanov): should we load params from config file?
     # defaults
-    k8s_version=1.8.7-gke.0
     disk_size=100
 
     cluster_name=demo-gke
@@ -61,7 +60,7 @@ function main() {
         gke_firewall_create $firewall_rules_name "$firewall_rules"
 
         # create big cluster
-        gke_cluster_create $cluster_name $cluster_region $k8s_version $disk_size $cluster_flavor $cluster_size
+        gke_cluster_create $cluster_name $cluster_region $disk_size $cluster_flavor $cluster_size
 
         # wait until cluster is alive and setup
         gke_cluster_wait_alive $cluster_name $cluster_region
@@ -164,10 +163,9 @@ function gke_cluster_exists() {
 function gke_cluster_create() {
     name="$1"
     zone="$2"
-    version="$3"
-    disk_size="$4"
-    machine_type="$5"
-    num_nodes="$6"
+    disk_size="$3"
+    machine_type="$4"
+    num_nodes="$5"
 
     if gke_cluster_exists $name $zone ; then
         log "Cluster $(cluster_log_name) already exists, run cleanup first to re-create"
@@ -176,7 +174,6 @@ function gke_cluster_create() {
 
         gke create \
             $name \
-            --cluster-version $version \
             --zone $zone \
             --disk-size $disk_size \
             --machine-type $machine_type \
