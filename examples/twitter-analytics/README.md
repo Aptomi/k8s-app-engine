@@ -109,3 +109,20 @@ application in [Twitter Application Management Console](https://apps.twitter.com
     ```
 Now if you open HTTP endpoint for *production* instance of `tweeviz`, you will be able to see hash tag statistics calculated over real-time messages retrieved over Twitter Streaming API.
 
+# Terminating all deployed services
+
+To delete all deployed instances of `twitter_stats` and `analytics_pipeline`, you must delete the corresponding dependencies which triggered their instantiation and Aptomi will handle the rest:
+```
+aptomictl login -u alice -p alice
+aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
+aptomictl login -u bob -p bob
+aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
+aptomictl login -u john -p john
+aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts.yaml
+```
+
+Or, you can do this manually via `kubectl`:
+```
+kubectl delete ns west
+kubectl delete ns east
+```
