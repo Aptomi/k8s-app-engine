@@ -33,6 +33,8 @@ type MockDeployPlugin struct {
 	SleepTime time.Duration
 }
 
+var _ DeployPlugin = &MockDeployPlugin{}
+
 // Cleanup does nothing
 func (p *MockDeployPlugin) Cleanup() error {
 	return nil
@@ -76,6 +78,8 @@ type MockDeployPluginFailComponents struct {
 	// FailAsPanic, if set to true, will panic on matching components. Otherwise it will return an error
 	FailAsPanic bool
 }
+
+var _ DeployPlugin = &MockDeployPluginFailComponents{}
 
 // Cleanup does nothing
 func (p *MockDeployPluginFailComponents) Cleanup() error {
@@ -136,6 +140,8 @@ func (p *MockDeployPluginFailComponents) Endpoints(cluster *lang.Cluster, deploy
 // MockPostProcessPlugin is a mock post-processing plugin which does nothing
 type MockPostProcessPlugin struct {
 }
+
+var _ PostProcessPlugin = &MockPostProcessPlugin{}
 
 // Process does nothing
 func (p *MockPostProcessPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
