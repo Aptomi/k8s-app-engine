@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"sync"
 )
@@ -13,6 +14,7 @@ const (
 type defaultRegistry struct {
 	mu sync.Mutex
 
+	config             config.Plugins
 	clusterTypes       map[string]ClusterPluginConstructor
 	codeTypes          map[string]CodePluginConstructor
 	postProcessPlugins []PostProcessPlugin
@@ -23,8 +25,9 @@ type defaultRegistry struct {
 }
 
 // NewRegistry creates a registry of aptomi engine plugins
-func NewRegistry(clusterTypes map[string]ClusterPluginConstructor, codeTypes map[string]CodePluginConstructor, postProcessPlugins []PostProcessPlugin) Registry {
+func NewRegistry(config config.Plugins, clusterTypes map[string]ClusterPluginConstructor, codeTypes map[string]CodePluginConstructor, postProcessPlugins []PostProcessPlugin) Registry {
 	return &defaultRegistry{
+		config:             config,
 		clusterTypes:       clusterTypes,
 		codeTypes:          codeTypes,
 		postProcessPlugins: postProcessPlugins,
@@ -44,7 +47,11 @@ func (registry *defaultRegistry) ForCluster(cluster *lang.Cluster) (ClusterPlugi
 
 	clusterPlugin, exist := registry.clusterPlugins[cluster.Name]
 	if !exist {
-		clusterPlugin = constructor(cluster)
+		var err error
+		clusterPlugin, err = constructor(cluster, registry.config)
+		if err != nil {
+			return nil, err
+		}
 		registry.clusterPlugins[cluster.Name] = clusterPlugin
 	}
 
@@ -69,7 +76,10 @@ func (registry *defaultRegistry) ForCodeType(cluster *lang.Cluster, codeType str
 
 	codePlugin, exist := registry.codePlugins[key]
 	if !exist {
-		codePlugin = constructor(clusterPlugin)
+		codePlugin, err = constructor(clusterPlugin, registry.config)
+		if err != nil {
+			return nil, err
+		}
 		registry.codePlugins[key] = codePlugin
 	}
 
