@@ -102,7 +102,7 @@ func (server *Server) enforce() error {
 	}
 
 	if server.cfg.Enforcer.Noop {
-		log.Infof("(enforce-%d) Applying changes in noop mode (sleep per action = %d seconds)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
+		log.Infof("(enforce-%d) Applying changes in noop mode (sleep per action = %s)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
 	} else {
 		log.Infof("(enforce-%d) Applying changes", server.enforcementIdx)
 	}
