@@ -16,7 +16,7 @@ type defaultRegistry struct {
 
 	config             config.Plugins
 	clusterTypes       map[string]ClusterPluginConstructor
-	codeTypes          map[string]CodePluginConstructor
+	codeTypes          map[string]map[string]CodePluginConstructor
 	postProcessPlugins []PostProcessPlugin
 
 	// Cached plugins instances
@@ -25,7 +25,7 @@ type defaultRegistry struct {
 }
 
 // NewRegistry creates a registry of aptomi engine plugins
-func NewRegistry(config config.Plugins, clusterTypes map[string]ClusterPluginConstructor, codeTypes map[string]CodePluginConstructor, postProcessPlugins []PostProcessPlugin) Registry {
+func NewRegistry(config config.Plugins, clusterTypes map[string]ClusterPluginConstructor, codeTypes map[string]map[string]CodePluginConstructor, postProcessPlugins []PostProcessPlugin) Registry {
 	return &defaultRegistry{
 		config:             config,
 		clusterTypes:       clusterTypes,
@@ -64,7 +64,11 @@ func (registry *defaultRegistry) ForCodeType(cluster *lang.Cluster, codeType str
 		return nil, err
 	}
 
-	constructor, exist := registry.codeTypes[codeType]
+	clusterCodeTypes, exist := registry.codeTypes[cluster.Type]
+	if !exist {
+		return nil, fmt.Errorf("configured code plugins doesn't support cluster type: %s", cluster.Type)
+	}
+	constructor, exist := clusterCodeTypes[codeType]
 	if !exist {
 		return nil, fmt.Errorf("no plugin found for code type: %s", codeType)
 	}
