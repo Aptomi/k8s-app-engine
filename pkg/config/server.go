@@ -38,7 +38,7 @@ type Enforcer struct {
 	Interval  time.Duration `validate:"-"`
 	Disabled  bool          `validate:"-"`
 	Noop      bool          `validate:"-"`
-	NoopSleep int           `validate:"-"`
+	NoopSleep time.Duration `validate:"-"`
 }
 
 // ServerAuth represents server auth config
