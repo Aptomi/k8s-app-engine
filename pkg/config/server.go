@@ -8,7 +8,7 @@ type Server struct {
 	API                  API             `validate:"required"`
 	UI                   UI              `validate:"omitempty"` // if UI is not defined, then UI will not be started
 	DB                   DB              `validate:"required"`
-	Helm                 Helm            `validate:"required"`
+	Plugins              Plugins         `validate:"required"`
 	Users                UserSources     `validate:"required"`
 	SecretsDir           string          `validate:"omitempty,dir"` // secrets is not a first-class citizen yet, so it's not required
 	Enforcer             Enforcer        `validate:"required"`
@@ -25,11 +25,6 @@ type UserSources struct {
 // IsDebug returns true if debug mode enabled
 func (s Server) IsDebug() bool {
 	return s.Debug
-}
-
-// Helm represents configs for Helm plugin
-type Helm struct {
-	Timeout time.Duration
 }
 
 // DB represents configs for DB
