@@ -8,8 +8,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
+	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
+	"github.com/Aptomi/aptomi/pkg/plugin/fake"
 	"github.com/Aptomi/aptomi/pkg/plugin/helm"
+	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
@@ -107,18 +110,38 @@ func (server *Server) initStore() {
 
 func (server *Server) initPluginRegistryFactory() {
 	server.pluginRegistryFactory = func() plugin.Registry {
-		if server.cfg.Enforcer.Noop {
-			return &plugin.MockRegistry{
-				DeployPlugin:      &plugin.MockDeployPlugin{SleepTime: time.Second * time.Duration(server.cfg.Enforcer.NoopSleep)},
-				PostProcessPlugin: &plugin.MockPostProcessPlugin{},
+		clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
+		codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
+		postProcessPlugins := make([]plugin.PostProcessPlugin, 0)
+
+		if !server.cfg.Enforcer.Noop {
+			clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
+				return k8s.New(cluster, cfg)
 			}
+
+			codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
+			codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+				return helm.New(cluster, cfg)
+			}
+
+			// there are no post process plugins so far
+			// postProcessPlugins = append(postProcessPlugins, ...)
+		} else {
+			sleepTime := server.cfg.Enforcer.NoopSleep
+
+			clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
+				return fake.NewNoOpClusterPlugin(sleepTime), nil
+			}
+
+			codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
+			codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+				return fake.NewNoOpCodePlugin(sleepTime), nil
+			}
+
+			postProcessPlugins = append(postProcessPlugins, fake.NewNoOpPostProcessPlugin(sleepTime))
 		}
 
-		helmK8s := helm.NewPlugin(server.cfg.Helm)
-		return plugin.NewRegistry(
-			[]plugin.DeployPlugin{helmK8s},
-			[]plugin.PostProcessPlugin{helmK8s},
-		)
+		return plugin.NewRegistry(server.cfg.Plugins, clusterTypes, codeTypes, postProcessPlugins)
 	}
 }
 
