@@ -1,59 +1,22 @@
 package helm
 
-import (
-	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang"
-	"time"
-)
+import "fmt"
 
-// Config represents K8s/Helm plugin configuration
-type Config struct {
-	Namespace       string      `yaml:",omitempty"`
-	TillerNamespace string      `yaml:",omitempty"`
-	Local           bool        `yaml:",omitempty"`
-	Context         string      `yaml:",omitempty"`
-	KubeConfig      interface{} `yaml:",omitempty"` // it's just a kubeconfig, we don't need to parse it
+// ClusterConfig represents Kubernetes cluster configuration specific for Helm plugin
+type ClusterConfig struct {
+	TillerNamespace string `yaml:",omitempty"`
 }
 
-func (cache *clusterCache) initConfig(cluster *lang.Cluster) error {
-	cache.cluster = cluster
-
-	config := &Config{}
-	cache.config = config
-
-	err := cluster.ParseConfigInto(config)
+func (plugin *Plugin) parseClusterConfig() error {
+	clusterConfig := &ClusterConfig{}
+	err := plugin.cluster.ParseConfigInto(clusterConfig)
 	if err != nil {
-		return fmt.Errorf("error while parsing Helm plugin specific cluster config: %s", err)
+		err = fmt.Errorf("error while parsing helm specific config of cluster %s: %s", plugin.cluster.Name, err)
 	}
 
-	if config.Local && config.KubeConfig != nil {
-		return fmt.Errorf("kube-config can't be specified when using local type in cluster: %s", cluster.Name)
-	}
-
-	if config.KubeConfig != nil {
-		cache.kubeConfig, cache.namespace, err = initKubeConfig(config, cluster)
-	} else {
-		cache.kubeConfig, err = initLocalKubeConfig()
-	}
-	if err != nil {
-		return err
-	}
-
-	if cache.pluginConfig.Timeout == 0 {
-		cache.pluginConfig.Timeout = 10 * time.Second
-	}
-	cache.kubeConfig.Timeout = cache.pluginConfig.Timeout
-
-	if len(config.Namespace) > 0 {
-		cache.namespace = config.Namespace
-	}
-	if len(cache.namespace) == 0 {
-		cache.namespace = "default"
-	}
-
-	cache.tillerNamespace = "kube-system"
-	if len(config.TillerNamespace) > 0 {
-		cache.tillerNamespace = config.TillerNamespace
+	plugin.tillerNamespace = "kube-system"
+	if len(clusterConfig.TillerNamespace) > 0 {
+		plugin.tillerNamespace = clusterConfig.TillerNamespace
 	}
 
 	return nil
