@@ -37,7 +37,7 @@ var _ plugin.CodePlugin = &Plugin{}
 func New(clusterPlugin plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
 	kubePlugin, ok := clusterPlugin.(*k8s.Plugin)
 	if !ok {
-		return nil, fmt.Errorf("kube cluster plugin expected for helm code plugin creation but received: %t", clusterPlugin)
+		return nil, fmt.Errorf("kube cluster plugin expected for helm code plugin creation but received: %T", clusterPlugin)
 	}
 
 	return &Plugin{
