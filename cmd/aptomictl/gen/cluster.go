@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/plugin/helm"
+	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/tools/clientcmd"
@@ -28,14 +28,14 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				panic(fmt.Sprintf("one of local or context could be specified"))
 			}
 
-			var clusterConfig *helm.Config
+			var clusterConfig *k8s.ClusterConfig
 			var err error
 
 			if local {
 				if len(clusterName) == 0 {
 					clusterName = "local"
 				}
-				clusterConfig = &helm.Config{Local: true, Namespace: "default"}
+				clusterConfig = &k8s.ClusterConfig{Local: true, Namespace: "default"}
 			} else {
 				if len(clusterName) == 0 {
 					clusterName = sourceContext
@@ -77,17 +77,17 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 	return cmd
 }
 
-func handleKubeConfigCluster(sourceContext string) (*helm.Config, error) {
+func handleKubeConfigCluster(sourceContext string) (*k8s.ClusterConfig, error) {
 	kubeConfig, err := buildTempKubeConfigWith(sourceContext)
 	if err != nil {
 		return nil, fmt.Errorf("error while building temp kube config with context %s: %s", sourceContext, err)
 	}
 
-	clusterConfig := helm.Config{
+	clusterConfig := &k8s.ClusterConfig{
 		KubeConfig: kubeConfig,
 	}
 
-	return &clusterConfig, err
+	return clusterConfig, err
 }
 
 func buildTempKubeConfigWith(sourceContext string) (*interface{}, error) {
