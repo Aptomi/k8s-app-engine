@@ -48,14 +48,24 @@ func (plugin *Plugin) Create(deployName string, params util.NestedParameterMap, 
 		return err
 	}
 
-	content, ok := params["content"].(string)
+	kubeClient, err := plugin.kube.NewClient()
+	if err != nil {
+		return err
+	}
+
+	targetManifest, ok := params["manifest"].(string)
 	if !ok {
-		return fmt.Errorf("content is a mandatory parameter")
+		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
 	client := plugin.prepareClient(eventLog, deployName)
 
-	return client.Create(plugin.kube.Namespace, strings.NewReader(content), 42, false)
+	err = client.Create(plugin.kube.Namespace, strings.NewReader(targetManifest), 42, false)
+	if err != nil {
+		return err
+	}
+
+	return plugin.storeManifest(kubeClient, deployName, targetManifest)
 }
 
 func (plugin *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
@@ -64,8 +74,29 @@ func (plugin *Plugin) Update(deployName string, params util.NestedParameterMap, 
 		return err
 	}
 
-	// todo: implement me
-	return fmt.Errorf("kubernetes raw code plugin doesn't support updates yet")
+	kubeClient, err := plugin.kube.NewClient()
+	if err != nil {
+		return err
+	}
+
+	currentManifest, err := plugin.loadManifest(kubeClient, deployName)
+	if err != nil {
+		return err
+	}
+
+	targetManifest, ok := params["manifest"].(string)
+	if !ok {
+		return fmt.Errorf("manifest is a mandatory parameter")
+	}
+
+	client := plugin.prepareClient(eventLog, deployName)
+
+	err = client.Update(plugin.kube.Namespace, strings.NewReader(currentManifest), strings.NewReader(targetManifest), false, false, 42, false)
+	if err != nil {
+		return err
+	}
+
+	return plugin.storeManifest(kubeClient, deployName, targetManifest)
 }
 
 func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
@@ -74,14 +105,24 @@ func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap,
 		return err
 	}
 
-	content, ok := params["content"].(string)
+	kubeClient, err := plugin.kube.NewClient()
+	if err != nil {
+		return err
+	}
+
+	deleteManifest, ok := params["manifest"].(string)
 	if !ok {
-		return fmt.Errorf("content is a mandatory parameter")
+		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
 	client := plugin.prepareClient(eventLog, deployName)
 
-	return client.Delete(plugin.kube.Namespace, strings.NewReader(content))
+	err = client.Delete(plugin.kube.Namespace, strings.NewReader(deleteManifest))
+	if err != nil {
+		return err
+	}
+
+	return plugin.deleteManifest(kubeClient, deployName)
 }
 
 func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
