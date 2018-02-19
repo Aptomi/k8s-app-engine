@@ -13,6 +13,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/fake"
 	"github.com/Aptomi/aptomi/pkg/plugin/helm"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
+	"github.com/Aptomi/aptomi/pkg/plugin/k8sraw"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
@@ -122,6 +123,9 @@ func (server *Server) initPluginRegistryFactory() {
 			codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
 			codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
 				return helm.New(cluster, cfg)
+			}
+			codeTypes["kubernetes"]["raw"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+				return k8sraw.New(cluster, cfg)
 			}
 
 			// there are no post process plugins so far
