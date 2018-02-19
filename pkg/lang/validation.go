@@ -20,7 +20,7 @@ import (
 var (
 	identifierRegex = "^[a-zA-Z][a-zA-Z0-9_-]{0,63}$"
 	clusterTypes    = []string{"kubernetes"}
-	codeTypes       = []string{"helm", "aptomi/code/kubernetes-helm"}
+	codeTypes       = []string{"helm"}
 	labelOpsKeys    = []string{"set", "remove"}
 	allowReject     = []string{"allow", "reject"}
 )
