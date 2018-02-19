@@ -18,6 +18,7 @@ import (
 	"sync"
 )
 
+// Plugin represents Helm code plugin for Kubernetes cluster
 type Plugin struct {
 	once sync.Once
 
@@ -32,6 +33,7 @@ type Plugin struct {
 
 var _ plugin.CodePlugin = &Plugin{}
 
+// New returns new instance of the Helm code plugin for specified Kubernetes cluster plugin and plugins config
 func New(clusterPlugin plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
 	kubePlugin, ok := clusterPlugin.(*k8s.Plugin)
 	if !ok {
@@ -64,6 +66,7 @@ func (plugin *Plugin) init(eventLog *event.Log) (err error) {
 	return
 }
 
+// Cleanup implements cleanup phase for the Helm plugin. It closes cached Tiller tunnel.
 func (plugin *Plugin) Cleanup() error {
 	if plugin.tillerTunnel != nil {
 		plugin.tillerTunnel.Close()
@@ -72,10 +75,12 @@ func (plugin *Plugin) Cleanup() error {
 	return nil
 }
 
+// Create implements creation of a new component instance in the cloud by deploying a Helm chart
 func (plugin *Plugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return plugin.createOrUpdate(deployName, params, eventLog, true)
 }
 
+// Update implements update of an existing component instance in the cloud by updating parameters of a helm chart
 func (plugin *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	return plugin.createOrUpdate(deployName, params, eventLog, false)
 }
@@ -200,6 +205,7 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 	return err
 }
 
+// Destroy implements destruction of an existing component instance in the cloud by running "helm delete" on the corresponding helm chart
 func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	err := plugin.init(eventLog)
 	if err != nil {
@@ -225,6 +231,7 @@ func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap,
 	return err
 }
 
+// Endpoints returns map from port type to url for all services of the current chart
 func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
 	err := plugin.init(eventLog)
 	if err != nil {

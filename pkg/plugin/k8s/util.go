@@ -8,6 +8,7 @@ import (
 	api "k8s.io/client-go/pkg/api/v1"
 )
 
+// NewClient returns new instance of the Kubernetes client created from the cached in the plugin cluster config
 func (plugin *Plugin) NewClient() (kubernetes.Interface, error) {
 	client, err := kubernetes.NewForConfig(plugin.KubeConfig)
 	if err != nil {
@@ -17,6 +18,7 @@ func (plugin *Plugin) NewClient() (kubernetes.Interface, error) {
 	return client, nil
 }
 
+// EnsureNamespace ensures configured Kubernetes namespace
 func (plugin *Plugin) EnsureNamespace(client kubernetes.Interface, namespace string) error {
 	_, err := client.CoreV1().Namespaces().Get(namespace, meta.GetOptions{})
 	if err != nil && errors.IsNotFound(err) {

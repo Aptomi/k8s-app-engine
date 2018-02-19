@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// Plugin represents Kubernetes cluster plugin
 type Plugin struct {
 	once            sync.Once
 	config          config.Kube
@@ -19,6 +20,7 @@ type Plugin struct {
 
 var _ plugin.ClusterPlugin = &Plugin{}
 
+// New creates new instance of the Kubernetes cluster plugin for specified Cluster and plugins config
 func New(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
 	return &Plugin{
 		config:  cfg.Kube,
@@ -26,6 +28,7 @@ func New(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error
 	}, nil
 }
 
+// Validate checks Kubernetes cluster by connecting to it and ensuring configured namespace
 func (plugin *Plugin) Validate() error {
 	err := plugin.Init()
 	if err != nil {
@@ -40,6 +43,7 @@ func (plugin *Plugin) Validate() error {
 	return plugin.EnsureNamespace(client, plugin.Namespace)
 }
 
+// Init parses Kubernetes cluster config and retrieves external address for Kubernetes cluster
 func (plugin *Plugin) Init() (err error) {
 	plugin.once.Do(func() {
 		err = plugin.parseClusterConfig()
@@ -55,6 +59,7 @@ func (plugin *Plugin) Init() (err error) {
 	return
 }
 
+// Cleanup intended to run cleanup operations for plugin, but it's not used in Kubernetes cluster plugin
 func (plugin *Plugin) Cleanup() error {
 	// no cleanup needed
 	return nil
