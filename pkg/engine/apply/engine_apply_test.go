@@ -1,6 +1,7 @@
 package apply
 
 import (
+	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/progress"
@@ -10,6 +11,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/plugin"
+	"github.com/Aptomi/aptomi/pkg/plugin/fake"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
@@ -375,11 +377,18 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 }
 
 func mockRegistryFailOnComponent(failAsPanic bool, failComponents ...string) plugin.Registry {
-	return &plugin.MockRegistry{
-		DeployPlugin: &plugin.MockDeployPluginFailComponents{
-			FailComponents: failComponents,
-			FailAsPanic:    failAsPanic,
-		},
-		PostProcessPlugin: &plugin.MockPostProcessPlugin{},
+	clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
+	codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
+	postProcessPlugins := make([]plugin.PostProcessPlugin, 0)
+
+	clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
+		return fake.NewNoOpClusterPlugin(0), nil
 	}
+
+	codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
+	codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+		return fake.NewFailCodePlugin(failComponents, failAsPanic), nil
+	}
+
+	return plugin.NewRegistry(config.Plugins{}, clusterTypes, codeTypes, postProcessPlugins)
 }
