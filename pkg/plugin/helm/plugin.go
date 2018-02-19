@@ -8,6 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/Aptomi/aptomi/pkg/util/sync"
 	"github.com/pmezard/go-difflib/difflib"
 	"gopkg.in/yaml.v2"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,13 +16,11 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/kube"
 	"strings"
-	"sync"
 )
 
 // Plugin represents Helm code plugin for Kubernetes cluster
 type Plugin struct {
-	once sync.Once
-
+	once            sync.Init
 	cluster         *lang.Cluster
 	config          config.Helm
 	kube            *k8s.Plugin
@@ -48,22 +47,21 @@ func New(clusterPlugin plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlu
 	}, nil
 }
 
-func (plugin *Plugin) init(eventLog *event.Log) (err error) {
-	plugin.once.Do(func() {
-		err = plugin.kube.Init()
+func (plugin *Plugin) init(eventLog *event.Log) error {
+	return plugin.once.Do(func() error {
+		err := plugin.kube.Init()
 		if err != nil {
-			return
+			return err
 		}
 
 		err = plugin.parseClusterConfig()
 		if err != nil {
-			return
+			return err
 		}
 
 		// todo(slukjanov): we should probably verify tunnel each time we need it
-		err = plugin.ensureTillerTunnel(eventLog)
+		return plugin.ensureTillerTunnel(eventLog)
 	})
-	return
 }
 
 // Cleanup implements cleanup phase for the Helm plugin. It closes cached Tiller tunnel.

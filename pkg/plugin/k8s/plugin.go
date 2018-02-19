@@ -4,13 +4,13 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
+	"github.com/Aptomi/aptomi/pkg/util/sync"
 	"k8s.io/client-go/rest"
-	"sync"
 )
 
 // Plugin represents Kubernetes cluster plugin
 type Plugin struct {
-	once            sync.Once
+	once            sync.Init
 	config          config.Kube
 	Cluster         *lang.Cluster
 	KubeConfig      *rest.Config
@@ -44,19 +44,20 @@ func (plugin *Plugin) Validate() error {
 }
 
 // Init parses Kubernetes cluster config and retrieves external address for Kubernetes cluster
-func (plugin *Plugin) Init() (err error) {
-	plugin.once.Do(func() {
-		err = plugin.parseClusterConfig()
+func (plugin *Plugin) Init() error {
+	return plugin.once.Do(func() error {
+		err := plugin.parseClusterConfig()
 		if err != nil {
-			return
+			return err
 		}
 
 		plugin.ExternalAddress, err = plugin.getExternalAddress()
 		if err != nil {
-			return
+			return err
 		}
+
+		return nil
 	})
-	return
 }
 
 // Cleanup intended to run cleanup operations for plugin, but it's not used in Kubernetes cluster plugin
