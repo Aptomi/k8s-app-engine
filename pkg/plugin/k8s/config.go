@@ -32,9 +32,9 @@ func (plugin *Plugin) parseClusterConfig() error {
 	}
 
 	if clusterConfig.KubeConfig != nil {
-		plugin.KubeConfig, plugin.Namespace, err = initKubeConfig(clusterConfig, cluster)
+		plugin.RestConfig, plugin.ClientConfig, plugin.Namespace, err = initKubeConfig(clusterConfig, cluster)
 	} else {
-		plugin.KubeConfig, err = initLocalKubeConfig()
+		plugin.RestConfig, plugin.ClientConfig, err = initLocalKubeConfig(cluster)
 	}
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (plugin *Plugin) parseClusterConfig() error {
 	if plugin.config.Timeout == 0 {
 		plugin.config.Timeout = 10 * time.Second
 	}
-	plugin.KubeConfig.Timeout = plugin.config.Timeout
+	plugin.RestConfig.Timeout = plugin.config.Timeout
 
 	if len(clusterConfig.Namespace) > 0 {
 		plugin.Namespace = clusterConfig.Namespace
@@ -55,14 +55,14 @@ func (plugin *Plugin) parseClusterConfig() error {
 	return nil
 }
 
-func initKubeConfig(config *ClusterConfig, cluster *lang.Cluster) (*rest.Config, string, error) {
+func initKubeConfig(config *ClusterConfig, cluster *lang.Cluster) (*rest.Config, clientcmd.ClientConfig, string, error) {
 	var data []byte
 	if strData, ok := config.KubeConfig.(string); ok {
 		data = []byte(strData)
 	} else {
 		yamlData, err := yaml.Marshal(config.KubeConfig)
 		if err != nil {
-			return nil, "", fmt.Errorf("error while marshaling kube config into bytes: %s", err)
+			return nil, nil, "", fmt.Errorf("error while marshaling kube config into bytes: %s", err)
 		}
 		data = yamlData
 	}
@@ -81,25 +81,34 @@ func initKubeConfig(config *ClusterConfig, cluster *lang.Cluster) (*rest.Config,
 
 	rawConf, err := conf.RawConfig()
 	if err != nil {
-		return nil, "", fmt.Errorf("error while getting raw kube config for cluster %s: %s", cluster.Name, err)
+		return nil, nil, "", fmt.Errorf("error while getting raw kube config for cluster %s: %s", cluster.Name, err)
 	}
 
 	if len(config.Context) == 0 && len(rawConf.CurrentContext) == 0 {
-		return nil, "", fmt.Errorf("context for cluster %s should be explicitly defined (context in cluster config or current-context in kubeconfig)", cluster.Name)
+		return nil, nil, "", fmt.Errorf("context for cluster %s should be explicitly defined (context in cluster config or current-context in kubeconfig)", cluster.Name)
 	}
 
 	clientConf, err := conf.ClientConfig()
 	if err != nil {
-		return nil, "", fmt.Errorf("could not get kubernetes config for cluster %s: %s", cluster.Name, err)
+		return nil, nil, "", fmt.Errorf("could not get kubernetes config for cluster %s: %s", cluster.Name, err)
 	}
 
 	if namespace, _, nsErr := conf.Namespace(); nsErr == nil && len(namespace) > 0 {
-		return clientConf, namespace, nil
+		return clientConf, conf, namespace, nil
 	}
 
-	return clientConf, "", nil
+	return clientConf, conf, "", nil
 }
 
-func initLocalKubeConfig() (*rest.Config, error) {
-	return rest.InClusterConfig()
+func initLocalKubeConfig(cluster *lang.Cluster) (*rest.Config, clientcmd.ClientConfig, error) {
+	rules := &clientcmd.ClientConfigLoadingRules{}
+	overrides := &clientcmd.ConfigOverrides{}
+	conf := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
+
+	clientConf, err := conf.ClientConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not get kubernetes config for cluster %s: %s", cluster.Name, err)
+	}
+
+	return clientConf, conf, nil
 }

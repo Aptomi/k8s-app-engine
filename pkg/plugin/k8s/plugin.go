@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/util/sync"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // Plugin represents Kubernetes cluster plugin
@@ -13,7 +14,8 @@ type Plugin struct {
 	once            sync.Init
 	config          config.Kube
 	Cluster         *lang.Cluster
-	KubeConfig      *rest.Config
+	RestConfig      *rest.Config
+	ClientConfig    clientcmd.ClientConfig
 	Namespace       string
 	ExternalAddress string
 }

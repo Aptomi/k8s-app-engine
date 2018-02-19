@@ -10,7 +10,7 @@ import (
 
 // NewClient returns new instance of the Kubernetes client created from the cached in the plugin cluster config
 func (plugin *Plugin) NewClient() (kubernetes.Interface, error) {
-	client, err := kubernetes.NewForConfig(plugin.KubeConfig)
+	client, err := kubernetes.NewForConfig(plugin.RestConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating kubernetes client: %s", err)
 	}

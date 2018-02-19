@@ -35,7 +35,7 @@ func (plugin *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 		if plugin.tillerTunnel != nil {
 			plugin.tillerTunnel.Close()
 		}
-		plugin.tillerTunnel, tunnelErr = portforwarder.New(plugin.tillerNamespace, client, plugin.kube.KubeConfig)
+		plugin.tillerTunnel, tunnelErr = portforwarder.New(plugin.tillerNamespace, client, plugin.kube.RestConfig)
 
 		if tunnelErr != nil {
 			if strings.Contains(tunnelErr.Error(), "could not find tiller") {
