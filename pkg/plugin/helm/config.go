@@ -11,7 +11,7 @@ func (plugin *Plugin) parseClusterConfig() error {
 	clusterConfig := &ClusterConfig{}
 	err := plugin.cluster.ParseConfigInto(clusterConfig)
 	if err != nil {
-		err = fmt.Errorf("error while parsing helm specific config of cluster %s: %s", plugin.cluster.Name, err)
+		return fmt.Errorf("error while parsing helm specific config of cluster %s: %s", plugin.cluster.Name, err)
 	}
 
 	plugin.tillerNamespace = "kube-system"

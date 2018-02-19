@@ -24,7 +24,7 @@ func (plugin *Plugin) parseClusterConfig() error {
 	clusterConfig := &ClusterConfig{}
 	err := plugin.Cluster.ParseConfigInto(clusterConfig)
 	if err != nil {
-		err = fmt.Errorf("error while parsing kubernetes specific config of cluster %s: %s", plugin.Cluster.Name, err)
+		return fmt.Errorf("error while parsing kubernetes specific config of cluster %s: %s", plugin.Cluster.Name, err)
 	}
 
 	if clusterConfig.Local && clusterConfig.KubeConfig != nil {
