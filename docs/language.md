@@ -111,7 +111,7 @@ Service can have also have labels attached to it. You can refer to those labels 
 When defining a **code component**, you must define the following fields:
 * `name` - component name unique within the service
 * `code` - section which describes application component that needs to be instantiated and managed
-    * `type` - right now the only supported code type is [aptomi/code/kubernetes-helm](https://helm.sh/), which is Helm package manager for k8s. But Aptomi is completely
+    * `type` - right now the only supported code type is [helm](https://helm.sh/), which is Helm package manager for k8s. But Aptomi is completely
       pluggable and allows developers to use their favorite framework for packaging applications. It can support applications manifests defined via ksonnet, k8s YAMLs and more.
 * `discovery` - every component can expose arbitrary discovery information about itself in a form of labels to other components.
 * `dependencies` - other components within the service, which current component depends on. It helps Aptomi to process discovery information and propagate parameters
@@ -130,7 +130,7 @@ For example, here is how you would define an application which consists of Wordp
   components:
     - name: wordpress_component
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://myhelmcharts.com/repo
           chartName: wordpress
@@ -143,7 +143,7 @@ For example, here is how you would define an application which consists of Wordp
 
     - name: mysql_component
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://myhelmcharts.com/repo
           chartName: mysql
@@ -211,7 +211,7 @@ use a special **contract component**, which points to a contract instead of a co
   components:
     - name: wordpress_component
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://myhelmcharts.com/repo
           chartName: wordpress

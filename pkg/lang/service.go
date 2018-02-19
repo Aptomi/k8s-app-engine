@@ -65,7 +65,7 @@ type ServiceComponent struct {
 
 // Code with type and parameters, used to instantiate/update/delete component instances
 type Code struct {
-	// Type represents code type (e.g. aptomi/code/kubernetes-helm). It determines the plugin that will get executed for
+	// Type represents code type (e.g. "helm"). It determines the plugin that will get executed for
 	// for this code component
 	Type string `validate:"required,codetype"`
 

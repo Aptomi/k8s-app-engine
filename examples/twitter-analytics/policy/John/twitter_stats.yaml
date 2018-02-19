@@ -15,7 +15,7 @@
     # Publisher (Twitter Streaming API -> kafka)
     - name: tweepub
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: "{{ .Labels.chart_name }}"
@@ -44,7 +44,7 @@
     # Spark job (takes tweets -> does hashtags stats -> puts stats into hdfs)
     - name: tweetics
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: tweetics
@@ -76,7 +76,7 @@
     # Visualizer (takes stats from hdfs and shows on web page)
     - name: tweeviz
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: tweeviz

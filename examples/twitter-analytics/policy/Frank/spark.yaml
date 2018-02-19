@@ -16,7 +16,7 @@
       discovery:
         url: "spark-master-{{ .Discovery.instance }}-0:7077"
       code:
-        type: aptomi/code/kubernetes-helm
+        type: helm
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: spark
