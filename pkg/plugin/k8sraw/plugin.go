@@ -14,9 +14,11 @@ import (
 )
 
 type Plugin struct {
-	once    sync.Init
-	cluster *lang.Cluster
-	kube    *k8s.Plugin
+	once          sync.Init
+	cluster       *lang.Cluster
+	config        config.K8sRaw
+	kube          *k8s.Plugin
+	dataNamespace string
 }
 
 // New returns new instance of the Kubernetes Raw code (objects) plugin for specified Kubernetes cluster plugin and plugins config
@@ -28,13 +30,29 @@ func New(clusterPlugin plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlu
 
 	return &Plugin{
 		cluster: kubePlugin.Cluster,
+		config:  cfg.K8sRaw,
 		kube:    kubePlugin,
 	}, nil
 }
 
 func (plugin *Plugin) init() error {
 	return plugin.once.Do(func() error {
-		return plugin.kube.Init()
+		err := plugin.kube.Init()
+		if err != nil {
+			return err
+		}
+
+		err = plugin.parseClusterConfig()
+		if err != nil {
+			return err
+		}
+
+		kubeClient, err := plugin.kube.NewClient()
+		if err != nil {
+			return err
+		}
+
+		return plugin.kube.EnsureNamespace(kubeClient, plugin.dataNamespace)
 	})
 }
 

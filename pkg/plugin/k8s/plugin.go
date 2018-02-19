@@ -12,7 +12,7 @@ import (
 // Plugin represents Kubernetes cluster plugin
 type Plugin struct {
 	once            sync.Init
-	config          config.Kube
+	config          config.K8s
 	Cluster         *lang.Cluster
 	RestConfig      *rest.Config
 	ClientConfig    clientcmd.ClientConfig
@@ -25,7 +25,7 @@ var _ plugin.ClusterPlugin = &Plugin{}
 // New creates new instance of the Kubernetes cluster plugin for specified Cluster and plugins config
 func New(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
 	return &Plugin{
-		config:  cfg.Kube,
+		config:  cfg.K8s,
 		Cluster: cluster,
 	}, nil
 }
