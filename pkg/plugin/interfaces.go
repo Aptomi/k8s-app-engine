@@ -32,6 +32,7 @@ type ClusterPlugin interface {
 	Validate() error
 }
 
+// ClusterPluginConstructor represents constructor for the cluster plugin
 type ClusterPluginConstructor func(cluster *lang.Cluster, cfg config.Plugins) (ClusterPlugin, error)
 
 // CodePlugin is a definition of deployment plugin which takes care of creating, updating and destroying
@@ -45,6 +46,7 @@ type CodePlugin interface {
 	Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error)
 }
 
+// CodePluginConstructor represents constructor the the code plugin
 type CodePluginConstructor func(cluster ClusterPlugin, cfg config.Plugins) (CodePlugin, error)
 
 // PostProcessPlugin is a definition of post-processing plugin which gets called once by an action from the engine
