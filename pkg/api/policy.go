@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -198,6 +199,22 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	err = currentPolicy.Validate()
 	if err != nil {
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
+	}
+
+	// Validate clusters using corresponding cluster plugins if policy is valid
+	plugins := api.pluginRegistryFactory()
+	for _, obj := range objects {
+		if cluster, ok := obj.(*lang.Cluster); ok {
+			plugin, pluginErr := plugins.ForCluster(cluster)
+			if pluginErr != nil {
+				panic(fmt.Sprintf("Error while getting cluster plugin for cluster %s of type %s: %s", cluster.Name, cluster.Type, pluginErr))
+			}
+
+			valErr := plugin.Validate()
+			if valErr != nil {
+				panic(fmt.Sprintf("Error while validating cluster %s of type %s: %s", cluster.Name, cluster.Type, valErr))
+			}
+		}
 	}
 
 	changed, policyData, err := api.store.UpdatePolicy(objects, user.Name)
