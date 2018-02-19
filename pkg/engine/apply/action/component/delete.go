@@ -77,11 +77,12 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 	if clusterObj == nil {
 		return fmt.Errorf("can't find cluster in policy: %s", clusterName)
 	}
+	cluster := clusterObj.(*lang.Cluster)
 
-	plugin, err := context.Plugins.GetDeployPlugin(component.Code.Type)
+	plugin, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {
 		return err
 	}
 
-	return plugin.Destroy(clusterObj.(*lang.Cluster), instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
+	return plugin.Destroy(instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
 }

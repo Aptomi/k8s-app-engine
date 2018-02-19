@@ -29,7 +29,7 @@ func NewPostProcessAction() *PostProcessAction {
 
 // Apply runs all registered post-processing plugins
 func (a *PostProcessAction) Apply(context *action.Context) error {
-	for _, plugin := range context.Plugins.GetPostProcessingPlugins() {
+	for _, plugin := range context.Plugins.PostProcess() {
 		err := plugin.Process(context.DesiredPolicy, context.DesiredState, context.ExternalData, context.EventLog)
 		if err != nil {
 			return fmt.Errorf("error while running post processing action: %s", err)
