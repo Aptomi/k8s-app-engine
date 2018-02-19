@@ -24,7 +24,6 @@ type Plugin struct {
 	cluster         *lang.Cluster
 	config          config.Helm
 	kube            *k8s.Plugin
-	namespace       string       // namespace to deploy app to
 	tillerNamespace string       // namespace for tiller
 	tillerTunnel    *kube.Tunnel // tunnel for accessing tiller
 	tillerHost      string       // local proxy address when connection established
@@ -40,10 +39,9 @@ func New(clusterPlugin plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlu
 	}
 
 	return &Plugin{
-		config:    cfg.Helm,
-		kube:      kubePlugin,
-		cluster:   kubePlugin.Cluster,
-		namespace: kubePlugin.Namespace,
+		config:  cfg.Helm,
+		kube:    kubePlugin,
+		cluster: kubePlugin.Cluster,
 	}, nil
 }
 
@@ -94,7 +92,7 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 		return err
 	}
 
-	err = plugin.kube.EnsureNamespace(kubeClient, plugin.namespace)
+	err = plugin.kube.EnsureNamespace(kubeClient, plugin.kube.Namespace)
 	if err != nil {
 		return err
 	}
@@ -140,7 +138,7 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 
 			_, err = helmClient.InstallRelease(
 				chartPath,
-				plugin.namespace,
+				plugin.kube.Namespace,
 				helm.ReleaseName(releaseName),
 				helm.ValueOverrides(helmParams),
 				helm.InstallReuseName(true),
@@ -162,8 +160,8 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 	if err != nil {
 		return fmt.Errorf("error while getting status of current release %s: %s", releaseName, err)
 	}
-	if status.Namespace != plugin.namespace {
-		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, plugin.namespace)
+	if status.Namespace != plugin.kube.Namespace {
+		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, plugin.kube.Namespace)
 	}
 
 	newRelease, err := helmClient.UpdateRelease(
@@ -251,7 +249,7 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 	endpoints := make(map[string]string)
 
 	// Check all corresponding services
-	services, err := client.Services(plugin.namespace).List(options)
+	services, err := client.Services(plugin.kube.Namespace).List(options)
 	if err != nil {
 		return nil, err
 	}
