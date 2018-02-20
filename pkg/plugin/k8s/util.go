@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/util"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -32,6 +33,29 @@ func (plugin *Plugin) EnsureNamespace(client kubernetes.Interface, namespace str
 	}
 
 	return err
+}
+
+func (plugin *Plugin) AddEndpointsFromService(service *api.Service, endpoints map[string]string) {
+	// todo(slukjanov): support not only node ports
+	if service.Spec.Type == "NodePort" {
+		for _, port := range service.Spec.Ports {
+			sURL := fmt.Sprintf("%s:%d", plugin.ExternalAddress, port.NodePort)
+
+			// todo(slukjanov): could we somehow detect real schema? I think no :(
+			if util.StringContainsAny(port.Name, "https") {
+				sURL = "https://" + sURL
+			} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana") {
+				sURL = "http://" + sURL
+			}
+
+			name := port.Name
+			if len(name) == 0 {
+				name = port.TargetPort.String()
+			}
+
+			endpoints[name] = sURL
+		}
+	}
 }
 
 func (plugin *Plugin) getExternalAddress() (string, error) {

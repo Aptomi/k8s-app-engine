@@ -255,21 +255,7 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 	}
 
 	for _, service := range services.Items {
-		// todo(slukjanov): support not only node ports
-		if service.Spec.Type == "NodePort" {
-			for _, port := range service.Spec.Ports {
-				sURL := fmt.Sprintf("%s:%d", plugin.kube.ExternalAddress, port.NodePort)
-
-				// todo(slukjanov): could we somehow detect real schema? I think no :(
-				if util.StringContainsAny(port.Name, "https") {
-					sURL = "https://" + sURL
-				} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana") {
-					sURL = "http://" + sURL
-				}
-
-				endpoints[port.Name] = sURL
-			}
-		}
+		plugin.kube.AddEndpointsFromService(&service, endpoints)
 	}
 
 	return endpoints, nil
