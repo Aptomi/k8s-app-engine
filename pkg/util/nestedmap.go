@@ -118,6 +118,7 @@ const (
 	includeMacrosPrefix = "@include "
 )
 
+// ProcessIncludeMacros walks through specified NestedParameterMap and resolves @include macros
 func ProcessIncludeMacros(node NestedParameterMap, baseDir string) error {
 	for key, value := range node {
 		// If it's a string, evaluate macros

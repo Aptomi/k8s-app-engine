@@ -35,6 +35,7 @@ func (plugin *Plugin) EnsureNamespace(client kubernetes.Interface, namespace str
 	return err
 }
 
+// AddEndpointsFromService searches for the available endpoints in specified service and writes them into provided map
 func (plugin *Plugin) AddEndpointsFromService(service *api.Service, endpoints map[string]string) {
 	// todo(slukjanov): support not only node ports
 	if service.Spec.Type == "NodePort" {

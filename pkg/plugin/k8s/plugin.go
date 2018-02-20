@@ -54,11 +54,7 @@ func (plugin *Plugin) Init() error {
 		}
 
 		plugin.ExternalAddress, err = plugin.getExternalAddress()
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	})
 }
 

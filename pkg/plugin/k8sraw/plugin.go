@@ -14,6 +14,7 @@ import (
 	"strings"
 )
 
+// Plugin represents Kubernetes Raw code plugin that supports deploying specified k8s objects into the cluster
 type Plugin struct {
 	once          sync.Init
 	cluster       *lang.Cluster
@@ -57,10 +58,12 @@ func (plugin *Plugin) init() error {
 	})
 }
 
+// Cleanup implements cleanup phase for the k8s raw plugin
 func (plugin *Plugin) Cleanup() error {
 	return nil
 }
 
+// Create implements creation of a new component instance in the cloud by deploying raw k8s objects
 func (plugin *Plugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	err := plugin.init()
 	if err != nil {
@@ -87,6 +90,7 @@ func (plugin *Plugin) Create(deployName string, params util.NestedParameterMap, 
 	return plugin.storeManifest(kubeClient, deployName, targetManifest)
 }
 
+// Update implements update of an existing component instance in the cloud by updating raw k8s objects
 func (plugin *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	err := plugin.init()
 	if err != nil {
@@ -118,6 +122,7 @@ func (plugin *Plugin) Update(deployName string, params util.NestedParameterMap, 
 	return plugin.storeManifest(kubeClient, deployName, targetManifest)
 }
 
+// Destroy implements destruction of an existing component instance in the cloud by deleting raw k8s objects
 func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
 	err := plugin.init()
 	if err != nil {
@@ -144,6 +149,7 @@ func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap,
 	return plugin.deleteManifest(kubeClient, deployName)
 }
 
+// Endpoints returns map from port type to url for all services of the deployed raw k8s objects
 func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
 	err := plugin.init()
 	if err != nil {
