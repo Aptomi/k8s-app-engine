@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/sync"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/helm/pkg/kube"
 	"strings"
 )
@@ -149,8 +150,37 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 		return nil, err
 	}
 
-	// todo: implement me
-	return make(map[string]string), nil
+	kubeClient, err := plugin.kube.NewClient()
+	if err != nil {
+		return nil, err
+	}
+
+	targetManifest, ok := params["manifest"].(string)
+	if !ok {
+		return nil, fmt.Errorf("manifest is a mandatory parameter")
+	}
+
+	client := plugin.prepareClient(eventLog, deployName)
+
+	infos, err := client.BuildUnstructured(plugin.kube.Namespace, strings.NewReader(targetManifest))
+	if err != nil {
+		return nil, err
+	}
+
+	endpoints := make(map[string]string)
+
+	for _, info := range infos {
+		if info.Mapping.GroupVersionKind.Kind == "Service" {
+			service, getErr := kubeClient.CoreV1().Services(plugin.kube.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				return nil, getErr
+			}
+
+			plugin.kube.AddEndpointsFromService(service, endpoints)
+		}
+	}
+
+	return endpoints, nil
 }
 
 func (plugin *Plugin) prepareClient(eventLog *event.Log, deployName string) *kube.Client {
