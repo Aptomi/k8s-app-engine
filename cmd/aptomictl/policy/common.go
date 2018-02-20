@@ -119,36 +119,9 @@ func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runt
 }
 
 func findPolicyFiles(policyPaths []string) ([]string, error) {
-	allFiles := make([]string, 0, len(policyPaths))
-
-	for _, rawPolicyPath := range policyPaths {
-		policyPath, errPath := filepath.Abs(rawPolicyPath)
-		if errPath != nil {
-			return nil, fmt.Errorf("error reading filepath: %s", errPath)
-		}
-
-		// if it's a directory, use all yaml files from it
-		if stat, err := os.Stat(policyPath); err == nil && stat.IsDir() {
-			// if dir provided, use all yaml files from it
-			files, errGlob := zglob.Glob(filepath.Join(policyPath, "**", "*.yaml"))
-			if errGlob != nil {
-				return nil, fmt.Errorf("error while searching yaml files in '%s' (error: %s)", policyPath, err)
-			}
-			allFiles = append(allFiles, files...)
-			continue
-		}
-
-		// otherwise, try as a single file or glob pattern/mask (so we can feed wildcard mask and process multiple files)
-		files, errGlob := zglob.Glob(policyPath)
-		if errGlob != nil {
-			return nil, fmt.Errorf("error while searching yaml files in '%s' (error: %s)", policyPath, errGlob)
-		}
-		if len(files) > 0 {
-			allFiles = append(allFiles, files...)
-			continue
-		}
-
-		return nil, fmt.Errorf("path doesn't exist or no YAML files found under: %s", policyPath)
+	allFiles, err := util.FindYamlFiles(policyPaths)
+	if err != nil {
+		return nil, err
 	}
 
 	sort.Strings(allFiles)
