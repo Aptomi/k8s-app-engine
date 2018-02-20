@@ -211,7 +211,8 @@ func processParameterTreeNode(node interface{}, parameters *template.Parameters,
 			if err != nil {
 				return err
 			}
-			result[key] = EscapeName(evaluatedValue)
+
+			result[key] = evaluatedValue
 		} else if mode == ModeCompile {
 			// just compile
 			_, err := template.NewTemplate(templateStr)
