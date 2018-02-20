@@ -2,7 +2,6 @@ package k8sraw
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -10,12 +9,16 @@ import (
 	"strings"
 )
 
-func (plugin *Plugin) manifestConfigMapName(deployName string) string {
-	return strings.ToLower(util.EscapeName(fmt.Sprintf("aptomi-raw-%s-%s", plugin.cluster.Name, deployName)))
+var (
+	configMapNameReplacer = strings.NewReplacer("#", "-", "_", "-")
+)
+
+func (plugin *Plugin) getManifestConfigMapName(deployName string) string {
+	return strings.ToLower(configMapNameReplacer.Replace(fmt.Sprintf("aptomi-raw-%s-%s", plugin.cluster.Name, deployName)))
 }
 
 func (plugin *Plugin) storeManifest(client kubernetes.Interface, deployName, manifest string) error {
-	name := plugin.manifestConfigMapName(deployName)
+	name := plugin.getManifestConfigMapName(deployName)
 
 	cm, err := client.CoreV1().ConfigMaps(plugin.dataNamespace).Get(name, meta.GetOptions{})
 	if err != nil {
@@ -45,7 +48,7 @@ func (plugin *Plugin) storeManifest(client kubernetes.Interface, deployName, man
 }
 
 func (plugin *Plugin) loadManifest(client kubernetes.Interface, deployName string) (string, error) {
-	name := plugin.manifestConfigMapName(deployName)
+	name := plugin.getManifestConfigMapName(deployName)
 
 	cm, err := client.CoreV1().ConfigMaps(plugin.dataNamespace).Get(name, meta.GetOptions{})
 	if err != nil {
@@ -64,7 +67,7 @@ func (plugin *Plugin) loadManifest(client kubernetes.Interface, deployName strin
 }
 
 func (plugin *Plugin) deleteManifest(client kubernetes.Interface, deployName string) error {
-	name := plugin.manifestConfigMapName(deployName)
+	name := plugin.getManifestConfigMapName(deployName)
 
 	err := client.CoreV1().ConfigMaps(plugin.dataNamespace).Delete(name, &meta.DeleteOptions{})
 	if err != nil && errors.IsNotFound(err) {
