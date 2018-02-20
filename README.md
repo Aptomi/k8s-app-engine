@@ -17,22 +17,25 @@ Aptomi's approach to **application delivery** becomes especially powerful in a *
 
 It also provides contextual **visibility** into teams and services, allowing to visualize dependencies and impact of changes. 
 
-![What is Aptomi](images/aptomi-what-is.png)
+## Overview
 
-## Demo
+[![What is Aptomi](images/aptomi-overview-ng.png)](https://www.youtube.com/watch?v=j4DVtZvMqGg)
 
-### Short demo (5 minutes, Asciinema)
-[![asciicast](images/aptomi-asciinema.png)](https://asciinema.org/a/163258)
+## Service Model 
 
-### Detailed demo (13 minutes, Youtube)
-[![youtube](images/aptomi-demo-youtube.png)](http://www.youtube.com/watch?v=HL4RwoBnuTc)
+[![Aptomi Service Model](images/aptomi-service-model-ng.png)](https://www.youtube.com/watch?v=wHEcpkPCkpk)
 
-### Asciinema Demos
+## Demos
+
+### Asciinema
 * Aptomi: installation - https://asciinema.org/a/163250
 * Aptomi: point to Kubernetes cluster - https://asciinema.org/a/163252
 * Aptomi: defining & running applications - https://asciinema.org/a/163258
 * Aptomi: updating a service instance - https://asciinema.org/a/163262
 * Aptomi: deleting service instances - https://asciinema.org/a/163269
+
+### Youtube
+* Detailed Demo - http://www.youtube.com/watch?v=HL4RwoBnuTc
 
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
