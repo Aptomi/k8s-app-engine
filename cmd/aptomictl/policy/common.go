@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
+	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
@@ -91,6 +92,20 @@ func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runt
 				return nil, fmt.Errorf("duplicate object with key %s detected in file %s (first occurrence is in file %s)", key, file, firstFile)
 			}
 			objectFile[key] = file
+
+			if service, serviceOk := obj.(*lang.Service); serviceOk {
+				for _, component := range service.Components {
+					if component.Code == nil || component.Code.Params == nil {
+						continue
+					}
+
+					includeErr := util.ProcessIncludeMacros(component.Code.Params, filepath.Dir(file))
+					if includeErr != nil {
+						return nil, includeErr
+					}
+				}
+			}
+
 		}
 
 		allObjects = append(allObjects, objects...)

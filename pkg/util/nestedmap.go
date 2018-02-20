@@ -5,7 +5,10 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"github.com/d4l3k/messagediff"
+	"io/ioutil"
+	"path/filepath"
 	"reflect"
+	"strings"
 )
 
 // NestedParameterMap is a nested map of parameters, which allows to work with maps [string][string]...[string] -> string, int, bool values
@@ -108,6 +111,36 @@ func (src NestedParameterMap) GetString(key string, defaultValue string) (string
 	}
 
 	return str, nil
+}
+
+const (
+	includeMacrosPrefix = "@include "
+)
+
+func ProcessIncludeMacros(node NestedParameterMap, baseDir string) error {
+	for key, value := range node {
+		// If it's a string, evaluate macros
+		if str, strOk := value.(string); strOk && strings.HasPrefix(str, includeMacrosPrefix) {
+			file := strings.TrimSpace(str[len(includeMacrosPrefix):])
+			if len(file) == 0 {
+				return fmt.Errorf("@include macros should have exactly one parameter - path to the file to be included")
+			}
+
+			file = filepath.Join(baseDir, file)
+			data, err := ioutil.ReadFile(file)
+			if err != nil {
+				return fmt.Errorf("can't read file to include %s: %s", file, err)
+			}
+			node[key] = string(data)
+		} else if nestedMap, mapOk := value.(NestedParameterMap); mapOk {
+			err := ProcessIncludeMacros(nestedMap, baseDir)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 const (
