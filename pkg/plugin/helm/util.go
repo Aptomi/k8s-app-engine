@@ -35,8 +35,12 @@ func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, versi
 	return
 }
 
-func getHelmReleaseName(deployName string) string {
-	return strings.ToLower(util.EscapeName(deployName))
+var (
+	releaseNameReplacer = strings.NewReplacer("#", "-", "_", "-")
+)
+
+func getReleaseName(deployName string) string {
+	return strings.ToLower(releaseNameReplacer.Replace(deployName))
 }
 
 func (plugin *Plugin) fetchChart(repository, name, version string) (string, error) {

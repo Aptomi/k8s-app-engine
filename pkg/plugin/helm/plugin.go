@@ -97,7 +97,7 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 		return err
 	}
 
-	releaseName := getHelmReleaseName(deployName)
+	releaseName := getReleaseName(deployName)
 	chartRepo, chartName, chartVersion, err := getHelmReleaseInfo(params)
 	if err != nil {
 		return err
@@ -208,7 +208,7 @@ func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap,
 		return err
 	}
 
-	releaseName := getHelmReleaseName(deployName)
+	releaseName := getReleaseName(deployName)
 
 	helmClient, err := plugin.newClient()
 	if err != nil {
@@ -241,7 +241,7 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 
 	client := kubeClient.CoreV1()
 
-	releaseName := getHelmReleaseName(deployName)
+	releaseName := getReleaseName(deployName)
 
 	selector := labels.Set{"release": releaseName}.AsSelector().String()
 	options := meta.ListOptions{LabelSelector: selector}
