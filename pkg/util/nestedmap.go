@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
+	log "github.com/Sirupsen/logrus"
 	"github.com/d4l3k/messagediff"
 	"io/ioutil"
 	"path/filepath"
@@ -121,17 +122,29 @@ func ProcessIncludeMacros(node NestedParameterMap, baseDir string) error {
 	for key, value := range node {
 		// If it's a string, evaluate macros
 		if str, strOk := value.(string); strOk && strings.HasPrefix(str, includeMacrosPrefix) {
-			file := strings.TrimSpace(str[len(includeMacrosPrefix):])
-			if len(file) == 0 {
-				return fmt.Errorf("@include macros should have exactly one parameter - path to the file to be included")
+			filePathsStr := strings.TrimSpace(str[len(includeMacrosPrefix):])
+			if len(filePathsStr) == 0 {
+				return fmt.Errorf("@include macros should have exactly one parameter - paths to the files to be included")
+			}
+			filePaths := strings.Split(filePathsStr, ",")
+			if len(filePaths) == 0 {
+				return fmt.Errorf("@include macros should point to at least one file")
 			}
 
-			file = filepath.Join(baseDir, file)
-			data, err := ioutil.ReadFile(file)
+			files, err := findIncludeFiles(baseDir, filePaths)
 			if err != nil {
-				return fmt.Errorf("can't read file to include %s: %s", file, err)
+				return err
 			}
-			node[key] = string(data)
+
+			manifest := ""
+			for _, file := range files {
+				data, dataErr := ioutil.ReadFile(file)
+				if dataErr != nil {
+					return fmt.Errorf("can't read file to include %s: %s", file, err)
+				}
+				manifest += "\n---\n" + string(data)
+			}
+			node[key] = manifest
 		} else if nestedMap, mapOk := value.(NestedParameterMap); mapOk {
 			err := ProcessIncludeMacros(nestedMap, baseDir)
 			if err != nil {
@@ -141,6 +154,26 @@ func ProcessIncludeMacros(node NestedParameterMap, baseDir string) error {
 	}
 
 	return nil
+}
+
+func findIncludeFiles(baseDir string, filePaths []string) ([]string, error) {
+	for idx, file := range filePaths {
+		if !filepath.IsAbs(file) {
+			filePaths[idx] = filepath.Join(baseDir, file)
+		}
+	}
+
+	allFiles, err := FindYamlFiles(filePaths)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug("Including data from files:")
+	for _, file := range allFiles {
+		log.Debugf("  [*] %s", file)
+	}
+
+	return allFiles, nil
 }
 
 const (
