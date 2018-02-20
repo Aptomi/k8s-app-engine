@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
+	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/tools/clientcmd"
@@ -59,6 +60,8 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				Type:   "kubernetes",
 				Config: clusterConfig,
 			}
+
+			logrus.Infof("Generating cluster: %s", clusterName)
 
 			data, err := yaml.Marshal(cluster)
 			if err != nil {
