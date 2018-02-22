@@ -1,5 +1,5 @@
-hash: 9d96835f4f3194cc20862c5045e86eb3c2a02ba65f5fb46e2ab31d5c8a4c7bd2
-updated: 2018-02-04T04:46:18.034461751-08:00
+hash: 534aae8e18667c99bfee7bf300df074d69222fab85eab8279be312c2d9f2d010
+updated: 2018-02-22T12:50:45.269026376-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -25,6 +25,8 @@ imports:
   - spew
 - name: github.com/dgrijalva/jwt-go
   version: dbeaa9332f19a944acb5736b4456cfcc02140e29
+  subpackages:
+  - request
 - name: github.com/docker/distribution
   version: 03efb43768979f4d2ea5187bef995656441829e5
   subpackages:
@@ -96,7 +98,7 @@ imports:
 - name: github.com/go-playground/universal-translator
   version: b32fa301c9fe55953584134cb6853a13c87ec0a1
 - name: github.com/gobwas/glob
-  version: bea32b9cd2d6f55753d94a28e959b13f0244797a
+  version: 5ccd90ef52e1e632236f7326478d4faa74f99438
   subpackages:
   - compiler
   - match
@@ -146,7 +148,7 @@ imports:
   - ptypes/any
   - ptypes/timestamp
 - name: github.com/google/go-cmp
-  version: 8099a9787ce5dc5984ed879a3bda47dc730a8e97
+  version: 3af367b6b30c263d47e8895973edcca9a49cf029
   subpackages:
   - cmp
 - name: github.com/google/gofuzz
@@ -260,11 +262,11 @@ imports:
 - name: github.com/ralekseenkov/govaluate
   version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
 - name: github.com/rs/cors
-  version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
+  version: feef513b9575b32f84bafa580aad89b011259019
 - name: github.com/satori/go.uuid
   version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/Sirupsen/logrus
-  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+  version: 8c0189d9f6bbf301e5d055d34268156b317016af
 - name: github.com/spf13/afero
   version: b28a7effac979219c2a2ed6205a4d70e4b1bcd02
   subpackages:
@@ -306,6 +308,7 @@ imports:
   - openpgp/packet
   - openpgp/s2k
   - ssh
+  - ssh/terminal
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
@@ -359,7 +362,7 @@ imports:
 - name: gopkg.in/asn1-ber.v1
   version: 379148ca0225df7a432012b8df0355c2a2063ac0
 - name: gopkg.in/go-playground/validator.v9
-  version: 3620d3c0694119b61c72071ff5a05a976e97b05a
+  version: 150fe5b6a4ccc9cd6ffdbf5d184b67fbea75efcc
   subpackages:
   - translations/en
 - name: gopkg.in/inf.v0

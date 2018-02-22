@@ -8,7 +8,7 @@ import:
   version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
 - package: github.com/mattn/go-zglob
 - package: github.com/Sirupsen/logrus
-  version: ^0.11.5
+  version: 8c0189d9f6bbf301e5d055d34268156b317016af
 - package: github.com/gosuri/uiprogress
 - package: github.com/gosuri/uilive
 - package: github.com/gorilla/handlers
