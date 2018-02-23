@@ -144,3 +144,11 @@ func (eventLog *Log) Save(hook logrus.Hook) {
 		}
 	}
 }
+
+// SaveAsString takes all buffered event log entries and saves them into a single string
+func (eventLog *Log) SaveAsString() string {
+	saver := &HookString{}
+	eventLog.Save(saver)
+
+	return saver.String()
+}
