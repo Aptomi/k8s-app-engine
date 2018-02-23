@@ -36,6 +36,9 @@ type Revision struct {
 	Status    string
 	Progress  RevisionProgress
 	AppliedAt time.Time
+
+	ResolveLog string
+	ApplyLog   string
 }
 
 // RevisionProgress represents revision applying progress

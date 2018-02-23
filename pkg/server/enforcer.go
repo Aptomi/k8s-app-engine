@@ -67,12 +67,11 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	eventLog := event.NewLog(fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
-	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, eventLog)
+	resolveLog := event.NewLog(fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
+	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
 	desiredState, err := resolver.ResolveAllDependencies()
 	if err != nil {
-		// todo save eventlog
-		server.saveErrRevision(currRevision, desiredPolicyGen)
+		server.saveErrRevision(currRevision, desiredPolicyGen, resolveLog)
 
 		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
 	}
@@ -83,6 +82,7 @@ func (server *Server) enforce() error {
 	if err != nil {
 		return fmt.Errorf("unable to get next revision: %s", err)
 	}
+	nextRevision.ResolveLog = resolveLog.SaveAsString()
 
 	// policy changed while no actions needed to achieve desired state
 	if len(stateDiff.Actions) <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
@@ -90,10 +90,6 @@ func (server *Server) enforce() error {
 		return nil
 	}
 	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.enforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, len(stateDiff.Actions))
-
-	// todo save eventlog (if there were changes?)
-
-	// todo if policy gen changed, we still need to save revision but with progress == done
 
 	// Save revision
 	err = server.store.SaveRevision(nextRevision)
@@ -108,11 +104,22 @@ func (server *Server) enforce() error {
 	}
 
 	pluginRegistry := server.pluginRegistryFactory()
-	eventLog = event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, eventLog, server.store.GetRevisionProgressUpdater(nextRevision))
+	applyLog := event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, applyLog, server.store.GetRevisionProgressUpdater(nextRevision))
 	_, err = applier.Apply()
 
-	// todo save eventlog
+	// reload revision to have progress data saved into it
+	nextRevision, saveErr := server.store.GetRevision(runtime.LastGen)
+	if saveErr != nil {
+		return fmt.Errorf("error while reloading last revision to have progress loaded: %s", saveErr)
+	}
+	nextRevision.ApplyLog = applyLog.SaveAsString()
+
+	// save apply log
+	saveErr = server.store.UpdateRevision(nextRevision)
+	if saveErr != nil {
+		return fmt.Errorf("error while saving new revision with apply log: %s", saveErr)
+	}
 
 	if err != nil {
 		return fmt.Errorf("error while applying new revision: %s", err)
@@ -122,17 +129,19 @@ func (server *Server) enforce() error {
 	return nil
 }
 
-func (server *Server) saveErrRevision(currRevision *engine.Revision, desiredPolicyGen runtime.Generation) {
+func (server *Server) saveErrRevision(currRevision *engine.Revision, desiredPolicyGen runtime.Generation, resolveLog *event.Log) {
 	if currRevision == nil || currRevision.Policy != desiredPolicyGen || currRevision.Status != engine.RevisionStatusError {
-		rev, revErr := server.store.NewRevision(desiredPolicyGen)
-		if revErr != nil {
-			log.Warnf("(enforce-%d) Error while creating revision to record resolution error: %s", server.enforcementIdx, revErr)
+		rev, err := server.store.NewRevision(desiredPolicyGen)
+		if err != nil {
+			log.Warnf("(enforce-%d) Error while creating revision to record resolution error: %s", server.enforcementIdx, err)
 		}
 
 		rev.Status = engine.RevisionStatusError
-		revErr = server.store.SaveRevision(rev)
-		if revErr != nil {
-			log.Warnf("(enforce-%d) Error while saving revision to record resolution error: %s", server.enforcementIdx, revErr)
+		rev.ResolveLog = resolveLog.SaveAsString()
+
+		err = server.store.SaveRevision(rev)
+		if err != nil {
+			log.Warnf("(enforce-%d) Error while saving revision to record resolution error: %s", server.enforcementIdx, err)
 		}
 	}
 }
