@@ -7,8 +7,40 @@ module.exports = [
   {
     type: 'tree',
     icon: 'fa fa-dashboard',
-    name: 'Policy',
+    name: 'Objects',
     items: [
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Services',
+        router: {
+          name: 'ShowServices'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Instances',
+        router: {
+          name: 'ShowDependencies'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Rules',
+        router: {
+          name: 'ShowRules'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Clusters',
+        router: {
+          name: 'ShowClusters'
+        }
+      },
       {
         type: 'item',
         icon: 'fa fa-circle-o',
@@ -31,14 +63,6 @@ module.exports = [
         name: 'Audit Log',
         router: {
           name: 'ShowAuditLog'
-        }
-      },
-      {
-        type: 'item',
-        icon: 'fa fa-circle-o',
-        name: 'Instances',
-        router: {
-          name: 'ShowDependencies'
         }
       },
       {

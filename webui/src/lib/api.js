@@ -146,6 +146,17 @@ export async function getDependencies (successFunc, errorFunc) {
   })
 }
 
+// loads all services
+export async function getServices (successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy'].join('/')
+  callAPI(handler, async, function (data) {
+    successFunc(filterObjects(data['objects'], null, 'service'))
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 // loads all endpoints
 export async function getEndpoints (d, successFunc, errorFunc) {
   await makeDelay()

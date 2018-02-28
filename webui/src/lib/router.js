@@ -9,11 +9,12 @@ import auth from 'lib/auth'
 
 // Aptomi pages
 import Login from 'pages/auth/Login.vue'
-import ShowObjects from 'pages/policy/ShowObjects.vue'
-import BrowsePolicy from 'pages/policy/BrowsePolicy.vue'
-import ShowDependencies from 'pages/policy/ShowDependencies.vue'
-import ShowUserRoles from 'pages/policy/ShowUserRoles.vue'
-import ShowAuditLog from 'pages/policy/ShowAuditLog.vue'
+import ShowObjects from 'pages/objects/ShowObjects.vue'
+import BrowsePolicy from 'pages/objects/BrowsePolicy.vue'
+import ShowServices from 'pages/objects/ShowServices.vue'
+import ShowDependencies from 'pages/objects/ShowDependencies.vue'
+import ShowUserRoles from 'pages/objects/ShowUserRoles.vue'
+import ShowAuditLog from 'pages/objects/ShowAuditLog.vue'
 
 Vue.use(Router)
 
@@ -27,13 +28,18 @@ const router = new Router({
     {
       path: '/',
       name: 'Home',
-      redirect: '/policy/objects'
+      redirect: '/objects/objects'
     },
     {
-      path: '/policy',
-      name: 'Policy',
+      path: '/objects',
+      name: 'Objects',
       component: Passthrough,
       children: [
+        {
+          path: 'services',
+          name: 'ShowServices',
+          component: ShowServices
+        },
         {
           path: 'objects',
           name: 'ShowObjects',
