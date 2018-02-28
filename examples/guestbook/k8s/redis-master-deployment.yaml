@@ -1,13 +1,14 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: redis-master
+  name: "redis-master-{{ .Discovery.service.instanceId }}"
 spec:
   selector:
     matchLabels:
       app: redis
       role: master
       tier: backend
+      instance: "{{ .Discovery.service.instanceId }}"
   replicas: 1
   template:
     metadata:
@@ -15,10 +16,11 @@ spec:
         app: redis
         role: master
         tier: backend
+        instance: "{{ .Discovery.service.instanceId }}"
     spec:
       containers:
       - name: master
-        image: k8s.gcr.io/redis:e2e  # or just image: redis
+        image: k8s.gcr.io/redis:e2e
         resources:
           requests:
             cpu: 100m
