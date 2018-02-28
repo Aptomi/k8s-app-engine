@@ -69,11 +69,20 @@
                   </div>
                 </td>
                 <td>
-                  <div v-for="c in d.components" v-if="c.code != null && c.code.type.indexOf('helm') >= 0" style="margin-right: 5px">
-                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/helm-logo.png" alt="Helm"/>
-                    <span>{{c.code.params.chartName}} /</span>
-                    <span v-if="c.code.params.chartVersion != null">{{c.code.params.chartVersion}}</span>
-                    <span v-else>latest</span>
+                  <div v-for="c in d.components" v-if="c.code != null" style="margin-right: 5px">
+                    <div v-if="c.code.type.indexOf('helm') >= 0">
+                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/helm-icon.png" alt="Helm"/>
+                      <span>{{c.code.params.chartName}} /</span>
+                      <span v-if="c.code.params.chartVersion != null">{{c.code.params.chartVersion}}</span>
+                      <span v-else>latest</span>
+                    </div>
+                    <div v-else-if="c.code.type.indexOf('raw') >= 0">
+                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" alt="Helm"/>
+                      <span>{{c.name}}</span>
+                    </div>
+                    <div v-else>
+                      <span class="label label-danger">Unknown code type</span>
+                    </div>
                   </div>
                 </td>
                 <td>
