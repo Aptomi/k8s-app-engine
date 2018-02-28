@@ -9,6 +9,7 @@ import router from './lib/router'
 import EventBus from './lib/eventBus.js'
 import axios from 'axios'
 import moment from 'moment'
+import VModal from 'vue-js-modal'
 
 Vue.prototype.$bus = EventBus
 Vue.prototype.$http = axios
@@ -24,6 +25,8 @@ Vue.filter('formatDate', function (value) {
     return moment(String(value)).format('MM/DD/YYYY hh:mm:ss')
   }
 })
+
+Vue.use(VModal, { dynamic: true })
 
 /* eslint-disable no-new */
 new Vue({

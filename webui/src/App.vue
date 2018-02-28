@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div class="wrapper" v-if="loggedIn">
+      <modals-container/>
       <va-navibar></va-navibar>
       <va-menu :menuItems="menuItems"></va-menu>
       <va-content></va-content>
@@ -10,8 +11,6 @@
         <!-- Default to the left -->
         <strong>Copyright &copy; 2018 <a href="http://aptomi.io">Aptomi</a>.</strong> All rights reserved.
       </footer>
-
-      <Modal></Modal>
     </div>
     <div v-else>
       <section class="content container-fluid">
@@ -19,8 +18,6 @@
           <router-view></router-view>
         </transition>
       </section>
-
-      <Modal></Modal>
     </div>
   </div>
 </template>
@@ -29,7 +26,6 @@
 import VANaviBar from './pages/components/NaviBar'
 import VAMenu from './pages/components/Menu'
 import VAAppContent from 'AppContent.vue'
-import Modal from './pages/components/Modal.vue'
 import store from './vuex/store.js'
 import menuItems from './lib/menuItems.js'
 import auth from 'lib/auth'
@@ -45,8 +41,7 @@ export default {
   components: {
     'va-navibar': VANaviBar,
     'va-menu': VAMenu,
-    'va-content': VAAppContent,
-    Modal
+    'va-content': VAAppContent
   },
   store
 }
