@@ -1,23 +1,55 @@
 <template>
   <div>
 
+    <div class="row" v-if="loading">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="overlay">
+            <i class="fa fa-refresh fa-spin"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" v-if="error">
+      <div class="col-xs-12">
+        <div class="box">
+          <table class="table table-hover">
+            <tbody>
+            <tr>
+              <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" v-if="!loading && !error && (dataMapByNs == null || Object.keys(dataMapByNs).length <= 0)">
+      <div class="col-xs-12">
+        <div class="box">
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <td>No Services Defined</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- /.row -->
-    <div class="row">
+    <div v-for="(objList, ns) in dataMapByNs" class="row">
       <div class="col-xs-12">
         <div class="box">
           <div class="box-header">
-            <h3 class="box-title">Services</h3>
-          </div>
-          <!-- /.box-header -->
-          <div class="overlay" v-if="loading">
-            <i class="fa fa-refresh fa-spin"></i>
+            <h3 class="box-title">Services: <b>{{ ns }}</b></h3>
           </div>
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">
               <thead>
               <tr>
-                <th>Namespace</th>
-                <th>Kind</th>
                 <th>Name</th>
                 <th>Uses</th>
                 <th>Code</th>
@@ -25,15 +57,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-if="error">
-                <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
-              </tr>
-              <tr v-if="services == null || services.length <= 0">
-                <td>No Services Defined</td>
-              </tr>
-              <tr v-for="d in services">
-                <td>{{d.namespace}}</td>
-                <td>{{d.kind}}</td>
+              <tr v-for="d in objList">
                 <td>
                   <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/service-icon.png" alt="Service"/>
                   <span>{{d.name}}</span>
@@ -47,7 +71,7 @@
                 <td>
                   <div v-for="c in d.components" v-if="c.code != null && c.code.type.indexOf('helm') >= 0" style="margin-right: 5px">
                     <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/helm-logo.png" alt="Helm"/>
-                    <span><b>{{c.code.params.chartName}}</b></span>
+                    <span>{{c.code.params.chartName}} /</span>
                     <span v-if="c.code.params.chartVersion != null">{{c.code.params.chartVersion}}</span>
                     <span v-else>latest</span>
                   </div>
@@ -70,7 +94,7 @@
 </template>
 
 <script>
-  import {getPolicyObjectsWithProperties} from 'lib/api.js'
+  import {getPolicyObjectsWithProperties, getObjectMapByNamespace} from 'lib/api.js'
   import objectYAML from 'pages/components/ObjectYAML'
 
   export default {
@@ -78,7 +102,7 @@
       // empty data
       return {
         loading: false,
-        services: null,
+        dataMapByNs: null,
         error: null
       }
     },
@@ -101,12 +125,12 @@
       },
       fetchData () {
         this.loading = true
-        this.services = null
+        this.dataMapByNs = null
         this.error = null
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-          this.services = data
+          this.dataMapByNs = getObjectMapByNamespace(data)
         }, this)
 
         const fetchError = $.proxy(function (err) {

@@ -47,7 +47,7 @@
 <script>
   import vSelect from 'vue-multiselect'
   import objectYaml from 'pages/components/ObjectYAML'
-  import { getPolicy, getPolicyObjects, getNamespaces, filterObjects } from 'lib/api.js'
+  import { getPolicy, getPolicyObjectRefMap, getNamespacesByRefMap, filterObjects } from 'lib/api.js'
 
   export default {
     data () {
@@ -64,7 +64,7 @@
     watch: {
       policyObjects: function (data) {
         // once policy objects are loaded, create the list of namespaces for the first dropdown
-        this.namespaces = getNamespaces(data)
+        this.namespaces = getNamespacesByRefMap(data)
         if (this.namespaces.length > 0) {
           // select first namespace
           this.selectedNamespace = this.namespaces[0]
@@ -114,7 +114,7 @@
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-          this.policyObjects = getPolicyObjects(data)
+          this.policyObjects = getPolicyObjectRefMap(data)
         }, this)
 
         const fetchError = $.proxy(function (err) {

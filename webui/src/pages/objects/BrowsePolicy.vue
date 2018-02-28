@@ -60,7 +60,7 @@
 <script>
   import vSelect from 'vue-multiselect'
   import vDiagram from 'pages/components/Diagram'
-  import { getPolicy, getPolicyGeneration, getPolicyObjects, getNamespaces } from 'lib/api.js'
+  import { getPolicy, getPolicyGeneration, getPolicyObjectRefMap, getNamespacesByRefMap } from 'lib/api.js'
 
   export default {
     data () {
@@ -126,7 +126,7 @@
       },
       policy: function (data) {
         // once policy is loaded, create the list of namespaces for the dropdown
-        this.namespaces = getNamespaces(getPolicyObjects(data))
+        this.namespaces = getNamespacesByRefMap(getPolicyObjectRefMap(data))
 
         // once policy is loaded, create the list of versions for the dropdown
         const generation = getPolicyGeneration(data)
