@@ -9,13 +9,26 @@ const basePath = process.env.API_BASEPATH
  * Exported functions, which can be used in pages/components
  */
 
-// returns the list of namespaces, given all policy objects
-export function getNamespaces (policyObjects) {
+// returns the list of namespaces, given a map of policy object references (map[namespace][kind][name] -> generation)
+export function getNamespacesByRefMap (policyObjectsRefMap) {
   const namespaces = []
-  for (const ns in policyObjects) {
+  for (const ns in policyObjectsRefMap) {
     namespaces.push(ns)
   }
-  return namespaces
+  return namespaces.sort()
+}
+
+// returns map from a namespace to a list of objects, given a list of objects
+export function getObjectMapByNamespace (objectList) {
+  const result = {}
+  for (const idx in objectList) {
+    const ns = objectList[idx]['namespace']
+    if (!(ns in result)) {
+      result[ns] = []
+    }
+    result[ns].push(objectList[idx])
+  }
+  return result
 }
 
 // filters the list of objects by a given namespace and/or kind
@@ -125,8 +138,8 @@ export function getPolicyGeneration (policy) {
   return policy['metadata']['generation']
 }
 
-// returns all policy objects (map[namespace][kind][name] -> generation), given the loaded policy
-export function getPolicyObjects (policy) {
+// returns map of references to policy objects (map[namespace][kind][name] -> generation), given the loaded policy
+export function getPolicyObjectRefMap (policy) {
   return policy['objects']
 }
 
@@ -235,7 +248,7 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
-      if (xhr.responseText) {
+      if (xhr.status === 200) {
         try {
           var data = yaml.safeLoad(xhr.responseText)
           if (data['kind'] === 'error') {
@@ -246,10 +259,8 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
         } catch (err) {
           errorFunc('error while parsing response: ' + err)
         }
-      } else if (xhr.statusText) {
-        errorFunc(xhr.status + ' ' + xhr.statusText)
       } else {
-        errorFunc('unable to load data from ' + path)
+        errorFunc('unable to load data from ' + path + ': ' + xhr.status + ' ' + xhr.statusText)
       }
     }
   }
