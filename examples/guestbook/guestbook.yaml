@@ -39,16 +39,10 @@
     namespace: main
     name: guestbook
 
+  # Each user will get own instance of the guestbook
   contexts:
-    - name: default
+    - name: personal
       allocation:
         service: guestbook
-
-- kind: dependency
-  metadata:
-    namespace: main
-    name: dev
-  user: Sam
-  contract: guestbook
-  labels:
-    cluster: cluster-us-west
+        keys:
+          - "{{ .User.Name }}"

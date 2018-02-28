@@ -1,0 +1,8 @@
+- kind: dependency
+  metadata:
+    namespace: main
+    name: bob_guestbook
+  user: Bob
+  contract: guestbook
+  labels:
+    cluster: cluster-us-west

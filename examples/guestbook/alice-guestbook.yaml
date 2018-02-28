@@ -1,0 +1,8 @@
+- kind: dependency
+  metadata:
+    namespace: main
+    name: alice_guestbook
+  user: Alice
+  contract: guestbook
+  labels:
+    cluster: cluster-us-west
