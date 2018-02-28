@@ -1,6 +1,6 @@
 - kind: dependency
   metadata:
-    namespace: main
+    namespace: social
     name: alice_guestbook
   user: Alice
   contract: guestbook
