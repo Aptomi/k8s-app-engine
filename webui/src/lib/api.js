@@ -130,28 +130,16 @@ export function getPolicyObjects (policy) {
   return policy['objects']
 }
 
-// loads all dependencies
-export async function getDependencies (successFunc, errorFunc) {
+// loads all objects and fetch their properties
+export async function getPolicyObjectsWithProperties (successFunc, errorFunc, kindFilter = null) {
   await makeDelay()
   const handler = ['policy'].join('/')
   callAPI(handler, async, function (data) {
-    const dependencies = filterObjects(data['objects'], null, 'dependency')
-    for (const idx in dependencies) {
-      fetchObjectProperties(dependencies[idx])
-      fetchDependencyStatus(dependencies[idx])
+    const objectList = filterObjects(data['objects'], null, kindFilter)
+    for (const idx in objectList) {
+      fetchObjectProperties(objectList[idx])
     }
-    successFunc(dependencies)
-  }, function (err) {
-    errorFunc(err)
-  })
-}
-
-// loads all services
-export async function getServices (successFunc, errorFunc) {
-  await makeDelay()
-  const handler = ['policy'].join('/')
-  callAPI(handler, async, function (data) {
-    successFunc(filterObjects(data['objects'], null, 'service'))
+    successFunc(objectList)
   }, function (err) {
     errorFunc(err)
   })
@@ -192,6 +180,10 @@ export function fetchObjectProperties (obj, successFunc = null, errorFunc = null
       errorFunc(err)
     }
   })
+
+  if (obj['kind'] === 'dependency') {
+    fetchDependencyStatus(obj)
+  }
 }
 
 // fetches status for a single dependency

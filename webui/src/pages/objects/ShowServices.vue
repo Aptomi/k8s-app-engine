@@ -63,7 +63,7 @@
 </template>
 
 <script>
-  import {getServices} from 'lib/api.js'
+  import {getPolicyObjectsWithProperties} from 'lib/api.js'
   import Endpoints from 'pages/components/Endpoints'
 
   export default {
@@ -99,7 +99,7 @@
           this.error = err
         }, this)
 
-        getServices(fetchSuccess, fetchError)
+        getPolicyObjectsWithProperties(fetchSuccess, fetchError, 'service')
       }
     }
   }

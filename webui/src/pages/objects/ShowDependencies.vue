@@ -68,7 +68,7 @@
 </template>
 
 <script>
-  import {getDependencies} from 'lib/api.js'
+  import {getPolicyObjectsWithProperties} from 'lib/api.js'
   import Endpoints from 'pages/components/Endpoints'
 
   export default {
@@ -104,7 +104,7 @@
           this.error = err
         }, this)
 
-        getDependencies(fetchSuccess, fetchError)
+        getPolicyObjectsWithProperties(fetchSuccess, fetchError, 'dependency')
       }
     }
   }
