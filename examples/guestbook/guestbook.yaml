@@ -1,0 +1,54 @@
+# Definition of Guestbook service
+- kind: service
+  metadata:
+    namespace: main
+    name: guestbook
+
+  components:
+    - name: frontend
+      code:
+        type: raw
+        params:
+          cluster: "{{ .Labels.cluster }}"
+          manifest: "@include k8s/frontend-*.yaml"
+
+      dependencies:
+        - redis-master
+        - redis-slave
+
+    - name: redis-master
+      code:
+        type: raw
+        params:
+          cluster: "{{ .Labels.cluster }}"
+          manifest: "@include k8s/redis-master-*.yaml"
+
+    - name: redis-slave
+      code:
+        type: raw
+        params:
+          cluster: "{{ .Labels.cluster }}"
+          manifest: "@include k8s/redis-slave-*.yaml"
+
+      dependencies:
+        - redis-master
+
+# Contract for GuestBook
+- kind: contract
+  metadata:
+    namespace: main
+    name: guestbook
+
+  contexts:
+    - name: default
+      allocation:
+        service: guestbook
+
+- kind: dependency
+  metadata:
+    namespace: main
+    name: dev
+  user: Sam
+  contract: guestbook
+  labels:
+    cluster: cluster-us-west
