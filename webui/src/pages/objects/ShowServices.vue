@@ -53,8 +53,8 @@
                   </div>
                 </td>
                 <td>
-                  <button type="button" class="btn btn-default btn-xs" @click="">Diagram</button>
-                  <button type="button" class="btn btn-default btn-xs" @click="openYaml(d)">YAML</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="showYaml(d)">YAML</button>
                 </td>
               </tr>
               </tbody>
@@ -87,7 +87,10 @@
       this.fetchData()
     },
     methods: {
-      openYaml (obj) {
+      showDiagram (obj) {
+        alert('diagram')
+      },
+      showYaml (obj) {
         this.$modal.show(objectYAML, {
           obj: obj,
           height: '465px'
