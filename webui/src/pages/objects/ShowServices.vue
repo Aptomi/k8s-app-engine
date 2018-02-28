@@ -17,8 +17,10 @@
               <thead>
               <tr>
                 <th>Namespace</th>
+                <th>Kind</th>
                 <th>Name</th>
-                <th>Components</th>
+                <th>Uses</th>
+                <th>Code</th>
                 <th>Action</th>
               </tr>
               </thead>
@@ -30,12 +32,25 @@
                 <td>No Services Defined</td>
               </tr>
               <tr v-for="d in services">
+                <td>{{d.namespace}}</td>
+                <td>{{d.kind}}</td>
                 <td>
-                  <span class="label label-primary">{{d.namespace}}</span>
+                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/service-icon.png" alt="Service"/>
+                  <span>{{d.name}}</span>
                 </td>
-                <td>{{d.name}}</td>
                 <td>
-                  <span v-for="c in d.components" class="label label-success" style="margin-right: 5px">{{c.name}}</span>
+                  <div v-for="c in d.components" v-if="c.contract != null">
+                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/contract-icon.png" alt="Contract"/>
+                    {{c.name}}
+                  </div>
+                </td>
+                <td>
+                  <div v-for="c in d.components" v-if="c.code != null && c.code.type.indexOf('helm') >= 0" style="margin-right: 5px">
+                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/helm-logo.png" alt="Helm"/>
+                    <span><b>{{c.code.params.chartName}}</b></span>
+                    <span v-if="c.code.params.chartVersion != null">{{c.code.params.chartVersion}}</span>
+                    <span v-else>latest</span>
+                  </div>
                 </td>
                 <td>
                   <button type="button" class="btn btn-default btn-xs" @click="">Diagram</button>
