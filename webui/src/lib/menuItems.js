@@ -44,22 +44,6 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Objects',
-        router: {
-          name: 'ShowObjects'
-        }
-      },
-      {
-        type: 'item',
-        icon: 'fa fa-circle-o',
-        name: 'Browser',
-        router: {
-          name: 'BrowsePolicy'
-        }
-      },
-      {
-        type: 'item',
-        icon: 'fa fa-circle-o',
         name: 'Audit Log',
         router: {
           name: 'ShowAuditLog'
@@ -71,6 +55,29 @@ module.exports = [
         name: 'User Roles',
         router: {
           name: 'ShowUserRoles'
+        }
+      }
+    ]
+  },
+  {
+    type: 'tree',
+    icon: 'fa fa-dashboard',
+    name: 'Debug',
+    items: [
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Objects',
+        router: {
+          name: 'ShowObjects'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Browser',
+        router: {
+          name: 'BrowsePolicy'
         }
       }
     ]
