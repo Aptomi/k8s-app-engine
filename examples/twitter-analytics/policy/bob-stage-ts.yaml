@@ -1,6 +1,6 @@
 - kind: dependency
   metadata:
-    namespace: main
+    namespace: social
     name: bob_stage
   user: Bob
   contract: twitter_stats

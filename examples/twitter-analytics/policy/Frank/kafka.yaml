@@ -1,7 +1,7 @@
 # Definition of Kafka service
 - kind: service
   metadata:
-    namespace: main
+    namespace: platform
     name: kafka
 
   labels:
@@ -38,7 +38,7 @@
 # Contract for Kafka
 - kind: contract
   metadata:
-    namespace: main
+    namespace: platform
     name: kafka
 
   contexts:

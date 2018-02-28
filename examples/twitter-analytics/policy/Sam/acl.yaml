@@ -2,7 +2,7 @@
 - kind: aclrule
   metadata:
     namespace: system
-    name: examples_domain_admins
+    name: example_domain_admins
   criteria:
     require-all:
       - global_ops
@@ -14,22 +14,22 @@
 - kind: aclrule
   metadata:
     namespace: system
-    name: examples_namespace_admins
+    name: example_namespace_admins
   criteria:
     require-all:
       - is_operator
   actions:
     add-role:
-      namespace-admin: main
+      namespace-admin: platform,social
 
 # This rule will make Alice, Bob, and Carol service consumers
 - kind: aclrule
   metadata:
     namespace: system
-    name: examples_service_consumers
+    name: example_service_consumers
   criteria:
     require-all:
       - org == 'dev'
   actions:
     add-role:
-      service-consumer: main
+      service-consumer: platform,social

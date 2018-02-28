@@ -1,7 +1,7 @@
 # Definition of Analytics Pipeline service
 - kind: service
   metadata:
-    namespace: main
+    namespace: platform
     name: analytics_pipeline
 
   labels:
@@ -21,7 +21,7 @@
 # Contract for Analytics Pipeline
 - kind: contract
   metadata:
-    namespace: main
+    namespace: platform
     name: analytics_pipeline
 
   contexts:

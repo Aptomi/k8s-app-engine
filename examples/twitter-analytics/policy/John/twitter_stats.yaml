@@ -1,7 +1,7 @@
 # Definition of Twitter Stats service
 - kind: service
   metadata:
-    namespace: main
+    namespace: social
     name: twitter_stats
 
   labels:
@@ -10,7 +10,7 @@
   components:
 
     - name: analytics_pipeline
-      contract: analytics_pipeline
+      contract: platform/analytics_pipeline
 
     # Publisher (Twitter Streaming API -> kafka)
     - name: tweepub
@@ -100,15 +100,15 @@
       dependencies:
         - analytics_pipeline
 
-# Contract for Twitter stats
+# Contract for Twitter Stats
 - kind: contract
   metadata:
-    namespace: main
+    namespace: social
     name: twitter_stats
 
   contexts:
-    # Production instance of the service (operated by ops/IT)
-    - name: prod
+    # Twitter Stats implementation which receives twitter messages from Twitter Streaming API
+    - name: realtime
       criteria:
         require-all:
           - org == 'it' && is_operator
@@ -119,8 +119,8 @@
       allocation:
         service: twitter_stats
 
-    # Staging instance of the service (for developers - individual instances)
-    - name: stage
+    # Twitter Stats implementation which generates a constant stream of fake twitter messages
+    - name: fake
       criteria:
         require-all:
           - org == 'dev'

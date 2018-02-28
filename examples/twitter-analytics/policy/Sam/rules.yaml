@@ -1,6 +1,6 @@
 - kind: rule
   metadata:
-    namespace: main
+    namespace: system
     name: prod_goes_to_us_east
   weight: 1000
   criteria:
@@ -14,7 +14,7 @@
 
 - kind: rule
   metadata:
-    namespace: main
+    namespace: system
     name: stage_goes_to_us_west
   weight: 2000
   criteria:
@@ -28,7 +28,7 @@
 
 - kind: rule
   metadata:
-    namespace: main
+    namespace: system
     name: reject_dependency_for_mobile_dev_users
   weight: 3000
   criteria:

@@ -1,7 +1,7 @@
 # Definition of Zookeeper service
 - kind: service
   metadata:
-    namespace: main
+    namespace: platform
     name: zookeeper
 
   labels:
@@ -27,7 +27,7 @@
 # Contract for Zookeeper
 - kind: contract
   metadata:
-    namespace: main
+    namespace: platform
     name: zookeeper
 
   contexts:
