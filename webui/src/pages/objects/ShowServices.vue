@@ -19,7 +19,6 @@
                 <th>Namespace</th>
                 <th>Name</th>
                 <th>Components</th>
-                <th>Services</th>
                 <th>Action</th>
               </tr>
               </thead>
@@ -31,16 +30,16 @@
                 <td>No Services Defined</td>
               </tr>
               <tr v-for="d in services">
-                <td>{{d.namespace}}</td>
-                <td>{{d.name}}</td>
-                <td v-if="!d.error">{{d.user}}</td>
-                <td v-else><span class="label label-danger center">Error</span></td>
-                <td v-if="!d.error">{{d.contract}}</td>
-                <td v-else><span class="label label-danger center">Error</span></td>
                 <td>
-                  <button v-if="d['status'] === 'Deployed'" type="button" class="btn btn-default btn-xs" @click="showEndpointsForDependency = d">Show
-                    Endpoints
-                  </button>
+                  <span class="label label-primary">{{d.namespace}}</span>
+                </td>
+                <td>{{d.name}}</td>
+                <td>
+                  <span v-for="c in d.components" class="label label-success" style="margin-right: 5px">{{c.name}}</span>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-default btn-xs" @click="">Diagram</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="">YAML</button>
                 </td>
               </tr>
               </tbody>
@@ -52,19 +51,11 @@
       </div>
     </div>
 
-    <!-- /.row -->
-    <div class="row" v-if="showEndpointsForDependency">
-      <div class="col-xs-12">
-        <endpoints :dependency="showEndpointsForDependency"></endpoints>
-      </div>
-    </div>
-
   </div>
 </template>
 
 <script>
   import {getPolicyObjectsWithProperties} from 'lib/api.js'
-  import Endpoints from 'pages/components/Endpoints'
 
   export default {
     data () {
@@ -72,16 +63,12 @@
       return {
         loading: false,
         services: null,
-        error: null,
-        showEndpointsForDependency: null
+        error: null
       }
     },
     created () {
       // fetch the data when the view is created and the data is already being observed
       this.fetchData()
-    },
-    components: {
-      'endpoints': Endpoints
     },
     methods: {
       fetchData () {
