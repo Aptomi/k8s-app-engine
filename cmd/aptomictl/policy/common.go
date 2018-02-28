@@ -63,9 +63,13 @@ func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runt
 		return nil, fmt.Errorf("error while searching for policy files: %s", err)
 	}
 
+	log.Info("Loading policy objects:")
+
 	allObjects := make([]runtime.Object, 0)
 	objectFile := make(map[string]string)
 	for _, file := range files {
+		log.Infof("  [*] %s", file)
+
 		data, readErr := ioutil.ReadFile(file)
 		if readErr != nil {
 			return nil, fmt.Errorf("can't read file %s error: %s", file, readErr)
@@ -105,6 +109,7 @@ func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runt
 				}
 			}
 
+			log.Infof("\t -> %s %s in %s", langObj.GetKind(), langObj.GetName(), langObj.GetNamespace())
 		}
 
 		allObjects = append(allObjects, objects...)
@@ -124,11 +129,6 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	}
 
 	sort.Strings(allFiles)
-
-	log.Info("Applying policy from:")
-	for _, policyPath := range allFiles {
-		log.Infof("  [*] %s", policyPath)
-	}
 
 	return allFiles, nil
 }
