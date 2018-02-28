@@ -20,6 +20,14 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
+        name: 'Contracts',
+        router: {
+          name: 'ShowContracts'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
         name: 'Dependencies',
         router: {
           name: 'ShowDependencies'
@@ -44,21 +52,29 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Audit Log',
-        router: {
-          name: 'ShowAuditLog'
-        }
-      },
-      {
-        type: 'item',
-        icon: 'fa fa-circle-o',
-        name: 'User Roles',
+        name: 'Users',
         router: {
           name: 'ShowUserRoles'
         }
       }
     ]
   },
+  {
+    type: 'tree',
+    icon: 'fa fa-dashboard',
+    name: 'Deployment',
+    items: [
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Audit Log',
+        router: {
+          name: 'ShowAuditLog'
+        }
+      }
+    ]
+  },
+
   {
     type: 'tree',
     icon: 'fa fa-dashboard',
