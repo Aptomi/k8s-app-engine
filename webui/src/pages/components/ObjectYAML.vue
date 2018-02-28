@@ -2,7 +2,7 @@
   <div>
     <div class="box box-default">
       <div class="box-header">
-        <h3 class="box-title">View Object: <b>{{ obj.namespace }} / {{ obj.kind }} / {{ obj.name }}</b></h3>
+        <h3 class="box-title">View: <b>{{ obj.namespace }} / {{ obj.kind }} / {{ obj.name }}</b></h3>
       </div>
       <!-- /.box-header -->
       <div class="overlay" v-if="loading">
@@ -17,7 +17,7 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <pre><code class="yaml">{{ obj.yaml }}</code></pre>
+            <pre style="font-size: 11px"><code v-bind:style="{ height: height }" class="yaml">{{ obj.yaml }}</code></pre>
           </div>
         </div>
         <!-- /.row -->
@@ -50,14 +50,7 @@
         hljs.highlightBlock(block)
       })
     },
-    props: {
-      'obj': {
-        type: Object,
-        validator: function (value) {
-          return true
-        }
-      }
-    },
+    props: ['obj', 'height'],
     watch: {
       'obj': 'fetchData'
     },

@@ -54,7 +54,7 @@
                 </td>
                 <td>
                   <button type="button" class="btn btn-default btn-xs" @click="">Diagram</button>
-                  <button type="button" class="btn btn-default btn-xs" @click="">YAML</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="openYaml(d)">YAML</button>
                 </td>
               </tr>
               </tbody>
@@ -71,6 +71,7 @@
 
 <script>
   import {getPolicyObjectsWithProperties} from 'lib/api.js'
+  import objectYAML from 'pages/components/ObjectYAML'
 
   export default {
     data () {
@@ -86,6 +87,15 @@
       this.fetchData()
     },
     methods: {
+      openYaml (obj) {
+        this.$modal.show(objectYAML, {
+          obj: obj,
+          height: '465px'
+        }, {
+          width: '60%',
+          height: '550px'
+        })
+      },
       fetchData () {
         this.loading = true
         this.services = null
