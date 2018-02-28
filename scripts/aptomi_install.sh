@@ -300,7 +300,12 @@ EOL
     else
         log_sub "Creating example users for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml$COLOR_RESET"
         run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
-        run_as_root cp ${UNPACKED_PATH}/examples/twitter-analytics/_external/users.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
+
+        if [ -d "${UNPACKED_PATH}/examples/twitter-analytics/_external" ]; then
+            run_as_root cp ${UNPACKED_PATH}/examples/twitter-analytics/_external/users.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
+        else
+            run_as_root cp ${UNPACKED_PATH}/examples/common/users.yaml ${APTOMI_SERVER_CONFIG_DIR}/users_example.yaml
+        fi
     fi
 
     if [ -d ${APTOMI_DB_DIR} ]; then
