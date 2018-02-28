@@ -41,6 +41,35 @@ const router = new Router({
           component: ShowServices
         },
         {
+          path: 'dependencies',
+          name: 'ShowDependencies',
+          component: ShowDependencies
+        },
+        {
+          path: 'users',
+          name: 'ShowUserRoles',
+          component: ShowUserRoles
+        }
+      ]
+    },
+    {
+      path: '/deployment',
+      name: 'Deployment',
+      component: Passthrough,
+      children: [
+        {
+          path: 'audit',
+          name: 'ShowAuditLog',
+          component: ShowAuditLog
+        }
+      ]
+    },
+    {
+      path: '/debug',
+      name: 'Debug',
+      component: Passthrough,
+      children: [
+        {
           path: 'objects',
           name: 'ShowObjects',
           component: ShowObjects
@@ -50,21 +79,6 @@ const router = new Router({
           name: 'BrowsePolicy',
           component: BrowsePolicy,
           props: true
-        },
-        {
-          path: 'dependencies',
-          name: 'ShowDependencies',
-          component: ShowDependencies
-        },
-        {
-          path: 'users',
-          name: 'ShowUserRoles',
-          component: ShowUserRoles
-        },
-        {
-          path: 'audit',
-          name: 'ShowAuditLog',
-          component: ShowAuditLog
         }
       ]
     },
