@@ -31,10 +31,10 @@
                     <span v-if="roleMap['domain-admin']" class="label label-success"><label class="fa fa-check"></label></span>
                   </td>
                   <td>
-                    <span v-for="flag, namespace in roleMap['namespace-admin']" class="label label-primary">{{ namespace }}</span>
+                    <span v-for="flag, namespace in roleMap['namespace-admin']" class="label label-primary" style="margin-right: 5px">{{ namespace }}</span>
                   </td>
                   <td>
-                    <span v-for="flag, namespace in roleMap['service-consumer']" class="label label-primary">{{ namespace }}</span>
+                    <span v-for="flag, namespace in roleMap['service-consumer']" class="label label-primary" style="margin-right: 5px">{{ namespace }}</span>
                   </td>
                 </tr>
               </tbody>
