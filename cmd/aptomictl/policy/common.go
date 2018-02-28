@@ -12,6 +12,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
 	log "github.com/Sirupsen/logrus"
+	yamlv2 "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -67,12 +68,17 @@ func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runt
 
 	allObjects := make([]runtime.Object, 0)
 	objectFile := make(map[string]string)
-	for _, file := range files {
-		log.Infof("  [*] %s", file)
 
+FILES:
+	for _, file := range files {
 		data, readErr := ioutil.ReadFile(file)
 		if readErr != nil {
 			return nil, fmt.Errorf("can't read file %s error: %s", file, readErr)
+		}
+
+		// skip entire file if we think that it's a file with k8s objects
+		if isK8sObject(data) {
+			continue FILES
 		}
 
 		objects, decodeErr := codec.DecodeOneOrMany(data)
@@ -108,7 +114,12 @@ func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runt
 					}
 				}
 			}
+		}
 
+		log.Infof("  [*] %s", file)
+
+		for _, obj := range objects {
+			langObj := obj.(lang.Base)
 			log.Infof("\t -> %s %s in %s", langObj.GetKind(), langObj.GetName(), langObj.GetNamespace())
 		}
 
@@ -175,4 +186,17 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 		panic("error")
 	}
 
+}
+
+func isK8sObject(data []byte) bool {
+	k8sObj := make(map[string]interface{})
+	k8sErr := yamlv2.Unmarshal(data, k8sObj)
+	if k8sErr != nil {
+		return false
+	}
+
+	// Aptomi don't have a spec field in language objects, but k8s always have it in all objects
+	_, exist := k8sObj["spec"]
+
+	return exist
 }
