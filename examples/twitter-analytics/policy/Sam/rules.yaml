@@ -1,7 +1,7 @@
 - kind: rule
   metadata:
     namespace: main
-    name: analytics_prod_goes_to_us_east
+    name: prod_goes_to_us_east
   weight: 1000
   criteria:
     require-all:
@@ -15,7 +15,7 @@
 - kind: rule
   metadata:
     namespace: main
-    name: analytics_stage_goes_to_us_west
+    name: stage_goes_to_us_west
   weight: 2000
   criteria:
     require-all:
