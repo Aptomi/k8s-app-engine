@@ -20,7 +20,7 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Instances',
+        name: 'Dependencies',
         router: {
           name: 'ShowDependencies'
         }
