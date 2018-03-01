@@ -160,13 +160,13 @@ login bob
 aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
 check_policy_version 7
 
-check_policy 3 ".Objects.main.dependency | length"
+check_policy 3 ".Objects.social.dependency | length"
 
 # delete Alice's dependency
 login alice
 aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
 check_policy_version 8
-check_policy 2 ".Objects.main.dependency | length"
+check_policy 2 ".Objects.social.dependency | length"
 
 # upgrade prod dependency
 sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
@@ -178,22 +178,26 @@ check_policy_version 9
 login carol
 aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
 check_policy_version 10
-check_policy 3 ".Objects.main.dependency | length"
+check_policy 3 ".Objects.social.dependency | length"
 
 # delete all dependencies
 login sam
 aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f "${POLICY_DIR}/policy/*-ts.yaml"
 check_policy_version 11
-check_policy 0 ".Objects.main.dependency | length"
+check_policy 0 ".Objects.social.dependency | length"
 
 # delete all definitions
 login sam
 aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy
 check_policy_version 12
-check_policy 0 ".Objects.main.contract | length"
-check_policy 0 ".Objects.main.dependency | length"
-check_policy 0 ".Objects.main.rule | length"
-check_policy 0 ".Objects.main.service | length"
+check_policy 0 ".Objects.platform.contract | length"
+check_policy 0 ".Objects.social.contract | length"
+check_policy 0 ".Objects.platform.dependency | length"
+check_policy 0 ".Objects.social.dependency | length"
+check_policy 0 ".Objects.platform.rule | length"
+check_policy 0 ".Objects.social.rule | length"
+check_policy 0 ".Objects.platform.service | length"
+check_policy 0 ".Objects.social.service | length"
 check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
 
@@ -221,10 +225,13 @@ login bob
 aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
 check_policy_version 18
 
-check_policy 6 ".Objects.main.contract | length"
-check_policy 3 ".Objects.main.dependency | length"
-check_policy 3 ".Objects.main.rule | length"
-check_policy 6 ".Objects.main.service | length"
+check_policy 5 ".Objects.platform.contract | length"
+check_policy 0 ".Objects.platform.dependency | length"
+check_policy 5 ".Objects.platform.service | length"
+check_policy 1 ".Objects.social.contract | length"
+check_policy 3 ".Objects.social.dependency | length"
+check_policy 1 ".Objects.social.service | length"
+check_policy 3 ".Objects.system.rule | length"
 check_policy 3 ".Objects.system.aclrule | length"
 check_policy 2 ".Objects.system.cluster | length"
 
