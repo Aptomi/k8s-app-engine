@@ -39,14 +39,14 @@
       </div>
     </div>
 
-    <object-yaml v-if="selectedObject" :obj="selectedObject" height="100%"></object-yaml>
+    <object-view-yaml v-if="selectedObject" :obj="selectedObject" height="100%"></object-view-yaml>
 
   </div>
 </template>
 
 <script>
   import vSelect from 'vue-multiselect'
-  import ObjectViewYAML from 'pages/components/ObjectViewYAML'
+  import objectViewYaml from 'pages/components/ObjectViewYAML'
   import { getPolicy, getPolicyObjectRefMap, getNamespacesByRefMap, filterObjects } from 'lib/api.js'
 
   export default {
@@ -127,7 +127,7 @@
     },
     components: {
       vSelect,
-      ObjectViewYAML
+      objectViewYaml
     }
   }
 </script>
