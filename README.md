@@ -98,7 +98,8 @@ Once Aptomi server is up and k8s cluster is ready, you can get started by runnin
 
 Example    | Description
 -----------|------------
-[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, multi-cloud
+[twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, multi-cloud, based on Helm
+[guestbook](examples/guestbook) | K8S Guestbook Application, multi-cloud, based on K8S YAMLs
 
 ### Step #4: Send us a note on Slack
 
