@@ -31,7 +31,7 @@
           <table class="table table-hover">
             <tbody>
               <tr>
-                <td>No Contracts Defined</td>
+                <td>No Clusters Defined</td>
               </tr>
             </tbody>
           </table>
