@@ -1,16 +1,50 @@
 <template>
   <div>
 
+    <div class="row" v-if="loading">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="overlay">
+            <i class="fa fa-refresh fa-spin"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" v-if="error">
+      <div class="col-xs-12">
+        <div class="box">
+          <table class="table table-hover">
+            <tbody>
+            <tr>
+              <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" v-if="!loading && !error && (dataMapByNs == null || Object.keys(dataMapByNs).length <= 0)">
+      <div class="col-xs-12">
+        <div class="box">
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <td>No Dependencies Defined</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- /.row -->
-    <div class="row">
+    <div v-for="(objList, ns) in dataMapByNs" class="row">
       <div class="col-xs-12">
         <div class="box">
           <div class="box-header">
-            <h3 class="box-title">Declared Dependencies</h3>
-          </div>
-          <!-- /.box-header -->
-          <div class="overlay" v-if="loading">
-            <i class="fa fa-refresh fa-spin"></i>
+            <h3 class="box-title">Dependencies: <b>{{ ns }}</b></h3>
           </div>
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">
@@ -25,13 +59,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-if="error">
-                <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
-              </tr>
-              <tr v-if="dependencies == null || dependencies.length <= 0">
-                <td>No Dependencies Declared</td>
-              </tr>
-              <tr v-for="d in dependencies">
+              <tr v-for="d in objList">
                 <td>{{d.namespace}}</td>
                 <td>{{d.name}}</td>
                 <td v-if="!d.error">{{d.user}}</td>
@@ -43,9 +71,9 @@
                 </td>
                 <td v-else><span class="label label-danger center">Error</span></td>
                 <td>
-                  <button v-if="d['status'] === 'Deployed'" type="button" class="btn btn-default btn-xs" @click="showEndpointsForDependency = d">Show
-                    Endpoints
-                  </button>
+                  <button type="button" class="btn btn-default btn-xs" @click="showEndpoints(d)">Endpoints</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="showYaml(d)">YAML</button>
                 </td>
               </tr>
               </tbody>
@@ -57,46 +85,56 @@
       </div>
     </div>
 
-    <!-- /.row -->
-    <div class="row" v-if="showEndpointsForDependency">
-      <div class="col-xs-12">
-        <endpoints :dependency="showEndpointsForDependency"></endpoints>
-      </div>
-    </div>
-
   </div>
 </template>
 
 <script>
-  import {getPolicyObjectsWithProperties} from 'lib/api.js'
-  import Endpoints from 'pages/components/Endpoints'
+  import {getPolicyObjectsWithProperties, getObjectMapByNamespace} from 'lib/api.js'
+  import objectYAML from 'pages/components/ObjectYAML'
+  import endpoints from 'pages/components/Endpoints'
 
   export default {
     data () {
       // empty data
       return {
         loading: false,
-        dependencies: null,
-        error: null,
-        showEndpointsForDependency: null
+        dataMapByNs: null,
+        error: null
       }
     },
     created () {
       // fetch the data when the view is created and the data is already being observed
       this.fetchData()
     },
-    components: {
-      'endpoints': Endpoints
-    },
     methods: {
+      showEndpoints (obj) {
+        this.$modal.show(endpoints, {
+          dependency: obj
+        }, {
+          width: '60%',
+          height: 'auto'
+        })
+      },
+      showDiagram (obj) {
+        alert('diagram')
+      },
+      showYaml (obj) {
+        this.$modal.show(objectYAML, {
+          obj: obj,
+          height: '465px'
+        }, {
+          width: '60%',
+          height: '550px'
+        })
+      },
       fetchData () {
         this.loading = true
-        this.dependencies = null
+        this.dataMapByNs = null
         this.error = null
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-          this.dependencies = data
+          this.dataMapByNs = getObjectMapByNamespace(data)
         }, this)
 
         const fetchError = $.proxy(function (err) {
