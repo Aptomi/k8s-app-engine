@@ -272,22 +272,30 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null, deleteF
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
+      var msg = path + ': returned ' + xhr.status + ' ' + xhr.statusText
       if (xhr.status === 200) {
+        // parse response as YAML
+        try {
+          const data = yaml.safeLoad(xhr.responseText)
+          successFunc(data)
+        } catch (err) {
+          msg += '(error while parsing response: ' + err + ')'
+          errorFunc(msg)
+        }
+      } else {
+        // let's try to parse out error text, which was returned
         try {
           const data = yaml.safeLoad(xhr.responseText)
           if (data['kind'] === 'error') {
-            errorFunc(data['error'])
+            msg = 'error: ' + data['error']
           } else {
-            successFunc(data)
+            msg += '(' + JSON.stringify(data) + ')'
           }
         } catch (err) {
-          errorFunc('error while parsing response: ' + err)
+          msg += '(error while parsing response: ' + err + ')'
         }
-      } else {
-        var msg = path + ': returned ' + xhr.status + ' ' + xhr.statusText
-        if (xhr.responseText != null) {
-          msg += '(' + xhr.responseText + ')'
-        }
+
+        // return error
         errorFunc(msg)
       }
     }
