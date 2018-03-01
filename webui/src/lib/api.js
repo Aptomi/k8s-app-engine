@@ -113,7 +113,7 @@ export async function getPolicy (successFunc, errorFunc) {
   })
 }
 
-// saves the latest policy
+// updates/saves objects in the latest policy
 export async function savePolicyObjects (successFunc, errorFunc, policyObjects) {
   await makeDelay()
   const handler = ['policy'].join('/')
@@ -122,6 +122,17 @@ export async function savePolicyObjects (successFunc, errorFunc, policyObjects) 
   }, function (err) {
     errorFunc(err)
   }, policyObjects)
+}
+
+// deletes objects in the latest policy
+export async function deletePolicyObjects (successFunc, errorFunc, policyObjects) {
+  await makeDelay()
+  const handler = ['policy'].join('/')
+  callAPI(handler, async, function (data) {
+    successFunc(data)
+  }, function (err) {
+    errorFunc(err)
+  }, policyObjects, true)
 }
 
 // loads all policies and returns revision information for each and every of them
@@ -256,7 +267,7 @@ function makeDelay () {
 }
 
 // makes an API call to Aptomi
-function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
+function callAPI (handler, isAsync, successFunc, errorFunc, body = null, deleteFlag = false) {
   const path = basePath + handler
   const xhr = new XMLHttpRequest()
   xhr.onreadystatechange = function () {
@@ -287,7 +298,11 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
     xhr.setRequestHeader('Content-type', 'application/yaml')
     xhr.send()
   } else {
-    xhr.open('POST', path, isAsync)
+    if (deleteFlag) {
+      xhr.open('DELETE', path, isAsync)
+    } else {
+      xhr.open('POST', path, isAsync)
+    }
     xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token)
     xhr.setRequestHeader('Content-type', 'application/yaml')
     xhr.send(yaml.safeDump(body))

@@ -5,7 +5,7 @@
         <h3 class="box-title">View/Edit: <b>{{ obj.namespace }} / {{ obj.kind }} / {{ obj.name }}</b></h3>
         <button class="btn btn-sm btn-default" style="float: right" @click="editorCancel">Cancel</button>
         <button class="btn btn-sm btn-primary" style="float: right; margin-right: 5px" @click="editorSave">Save</button>
-        <button class="btn btn-sm btn-danger" style="float: right; margin-right: 5px" @click="editorSave">Delete</button>
+        <button class="btn btn-sm btn-danger" style="float: right; margin-right: 5px" @click="editorDelete">Delete</button>
       </div>
       <!-- /.box-header -->
       <div class="overlay" v-if="loading">
@@ -32,7 +32,7 @@
   </div>
 </template>
 <script>
-  import { fetchObjectProperties, savePolicyObjects } from 'lib/api.js'
+  import { fetchObjectProperties, savePolicyObjects, deletePolicyObjects } from 'lib/api.js'
   import hljs from 'highlight.js'
   import 'highlight.js/styles/agate.css'
   import yaml from 'js-yaml'
@@ -68,8 +68,38 @@
         this.$emit('close')
       },
       editorDelete: function () {
-        alert(this.obj.yaml)
-        this.$emit('close')
+        // trying to parse YAML first
+        var parsedObj
+        try {
+          parsedObj = yaml.safeLoad(this.obj.yaml)
+        } catch (e) {
+          // keep plain alert here for now, so user can read the error for as long as needed before closing it
+          alert('Invalid YAML: ' + e)
+          return
+        }
+
+        // ask for a confirmation
+        if (!confirm('Are you sure you want to delete the object?')) {
+          return
+        }
+
+        const deleteSuccess = $.proxy(function (data) {
+          var message = data['policychanged'] ? 'Changed: version ' + (data['policygeneration'] - 1) + ' -> ' + data['policygeneration'] : 'No changes'
+          this.$notify({
+            group: 'main',
+            type: 'warning',
+            title: 'Deleted Successfully',
+            text: message
+          })
+          this.$emit('close')
+        }, this)
+
+        const deleteError = $.proxy(function (err) {
+          // keep plain alert here for now, so user can read the error for as long as needed before closing it
+          alert(err)
+        }, this)
+
+        deletePolicyObjects(deleteSuccess, deleteError, parsedObj)
       },
       editorSave: function () {
         // trying to parse YAML first
