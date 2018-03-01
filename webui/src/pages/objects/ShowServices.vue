@@ -77,7 +77,7 @@
                       <span v-else>latest</span>
                     </div>
                     <div v-else-if="c.code.type.indexOf('raw') >= 0">
-                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" alt="Helm"/>
+                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" alt="Kubernetes"/>
                       <span>{{c.name}}</span>
                     </div>
                     <div v-else>
