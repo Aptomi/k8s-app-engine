@@ -9,15 +9,15 @@ import auth from 'lib/auth'
 
 // Aptomi pages
 import Login from 'pages/auth/Login.vue'
-import ShowObjects from 'pages/objects/ShowObjects.vue'
-import BrowsePolicy from 'pages/objects/BrowsePolicy.vue'
 import ShowServices from 'pages/objects/ShowServices.vue'
 import ShowContracts from 'pages/objects/ShowContracts.vue'
 import ShowClusters from 'pages/objects/ShowClusters.vue'
 import ShowRules from 'pages/objects/ShowRules.vue'
 import ShowDependencies from 'pages/objects/ShowDependencies.vue'
 import ShowUserRoles from 'pages/objects/ShowUserRoles.vue'
-import ShowAuditLog from 'pages/objects/ShowAuditLog.vue'
+import ShowAuditLog from 'pages/deployment/ShowAuditLog.vue'
+import ShowObjects from 'pages/debug/ShowObjects.vue'
+import BrowsePolicy from 'pages/debug/BrowsePolicy.vue'
 
 Vue.use(Router)
 
