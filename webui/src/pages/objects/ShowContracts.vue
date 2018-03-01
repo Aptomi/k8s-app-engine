@@ -59,13 +59,13 @@
               <tbody>
               <tr v-for="d in objList">
                 <td>
-                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/contract-icon.png" alt="Contract"/>
+                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/contract-icon.png" title="Contract"/>
                   <span>{{d.name}}</span>
                 </td>
                 <td>
                   <div v-for="c in d.contexts">
                       {{c.name}} ->
-                      <img style="height: 20px; margin-right: 5px" src="/static/img/service-icon.png" alt="Service"/>{{c.allocation.service}}
+                      <img style="height: 20px; margin-right: 5px" src="/static/img/service-icon.png" title="Service"/>{{c.allocation.service}}
                     </span>
                   </div>
                 </td>

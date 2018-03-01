@@ -59,25 +59,25 @@
               <tbody>
               <tr v-for="d in objList">
                 <td>
-                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/service-icon.png" alt="Service"/>
+                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/service-icon.png" title="Service"/>
                   <span>{{d.name}}</span>
                 </td>
                 <td>
                   <div v-for="c in d.components" v-if="c.contract != null">
-                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/contract-icon.png" alt="Contract"/>
+                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/contract-icon.png" title="Contract"/>
                     {{c.name}}
                   </div>
                 </td>
                 <td>
                   <div v-for="c in d.components" v-if="c.code != null" style="margin-right: 5px">
                     <div v-if="c.code.type.indexOf('helm') >= 0">
-                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/helm-icon.png" alt="Helm"/>
+                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/helm-icon.png" title="Helm Chart"/>
                       <span>{{c.code.params.chartName}} /</span>
                       <span v-if="c.code.params.chartVersion != null">{{c.code.params.chartVersion}}</span>
                       <span v-else>latest</span>
                     </div>
                     <div v-else-if="c.code.type.indexOf('raw') >= 0">
-                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" alt="Kubernetes"/>
+                      <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" title="Kubernetes YAMLs"/>
                       <span>{{c.name}}</span>
                     </div>
                     <div v-else>

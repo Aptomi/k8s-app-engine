@@ -15,7 +15,7 @@
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th>User</th>
+                  <th>Name</th>
                   <th>Domain Admin</th>
                   <th>Namespace Admin</th>
                   <th>Service Consumer</th>
@@ -26,7 +26,10 @@
                   <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
                 </tr>
                 <tr v-for="roleMap, username in users">
-                  <td>{{ username }}</td>
+                  <td>
+                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/user-icon.png" title="User"/>
+                    <span>{{ username }}</span>
+                  </td>
                   <td>
                     <span v-if="roleMap['domain-admin']" class="label label-success"><label class="fa fa-check"></label></span>
                   </td>

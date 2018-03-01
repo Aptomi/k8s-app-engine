@@ -50,7 +50,6 @@
             <table class="table table-hover">
               <thead>
               <tr>
-                <th>Namespace</th>
                 <th>Name</th>
                 <th>User</th>
                 <th>Contract</th>
@@ -60,8 +59,10 @@
               </thead>
               <tbody>
               <tr v-for="d in objList">
-                <td>{{d.namespace}}</td>
-                <td>{{d.name}}</td>
+                <td>
+                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/dependency-icon.png" title="Dependency"/>
+                  <span>{{d.name}}</span>
+                </td>
                 <td v-if="!d.error">{{d.user}}</td>
                 <td v-else><span class="label label-danger center">Error</span></td>
                 <td v-if="!d.error">{{d.contract}}</td>

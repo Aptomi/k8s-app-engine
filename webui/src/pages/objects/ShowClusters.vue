@@ -60,7 +60,7 @@
               <tr v-for="d in objList">
                 <td>
                   <div v-if="d.type.indexOf('kubernetes') >= 0">
-                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" alt="Kubernetes"/>
+                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/k8s-icon.png" title="Kubernetes YAMLs"/>
                   </div>
                   <div v-else>
                     <span style="float: left; height: 20px; margin-right: 5px" class="label label-danger">Unknown cluster type</span>
