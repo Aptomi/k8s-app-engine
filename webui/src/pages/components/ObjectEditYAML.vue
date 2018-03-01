@@ -5,6 +5,7 @@
         <h3 class="box-title">View/Edit: <b>{{ obj.namespace }} / {{ obj.kind }} / {{ obj.name }}</b></h3>
         <button class="btn btn-sm btn-default" style="float: right" @click="editorCancel">Cancel</button>
         <button class="btn btn-sm btn-primary" style="float: right; margin-right: 5px" @click="editorSave">Save</button>
+        <button class="btn btn-sm btn-danger" style="float: right; margin-right: 5px" @click="editorSave">Delete</button>
       </div>
       <!-- /.box-header -->
       <div class="overlay" v-if="loading">
@@ -27,12 +28,14 @@
 
       <!-- /.box-body -->
     </div>
+
   </div>
 </template>
 <script>
-  import { fetchObjectProperties } from 'lib/api.js'
+  import { fetchObjectProperties, savePolicyObjects } from 'lib/api.js'
   import hljs from 'highlight.js'
   import 'highlight.js/styles/agate.css'
+  import yaml from 'js-yaml'
 
   export default {
     data () {
@@ -64,9 +67,38 @@
       editorCancel: function () {
         this.$emit('close')
       },
-      editorSave: function () {
+      editorDelete: function () {
         alert(this.obj.yaml)
         this.$emit('close')
+      },
+      editorSave: function () {
+        // trying to parse YAML first
+        var parsedObj
+        try {
+          parsedObj = yaml.safeLoad(this.obj.yaml)
+        } catch (e) {
+          // keep plain alert here for now, so user can read the error for as long as needed before closing it
+          alert('Invalid YAML: ' + e)
+          return
+        }
+
+        const saveSuccess = $.proxy(function (data) {
+          var message = data['policychanged'] ? 'Changed: version ' + (data['policygeneration'] - 1) + ' -> ' + data['policygeneration'] : 'No changes'
+          this.$notify({
+            group: 'main',
+            type: 'success',
+            title: 'Saved Successfully',
+            text: message
+          })
+          this.$emit('close')
+        }, this)
+
+        const saveError = $.proxy(function (err) {
+          // keep plain alert here for now, so user can read the error for as long as needed before closing it
+          alert(err)
+        }, this)
+
+        savePolicyObjects(saveSuccess, saveError, parsedObj)
       },
       fetchData () {
         this.loading = true

@@ -113,6 +113,17 @@ export async function getPolicy (successFunc, errorFunc) {
   })
 }
 
+// saves the latest policy
+export async function savePolicyObjects (successFunc, errorFunc, policyObjects) {
+  await makeDelay()
+  const handler = ['policy'].join('/')
+  callAPI(handler, async, function (data) {
+    successFunc(data)
+  }, function (err) {
+    errorFunc(err)
+  }, policyObjects)
+}
+
 // loads all policies and returns revision information for each and every of them
 export async function getAllPolicies (successFunc, errorFunc) {
   await makeDelay()
@@ -252,7 +263,7 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
         try {
-          var data = yaml.safeLoad(xhr.responseText)
+          const data = yaml.safeLoad(xhr.responseText)
           if (data['kind'] === 'error') {
             errorFunc(data['error'])
           } else {
@@ -262,7 +273,11 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
           errorFunc('error while parsing response: ' + err)
         }
       } else {
-        errorFunc('unable to load data from ' + path + ': ' + xhr.status + ' ' + xhr.statusText)
+        var msg = path + ': returned ' + xhr.status + ' ' + xhr.statusText
+        if (xhr.responseText != null) {
+          msg += '(' + xhr.responseText + ')'
+        }
+        errorFunc(msg)
       }
     }
   }
@@ -273,6 +288,7 @@ function callAPI (handler, isAsync, successFunc, errorFunc, body = null) {
     xhr.send()
   } else {
     xhr.open('POST', path, isAsync)
+    xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.token)
     xhr.setRequestHeader('Content-type', 'application/yaml')
     xhr.send(yaml.safeDump(body))
   }

@@ -10,6 +10,7 @@ import EventBus from './lib/eventBus.js'
 import axios from 'axios'
 import moment from 'moment'
 import VModal from 'vue-js-modal'
+import Notifications from 'vue-notification'
 
 Vue.prototype.$bus = EventBus
 Vue.prototype.$http = axios
@@ -27,6 +28,7 @@ Vue.filter('formatDate', function (value) {
 })
 
 Vue.use(VModal, { dynamic: true })
+Vue.use(Notifications)
 
 /* eslint-disable no-new */
 new Vue({

@@ -2,6 +2,8 @@
   <div id="app">
     <div class="wrapper" v-if="loggedIn">
       <modals-container/>
+      <notifications group="main" position="bottom right" />
+
       <va-navibar></va-navibar>
       <va-menu :menuItems="menuItems"></va-menu>
       <va-content></va-content>
