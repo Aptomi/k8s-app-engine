@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"time"
 )
@@ -37,8 +38,8 @@ type Revision struct {
 	Progress  RevisionProgress
 	AppliedAt time.Time
 
-	ResolveLog string
-	ApplyLog   string
+	ResolveLog []*event.APIEvent
+	ApplyLog   []*event.APIEvent
 }
 
 // RevisionProgress represents revision applying progress

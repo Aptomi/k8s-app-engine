@@ -91,7 +91,7 @@ func (server *Server) enforce() error {
 	if err != nil {
 		return fmt.Errorf("unable to get next revision: %s", err)
 	}
-	nextRevision.ResolveLog = resolveLog.SaveAsString()
+	nextRevision.ResolveLog = resolveLog.AsAPIEvents()
 
 	// policy changed while no actions needed to achieve desired state
 	if len(stateDiff.Actions) <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
@@ -122,7 +122,7 @@ func (server *Server) enforce() error {
 	if saveErr != nil {
 		return fmt.Errorf("error while reloading last revision to have progress loaded: %s", saveErr)
 	}
-	nextRevision.ApplyLog = applyLog.SaveAsString()
+	nextRevision.ApplyLog = applyLog.AsAPIEvents()
 
 	// save apply log
 	saveErr = server.store.UpdateRevision(nextRevision)
@@ -146,7 +146,7 @@ func (server *Server) saveErrRevision(currRevision *engine.Revision, desiredPoli
 		}
 
 		rev.Status = engine.RevisionStatusError
-		rev.ResolveLog = resolveLog.SaveAsString()
+		rev.ResolveLog = resolveLog.AsAPIEvents()
 
 		err = server.store.SaveRevision(rev)
 		if err != nil {
