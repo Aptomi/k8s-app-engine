@@ -91,7 +91,7 @@
 
 <script>
   import {getPolicyObjectsWithProperties, getObjectMapByNamespace} from 'lib/api.js'
-  import objectYAML from 'pages/components/ObjectYAML'
+  import ObjectViewYAML from 'pages/components/ObjectViewYAML'
   import endpoints from 'pages/components/Endpoints'
 
   export default {
@@ -120,7 +120,7 @@
         alert('diagram')
       },
       showYaml (obj) {
-        this.$modal.show(objectYAML, {
+        this.$modal.show(ObjectViewYAML, {
           obj: obj,
           height: '465px'
         }, {

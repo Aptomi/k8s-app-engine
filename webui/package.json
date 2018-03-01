@@ -32,7 +32,6 @@
     "vue-js-modal": "^1.3.12",
     "vue-multiselect": "^2.0.8",
     "vue-router": "^3.0.1",
-    "vue2-ace-editor": "^0.0.7",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -47,6 +46,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
+    "brace": "^0.8.0",
     "chai": "^4.1.2",
     "chalk": "^2.3.0",
     "chromedriver": "^2.34.1",
@@ -96,6 +96,7 @@
     "vue-loader": "^13.6.2",
     "vue-style-loader": "^3.0.3",
     "vue-template-compiler": "^2.5.13",
+    "vue2-ace-editor": "^0.0.7",
     "webpack": "^3.10.0",
     "webpack-bundle-analyzer": "^2.9.1",
     "webpack-dev-middleware": "^2.0.3",

@@ -46,7 +46,7 @@
 
 <script>
   import vSelect from 'vue-multiselect'
-  import objectYaml from 'pages/components/ObjectYAML'
+  import ObjectViewYAML from 'pages/components/ObjectViewYAML'
   import { getPolicy, getPolicyObjectRefMap, getNamespacesByRefMap, filterObjects } from 'lib/api.js'
 
   export default {
@@ -127,7 +127,7 @@
     },
     components: {
       vSelect,
-      objectYaml
+      ObjectViewYAML
     }
   }
 </script>
