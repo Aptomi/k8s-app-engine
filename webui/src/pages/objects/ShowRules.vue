@@ -102,7 +102,7 @@
                 </td>
                 <td>
                   <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
-                  <button type="button" class="btn btn-default btn-xs" @click="showYaml(d)">YAML</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="editYaml(d)">Edit</button>
                 </td>
               </tr>
               </tbody>
@@ -119,7 +119,7 @@
 
 <script>
   import {getPolicyObjectsWithProperties, getObjectMapByNamespace} from 'lib/api.js'
-  import ObjectViewYAML from 'pages/components/ObjectViewYAML'
+  import objectEditYAML from 'pages/components/ObjectEditYAML'
 
   export default {
     data () {
@@ -138,8 +138,8 @@
       showDiagram (obj) {
         alert('diagram')
       },
-      showYaml (obj) {
-        this.$modal.show(ObjectViewYAML, {
+      editYaml (obj) {
+        this.$modal.show(objectEditYAML, {
           obj: obj,
           height: '465px'
         }, {
