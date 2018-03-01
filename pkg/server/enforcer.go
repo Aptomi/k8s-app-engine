@@ -22,7 +22,16 @@ func (server *Server) enforceLoop() error {
 		if err != nil {
 			logError(err)
 		}
-		time.Sleep(server.cfg.Enforcer.Interval)
+
+		// sleep for a specified time or wait until policy has changed, whichever comes first
+		timer := time.NewTimer(server.cfg.Enforcer.Interval)
+		select {
+		case <-server.policyChanged:
+			break
+		case <-timer.C:
+			break
+		}
+		timer.Stop()
 	}
 }
 

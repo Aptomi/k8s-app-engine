@@ -64,7 +64,6 @@ db:
 
 enforcer:
   noop: true
-  interval: 0.1s
 
 domainAdminOverrides:
   Sam: true
@@ -131,7 +130,7 @@ function check_policy_version() {
     check_policy $1 .Metadata.Generation
 }
 
-WAIT_FLAGS="--wait --wait-interval 0.1s --wait-attempts 20"
+WAIT_FLAGS="--wait --wait-attempts 20"
 
 # apply full policy (w/o Carol)
 check_policy_version 1

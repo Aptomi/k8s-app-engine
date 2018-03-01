@@ -244,7 +244,6 @@ db:
 
 enforcer:
   noop: false
-  interval: 2s
 
 users:
   file:

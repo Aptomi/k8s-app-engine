@@ -145,14 +145,27 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 }
 
 func waitForApplyToFinish(attempts int, interval time.Duration, client client.Core, result *api.PolicyUpdateResult) {
-	fmt.Print("Waiting for updated policy to be applied...")
-	time.Sleep(interval)
+	// we only need to wait if a revision has not been created yet, or there is already a revision and it's in progress
+	var rev *engine.Revision
+	rev, _ = client.Revision().ShowByPolicy(result.PolicyGeneration)
+	haveToWait := rev == nil || rev.Status == engine.RevisionStatusInProgress
 
+	// if we don't need to wait, then let's exit right away
+	if !haveToWait {
+		if rev.Status == engine.RevisionStatusSuccess {
+			fmt.Printf("Success. At revision %d\n", rev.GetGeneration())
+		} else if rev.Status == engine.RevisionStatusError {
+			fmt.Printf("Error! At revision %d, it has not been fully applied due to an error\n", rev.GetGeneration())
+			panic("error")
+		}
+		return
+	}
+
+	fmt.Print("Waiting for changes to be applied...")
 	var progressBar progress.Indicator
 	var progressLast = 0
 
-	var rev *engine.Revision
-	finished := retry.Do(attempts, interval, func() bool {
+	finished := retry.Do2(attempts, interval, func() bool {
 		var revErr error
 		rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
 		if revErr != nil {
@@ -175,14 +188,14 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 
 	if !finished {
 		progressBar.Done(false)
-		fmt.Printf("Timeout. Revision %d has not been applied in %d seconds\n", rev.GetGeneration(), 60*5)
+		fmt.Printf("Timeout! Revision %d has not been applied in %d seconds\n", rev.GetGeneration(), 60*5)
 		panic("timeout")
 	} else if rev.Status == engine.RevisionStatusSuccess {
 		progressBar.Done(true)
-		fmt.Printf("Success! Revision %d created and applied\n", rev.GetGeneration())
+		fmt.Printf("Success. Revision %d applied successfully\n", rev.GetGeneration())
 	} else if rev.Status == engine.RevisionStatusError {
 		progressBar.Done(false)
-		fmt.Printf("Error. Revision %d failed with an error and has not been fully applied\n", rev.GetGeneration())
+		fmt.Printf("Error! Revision %d failed with an error and has not been fully applied\n", rev.GetGeneration())
 		panic("error")
 	}
 

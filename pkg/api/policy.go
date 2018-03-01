@@ -223,6 +223,11 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	}
 
 	api.getPolicyUpdateResult(writer, request, changed, policyData)
+
+	if changed {
+		// signal to the channel that policy has changed, that will trigger the enforcement right away
+		api.policyChanged <- true
+	}
 }
 
 func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -264,6 +269,11 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	}
 
 	api.getPolicyUpdateResult(writer, request, changed, policyData)
+
+	if changed {
+		// signal to the channel that policy has changed, that will trigger the enforcement right away
+		api.policyChanged <- true
+	}
 }
 
 func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *http.Request, changed bool, policyData *engine.PolicyData) {
