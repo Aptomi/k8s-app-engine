@@ -31,7 +31,7 @@ const router = new Router({
     {
       path: '/',
       name: 'Home',
-      redirect: '/objects/objects'
+      redirect: '/objects/services'
     },
     {
       path: '/objects',
