@@ -43,11 +43,11 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	}
 
 	var status string
-	key := runtime.KeyForStorable(dependency)
+	depKey := runtime.KeyForStorable(dependency)
 
 	foundRefs := false
 	for _, instance := range actualState.ComponentInstanceMap {
-		if _, ok := instance.DependencyKeys[key]; ok {
+		if _, ok := instance.DependencyKeys[depKey]; ok {
 			foundRefs = true
 			break
 		}
