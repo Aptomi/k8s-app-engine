@@ -179,15 +179,17 @@ export async function getEndpoints (d, successFunc, errorFunc) {
 export function fetchObjectProperties (obj, successFunc = null, errorFunc = null) {
   const handler = ['policy', 'gen', '0', 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
   callAPI(handler, sync, function (data) {
+    // copy over retrieved object properties
     for (const key in data) {
       obj[key] = data[key]
     }
+    // remove generation prior to getting YAML representation
+    delete data['metadata']['generation']
     obj['yaml'] = yaml.safeDump(data, {'lineWidth': 160})
     if (successFunc != null) {
       successFunc(obj)
     }
   }, function (err) {
-    // can't fetch object properties
     obj['error'] = 'unable to fetch object properties: ' + err
     if (errorFunc != null) {
       errorFunc(err)
