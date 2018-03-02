@@ -60,8 +60,7 @@
               <tbody>
               <tr v-for="d in objList">
                 <td>
-                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/dependency-icon.png" title="Dependency"/>
-                  <span>{{d.name}}</span>
+                  <obj-with-icon :obj="d"/>
                 </td>
                 <td v-if="!d.error">{{d.user}}</td>
                 <td v-else><span class="label label-danger center">Error</span></td>

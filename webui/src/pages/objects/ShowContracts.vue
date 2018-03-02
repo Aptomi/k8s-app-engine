@@ -59,14 +59,11 @@
               <tbody>
               <tr v-for="d in objList">
                 <td>
-                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/contract-icon.png" title="Contract"/>
-                  <span>{{d.name}}</span>
+                  <obj-with-icon :obj="d"/>
                 </td>
                 <td>
                   <div v-for="c in d.contexts">
-                      {{c.name}} ->
-                      <img style="height: 20px; margin-right: 5px" src="/static/img/service-icon.png" title="Service"/>{{c.allocation.service}}
-                    </span>
+                      <obj-with-icon :prefix="c.name + ' -> '" kind="service" :obj="{name: c.allocation.service}"/>
                   </div>
                 </td>
                 <td>

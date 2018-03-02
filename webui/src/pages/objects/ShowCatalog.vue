@@ -50,8 +50,8 @@
             <table class="table table-hover">
               <thead>
               <tr>
-                <th>Kind</th>
                 <th>Name</th>
+                <th>Kind</th>
                 <th>Action</th>
               </tr>
               </thead>

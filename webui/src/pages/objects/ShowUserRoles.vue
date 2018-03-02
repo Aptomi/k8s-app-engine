@@ -27,8 +27,7 @@
                 </tr>
                 <tr v-for="roleMap, username in users">
                   <td>
-                    <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/user-icon.png" title="User"/>
-                    <span>{{ username }}</span>
+                    <obj-with-icon kind="user" :obj="{name: username}"/>
                   </td>
                   <td>
                     <span v-if="roleMap['domain-admin']" class="label label-success"><label class="fa fa-check"></label></span>

@@ -60,8 +60,7 @@
               <tbody>
               <tr v-for="d in sorted(objList)">
                 <td>
-                  <img style="float: left; height: 20px; margin-right: 5px" src="/static/img/rule-icon.png" title="Rule"/>
-                  <span>{{d.name}}</span>
+                  <obj-with-icon :obj="d"/>
                 </td>
                 <td>
                   {{d.weight}}
