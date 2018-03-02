@@ -20,6 +20,7 @@ func (p *Plugin) NewClient() (kubernetes.Interface, error) {
 	return client, nil
 }
 
+// NewHelmKube returns new instance of the Helm Kube client
 func (p *Plugin) NewHelmKube(deployName string, eventLog *event.Log) *kube.Client {
 	client := kube.New(p.ClientConfig)
 	client.Log = func(format string, args ...interface{}) {

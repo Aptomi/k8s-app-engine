@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// EndpointsForManifests returns endpoints for specified manifest
 func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventLog *event.Log) (map[string]string, error) {
 	kubeClient, err := p.NewClient()
 	if err != nil {

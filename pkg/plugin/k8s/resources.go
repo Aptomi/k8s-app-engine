@@ -13,6 +13,7 @@ import (
 
 var resourceRegistry = buildResourceRegistry()
 
+// ResourcesForManifest returns resources for specified manifest
 func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLog *event.Log) (plugin.Resources, error) {
 	kubeClient, err := p.NewClient()
 	if err != nil {
