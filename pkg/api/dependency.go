@@ -56,9 +56,9 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		}
 	}
 	if foundRefs {
-		status = "Deployed"
+		status = "Active"
 	} else {
-		status = "Not Deployed"
+		status = "Inactive"
 	}
 
 	api.contentType.WriteOne(writer, request, &dependencyStatusWrapper{Data: status})
