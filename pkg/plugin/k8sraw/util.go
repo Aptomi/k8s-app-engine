@@ -13,14 +13,14 @@ var (
 	configMapNameReplacer = strings.NewReplacer("#", "-", "_", "-")
 )
 
-func (plugin *Plugin) getManifestConfigMapName(deployName string) string {
-	return strings.ToLower(configMapNameReplacer.Replace(fmt.Sprintf("aptomi-raw-%s-%s", plugin.cluster.Name, deployName)))
+func (p *Plugin) getManifestConfigMapName(deployName string) string {
+	return strings.ToLower(configMapNameReplacer.Replace(fmt.Sprintf("aptomi-raw-%s-%s", p.cluster.Name, deployName)))
 }
 
-func (plugin *Plugin) storeManifest(client kubernetes.Interface, deployName, manifest string) error {
-	name := plugin.getManifestConfigMapName(deployName)
+func (p *Plugin) storeManifest(client kubernetes.Interface, deployName, manifest string) error {
+	name := p.getManifestConfigMapName(deployName)
 
-	cm, err := client.CoreV1().ConfigMaps(plugin.dataNamespace).Get(name, meta.GetOptions{})
+	cm, err := client.CoreV1().ConfigMaps(p.dataNamespace).Get(name, meta.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
 			cm = &api.ConfigMap{
@@ -32,7 +32,7 @@ func (plugin *Plugin) storeManifest(client kubernetes.Interface, deployName, man
 				},
 			}
 
-			_, err = client.CoreV1().ConfigMaps(plugin.dataNamespace).Create(cm)
+			_, err = client.CoreV1().ConfigMaps(p.dataNamespace).Create(cm)
 		}
 
 		return err
@@ -42,34 +42,34 @@ func (plugin *Plugin) storeManifest(client kubernetes.Interface, deployName, man
 		"manifest": manifest,
 	}
 
-	_, err = client.CoreV1().ConfigMaps(plugin.dataNamespace).Update(cm)
+	_, err = client.CoreV1().ConfigMaps(p.dataNamespace).Update(cm)
 
 	return err
 }
 
-func (plugin *Plugin) loadManifest(client kubernetes.Interface, deployName string) (string, error) {
-	name := plugin.getManifestConfigMapName(deployName)
+func (p *Plugin) loadManifest(client kubernetes.Interface, deployName string) (string, error) {
+	name := p.getManifestConfigMapName(deployName)
 
-	cm, err := client.CoreV1().ConfigMaps(plugin.dataNamespace).Get(name, meta.GetOptions{})
+	cm, err := client.CoreV1().ConfigMaps(p.dataNamespace).Get(name, meta.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return "", fmt.Errorf("can't find data for deployment %s (should be stored in namespace %s): %s", deployName, plugin.dataNamespace, err)
+			return "", fmt.Errorf("can't find data for deployment %s (should be stored in namespace %s): %s", deployName, p.dataNamespace, err)
 		}
 		return "", err
 	}
 
 	manifest := cm.Data["manifest"]
 	if len(manifest) == 0 {
-		return "", fmt.Errorf("no manifest found in data for deployment %s (stored in configmap %s/%s", deployName, plugin.dataNamespace, name)
+		return "", fmt.Errorf("no manifest found in data for deployment %s (stored in configmap %s/%s", deployName, p.dataNamespace, name)
 	}
 
 	return manifest, nil
 }
 
-func (plugin *Plugin) deleteManifest(client kubernetes.Interface, deployName string) error {
-	name := plugin.getManifestConfigMapName(deployName)
+func (p *Plugin) deleteManifest(client kubernetes.Interface, deployName string) error {
+	name := p.getManifestConfigMapName(deployName)
 
-	err := client.CoreV1().ConfigMaps(plugin.dataNamespace).Delete(name, &meta.DeleteOptions{})
+	err := client.CoreV1().ConfigMaps(p.dataNamespace).Delete(name, &meta.DeleteOptions{})
 	if err != nil && errors.IsNotFound(err) {
 		return nil
 	}

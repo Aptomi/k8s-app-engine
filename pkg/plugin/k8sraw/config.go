@@ -7,19 +7,19 @@ type ClusterConfig struct {
 	DataNamespace string `yaml:",omitempty"`
 }
 
-func (plugin *Plugin) parseClusterConfig() error {
+func (p *Plugin) parseClusterConfig() error {
 	clusterConfig := &ClusterConfig{}
-	err := plugin.cluster.ParseConfigInto(clusterConfig)
+	err := p.cluster.ParseConfigInto(clusterConfig)
 	if err != nil {
-		return fmt.Errorf("error while parsing k8s raw specific config of cluster %s: %s", plugin.cluster.Name, err)
+		return fmt.Errorf("error while parsing k8s raw specific config of cluster %s: %s", p.cluster.Name, err)
 	}
 
-	plugin.dataNamespace = "aptomi"
-	if len(plugin.config.DataNamespace) > 0 {
-		plugin.dataNamespace = clusterConfig.DataNamespace
+	p.dataNamespace = "aptomi"
+	if len(p.config.DataNamespace) > 0 {
+		p.dataNamespace = clusterConfig.DataNamespace
 	}
 	if len(clusterConfig.DataNamespace) > 0 {
-		plugin.dataNamespace = clusterConfig.DataNamespace
+		p.dataNamespace = clusterConfig.DataNamespace
 	}
 
 	return nil
