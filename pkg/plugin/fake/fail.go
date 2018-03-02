@@ -73,3 +73,7 @@ func (plugin *failCodePlugin) Destroy(deployName string, params util.NestedParam
 func (plugin *failCodePlugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
 	return make(map[string]string), nil
 }
+
+func (plugin *failCodePlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+	return nil, nil
+}

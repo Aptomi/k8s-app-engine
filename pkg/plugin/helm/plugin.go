@@ -260,3 +260,7 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 
 	return endpoints, nil
 }
+
+func (plugin *Plugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+	return nil, nil
+}

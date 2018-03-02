@@ -69,6 +69,10 @@ func (plugin *noOpPlugin) Endpoints(deployName string, params util.NestedParamet
 	return make(map[string]string), nil
 }
 
+func (plugin *noOpPlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+	return nil, nil
+}
+
 func (plugin *noOpPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	time.Sleep(plugin.sleepTime)
 	return nil
