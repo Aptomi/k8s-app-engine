@@ -27,7 +27,10 @@
           </thead>
           <tbody>
           <tr v-for="item in table.items">
-            <td v-for="column in item">{{ column }}</td>
+            <td v-for="column, idx in item">
+              <span v-if="table.headers[idx] === 'Created'">{{ column | formatDateAgo }}</span>
+              <span v-else>{{ column }}</span>
+            </td>
           </tr>
           </tbody>
         </table>
