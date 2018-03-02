@@ -145,23 +145,14 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 }
 
 func waitForApplyToFinish(attempts int, interval time.Duration, client client.Core, result *api.PolicyUpdateResult) {
-	// we only need to wait if a revision has not been created yet, or there is already a revision and it's in progress
-	var rev *engine.Revision
-	rev, _ = client.Revision().ShowByPolicy(result.PolicyGeneration)
-	haveToWait := rev == nil || rev.Status == engine.RevisionStatusInProgress
-
-	// if we don't need to wait, then let's exit right away
-	if !haveToWait {
-		if rev.Status == engine.RevisionStatusSuccess {
-			fmt.Printf("Success. At revision %d\n", rev.GetGeneration())
-		} else if rev.Status == engine.RevisionStatusError {
-			fmt.Printf("Error! At revision %d, it has not been fully applied due to an error\n", rev.GetGeneration())
-			panic("error")
-		}
+	// if policy hasn't changed, then we don't have to wait. let's exit right away
+	if !result.PolicyChanged {
 		return
 	}
 
 	fmt.Print("Waiting for changes to be applied...")
+	var rev *engine.Revision
+
 	var progressBar progress.Indicator
 	var progressLast = 0
 
