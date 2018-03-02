@@ -1,6 +1,6 @@
 package plugin
 
-type DeploymentStatus map[string]*ResourceTable
+type Resources map[string]*ResourceTable
 
 type ResourceTable struct {
 	Headers []string
@@ -9,7 +9,7 @@ type ResourceTable struct {
 
 type Resource = []string
 
-func (status DeploymentStatus) Merge(with DeploymentStatus) {
+func (status Resources) Merge(with Resources) {
 	for key, withTable := range with {
 		table, exist := status[key]
 		if !exist {

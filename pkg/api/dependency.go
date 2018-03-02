@@ -64,15 +64,15 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	api.contentType.WriteOne(writer, request, &dependencyStatusWrapper{Data: status})
 }
 
-type dependencyDeployStatusWrapper struct {
-	Status plugin.DeploymentStatus
+type dependencyResourcesWrapper struct {
+	Resources plugin.Resources
 }
 
-func (g *dependencyDeployStatusWrapper) GetKind() string {
-	return "dependencyDeployStatus"
+func (g *dependencyResourcesWrapper) GetKind() string {
+	return "dependencyResources"
 }
 
-func (api *coreAPI) handleDependencyDeployStatusGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	gen := runtime.LastGen
 	policy, _, err := api.store.GetPolicy(gen)
 	if err != nil {
@@ -100,7 +100,7 @@ func (api *coreAPI) handleDependencyDeployStatusGet(writer http.ResponseWriter, 
 
 	plugins := api.pluginRegistryFactory()
 	depKey := runtime.KeyForStorable(dependency)
-	status := make(plugin.DeploymentStatus)
+	resources := make(plugin.Resources)
 	for _, instance := range actualState.ComponentInstanceMap {
 		if _, ok := instance.DependencyKeys[depKey]; ok {
 			codePlugin, pluginErr := pluginForComponentInstance(instance, policy, plugins)
@@ -111,17 +111,17 @@ func (api *coreAPI) handleDependencyDeployStatusGet(writer http.ResponseWriter, 
 				continue
 			}
 
-			eventLog := event.NewLog("status", false)
-			instanceStatus, statusErr := codePlugin.Status(instance.GetDeployName(), instance.CalculatedCodeParams, eventLog)
-			if statusErr != nil {
-				panic(fmt.Sprintf("Error while getting deployment status for component instance %s: %s", instance.GetKey(), statusErr))
+			eventLog := event.NewLog("resources", false)
+			instanceResources, resErr := codePlugin.Resources(instance.GetDeployName(), instance.CalculatedCodeParams, eventLog)
+			if resErr != nil {
+				panic(fmt.Sprintf("Error while getting deployment resources for component instance %s: %s", instance.GetKey(), resErr))
 			}
 
-			status.Merge(instanceStatus)
+			resources.Merge(instanceResources)
 		}
 	}
 
-	api.contentType.WriteOne(writer, request, &dependencyDeployStatusWrapper{status})
+	api.contentType.WriteOne(writer, request, &dependencyResourcesWrapper{resources})
 }
 
 func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lang.Policy, plugins plugin.Registry) (plugin.CodePlugin, error) {

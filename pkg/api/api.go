@@ -59,7 +59,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 
 	// retrieve dependency along with its status
 	router.GET("/api/v1/policy/dependency/:ns/:name/status", auth(api.handleDependencyStatusGet))
-	router.GET("/api/v1/policy/dependency/:ns/:name/deploystatus", auth(api.handleDependencyDeployStatusGet))
+	router.GET("/api/v1/policy/dependency/:ns/:name/resources", auth(api.handleDependencyResourcesGet))
 
 	// retrieve endpoints (all + by dependency)
 	router.GET("/api/v1/endpoints", api.handleEndpointsGet)

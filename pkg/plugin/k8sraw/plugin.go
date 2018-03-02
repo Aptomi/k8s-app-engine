@@ -191,7 +191,7 @@ func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, ev
 	return endpoints, nil
 }
 
-func (p *Plugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	err := p.init()
 	if err != nil {
 		return nil, err
@@ -219,7 +219,7 @@ func (p *Plugin) Status(deployName string, params util.NestedParameterMap, event
 	// not sure if it's good to have version.... we could have issues with versions in different k8s clusters
 	handlers["k8s/v1/Deployment"] = &K8sDeploymentResourceTypeHandler{}
 
-	status := make(plugin.DeploymentStatus)
+	resources := make(plugin.Resources)
 	for _, info := range infos {
 		gvk := info.ResourceMapping().GroupVersionKind
 		resourceType := "k8s/" + gvk.Version + "/" + gvk.Kind
@@ -229,10 +229,10 @@ func (p *Plugin) Status(deployName string, params util.NestedParameterMap, event
 			continue
 		}
 
-		table, exist := status[resourceType]
+		table, exist := resources[resourceType]
 		if !exist {
 			table = &plugin.ResourceTable{}
-			status[resourceType] = table
+			resources[resourceType] = table
 			table.Headers = handler.Headers()
 		}
 
@@ -251,7 +251,7 @@ func (p *Plugin) Status(deployName string, params util.NestedParameterMap, event
 		}
 	}
 
-	return status, nil
+	return resources, nil
 }
 
 type ResourceTypeHandler interface {

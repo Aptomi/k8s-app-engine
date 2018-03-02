@@ -74,6 +74,6 @@ func (plugin *failCodePlugin) Endpoints(deployName string, params util.NestedPar
 	return make(map[string]string), nil
 }
 
-func (plugin *failCodePlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+func (plugin *failCodePlugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	return nil, nil
 }

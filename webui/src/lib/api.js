@@ -194,9 +194,9 @@ export async function getEndpoints (d, successFunc, errorFunc) {
 // loads dependency deployment status
 export async function getResources (d, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['policy', 'dependency', d['metadata']['namespace'], d['metadata']['name'], 'deploystatus'].join('/')
+  const handler = ['policy', 'dependency', d['metadata']['namespace'], d['metadata']['name'], 'resources'].join('/')
   callAPI(handler, async, function (data) {
-    successFunc(data['status'])
+    successFunc(data['resources'])
   }, function (err) {
     errorFunc(err)
   })

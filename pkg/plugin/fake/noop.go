@@ -69,7 +69,7 @@ func (plugin *noOpPlugin) Endpoints(deployName string, params util.NestedParamet
 	return make(map[string]string), nil
 }
 
-func (plugin *noOpPlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+func (plugin *noOpPlugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	return nil, nil
 }
 

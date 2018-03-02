@@ -261,6 +261,6 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 	return endpoints, nil
 }
 
-func (plugin *Plugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.DeploymentStatus, error) {
+func (plugin *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	return nil, nil
 }
