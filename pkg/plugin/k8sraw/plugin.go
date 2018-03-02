@@ -243,12 +243,36 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 				return nil, getErr
 			}
 			table.Items = append(table.Items, handler.Columns(service))
+		} else if info.Mapping.GroupVersionKind.Kind == "ConfigMap" {
+			configMap, getErr := kubeClient.CoreV1().ConfigMaps(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				return nil, getErr
+			}
+			table.Items = append(table.Items, handler.Columns(configMap))
+		} else if info.Mapping.GroupVersionKind.Kind == "Secret" {
+			secret, getErr := kubeClient.CoreV1().Secrets(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				return nil, getErr
+			}
+			table.Items = append(table.Items, handler.Columns(secret))
+		} else if info.Mapping.GroupVersionKind.Kind == "PersistentVolumeClaim" {
+			pvc, getErr := kubeClient.CoreV1().PersistentVolumeClaims(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				return nil, getErr
+			}
+			table.Items = append(table.Items, handler.Columns(pvc))
 		} else if info.Mapping.GroupVersionKind.Kind == "Deployment" {
 			deployment, getErr := kubeClient.AppsV1beta1().Deployments(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				return nil, getErr
 			}
 			table.Items = append(table.Items, handler.Columns(deployment))
+		} else if info.Mapping.GroupVersionKind.Kind == "StatefulSet" {
+			statefulSet, getErr := kubeClient.AppsV1beta1().StatefulSets(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				return nil, getErr
+			}
+			table.Items = append(table.Items, handler.Columns(statefulSet))
 		}
 	}
 
