@@ -9,15 +9,15 @@ import (
 	"strings"
 )
 
-func (plugin *Plugin) EndpointsForManifests(deployName, targetManifest string, eventLog *event.Log) (map[string]string, error) {
-	kubeClient, err := plugin.NewClient()
+func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventLog *event.Log) (map[string]string, error) {
+	kubeClient, err := p.NewClient()
 	if err != nil {
 		return nil, err
 	}
 
-	helmKube := plugin.NewHelmKube(deployName, eventLog)
+	helmKube := p.NewHelmKube(deployName, eventLog)
 
-	infos, err := helmKube.BuildUnstructured(plugin.Namespace, strings.NewReader(targetManifest))
+	infos, err := helmKube.BuildUnstructured(p.Namespace, strings.NewReader(targetManifest))
 	if err != nil {
 		return nil, err
 	}
@@ -26,12 +26,12 @@ func (plugin *Plugin) EndpointsForManifests(deployName, targetManifest string, e
 
 	for _, info := range infos {
 		if info.Mapping.GroupVersionKind.Kind == "Service" {
-			service, getErr := kubeClient.CoreV1().Services(plugin.Namespace).Get(info.Name, meta.GetOptions{})
+			service, getErr := kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				return nil, getErr
 			}
 
-			plugin.addEndpointsFromService(service, endpoints)
+			p.addEndpointsFromService(service, endpoints)
 		}
 	}
 
@@ -39,11 +39,11 @@ func (plugin *Plugin) EndpointsForManifests(deployName, targetManifest string, e
 }
 
 // addEndpointsFromService searches for the available endpoints in specified service and writes them into provided map
-func (plugin *Plugin) addEndpointsFromService(service *api.Service, endpoints map[string]string) {
+func (p *Plugin) addEndpointsFromService(service *api.Service, endpoints map[string]string) {
 	// todo(slukjanov): support not only node ports
 	if service.Spec.Type == "NodePort" {
 		for _, port := range service.Spec.Ports {
-			sURL := fmt.Sprintf("%s:%d", plugin.ExternalAddress, port.NodePort)
+			sURL := fmt.Sprintf("%s:%d", p.ExternalAddress, port.NodePort)
 
 			// todo(slukjanov): could we somehow detect real schema? I think no :(
 			if util.StringContainsAny(port.Name, "https") {

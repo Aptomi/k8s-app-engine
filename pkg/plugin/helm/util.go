@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func (plugin *Plugin) newClient() (*helm.Client, error) {
-	return helm.NewClient(helm.Host(plugin.tillerHost)), nil
+func (p *Plugin) newClient() (*helm.Client, error) {
+	return helm.NewClient(helm.Host(p.tillerHost)), nil
 }
 
 func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, version string, err error) {
@@ -43,7 +43,7 @@ func getReleaseName(deployName string) string {
 	return strings.ToLower(releaseNameReplacer.Replace(deployName))
 }
 
-func (plugin *Plugin) fetchChart(repository, name, version string) (string, error) {
+func (p *Plugin) fetchChart(repository, name, version string) (string, error) {
 	chartURL, err := repo.FindChartInRepoURL(
 		repository, name, version,
 		"", "", "",

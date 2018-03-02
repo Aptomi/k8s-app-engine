@@ -7,16 +7,16 @@ type ClusterConfig struct {
 	TillerNamespace string `yaml:",omitempty"`
 }
 
-func (plugin *Plugin) parseClusterConfig() error {
+func (p *Plugin) parseClusterConfig() error {
 	clusterConfig := &ClusterConfig{}
-	err := plugin.cluster.ParseConfigInto(clusterConfig)
+	err := p.cluster.ParseConfigInto(clusterConfig)
 	if err != nil {
-		return fmt.Errorf("error while parsing helm specific config of cluster %s: %s", plugin.cluster.Name, err)
+		return fmt.Errorf("error while parsing helm specific config of cluster %s: %s", p.cluster.Name, err)
 	}
 
-	plugin.tillerNamespace = "kube-system"
+	p.tillerNamespace = "kube-system"
 	if len(clusterConfig.TillerNamespace) > 0 {
-		plugin.tillerNamespace = clusterConfig.TillerNamespace
+		p.tillerNamespace = clusterConfig.TillerNamespace
 	}
 
 	return nil

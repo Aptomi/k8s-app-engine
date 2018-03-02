@@ -11,8 +11,8 @@ import (
 )
 
 // NewClient returns new instance of the Kubernetes client created from the cached in the plugin cluster config
-func (plugin *Plugin) NewClient() (kubernetes.Interface, error) {
-	client, err := kubernetes.NewForConfig(plugin.RestConfig)
+func (p *Plugin) NewClient() (kubernetes.Interface, error) {
+	client, err := kubernetes.NewForConfig(p.RestConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating kubernetes client: %s", err)
 	}
@@ -20,8 +20,8 @@ func (plugin *Plugin) NewClient() (kubernetes.Interface, error) {
 	return client, nil
 }
 
-func (plugin *Plugin) NewHelmKube(deployName string, eventLog *event.Log) *kube.Client {
-	client := kube.New(plugin.ClientConfig)
+func (p *Plugin) NewHelmKube(deployName string, eventLog *event.Log) *kube.Client {
+	client := kube.New(p.ClientConfig)
 	client.Log = func(format string, args ...interface{}) {
 		eventLog.WithFields(event.Fields{
 			"deployName": deployName,
@@ -32,7 +32,7 @@ func (plugin *Plugin) NewHelmKube(deployName string, eventLog *event.Log) *kube.
 }
 
 // EnsureNamespace ensures configured Kubernetes namespace
-func (plugin *Plugin) EnsureNamespace(client kubernetes.Interface, namespace string) error {
+func (p *Plugin) EnsureNamespace(client kubernetes.Interface, namespace string) error {
 	_, err := client.CoreV1().Namespaces().Get(namespace, meta.GetOptions{})
 	if err != nil && errors.IsNotFound(err) {
 		ns := &api.Namespace{
@@ -47,10 +47,10 @@ func (plugin *Plugin) EnsureNamespace(client kubernetes.Interface, namespace str
 	return err
 }
 
-func (plugin *Plugin) getExternalAddress() (string, error) {
-	client, err := plugin.NewClient()
+func (p *Plugin) getExternalAddress() (string, error) {
+	client, err := p.NewClient()
 	if err != nil {
-		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", plugin.Cluster.Name, err)
+		return "", fmt.Errorf("error while creating k8s client to cluster %s: %s", p.Cluster.Name, err)
 	}
 
 	nodes, err := client.CoreV1().Nodes().List(meta.ListOptions{})
@@ -58,7 +58,7 @@ func (plugin *Plugin) getExternalAddress() (string, error) {
 		return "", err
 	}
 	if len(nodes.Items) == 0 {
-		return "", fmt.Errorf("no nodes found for k8s cluster %s, it's critical eror", plugin.Cluster.Name)
+		return "", fmt.Errorf("no nodes found for k8s cluster %s, it's critical eror", p.Cluster.Name)
 	}
 
 	returnFirst := func(addrType api.NodeAddressType) string {
@@ -80,7 +80,7 @@ func (plugin *Plugin) getExternalAddress() (string, error) {
 		addr = returnFirst(api.NodeHostName)
 	}
 	if addr == "" {
-		return "", fmt.Errorf("couldn't find external IP for cluster: %s", plugin.Cluster.Name)
+		return "", fmt.Errorf("couldn't find external IP for cluster: %s", p.Cluster.Name)
 	}
 
 	return addr, nil

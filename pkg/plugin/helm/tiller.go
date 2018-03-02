@@ -16,30 +16,30 @@ import (
 	"time"
 )
 
-func (plugin *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
-	client, clientErr := plugin.kube.NewClient()
+func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
+	client, clientErr := p.kube.NewClient()
 	if clientErr != nil {
 		return clientErr
 	}
 
 	// we should be able to list pods in tiller namespace
-	_, clientErr = client.CoreV1().Pods(plugin.tillerNamespace).List(meta.ListOptions{})
+	_, clientErr = client.CoreV1().Pods(p.tillerNamespace).List(meta.ListOptions{})
 	if clientErr != nil {
-		return fmt.Errorf("error while pre-flight check for cluster %s: %s", plugin.cluster.Name, clientErr)
+		return fmt.Errorf("error while pre-flight check for cluster %s: %s", p.cluster.Name, clientErr)
 	}
 
-	eventLog.WithFields(event.Fields{}).Debugf("Creating k8s tunnel for cluster %s", plugin.cluster.Name)
+	eventLog.WithFields(event.Fields{}).Debugf("Creating k8s tunnel for cluster %s", p.cluster.Name)
 
 	var tunnelErr error
 	ok := retry.Do(120, 5*time.Second, func() bool {
-		if plugin.tillerTunnel != nil {
-			plugin.tillerTunnel.Close()
+		if p.tillerTunnel != nil {
+			p.tillerTunnel.Close()
 		}
-		plugin.tillerTunnel, tunnelErr = portforwarder.New(plugin.tillerNamespace, client, plugin.kube.RestConfig)
+		p.tillerTunnel, tunnelErr = portforwarder.New(p.tillerNamespace, client, p.kube.RestConfig)
 
 		if tunnelErr != nil {
 			if strings.Contains(tunnelErr.Error(), "could not find tiller") {
-				tillerErr := plugin.setupTiller(client, eventLog)
+				tillerErr := p.setupTiller(client, eventLog)
 				if tillerErr != nil {
 					tunnelErr = tillerErr
 				} else {
@@ -48,29 +48,29 @@ func (plugin *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 				}
 			}
 
-			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error while creating k8s tunnel for cluster %s: %s", plugin.cluster.Name, tunnelErr)
+			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error while creating k8s tunnel for cluster %s: %s", p.cluster.Name, tunnelErr)
 
 			return false
 		}
 
-		port := plugin.tillerTunnel.Local
-		plugin.tillerHost = fmt.Sprintf("localhost:%d", port)
+		port := p.tillerTunnel.Local
+		p.tillerHost = fmt.Sprintf("localhost:%d", port)
 
-		helmClient, err := plugin.newClient()
+		helmClient, err := p.newClient()
 		if err != nil {
-			tunnelErr = fmt.Errorf("can't create helm client for just created k8s tunnel for cluster %s: %s", plugin.cluster.Name, err)
+			tunnelErr = fmt.Errorf("can't create helm client for just created k8s tunnel for cluster %s: %s", p.cluster.Name, err)
 			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error: %s", tunnelErr)
 			return false
 		}
 
 		_, err = helmClient.ListReleases(helm.ReleaseListLimit(1))
 		if err != nil {
-			tunnelErr = fmt.Errorf("can't do helm list using just created k8s tunnel for cluster %s: %s", plugin.cluster.Name, err)
+			tunnelErr = fmt.Errorf("can't do helm list using just created k8s tunnel for cluster %s: %s", p.cluster.Name, err)
 			eventLog.WithFields(event.Fields{}).Debugf("Retrying after error: %s", tunnelErr)
 			return false
 		}
 
-		eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port %d for cluster %s", port, plugin.cluster.Name)
+		eventLog.WithFields(event.Fields{}).Debugf("Created k8s tunnel using local port %d for cluster %s", port, p.cluster.Name)
 
 		return true
 	})
@@ -80,33 +80,33 @@ func (plugin *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 			return tunnelErr
 		}
 
-		return fmt.Errorf("tiller tunnel creation timeout for cluster: %s", plugin.cluster.Name)
+		return fmt.Errorf("tiller tunnel creation timeout for cluster: %s", p.cluster.Name)
 	}
 
 	return nil
 }
 
-func (plugin *Plugin) setupTiller(client kubernetes.Interface, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Debugf("Setting up tiller in cluster %s namespace %s", plugin.cluster.Name, plugin.tillerNamespace)
+func (p *Plugin) setupTiller(client kubernetes.Interface, eventLog *event.Log) error {
+	eventLog.WithFields(event.Fields{}).Debugf("Setting up tiller in cluster %s namespace %s", p.cluster.Name, p.tillerNamespace)
 
-	err := plugin.kube.EnsureNamespace(client, plugin.tillerNamespace)
+	err := p.kube.EnsureNamespace(client, p.tillerNamespace)
 	if err != nil {
 		return err
 	}
 
-	saName := "tiller-" + plugin.tillerNamespace
-	err = ensureKubeServiceAccount(client, plugin.tillerNamespace, saName)
+	saName := "tiller-" + p.tillerNamespace
+	err = ensureKubeServiceAccount(client, p.tillerNamespace, saName)
 	if err != nil {
 		return err
 	}
 
-	err = ensureKubeAdminClusterRoleBinding(client, plugin.tillerNamespace, saName)
+	err = ensureKubeAdminClusterRoleBinding(client, p.tillerNamespace, saName)
 	if err != nil {
 		return err
 	}
 
 	return installer.Install(client, &installer.Options{
-		Namespace:      plugin.tillerNamespace,
+		Namespace:      p.tillerNamespace,
 		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.6.2",
 		ServiceAccount: saName,
 	})

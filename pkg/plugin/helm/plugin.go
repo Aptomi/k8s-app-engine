@@ -43,54 +43,54 @@ func New(clusterPlugin plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlu
 	}, nil
 }
 
-func (plugin *Plugin) init(eventLog *event.Log) error {
-	return plugin.once.Do(func() error {
-		err := plugin.kube.Init()
+func (p *Plugin) init(eventLog *event.Log) error {
+	return p.once.Do(func() error {
+		err := p.kube.Init()
 		if err != nil {
 			return err
 		}
 
-		err = plugin.parseClusterConfig()
+		err = p.parseClusterConfig()
 		if err != nil {
 			return err
 		}
 
 		// todo(slukjanov): we should probably verify tunnel each time we need it
-		return plugin.ensureTillerTunnel(eventLog)
+		return p.ensureTillerTunnel(eventLog)
 	})
 }
 
 // Cleanup implements cleanup phase for the Helm plugin. It closes cached Tiller tunnel.
-func (plugin *Plugin) Cleanup() error {
-	if plugin.tillerTunnel != nil {
-		plugin.tillerTunnel.Close()
+func (p *Plugin) Cleanup() error {
+	if p.tillerTunnel != nil {
+		p.tillerTunnel.Close()
 	}
 
 	return nil
 }
 
 // Create implements creation of a new component instance in the cloud by deploying a Helm chart
-func (plugin *Plugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	return plugin.createOrUpdate(deployName, params, eventLog, true)
+func (p *Plugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	return p.createOrUpdate(deployName, params, eventLog, true)
 }
 
 // Update implements update of an existing component instance in the cloud by updating parameters of a helm chart
-func (plugin *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	return plugin.createOrUpdate(deployName, params, eventLog, false)
+func (p *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	return p.createOrUpdate(deployName, params, eventLog, false)
 }
 
-func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
-	err := plugin.init(eventLog)
+func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
+	err := p.init(eventLog)
 	if err != nil {
 		return err
 	}
 
-	kubeClient, err := plugin.kube.NewClient()
+	kubeClient, err := p.kube.NewClient()
 	if err != nil {
 		return err
 	}
 
-	err = plugin.kube.EnsureNamespace(kubeClient, plugin.kube.Namespace)
+	err = p.kube.EnsureNamespace(kubeClient, p.kube.Namespace)
 	if err != nil {
 		return err
 	}
@@ -101,12 +101,12 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 		return err
 	}
 
-	helmClient, err := plugin.newClient()
+	helmClient, err := p.newClient()
 	if err != nil {
 		return err
 	}
 
-	chartPath, err := plugin.fetchChart(chartRepo, chartName, chartVersion)
+	chartPath, err := p.fetchChart(chartRepo, chartName, chartVersion)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 		return fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	cluster := plugin.cluster
+	cluster := p.cluster
 	if create {
 		if currRelease != nil {
 			// If a release already exists, let's just go ahead and update it
@@ -136,11 +136,11 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 
 			_, err = helmClient.InstallRelease(
 				chartPath,
-				plugin.kube.Namespace,
+				p.kube.Namespace,
 				helm.ReleaseName(releaseName),
 				helm.ValueOverrides(helmParams),
 				helm.InstallReuseName(true),
-				helm.InstallTimeout(int64(plugin.config.Timeout)),
+				helm.InstallTimeout(int64(p.config.Timeout)),
 			)
 
 			return err
@@ -158,15 +158,15 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 	if err != nil {
 		return fmt.Errorf("error while getting status of current release %s: %s", releaseName, err)
 	}
-	if status.Namespace != plugin.kube.Namespace {
-		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, plugin.kube.Namespace)
+	if status.Namespace != p.kube.Namespace {
+		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, p.kube.Namespace)
 	}
 
 	newRelease, err := helmClient.UpdateRelease(
 		releaseName,
 		chartPath,
 		helm.UpdateValueOverrides(helmParams),
-		helm.UpgradeTimeout(int64(plugin.config.Timeout)),
+		helm.UpgradeTimeout(int64(p.config.Timeout)),
 	)
 	if err != nil {
 		return err
@@ -200,15 +200,15 @@ func (plugin *Plugin) createOrUpdate(deployName string, params util.NestedParame
 }
 
 // Destroy implements destruction of an existing component instance in the cloud by running "helm delete" on the corresponding helm chart
-func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	err := plugin.init(eventLog)
+func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+	err := p.init(eventLog)
 	if err != nil {
 		return err
 	}
 
 	releaseName := getReleaseName(deployName)
 
-	helmClient, err := plugin.newClient()
+	helmClient, err := p.newClient()
 	if err != nil {
 		return err
 	}
@@ -220,19 +220,19 @@ func (plugin *Plugin) Destroy(deployName string, params util.NestedParameterMap,
 	_, err = helmClient.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
-		helm.DeleteTimeout(int64(plugin.config.Timeout)),
+		helm.DeleteTimeout(int64(p.config.Timeout)),
 	)
 	return err
 }
 
 // Endpoints returns map from port type to url for all services of the current chart
-func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
-	err := plugin.init(eventLog)
+func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
+	err := p.init(eventLog)
 	if err != nil {
 		return nil, err
 	}
 
-	helmClient, err := plugin.newClient()
+	helmClient, err := p.newClient()
 	if err != nil {
 		return nil, err
 	}
@@ -244,10 +244,10 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 		return nil, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	return plugin.kube.EndpointsForManifests(deployName, currRelease.Release.Manifest, eventLog)
+	return p.kube.EndpointsForManifests(deployName, currRelease.Release.Manifest, eventLog)
 }
 
 // Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance
-func (plugin *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
+func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	return nil, nil
 }

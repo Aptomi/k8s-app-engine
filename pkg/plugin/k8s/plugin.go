@@ -31,35 +31,35 @@ func New(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error
 }
 
 // Validate checks Kubernetes cluster by connecting to it and ensuring configured namespace
-func (plugin *Plugin) Validate() error {
-	err := plugin.Init()
+func (p *Plugin) Validate() error {
+	err := p.Init()
 	if err != nil {
 		return err
 	}
 
-	client, err := plugin.NewClient()
+	client, err := p.NewClient()
 	if err != nil {
 		return err
 	}
 
-	return plugin.EnsureNamespace(client, plugin.Namespace)
+	return p.EnsureNamespace(client, p.Namespace)
 }
 
 // Init parses Kubernetes cluster config and retrieves external address for Kubernetes cluster
-func (plugin *Plugin) Init() error {
-	return plugin.once.Do(func() error {
-		err := plugin.parseClusterConfig()
+func (p *Plugin) Init() error {
+	return p.once.Do(func() error {
+		err := p.parseClusterConfig()
 		if err != nil {
 			return err
 		}
 
-		plugin.ExternalAddress, err = plugin.getExternalAddress()
+		p.ExternalAddress, err = p.getExternalAddress()
 		return err
 	})
 }
 
 // Cleanup intended to run cleanup operations for plugin, but it's not used in Kubernetes cluster plugin
-func (plugin *Plugin) Cleanup() error {
+func (p *Plugin) Cleanup() error {
 	// no cleanup needed
 	return nil
 }

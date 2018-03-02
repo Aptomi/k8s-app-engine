@@ -9,9 +9,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/sync"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/pkg/api/v1"
-	"k8s.io/client-go/pkg/apis/apps/v1beta1"
 	"strings"
 )
 
@@ -172,160 +169,10 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 		return nil, err
 	}
 
-	kubeClient, err := p.kube.NewClient()
-	if err != nil {
-		return nil, err
-	}
-
 	targetManifest, ok := params["manifest"].(string)
 	if !ok {
 		return nil, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.kube.NewHelmKube(deployName, eventLog)
-
-	infos, err := client.BuildUnstructured(p.kube.Namespace, strings.NewReader(targetManifest))
-	if err != nil {
-		return nil, err
-	}
-
-	handlers := make(map[string]ResourceTypeHandler)
-	handlers["k8s/v1/Service"] = &serviceResourceTypeHandler{}
-	// not sure if it's good to have version.... we could have issues with versions in different k8s clusters
-	handlers["k8s/v1/Deployment"] = &deploymentResourceTypeHandler{}
-
-	resources := make(plugin.Resources)
-	for _, info := range infos {
-		gvk := info.ResourceMapping().GroupVersionKind
-		resourceType := "k8s/" + gvk.Version + "/" + gvk.Kind
-
-		handler, exist := handlers[resourceType]
-		if !exist {
-			continue
-		}
-
-		table, exist := resources[resourceType]
-		if !exist {
-			table = &plugin.ResourceTable{}
-			resources[resourceType] = table
-			table.Headers = handler.Headers()
-		}
-
-		if info.Mapping.GroupVersionKind.Kind == "Service" {
-			service, getErr := kubeClient.CoreV1().Services(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(service))
-		} else if info.Mapping.GroupVersionKind.Kind == "ConfigMap" {
-			configMap, getErr := kubeClient.CoreV1().ConfigMaps(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(configMap))
-		} else if info.Mapping.GroupVersionKind.Kind == "Secret" {
-			secret, getErr := kubeClient.CoreV1().Secrets(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(secret))
-		} else if info.Mapping.GroupVersionKind.Kind == "PersistentVolumeClaim" {
-			pvc, getErr := kubeClient.CoreV1().PersistentVolumeClaims(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(pvc))
-		} else if info.Mapping.GroupVersionKind.Kind == "Deployment" {
-			deployment, getErr := kubeClient.AppsV1beta1().Deployments(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(deployment))
-		} else if info.Mapping.GroupVersionKind.Kind == "StatefulSet" {
-			statefulSet, getErr := kubeClient.AppsV1beta1().StatefulSets(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(statefulSet))
-		} else if info.Mapping.GroupVersionKind.Kind == "Job" {
-			job, getErr := kubeClient.BatchV1().Jobs(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-			table.Items = append(table.Items, handler.Columns(job))
-		}
-	}
-
-	return resources, nil
-}
-
-// ResourceTypeHandler is an interface for handlers that returns list of headers and columns to represent specified
-// object.
-type ResourceTypeHandler interface {
-	Headers() []string
-	Columns(interface{}) []string
-}
-
-var serviceResourceHeaders = []string{
-	"Namespace",
-	"Name",
-	"Type",
-	"Port(s)",
-	"Created",
-}
-
-type serviceResourceTypeHandler struct {
-}
-
-func (*serviceResourceTypeHandler) Headers() []string {
-	return serviceResourceHeaders
-}
-
-func (*serviceResourceTypeHandler) Columns(obj interface{}) []string {
-	service := obj.(*v1.Service)
-	parts := make([]string, len(service.Spec.Ports))
-	for idx, port := range service.Spec.Ports {
-		if port.NodePort > 0 {
-			parts[idx] = fmt.Sprintf("%d:%d/%s", port.Port, port.NodePort, port.Protocol)
-		} else {
-			parts[idx] = fmt.Sprintf("%d/%s", port.Port, port.Protocol)
-		}
-		if len(port.Name) > 0 {
-			parts[idx] += "(" + port.Name + ")"
-		}
-	}
-	ports := strings.Join(parts, ",")
-
-	return []string{service.Namespace, service.Name, string(service.Spec.Type), ports, service.CreationTimestamp.String()}
-}
-
-var deploymentResourceHeaders = []string{
-	"Namespace",
-	"Name",
-	"Desired",
-	"Current",
-	"Up-to-date",
-	"Available",
-	"Generation",
-	"Created",
-}
-
-type deploymentResourceTypeHandler struct {
-}
-
-func (*deploymentResourceTypeHandler) Headers() []string {
-	return deploymentResourceHeaders
-}
-
-func (*deploymentResourceTypeHandler) Columns(obj interface{}) []string {
-	deployment := obj.(*v1beta1.Deployment)
-
-	desiredReplicas := fmt.Sprintf("%d", *deployment.Spec.Replicas)
-	currentReplicas := fmt.Sprintf("%d", deployment.Status.Replicas)
-	updatedReplicas := fmt.Sprintf("%d", deployment.Status.UpdatedReplicas)
-	availableReplicas := fmt.Sprintf("%d", deployment.Status.AvailableReplicas)
-	gen := fmt.Sprintf("%d", deployment.Generation)
-	created := deployment.CreationTimestamp.String()
-
-	return []string{deployment.Namespace, deployment.Name, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, gen, created}
+	return p.kube.ResourcesForManifest(deployName, targetManifest, eventLog)
 }

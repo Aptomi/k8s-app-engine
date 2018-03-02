@@ -18,13 +18,13 @@ type ClusterConfig struct {
 	KubeConfig interface{} `yaml:",omitempty"` // it's just a kubeconfig, we don't need to parse it
 }
 
-func (plugin *Plugin) parseClusterConfig() error {
-	cluster := plugin.Cluster
+func (p *Plugin) parseClusterConfig() error {
+	cluster := p.Cluster
 
 	clusterConfig := &ClusterConfig{}
-	err := plugin.Cluster.ParseConfigInto(clusterConfig)
+	err := p.Cluster.ParseConfigInto(clusterConfig)
 	if err != nil {
-		return fmt.Errorf("error while parsing kubernetes specific config of cluster %s: %s", plugin.Cluster.Name, err)
+		return fmt.Errorf("error while parsing kubernetes specific config of cluster %s: %s", p.Cluster.Name, err)
 	}
 
 	if clusterConfig.Local && clusterConfig.KubeConfig != nil {
@@ -32,24 +32,24 @@ func (plugin *Plugin) parseClusterConfig() error {
 	}
 
 	if clusterConfig.KubeConfig != nil {
-		plugin.RestConfig, plugin.ClientConfig, plugin.Namespace, err = initKubeConfig(clusterConfig, cluster)
+		p.RestConfig, p.ClientConfig, p.Namespace, err = initKubeConfig(clusterConfig, cluster)
 	} else {
-		plugin.RestConfig, plugin.ClientConfig, err = initLocalKubeConfig(cluster)
+		p.RestConfig, p.ClientConfig, err = initLocalKubeConfig(cluster)
 	}
 	if err != nil {
 		return err
 	}
 
-	if plugin.config.Timeout == 0 {
-		plugin.config.Timeout = 10 * time.Second
+	if p.config.Timeout == 0 {
+		p.config.Timeout = 10 * time.Second
 	}
-	plugin.RestConfig.Timeout = plugin.config.Timeout
+	p.RestConfig.Timeout = p.config.Timeout
 
 	if len(clusterConfig.Namespace) > 0 {
-		plugin.Namespace = clusterConfig.Namespace
+		p.Namespace = clusterConfig.Namespace
 	}
-	if len(plugin.Namespace) == 0 {
-		plugin.Namespace = "default"
+	if len(p.Namespace) == 0 {
+		p.Namespace = "default"
 	}
 
 	return nil
