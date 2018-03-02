@@ -191,6 +191,17 @@ export async function getEndpoints (d, successFunc, errorFunc) {
   })
 }
 
+// loads dependency deployment status
+export async function getResources (d, successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy', 'dependency', d['metadata']['namespace'], d['metadata']['name'], 'deploystatus'].join('/')
+  callAPI(handler, async, function (data) {
+    successFunc(data['status'])
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 /*
  * Helpers to synchronously fetch missing data. Those are required because our API cannot return data in
  * a single call. So we have to make multiple calls.

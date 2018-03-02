@@ -74,6 +74,7 @@
                 <td>
                   <button type="button" class="btn btn-default btn-xs" @click="showEndpoints(d)">Endpoints</button>
                   <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
+                  <button type="button" class="btn btn-default btn-xs" @click="showResources(d)">Resources</button>
                   <button type="button" class="btn btn-default btn-xs" @click="editYaml(d)">Edit</button>
                 </td>
               </tr>
@@ -93,6 +94,7 @@
   import {getPolicyObjectsWithProperties, getObjectMapByNamespace} from 'lib/api.js'
   import objectEditYAML from 'pages/components/ObjectEditYAML'
   import endpoints from 'pages/components/Endpoints'
+  import resources from 'pages/components/Resources'
 
   export default {
     data () {
@@ -118,6 +120,14 @@
       },
       showDiagram (obj) {
         alert('diagram')
+      },
+      showResources (obj) {
+        this.$modal.show(resources, {
+          dependency: obj
+        }, {
+          width: '60%',
+          height: 'auto'
+        })
       },
       editYaml (obj) {
         this.$modal.show(objectEditYAML, {
