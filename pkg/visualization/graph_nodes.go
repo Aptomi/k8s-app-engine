@@ -83,7 +83,7 @@ type componentNode struct {
 }
 
 func (n componentNode) getGroup() string {
-	return "component"
+	return "component" + n.component.Code.Type
 }
 
 func (n componentNode) getID() string {

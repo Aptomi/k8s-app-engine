@@ -86,7 +86,7 @@
                   </div>
                 </td>
                 <td>
-                  <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
+                  <!-- <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button> -->
                   <button type="button" class="btn btn-default btn-xs" @click="editYaml(d)">Edit</button>
                 </td>
               </tr>

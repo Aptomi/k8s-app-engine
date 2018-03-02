@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/visualization"
 	"github.com/julienschmidt/httprouter"
@@ -148,9 +149,15 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 		panic(fmt.Sprintf("error while getting object from policy: %s", err))
 	}
 
+	var resolution *resolve.PolicyResolution
+	if kind == lang.DependencyObject.Kind {
+		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog("api-object-diagram", true))
+		resolution, _ = resolver.ResolveAllDependencies()
+	}
+
 	var graph *visualization.Graph
-	graphBuilder := visualization.NewGraphBuilder(policy, nil, nil)
-	graph = graphBuilder.Object(visualization.PolicyCfgDefault, obj)
+	graphBuilder := visualization.NewGraphBuilder(policy, resolution, api.externalData)
+	graph = graphBuilder.Object(obj)
 
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }

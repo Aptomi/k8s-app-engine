@@ -6,12 +6,15 @@ import (
 )
 
 // Object produces a graph which represents an object
-func (b *GraphBuilder) Object(cfg *PolicyCfg, obj runtime.Object) *Graph {
+func (b *GraphBuilder) Object(obj runtime.Object) *Graph {
 	if service, ok := obj.(*lang.Service); ok {
-		b.traceService(service, nil, "", 0, cfg)
+		b.traceService(service, nil, "", 0, PolicyCfgDefault)
 	}
 	if contract, ok := obj.(*lang.Contract); ok {
-		b.traceContract(contract, nil, "", 0, cfg)
+		b.traceContract(contract, nil, "", 0, PolicyCfgDefault)
+	}
+	if dependency, ok := obj.(*lang.Dependency); ok {
+		b.traceDependencyResolution("", dependency, nil, 0, DependencyResolutionCfgDefault)
 	}
 	return b.graph
 }
@@ -51,27 +54,34 @@ func (b *GraphBuilder) traceService(service *lang.Service, last graphNode, lastL
 		b.graph.addEdge(newEdge(last, svcNode, lastLabel))
 	}
 
-	// for every contract service relies on
-	codeComponents := 0
+	// process components first
+	showedComponents := false
 	for _, component := range service.Components {
-		if component.Code != nil {
-			codeComponents++
-		}
-	}
-	for _, component := range service.Components {
-		if component.Code != nil && (codeComponents > 1 || !cfg.optimizeServicesWithSingleComponent) {
+		if component.Code != nil && cfg.showServiceComponents {
 			// service -> component
 			cmpNode := componentNode{service: service, component: component}
 			b.graph.addNode(cmpNode, level+1)
 			b.graph.addEdge(newEdge(svcNode, cmpNode, ""))
+			showedComponents = true
 		}
+	}
+
+	// do not show any more service components down the tree if we already showed them at top level
+	cfgNext := &PolicyCfg{}
+	*cfgNext = *cfg
+	if cfg.showServiceComponentsOnlyForTopLevel && showedComponents {
+		cfgNext.showServiceComponents = false
+	}
+
+	// process contracts after that
+	for _, component := range service.Components {
 		if len(component.Contract) > 0 {
 			contractObjNew, errContract := b.policy.GetObject(lang.ContractObject.Kind, component.Contract, service.Namespace)
 			if errContract != nil {
 				b.graph.addNode(errorNode{err: errContract}, level+1)
 				continue
 			}
-			b.traceContract(contractObjNew.(*lang.Contract), svcNode, "", level+1, cfg)
+			b.traceContract(contractObjNew.(*lang.Contract), svcNode, "", level+1, cfgNext)
 		}
 	}
 

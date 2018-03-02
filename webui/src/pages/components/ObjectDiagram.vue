@@ -47,7 +47,6 @@
           this.loading = false
           let container = document.getElementById('object_details_graph')
           let network = new vis.Network(container, data, options)
-          // network.on("click", clickedNode)
           network.fit()
         }, this)
 
@@ -64,10 +63,10 @@
   var options = {
     nodes: {
       font: {
-        size: 12,
+        size: 16,
         color: 'white'
       },
-      borderWidth: 2,
+      borderWidth: 0,
       chosen: {
         label: false,
         node: chosenNode
@@ -76,40 +75,48 @@
     edges: {
       width: 1,
       font: {
-        size: 12,
+        size: 16,
         strokeWidth: 0,
-        color: 'white',
+        color: 'rgb(246,65,111)',
         align: 'top'
       }
     },
     groups: {
       service: {
-        shape: 'icon',
-        icon: {
-          face: 'FontAwesome',
-          code: '\uf1b2',
-          size: 50,
-          color: 'red'
-        },
-        color: {
-          border: 'red'
-        }
-      },
-      component: {
-        font: {
-          color: 'black',
-          multi: 'html'
-        },
-        color: {background: 'rgb(250,250,80)', border: 'darkslategrey'},
-        shape: 'box'
+        size: 25,
+        shape: 'circularImage',
+        image: '/static/img/service-icon-circle.png',
+        color: {background: 'white', border: 'lightgray'}
       },
       contract: {
         font: {
-          color: 'black',
+          color: 'rgb(220,213,31)',
           multi: 'html'
         },
-        color: {background: 'rgb(0,255,140)', border: 'darkslategrey'},
-        shape: 'box'
+        size: 25,
+        shape: 'circularImage',
+        image: '/static/img/contract-icon.png',
+        color: {background: 'rgb(164,253,74)', border: 'rgb(220,213,31)'}
+      },
+      componenthelm: {
+        font: {
+          color: 'rgb(66,136,251)',
+          multi: 'html'
+        },
+        size: 25,
+        shape: 'circularImage',
+        image: '/static/img/helm-icon.png',
+        color: {background: 'white', border: 'rgb(66,136,251)'}
+      },
+      componentraw: {
+        font: {
+          color: 'rgb(66,136,251)',
+          multi: 'html'
+        },
+        size: 25,
+        shape: 'circularImage',
+        image: '/static/img/k8s-icon.png',
+        color: {background: 'white', border: 'rgb(66,136,251)'}
       },
       serviceInstance: {
         font: {
@@ -151,10 +158,6 @@
           size: 50,
           color: 'red'
         }
-      },
-      mints: {color: 'rgb(0,255,140)'},
-      source: {
-        color: {border: 'white'}
       }
     },
     layout: {
@@ -202,7 +205,7 @@
     color: #d3d3d3;
     background-color: #222222;
     border: 1px solid #444444;
-    font: 12pt arial;
+    font: 16pt arial;
     width: 100%;
   }
 </style>

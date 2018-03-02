@@ -22,9 +22,7 @@ func (b *GraphBuilder) DependencyResolution(cfg *DependencyResolutionCfg) *Graph
 	// trace all dependencies
 	for _, dependencyObj := range b.policy.GetObjectsByKind(lang.DependencyObject.Kind) {
 		dependency := dependencyObj.(*lang.Dependency)
-		depNode := dependencyNode{dependency: dependency, b: b}
-		b.graph.addNode(depNode, 0)
-		b.traceDependencyResolution("", dependency, depNode, 1, cfg)
+		b.traceDependencyResolution("", dependency, nil, 0, cfg)
 	}
 	return b.graph
 }
@@ -32,7 +30,13 @@ func (b *GraphBuilder) DependencyResolution(cfg *DependencyResolutionCfg) *Graph
 func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang.Dependency, last graphNode, level int, cfg *DependencyResolutionCfg) {
 	var edgesOut map[string]bool
 	if len(keySrc) <= 0 {
-		// if we are tracing a dependency, then add an outgoing edge to its corresponding service instance
+		// create a dependency node
+		depNode := dependencyNode{dependency: dependency, b: b}
+		b.graph.addNode(depNode, 0)
+		last = depNode
+		level++
+
+		// add an outgoing edge to its corresponding service instance
 		edgesOut = make(map[string]bool)
 		resolvedKey := b.resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)]
 		if len(resolvedKey) > 0 {

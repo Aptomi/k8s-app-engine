@@ -7,12 +7,14 @@ import (
 
 // PolicyCfg defines graph generation parameters for Policy
 type PolicyCfg struct {
-	optimizeServicesWithSingleComponent bool
+	showServiceComponentsOnlyForTopLevel bool
+	showServiceComponents                bool
 }
 
 // PolicyCfgDefault is default graph generation parameters for Policy
 var PolicyCfgDefault = &PolicyCfg{
-	optimizeServicesWithSingleComponent: true,
+	showServiceComponentsOnlyForTopLevel: true,
+	showServiceComponents:                true,
 }
 
 // Policy produces just a policy graph without showing any resolution data

@@ -74,7 +74,7 @@
                   {{d.config.namespace}}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
+                  <!-- <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button> -->
                   <button type="button" class="btn btn-default btn-xs" @click="editYaml(d)">Edit</button>
                 </td>
               </tr>
@@ -108,9 +108,6 @@
       this.fetchData()
     },
     methods: {
-      showDiagram (obj) {
-        alert('diagram')
-      },
       editYaml (obj) {
         this.$modal.show(objectEditYAML, {
           obj: obj,
