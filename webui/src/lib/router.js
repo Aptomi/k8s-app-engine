@@ -16,7 +16,6 @@ import ShowRules from 'pages/objects/ShowRules.vue'
 import ShowDependencies from 'pages/objects/ShowDependencies.vue'
 import ShowUserRoles from 'pages/objects/ShowUserRoles.vue'
 import ShowAuditLog from 'pages/deployment/ShowAuditLog.vue'
-import ShowObjects from 'pages/debug/ShowObjects.vue'
 import BrowsePolicy from 'pages/debug/BrowsePolicy.vue'
 
 Vue.use(Router)
@@ -87,11 +86,6 @@ const router = new Router({
       name: 'Debug',
       component: Passthrough,
       children: [
-        {
-          path: 'objects',
-          name: 'ShowObjects',
-          component: ShowObjects
-        },
         {
           path: 'browse',
           name: 'BrowsePolicy',

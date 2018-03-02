@@ -83,14 +83,6 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Objects',
-        router: {
-          name: 'ShowObjects'
-        }
-      },
-      {
-        type: 'item',
-        icon: 'fa fa-circle-o',
         name: 'Browser',
         router: {
           name: 'BrowsePolicy'
