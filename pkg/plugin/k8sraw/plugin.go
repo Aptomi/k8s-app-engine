@@ -299,6 +299,7 @@ var K8sDeploymentResourceHeaders = []string{
 	"Current",
 	"Up-to-date",
 	"Available",
+	"Generation",
 	"Created",
 }
 
@@ -316,8 +317,10 @@ func (*K8sDeploymentResourceTypeHandler) Columns(obj interface{}) []string {
 	currentReplicas := fmt.Sprintf("%d", deployment.Status.Replicas)
 	updatedReplicas := fmt.Sprintf("%d", deployment.Status.UpdatedReplicas)
 	availableReplicas := fmt.Sprintf("%d", deployment.Status.AvailableReplicas)
+	gen := fmt.Sprintf("%s", deployment.Generation)
+	created := deployment.CreationTimestamp.String()
 
-	return []string{deployment.Namespace, deployment.Name, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, deployment.CreationTimestamp.String()}
+	return []string{deployment.Namespace, deployment.Name, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, gen, created}
 }
 
 func (p *Plugin) prepareClient(eventLog *event.Log, deployName string) *kube.Client {
