@@ -28,7 +28,7 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 	resources := make(plugin.Resources)
 	for _, info := range infos {
 		gvk := info.ResourceMapping().GroupVersionKind
-		resourceType := "k8s/" + gvk.Version + "/" + gvk.Kind
+		resourceType := "k8s/" + gvk.Kind
 
 		if !resourceRegistry.IsSupported(resourceType) {
 			continue
@@ -64,6 +64,12 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 		if getErr != nil {
 			return nil, getErr
 		}
+
+		// missing object or don't know how to load it
+		if obj == nil {
+			continue
+		}
+
 		table.Items = append(table.Items, resourceRegistry.Handle(resourceType, obj))
 	}
 
@@ -73,13 +79,13 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 func buildResourceRegistry() *plugin.ResourceRegistry {
 	reg := plugin.NewResourceRegistry()
 
-	reg.AddHandler("k8s/v1/Service", serviceResourceHeaders, serviceResourceHandler)
-	reg.AddHandler("k8s/v1/Deployment", deploymentResourceHeaders, deploymentResourceHandler)
+	reg.AddHandler("k8s/Service", serviceResourceHeaders, serviceResourceHandler)
+	reg.AddHandler("k8s/Deployment", deploymentResourceHeaders, deploymentResourceHandler)
 
 	return reg
 }
 
-// K8s Service
+// k8s/Service
 
 var serviceResourceHeaders = []string{
 	"Namespace",
@@ -107,7 +113,7 @@ func serviceResourceHandler(obj interface{}) []string {
 	return []string{service.Namespace, service.Name, string(service.Spec.Type), ports, service.CreationTimestamp.String()}
 }
 
-// K8s Deployment
+// k8s/Deployment
 
 var deploymentResourceHeaders = []string{
 	"Namespace",
