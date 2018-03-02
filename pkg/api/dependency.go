@@ -2,7 +2,10 @@ package api
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -59,4 +62,92 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	}
 
 	api.contentType.WriteOne(writer, request, &dependencyStatusWrapper{Data: status})
+}
+
+type dependencyDeployStatusWrapper struct {
+	Status plugin.DeploymentStatus
+}
+
+func (g *dependencyDeployStatusWrapper) GetKind() string {
+	return "dependencyDeployStatus"
+}
+
+func (api *coreAPI) handleDependencyDeployStatusGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	gen := runtime.LastGen
+	policy, _, err := api.store.GetPolicy(gen)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting requested policy: %s", err))
+	}
+
+	ns := params.ByName("ns")
+	kind := lang.DependencyObject.Kind
+	name := params.ByName("name")
+
+	obj, err := policy.GetObject(kind, name, ns)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting object %s/%s/%s in policy #%s", ns, kind, name, gen))
+	}
+	if obj == nil {
+		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
+	}
+
+	// once dependency is loaded, we need to find its state in the actual state
+	dependency := obj.(*lang.Dependency)
+	actualState, err := api.store.GetActualState()
+	if err != nil {
+		panic(fmt.Sprintf("Can't load actual state to get endpoints: %s", err))
+	}
+
+	plugins := api.pluginRegistryFactory()
+	depKey := runtime.KeyForStorable(dependency)
+	status := make(plugin.DeploymentStatus)
+	for _, instance := range actualState.ComponentInstanceMap {
+		if _, ok := instance.DependencyKeys[depKey]; ok {
+			codePlugin, pluginErr := pluginForComponentInstance(instance, policy, plugins)
+			if pluginErr != nil {
+				panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), err))
+			}
+			if codePlugin == nil {
+				continue
+			}
+
+			eventLog := event.NewLog("status", false)
+			instanceStatus, statusErr := codePlugin.Status(instance.GetDeployName(), instance.CalculatedCodeParams, eventLog)
+			if statusErr != nil {
+				panic(fmt.Sprintf("Error while getting deployment status for component instance %s: %s", instance.GetKey(), statusErr))
+			}
+
+			status.Merge(instanceStatus)
+		}
+	}
+
+	api.contentType.WriteOne(writer, request, &dependencyDeployStatusWrapper{status})
+}
+
+func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lang.Policy, plugins plugin.Registry) (plugin.CodePlugin, error) {
+	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
+
+	if component == nil || component.Code == nil {
+		return nil, nil
+	}
+
+	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
+	if !ok {
+		return nil, fmt.Errorf("no cluster specified in code params, component instance: %v", instance.GetKey())
+	}
+
+	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
+	if err != nil {
+		return nil, err
+	}
+	if clusterObj == nil {
+		return nil, fmt.Errorf("can't find cluster in policy: %s", clusterName)
+	}
+	cluster := clusterObj.(*lang.Cluster)
+
+	return plugins.ForCodeType(cluster, component.Code.Type)
 }
