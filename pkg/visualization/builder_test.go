@@ -37,7 +37,7 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	{
 		data := NewGraphBuilder(b.Policy(), resolutionEmpty, b.External()).Policy(PolicyCfgDefault).GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 5400 }, "Policy visualization: generated policy") {
+		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Policy visualization: generated policy") {
 			debug(t, data)
 		}
 	}
@@ -51,7 +51,7 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	{
 		data := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault).GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 3000 }, "Policy visualization: generated policy -> successfully resolved") {
+		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Policy visualization: generated policy -> successfully resolved") {
 			debug(t, data)
 		}
 	}
