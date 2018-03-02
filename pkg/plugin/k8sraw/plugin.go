@@ -273,6 +273,12 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 				return nil, getErr
 			}
 			table.Items = append(table.Items, handler.Columns(statefulSet))
+		} else if info.Mapping.GroupVersionKind.Kind == "Job" {
+			job, getErr := kubeClient.BatchV1().Jobs(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				return nil, getErr
+			}
+			table.Items = append(table.Items, handler.Columns(job))
 		}
 	}
 
