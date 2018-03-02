@@ -249,5 +249,22 @@ func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, ev
 
 // Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance
 func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
-	return nil, nil
+	err := p.init(eventLog)
+	if err != nil {
+		return nil, err
+	}
+
+	helmClient, err := p.newClient()
+	if err != nil {
+		return nil, err
+	}
+
+	releaseName := getReleaseName(deployName)
+
+	currRelease, err := helmClient.ReleaseContent(releaseName)
+	if err != nil {
+		return nil, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
+	}
+
+	return p.kube.ResourcesForManifest(deployName, currRelease.Release.Manifest, eventLog)
 }
