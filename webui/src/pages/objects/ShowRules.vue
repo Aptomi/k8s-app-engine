@@ -144,7 +144,7 @@
         })
       },
       sorted: function (objList) {
-        return objList.sort(function (a, b) { return a.weight - b.weight })
+        return objList.slice().sort(function (a, b) { return a.weight - b.weight })
       },
       fetchData () {
         this.loading = true
