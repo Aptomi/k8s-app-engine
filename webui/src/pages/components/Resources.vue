@@ -29,6 +29,8 @@
           <tr v-for="item in table.items">
             <td v-for="column, idx in item">
               <span v-if="table.headers[idx] === 'Created'">{{ column | formatDateAgo }}</span>
+              <span class="label label-success" v-else-if="table.headers[idx] === 'Ready' && column === 'true'">Ready</span>
+              <span class="label label-warning" v-else-if="table.headers[idx] === 'Ready' && column !== 'true'">Not Ready</span>
               <span v-else>{{ column }}</span>
             </td>
           </tr>

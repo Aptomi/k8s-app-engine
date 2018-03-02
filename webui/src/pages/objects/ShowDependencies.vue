@@ -131,7 +131,7 @@
         this.$modal.show(resources, {
           dependency: obj
         }, {
-          width: '60%',
+          width: '80%',
           height: 'auto'
         })
       },
