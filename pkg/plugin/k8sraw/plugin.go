@@ -317,7 +317,7 @@ func (*K8sDeploymentResourceTypeHandler) Columns(obj interface{}) []string {
 	currentReplicas := fmt.Sprintf("%d", deployment.Status.Replicas)
 	updatedReplicas := fmt.Sprintf("%d", deployment.Status.UpdatedReplicas)
 	availableReplicas := fmt.Sprintf("%d", deployment.Status.AvailableReplicas)
-	gen := fmt.Sprintf("%s", deployment.Generation)
+	gen := fmt.Sprintf("%d", deployment.Generation)
 	created := deployment.CreationTimestamp.String()
 
 	return []string{deployment.Namespace, deployment.Name, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, gen, created}
