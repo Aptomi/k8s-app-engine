@@ -11,8 +11,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util/sync"
 	"github.com/pmezard/go-difflib/difflib"
 	"gopkg.in/yaml.v2"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/kube"
 	"strings"
@@ -234,31 +232,19 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 		return nil, err
 	}
 
-	kubeClient, err := plugin.kube.NewClient()
+	helmClient, err := plugin.newClient()
 	if err != nil {
 		return nil, err
 	}
-
-	client := kubeClient.CoreV1()
 
 	releaseName := getReleaseName(deployName)
 
-	selector := labels.Set{"release": releaseName}.AsSelector().String()
-	options := meta.ListOptions{LabelSelector: selector}
-
-	endpoints := make(map[string]string)
-
-	// Check all corresponding services
-	services, err := client.Services(plugin.kube.Namespace).List(options)
+	currRelease, err := helmClient.ReleaseContent(releaseName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	for _, service := range services.Items {
-		plugin.kube.AddEndpointsFromService(&service, endpoints)
-	}
-
-	return endpoints, nil
+	return plugin.kube.EndpointsForManifests(deployName, currRelease.Release.Manifest, eventLog)
 }
 
 // Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance

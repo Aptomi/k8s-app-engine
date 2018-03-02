@@ -12,7 +12,6 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/pkg/apis/apps/v1beta1"
-	"k8s.io/helm/pkg/kube"
 	"strings"
 )
 
@@ -82,7 +81,7 @@ func (p *Plugin) Create(deployName string, params util.NestedParameterMap, event
 		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.prepareClient(eventLog, deployName)
+	client := p.kube.NewHelmKube(deployName, eventLog)
 
 	err = client.Create(p.kube.Namespace, strings.NewReader(targetManifest), 42, false)
 	if err != nil {
@@ -114,7 +113,7 @@ func (p *Plugin) Update(deployName string, params util.NestedParameterMap, event
 		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.prepareClient(eventLog, deployName)
+	client := p.kube.NewHelmKube(deployName, eventLog)
 
 	err = client.Update(p.kube.Namespace, strings.NewReader(currentManifest), strings.NewReader(targetManifest), false, false, 42, false)
 	if err != nil {
@@ -141,7 +140,7 @@ func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, even
 		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.prepareClient(eventLog, deployName)
+	client := p.kube.NewHelmKube(deployName, eventLog)
 
 	err = client.Delete(p.kube.Namespace, strings.NewReader(deleteManifest))
 	if err != nil {
@@ -158,37 +157,12 @@ func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, ev
 		return nil, err
 	}
 
-	kubeClient, err := p.kube.NewClient()
-	if err != nil {
-		return nil, err
-	}
-
 	targetManifest, ok := params["manifest"].(string)
 	if !ok {
 		return nil, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.prepareClient(eventLog, deployName)
-
-	infos, err := client.BuildUnstructured(p.kube.Namespace, strings.NewReader(targetManifest))
-	if err != nil {
-		return nil, err
-	}
-
-	endpoints := make(map[string]string)
-
-	for _, info := range infos {
-		if info.Mapping.GroupVersionKind.Kind == "Service" {
-			service, getErr := kubeClient.CoreV1().Services(p.kube.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
-
-			p.kube.AddEndpointsFromService(service, endpoints)
-		}
-	}
-
-	return endpoints, nil
+	return p.kube.EndpointsForManifests(deployName, targetManifest, eventLog)
 }
 
 // Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance
@@ -208,7 +182,7 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 		return nil, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.prepareClient(eventLog, deployName)
+	client := p.kube.NewHelmKube(deployName, eventLog)
 
 	infos, err := client.BuildUnstructured(p.kube.Namespace, strings.NewReader(targetManifest))
 	if err != nil {
@@ -354,15 +328,4 @@ func (*deploymentResourceTypeHandler) Columns(obj interface{}) []string {
 	created := deployment.CreationTimestamp.String()
 
 	return []string{deployment.Namespace, deployment.Name, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, gen, created}
-}
-
-func (p *Plugin) prepareClient(eventLog *event.Log, deployName string) *kube.Client {
-	client := kube.New(p.kube.ClientConfig)
-	client.Log = func(format string, args ...interface{}) {
-		eventLog.WithFields(event.Fields{
-			"deployName": deployName,
-		}).Debugf(fmt.Sprintf("[instance: %s] ", deployName)+format, args...)
-	}
-
-	return client
 }
