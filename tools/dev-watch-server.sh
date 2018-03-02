@@ -2,8 +2,6 @@
 
 set -eou pipefail
 
-echo "APTOMI_DB=$APTOMI_DB"
-
 COLOR_GRAY='\033[0;37m'
 COLOR_BLUE='\033[0;34m'
 COLOR_RED='\033[0;31m'
@@ -36,7 +34,7 @@ function log() {
 
 watched_path="cmd pkg Makefile tools vendor"
 
-log "Watching repo and reloading aptomi server after any changes in: $watched_path"
+log "Watching for code changes and reloading aptomi server after a code change is detected: $watched_path"
 
 if ! hash fswatch 2>/dev/null; then
     log "App fswatch isn't installed but required"
