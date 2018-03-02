@@ -15,6 +15,7 @@ import ShowClusters from 'pages/objects/ShowClusters.vue'
 import ShowRules from 'pages/objects/ShowRules.vue'
 import ShowDependencies from 'pages/objects/ShowDependencies.vue'
 import ShowUserRoles from 'pages/objects/ShowUserRoles.vue'
+import ShowCatalog from 'pages/objects/ShowCatalog.vue'
 import ShowAuditLog from 'pages/deployment/ShowAuditLog.vue'
 import BrowsePolicy from 'pages/debug/BrowsePolicy.vue'
 
@@ -66,6 +67,11 @@ const router = new Router({
           path: 'users',
           name: 'ShowUserRoles',
           component: ShowUserRoles
+        },
+        {
+          path: 'catalog',
+          name: 'ShowCatalog',
+          component: ShowCatalog
         }
       ]
     },

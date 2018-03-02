@@ -11,6 +11,7 @@ import axios from 'axios'
 import moment from 'moment'
 import VModal from 'vue-js-modal'
 import Notifications from 'vue-notification'
+import ObjWithIcon from './pages/components/ObjWithIcon'
 
 Vue.prototype.$bus = EventBus
 Vue.prototype.$http = axios
@@ -29,6 +30,7 @@ Vue.filter('formatDate', function (value) {
 
 Vue.use(VModal, { dynamic: true })
 Vue.use(Notifications)
+Vue.component('obj-with-icon', ObjWithIcon)
 
 /* eslint-disable no-new */
 new Vue({

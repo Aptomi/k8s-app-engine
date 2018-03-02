@@ -56,6 +56,14 @@ module.exports = [
         router: {
           name: 'ShowUserRoles'
         }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Catalog',
+        router: {
+          name: 'ShowCatalog'
+        }
       }
     ]
   },
