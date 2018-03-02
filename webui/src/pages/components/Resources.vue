@@ -11,7 +11,7 @@
       <div v-if="error">
         <span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i>
       </div>
-      <div v-if="resources == null || Object.keys(resources).length <= 0">
+      <div v-if="!loading && !error && (resources == null || Object.keys(resources).length <= 0)">
         No Resources Found
       </div>
 
