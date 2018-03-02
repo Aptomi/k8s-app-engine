@@ -191,6 +191,7 @@ func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, ev
 	return endpoints, nil
 }
 
+// Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance
 func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	err := p.init()
 	if err != nil {
@@ -215,9 +216,9 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 	}
 
 	handlers := make(map[string]ResourceTypeHandler)
-	handlers["k8s/v1/Service"] = &K8sServiceResourceTypeHandler{}
+	handlers["k8s/v1/Service"] = &serviceResourceTypeHandler{}
 	// not sure if it's good to have version.... we could have issues with versions in different k8s clusters
-	handlers["k8s/v1/Deployment"] = &K8sDeploymentResourceTypeHandler{}
+	handlers["k8s/v1/Deployment"] = &deploymentResourceTypeHandler{}
 
 	resources := make(plugin.Resources)
 	for _, info := range infos {
@@ -254,12 +255,14 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 	return resources, nil
 }
 
+// ResourceTypeHandler is an interface for handlers that returns list of headers and columns to represent specified
+// object.
 type ResourceTypeHandler interface {
 	Headers() []string
 	Columns(interface{}) []string
 }
 
-var K8sServiceResourceHeaders = []string{
+var serviceResourceHeaders = []string{
 	"Namespace",
 	"Name",
 	"Type",
@@ -267,14 +270,14 @@ var K8sServiceResourceHeaders = []string{
 	"Created",
 }
 
-type K8sServiceResourceTypeHandler struct {
+type serviceResourceTypeHandler struct {
 }
 
-func (*K8sServiceResourceTypeHandler) Headers() []string {
-	return K8sServiceResourceHeaders
+func (*serviceResourceTypeHandler) Headers() []string {
+	return serviceResourceHeaders
 }
 
-func (*K8sServiceResourceTypeHandler) Columns(obj interface{}) []string {
+func (*serviceResourceTypeHandler) Columns(obj interface{}) []string {
 	service := obj.(*v1.Service)
 	parts := make([]string, len(service.Spec.Ports))
 	for idx, port := range service.Spec.Ports {
@@ -292,7 +295,7 @@ func (*K8sServiceResourceTypeHandler) Columns(obj interface{}) []string {
 	return []string{service.Namespace, service.Name, string(service.Spec.Type), ports, service.CreationTimestamp.String()}
 }
 
-var K8sDeploymentResourceHeaders = []string{
+var deploymentResourceHeaders = []string{
 	"Namespace",
 	"Name",
 	"Desired",
@@ -303,14 +306,14 @@ var K8sDeploymentResourceHeaders = []string{
 	"Created",
 }
 
-type K8sDeploymentResourceTypeHandler struct {
+type deploymentResourceTypeHandler struct {
 }
 
-func (*K8sDeploymentResourceTypeHandler) Headers() []string {
-	return K8sDeploymentResourceHeaders
+func (*deploymentResourceTypeHandler) Headers() []string {
+	return deploymentResourceHeaders
 }
 
-func (*K8sDeploymentResourceTypeHandler) Columns(obj interface{}) []string {
+func (*deploymentResourceTypeHandler) Columns(obj interface{}) []string {
 	deployment := obj.(*v1beta1.Deployment)
 
 	desiredReplicas := fmt.Sprintf("%d", *deployment.Spec.Replicas)

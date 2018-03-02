@@ -261,6 +261,7 @@ func (plugin *Plugin) Endpoints(deployName string, params util.NestedParameterMa
 	return endpoints, nil
 }
 
+// Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance
 func (plugin *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	return nil, nil
 }

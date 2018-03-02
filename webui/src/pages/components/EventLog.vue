@@ -39,7 +39,7 @@
   </div>
 </template>
 <script>
-  // import { getEndpoints } from 'lib/api.js'
+  import { getEventLogs } from 'lib/api.js'
 
   export default {
     data () {
@@ -80,20 +80,19 @@
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-          this.log = data
+          if (this.type === 'resolve') {
+            this.log = data.resolvelog
+          } else if (this.type === 'apply') {
+            this.log = data.applylog
+          }
         }, this)
 
-        // const fetchError = $.proxy(function (err) {
-        //   this.loading = false
-        //   this.error = err
-        // }, this)
+        const fetchError = $.proxy(function (err) {
+          this.loading = false
+          this.error = err
+        }, this)
 
-        // getEndpoints(this.dependency, fetchSuccess, fetchError)
-        if (this.type === 'resolve') {
-          fetchSuccess(this.revision.resolvelog)
-        } else if (this.type === 'apply') {
-          fetchSuccess(this.revision.applylog)
-        }
+        getEventLogs(this.revision, fetchSuccess, fetchError)
       }
     }
   }

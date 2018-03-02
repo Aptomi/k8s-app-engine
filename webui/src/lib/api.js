@@ -202,6 +202,13 @@ export async function getResources (d, successFunc, errorFunc) {
   })
 }
 
+// loads revision event logs
+export async function getEventLogs (r, successFunc, errorFunc) {
+  await makeDelay()
+  // temporarily just return back revision itself as it now contains both logs in it
+  successFunc(r)
+}
+
 /*
  * Helpers to synchronously fetch missing data. Those are required because our API cannot return data in
  * a single call. So we have to make multiple calls.
