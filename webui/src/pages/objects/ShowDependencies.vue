@@ -71,9 +71,9 @@
                 </td>
                 <td v-else><span class="label label-danger center">Error</span></td>
                 <td>
-                  <button type="button" class="btn btn-default btn-xs" @click="showEndpoints(d)">Endpoints</button>
-                  <button type="button" class="btn btn-default btn-xs" @click="showResources(d)">Resources</button>
-                  <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
+                  <button v-if="d['status'] === 'Active'" type="button" class="btn btn-default btn-xs" @click="showEndpoints(d)">Endpoints</button>
+                  <button v-if="d['status'] === 'Active'" type="button" class="btn btn-default btn-xs" @click="showResources(d)">Resources</button>
+                  <button v-if="d['status'] === 'Active'" type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button>
                   <button type="button" class="btn btn-default btn-xs" @click="editYaml(d)">Edit</button>
                 </td>
               </tr>
