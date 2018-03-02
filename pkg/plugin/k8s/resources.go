@@ -7,6 +7,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/pkg/apis/apps/v1beta1"
+	"strconv"
 	"strings"
 )
 
@@ -48,17 +49,17 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 		case "Service":
 			obj, getErr = kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "ConfigMap":
-			obj, getErr = kubeClient.CoreV1().ConfigMaps(p.Namespace).Get(info.Name, meta.GetOptions{})
+			//obj, getErr = kubeClient.CoreV1().ConfigMaps(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "Secret":
-			obj, getErr = kubeClient.CoreV1().Secrets(p.Namespace).Get(info.Name, meta.GetOptions{})
+			//obj, getErr = kubeClient.CoreV1().Secrets(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "PersistentVolumeClaim":
-			obj, getErr = kubeClient.CoreV1().PersistentVolumeClaims(p.Namespace).Get(info.Name, meta.GetOptions{})
+			//obj, getErr = kubeClient.CoreV1().PersistentVolumeClaims(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "Deployment":
 			obj, getErr = kubeClient.AppsV1beta1().Deployments(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "StatefulSet":
 			obj, getErr = kubeClient.AppsV1beta1().StatefulSets(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "Job":
-			obj, getErr = kubeClient.BatchV1().Jobs(p.Namespace).Get(info.Name, meta.GetOptions{})
+			//obj, getErr = kubeClient.BatchV1().Jobs(p.Namespace).Get(info.Name, meta.GetOptions{})
 		}
 
 		if getErr != nil {
@@ -79,8 +80,11 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 func buildResourceRegistry() *plugin.ResourceRegistry {
 	reg := plugin.NewResourceRegistry()
 
-	reg.AddHandler("k8s/Service", serviceResourceHeaders, serviceResourceHandler)
+	// todo(slukjanov): support all other resources
+	// k8s/Service handling is temporarily disabled
+	reg.AddHandler("_k8s/Service", serviceResourceHeaders, serviceResourceHandler)
 	reg.AddHandler("k8s/Deployment", deploymentResourceHeaders, deploymentResourceHandler)
+	reg.AddHandler("k8s/StatefulSet", statefulSetResourceHeaders, statefulSetResourceHandler)
 
 	return reg
 }
@@ -118,6 +122,7 @@ func serviceResourceHandler(obj interface{}) []string {
 var deploymentResourceHeaders = []string{
 	"Namespace",
 	"Name",
+	"Ready",
 	"Desired",
 	"Current",
 	"Up-to-date",
@@ -133,8 +138,29 @@ func deploymentResourceHandler(obj interface{}) []string {
 	currentReplicas := fmt.Sprintf("%d", deployment.Status.Replicas)
 	updatedReplicas := fmt.Sprintf("%d", deployment.Status.UpdatedReplicas)
 	availableReplicas := fmt.Sprintf("%d", deployment.Status.AvailableReplicas)
+	ready := strconv.FormatBool(desiredReplicas == currentReplicas && currentReplicas == updatedReplicas && updatedReplicas == availableReplicas)
 	gen := fmt.Sprintf("%d", deployment.Generation)
 	created := deployment.CreationTimestamp.String()
 
-	return []string{deployment.Namespace, deployment.Name, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, gen, created}
+	return []string{deployment.Namespace, deployment.Name, ready, desiredReplicas, currentReplicas, updatedReplicas, availableReplicas, gen, created}
+}
+
+// k8s/StatefulSet
+
+var statefulSetResourceHeaders = []string{
+	"Namespace",
+	"Name",
+	"Ready",
+	"Desired",
+	"Current",
+}
+
+func statefulSetResourceHandler(obj interface{}) []string {
+	statefulSet := obj.(*v1beta1.StatefulSet)
+
+	desiredReplicas := fmt.Sprintf("%d", *statefulSet.Spec.Replicas)
+	currentReplicas := fmt.Sprintf("%d", statefulSet.Status.Replicas)
+	ready := strconv.FormatBool(desiredReplicas == currentReplicas)
+
+	return []string{statefulSet.Namespace, statefulSet.Name, ready, desiredReplicas, currentReplicas}
 }
