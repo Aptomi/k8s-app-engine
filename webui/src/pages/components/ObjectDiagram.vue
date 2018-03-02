@@ -123,29 +123,20 @@
           color: 'black',
           multi: 'html'
         },
-        color: {background: 'rgb(0,123,199)', border: 'darkslategrey'},
+        color: {background: 'rgb(19,132,186)', border: 'darkslategrey'},
         shape: 'box'
       },
       dependency: {
-        shape: 'icon',
-        icon: {
-          face: 'FontAwesome',
-          code: '\uf007',
-          size: 50,
-          color: 'orange'
-        }
+        size: 25,
+        shape: 'circularImage',
+        image: '/static/img/user-icon-circle.png',
+        color: {background: 'white', border: 'lightgray'}
       },
       dependencyNotResolved: {
-        shape: 'icon',
-        font: {
-          multi: 'html'
-        },
-        icon: {
-          face: 'FontAwesome',
-          code: '\uf235',
-          size: 50,
-          color: 'red'
-        }
+        size: 25,
+        shape: 'circularImage',
+        image: '/static/img/user-icon-circle.png',
+        color: {background: 'red', border: 'white'}
       },
       error: {
         shape: 'icon',
