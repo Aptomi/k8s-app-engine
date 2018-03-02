@@ -52,7 +52,8 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.POST("/api/v1/policy", auth(api.handlePolicyUpdate))
 	router.DELETE("/api/v1/policy", auth(api.handlePolicyDelete))
 
-	// policy diagrams
+	// policy & object diagrams
+	router.GET("/api/v1/policy/diagram/object/:ns/:kind/:name", auth(api.handleObjectDiagram))
 	router.GET("/api/v1/policy/diagram/mode/:mode", auth(api.handlePolicyDiagram))
 	router.GET("/api/v1/policy/diagram/mode/:mode/gen/:gen", auth(api.handlePolicyDiagram))
 	router.GET("/api/v1/policy/diagram/compare/mode/:mode/gen/:gen/genBase/:genBase", auth(api.handlePolicyDiagramCompare))

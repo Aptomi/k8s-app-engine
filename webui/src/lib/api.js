@@ -54,6 +54,17 @@ export function filterObjects (policyObjects, nsFilter = null, kindFilter = null
   return result
 }
 
+// loads the object diagram
+export async function getObjectDiagram (obj, successFunc, errorFunc) {
+  await makeDelay()
+  const handler = ['policy', 'diagram', 'object', obj['namespace'], obj['kind'], obj['name']].join('/')
+  callAPI(handler, async, function (data) {
+    successFunc(data['data'])
+  }, function (err) {
+    errorFunc(err)
+  })
+}
+
 // loads the policy diagram
 export async function getPolicyDiagram (mode, generation, successFunc, errorFunc) {
   await makeDelay()

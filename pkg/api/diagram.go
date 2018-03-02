@@ -132,3 +132,25 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }
+
+func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	ns := params.ByName("ns")
+	kind := params.ByName("kind")
+	name := params.ByName("name")
+
+	policy, _, err := api.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting policy: %s", err))
+	}
+
+	obj, err := policy.GetObject(kind, name, ns)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting object from policy: %s", err))
+	}
+
+	var graph *visualization.Graph
+	graphBuilder := visualization.NewGraphBuilder(policy, nil, nil)
+	graph = graphBuilder.Object(visualization.PolicyCfgDefault, obj)
+
+	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
+}

@@ -105,6 +105,7 @@
 <script>
   import {getPolicyObjectsWithProperties, getObjectMapByNamespace} from 'lib/api.js'
   import objectEditYAML from 'pages/components/ObjectEditYAML'
+  import objectDiagram from 'pages/components/ObjectDiagram'
 
   export default {
     data () {
@@ -121,7 +122,13 @@
     },
     methods: {
       showDiagram (obj) {
-        alert('diagram')
+        this.$modal.show(objectDiagram, {
+          obj: obj,
+          height: '465px'
+        }, {
+          width: '60%',
+          height: '550px'
+        })
       },
       editYaml (obj) {
         this.$modal.show(objectEditYAML, {
