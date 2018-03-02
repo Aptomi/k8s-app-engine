@@ -33,8 +33,6 @@
 </template>
 <script>
   import { fetchObjectProperties, savePolicyObjects, deletePolicyObjects } from 'lib/api.js'
-  import hljs from 'highlight.js'
-  import 'highlight.js/styles/agate.css'
   import yaml from 'js-yaml'
 
   export default {
@@ -48,12 +46,6 @@
     created () {
       // fetch the data when the view is created and the data is already being observed
       this.fetchData()
-    },
-    mounted () {
-      // highlight
-      $('pre code').each(function (i, block) {
-        hljs.highlightBlock(block)
-      })
     },
     props: ['obj', 'height'],
     watch: {
@@ -136,12 +128,6 @@
 
         const fetchSuccess = $.proxy(function (data) {
           this.loading = false
-
-          // highlight
-          $('pre code').each(function (i, block) {
-            block.textContent = data['yaml']
-            hljs.highlightBlock(block)
-          })
         }, this)
 
         const fetchError = $.proxy(function (err) {
