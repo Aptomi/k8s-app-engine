@@ -34,7 +34,7 @@
                   <td>{{ p['metadata']['updatedat'] | formatDateAgo }} <small>({{ p['metadata']['updatedat'] | formatDate }})</small></td>
                   <td class="col-xs-4">
                     <!-- <span v-if="p['revisions'] == null || p['revisions'].length <= 0" class="label label-success" style="float:left; margin-right: 2px; margin-bottom: 2px">skipped</span> -->
-                    <span v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'success', 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
+                    <span @click="showEventLog('apply', r)" v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'success', 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
                   </td>
                   <td class="align-middle">
                     <div v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1" class="progress-group">
@@ -63,12 +63,12 @@
                         <span class="caret"></span>
                         <span class="sr-only">Toggle Dropdown</span>
                       </button>
-                      <ul class="dropdown-menu" style="left: auto !important; right: 0 !important;">
+                      <ul class="dropdown-menu" style="left: auto !important; right: 0 !important;" v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1">
                         <li><router-link :to="{ name: 'BrowsePolicy', params: { inMode: 'policy', inPolicyVersion: p['metadata']['generation'].toString() }}">Browse Policy</router-link></li>
                         <li><router-link :to="{ name: 'BrowsePolicy', params: { inMode: 'policy', inPolicyVersion: p['metadata']['generation'].toString(), inCompareEnabled: true, inPolicyVersionBase: (p['metadata']['generation'] - 1).toString() }}">Compare With Previous</router-link></li>
                         <li class="divider"></li>
-                        <li><a href="#">View Resolution Log</a></li>
-                        <li><a href="#">View Apply Log</a></li>
+                        <li><a href="#" @click="showEventLog('resolve', r)">View Resolve Log</a></li>
+                        <li><a href="#" @click="showEventLog('apply', r)">View Apply Log</a></li>
                       </ul>
                     </div>
                   </td>
@@ -88,6 +88,7 @@
 
 <script>
   import {getAllPolicies, fetchPolicy, fetchPolicyRevisions} from 'lib/api.js'
+  import eventLog from 'pages/components/EventLog'
 
   export default {
     data () {
@@ -154,6 +155,15 @@
         }, this)
 
         getAllPolicies(fetchSuccess, fetchError)
+      },
+      showEventLog (type, obj) {
+        this.$modal.show(eventLog, {
+          revision: obj,
+          type: type
+        }, {
+          width: '60%',
+          height: 'auto'
+        })
       }
     },
     beforeDestroy: function () {
