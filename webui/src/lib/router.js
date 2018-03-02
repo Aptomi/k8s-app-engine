@@ -17,7 +17,7 @@ import ShowDependencies from 'pages/objects/ShowDependencies.vue'
 import ShowUserRoles from 'pages/objects/ShowUserRoles.vue'
 import ShowCatalog from 'pages/objects/ShowCatalog.vue'
 import ShowAuditLog from 'pages/deployment/ShowAuditLog.vue'
-import BrowsePolicy from 'pages/debug/BrowsePolicy.vue'
+import BrowsePolicy from 'pages/deployment/BrowsePolicy.vue'
 
 Vue.use(Router)
 
@@ -81,22 +81,15 @@ const router = new Router({
       component: Passthrough,
       children: [
         {
-          path: 'audit',
-          name: 'ShowAuditLog',
-          component: ShowAuditLog
-        }
-      ]
-    },
-    {
-      path: '/debug',
-      name: 'Debug',
-      component: Passthrough,
-      children: [
-        {
           path: 'browse',
           name: 'BrowsePolicy',
           component: BrowsePolicy,
           props: true
+        },
+        {
+          path: 'audit',
+          name: 'ShowAuditLog',
+          component: ShowAuditLog
         }
       ]
     },

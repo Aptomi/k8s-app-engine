@@ -75,25 +75,17 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Audit Log',
-        router: {
-          name: 'ShowAuditLog'
-        }
-      }
-    ]
-  },
-
-  {
-    type: 'tree',
-    icon: 'fa fa-dashboard',
-    name: 'Debug',
-    items: [
-      {
-        type: 'item',
-        icon: 'fa fa-circle-o',
         name: 'Browser',
         router: {
           name: 'BrowsePolicy'
+        }
+      },
+      {
+        type: 'item',
+        icon: 'fa fa-circle-o',
+        name: 'Audit Log',
+        router: {
+          name: 'ShowAuditLog'
         }
       }
     ]
