@@ -161,6 +161,23 @@ For Helm plugin, you need to provide the following parameters under "params" sec
 
 Every parameter under "params" section can be a fixed value or an expression which can refer to various labels.
 
+Also, components can have criteria. If criteria evaluates to true, the component is included into a service. Otherwise, it will be excluded from processing. E.g.
+```yaml
+- kind: service
+  metadata:
+    namespace: main
+    name: wordpress
+
+  components:
+    - name: wordpress_component
+      ...
+    - name: mysql_component
+      criteria:
+        require-all:
+          - db_enabled
+      ...
+```
+
 ## Contract
 Once a service is defined, it has to be exposed through a [contract](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Contract).
 
@@ -308,7 +325,7 @@ The order in which the rules are being processed and executed is:
 * local rules - one by one for a given namespace, sorted by weight
 * global rules - one by one, sorted by weight
 
-A rule has a criteria and an action. If a criteria evaluates to true, then an action is executed. The list of supported actions is:
+A rule has criteria and an action. If criteria evaluates to true, then an action is executed. The list of supported actions is:
 * change-labels - change one or more labels
 * dependency - reject dependency and not allow instantiation
 
@@ -403,7 +420,7 @@ Criteria gets evaluated to true only when:
 * At least one of `require-any` expressions evaluates to true
 * None of `require-none` expressions evaluate to true
 
-If a section is absent, it will be skipped. So it's perfectly fine to have a criteria with fewer than 3 sections (e.g. with just `require-all`) or with no sections at all.
+If a section is absent, it will be skipped. So it's perfectly fine to have criteria with fewer than 3 sections (e.g. with just `require-all`) or with no sections at all.
 
 It's also possible to have an empty criteria without any clauses (or even omit `criteria` construct all together). In this case an empty criteria is always considered to be 'true'.
 
