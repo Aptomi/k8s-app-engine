@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"sync"
@@ -46,6 +47,10 @@ type ServiceComponent struct {
 	// Name is a user-defined component name
 	Name string `validate:"identifier"`
 
+	// Criteria - if it gets evaluated to true during policy resolution, then component will be included
+	// into the service. It's an optional field, so if it's nil then it is considered to be true automatically
+	Criteria *Criteria `validate:"omitempty"`
+
 	// Contract, if not empty, denoted that the component points to another contract as a dependency. Meaning that
 	// a service needs to have another service running as its dependency (e.g. 'wordpress' service needs a 'database'
 	// contract). This dependency will be fulfilled at policy resolution time.
@@ -73,6 +78,14 @@ type Code struct {
 	// and can refer to arbitrary labels, as well as discovery parameters exposed by other components (within the
 	// current service) and discovery parameters exposed by services the current service depends on
 	Params util.NestedParameterMap `validate:"omitempty,templateNestedMap"`
+}
+
+// Matches checks if component criteria is satisfied
+func (component *ServiceComponent) Matches(params *expression.Parameters, cache *expression.Cache) (bool, error) {
+	if component.Criteria == nil {
+		return true, nil
+	}
+	return component.Criteria.allows(params, cache)
 }
 
 // GetComponentsMap lazily initializes and returns a map of name -> component, while being thread-safe
