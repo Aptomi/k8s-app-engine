@@ -15,30 +15,30 @@ const (
 func evaluate(t *testing.T, expressionStr string, params *Parameters, expectedResult int) {
 	// Check for compilation
 	expr, err := NewExpression(expressionStr)
-	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Expression compilation (success vs. error): "+expressionStr) || expectedResult == ResCompileError {
+	if !assert.Equal(t, expectedResult != ResCompileError, err == nil, "Expression compilation (success vs. error): %s", expressionStr) || expectedResult == ResCompileError {
 		return
 	}
 
 	// Check for evaluation
 	result, err := expr.EvaluateAsBool(params)
-	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Expression evaluation (success vs. error): "+expressionStr) || expectedResult == ResEvalError {
+	if !assert.Equal(t, expectedResult != ResEvalError, err == nil, "Expression evaluation (success vs. error): %s", expressionStr) || expectedResult == ResEvalError {
 		return
 	}
 
 	// Check for result
-	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: "+expressionStr)
+	assert.Equal(t, expectedResult == ResTrue, result, "Expression evaluation result: %s", expressionStr)
 }
 
 func evaluateWithCache(t *testing.T, expressionStr string, params *Parameters, expectedResult int, cache *Cache) {
 	// Check for compilation & evaluation
 	for i := 0; i < 10; i++ {
 		result, err := cache.EvaluateAsBool(expressionStr, params)
-		if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Expression compilation && evaluation (success vs. error): "+expressionStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
+		if !assert.Equal(t, expectedResult != ResCompileError && expectedResult != ResEvalError, err == nil, "[Cache] Expression compilation && evaluation (success vs. error): %s", expressionStr) || expectedResult == ResCompileError || expectedResult == ResEvalError {
 			return
 		}
 
 		// Check for result
-		assert.Equal(t, expectedResult == ResTrue, result, "[Cache] Expression evaluation result: "+expressionStr)
+		assert.Equal(t, expectedResult == ResTrue, result, "[Cache] Expression evaluation result: %s", expressionStr)
 	}
 }
 

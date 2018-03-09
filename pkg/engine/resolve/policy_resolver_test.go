@@ -390,7 +390,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult 
 	// check for error message
 	verifier := event.NewLogVerifier(expectedLogMessage, expectedResult == ResError)
 	resolver.eventLog.Save(verifier)
-	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: "+expectedLogMessage) {
+	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: %s", expectedLogMessage) {
 		hook := &event.HookConsole{}
 		resolver.eventLog.Save(hook)
 		t.FailNow()

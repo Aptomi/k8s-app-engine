@@ -1,7 +1,6 @@
 package lang
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/stretchr/testify/assert"
@@ -17,9 +16,9 @@ const (
 func match(t *testing.T, context *Context, params *expression.Parameters, expected int, cache *expression.Cache) {
 	t.Helper()
 	result, err := context.Matches(params, cache)
-	assert.Equal(t, expected == ResError, err != nil, "Context matching (success vs. error): "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
+	assert.Equal(t, expected == ResError, err != nil, "Context matching (success vs. error): %+v, params %+v", context.Criteria, params)
 	if err == nil {
-		assert.Equal(t, expected == ResTrue, result, "Context matching: "+fmt.Sprintf("%+v, params %+v", context.Criteria, params))
+		assert.Equal(t, expected == ResTrue, result, "Context matching: %+v, params %+v", context.Criteria, params)
 	}
 }
 
@@ -44,9 +43,9 @@ func matchContext(t *testing.T, context *Context, paramsMatch []*expression.Para
 func evalKeys(t *testing.T, context *Context, params *template.Parameters, expectedError bool, expected []string, cache *template.Cache) {
 	t.Helper()
 	keys, err := context.ResolveKeys(params, cache)
-	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: "+fmt.Sprintf("%+v, params %+v", context, params))
+	assert.Equal(t, expectedError, err != nil, "Allocation key evaluation (success vs. error). Context: %+v, params %+v", context, params)
 	if err == nil {
-		assert.Equal(t, expected, keys, "Allocation key resolution: "+fmt.Sprintf("%+v, params %+v", context.Allocation, params))
+		assert.Equal(t, expected, keys, "Allocation key resolution: %+v, params %+v", context.Allocation, params)
 	}
 }
 

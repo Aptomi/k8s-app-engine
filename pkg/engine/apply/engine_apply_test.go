@@ -345,7 +345,7 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCn
 		// check for error messages
 		verifier := event.NewLogVerifier(expectedMessage, expectedResult == ResError)
 		apply.eventLog.Save(verifier)
-		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of messages containing words: "+expectedMessage) {
+		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of messages containing words: %s", expectedMessage) {
 			hook := &event.HookConsole{}
 			apply.eventLog.Save(hook)
 			t.FailNow()
@@ -370,7 +370,7 @@ func getTimes(t *testing.T, key string, u2 *resolve.PolicyResolution) componentT
 func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyResolution) *resolve.ComponentInstance {
 	t.Helper()
 	instance, ok := resolution.ComponentInstanceMap[key]
-	if !assert.True(t, ok, "Component instance exists in resolution data: "+key) {
+	if !assert.True(t, ok, "Component instance exists in resolution data: %s", key) {
 		t.FailNow()
 	}
 	return instance
