@@ -291,6 +291,18 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Iterate over all service components and resolve them recursively
 	// Note that discovery variables can refer to other variables announced by dependents in the discovery tree
 	for _, node.component = range componentsOrdered {
+		// Check if component criteria holds
+		componentMatch, componentMatchErr := node.componentMatches(node.component)
+		if componentMatchErr != nil {
+			// Return an error in case we failed to check component criteria
+			return node.cannotResolveInstance(err)
+		}
+
+		// If component criteria doesn't hold, do not proceed further
+		if !componentMatch {
+			continue
+		}
+
 		// Create key
 		node.componentKey, err = node.createComponentKey(node.component)
 		if err != nil {

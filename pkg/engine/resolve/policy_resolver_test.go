@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestPolicyResolverContract(t *testing.T) {
+func TestPolicyResolverSimple(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	// create a service with two contexts within a contract
@@ -46,6 +46,55 @@ func TestPolicyResolverContract(t *testing.T) {
 	// check instance 2
 	instance2 := getInstanceByParams(t, cluster, contract, contract.Contexts[1], nil, service, component, resolution)
 	assert.Equal(t, 1, len(instance2.DependencyKeys), "Instance should be referenced by one dependency")
+}
+
+func TestPolicyResolverComponentWithCriteria(t *testing.T) {
+	b := builder.NewPolicyBuilder()
+
+	// create a service with conditional components
+	service := b.AddService()
+	contract := b.AddContract(service, b.CriteriaTrue())
+
+	component1 := b.CodeComponent(nil, nil)
+	component1.Criteria = b.CriteriaTrue()
+	b.AddServiceComponent(service, component1)
+
+	component2 := b.CodeComponent(nil, nil)
+	component2.Criteria = &lang.Criteria{RequireAll: []string{"param2 == 'value2'"}}
+	b.AddServiceComponent(service, component2)
+
+	component3 := b.CodeComponent(nil, nil)
+	component3.Criteria = &lang.Criteria{RequireAll: []string{"param3 == 'value3'"}}
+	b.AddServiceComponent(service, component3)
+
+	// add rule to set cluster
+	cluster := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+
+	// add dependency (should be resolved to use components 1 and 2, but not 3)
+	d1 := b.AddDependency(b.AddUser(), contract)
+	d1.Labels["param2"] = "value2"
+
+	// add dependency (should be resolved to use components 1 and 3, but not 2)
+	d2 := b.AddDependency(b.AddUser(), contract)
+	d1.Labels["param3"] = "value3"
+
+	// policy resolution should be completed successfully
+	resolution := resolvePolicy(t, b, ResSuccess, "Successfully resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency should be resolved")
+	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency should be resolved")
+
+	// check component 1
+	instance1 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component1, resolution)
+	assert.Equal(t, 2, len(instance1.DependencyKeys), "Component 1 instance should be used by both dependencies")
+
+	// check component 2
+	instance2 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component2, resolution)
+	assert.Equal(t, 1, len(instance2.DependencyKeys), "Component 2 instance should be used by only one dependency")
+
+	// check component 3
+	instance3 := getInstanceByParams(t, cluster, contract, contract.Contexts[0], nil, service, component3, resolution)
+	assert.Equal(t, 1, len(instance3.DependencyKeys), "Component 3 instance should be used by only one dependency")
 }
 
 func TestPolicyResolverMultipleNS(t *testing.T) {

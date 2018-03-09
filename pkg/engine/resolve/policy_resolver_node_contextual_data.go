@@ -20,6 +20,15 @@ func (node *resolutionNode) getContextualDataForContextExpression() *expression.
 	)
 }
 
+// This method defines which contextual information will be exposed to the expression engine (for evaluating criteria)
+// Be careful about what gets exposed through this method. User can refer to structs and their methods from the policy
+func (node *resolutionNode) getContextualDataForComponentCriteria() *expression.Parameters {
+	return expression.NewParams(
+		node.labels.Labels,
+		map[string]interface{}{},
+	)
+}
+
 /*
 	Data exposed to rules defined
 */

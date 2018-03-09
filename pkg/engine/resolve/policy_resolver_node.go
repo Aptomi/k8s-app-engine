@@ -217,11 +217,11 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 	node.logStartMatchingContexts()
 
 	// Find matching context
-	contextualDataForExpression := node.getContextualDataForContextExpression()
+	contextualData := node.getContextualDataForContextExpression()
 	var contextMatched *lang.Context
 	for _, context := range node.contract.Contexts {
 		// Check if context matches (based on criteria)
-		matched, err := context.Matches(contextualDataForExpression, node.resolver.expressionCache)
+		matched, err := context.Matches(contextualData, node.resolver.expressionCache)
 		if err != nil {
 			// Propagate error up
 			return nil, node.errorWhenTestingContext(context, err)
@@ -279,6 +279,20 @@ func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string
 	return result, nil
 }
 
+// checks if component criteria holds or not (i.e. whether component should be included or excluded from processing)
+func (node *resolutionNode) componentMatches(component *lang.ServiceComponent) (bool, error) {
+	contextualData := node.getContextualDataForComponentCriteria()
+	matched, err := component.Matches(contextualData, node.resolver.expressionCache)
+	if err != nil {
+		// Propagate error up
+		return false, node.errorWhenTestingComponent(component, err)
+	}
+	if !matched {
+		node.logComponentNotMatched(component)
+	}
+	return matched, nil
+}
+
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent) (*ComponentInstanceKey, error) {
 	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, node.labels.Labels[lang.LabelCluster], runtime.SystemNS)
@@ -312,9 +326,9 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 	}
 
 	rules := policyNamespace.Rules.GetRulesSortedByWeight()
-	contextualDataForRule := node.getContextualDataForRuleExpression()
+	contextualData := node.getContextualDataForRuleExpression()
 	for _, rule := range rules {
-		matched, err := rule.Matches(contextualDataForRule, node.resolver.expressionCache)
+		matched, err := rule.Matches(contextualData, node.resolver.expressionCache)
 		if err != nil {
 			return node.errorWhenProcessingRule(rule, err)
 		}

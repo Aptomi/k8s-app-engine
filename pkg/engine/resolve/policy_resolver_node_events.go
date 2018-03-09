@@ -75,6 +75,18 @@ func (node *resolutionNode) errorWhenTestingContext(context *lang.Context, cause
 	return NewCriticalError(err)
 }
 
+func (node *resolutionNode) errorWhenTestingComponent(component *lang.ServiceComponent, cause error) error {
+	err := errors.NewErrorWithDetails(
+		fmt.Sprintf("Error while trying to check component criteria '%s' for service '%s': %s", component.Name, node.service.Name, cause),
+		errors.Details{
+			"service":   node.service,
+			"component": component,
+			"cause":     cause,
+		},
+	)
+	return NewCriticalError(err)
+}
+
 func (node *resolutionNode) errorWhenProcessingRule(rule *lang.Rule, cause error) error {
 	err := errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while processing rule '%s' on contract '%s', context '%s', service '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.service.Name, cause),
@@ -184,6 +196,10 @@ func (node *resolutionNode) logContextMatched(contextMatched *lang.Context) {
 
 func (node *resolutionNode) logContextNotMatched() {
 	node.eventLog.WithFields(event.Fields{}).Warningf("Unable to find matching context within contract: '%s'", node.contract.Name)
+}
+
+func (node *resolutionNode) logComponentNotMatched(component *lang.ServiceComponent) {
+	node.eventLog.WithFields(event.Fields{}).Infof("Component criteria evaluated to 'false', excluding it from processing: service '%s', component '%s'", node.service.Name, node.component.Name)
 }
 
 func (node *resolutionNode) logTestedContextCriteria(context *lang.Context, matched bool) {
