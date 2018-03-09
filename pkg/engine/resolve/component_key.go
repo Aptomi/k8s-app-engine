@@ -33,20 +33,23 @@ type ComponentInstanceKey struct {
 	Namespace           string // determined from the contract
 	ContractName        string // mandatory
 	ContextName         string // mandatory
+	KeysResolved        string // mandatory
 	ContextNameWithKeys string // calculated
 	ServiceName         string // determined from the context (included into key for readability)
 	ComponentName       string // component name
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(cluster *lang.Cluster, contract *lang.Contract, context *lang.Context, allocationsKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(cluster *lang.Cluster, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
-	contextNameWithKeys := getContextNameWithKeys(contextName, allocationsKeysResolved)
+	keysResolved := strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
+	contextNameWithKeys := strings.Join([]string{contextName, keysResolved}, componentInstanceKeySeparator)
 	return &ComponentInstanceKey{
 		ClusterName:         getClusterNameUnsafe(cluster),
 		Namespace:           getContractNamespaceUnsafe(contract),
 		ContractName:        getContractNameUnsafe(contract),
 		ContextName:         contextName,
+		KeysResolved:        keysResolved,
 		ContextNameWithKeys: contextNameWithKeys,
 		ServiceName:         getServiceNameUnsafe(service),
 		ComponentName:       getComponentNameUnsafe(component),
@@ -163,13 +166,4 @@ func getComponentNameUnsafe(component *lang.ServiceComponent) string {
 		return componentRootName
 	}
 	return component.Name
-}
-
-// Returns context name combined with allocation keys
-func getContextNameWithKeys(contextName string, allocationKeysResolved []string) string {
-	result := contextName
-	if len(allocationKeysResolved) > 0 {
-		result += componentInstanceKeySeparator + strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
-	}
-	return result
 }

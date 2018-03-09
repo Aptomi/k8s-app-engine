@@ -111,25 +111,30 @@ func (n serviceInstanceNode) getID() string {
 }
 
 func (n serviceInstanceNode) getLabel() string {
-	timeRunning := ""
-	if !n.instance.CreatedAt.IsZero() {
-		timeRunning = fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))
-	}
-	return fmt.Sprintf(
+	result := fmt.Sprintf(
 		`<b>%s</b>
-			context: <i>%s</i>
-			cluster: <i>%s</i>%s`,
+				context: <i>%s</i>`,
 		html.EscapeString(n.service.Name),
-		html.EscapeString(shorten(n.instance.Metadata.Key.ContextNameWithKeys)),
-		html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]),
-		timeRunning,
+		html.EscapeString(n.instance.Metadata.Key.ContextName),
 	)
+
+	if len(n.instance.Metadata.Key.KeysResolved) > 0 {
+		result += fmt.Sprintf("\nkeys: <i>%s</i>", html.EscapeString(shorten(n.instance.Metadata.Key.KeysResolved)))
+	}
+
+	result += fmt.Sprintf("\ncluster: <i>%s</i>", html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]))
+
+	if !n.instance.CreatedAt.IsZero() {
+		result += fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))
+	}
+
+	return result
 }
 
 func shorten(s string) string {
-	if len(s) > 20 {
+	if len(s) > 15 {
 		suffix := "..."
-		return s[:20-len(suffix)] + suffix
+		return s[:15-len(suffix)] + suffix
 	}
 	return s
 }
