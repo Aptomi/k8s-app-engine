@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
@@ -53,11 +54,13 @@ func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Par
 func (node *resolutionNode) getContextualDataForContextAllocationTemplate() *template.Parameters {
 	return template.NewParams(
 		struct {
-			User   interface{}
-			Labels interface{}
+			User       interface{}
+			Dependency interface{}
+			Labels     interface{}
 		}{
-			User:   node.proxyUser(node.user),
-			Labels: node.labels.Labels,
+			User:       node.proxyUser(node.user),
+			Dependency: node.proxyDependency(node.dependency),
+			Labels:     node.labels.Labels,
 		},
 	)
 }
@@ -95,7 +98,7 @@ func (node *resolutionNode) proxyService(service *lang.Service) interface{} {
 
 // How user is visible from the policy language
 func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
-	result := struct {
+	return struct {
 		Name    interface{}
 		Labels  interface{}
 		Secrets interface{}
@@ -103,6 +106,15 @@ func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 		Name:    user.Name,
 		Labels:  user.Labels,
 		Secrets: node.resolver.externalData.SecretLoader.LoadSecretsByUserName(user.Name),
+	}
+}
+
+// How user is visible from the policy language
+func (node *resolutionNode) proxyDependency(dependency *lang.Dependency) interface{} {
+	result := struct {
+		Id interface{}
+	}{
+		Id: runtime.KeyForStorable(dependency),
 	}
 	return result
 }
