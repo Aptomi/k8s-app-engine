@@ -12,8 +12,8 @@
    sure to replace `[CONTEXT_NAME]` with the name of your context:
     ```
     aptomictl login -u admin -p admin
-    aptomictl gen cluster -c [CONTEXT_NAME] -n cluster-us-east -N east | aptomictl policy apply -f -
-    aptomictl gen cluster -c [CONTEXT_NAME] -n cluster-us-west -N west | aptomictl policy apply -f -
+    aptomictl gen cluster -n cluster-us-east -c [CONTEXT_NAME] -N east | aptomictl policy apply -f -
+    aptomictl gen cluster -n cluster-us-west -c [CONTEXT_NAME] -N west | aptomictl policy apply -f -
     ```
 
 Now you can move on to running the examples.

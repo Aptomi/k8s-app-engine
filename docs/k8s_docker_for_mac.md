@@ -17,8 +17,8 @@
 2. Import it into Aptomi as two separate clusters *cluster-us-east* and *cluster-us-west* (corresponding to two namespaces `east` and `west` in a local k8s cluster):
     ```
     aptomictl login -u admin -p admin
-    aptomictl gen cluster -c docker-for-desktop -n cluster-us-east -N east | aptomictl policy apply -f -
-    aptomictl gen cluster -c docker-for-desktop -n cluster-us-west -N west | aptomictl policy apply -f -
+    aptomictl gen cluster -n cluster-us-east -c docker-for-desktop -N east | aptomictl policy apply -f -
+    aptomictl gen cluster -n cluster-us-west -c docker-for-desktop -N west | aptomictl policy apply -f -
     ```
 
 Now you can move on to running the examples.
