@@ -120,10 +120,18 @@ func (n serviceInstanceNode) getLabel() string {
 			context: <i>%s</i>
 			cluster: <i>%s</i>%s`,
 		html.EscapeString(n.service.Name),
-		html.EscapeString(n.instance.Metadata.Key.ContextNameWithKeys),
+		html.EscapeString(shorten(n.instance.Metadata.Key.ContextNameWithKeys)),
 		html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]),
 		timeRunning,
 	)
+}
+
+func shorten(s string) string {
+	if len(s) > 20 {
+		suffix := "..."
+		return s[:20-len(suffix)] + suffix
+	}
+	return s
 }
 
 /*
