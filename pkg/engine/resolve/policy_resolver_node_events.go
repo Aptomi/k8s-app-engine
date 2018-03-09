@@ -16,14 +16,14 @@ import (
 
 func (node *resolutionNode) errorUserDoesNotExist() error {
 	return errors.NewErrorWithDetails(
-		fmt.Sprintf("Dependency refers to non-existing user: %s", node.dependency.User),
+		fmt.Sprintf("Dependency '%s/%s' refers to non-existing user: %s", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User),
 		errors.Details{},
 	)
 }
 
 func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
 	return errors.NewErrorWithDetails(
-		fmt.Sprintf("Rules do not allow dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.dependency.User, node.dependency.Contract, node.contractName, node.depth),
+		fmt.Sprintf("Rules do not allow dependency '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract, node.contractName, node.depth),
 		errors.Details{},
 	)
 }
@@ -151,10 +151,10 @@ func (node *resolutionNode) errorServiceCycleDetected() error {
 func (node *resolutionNode) logStartResolvingDependency() {
 	if node.depth == 0 {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(event.Fields{}).Infof("Resolving top-level dependency: '%s' -> '%s'", node.dependency.User, node.dependency.Contract)
+		node.eventLog.WithFields(event.Fields{}).Infof("Resolving top-level dependency '%s/%s' ('%s' -> '%s')", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract)
 	} else {
 		// recursively processing sub-dependencies
-		node.eventLog.WithFields(event.Fields{}).Infof("Resolving dependency: '%s' -> '%s' (processing '%s', tree depth %d)", node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
+		node.eventLog.WithFields(event.Fields{}).Infof("Resolving dependency '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
@@ -248,7 +248,7 @@ func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstan
 	}
 	if node.depth == 0 && cik.IsService() {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(fields).Infof("Successfully resolved dependency '%s' -> '%s': %s", node.user.Name, node.dependency.Contract, cik.GetKey())
+		node.eventLog.WithFields(fields).Infof("Successfully resolved dependency '%s/%s' ('%s' -> '%s'): %s", node.dependency.Metadata.Namespace, node.dependency.Name, node.user.Name, node.dependency.Contract, cik.GetKey())
 	} else if cik.IsService() {
 		// resolved service instance
 		node.eventLog.WithFields(fields).Infof("Successfully resolved service instance '%s' -> '%s': %s", node.user.Name, node.contract.Name, cik.GetKey())

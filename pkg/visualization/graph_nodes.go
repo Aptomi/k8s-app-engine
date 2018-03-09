@@ -30,7 +30,7 @@ func (n dependencyNode) getID() string {
 }
 
 func (n dependencyNode) getLabel() string {
-	return n.dependency.User
+	return n.dependency.Metadata.Namespace + "/" + n.dependency.Name
 }
 
 /*
