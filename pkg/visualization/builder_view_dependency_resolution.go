@@ -50,6 +50,13 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 	// recursively walk the graph
 	for keyDst := range edgesOut {
 		instanceCurrent := b.resolution.ComponentInstanceMap[keyDst]
+
+		// check that instance contains our dependency
+		depKey := runtime.KeyForStorable(dependency)
+		if ok, _ := instanceCurrent.DependencyKeys[depKey]; !ok {
+			continue
+		}
+
 		if instanceCurrent.Metadata.Key.IsService() {
 			// if it's a service, then create a contract node
 			contractObj, errContract := b.policy.GetObject(lang.ContractObject.Kind, instanceCurrent.Metadata.Key.ContractName, instanceCurrent.Metadata.Key.Namespace)
