@@ -63,6 +63,7 @@ func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 		Namespace:           cik.Namespace,
 		ContractName:        cik.ContractName,
 		ContextName:         cik.ContextName,
+		KeysResolved:        cik.KeysResolved,
 		ContextNameWithKeys: cik.ContextNameWithKeys,
 		ComponentName:       cik.ComponentName,
 	}
