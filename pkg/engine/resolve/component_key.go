@@ -43,7 +43,10 @@ type ComponentInstanceKey struct {
 func NewComponentInstanceKey(cluster *lang.Cluster, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
 	keysResolved := strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
-	contextNameWithKeys := strings.Join([]string{contextName, keysResolved}, componentInstanceKeySeparator)
+	contextNameWithKeys := contextName
+	if len(keysResolved) > 0 {
+		contextNameWithKeys = strings.Join([]string{contextNameWithKeys, keysResolved}, componentInstanceKeySeparator)
+	}
 	return &ComponentInstanceKey{
 		ClusterName:         getClusterNameUnsafe(cluster),
 		Namespace:           getContractNamespaceUnsafe(contract),
