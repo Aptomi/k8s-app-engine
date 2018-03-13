@@ -1,0 +1,35 @@
+# This rule will make Sam a domain admin
+- kind: aclrule
+  metadata:
+    namespace: system
+    name: example_domain_admins
+  criteria:
+    require-all:
+      - global_ops
+  actions:
+    add-role:
+      domain-admin: '*'
+
+# This rule will make Frank, John, and Sam namespace admins
+- kind: aclrule
+  metadata:
+    namespace: system
+    name: example_namespace_admins
+  criteria:
+    require-all:
+      - is_operator
+  actions:
+    add-role:
+      namespace-admin: platform,social
+
+# This rule will make Alice, Bob, and Carol service consumers
+- kind: aclrule
+  metadata:
+    namespace: system
+    name: example_service_consumers
+  criteria:
+    require-all:
+      - org == 'dev'
+  actions:
+    add-role:
+      service-consumer: platform,social

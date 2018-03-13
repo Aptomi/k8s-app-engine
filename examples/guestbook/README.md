@@ -5,8 +5,8 @@ Example from the Stateless Applications deployment into Kubernetes - Guestbook.
 https://kubernetes.io/docs/tutorials/stateless-application/guestbook/
 
 ```bash
-aptomictl login -u sam -p sam
-aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/Sam
+aptomictl login -u admin -p admin
+aptomictl policy apply --wait -f ~/.aptomi/examples/guestbook/acl.yaml
 
 aptomictl login -u john -p john
 aptomictl policy apply --wait -f ~/.aptomi/examples/guestbook/guestbook.yaml
