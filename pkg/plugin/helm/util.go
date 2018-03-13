@@ -1,12 +1,13 @@
 package helm
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"io/ioutil"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/repo"
-	"strings"
 )
 
 func (p *Plugin) newClient() (*helm.Client, error) {
@@ -35,12 +36,10 @@ func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, versi
 	return
 }
 
-var (
-	releaseNameReplacer = strings.NewReplacer("#", "-", "_", "-")
-)
-
 func getReleaseName(deployName string) string {
-	return strings.ToLower(releaseNameReplacer.Replace(deployName))
+	hasher := sha1.New()
+	hasher.Write([]byte(deployName))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func (p *Plugin) fetchChart(repository, name, version string) (string, error) {
