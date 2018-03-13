@@ -295,12 +295,10 @@ func (node *resolutionNode) componentMatches(component *lang.ServiceComponent) (
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent) (*ComponentInstanceKey, error) {
-	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, node.labels.Labels[lang.LabelCluster], runtime.SystemNS)
-	if err != nil {
-		return nil, node.errorClusterDoesNotExist()
-	}
-	if clusterObj == nil {
-		return nil, node.errorClusterDoesNotExist()
+	clusterName := node.labels.Labels[lang.LabelCluster]
+	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
+	if err != nil || clusterObj == nil {
+		return nil, node.errorClusterDoesNotExist(clusterName)
 	}
 
 	return NewComponentInstanceKey(

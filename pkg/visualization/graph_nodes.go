@@ -122,7 +122,7 @@ func (n serviceInstanceNode) getLabel() string {
 		result += fmt.Sprintf("\nkeys: <i>%s</i>", html.EscapeString(shorten(n.instance.Metadata.Key.KeysResolved)))
 	}
 
-	result += fmt.Sprintf("\ncluster: <i>%s</i>", html.EscapeString(n.instance.CalculatedLabels.Labels[lang.LabelCluster]))
+	result += fmt.Sprintf("\ncluster: <i>%s</i>", html.EscapeString(n.instance.GetCluster()))
 
 	if !n.instance.CreatedAt.IsZero() {
 		result += fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))

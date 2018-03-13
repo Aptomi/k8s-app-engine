@@ -40,16 +40,16 @@ func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
 	all together
 */
 
-func (node *resolutionNode) errorClusterDoesNotExist() error {
+func (node *resolutionNode) errorClusterDoesNotExist(clusterName string) error {
 	var err *errors.ErrorWithDetails
-	if label, ok := node.labels.Labels[lang.LabelCluster]; ok {
+	if len(clusterName) > 0 {
 		err = errors.NewErrorWithDetails(
-			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", runtime.SystemNS, label),
+			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", runtime.SystemNS, clusterName),
 			errors.Details{},
 		)
 	} else {
 		err = errors.NewErrorWithDetails(
-			fmt.Sprintf("Engine needs cluster defined, but 'cluster' label is not set"),
+			fmt.Sprintf("Engine needs cluster defined, but cluster is not set"),
 			errors.Details{},
 		)
 	}

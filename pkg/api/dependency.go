@@ -135,9 +135,9 @@ func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lan
 		return nil, nil
 	}
 
-	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
-	if !ok {
-		return nil, fmt.Errorf("no cluster specified in code params, component instance: %v", instance.GetKey())
+	clusterName := instance.GetCluster()
+	if len(clusterName) <= 0 {
+		return nil, fmt.Errorf("component instance does not have cluster assigned: %v", instance.GetKey())
 	}
 
 	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)

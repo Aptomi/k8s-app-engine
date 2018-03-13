@@ -71,8 +71,8 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		"code":         instance.CalculatedCodeParams,
 	}).Info("Getting endpoints for component instance: " + instance.GetKey())
 
-	clusterName, ok := instance.CalculatedCodeParams[lang.LabelCluster].(string)
-	if !ok {
+	clusterName := instance.GetCluster()
+	if len(clusterName) <= 0 {
 		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
 	}
 
