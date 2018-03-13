@@ -9,10 +9,27 @@ metadata:
     app: {{ template "labels_demo.name" . }}
 data:
   index.html: |
-    param1: {{ .Values.param1 | default "<not set>" }} <br/>
-    param1: {{ .Values.param2 | default "<not set>" }} <br/>
-    param1: {{ .Values.param3 | default "<not set>" }} <br/>
+    <pre>
+    # High-level knobs
+    param1: '{{ .Values.param1 | default "<not set>" }}'
+    param2: '{{ .Values.param2 | default "<not set>" }}'
+    param3: '{{ .Values.param3 | default "<not set>" }}'
 
-    {{ if eq .Values.param3 "asd" }}
-      This will show up only if param3 is set to asd
+    {{ if eq .Values.param1 "valueA" }}
+    param4: 'aaa' # based on value of high-level knob param1
+    {{ else }}
+    param4: 'xxx' # based on value of high-level knob param1
     {{ end }}
+
+    {{ if eq .Values.param2 "valueB" }}
+    param5: 'bbb' # based on value of high-level knob param2
+    {{ else }}
+    param5: 'yyy' # based on value of high-level knob param2
+    {{ end }}
+
+    {{ if eq .Values.param3 "valueC" }}
+    param6: 'ccc' # based on value of high-level knob param3
+    {{ else }}
+    param6: 'zzz' # based on value of high-level knob param3
+    {{ end }}
+    </pre>
