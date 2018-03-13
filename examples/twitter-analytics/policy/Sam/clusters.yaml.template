@@ -1,0 +1,17 @@
+# Cluster definition for cluster-us-east (just for the smoke tests)
+- kind: cluster
+  metadata:
+    namespace: system
+    name: cluster-us-east
+  type: kubernetes
+  config:
+    kubeconfig:
+
+# Cluster definition for cluster-us-west (just for the smoke tests)
+- kind: cluster
+  metadata:
+    namespace: system
+    name: cluster-us-west
+  type: kubernetes
+  config:
+    kubeconfig:
