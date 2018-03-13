@@ -22,8 +22,6 @@
           chartName: spark
           chartVersion: 3.0.3
 
-          cluster: "{{ .Labels.cluster }}"
-
           spark:
             master:
               replicas: 1

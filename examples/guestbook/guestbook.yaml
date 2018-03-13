@@ -9,7 +9,6 @@
       code:
         type: raw
         params:
-          cluster: "{{ .Labels.cluster }}"
           manifest: "@include k8s/frontend-*.yaml"
 
       dependencies:
@@ -20,14 +19,12 @@
       code:
         type: raw
         params:
-          cluster: "{{ .Labels.cluster }}"
           manifest: "@include k8s/redis-master-*.yaml"
 
     - name: redis-slave
       code:
         type: raw
         params:
-          cluster: "{{ .Labels.cluster }}"
           manifest: "@include k8s/redis-slave-*.yaml"
 
       dependencies:

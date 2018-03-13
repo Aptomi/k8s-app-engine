@@ -20,8 +20,6 @@
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: "{{ .Labels.chart_name }}"
 
-          cluster: "{{ .Labels.cluster }}"
-
           # Pass labels to publisher application
           twitter:
             baseWord: "{{ default .Labels.base_word }}"
@@ -48,8 +46,6 @@
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: tweetics
-
-          cluster: "{{ .Labels.cluster }}"
 
           zookeeper:
             addresses:
@@ -80,8 +76,6 @@
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: tweeviz
-
-          cluster: "{{ .Labels.cluster }}"
 
           image:
             repository: aptomi/

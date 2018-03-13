@@ -22,8 +22,6 @@
           chartName: kafka
           chartVersion: 1.6.0
 
-          cluster: "{{ .Labels.cluster }}"
-
           replicas: 1
           antiAffinity: "soft"
 

@@ -19,8 +19,6 @@
           chartName: zookeeper
           chartVersion: 1.7.0
 
-          cluster: "{{ .Labels.cluster }}"
-
           replicas: 1
           antiAffinity: "soft"
 

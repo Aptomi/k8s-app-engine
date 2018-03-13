@@ -19,8 +19,6 @@
           chartName: hdfs
           chartVersion: 2.3.0
 
-          cluster: "{{ .Labels.cluster }}"
-
           datanode:
             replicas: 1
             antiAffinity: "soft"
