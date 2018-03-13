@@ -112,9 +112,9 @@ func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 // How user is visible from the policy language
 func (node *resolutionNode) proxyDependency(dependency *lang.Dependency) interface{} {
 	result := struct {
-		Id interface{}
+		ID interface{}
 	}{
-		Id: runtime.KeyForStorable(dependency),
+		ID: runtime.KeyForStorable(dependency),
 	}
 	return result
 }
