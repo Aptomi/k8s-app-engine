@@ -1,0 +1,28 @@
+# Default values for Aptomi Labels demo chart.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+
+param1: ""
+param2: ""
+param3: ""
+
+image:
+  repository: nginx
+  tag: 1
+  pullPolicy: IfNotPresent
+
+service:
+  annotations: {}
+  clusterIP: ""
+  externalIPs: []
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  type: NodePort
+  port: 8888
+  nodePort: ""
+
+podAnnotations: {}
+
+resources: {}
+
+nodeSelector: {}

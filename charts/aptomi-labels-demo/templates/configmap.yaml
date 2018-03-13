@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "labels_demo.fullname" . }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    app: {{ template "labels_demo.name" . }}
+data:
+  index.html: |
+    param1: {{ .Values.param1 | default "<not set>" }} <br/>
+    param1: {{ .Values.param2 | default "<not set>" }} <br/>
+    param1: {{ .Values.param3 | default "<not set>" }} <br/>
+
+    {{ if eq .Values.param3 "asd" }}
+      This will show up only if param3 is set to asd
+    {{ end }}
