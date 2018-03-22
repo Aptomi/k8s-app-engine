@@ -1,5 +1,5 @@
-hash: 269e92221bbb143becccf984f213bde68c7d2ebee53f9535b1912498023958f4
-updated: 2018-03-22T15:48:44.021832591-07:00
+hash: a3f7e13fa64c38cbeb1999034e31b91ea789a2fa653e46ce8a772e86662524c0
+updated: 2018-03-22T16:17:20.770387263-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -184,8 +184,6 @@ imports:
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
-- name: github.com/jstemmer/go-junit-report
-  version: f738270caf65e63c420dbf2d5906d00e13b1a5f3
 - name: github.com/juju/ratelimit
   version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/julienschmidt/httprouter
@@ -214,8 +212,6 @@ imports:
   version: 4ecb59231939b2e499b1f2fd8f075565977d2452
   subpackages:
   - fastwalk
-- name: github.com/mattn/goveralls
-  version: 1c14a4061c1cb86f0310cc0d4c0b5bc743879bc5
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
@@ -292,8 +288,6 @@ imports:
   subpackages:
   - codec
   - codec/codecgen
-- name: github.com/UnnoTed/fileb0x
-  version: 131c1a4cc975532c8ba9b83caab2577cdfd1925d
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:

@@ -119,11 +119,5 @@ import:
   - bson
 - package: github.com/rs/cors
   version: ^1.2.0
-- package: github.com/UnnoTed/fileb0x
-  version: 131c1a4cc975532c8ba9b83caab2577cdfd1925d
-- package: github.com/mattn/goveralls
-  version: 1c14a4061c1cb86f0310cc0d4c0b5bc743879bc5
-- package: github.com/jstemmer/go-junit-report
-  version: f738270caf65e63c420dbf2d5906d00e13b1a5f3
 - package: github.com/pmezard/go-difflib
   version: ~1.0.0
