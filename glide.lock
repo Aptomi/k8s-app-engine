@@ -1,10 +1,10 @@
-hash: 534aae8e18667c99bfee7bf300df074d69222fab85eab8279be312c2d9f2d010
-updated: 2018-02-22T12:50:45.269026376-08:00
+hash: 074176ef3cf4d72c95d37468b4587d1aacb9df75c0bdc0d2a7aaf677de40e66a
+updated: 2018-03-22T14:01:05.372794379-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
 - name: github.com/alecthomas/gometalinter
-  version: bae2f1293d092fd8167939d5108d1b025eaef9de
+  version: 46cc1ea3778b247666c2949669a3333c532fa9c6
 - name: github.com/Azure/go-autorest
   version: 58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d
 - name: github.com/beorn7/perks
@@ -153,6 +153,8 @@ imports:
   - cmp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
+- name: github.com/goreleaser/goreleaser
+  version: 79ceb16a74aa47c574d1df125919b2d4f8969b9f
 - name: github.com/gorilla/handlers
   version: 90663712d74cb411cbef281bc1e08c19d1a76145
 - name: github.com/gosuri/uilive
@@ -173,6 +175,7 @@ imports:
   subpackages:
   - hcl/ast
   - hcl/parser
+  - hcl/printer
   - hcl/scanner
   - hcl/strconv
   - hcl/token
@@ -185,6 +188,8 @@ imports:
   version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jstemmer/go-junit-report
+  version: f738270caf65e63c420dbf2d5906d00e13b1a5f3
 - name: github.com/juju/ratelimit
   version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/julienschmidt/httprouter
@@ -213,6 +218,8 @@ imports:
   version: 4ecb59231939b2e499b1f2fd8f075565977d2452
   subpackages:
   - fastwalk
+- name: github.com/mattn/goveralls
+  version: 1c14a4061c1cb86f0310cc0d4c0b5bc743879bc5
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
@@ -281,7 +288,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
-  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
+  version: b5e8006cbee93ec955a89ab31e0e3ce3204f3736
 - name: github.com/technosophos/moniker
   version: 9f956786b91d9786ca11aa5be6104542fa911546
 - name: github.com/ugorji/go
@@ -290,7 +297,7 @@ imports:
   - codec
   - codec/codecgen
 - name: github.com/UnnoTed/fileb0x
-  version: 541cb8da1731f2b7ea0d89d018ce5fede91c0507
+  version: 131c1a4cc975532c8ba9b83caab2577cdfd1925d
 - name: golang.org/x/crypto
   version: d172538b2cfce0c13cee31e647d0367aa8cd2486
   subpackages:
@@ -362,7 +369,7 @@ imports:
 - name: gopkg.in/asn1-ber.v1
   version: 379148ca0225df7a432012b8df0355c2a2063ac0
 - name: gopkg.in/go-playground/validator.v9
-  version: 150fe5b6a4ccc9cd6ffdbf5d184b67fbea75efcc
+  version: 8ce234ff024d85b3848e485decba806385d6e276
   subpackages:
   - translations/en
 - name: gopkg.in/inf.v0
@@ -412,7 +419,7 @@ imports:
   - pkg/urlutil
   - pkg/version
 - name: k8s.io/kubernetes
-  version: 3bda299a6414b4866f179921610d6738206a18fe
+  version: 8c7c1c8b0ce0866d5ded2ce4fa402a716ce6bb6c
   subpackages:
   - cmd/kubeadm/app/apis/kubeadm
   - federation/apis/federation
@@ -564,6 +571,7 @@ imports:
   - pkg/util
   - pkg/util/exec
   - pkg/util/hash
+  - pkg/util/io
   - pkg/util/labels
   - pkg/util/metrics
   - pkg/util/mount

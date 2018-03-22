@@ -113,19 +113,18 @@ clean:
 .PHONY: lint
 lint: prepare_gometalinter
 ifdef JENKINS_HOME
-	${GOENV} gometalinter.v2 --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
+	${GOENV} gometalinter --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
 else
-	${GOENV} gometalinter.v2 --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
+	${GOENV} gometalinter --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
 endif
 
-HAS_GOMETALINTER := $(shell command -v gometalinter.v2)
+HAS_GOMETALINTER := $(shell command -v gometalinter)
 
 .PHONY: prepare_gometalinter
 prepare_gometalinter:
 ifndef HAS_GOMETALINTER
-	go get -u -v -d gopkg.in/alecthomas/gometalinter.v2 && \
-	go install -v gopkg.in/alecthomas/gometalinter.v2 && \
-	gometalinter.v2 --install --update
+	go install -v github.com/alecthomas/gometalinter
+	gometalinter --install --update
 endif
 
 .PHONY: toc
@@ -154,7 +153,7 @@ HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
 .PHONY: prepare_go_junit_report
 prepare_go_junit_report:
 ifndef HAS_GO_JUNIT_REPORT
-	go get -u -v github.com/jstemmer/go-junit-report
+	go install -v github.com/jstemmer/go-junit-report
 endif
 
 HAS_GOVERALLS := $(shell command -v goveralls)
@@ -162,7 +161,7 @@ HAS_GOVERALLS := $(shell command -v goveralls)
 .PHONY: prepare_goveralls
 prepare_goveralls:
 ifndef HAS_GOVERALLS
-	go get -u -v github.com/mattn/goveralls
+	go install -v github.com/mattn/goveralls
 endif
 
 HAS_FILEBOX := $(shell command -v fileb0x)
@@ -170,7 +169,7 @@ HAS_FILEBOX := $(shell command -v fileb0x)
 .PHONY: prepare_filebox
 prepare_filebox:
 ifndef HAS_FILEBOX
-	go get -u -v github.com/UnnoTed/fileb0x
+	go install -v github.com/UnnoTed/fileb0x
 endif
 
 HAS_GORELEASER := $(shell command -v goreleaser)
@@ -178,7 +177,7 @@ HAS_GORELEASER := $(shell command -v goreleaser)
 .PHONY: prepare_goreleaser
 prepare_goreleaser:
 ifndef HAS_GORELEASER
-	go get -u -v github.com/goreleaser/goreleaser
+	go install -v github.com/goreleaser/goreleaser
 endif
 
 .PHONY: w-dep
