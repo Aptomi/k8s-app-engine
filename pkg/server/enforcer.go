@@ -27,9 +27,9 @@ func (server *Server) enforceLoop() error {
 		timer := time.NewTimer(server.cfg.Enforcer.Interval)
 		select {
 		case <-server.policyChanged:
-			break
+			break // nolint: megacheck
 		case <-timer.C:
-			break
+			break // nolint: megacheck
 		}
 		timer.Stop()
 	}
