@@ -1,7 +1,7 @@
 package helm
 
 import (
-	"crypto/md5"
+	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -37,7 +37,7 @@ func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, versi
 }
 
 func getReleaseName(deployName string) string {
-	hasher := md5.New()
+	hasher := sha1.New()
 	hasher.Write([]byte(deployName))
 	return "aptomi-" + hex.EncodeToString(hasher.Sum(nil))
 }
