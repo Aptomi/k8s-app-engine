@@ -4,7 +4,6 @@ BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GOENV=CGO_ENABLED=0
 GOFLAGS=-ldflags "-X github.com/Aptomi/aptomi/pkg/version.gitVersion=${GIT_VERSION} -X github.com/Aptomi/aptomi/pkg/version.gitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/pkg/version.buildDate=${BUILD_DATE}"
 GO=${GOENV} go
-VBIN=vendor_bin
 
 .PHONY: default
 default: clean build test
@@ -39,7 +38,7 @@ coverage-full:
 
 .PHONY: coverage-publish
 coverage-publish: prepare_goveralls
-	${VBIN}/goveralls -coverprofile coverage.out
+	goveralls -coverprofile coverage.out
 
 .PHONY: test
 test:
@@ -72,7 +71,7 @@ smoke: install alltest
 .PHONY: embed-ui
 embed-ui: prepare_filebox
 	find webui -type f | grep -v '/node_modules' | grep -v '/dist' | sort | xargs shasum 2>/dev/null | shasum > .ui_hash_current
-	if diff .ui_hash_current .ui_hash_previous; then echo 'No changes in UI. Skipping UI build'; else rm -rf pkg/server/ui/*b0x*; cd webui; npm run build; cd ..; ${VBIN}/fileb0x webui/b0x.yaml; fi
+	if diff .ui_hash_current .ui_hash_previous; then echo 'No changes in UI. Skipping UI build'; else rm -rf pkg/server/ui/*b0x*; cd webui; npm run build; cd ..; fileb0x webui/b0x.yaml; fi
 	cp .ui_hash_current .ui_hash_previous
 
 #
@@ -148,28 +147,28 @@ ifndef HAS_GLIDE
 	${GO} get -u -v github.com/Masterminds/glide
 endif
 
-HAS_GO_JUNIT_REPORT := $(shell command -v ${VBIN}/go-junit-report)
+HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
 
 .PHONY: prepare_go_junit_report
 prepare_go_junit_report:
 ifndef HAS_GO_JUNIT_REPORT
-	${GO} build -o ${VBIN}/go-junit-report ./vendor/github.com/jstemmer/go-junit-report
+	${GO} get -u -v github.com/jstemmer/go-junit-report
 endif
 
-HAS_GOVERALLS := $(shell command -v ${VBIN}/goveralls)
+HAS_GOVERALLS := $(shell command -v goveralls)
 
 .PHONY: prepare_goveralls
 prepare_goveralls:
 ifndef HAS_GOVERALLS
-	${GO} build -o ${VBIN}/goveralls ./vendor/github.com/mattn/goveralls
+	${GO} get -u -v github.com/mattn/goveralls
 endif
 
-HAS_FILEBOX := $(shell command -v ${VBIN}/fileb0x)
+HAS_FILEBOX := $(shell command -v fileb0x)
 
 .PHONY: prepare_filebox
 prepare_filebox:
 ifndef HAS_FILEBOX
-	${GO} build -o ${VBIN}/fileb0x ./vendor/github.com/UnnoTed/fileb0x
+	${GO} get -u -v github.com/UnnoTed/fileb0x
 endif
 
 HAS_GORELEASER := $(shell command -v goreleaser)
