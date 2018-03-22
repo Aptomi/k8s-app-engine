@@ -1,7 +1,7 @@
-bin
 /aptomi
 /aptomictl
 vendor
+vendor_bin
 db*.yaml
 graph*.png
 graph*.dot
