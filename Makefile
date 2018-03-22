@@ -4,6 +4,7 @@ BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GOENV=CGO_ENABLED=0
 GOFLAGS=-ldflags "-X github.com/Aptomi/aptomi/pkg/version.gitVersion=${GIT_VERSION} -X github.com/Aptomi/aptomi/pkg/version.gitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/pkg/version.buildDate=${BUILD_DATE}"
 GO=${GOENV} go
+VBIN=vendor_bin
 
 .PHONY: default
 default: clean build test
@@ -15,7 +16,6 @@ ifndef JENKINS_HOME
 else
 	${GOENV} glide --no-color install --strip-vendor
 endif
-	${GO} build -o bin/protoc-gen-go ./vendor/github.com/golang/protobuf/protoc-gen-go
 	tools/setup-apimachinery.sh
 	cd webui; npm install
 
@@ -39,7 +39,7 @@ coverage-full:
 
 .PHONY: coverage-publish
 coverage-publish: prepare_goveralls
-	goveralls -coverprofile coverage.out
+	${VBIN}/goveralls -coverprofile coverage.out
 
 .PHONY: test
 test:
@@ -48,7 +48,7 @@ test:
 
 .PHONY: test-race
 test-race:
-	CGO_ENABLED=1 go test -race -short -v ./...
+	CGO_ENABLED=1 ${GO} test -race -short -v ./...
 	@echo "\nNo race conditions detected. Unit tests passed"
 
 .PHONY: alltest
@@ -72,7 +72,7 @@ smoke: install alltest
 .PHONY: embed-ui
 embed-ui: prepare_filebox
 	find webui -type f | grep -v '/node_modules' | grep -v '/dist' | sort | xargs shasum 2>/dev/null | shasum > .ui_hash_current
-	if diff .ui_hash_current .ui_hash_previous; then echo 'No changes in UI. Skipping UI build'; else rm -rf pkg/server/ui/*b0x*; cd webui; npm run build; cd ..; fileb0x webui/b0x.yaml; fi
+	if diff .ui_hash_current .ui_hash_previous; then echo 'No changes in UI. Skipping UI build'; else rm -rf pkg/server/ui/*b0x*; cd webui; npm run build; cd ..; ${VBIN}/fileb0x webui/b0x.yaml; fi
 	cp .ui_hash_current .ui_hash_previous
 
 #
@@ -123,8 +123,8 @@ HAS_GOMETALINTER := $(shell command -v gometalinter)
 .PHONY: prepare_gometalinter
 prepare_gometalinter:
 ifndef HAS_GOMETALINTER
-	go install -v github.com/alecthomas/gometalinter
-	gometalinter --install --update
+	${GO} get -u -v github.com/alecthomas/gometalinter
+	gometalinter --install
 endif
 
 .PHONY: toc
@@ -145,31 +145,31 @@ HAS_GLIDE := $(shell command -v glide)
 .PHONY: prepare_glide
 prepare_glide:
 ifndef HAS_GLIDE
-	go get -u -v github.com/Masterminds/glide
+	${GO} get -u -v github.com/Masterminds/glide
 endif
 
-HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
+HAS_GO_JUNIT_REPORT := $(shell command -v ${VBIN}/go-junit-report)
 
 .PHONY: prepare_go_junit_report
 prepare_go_junit_report:
 ifndef HAS_GO_JUNIT_REPORT
-	go install -v github.com/jstemmer/go-junit-report
+	${GO} build -o ${VBIN}/go-junit-report ./vendor/github.com/jstemmer/go-junit-report
 endif
 
-HAS_GOVERALLS := $(shell command -v goveralls)
+HAS_GOVERALLS := $(shell command -v ${VBIN}/goveralls)
 
 .PHONY: prepare_goveralls
 prepare_goveralls:
 ifndef HAS_GOVERALLS
-	go install -v github.com/mattn/goveralls
+	${GO} build -o ${VBIN}/goveralls ./vendor/github.com/mattn/goveralls
 endif
 
-HAS_FILEBOX := $(shell command -v fileb0x)
+HAS_FILEBOX := $(shell command -v ${VBIN}/fileb0x)
 
 .PHONY: prepare_filebox
 prepare_filebox:
 ifndef HAS_FILEBOX
-	go install -v github.com/UnnoTed/fileb0x
+	${GO} build -o ${VBIN}/fileb0x ./vendor/github.com/UnnoTed/fileb0x
 endif
 
 HAS_GORELEASER := $(shell command -v goreleaser)
@@ -177,7 +177,7 @@ HAS_GORELEASER := $(shell command -v goreleaser)
 .PHONY: prepare_goreleaser
 prepare_goreleaser:
 ifndef HAS_GORELEASER
-	go install -v github.com/goreleaser/goreleaser
+	${GO} get -u -v github.com/goreleaser/goreleaser
 endif
 
 .PHONY: w-dep
