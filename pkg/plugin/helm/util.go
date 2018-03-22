@@ -37,9 +37,12 @@ func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, versi
 }
 
 func getReleaseName(deployName string) string {
-	hasher := sha1.New()
-	hasher.Write([]byte(deployName))
-	return "aptomi-" + hex.EncodeToString(hasher.Sum(nil))
+	h := sha1.New()
+	_, err := h.Write([]byte(deployName))
+	if err != nil {
+		panic(err)
+	}
+	return "aptomi-" + hex.EncodeToString(h.Sum(nil))
 }
 
 func (p *Plugin) fetchChart(repository, name, version string) (string, error) {
