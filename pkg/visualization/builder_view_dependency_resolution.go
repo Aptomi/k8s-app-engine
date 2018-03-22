@@ -53,7 +53,7 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 
 		// check that instance contains our dependency
 		depKey := runtime.KeyForStorable(dependency)
-		if ok, _ := instanceCurrent.DependencyKeys[depKey]; !ok {
+		if !instanceCurrent.DependencyKeys[depKey] {
 			continue
 		}
 
