@@ -1,10 +1,8 @@
-hash: 074176ef3cf4d72c95d37468b4587d1aacb9df75c0bdc0d2a7aaf677de40e66a
-updated: 2018-03-22T14:01:05.372794379-07:00
+hash: 269e92221bbb143becccf984f213bde68c7d2ebee53f9535b1912498023958f4
+updated: 2018-03-22T15:48:44.021832591-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
-- name: github.com/alecthomas/gometalinter
-  version: 46cc1ea3778b247666c2949669a3333c532fa9c6
 - name: github.com/Azure/go-autorest
   version: 58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d
 - name: github.com/beorn7/perks
@@ -153,8 +151,6 @@ imports:
   - cmp
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
-- name: github.com/goreleaser/goreleaser
-  version: 79ceb16a74aa47c574d1df125919b2d4f8969b9f
 - name: github.com/gorilla/handlers
   version: 90663712d74cb411cbef281bc1e08c19d1a76145
 - name: github.com/gosuri/uilive
