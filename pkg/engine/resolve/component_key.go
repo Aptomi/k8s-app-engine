@@ -1,7 +1,9 @@
 package resolve
 
 import (
+	"encoding/base32"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"hash/fnv"
 	"strings"
 )
 
@@ -107,15 +109,20 @@ func (cik ComponentInstanceKey) GetKey() string {
 	return cik.key
 }
 
+var (
+	base32LowerCaseHexEncoding = base32.NewEncoding("0123456789abcdefghijklmnopqrstuv")
+)
+
 // GetDeployName returns a string that could be used as name for deployment inside the cluster
 func (cik ComponentInstanceKey) GetDeployName() string {
-	return strings.Join(
-		[]string{
-			cik.Namespace,
-			cik.ContractName,
-			cik.ContextNameWithKeys,
-			cik.ComponentName,
-		}, componentInstanceKeySeparator)
+	h := fnv.New64a()
+	_, err := h.Write([]byte(cik.GetKey()))
+	if err != nil {
+		panic(err)
+	}
+	keyHash := base32LowerCaseHexEncoding.EncodeToString(h.Sum(nil))[0:13]
+
+	return "a-" + keyHash
 }
 
 // If cluster has not been resolved yet and we need a key, generate one

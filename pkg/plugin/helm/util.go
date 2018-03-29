@@ -1,8 +1,6 @@
 package helm
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"io/ioutil"
@@ -37,12 +35,7 @@ func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, versi
 }
 
 func getReleaseName(deployName string) string {
-	h := sha1.New()
-	_, err := h.Write([]byte(deployName))
-	if err != nil {
-		panic(err)
-	}
-	return "aptomi-" + hex.EncodeToString(h.Sum(nil))
+	return deployName
 }
 
 func (p *Plugin) fetchChart(repository, name, version string) (string, error) {
