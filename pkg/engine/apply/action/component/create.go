@@ -35,7 +35,7 @@ func (a *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud
 	err := a.processDeployment(context)
 	if err != nil {
-		return fmt.Errorf("error while creating component '%s': %s", a.ComponentKey, err)
+		return fmt.Errorf("unable to deploy component instance '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
@@ -67,7 +67,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 
 	clusterName := instance.GetCluster()
 	if len(clusterName) <= 0 {
-		return fmt.Errorf("no cluster specified in code params, component instance: %v", a.ComponentKey)
+		return fmt.Errorf("policy doesn't specify deployment target for component instance")
 	}
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
@@ -75,7 +75,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 		return err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("can't find cluster in policy: %s", clusterName)
+		return fmt.Errorf("cluster '%s' in not present in policy", clusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
