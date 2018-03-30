@@ -39,7 +39,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		desired.external(),
-		mockRegistryFailOnComponent(false),
+		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -78,7 +78,7 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		desired.external(),
-		mockRegistryFailOnComponent(failAsPanic, desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service).Components[0].Name),
+		mockRegistry(false, failAsPanic),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -112,7 +112,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		desired.external(),
-		mockRegistryFailOnComponent(false),
+		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -154,7 +154,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		desiredNext.external(),
-		mockRegistryFailOnComponent(false),
+		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNext.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -190,7 +190,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		desiredNextAfterUpdate.external(),
-		mockRegistryFailOnComponent(false),
+		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNextAfterUpdate.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -210,7 +210,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	assert.True(t, serviceTimesUpdated.updated.After(serviceTimes.updated), "Update time for parent service should be changed")
 }
 
-func TestDeletePolicyObjectsWhileComponentInstancesAreStilRunningFails(t *testing.T) {
+func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testing.T) {
 	// Start with empty actual state & empty policy
 	empty := newTestData(t, builder.NewPolicyBuilder())
 	actualState := empty.resolution()
@@ -228,7 +228,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStilRunningFails(t *testin
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		generated.external(),
-		mockRegistryFailOnComponent(false),
+		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(generated.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -248,7 +248,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStilRunningFails(t *testin
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		generated.external(),
-		mockRegistryFailOnComponent(false),
+		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(reset.resolution(), actualState).Actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
@@ -376,7 +376,7 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 	return instance
 }
 
-func mockRegistryFailOnComponent(failAsPanic bool, failComponents ...string) plugin.Registry {
+func mockRegistry(applySuccess, failAsPanic bool) plugin.Registry {
 	clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
 	codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
 	postProcessPlugins := make([]plugin.PostProcessPlugin, 0)
@@ -387,7 +387,10 @@ func mockRegistryFailOnComponent(failAsPanic bool, failComponents ...string) plu
 
 	codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
 	codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
-		return fake.NewFailCodePlugin(failComponents, failAsPanic), nil
+		if applySuccess {
+			return fake.NewNoOpCodePlugin(0), nil
+		}
+		return fake.NewFailCodePlugin(failAsPanic), nil
 	}
 
 	return plugin.NewRegistry(config.Plugins{}, clusterTypes, codeTypes, postProcessPlugins)

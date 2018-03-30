@@ -408,7 +408,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		actualState,
 		actual.NewNoOpActionStateUpdater(),
 		externalData,
-		mockRegistryFailOnComponent(false, "fail-components-like-these"),
+		mockRegistry(true, false),
 		actions,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
