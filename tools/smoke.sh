@@ -12,6 +12,8 @@ fi
 
 set -eou pipefail
 
+APTOMI="${GOPATH}/bin/aptomi"
+APTOMICTL="${GOPATH}/bin/aptomictl"
 DEBUG=${DEBUG:-no}
 DEBUG_MODE=false
 if [ "yes" == "$DEBUG" ]; then
@@ -87,7 +89,7 @@ users:
         deactivated: deactivated
 EOL
 
-aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
+${APTOMI} server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
 SERVER_PID=$!
 
 echo "Server PID: ${SERVER_PID}"
@@ -101,11 +103,11 @@ if [ -z "$SERVER_RUNNING" ]; then
 fi
 
 function login() {
-    aptomictl --config ${CONF_DIR} login --username $1 --password $1
+    ${APTOMICTL} --config ${CONF_DIR} login --username $1 --password $1
 }
 
 login alice
-if aptomictl --config ${CONF_DIR} policy apply -f ${POLICY_DIR}/policy &>/dev/null ; then
+if ${APTOMICTL} --config ${CONF_DIR} policy apply -f ${POLICY_DIR}/policy &>/dev/null ; then
     echo "Alice shouldn't be able to upload full policy"
     exit 1
 fi
@@ -115,7 +117,7 @@ function check_policy() {
     query="$2"
 
     login sam
-    actual="$(aptomictl --config ${CONF_DIR} policy show -o json | jq "$2")"
+    actual="$(${APTOMICTL} --config ${CONF_DIR} policy show -o json | jq "$2")"
 
     if [ "$actual" -eq "$expected" ]; then
         echo "Found value is equal to expected $actual for query $query"
@@ -136,58 +138,58 @@ WAIT_FLAGS="--wait --wait-attempts 20"
 check_policy_version 1
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
 check_policy_version 2
 
 login frank
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
 check_policy_version 3
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
 check_policy_version 4
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
 check_policy_version 5
 
 login alice
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
 check_policy_version 6
 
 login bob
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
 check_policy_version 7
 
 check_policy 3 ".Objects.social.dependency | length"
 
 # delete Alice's dependency
 login alice
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
 check_policy_version 8
 check_policy 2 ".Objects.social.dependency | length"
 
 # upgrade prod dependency
 sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
 check_policy_version 9
 
 # apply Carol's dependency
 login carol
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
 check_policy_version 10
 check_policy 3 ".Objects.social.dependency | length"
 
 # delete all dependencies
 login sam
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f "${POLICY_DIR}/policy/*-ts.yaml"
+${APTOMICTL} --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f "${POLICY_DIR}/policy/*-ts.yaml"
 check_policy_version 11
 check_policy 0 ".Objects.social.dependency | length"
 
 # delete all definitions
 login sam
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy
+${APTOMICTL} --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy
 check_policy_version 12
 check_policy 0 ".Objects.platform.contract | length"
 check_policy 0 ".Objects.social.contract | length"
@@ -201,27 +203,27 @@ check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
 check_policy_version 13
 
 login frank
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
 check_policy_version 14
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
 check_policy_version 15
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
 check_policy_version 16
 
 login alice
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
 check_policy_version 17
 
 login bob
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+${APTOMICTL} --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
 check_policy_version 18
 
 check_policy 5 ".Objects.platform.contract | length"
