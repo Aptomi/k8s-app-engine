@@ -21,7 +21,7 @@ tools/demo-ldap.sh
 
 make lint
 
-make smoke
+DEBUG=yes make smoke
 
 source /jenkins/aptomi-coveralls.io
 make coverage-full coverage-publish
