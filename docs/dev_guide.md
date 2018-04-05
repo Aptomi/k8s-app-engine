@@ -1,7 +1,7 @@
 # Dev Guide
 
 ## Building From Source
-In order to build Aptomi from source you will need Go (the latest 1.9.x) and a couple of external dependencies:
+In order to build Aptomi from source you will need Go (the latest 1.10.x) and a couple of external dependencies:
 * glide - all Go dependencies for Aptomi are managed via [Glide](https://glide.sh/)
 * docker - to run Aptomi in container, as well as to run sample LDAP server with user data
 * kubernetes-cli and kubernetes-helm for using Kubernetes with Helm
@@ -13,6 +13,15 @@ If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](h
 brew install go glide docker kubernetes-cli kubernetes-helm npm telnet jq
 ```
 
+Make sure `$GOPATH` is exported in your shell (e.g. `~/.bash_profile`) and `$PATH` includes `$GOPATH/bin`:
+```
+# echo $GOPATH
+/Users/test/go
+
+# echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Users/test/go/bin
+``` 
+
 Check out Aptomi source code from the repo:
 ```
 mkdir -p $GOPATH/src/github.com/Aptomi
@@ -20,11 +29,19 @@ cd $GOPATH/src/github.com/Aptomi
 git clone https://github.com/Aptomi/aptomi.git
 ```
 
-In order to build Aptomi, you must first tell Glide to fetch all of its dependencies. It will read the list of
-dependencies defined in `glide.lock` and fetch them into a local "vendor" folder. After that, you must run Go to
-build and install the binaries. There are convenient Makefile targets for both, run them:
+In order to build Aptomi, you must first tell Glide to fetch all project dependencies. It will read the list of
+dependencies defined in `glide.lock` and fetch them into a local "vendor" folder:
 ```
 make vendor 
+```
+
+After that, you can build project binaries. It will produce `aptomi` and `aptomictl` in the current directory:
+```
+make
+```
+
+You can also get these binaries built and installed into `$GOPATH/bin`:
+```
 make install
 ```
 
