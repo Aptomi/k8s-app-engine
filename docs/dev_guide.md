@@ -77,6 +77,11 @@ Command     | Action
 ```npm run e2e``` | Run e2e tests: *coming soon*
 ```npm run test``` | Run all tests: *coming soon*
 
+## Creating configs
+If you are building from source and want to run examples, you will need to generate configs for Aptomi server, client, as well as add sample users to Aptomi.
+
+You can either do it manually, or just run an [installation script](install_compact.md) that will install the latest Aptomi release (it will co-exist well with the binaries built from source) and create those configs for you.
+
 ## How to release
 Use `git tag` and `make release` for creating new release.
 
