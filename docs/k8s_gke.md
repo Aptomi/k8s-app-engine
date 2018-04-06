@@ -4,10 +4,10 @@
 
 # Configure Google Cloud SDK
 1. Open [Google Cloud Console](https://console.cloud.google.com/)
-    * Create new project with any name
-    * API Manager -> Enable API
-        * Google Container Engine API
-        * Google Compute Engine API
+    * Create a new project
+    * APIs & Services -> Dashboard -> Enable APIs and Services
+        * Google Kubernetes Engine API -> Enable
+        * Google Compute Engine API -> Enable
 1. Install Google Cloud SDK
     * ```curl https://sdk.cloud.google.com | bash```
 1. Authenticate
