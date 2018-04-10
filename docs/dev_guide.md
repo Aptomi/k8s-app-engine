@@ -1,12 +1,12 @@
 # Dev Guide
 
 ## Building From Source
-In order to build Aptomi from source you will need Go (the latest 1.10.x) and a couple of external dependencies:
-* glide - all Go dependencies for Aptomi are managed via [Glide](https://glide.sh/)
-* docker - to run Aptomi in container, as well as to run sample LDAP server with user data
-* kubernetes-cli and kubernetes-helm for using Kubernetes with Helm
-* npm - to build UI, as well as automatically generate table of contents in README.md 
-* telnet, jq - for the script which runs smoke tests
+In order to build Aptomi from source, you will need Go (the latest 1.10.x) and a couple of external dependencies:
+* __glide__ - all Go dependencies for Aptomi are managed via [Glide](https://glide.sh/)
+* __docker__ - to run Aptomi in a container, as well as to run a sample LDAP server with user data
+* __kubernetes-cli and kubernetes-helm__ - for using Kubernetes with Helm
+* __npm__ - to build the UI and automatically generate the table of contents in README.md 
+* __telnet, jq__ - for the script which runs smoke tests
 
 If you are on macOS, install [Homebrew](https://brew.sh/) and [Docker For Mac](https://docs.docker.com/docker-for-mac/install/), then run: 
 ```
@@ -22,7 +22,7 @@ Make sure `$GOPATH` is exported in your shell (e.g. `~/.bash_profile`) and `$PAT
 /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Users/test/go/bin
 ``` 
 
-Check out Aptomi source code from the repo:
+Check out the Aptomi source code from the repo:
 ```
 mkdir -p $GOPATH/src/github.com/Aptomi
 cd $GOPATH/src/github.com/Aptomi
@@ -35,7 +35,7 @@ dependencies defined in `glide.lock` and fetch them into a local "vendor" folder
 make vendor 
 ```
 
-After that, you can build project binaries. It will produce `aptomi` and `aptomictl` in the current directory:
+After that, you can build the project binaries. This will produce `aptomi` and `aptomictl` in the current directory:
 ```
 make
 ```
@@ -78,23 +78,23 @@ Command     | Action
 ```npm run test``` | Run all tests: *coming soon*
 
 ## Creating configs
-If you are building from source and want to run examples, you will need to generate configs for Aptomi server, client, as well as add sample users to Aptomi.
+If you are building from source and want to run our examples, you will need to generate configs for the Aptomi server and client, and add some sample users to Aptomi.
 
-You can either do it manually, or just run an [installation script](install_compact.md) that will install the latest Aptomi release (it will co-exist well with the binaries built from source) and create those configs for you.
+You can do this manually, or you can run an [installation script](install_compact.md) that will install the latest Aptomi release (it will co-exist well with the binaries built from source) and create those configs for you.
 
 ## How to release
 Use `git tag` and `make release` for creating new release.
 
-1. Create annotated git tag and push it to github repo. Use commit message like `Aptomi v0.1.2`.
+1. Create an annotated git tag and push it to the github repo. Use a commit message like `Aptomi v0.1.2`.
 
 ```
 git tag -a v0.1.2
 git push origin v0.1.2
 ```
 
-1. Create GitHub API token with the `repo` scope selected to upload artifacts to GitHub release page. You can create
+1. Create a GitHub API token with the `repo` scope selected to upload artifacts to the GitHub release page. You can create
 one [here](https://github.com/settings/tokens/new). This token should be added to the environment variables as `GITHUB_TOKEN`.
 
-1. Run `make release`. It'll create everything needed and upload all artifacts to github.
+1. Run `make release`. This will create everything you need and upload all artifacts to github.
 
-1. Go to https://github.com/Aptomi/aptomi/releases/tag/v0.1.2 and fix changelog / description if needed.
+1. Go to https://github.com/Aptomi/aptomi/releases/tag/v0.1.2 and fix the changelog / description if needed.
