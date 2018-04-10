@@ -42,7 +42,7 @@ Aptomi also provides contextual **visibility** into teams and services, allowing
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Why Aptomi](#why-aptomi)
+- [Why Aptomi?](#why-aptomi)
 - [Quickstart](#quickstart)
   - [Step #1: Installation](#step-1-installation)
   - [Step #2: Setting up k8s Cluster](#step-2-setting-up-k8s-cluster)
