@@ -11,11 +11,11 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/aptomi.svg)](https://github.com/Aptomi/aptomi/commits/master)
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
-[Aptomi](http://aptomi.io) is a platform for development teams that simplifies roll-out and operation of container-based applications on **Kubernetes**. It introduces a service-centric abstraction, which allows to compose applications from multiple components connected together. It supports components packaged using Helm, ksonnet, k8s YAMLs or any other Kubernetes-friendly way.
+[Aptomi](http://aptomi.io) is a platform for development teams that simplifies the roll-out and operation of container-based applications on **Kubernetes**. It introduces a service-centric abstraction, which allows users to compose applications from multiple connected components. Aptomi supports components packaged using Helm, ksonnet, k8s YAMLs, and any other Kubernetes-friendly way!
 
-Aptomi's approach to **application delivery** becomes especially powerful in a **multi-team** setup, where components owned by different teams must be put together into a service. With ownership boundaries, Dev teams can specify **multi-cluster** and **multi-env** (e.g. dev, stage, prod) service behavior, as well as control lifecycle and updates of their respective services.
+Aptomi's approach to **application delivery** becomes especially powerful in a **multi-team** setup, where components owned by different teams must be put together into a service. With ownership boundaries, Dev teams can specify **multi-cluster** and **multi-env** (e.g. dev, stage, prod) service behavior, as well as control the lifecycle and updates of their respective services.
 
-It also provides contextual **visibility** into teams and services, allowing to visualize dependencies and impact of changes. 
+Aptomi also provides contextual **visibility** into teams and services, allowing our users to visualize complex dependencies and accurately assess the impact of changes. 
 
 ## Overview
 
@@ -56,12 +56,12 @@ It also provides contextual **visibility** into teams and services, allowing to 
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Why Aptomi
+## Why Aptomi?
 
-* Why would I want to use Aptomi [as a Developer](docs/benefits.md#for-developers)
-* Why would I want to use Aptomi [as an Operator](docs/benefits.md#for-operators)
-* How does Aptomi fit into [CI/CD model with Spinnaker/Jenkins](docs/benefits.md#how-aptomi-fits-into-cicd-jenkins-spinnaker)
-* Why would I want to use Aptomi [if I'm already implementing Kubernetes/OpenShift](docs/benefits.md#why-would-i-want-to-use-aptomi-if-im-already-implementing-kubernetesopenshift)
+* Why would I want to use Aptomi [as a Developer?](docs/benefits.md#for-developers)
+* Why would I want to use Aptomi [as an Operator?](docs/benefits.md#for-operators)
+* How does Aptomi fit into [CI/CD model with Spinnaker/Jenkins?](docs/benefits.md#how-aptomi-fits-into-cicd-jenkins-spinnaker)
+* Why would I want to use Aptomi [if I'm already implementing Kubernetes/OpenShift?](docs/benefits.md#why-would-i-want-to-use-aptomi-if-im-already-implementing-kubernetesopenshift)
 
 ## Quickstart
 
@@ -73,28 +73,28 @@ Installation Mode     | Complexity | Description
 [Compact](docs/install_compact.md) | Easy | Aptomi will be installed on a local machine (binaries or in a single Docker container)
 [Kubernetes](docs/install_kubernetes.md) | Medium | Aptomi will be deployed on k8s via Helm chart
 
-You can also install it in a stripped-down mode with fake executor:
+You can also install Aptomi in a stripped-down mode with a fake executor:
 
 Installation Mode     | Complexity | Description
 ----------------------|------------|-------------
-[Concepts](docs/install_concepts.md) | Easy | Use this only if you want get familiar with Aptomi concepts, API and UI. App deployment to k8s is **DISABLED**
+[Concepts](docs/install_concepts.md) | Easy | Use this only if you want get familiar with Aptomi's concepts, API and UI. App deployment to k8s is **DISABLED**
 
 ### Step #2: Setting up k8s Cluster
 
-You need to have access a k8s cluster to deploy apps from the provided examples.
+You will need to have access to a k8s cluster to deploy apps from the provided examples.
 
-Having a powerful k8s cluster with good internet connection will definitely provide *better experience* compared to a local single-node k8s cluster. We consider GKE as the best option if you don't have your own k8s cluster.
+Having a powerful k8s cluster with a good internet connection will definitely provide a *better experience* compared to a local, single-node k8s cluster. We consider GKE to be the best option if you don't have your own k8s cluster.
 
 Kubernetes Cluster | When to use     | How to run
 ------------|-----------------|-----------
-Your own    | If you already have k8s cluster set up | [Configure Aptomi to use an existing k8s cluster](docs/k8s_own.md)
-Google Kubernetes Engine | Useful if you have a new Google account and free credits | [Configure Aptomi to use GKE](docs/k8s_gke.md)
+Your own    | If you already have a k8s cluster set up | [Configure Aptomi to use an existing k8s cluster](docs/k8s_own.md)
+Google Kubernetes Engine | If you have a Google account and free credits | [Configure Aptomi to use GKE](docs/k8s_gke.md)
 k8s / Minikube | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Minikube](docs/k8s_minikube.md)
 k8s / Docker For Mac | Single-node, local machine with 16GB+ RAM | [Configure Aptomi to use Docker For Mac](docs/k8s_docker_for_mac.md)
 
 ### Step #3: Running Examples
 
-Once Aptomi server is up and k8s cluster is ready, you can get started by running the following examples:
+Once the Aptomi server is up and your k8s cluster is ready, you can get started by running the following examples:
 
 Example    | Description
 -----------|------------
@@ -103,7 +103,7 @@ Example    | Description
 
 ### Step #4: Send us a note on Slack
 
-Let us know your feedback on #general in [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io). If you ran into issues, we will help get them resolved. 
+Give us your feedback on #general in [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io). If you run into any issues, we are always happy to help you resolve them! 
 
 ## How It Works
 
@@ -118,7 +118,7 @@ See [artchitecture documentation](docs/architecture.md)
 See [language documentation](docs/language.md)
 
 ## How to contribute
-The very least you can do is to [report a bug](https://github.com/Aptomi/aptomi/issues)!
+The very least you can do is [report a bug](https://github.com/Aptomi/aptomi/issues)!
 
 If you want to make a pull request for a bug fix or contribute a feature, see our [Development Guide](docs/dev_guide.md) for how to develop, run and test your code.
 
