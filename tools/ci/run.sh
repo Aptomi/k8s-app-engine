@@ -28,6 +28,8 @@ make coverage-full coverage-publish
 
 tools/test-install.sh
 
+sudo rm -rf "${PWD}/.aptomi-install-cache"
+
 tools/publish-docker.sh
 
 docker rmi $(docker images --filter "dangling=true" -q --no-trunc) || true

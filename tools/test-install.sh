@@ -23,6 +23,4 @@ test_install xenial "./aptomi_install.sh --with-example && ./aptomi_uninstall_an
 test_install centos7 "./aptomi_install.sh && ./aptomi_uninstall_and_clean.sh"
 test_install centos7 "./aptomi_install.sh --with-example && ./aptomi_uninstall_and_clean.sh"
 
-rm -rf "${PWD}/.aptomi-install-cache"
-
 echo "All install scripts successfully verified"
