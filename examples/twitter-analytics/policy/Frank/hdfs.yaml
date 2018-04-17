@@ -4,14 +4,11 @@
     namespace: platform
     name: hdfs
 
-  labels:
-    type: analytics
-
   components:
 
     - name: hdfs
       discovery:
-        url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}:8020"
+        url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}.{{ .Cluster.Namespace }}:8020"
       code:
         type: helm
         params:
@@ -30,18 +27,8 @@
     name: hdfs
 
   contexts:
-    # Production instance of the service (operated by ops/IT)
-    - name: prod
-      criteria:
-        require-all:
-          - org == 'it' && is_operator
-      allocation:
-        service: hdfs
+    # It's a platform service, so we are running it as a single 'platform' instance exposed to everyone
+    - name: platform
 
-    # Staging instance of the service (for developers)
-    - name: stage
-      criteria:
-        require-all:
-          - org == 'dev'
       allocation:
         service: hdfs

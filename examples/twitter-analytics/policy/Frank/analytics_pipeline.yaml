@@ -4,9 +4,6 @@
     namespace: platform
     name: analytics_pipeline
 
-  labels:
-    type: analytics
-
   components:
 
     - name: kafka
@@ -25,18 +22,8 @@
     name: analytics_pipeline
 
   contexts:
-    # Production instance of the service (operated by ops/IT)
-    - name: prod
-      criteria:
-        require-all:
-          - org == 'it' && is_operator
-      allocation:
-        service: analytics_pipeline
+    # It's a platform service, so we are running it as a single 'platform' instance exposed to everyone
+    - name: platform
 
-    # Staging instance of the service (for developers)
-    - name: stage
-      criteria:
-        require-all:
-          - org == 'dev'
       allocation:
         service: analytics_pipeline

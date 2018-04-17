@@ -4,9 +4,6 @@
     namespace: social
     name: twitter_stats
 
-  labels:
-    type: dev-apps
-
   components:
 
     - name: analytics_pipeline
@@ -82,9 +79,9 @@
             name: tweeviz
             tag: "v1.2.0-{{ .Labels.tsvisimage }}"
 
-          topListSize: "{{ .Labels.display_top_hashtags }}"
+          topListSize: 10
 
-          header: Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})
+          header: "Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})"
 
           hdfs:
             addresses:
@@ -108,7 +105,7 @@
           - org == 'it' && is_operator
       change-labels:
         set:
-          display_top_hashtags: 10
+          service_realtime: true
           chart_name: tweepub
       allocation:
         service: twitter_stats
@@ -120,9 +117,9 @@
           - org == 'dev'
       change-labels:
         set:
-          display_top_hashtags: 100
+          service_fake: true
           chart_name: tweepub-fake
-          base_word: "stage"
+          base_word: "development"
       allocation:
         service: twitter_stats
         keys:

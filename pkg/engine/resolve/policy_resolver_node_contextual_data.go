@@ -1,6 +1,7 @@
 package resolve
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
@@ -73,10 +74,12 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 			User      interface{}
 			Labels    interface{}
 			Discovery interface{}
+			Cluster   interface{}
 		}{
 			User:      node.proxyUser(node.user),
 			Labels:    node.labels.Labels,
 			Discovery: node.proxyDiscovery(node.discoveryTreeNode, node.componentKey),
+			Cluster:   node.proxyCluster(node.labels.Labels[lang.LabelCluster]),
 		},
 	)
 }
@@ -109,12 +112,38 @@ func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 	}
 }
 
-// How user is visible from the policy language
+// How dependency is visible from the policy language
 func (node *resolutionNode) proxyDependency(dependency *lang.Dependency) interface{} {
 	result := struct {
 		ID interface{}
 	}{
 		ID: runtime.KeyForStorable(dependency),
+	}
+	return result
+}
+
+// How cluster is visible from the policy language
+func (node *resolutionNode) proxyCluster(name string) interface{} {
+	// make cluster available
+	clusterName := node.labels.Labels[lang.LabelCluster]
+	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
+	if err != nil || clusterObj == nil {
+		panic(fmt.Sprintf("cluster not set for component instance '%s'", node.componentKey))
+	}
+	cluster := clusterObj.(*lang.Cluster)
+
+	clusterConfig := &struct {
+		Namespace string `yaml:",omitempty"`
+	}{}
+
+	err = cluster.ParseConfigInto(clusterConfig)
+	if err != nil {
+		panic(fmt.Sprintf("can't parse config for cluster '%s'", cluster.Metadata.Name))
+	}
+	result := struct {
+		Namespace string
+	}{
+		Namespace: clusterConfig.Namespace,
 	}
 	return result
 }

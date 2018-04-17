@@ -1,12 +1,11 @@
 - kind: rule
   metadata:
     namespace: system
-    name: prod_goes_to_us_east
+    name: platform_services_deployment_rule
   weight: 1000
   criteria:
     require-all:
-      - org == 'it' && is_operator
-      - in(service.Labels.type, 'analytics', 'dev-apps')
+      - service.Namespace == 'platform'
   actions:
     change-labels:
       set:
@@ -15,12 +14,26 @@
 - kind: rule
   metadata:
     namespace: system
-    name: stage_goes_to_us_west
+    name: realtime_services_deployment_rule
   weight: 2000
   criteria:
     require-all:
-      - org == 'dev'
-      - in(service.Labels.type, 'analytics', 'dev-apps')
+      - service.Namespace == 'social'
+      - service_realtime
+  actions:
+    change-labels:
+      set:
+        cluster: cluster-us-east
+
+- kind: rule
+  metadata:
+    namespace: system
+    name: fake_services_deployment_rule
+  weight: 3000
+  criteria:
+    require-all:
+      - service.Namespace == 'social'
+      - service_fake
   actions:
     change-labels:
       set:
@@ -30,7 +43,7 @@
   metadata:
     namespace: system
     name: reject_dependency_for_mobile_dev_users
-  weight: 3000
+  weight: 4000
   criteria:
     require-all:
       - team == 'mobile-dev'
