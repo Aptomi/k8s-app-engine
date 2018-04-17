@@ -31,7 +31,7 @@
             deployChart: false
             addresses:
               kafka: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
-            topic: "tweepub-{{ .Discovery.service.instanceId }}"
+            topic: "tweepub-{{ .Discovery.Service.InstanceId }}"
 
       dependencies:
         - analytics_pipeline
@@ -51,7 +51,7 @@
           kafka:
             addresses:
               kafka:  "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
-            topic: "tweepub-{{ .Discovery.service.instanceId }}"
+            topic: "tweepub-{{ .Discovery.Service.InstanceId }}"
 
           spark:
             deployChart: false
@@ -62,7 +62,7 @@
           hdfs:
             addresses:
               namenode: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
-            path: "/twitter-{{ .Discovery.service.instanceId }}/results"
+            path: "/twitter-{{ .Discovery.Service.InstanceId }}/results"
       dependencies:
         - analytics_pipeline
 
@@ -81,12 +81,12 @@
 
           topListSize: 10
 
-          header: "Twitter Stats {{ .User.Name }} ({{ .Discovery.instance }})"
+          header: "Twitter Stats {{ .User.Name }} ({{ .Discovery.Instance }})"
 
           hdfs:
             addresses:
               namenode: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
-            path: "/twitter-{{ .Discovery.service.instanceId }}"
+            path: "/twitter-{{ .Discovery.Service.InstanceId }}"
 
       dependencies:
         - analytics_pipeline

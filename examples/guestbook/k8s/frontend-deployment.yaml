@@ -1,20 +1,20 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: "guestbook-frontend-{{ .Discovery.service.instanceId }}"
+  name: "guestbook-frontend-{{ .Discovery.Service.InstanceId }}"
 spec:
   selector:
     matchLabels:
       app: guestbook
       tier: frontend
-      instance: "{{ .Discovery.service.instanceId }}"
+      instance: "{{ .Discovery.Service.InstanceId }}"
   replicas: 3
   template:
     metadata:
       labels:
         app: guestbook
         tier: frontend
-        instance: "{{ .Discovery.service.instanceId }}"
+        instance: "{{ .Discovery.Service.InstanceId }}"
     spec:
       containers:
       - name: php-redis
@@ -27,8 +27,8 @@ spec:
         - name: GET_HOSTS_FROM
           value: env
         - name: REDIS_MASTER_SERVICE_HOST
-          value: "redis-master-{{ .Discovery.service.instanceId }}"
+          value: "redis-master-{{ .Discovery.Service.InstanceId }}"
         - name: REDIS_SLAVE_SERVICE_HOST
-          value: "redis-slave-{{ .Discovery.service.instanceId }}"
+          value: "redis-slave-{{ .Discovery.Service.InstanceId }}"
         ports:
         - containerPort: 80

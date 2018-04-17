@@ -153,24 +153,20 @@ func (node *resolutionNode) proxyDiscovery(discoveryTree util.NestedParameterMap
 	result := discoveryTree.MakeCopy()
 
 	// special case to announce own component instance
-	result["instance"] = util.EscapeName(cik.GetDeployName())
+	result["Instance"] = util.EscapeName(cik.GetDeployName())
 
 	// special case to announce own component ID
-	result["instanceId"] = util.HashFnv(cik.GetKey())
+	result["InstanceId"] = util.HashFnv(cik.GetKey())
 
 	// expose parent service information as well
 	if cik.IsComponent() {
-		// Get service key
 		serviceCik := cik.GetParentServiceKey()
-
-		// create a bucket for service
-		result["service"] = util.NestedParameterMap{}
-
-		// special case to announce own component instance
-		result.GetNestedMap("service")["instance"] = util.EscapeName(serviceCik.GetDeployName())
-
-		// special case to announce own component ID
-		result.GetNestedMap("service")["instanceId"] = util.HashFnv(serviceCik.GetKey())
+		result["Service"] = util.NestedParameterMap{
+			// announce instance of the enclosing service
+			"Instance": util.EscapeName(serviceCik.GetDeployName()),
+			// announce instance of the enclosing service instance ID
+			"InstanceId": util.HashFnv(serviceCik.GetKey()),
+		}
 	}
 
 	return result

@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "guestbook-frontend-{{ .Discovery.service.instanceId }}"
+  name: "guestbook-frontend-{{ .Discovery.Service.InstanceId }}"
   labels:
     app: guestbook
     tier: frontend
-    instance: "{{ .Discovery.service.instanceId }}"
+    instance: "{{ .Discovery.Service.InstanceId }}"
 spec:
   # comment or delete the following line if you want to use a LoadBalancer
   type: NodePort 
@@ -18,4 +18,4 @@ spec:
   selector:
     app: guestbook
     tier: frontend
-    instance: "{{ .Discovery.service.instanceId }}"
+    instance: "{{ .Discovery.Service.InstanceId }}"

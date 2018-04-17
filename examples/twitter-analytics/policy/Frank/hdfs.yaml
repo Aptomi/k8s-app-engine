@@ -8,7 +8,7 @@
 
     - name: hdfs
       discovery:
-        url: "hdfs-namenode-{{ .Discovery.instance }}-0.hdfs-namenode-{{ .Discovery.instance }}.{{ .Cluster.Namespace }}:8020"
+        url: "hdfs-namenode-{{ .Discovery.Instance }}-0.hdfs-namenode-{{ .Discovery.Instance }}.{{ .Cluster.Namespace }}:8020"
       code:
         type: helm
         params:
