@@ -22,6 +22,8 @@ webui-vis-tmp/output.json
 
 examples/private
 clusters.yaml
+clusters-*.yaml
+clusters_*.yaml
 
 .idea
 
