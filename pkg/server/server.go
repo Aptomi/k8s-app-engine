@@ -175,7 +175,7 @@ func (server *Server) startHTTPServer() {
 	server.httpServer = &http.Server{
 		Handler:      handler,
 		Addr:         server.cfg.API.ListenAddr(),
-		WriteTimeout: 5 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 	}
 
