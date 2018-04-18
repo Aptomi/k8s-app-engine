@@ -1,11 +1,8 @@
 - kind: rule
   metadata:
-    namespace: system
+    namespace: platform
     name: platform_services_deployment_rule
   weight: 1000
-  criteria:
-    require-all:
-      - service.Namespace == 'platform'
   actions:
     change-labels:
       set:
@@ -13,12 +10,11 @@
 
 - kind: rule
   metadata:
-    namespace: system
+    namespace: social
     name: realtime_services_deployment_rule
-  weight: 2000
+  weight: 1000
   criteria:
     require-all:
-      - service.Namespace == 'social'
       - message_stream == 'realtime'
   actions:
     change-labels:
@@ -27,12 +23,11 @@
 
 - kind: rule
   metadata:
-    namespace: system
+    namespace: social
     name: dev_services_deployment_rule
-  weight: 3000
+  weight: 2000
   criteria:
     require-all:
-      - service.Namespace == 'social'
       - message_stream != 'realtime'
   actions:
     change-labels:
@@ -43,7 +38,7 @@
   metadata:
     namespace: system
     name: reject_dependency_for_mobile_dev_users
-  weight: 4000
+  weight: 1000
   criteria:
     require-all:
       - team == 'mobile-dev'
