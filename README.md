@@ -99,6 +99,7 @@ Once the Aptomi server is up and your k8s cluster is ready, you can get started 
 Example    | Description
 -----------|------------
 [twitter-analytics](examples/twitter-analytics) | Twitter Analytics Application, multiple services, multi-cloud, based on Helm
+[twitter-analytics-with-concourse-ci](examples/twitter-analytics-with-concourse-ci) | Twitter Analytics Application, integrated with Concourse CI/CD pipelines
 [guestbook](examples/guestbook) | K8S Guestbook Application, multi-cloud, based on K8S YAMLs
 
 ### Step #4: Send us a note on Slack

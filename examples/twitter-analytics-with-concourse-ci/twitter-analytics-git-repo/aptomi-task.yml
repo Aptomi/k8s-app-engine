@@ -1,0 +1,12 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: aptomi/aptomictl}
+
+inputs:
+- name: repo
+
+run:
+  path: repo/aptomi-task.sh

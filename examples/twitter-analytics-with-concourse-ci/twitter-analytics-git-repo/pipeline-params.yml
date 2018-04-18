@@ -1,0 +1,2 @@
+dev-policy: policy/alice-dev-ts.yaml
+prod-policy: policy/john-prod-ts.yaml
