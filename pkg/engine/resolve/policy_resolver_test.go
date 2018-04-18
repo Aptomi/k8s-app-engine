@@ -215,7 +215,7 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	service := b.AddService()
 	component1 := b.CodeComponent(
 		nil,
-		util.NestedParameterMap{"url": "component1-{{ .Discovery.instance }}"},
+		util.NestedParameterMap{"url": "component1-{{ .Discovery.Instance }}"},
 	)
 	component2 := b.CodeComponent(
 		util.NestedParameterMap{
@@ -231,7 +231,7 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 				},
 			},
 		},
-		util.NestedParameterMap{"url": "component2-{{ .Discovery.instance }}"},
+		util.NestedParameterMap{"url": "component2-{{ .Discovery.Instance }}"},
 	)
 	b.AddServiceComponent(service, component1)
 	b.AddServiceComponent(service, component2)

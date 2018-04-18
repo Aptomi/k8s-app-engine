@@ -175,8 +175,12 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 			Namespace: runtime.SystemNS,
 			Name:      util.RandomID(builder.random, idLength),
 		},
-		Type:   "kubernetes",
-		Config: "something",
+		Type: "kubernetes",
+		Config: struct {
+			Namespace string
+		}{
+			Namespace: "default",
+		},
 	}
 	builder.addObject(builder.domainAdminView, result)
 	return result

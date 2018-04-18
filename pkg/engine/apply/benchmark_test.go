@@ -332,8 +332,12 @@ func (gen *PolicyGenerator) makeCluster() {
 			Namespace: "system",
 			Name:      "cluster-test",
 		},
-		Type:   "kubernetes",
-		Config: "something",
+		Type: "kubernetes",
+		Config: struct {
+			Namespace string
+		}{
+			Namespace: "default",
+		},
 	}
 	gen.addObject(cluster)
 }
