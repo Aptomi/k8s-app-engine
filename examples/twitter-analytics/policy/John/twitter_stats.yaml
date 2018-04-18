@@ -15,11 +15,11 @@
         type: helm
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
-          chartName: "{{ .Labels.chart_name }}"
+          chartName: "{{ if eq .Labels.message_stream \"realtime\" }}tweepub{{ else }}tweepub-fake{{ end }}"
 
           # Pass labels to publisher application
           twitter:
-            baseWord: "{{ default .Labels.base_word }}"
+            baseWord: "{{ default .Labels.message_stream }}"
             appKey: "{{ default .Labels.appKey }}"
             appSecret: "{{ default .Labels.appSecret }}"
             tokenKey: "{{ default .Labels.tokenKey }}"
@@ -98,28 +98,29 @@
     name: twitter_stats
 
   contexts:
-    # Twitter Stats implementation which receives twitter messages from Twitter Streaming API
+    # Twitter Stats 'realtime' implementation:
+    # - receives messages from Twitter Streaming API
+    # - picked when condition org == 'it' is met
     - name: realtime
       criteria:
         require-all:
-          - org == 'it' && is_operator
+          - org == 'it'
       change-labels:
         set:
-          service_realtime: true
-          chart_name: tweepub
+          message_stream: 'realtime'
       allocation:
         service: twitter_stats
 
-    # Twitter Stats implementation which generates a constant stream of fake twitter messages
-    - name: fake
+    # Twitter Stats 'dev' implementation:
+    # - generates a constant stream of test messages (without connecting to Twitter Streaming API)
+    # - picked when condition org == 'dev'
+    - name: dev
       criteria:
         require-all:
           - org == 'dev'
       change-labels:
         set:
-          service_fake: true
-          chart_name: tweepub-fake
-          base_word: "development"
+          message_stream: 'development'
       allocation:
         service: twitter_stats
         keys:

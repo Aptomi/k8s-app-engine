@@ -19,7 +19,7 @@
   criteria:
     require-all:
       - service.Namespace == 'social'
-      - service_realtime
+      - message_stream == 'realtime'
   actions:
     change-labels:
       set:
@@ -28,12 +28,12 @@
 - kind: rule
   metadata:
     namespace: system
-    name: fake_services_deployment_rule
+    name: dev_services_deployment_rule
   weight: 3000
   criteria:
     require-all:
       - service.Namespace == 'social'
-      - service_fake
+      - message_stream != 'realtime'
   actions:
     change-labels:
       set:
