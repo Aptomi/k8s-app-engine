@@ -31,7 +31,7 @@ type Rule struct {
 
 	// Criteria - if it gets evaluated to true during policy resolution, then rules's actions will be executed.
 	// It's an optional field, so if it's nil then it is considered to be evaluated to true automatically
-	Criteria *Criteria `validate:"omitempty"`
+	Criteria *Criteria `yaml:",omitempty" validate:"omitempty"`
 
 	// Actions define the set of actions that will be executed if Criteria gets evaluated to true
 	Actions *RuleActions `validate:"required"`

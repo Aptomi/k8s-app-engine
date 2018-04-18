@@ -66,10 +66,16 @@
                   {{d.weight}}
                 </td>
                 <td>
-                  <div v-for="(cList, cType) in d.criteria" >
-                    <div v-for="c in cList">
-                      <span class="label" v-bind:class="{ 'label-success': cType === 'require-all', 'label-info': cType === 'require-any', 'label-danger': cType === 'require-none'}">{{cType}}</span>
-                      <span>{{ c }}</span>
+                  <div v-if="d.criteria == null || d.criteria.length <= 0">
+                    <span class="label label-success">require-all</span>
+                    <span>true</span>
+                  </div>
+                  <div v-else>
+                    <div v-for="(cList, cType) in d.criteria" >
+                      <div v-for="c in cList">
+                        <span class="label" v-bind:class="{ 'label-success': cType === 'require-all', 'label-info': cType === 'require-any', 'label-danger': cType === 'require-none'}">{{cType}}</span>
+                        <span>{{ c }}</span>
+                      </div>
                     </div>
                   </div>
                 </td>
