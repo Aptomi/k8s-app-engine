@@ -1,31 +1,34 @@
 # Description
 
-In this example there are 2 key services:
+In this example there are two key services:
 * `analytics_pipeline` - A data analytics service which consists of Kafka, Spark, HDFS, and Zookeeper.
 * `twitter_stats` -  A Twitter data processing service, which gets messages from Twitter in real time, calculates top hashtag statistics using an external `analytics_pipeline` service,
    and displays results on a web page.
 
-These services are offered in two different contexts/flavors:
-* *stage*: intended for development and testing. A single instance of `analytics_pipeline` gets shared between all consumers. `twitter_stats` uses a mock implementation, which generates a stream of random Twitter messages.
-* *production*: intended for production use. `analytics_pipeline` has better availability and performance. `twitter_stats` receives messages from Twitter in real time.
-
+Deployment of those services are managed by Aptomi as follows:
+* `analytics_pipeline` is a platform service, which gets deployed in ** as a single instance and gets shared by other services
+* `twitter_stats` in offered in *realtime* and *dev* contexts
+  * *realtime* is used in production deployments, configured to receive messages via Twitter Streaming API
+  * *dev* is used for testing, configured to use mock backend which generates a constant stream of pre-defined messages  
+   
 ![Diagram](diagram.png)
 
 These services have different owners, who can fully control how their services get offered and shared:
 
-User  | Role |
+User  | Role
 ------|-------
 Sam   | Domain admin for Aptomi
-Frank | Owner of `analytics_pipeline`
-John  | Owner of `twitter_stats`
-Alice, Bob, Carol | Users and code contributors to `twitter_stats`
+Frank | Owner of `analytics_pipeline` service and its deployments
+John  | Owner of `twitter_stats` service and its deployments
+Alice, Bob, Carol | Developers and users of `twitter_stats`
 
 This example illustrates a few important things that Aptomi does:
 
-1. **Run multi-component apps across several environments**
-    * Define an application and its contexts/flavors
-    * Components get lazily instantiated based on the service/component graph
-    * Update components of an application after you deploy without affecting dependent services
+1. **Manage deployments of multi-component apps as code**
+    * Define an application and its contexts
+    * Run them across multiple environments and clusters
+    * Update specific parts/components of an application after you deploy
+    * Automatically know impact of changes based on the service graph
 1. **Service ownership & reuse**
     - Owners define how their services get offered & shared with others
     - Consumers can be directed to use the same service instance
@@ -37,22 +40,25 @@ This example illustrates a few important things that Aptomi does:
 1. Upload user roles and rules into Aptomi using the CLI, then import the `analytics_pipeline` and `twitter_stats` services:
     ```
     aptomictl login -u sam -p sam
-    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/Sam
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/rules_clusters
+    
     aptomictl login -u frank -p frank
-    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/Frank
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/analytics_pipeline
+    
     aptomictl login -u john -p john
-    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/John
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/twitter_stats
     ```
 
 1. At this point, all service definitions have been published to Aptomi, but nothing has been instantiated yet. You can see
 this in the Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/browse)
 
-1. Start two staging instances of `twitter-stats`, wait until they are up:
+1. Start dev instances of `twitter-stats`, wait until they are up:
     ```
     aptomictl login -u alice -p alice
-    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-dev-ts.yaml
+    
     aptomictl login -u bob -p bob
-    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-dev-ts.yaml
     ```
 
     To check your deployment progress, run `kubectl get pods` and wait for "1/1" status for all created pods:
@@ -78,22 +84,25 @@ this in the Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/bro
     watch -n1 -d -- kubectl -n east get pods
     ```
 
-    **Important note**: you will need to take an extra step in order to get the *production* environment fully up and running. Right now `tweepub` and `tweeviz` health checks will be showing "0/1" - this
+    **Important note**: you will need to take an extra step in order to get the *prod* environment fully up and running. Right now `tweepub` and `tweeviz` health checks will be showing "0/1" - this
     is expected, as they can't use the Twitter Streaming API until tokens have been configured. Once you set up tokens in Twitter and pass them
     to Aptomi, those services will start successfully. See the next section on how to configure Twitter keys and pass them to Aptomi.
 
 1. At this point you can see that:
-    * Aptomi applied the defined [rules](policy/Sam/rules.yaml) and allocated *stage* in `cluster-us-west` and *production* in `cluster-us-east`
+    * Aptomi applied the defined [rules](policy/rules_clusters/rules.yaml) and allocated
+        * *analytics_pipeline* in `cluster-us-east`
+        * *dev* instances of `twitter-stats` in `cluster-us-west`
+        * *prod* instances of `twitter-stats` in `cluster-us-east`
 
-    * Aptomi dictated that `analytics pipeline` will be shared in staging by both Alice and Bob. See [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State
+    * Aptomi enforced that `analytics pipeline` will be shared by all consumers. See [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State
 
-    * Service endpoints are available under [Instances](http://localhost:27866/#/policy/dependencies) in Aptomi UI
-        * `tweeviz` available in *stage* over HTTP with fake Twitter data source
+    * Service endpoints are available under [Dependencies](http://localhost:27866/#/objects/dependencies) in Aptomi UI
+        * `tweeviz` available in *alice_dev* and *bob_dev* over HTTP with fake Twitter data source
         * `tweeviz` available in *prod* over HTTP with real-time Twitter data (assuming you have followed the step to configure Twitter tokens)
 
 # Advanced: Enabling Streaming Data from Twitter
 
-If you want a truly fully functional demo, you can actually inject Twitter App Tokens into the *production* instance of `twitter_stats`, so it can start pulling data from the Twitter Streaming API!
+If you want a truly fully functional demo, you can actually inject Twitter App Tokens into the *prod* instance of `twitter_stats`, so it can start pulling data from the Twitter Streaming API!
 
 First, create an application in the [Twitter Application Management Console](https://apps.twitter.com) ![Twitter App Create](twitter-app-create.png)
 
@@ -115,9 +124,9 @@ Now, if you open the HTTP endpoint for the *production* instance of `tweeviz`, y
 To delete all deployed instances of `twitter_stats` and `analytics_pipeline`, you must delete the corresponding dependencies which triggered their instantiation. Aptomi will handle the rest:
 ```
 aptomictl login -u alice -p alice
-aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-stage-ts.yaml
+aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-dev-ts.yaml
 aptomictl login -u bob -p bob
-aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-stage-ts.yaml
+aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/bob-dev-ts.yaml
 aptomictl login -u john -p john
 aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/john-prod-ts.yaml
 ```
