@@ -26,7 +26,7 @@ POLICY_DIR_TMP=$(mktemp -d)
 
 # copy policy over, create clusters from templates
 cp -R examples/twitter-analytics/* $POLICY_DIR
-cp ${POLICY_DIR}/policy/Sam/clusters.{yaml.template,yaml}
+cp ${POLICY_DIR}/policy/rules_clusters/clusters.{yaml.template,yaml}
 
 function cleanup() {
     stop_server
@@ -133,19 +133,18 @@ function check_policy_version() {
 
 WAIT_FLAGS="--wait --wait-attempts 20"
 
-# apply full policy (w/o Carol)
 check_policy_version 1
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules_clusters
 check_policy_version 2
 
 login frank
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/analytics_pipeline
 check_policy_version 3
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/twitter_stats
 check_policy_version 4
 
 login john
@@ -153,18 +152,18 @@ aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/polic
 check_policy_version 5
 
 login alice
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-dev-ts.yaml
 check_policy_version 6
 
 login bob
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-dev-ts.yaml
 check_policy_version 7
 
 check_policy 3 ".Objects.social.dependency | length"
 
 # delete Alice's dependency
 login alice
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-dev-ts.yaml
 check_policy_version 8
 check_policy 2 ".Objects.social.dependency | length"
 
@@ -176,7 +175,7 @@ check_policy_version 9
 
 # apply Carol's dependency
 login carol
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/carol-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/carol-dev-ts.yaml
 check_policy_version 10
 check_policy 3 ".Objects.social.dependency | length"
 
@@ -202,15 +201,15 @@ check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Sam
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules_clusters
 check_policy_version 13
 
 login frank
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/Frank
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/analytics_pipeline
 check_policy_version 14
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/John
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/twitter_stats
 check_policy_version 15
 
 login john
@@ -218,11 +217,11 @@ aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/polic
 check_policy_version 16
 
 login alice
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-dev-ts.yaml
 check_policy_version 17
 
 login bob
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-stage-ts.yaml
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-dev-ts.yaml
 check_policy_version 18
 
 check_policy 5 ".Objects.platform.contract | length"

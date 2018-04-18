@@ -1,7 +1,7 @@
 - kind: dependency
   metadata:
     namespace: social
-    name: bob_stage
+    name: bob_dev
   user: Bob
   contract: twitter_stats
   labels:
