@@ -26,7 +26,7 @@ POLICY_DIR_TMP=$(mktemp -d)
 
 # copy policy over, create clusters from templates
 cp -R examples/twitter-analytics/* $POLICY_DIR
-cp ${POLICY_DIR}/policy/rules_clusters/clusters.{yaml.template,yaml}
+cp ${POLICY_DIR}/policy/clusters/clusters.{yaml.template,yaml}
 
 function cleanup() {
     stop_server
@@ -136,7 +136,7 @@ WAIT_FLAGS="--wait --wait-attempts 20"
 check_policy_version 1
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules_clusters
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters
 check_policy_version 2
 
 login frank
@@ -201,7 +201,7 @@ check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules_clusters
+aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters
 check_policy_version 13
 
 login frank

@@ -40,7 +40,7 @@ This example illustrates a few important things that Aptomi does:
 1. Upload user roles and rules into Aptomi using the CLI, then import the `analytics_pipeline` and `twitter_stats` services:
     ```
     aptomictl login -u sam -p sam
-    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/rules_clusters
+    aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/rules
     
     aptomictl login -u frank -p frank
     aptomictl policy apply --wait -f ~/.aptomi/examples/twitter-analytics/policy/analytics_pipeline
@@ -89,7 +89,7 @@ this in the Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/bro
     to Aptomi, those services will start successfully. See the next section on how to configure Twitter keys and pass them to Aptomi.
 
 1. At this point you can see that:
-    * Aptomi applied the defined [rules](policy/rules_clusters/rules.yaml) and allocated
+    * Aptomi applied the defined [rules](policy/rules/rules.yaml) and allocated
         * *analytics_pipeline* in `cluster-us-east`
         * *dev* instances of `twitter-stats` in `cluster-us-west`
         * *prod* instances of `twitter-stats` in `cluster-us-east`
