@@ -31,7 +31,7 @@
           <table class="table table-hover">
             <tbody>
               <tr>
-                <td>No Dependencies Defined</td>
+                <td>No Instances Defined</td>
               </tr>
             </tbody>
           </table>
@@ -44,7 +44,7 @@
       <div class="col-xs-12">
         <div class="box">
           <div class="box-header">
-            <h3 class="box-title">Dependencies: <b>{{ ns }}</b></h3>
+            <h3 class="box-title">Instances: <b>{{ ns }}</b></h3>
           </div>
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">

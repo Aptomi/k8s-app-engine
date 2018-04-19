@@ -28,7 +28,7 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Dependencies',
+        name: 'Instances',
         router: {
           name: 'ShowDependencies'
         }
@@ -60,7 +60,7 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Catalog',
+        name: 'All Objects',
         router: {
           name: 'ShowCatalog'
         }
