@@ -1,0 +1,54 @@
+---
+jobs:
+- name: deploy-dev
+  public: true
+  plan:
+  - get: gitrepo
+    trigger: false
+  - task: deploy-dev
+    file: gitrepo/aptomi-task.yml
+    input_mapping:
+      repo: gitrepo
+    params:
+      ACTION: apply
+      FILEPATH: repo/((dev-policy))
+
+- name: run-tests
+  public: true
+  plan:
+  - get: gitrepo
+    trigger: false
+    passed:
+      - deploy-dev
+  - task: run-tests
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: busybox}
+      run:
+        path: echo
+        args:
+        - Tests Passed!
+
+- name: destroy-dev
+  public: true
+  plan:
+  - get: gitrepo
+    trigger: false
+    passed:
+      - run-tests
+  - task: destroy-dev
+    file: gitrepo/aptomi-task.yml
+    input_mapping:
+      repo: gitrepo
+    params:
+      ACTION: delete
+      FILEPATH: repo/((dev-policy))
+
+resources:
+- name: gitrepo
+  type: git
+  source:
+    uri: ((repo))
+

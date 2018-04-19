@@ -1,0 +1,21 @@
+---
+jobs:
+- name: update-prod
+  public: true
+  plan:
+  - get: gitrepo
+    trigger: false
+  - task: update-prod
+    file: gitrepo/aptomi-task.yml
+    input_mapping:
+      repo: gitrepo
+    params:
+      ACTION: apply
+      FILEPATH: repo/((prod-policy))
+
+resources:
+- name: gitrepo
+  type: git
+  source:
+    uri: ((repo))
+
