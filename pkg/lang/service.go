@@ -49,7 +49,7 @@ type ServiceComponent struct {
 
 	// Criteria - if it gets evaluated to true during policy resolution, then component will be included
 	// into the service. It's an optional field, so if it's nil then it is considered to be true automatically
-	Criteria *Criteria `validate:"omitempty"`
+	Criteria *Criteria `yaml:",omitempty" validate:"omitempty"`
 
 	// Contract, if not empty, denoted that the component points to another contract as a dependency. Meaning that
 	// a service needs to have another service running as its dependency (e.g. 'wordpress' service needs a 'database'
