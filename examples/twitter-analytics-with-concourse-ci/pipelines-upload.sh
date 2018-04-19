@@ -15,5 +15,11 @@ set -x
 fly -t tutorial login
 fly -t tutorial sync
 
-fly -t tutorial set-pipeline -n -c twitter-analytics-git-repo/pipeline-dev-to-prod.yml -l twitter-analytics-git-repo/pipeline-params.yml -v repo=$REPO_URI -p dev-to-prod
-fly -t tutorial unpause-pipeline -p dev-to-prod
+fly -t tutorial set-pipeline -n -c twitter-analytics-git-repo/pipeline-dev-test-changes.yml -l twitter-analytics-git-repo/pipeline-params.yml -v repo=$REPO_URI -p dev-test-changes
+fly -t tutorial unpause-pipeline -p dev-test-changes
+
+fly -t tutorial set-pipeline -n -c twitter-analytics-git-repo/pipeline-apply-rules.yml -l twitter-analytics-git-repo/pipeline-params.yml -v repo=$REPO_URI -p apply-rules
+fly -t tutorial unpause-pipeline -p apply-rules
+
+fly -t tutorial set-pipeline -n -c twitter-analytics-git-repo/pipeline-update-prod.yml -l twitter-analytics-git-repo/pipeline-params.yml -v repo=$REPO_URI -p update-prod
+fly -t tutorial unpause-pipeline -p update-prod
