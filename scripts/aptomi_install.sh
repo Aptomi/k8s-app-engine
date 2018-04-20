@@ -499,9 +499,9 @@ function upload_example() {
     example_run_line "frank" "twitter-analytics/policy/analytics_pipeline"
     example_run_line "john" "twitter-analytics/policy/twitter_stats"
     example_run_line "john" "twitter-analytics/policy/john-prod-ts.yaml"
-    example_run_line "alice" "twitter-analytics/policy/alice-stage-ts.yaml"
-    example_run_line "bob" "twitter-analytics/policy/bob-stage-ts.yaml"
-    example_run_line "carol" "twitter-analytics/policy/carol-stage-ts.yaml"
+    example_run_line "alice" "twitter-analytics/policy/alice-dev-ts.yaml"
+    example_run_line "bob" "twitter-analytics/policy/bob-dev-ts.yaml"
+    example_run_line "carol" "twitter-analytics/policy/carol-dev-ts.yaml"
 }
 
 function help() {
