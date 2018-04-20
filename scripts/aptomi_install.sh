@@ -494,10 +494,10 @@ function example_run_line() {
 
 function upload_example() {
     log_sub "Uploading example"
-    example_run_line "sam" "twitter-analytics/policy/Sam"
-    example_run_line "sam" "twitter-analytics/policy/Sam/clusters.yaml.template"
-    example_run_line "frank" "twitter-analytics/policy/Frank"
-    example_run_line "john" "twitter-analytics/policy/John"
+    example_run_line "sam" "twitter-analytics/policy/rules"
+    example_run_line "sam" "twitter-analytics/policy/clusters/clusters.yaml.template"
+    example_run_line "frank" "twitter-analytics/policy/analytics_pipeline"
+    example_run_line "john" "twitter-analytics/policy/twitter_stats"
     example_run_line "john" "twitter-analytics/policy/john-prod-ts.yaml"
     example_run_line "alice" "twitter-analytics/policy/alice-stage-ts.yaml"
     example_run_line "bob" "twitter-analytics/policy/bob-stage-ts.yaml"
