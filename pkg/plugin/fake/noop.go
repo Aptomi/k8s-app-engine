@@ -40,12 +40,10 @@ func NewNoOpPostProcessPlugin(sleepTime time.Duration) plugin.PostProcessPlugin 
 }
 
 func (plugin *noOpPlugin) Validate() error {
-	time.Sleep(plugin.sleepTime)
 	return nil
 }
 
 func (plugin *noOpPlugin) Cleanup() error {
-	time.Sleep(plugin.sleepTime)
 	return nil
 }
 
@@ -74,6 +72,5 @@ func (plugin *noOpPlugin) Resources(deployName string, params util.NestedParamet
 }
 
 func (plugin *noOpPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
-	time.Sleep(plugin.sleepTime)
 	return nil
 }
