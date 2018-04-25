@@ -29,6 +29,7 @@ var (
 type contextKey string
 
 var policyKey = contextKey("policy")
+var errorsKey = contextKey("errors")
 
 func (c contextKey) String() string {
 	return "lang context key " + string(c)
@@ -60,16 +61,16 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 	result := validator.New()
 
 	// independent validators
-	_ = result.RegisterValidation("identifier", validateIdentifier)
-	_ = result.RegisterValidation("clustertype", validateClusterType)
-	_ = result.RegisterValidation("codetype", validateCodeType)
-	_ = result.RegisterValidation("expression", validateExpression)
-	_ = result.RegisterValidation("template", validateTemplate)
-	_ = result.RegisterValidation("templateNestedMap", validateTemplateNestedMap)
-	_ = result.RegisterValidation("labels", validateLabels)
-	_ = result.RegisterValidation("labelOperations", validateLabelOperations)
-	_ = result.RegisterValidation("allowReject", validateAllowRejectAction)
-	_ = result.RegisterValidation("addRoleNS", validateACLRoleActionMap)
+	_ = result.RegisterValidationCtx("identifier", validateIdentifier)
+	_ = result.RegisterValidationCtx("clustertype", validateClusterType)
+	_ = result.RegisterValidationCtx("codetype", validateCodeType)
+	_ = result.RegisterValidationCtx("expression", validateExpression)
+	_ = result.RegisterValidationCtx("template", validateTemplate)
+	_ = result.RegisterValidationCtx("templateNestedMap", validateTemplateNestedMap)
+	_ = result.RegisterValidationCtx("labels", validateLabels)
+	_ = result.RegisterValidationCtx("labelOperations", validateLabelOperations)
+	_ = result.RegisterValidationCtx("allowReject", validateAllowRejectAction)
+	_ = result.RegisterValidationCtx("addRoleNS", validateACLRoleActionMap)
 
 	// validators with context containing policy
 	result.RegisterStructValidation(validateRule, Rule{})
@@ -80,6 +81,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 
 	// context
 	ctx := context.WithValue(context.Background(), policyKey, policy)
+	ctx = context.WithValue(ctx, errorsKey, &policyValidationError{})
 
 	// default translations
 	eng := english.New()
@@ -95,75 +97,73 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 		tag         string
 		translation string
 	}{
-		// static
-		{
-			tag:         "identifier",
-			translation: fmt.Sprintf("{0} must be a valid identifier, but found '{1}'"),
-		},
 		{
 			tag:         "clustertype",
-			translation: fmt.Sprintf("{0} must be in %s, but found '{1}'", clusterTypes),
+			translation: fmt.Sprintf("'{0}' is not valid, must be in %s", clusterTypes),
 		},
 		{
 			tag:         "codetype",
-			translation: fmt.Sprintf("{0} must be in %s, but found '{1}'", codeTypes),
-		},
-		{
-			tag:         "expression",
-			translation: fmt.Sprintf("{0} must be a valid expression, but found '{1}'"),
-		},
-		{
-			tag:         "template",
-			translation: fmt.Sprintf("{0} must be a valid text template, but found '{1}'"),
-		},
-		{
-			tag:         "templateNestedMap",
-			translation: fmt.Sprintf("{0} must be a valid text template map (all nested text templates must be valid)"),
-		},
-		{
-			tag:         "labels",
-			translation: fmt.Sprintf("{0} must be a valid label map (all label names must be valid)"),
-		},
-		{
-			tag:         "labelOperations",
-			translation: fmt.Sprintf("{0} must be a valid label operations map (keys must be in %s, all label names must be valid)", labelOpsKeys),
+			translation: fmt.Sprintf("'{0}' is not valid, must be in %s", codeTypes),
 		},
 		{
 			tag:         "allowReject",
-			translation: fmt.Sprintf("{0} must be in %s, but found '{1}'", allowReject),
-		},
-		{
-			tag:         "addRoleNS",
-			translation: fmt.Sprintf("{0} must be a valid role assignment map (key must be in %s, namespace list must be comma-separated identifiers/wildcards)", util.GetSortedStringKeys(ACLRolesMap)),
-		},
-		// dynamic/custom
-		{
-			tag:         "exists",
-			translation: fmt.Sprintf("object does not exist"),
-		},
-		{
-			tag:         "single",
-			translation: fmt.Sprintf("only a single value is allowed"),
-		},
-		{
-			tag:         "unique",
-			translation: fmt.Sprintf("must be unique, but it is not"),
-		},
-		{
-			tag:         "noComponentCycle",
-			translation: fmt.Sprintf("circular dependency detected in components"),
-		},
-		{
-			tag:         "ruleActions",
-			translation: fmt.Sprintf("{0} must have at least one action defined"),
-		},
-		{
-			tag:         "aclRuleActions",
-			translation: fmt.Sprintf("{0} is a required field for ACL rule. Must specify role assignment map"),
+			translation: fmt.Sprintf("'{0}' is not valid, must be in %s", allowReject),
 		},
 		{
 			tag:         "systemNS",
-			translation: fmt.Sprintf("{0} must be '%s', but found '{1}'", runtime.SystemNS),
+			translation: fmt.Sprintf("'{0}' is not valid, must always be '%s'", runtime.SystemNS),
+		},
+		{
+			tag:         "identifier",
+			translation: fmt.Sprintf("'{0}' is not a valid identifier"),
+		},
+		{
+			tag:         "expression",
+			translation: fmt.Sprintf("'{0}' is not a valid expression"),
+		},
+		{
+			tag:         "template",
+			translation: fmt.Sprintf("'{0}' is not a valid text template"),
+		},
+		{
+			tag:         "templateNestedMap",
+			translation: fmt.Sprintf("is not a valid text template map (one or more nested text templates is invalid)"),
+		},
+		{
+			tag:         "labels",
+			translation: fmt.Sprintf("is not a valid label map (one or more nested label names is invalid)"),
+		},
+		{
+			tag:         "labelOperations",
+			translation: fmt.Sprintf("is not a valid label operations map (keys must be in %s, all label names must be valid)", labelOpsKeys),
+		},
+		{
+			tag:         "addRoleNS",
+			translation: fmt.Sprintf("is not a valid role assignment map (key must be in %s, namespace list must be comma-separated identifiers/wildcards)", util.GetSortedStringKeys(ACLRolesMap)),
+		},
+		{
+			tag:         "exists",
+			translation: fmt.Sprintf("object '{0}' does not exist"),
+		},
+		{
+			tag:         "codeContractSingle",
+			translation: fmt.Sprintf("component '{0}' should either be code or contract"),
+		},
+		{
+			tag:         "unique",
+			translation: fmt.Sprintf("'{0}' is not unique"),
+		},
+		{
+			tag:         "topologicalSort",
+			translation: fmt.Sprintf("{0}"),
+		},
+		{
+			tag:         "ruleActions",
+			translation: fmt.Sprintf("is a required field (at least one action must be specified)"),
+		},
+		{
+			tag:         "aclRuleActions",
+			translation: fmt.Sprintf("is a required field (role assignment map must be specified)"),
 		},
 	}
 	for _, t := range translations {
@@ -191,7 +191,7 @@ func registrationFunc(tag string, translation string) validator.RegisterTranslat
 }
 
 func translateFunc(ut ut.Translator, fe validator.FieldError) string {
-	t, err := ut.T(fe.Tag(), fe.Field(), reflect.ValueOf(fe.Value()).String())
+	t, err := ut.T(fe.Tag(), reflect.ValueOf(fe.Value()).String(), fe.Param())
 	if err != nil {
 		return fe.(error).Error()
 	}
@@ -216,50 +216,76 @@ func (v *PolicyValidator) Validate() error {
 		result.addError(errStr)
 	}
 
+	// collect additional errors stored in context
+	for _, errStr := range v.ctx.Value(errorsKey).(*policyValidationError).errList {
+		result.addError(errStr)
+	}
+
 	return result
 }
 
+// adds validation error to the context
+func attachErrorToContext(ctx context.Context, level validator.FieldLevel, errMsg string) {
+	pve := ctx.Value(errorsKey).(*policyValidationError)
+	pve.errList = append(pve.errList, errMsg)
+}
+
+// checks in a given field is a string, and it has a valid value (one of the values from a given string array)
+func validateInStringArray(ctx context.Context, expectedValues []string, fl validator.FieldLevel) bool {
+	return util.ContainsString(expectedValues, fl.Field().String())
+}
+
 // checks if a given string is a valid allow/reject action type
-func validateAllowRejectAction(fl validator.FieldLevel) bool {
-	return util.ContainsString(allowReject, fl.Field().String())
+func validateAllowRejectAction(ctx context.Context, fl validator.FieldLevel) bool {
+	return validateInStringArray(ctx, allowReject, fl)
 }
 
 // checks if a given string is a valid cluster type
-func validateClusterType(fl validator.FieldLevel) bool {
-	return util.ContainsString(clusterTypes, fl.Field().String())
+func validateClusterType(ctx context.Context, fl validator.FieldLevel) bool {
+	return validateInStringArray(ctx, clusterTypes, fl)
 }
 
 // checks if a given string is a valid code type
-func validateCodeType(fl validator.FieldLevel) bool {
-	return util.ContainsString(codeTypes, fl.Field().String())
+func validateCodeType(ctx context.Context, fl validator.FieldLevel) bool {
+	return validateInStringArray(ctx, codeTypes, fl)
 }
 
 // checks if a given string is valid identifier
-func validateIdentifier(fl validator.FieldLevel) bool {
+func validateIdentifier(ctx context.Context, fl validator.FieldLevel) bool {
 	return isIdentifier(fl.Field().String())
 }
 
 // checks if a given string is valid expression
-func validateExpression(fl validator.FieldLevel) bool {
-	expr, err := expression.NewExpression(fl.Field().String())
-	return expr != nil && err == nil
+func validateExpression(ctx context.Context, fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	_, err := expression.NewExpression(value)
+	if err != nil {
+		attachErrorToContext(ctx, fl, err.Error())
+	}
+	return err == nil
 }
 
 // checks if a given string is valid template
-func validateTemplate(fl validator.FieldLevel) bool {
-	tmpl, err := template.NewTemplate(fl.Field().String())
-	return tmpl != nil && err == nil
+func validateTemplate(ctx context.Context, fl validator.FieldLevel) bool {
+	_, err := template.NewTemplate(fl.Field().String())
+	if err != nil {
+		attachErrorToContext(ctx, fl, err.Error())
+	}
+	return err == nil
 }
 
 // checks if a given nested map is a valid map of text templates (e.g. code parameters, discovery parameters, etc)
-func validateTemplateNestedMap(fl validator.FieldLevel) bool {
+func validateTemplateNestedMap(ctx context.Context, fl validator.FieldLevel) bool {
 	pMap := fl.Field().Interface().(util.NestedParameterMap)
 	_, err := util.ProcessParameterTree(pMap, nil, nil, util.ModeCompile)
+	if err != nil {
+		attachErrorToContext(ctx, fl, err.Error())
+	}
 	return err == nil
 }
 
 // checks if a given map is a valid map of label operations (contains only set/remove, and also label names are valid)
-func validateLabelOperations(fl validator.FieldLevel) bool {
+func validateLabelOperations(ctx context.Context, fl validator.FieldLevel) bool {
 	ops := fl.Field().Interface().(LabelOperations)
 	for opType, operations := range ops {
 		if !util.ContainsString(labelOpsKeys, opType) {
@@ -275,7 +301,7 @@ func validateLabelOperations(fl validator.FieldLevel) bool {
 }
 
 // checks if a given map is a valid map of setting ACL Role actions
-func validateACLRoleActionMap(fl validator.FieldLevel) bool {
+func validateACLRoleActionMap(ctx context.Context, fl validator.FieldLevel) bool {
 	addRoleMap := fl.Field().Interface().(map[string]string)
 	for roleID, namespaceList := range addRoleMap {
 		role := ACLRolesMap[roleID]
@@ -295,7 +321,7 @@ func validateACLRoleActionMap(fl validator.FieldLevel) bool {
 }
 
 // checks if a given map[string]string is a valid map of labels
-func validateLabels(fl validator.FieldLevel) bool {
+func validateLabels(ctx context.Context, fl validator.FieldLevel) bool {
 	names := fl.Field().MapKeys()
 	for _, name := range names {
 		if !isIdentifier(name.String()) {
@@ -320,7 +346,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 			cnt++
 		}
 		if cnt != 1 {
-			sl.ReportError(service, fmt.Sprintf("Component[%s].Code|Contract", component.Name), "", "single", "")
+			sl.ReportError(component.Name, fmt.Sprintf("Component[%s]", component.Name), "", "codeContractSingle", "")
 			return
 		}
 
@@ -328,7 +354,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 		if len(component.Contract) > 0 {
 			obj, err := policy.GetObject(ContractObject.Kind, component.Contract, service.Namespace)
 			if obj == nil || err != nil {
-				sl.ReportError(service, fmt.Sprintf("Component[%s].Contract[%s]", component.Name, component.Contract), "", "exists", "")
+				sl.ReportError(component.Contract, fmt.Sprintf("Component[%s].Contract[%s]", component.Name, component.Contract), "", "exists", "")
 				return
 			}
 		}
@@ -338,7 +364,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 	componentNames := make(map[string]bool)
 	for _, component := range service.Components {
 		if _, exists := componentNames[component.Name]; exists {
-			sl.ReportError(service, fmt.Sprintf("Component[%s].Name", component.Name), "", "unique", "")
+			sl.ReportError(component.Name, fmt.Sprintf("Component[%s].Name", component.Name), "", "unique", "")
 			return
 		}
 		componentNames[component.Name] = true
@@ -347,14 +373,14 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 	// components should not have cycles
 	_, err := service.GetComponentsSortedTopologically()
 	if err != nil {
-		sl.ReportError(service, "Components", "", "noComponentCycle", "")
+		sl.ReportError(err.Error(), "Components", "", "topologicalSort", "")
 	}
 
 	// dependencies should point to existing components
 	for _, component := range service.Components {
 		for _, dependencyName := range component.Dependencies {
 			if _, exists := componentNames[dependencyName]; !exists {
-				sl.ReportError(service, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, dependencyName), "", "exists", "")
+				sl.ReportError(dependencyName, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, dependencyName), "", "exists", "")
 				return
 			}
 		}
@@ -369,7 +395,7 @@ func validateDependency(ctx context.Context, sl validator.StructLevel) {
 	// dependency should point to an existing contract
 	obj, err := policy.GetObject(ContractObject.Kind, dependency.Contract, dependency.Namespace)
 	if obj == nil || err != nil {
-		sl.ReportError(dependency, fmt.Sprintf("Contract[%s]", dependency.Contract), "", "exists", "")
+		sl.ReportError(dependency.Contract, fmt.Sprintf("Contract[%s]", dependency.Contract), "", "exists", "")
 		return
 	}
 }
@@ -387,7 +413,7 @@ func validateContract(ctx context.Context, sl validator.StructLevel) {
 		}
 		obj, err := policy.GetObject(ServiceObject.Kind, serviceName, contract.Namespace)
 		if obj == nil || err != nil {
-			sl.ReportError(contract, fmt.Sprintf("Contexts[%s].Service[%s]", contractCtx.Name, serviceName), "", "exists", "")
+			sl.ReportError(serviceName, fmt.Sprintf("Contexts[%s].Service[%s]", contractCtx.Name, serviceName), "", "exists", "")
 			return
 		}
 	}
