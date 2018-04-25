@@ -14,7 +14,7 @@ func NewVersionCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print the Aptomi Client version",
+		Short: "Print Aptomi Server version",
 		Run: func(cmd *cobra.Command, args []string) {
 			info := version.GetBuildInfo()
 
