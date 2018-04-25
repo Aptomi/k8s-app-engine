@@ -4,7 +4,7 @@ jobs:
   public: true
   plan:
   - get: gitrepo
-    trigger: true
+    trigger: false
   - task: apply-rules
     file: gitrepo/aptomi-task.yml
     input_mapping:
