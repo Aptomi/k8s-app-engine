@@ -9,8 +9,8 @@ import (
 func NewCommand(cfg *config.Client) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "policy",
-		Short: "policy subcommand",
-		Long:  "policy subcommand long",
+		Short: "Policy subcommand",
+		Long:  "Policy subcommand long",
 	}
 
 	cmd.AddCommand(

@@ -8,8 +8,8 @@ import (
 var (
 	serverCmd = &cobra.Command{
 		Use:   "server",
-		Short: "start Aptomi server",
-		Long:  "start Aptomi server",
+		Short: "Start Aptomi server",
+		Long:  "Start Aptomi server",
 
 		Run: func(cmd *cobra.Command, args []string) {
 			server.NewServer(cfg).Start()

@@ -9,8 +9,8 @@ import (
 func NewCommand(cfg *config.Client) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "endpoints",
-		Short: "endpoints subcommand",
-		Long:  "endpoints subcommand long",
+		Short: "Endpoints subcommand",
+		Long:  "Endpoints subcommand long",
 	}
 
 	cmd.AddCommand(

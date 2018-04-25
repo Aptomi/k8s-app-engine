@@ -9,8 +9,8 @@ import (
 func NewCommand(cfg *config.Client) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "revision",
-		Short: "revision subcommand",
-		Long:  "revision subcommand long",
+		Short: "Revision subcommand",
+		Long:  "Revision subcommand long",
 	}
 
 	cmd.AddCommand(

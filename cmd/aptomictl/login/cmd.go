@@ -20,7 +20,7 @@ func NewCommand(cfg *config.Client, cfgFile *string) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "login",
-		Short: "login into the Aptomi",
+		Short: "Login into the Aptomi",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(username) == 0 || len(password) == 0 {
 				panic(fmt.Sprintf("Both username and password should be non-empty"))

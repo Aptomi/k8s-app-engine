@@ -17,7 +17,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print the Aptomi Client (and Server) versions",
+		Short: "Print Aptomi Client (and Server) versions",
 		Run: func(cmd *cobra.Command, args []string) {
 			if !client && !server {
 				client = true
