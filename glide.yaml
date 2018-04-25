@@ -37,7 +37,7 @@ import:
 - package: github.com/patrickmn/go-cache
   version: ^2.1.0
 - package: gopkg.in/go-playground/validator.v9
-  version: ^9.7.0
+  version: ^9.15.0
 - package: github.com/go-playground/universal-translator
   version: ^0.16.0
 - package: k8s.io/helm
