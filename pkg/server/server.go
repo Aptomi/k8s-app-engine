@@ -47,7 +47,7 @@ func NewServer(cfg *config.Server) *Server {
 	s := &Server{
 		cfg:              cfg,
 		backgroundErrors: make(chan string),
-		policyChanged:    make(chan bool),
+		policyChanged:    make(chan bool, 2048),
 	}
 
 	return s
