@@ -69,24 +69,24 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLo
 
 // ResolveAllDependencies takes policy as input and calculates PolicyResolution (desired state) as output.
 //
-// It resolves all recorded service consumption declarations ("<user> needs <contract> with <labels>"), calculating
-// which component have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
-// it can be rendered by the engine diff/apply by deploying/configuring required components/containers in the cloud.
+// It resolves all recorded claims for consuming contracts ("instantiate <contract> with <labels>"), calculating
+// which components have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
+// it can be rendered by the engine diff/apply by deploying and configuring required components in the cloud.
 func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, error) {
-	// Run policy validation before resolution, just in case
+	// Run policy validation before resolution
 	err := resolver.policy.Validate()
 	if err != nil {
 		return nil, err
 	}
 
-	// Allocate semaphore
+	// Allocate semaphore, making sure we don't run more than MaxConcurrentGoRoutines go routines at the same time
 	var semaphore = make(chan int, MaxConcurrentGoRoutines)
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
 	var errs = make(chan error, len(dependencies))
 
-	// Run every declared dependency via policy and resolve it
+	// Resolve every declared dependency
 	for _, d := range dependencies {
-		// resolve dependency via applying policy
+		// Start go routine for resolving a given dependency
 		semaphore <- 1
 		go func(d *lang.Dependency) {
 			node, resolveErr := resolver.resolveDependency(d)
