@@ -19,7 +19,7 @@ type PolicyResolution struct {
 	// Resolved component instances: componentKey -> componentInstance
 	ComponentInstanceMap map[string]*ComponentInstance
 
-	// Resolved dependencies: dependencyID -> serviceKey
+	// Resolved dependencies: dependencyID -> dependency resolution
 	dependencyInstanceMap map[string]*DependencyResolution
 
 	// Resolved component processing order in which components/services have to be processed
