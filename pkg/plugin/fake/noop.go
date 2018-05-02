@@ -16,7 +16,6 @@ type noOpPlugin struct {
 
 var _ plugin.ClusterPlugin = &noOpPlugin{}
 var _ plugin.CodePlugin = &noOpPlugin{}
-var _ plugin.PostProcessPlugin = &noOpPlugin{}
 
 // NewNoOpClusterPlugin returns fake cluster plugin which does nothing, except sleeping a given time amount on every action
 func NewNoOpClusterPlugin(sleepTime time.Duration) plugin.ClusterPlugin {
@@ -27,13 +26,6 @@ func NewNoOpClusterPlugin(sleepTime time.Duration) plugin.ClusterPlugin {
 
 // NewNoOpCodePlugin returns fake code plugin which does nothing, except sleeping a given time amount on every action
 func NewNoOpCodePlugin(sleepTime time.Duration) plugin.CodePlugin {
-	return &noOpPlugin{
-		sleepTime: sleepTime,
-	}
-}
-
-// NewNoOpPostProcessPlugin returns fake post process plugin which does nothing, except sleeping a given time amount on every action
-func NewNoOpPostProcessPlugin(sleepTime time.Duration) plugin.PostProcessPlugin {
 	return &noOpPlugin{
 		sleepTime: sleepTime,
 	}

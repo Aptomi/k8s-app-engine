@@ -2,9 +2,7 @@ package plugin
 
 import (
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
@@ -13,7 +11,6 @@ import (
 type Registry interface {
 	ForCluster(cluster *lang.Cluster) (ClusterPlugin, error)
 	ForCodeType(cluster *lang.Cluster, codeType string) (CodePlugin, error)
-	PostProcess() []PostProcessPlugin
 }
 
 // RegistryFactory returns plugins registry on demand
@@ -49,11 +46,3 @@ type CodePlugin interface {
 
 // CodePluginConstructor represents constructor the the code plugin
 type CodePluginConstructor func(cluster ClusterPlugin, cfg config.Plugins) (CodePlugin, error)
-
-// PostProcessPlugin is a definition of post-processing plugin which gets called once by an action from the engine
-// applier, after engine is done processing all component instances.
-type PostProcessPlugin interface {
-	Base
-
-	Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error
-}

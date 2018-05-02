@@ -14,10 +14,9 @@ const (
 type defaultRegistry struct {
 	mu sync.Mutex
 
-	config             config.Plugins
-	clusterTypes       map[string]ClusterPluginConstructor
-	codeTypes          map[string]map[string]CodePluginConstructor
-	postProcessPlugins []PostProcessPlugin
+	config       config.Plugins
+	clusterTypes map[string]ClusterPluginConstructor
+	codeTypes    map[string]map[string]CodePluginConstructor
 
 	// Cached plugins instances
 	clusterPlugins map[string]ClusterPlugin
@@ -25,14 +24,13 @@ type defaultRegistry struct {
 }
 
 // NewRegistry creates a registry of aptomi engine plugins
-func NewRegistry(config config.Plugins, clusterTypes map[string]ClusterPluginConstructor, codeTypes map[string]map[string]CodePluginConstructor, postProcessPlugins []PostProcessPlugin) Registry {
+func NewRegistry(config config.Plugins, clusterTypes map[string]ClusterPluginConstructor, codeTypes map[string]map[string]CodePluginConstructor) Registry {
 	return &defaultRegistry{
-		config:             config,
-		clusterTypes:       clusterTypes,
-		codeTypes:          codeTypes,
-		postProcessPlugins: postProcessPlugins,
-		clusterPlugins:     make(map[string]ClusterPlugin),
-		codePlugins:        make(map[string]CodePlugin),
+		config:         config,
+		clusterTypes:   clusterTypes,
+		codeTypes:      codeTypes,
+		clusterPlugins: make(map[string]ClusterPlugin),
+		codePlugins:    make(map[string]CodePlugin),
 	}
 }
 
@@ -88,8 +86,4 @@ func (registry *defaultRegistry) ForCodeType(cluster *lang.Cluster, codeType str
 	}
 
 	return codePlugin, nil
-}
-
-func (registry *defaultRegistry) PostProcess() []PostProcessPlugin {
-	return registry.postProcessPlugins
 }

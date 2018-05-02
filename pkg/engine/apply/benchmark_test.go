@@ -3,6 +3,7 @@ package apply
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -404,7 +405,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	desiredState := resolvePolicyBenchmark(t, desiredPolicy, externalData, true)
 
 	// process all actions
-	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).Actions
+	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan
 
 	applier := NewEngineApply(
 		desiredPolicy,
@@ -418,7 +419,8 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		progress.NewNoop(),
 	)
 
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
+	cnt := applier.actionPlan.Apply(action.Noop()).Success
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: cnt, Failed: 0, Skipped: 0})
 
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)

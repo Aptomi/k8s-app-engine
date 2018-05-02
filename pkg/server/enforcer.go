@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -95,11 +96,12 @@ func (server *Server) enforce() error {
 	nextRevision.ResolveLog = resolveLog.AsAPIEvents()
 
 	// policy changed while no actions needed to achieve desired state
-	if len(stateDiff.Actions) <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
+	actionCnt := stateDiff.ActionPlan.Apply(action.Noop()).Success
+	if actionCnt <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
 		log.Infof("(enforce-%d) No changes, policy gen %d", server.enforcementIdx, desiredPolicyGen)
 		return nil
 	}
-	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.enforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, len(stateDiff.Actions))
+	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.enforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, actionCnt)
 
 	// Save revision
 	err = server.store.SaveRevision(nextRevision)
@@ -115,8 +117,8 @@ func (server *Server) enforce() error {
 
 	pluginRegistry := server.pluginRegistryFactory()
 	applyLog := event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.Actions, applyLog, server.store.GetRevisionProgressUpdater(nextRevision))
-	_, err = applier.Apply()
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.GetRevisionProgressUpdater(nextRevision))
+	_, _, err = applier.Apply()
 
 	// reload revision to have progress data saved into it
 	nextRevision, saveErr := server.store.GetRevision(runtime.LastGen)
@@ -134,7 +136,7 @@ func (server *Server) enforce() error {
 	if err != nil {
 		return fmt.Errorf("error while applying new revision: %s", err)
 	}
-	log.Infof("(enforce-%d) New revision %d successfully applied, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.GetComponentProcessingOrder()))
+	log.Infof("(enforce-%d) New revision %d successfully applied, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentInstanceMap))
 
 	return nil
 }

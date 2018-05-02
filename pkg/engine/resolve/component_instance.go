@@ -63,7 +63,7 @@ type ComponentInstance struct {
 	// EdgesIn is a set of incoming graph edges ('key' -> true) into this component instance. Storing for observability and reporting, so we can reconstruct the graph
 	EdgesIn map[string]bool
 
-	// EdgesOut is a set of outgoing graph edges ('key' -> true) into this component instance. Storing for observability and reporting, so we can reconstruct the graph
+	// EdgesOut is a set of outgoing graph edges ('key' -> true) from this component instance. Storing for observability and reporting, so we can reconstruct the graph
 	EdgesOut map[string]bool
 
 	// DataForPlugins is an additional data recorded for use in plugins

@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -298,10 +299,11 @@ func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *h
 	desiredState := resolver.ResolveAllDependencies()
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
 
-	actions := make([]string, len(stateDiff.Actions))
-	for idx, action := range stateDiff.Actions {
-		actions[idx] = action.GetName()
-	}
+	actions := []string{}
+	_ = stateDiff.ActionPlan.Apply(action.WrapSequential(func(act action.Base) error {
+		actions = append(actions, act.GetName())
+		return nil
+	}))
 
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),

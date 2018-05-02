@@ -2,6 +2,7 @@ package component
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
@@ -30,5 +31,15 @@ func NewDetachDependencyAction(componentKey string, dependencyID string) *Detach
 
 // Apply applies the action
 func (a *DetachDependencyAction) Apply(context *action.Context) error {
-	return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
+	context.EventLog.WithFields(event.Fields{
+		"componentKey": a.ComponentKey,
+		"dependency":   a.DependencyID,
+	}).Debug("Detaching dependency '" + a.DependencyID + "' from component instance: " + a.ComponentKey)
+
+	// if an instance is still present in desired state (haven't been fully deleted due to other dependencies), then update actual state
+	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
+	if instance != nil {
+		return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
+	}
+	return nil
 }

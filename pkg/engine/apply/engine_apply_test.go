@@ -3,6 +3,7 @@ package apply
 import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -17,11 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
-)
-
-const (
-	ResSuccess = iota
-	ResError   = iota
 )
 
 func TestApplyComponentCreateSuccess(t *testing.T) {
@@ -40,7 +36,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		desired.external(),
 		mockRegistry(true, false),
-		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
@@ -49,7 +45,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 5, Failed: 0, Skipped: 0})
 
 	// check that actual state got updated
 	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should not be empty after apply()")
@@ -79,7 +75,7 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 		actual.NewNoOpActionStateUpdater(),
 		desired.external(),
 		mockRegistry(false, failAsPanic),
-		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
@@ -87,10 +83,10 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check for errors
-	actualState = applyAndCheck(t, applier, ResError, 1, "failed by plugin mock for component")
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 0, Failed: 1, Skipped: 2})
 
-	// check that actual state got updated (service component exists, but no child components got deployed)
-	assert.Equal(t, 1, len(actualState.ComponentInstanceMap), "Actual state should be correctly updated by apply()")
+	// check that actual state didn't get updated
+	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should not be touched by apply()")
 }
 
 func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
@@ -113,13 +109,13 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		desired.external(),
 		mockRegistry(true, false),
-		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 5, Failed: 0, Skipped: 0})
 
 	// Get key to a component
 	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)
@@ -156,13 +152,13 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		desiredNext.external(),
 		mockRegistry(true, false),
-		diff.NewPolicyResolutionDiff(desiredNext.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(desiredNext.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 3, Failed: 0, Skipped: 0})
 
 	// Check creation/update times
 	times2 := getTimes(t, key.GetKey(), actualState)
@@ -192,13 +188,13 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		actual.NewNoOpActionStateUpdater(),
 		desiredNextAfterUpdate.external(),
 		mockRegistry(true, false),
-		diff.NewPolicyResolutionDiff(desiredNextAfterUpdate.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(desiredNextAfterUpdate.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 3, Failed: 0, Skipped: 0})
 
 	// Check creation/update times for component
 	componentTimesUpdated := getTimes(t, key.GetKey(), actualState)
@@ -230,13 +226,14 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		actual.NewNoOpActionStateUpdater(),
 		generated.external(),
 		mockRegistry(true, false),
-		diff.NewPolicyResolutionDiff(generated.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(generated.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, ResSuccess, 0, "Successfully resolved")
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 5, Failed: 0, Skipped: 0})
+
 	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should have populated with components at this point")
 
 	// Reset policy back to empty
@@ -250,13 +247,13 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		actual.NewNoOpActionStateUpdater(),
 		generated.external(),
 		mockRegistry(true, false),
-		diff.NewPolicyResolutionDiff(reset.resolution(), actualState).Actions,
+		diff.NewPolicyResolutionDiff(reset.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
 		progress.NewNoop(),
 	)
 
 	// delete/detach, delete/detach, endpoints/endpoints - 6 actions failed in total
-	actualState = applyAndCheck(t, applierNext, ResError, 6, "error while applying action")
+	actualState = applyAndCheck(t, applierNext, action.ApplyResult{Success: 1, Failed: 1, Skipped: 0})
 	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should be intact after actions failing")
 }
 
@@ -331,27 +328,21 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 	return result
 }
 
-func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult int, errorCnt int, expectedMessage string) *resolve.PolicyResolution {
+func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {
 	t.Helper()
-	actualState, err := apply.Apply()
+	actualState, result, _ := apply.Apply()
 
-	if !assert.Equal(t, expectedResult != ResError, err == nil, "Apply status (success vs. error)") {
+	ok := assert.Equal(t, expectedResult.Success, result.Success, "Number of successfully executed actions")
+	ok = ok && assert.Equal(t, expectedResult.Failed, result.Failed, "Number of failed actions")
+	ok = ok && assert.Equal(t, expectedResult.Skipped, result.Skipped, "Number of skipped actions")
+
+	if !ok {
 		// print log into stdout and exit
 		hook := &event.HookConsole{}
 		apply.eventLog.Save(hook)
 		t.FailNow()
 	}
 
-	if expectedResult == ResError {
-		// check for error messages
-		verifier := event.NewLogVerifier(expectedMessage, expectedResult == ResError)
-		apply.eventLog.Save(verifier)
-		if !assert.Equal(t, errorCnt, verifier.MatchedErrorsCount(), "Apply event log should have correct number of messages containing words: %s", expectedMessage) {
-			hook := &event.HookConsole{}
-			apply.eventLog.Save(hook)
-			t.FailNow()
-		}
-	}
 	return actualState
 }
 
@@ -380,7 +371,6 @@ func getInstanceInternal(t *testing.T, key string, resolution *resolve.PolicyRes
 func mockRegistry(applySuccess, failAsPanic bool) plugin.Registry {
 	clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
 	codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
-	postProcessPlugins := make([]plugin.PostProcessPlugin, 0)
 
 	clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
 		return fake.NewNoOpClusterPlugin(0), nil
@@ -394,5 +384,5 @@ func mockRegistry(applySuccess, failAsPanic bool) plugin.Registry {
 		return fake.NewFailCodePlugin(failAsPanic), nil
 	}
 
-	return plugin.NewRegistry(config.Plugins{}, clusterTypes, codeTypes, postProcessPlugins)
+	return plugin.NewRegistry(config.Plugins{}, clusterTypes, codeTypes)
 }

@@ -7,7 +7,5 @@
 // code plugin is created for each pair of the lang.Cluster and code type, for example, cluster "test-1" and code
 // type "helm".
 //
-// PostProcess plugins has access to all data across all cloud providers and executed as a last step.
-//
 // All plugins created for single enforcement cycle or API call using plugin registry.
 package plugin

@@ -2,6 +2,7 @@ package component
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
@@ -31,5 +32,10 @@ func NewAttachDependencyAction(componentKey string, dependencyID string) *Attach
 
 // Apply applies the action
 func (a *AttachDependencyAction) Apply(context *action.Context) error {
+	context.EventLog.WithFields(event.Fields{
+		"componentKey": a.ComponentKey,
+		"dependency":   a.DependencyID,
+	}).Debug("Attaching dependency '" + a.DependencyID + "' to component instance: " + a.ComponentKey)
+
 	return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
 }

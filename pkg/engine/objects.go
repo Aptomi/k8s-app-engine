@@ -2,7 +2,6 @@ package engine
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action/global"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
@@ -16,7 +15,6 @@ var (
 		component.AttachDependencyActionObject,
 		component.DetachDependencyActionObject,
 		component.EndpointsActionObject,
-		global.PostProcessActionObject,
 	}
 
 	// Objects is the list of informational objects for all objects in the engine

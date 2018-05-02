@@ -4,7 +4,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action/global"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/stretchr/testify/assert"
@@ -65,7 +64,6 @@ func makePolicyUpdateResult(policyChanged bool) *api.PolicyUpdateResult {
 			component.NewDetachDependencyAction(key.GetKey(), "depId").GetName(),
 			component.NewAttachDependencyAction(key.GetKey(), "depId").GetName(),
 			component.NewEndpointsAction(key.GetKey()).GetName(),
-			global.NewPostProcessAction().GetName(),
 		},
 	}
 	return result

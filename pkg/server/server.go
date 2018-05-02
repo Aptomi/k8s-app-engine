@@ -115,7 +115,6 @@ func (server *Server) initPluginRegistryFactory() {
 	server.pluginRegistryFactory = func() plugin.Registry {
 		clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
 		codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
-		postProcessPlugins := make([]plugin.PostProcessPlugin, 0)
 
 		if !server.cfg.Enforcer.Noop {
 			clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
@@ -129,9 +128,6 @@ func (server *Server) initPluginRegistryFactory() {
 			codeTypes["kubernetes"]["raw"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
 				return k8sraw.New(cluster, cfg)
 			}
-
-			// there are no post process plugins so far
-			// postProcessPlugins = append(postProcessPlugins, ...)
 		} else {
 			sleepTime := server.cfg.Enforcer.NoopSleep
 
@@ -143,11 +139,9 @@ func (server *Server) initPluginRegistryFactory() {
 			codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
 				return fake.NewNoOpCodePlugin(sleepTime), nil
 			}
-
-			postProcessPlugins = append(postProcessPlugins, fake.NewNoOpPostProcessPlugin(sleepTime))
 		}
 
-		return plugin.NewRegistry(server.cfg.Plugins, clusterTypes, codeTypes, postProcessPlugins)
+		return plugin.NewRegistry(server.cfg.Plugins, clusterTypes, codeTypes)
 	}
 }
 

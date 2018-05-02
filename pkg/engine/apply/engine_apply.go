@@ -23,8 +23,8 @@ type EngineApply struct {
 	externalData       *external.Data
 	plugins            plugin.Registry
 
-	// Actions to be applied
-	actions []action.Base
+	// Action plan to be applied
+	actionPlan *action.Plan
 
 	// Buffered event log - gets populated while applying changes
 	eventLog *event.Log
@@ -36,7 +36,7 @@ type EngineApply struct {
 // NewEngineApply creates an instance of EngineApply
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actions []action.Base, eventLog *event.Log, progress progress.Indicator) *EngineApply {
+func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actionPlan *action.Plan, eventLog *event.Log, progress progress.Indicator) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,
 		desiredState:       desiredState,
@@ -44,7 +44,7 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 		actualStateUpdater: actualStateUpdater,
 		externalData:       externalData,
 		plugins:            plugins,
-		actions:            actions,
+		actionPlan:         actionPlan,
 		eventLog:           eventLog,
 		progress:           progress,
 	}
@@ -55,12 +55,13 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 // As actions get executed, they will instantiate/update/delete components according to the resolved
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
-func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
+func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResult, error) {
 	// error count while applying changes
 	foundErrors := false
 
 	// initialize progress indicator
-	apply.progress.SetTotal(len(apply.actions))
+	cnt := apply.actionPlan.Apply(action.Noop()).Success
+	apply.progress.SetTotal(cnt)
 
 	// process all actions
 	context := action.NewContext(
@@ -72,7 +73,9 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
 		apply.plugins,
 		apply.eventLog,
 	)
-	for _, act := range apply.actions {
+
+	// TODO: apply in parallel, https://github.com/Aptomi/aptomi/issues/310
+	result := apply.actionPlan.Apply(action.WrapSequential(func(act action.Base) error {
 		apply.progress.Advance()
 		err := apply.executeAction(act, context)
 		if err != nil {
@@ -80,7 +83,8 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
 			apply.eventLog.LogError(err)
 			foundErrors = true
 		}
-	}
+		return err
+	}))
 
 	// Finalize progress indicator
 	apply.progress.Done(!foundErrors)
@@ -89,11 +93,11 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, error) {
 	if foundErrors {
 		err := fmt.Errorf("one or more errors occurred while running actions")
 		apply.eventLog.LogError(err)
-		return apply.actualState, err
+		return apply.actualState, result, err
 	}
 
 	// No errors occurred
-	return apply.actualState, nil
+	return apply.actualState, result, nil
 }
 
 func (apply *EngineApply) executeAction(action action.Base, context *action.Context) (errResult error) {

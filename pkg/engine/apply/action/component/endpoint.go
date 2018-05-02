@@ -32,10 +32,9 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 
 // Apply applies the action
 func (a *EndpointsAction) Apply(context *action.Context) error {
-	// skip component for some reason doesn't exist in actual state
-	// this might happen if, for example, it the corresponding component got destroyed by a prior delete action
+	// if component for some reason doesn't exist in actual state, report an error
 	if context.ActualState.ComponentInstanceMap[a.ComponentKey] == nil {
-		return nil
+		return fmt.Errorf("unable to get endpoints for component instance '%s': it doesn't exist in actual state", a.ComponentKey)
 	}
 
 	err := a.processEndpoints(context)
@@ -56,8 +55,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
-		// This is a service instance. Do nothing
-		return nil
+		return fmt.Errorf("retrieving endpoints for service instance is not supported")
 	}
 
 	// endpoints could be calculated only for components with code
