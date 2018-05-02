@@ -299,6 +299,8 @@ func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *h
 	desiredState := resolver.ResolveAllDependencies()
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
 
+	// TODO: we need to start showing dependency status in API result, as well as links/cmds to view logs
+
 	actions := []string{}
 	_ = stateDiff.ActionPlan.Apply(action.WrapSequential(func(act action.Base) error {
 		actions = append(actions, act.GetName())
