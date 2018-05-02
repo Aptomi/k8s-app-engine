@@ -51,7 +51,9 @@ func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, de
 
 // RecordCodeParams stores calculated code params for component instance
 func (resolution *PolicyResolution) RecordCodeParams(cik *ComponentInstanceKey, codeParams util.NestedParameterMap) error {
-	return resolution.GetComponentInstanceEntry(cik).addCodeParams(codeParams)
+	instance := resolution.GetComponentInstanceEntry(cik)
+	instance.IsCode = true
+	return instance.addCodeParams(codeParams)
 }
 
 // RecordDiscoveryParams stores calculated discovery params for component instance

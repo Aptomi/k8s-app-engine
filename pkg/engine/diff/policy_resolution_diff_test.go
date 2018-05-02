@@ -89,6 +89,16 @@ func TestDiffComponentDelete(t *testing.T) {
 	verifyDiff(t, diffAgain, 0, 2, 0, 0, 2, 0)
 }
 
+func TestDiffComponentWithServiceSharing(t *testing.T) {
+	b := makePolicyBuilderWithServiceSharing()
+	resolvedNext := resolvePolicy(t, b)
+	resolvedEmpty := resolvePolicy(t, builder.NewPolicyBuilder())
+
+	// diff should contain instantiated component
+	diff := NewPolicyResolutionDiff(resolvedNext, resolvedEmpty)
+	verifyDiff(t, diff, 7, 0, 0, 9, 0, 0)
+}
+
 /*
 	Helpers
 */
@@ -109,6 +119,31 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+
+	return b
+}
+
+func makePolicyBuilderWithServiceSharing() *builder.PolicyBuilder {
+	b := builder.NewPolicyBuilder()
+
+	// create a service, which depends on another service
+	service1 := b.AddService()
+	contract1 := b.AddContract(service1, b.CriteriaTrue())
+	service2 := b.AddService()
+	contract2 := b.AddContract(service2, b.CriteriaTrue())
+	b.AddServiceComponent(service1, b.ContractComponent(contract2))
+
+	// make first service one per dependency, and they all will share the second service
+	contract1.Contexts[0].Allocation.Keys = []string{"{{ .Dependency.ID }}"}
+
+	// add rule to set cluster
+	clusterObj := b.AddCluster()
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+
+	// add dependencies
+	b.AddDependency(b.AddUser(), contract1)
+	b.AddDependency(b.AddUser(), contract1)
+	b.AddDependency(b.AddUser(), contract1)
 
 	return b
 }

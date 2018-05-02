@@ -51,6 +51,9 @@ type ComponentInstance struct {
 	// DependencyKeys is a list of dependency keys which are keeping this component instantiated
 	DependencyKeys map[string]bool
 
+	// IsCode means the component is code
+	IsCode bool
+
 	// CalculatedLabels is a set of calculated labels for the component, aggregated over all uses
 	CalculatedLabels *lang.LabelSet
 
@@ -206,6 +209,9 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	for dependencyKey := range ops.DependencyKeys {
 		instance.addDependency(dependencyKey)
 	}
+
+	// Transfer IsCode bool
+	instance.IsCode = instance.IsCode || ops.IsCode
 
 	// Combine labels
 	instance.addLabels(ops.CalculatedLabels)

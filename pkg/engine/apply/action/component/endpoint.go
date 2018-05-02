@@ -60,7 +60,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 
 	// endpoints could be calculated only for components with code
 	if component.Code == nil {
-		return nil
+		return fmt.Errorf("retrieving endpoints for non-code components is not supported")
 	}
 
 	context.EventLog.WithFields(event.Fields{

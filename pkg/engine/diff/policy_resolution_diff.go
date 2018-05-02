@@ -96,7 +96,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	}
 
 	// See if it's a service or component
-	isComponent := (prevInstance != nil && prevInstance.Metadata.Key.IsComponent()) || (nextInstance != nil && nextInstance.Metadata.Key.IsComponent())
+	isCodeComponent := (prevInstance != nil && prevInstance.IsCode) || (nextInstance != nil && nextInstance.IsCode)
 
 	// Bool that says that we should retrieve endpoints
 	endpointsAction := false
@@ -108,19 +108,18 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	}
 
 	// See if a component needs to be updated
-	if len(depKeysPrev) > 0 && len(depKeysNext) > 0 {
+	if len(depKeysPrev) > 0 && len(depKeysNext) > 0 && isCodeComponent {
 		sameParams := prevInstance.CalculatedCodeParams.DeepEqual(nextInstance.CalculatedCodeParams)
 		if !sameParams {
 			node.AddAction(component.NewUpdateAction(key), true)
 
-			// if it has a parent service, indicate that it basically gets updated as well
+			// indicate that a parent service component instance gets updated as well
 			// this is required for adjusting update/creation times of a service with changed component
 			// this may produce duplicate "update" actions for the parent service
-			if isComponent {
-				serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
-				serviceNode := diff.ActionPlan.GetActionGraphNode(serviceKey)
-				serviceNode.AddAction(component.NewUpdateAction(serviceKey), true)
-			}
+			serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
+			serviceNode := diff.ActionPlan.GetActionGraphNode(serviceKey)
+			serviceNode.AddAction(component.NewUpdateAction(serviceKey), true)
+
 			endpointsAction = true
 		}
 	}
@@ -148,7 +147,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	}
 
 	// See if we need to retrieve component endpoints
-	if endpointsAction && isComponent {
+	if endpointsAction && isCodeComponent {
 		node.AddAction(component.NewEndpointsAction(key), true)
 	}
 }
