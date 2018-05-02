@@ -80,7 +80,7 @@ func (server *Server) enforce() error {
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
 	desiredState := resolver.ResolveAllDependencies()
 
-	// TODO: get rid of err revisions. revision should not have a gloval err status
+	// TODO: get rid of err revisions. revision should not have a global err status
 	if false {
 		server.saveErrRevision(currRevision, desiredPolicyGen, resolveLog)
 		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
