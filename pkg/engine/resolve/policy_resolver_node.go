@@ -11,9 +11,6 @@ import (
 // This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
 // It gets incrementally populated with data, as policy evaluation goes on for a given dependency
 type resolutionNode struct {
-	// whether we successfully resolved this node or not
-	resolved bool
-
 	// pointer to the policy resolver
 	resolver *PolicyResolver
 
@@ -74,8 +71,6 @@ type resolutionNode struct {
 func (resolver *PolicyResolver) newResolutionNode() *resolutionNode {
 	eventLog := event.NewLog(resolver.eventLog.GetScope(), false)
 	return &resolutionNode{
-		resolved: false,
-
 		resolver:          resolver,
 		eventLog:          eventLog,
 		eventLogsCombined: []*event.Log{eventLog},
@@ -95,28 +90,26 @@ func (resolver *PolicyResolver) newResolutionNode() *resolutionNode {
 // Initialized a newly created resolution node as a starting point for resolving a particular dependency.
 // Adds dependency and user labels into it.
 func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, dependency *lang.Dependency) {
-	// combine user labels and dependency labels
-	node.labels = lang.NewLabelSet(dependency.Labels)
-	user := resolver.externalData.UserLoader.LoadUserByName(dependency.User)
-	if user != nil {
-		node.labels.AddLabels(user.Labels)
-	}
-
 	// populate user, dependency
 	node.dependency = dependency
+	user := resolver.externalData.UserLoader.LoadUserByName(dependency.User)
 	node.user = user
 
 	// start with the namespace & contract specified in the dependency
 	node.namespace = dependency.Namespace
 	node.contractName = dependency.Contract
+
+	// create a starting set of labels, combining user labels and dependency labels
+	node.labels = lang.NewLabelSet(dependency.Labels)
+	if user != nil {
+		node.labels.AddLabels(user.Labels)
+	}
 }
 
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
 	eventLog := event.NewLog(node.eventLog.GetScope(), false)
 	return &resolutionNode{
-		resolved: false,
-
 		resolver:          node.resolver,
 		eventLog:          eventLog,
 		eventLogsCombined: []*event.Log{eventLog},
@@ -143,42 +136,6 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		// copy path
 		path: util.CopySliceOfStrings(node.path),
 	}
-}
-
-// This method is called by the main engine resolution engine when an error happens
-// If analyzes error type, writes the corresponding messages into the log
-// And makes a decision whether to swallow the error, or fail policy processing
-func (node *resolutionNode) cannotResolveInstance(err error) error {
-	var criticalError *CriticalError
-	isCriticalError := false
-
-	// Log critical error as error in the event log
-	if err != nil {
-		criticalError, isCriticalError = err.(*CriticalError)
-		if isCriticalError {
-			if !criticalError.IsLogged() {
-				// Log it
-				node.eventLog.LogError(err)
-
-				// Mark this error as processed. So that when we go up the recursion stack, we don't log it multiple times
-				criticalError.SetLoggedFlag()
-			}
-		} else {
-			// Log it
-			node.eventLog.LogWarning(err)
-		}
-	}
-
-	// Log that service or component instance cannot be resolved
-	node.logCannotResolveInstance()
-
-	// If it's a critical error, return it
-	if isCriticalError {
-		return err
-	}
-
-	// Otherwise, tell engine to swallow it
-	return nil
 }
 
 // As the resolution goes on, this method is called when objects become resolved and available in the context
@@ -233,12 +190,11 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 		}
 	}
 
-	if contextMatched != nil {
-		node.logContextMatched(contextMatched)
-	} else {
-		node.logContextNotMatched()
+	if contextMatched == nil {
+		return nil, node.errorContextNotMatched()
 	}
 
+	node.logContextMatched(contextMatched)
 	return contextMatched, nil
 }
 

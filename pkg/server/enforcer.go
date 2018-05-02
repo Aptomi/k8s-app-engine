@@ -78,10 +78,11 @@ func (server *Server) enforce() error {
 
 	resolveLog := event.NewLog(fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
-	desiredState, err := resolver.ResolveAllDependencies()
-	if err != nil {
-		server.saveErrRevision(currRevision, desiredPolicyGen, resolveLog)
+	desiredState := resolver.ResolveAllDependencies()
 
+	// TODO: get rid of err revisions. revision should not have a gloval err status
+	if false {
+		server.saveErrRevision(currRevision, desiredPolicyGen, resolveLog)
 		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
 	}
 

@@ -20,7 +20,7 @@ type PolicyResolution struct {
 	ComponentInstanceMap map[string]*ComponentInstance
 
 	// Resolved dependencies: dependencyID -> serviceKey
-	dependencyInstanceMap map[string]string
+	dependencyInstanceMap map[string]*DependencyResolution
 
 	// Resolved component processing order in which components/services have to be processed
 	componentProcessingOrderHas map[string]bool
@@ -33,7 +33,7 @@ func NewPolicyResolution(isDesired bool) *PolicyResolution {
 	return &PolicyResolution{
 		isDesired:                   isDesired,
 		ComponentInstanceMap:        make(map[string]*ComponentInstance),
-		dependencyInstanceMap:       make(map[string]string),
+		dependencyInstanceMap:       make(map[string]*DependencyResolution),
 		componentProcessingOrderHas: make(map[string]bool),
 		componentProcessingOrder:    []string{},
 	}
@@ -89,7 +89,8 @@ func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *Co
 	}
 }
 
-// AppendData appends data to the current PolicyResolution record by aggregating data over component instances
+// AppendData appends data to the current PolicyResolution record by aggregating data over component instances.
+// If there is a conflict (e.g. components have different code parameters), then an error will be reported.
 func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
 	for _, instance := range ops.ComponentInstanceMap {
 		err := resolution.GetComponentInstanceEntry(instance.Metadata.Key).appendData(instance)
@@ -103,8 +104,8 @@ func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
 	return nil
 }
 
-// GetComponentProcessingOrder returns component processing order, figured out by a policy resolver,
-// in which components/services have to be processed
+// GetComponentProcessingOrder returns component processing order, as determined by the policy resolver, in which
+// components/services have to be processed
 func (resolution *PolicyResolution) GetComponentProcessingOrder() []string {
 	if !resolution.isDesired {
 		panic("attempting to get component processing order from actual state")
@@ -112,8 +113,8 @@ func (resolution *PolicyResolution) GetComponentProcessingOrder() []string {
 	return resolution.componentProcessingOrder
 }
 
-// GetDependencyInstanceMap returns map for resolved dependencies: dependencyID -> serviceKey
-func (resolution *PolicyResolution) GetDependencyInstanceMap() map[string]string {
+// GetDependencyInstanceMap returns map which contains resolution status for every dependency
+func (resolution *PolicyResolution) GetDependencyInstanceMap() map[string]*DependencyResolution {
 	if !resolution.isDesired {
 		panic("attempting to get dependency instance map for actual state")
 	}
@@ -121,7 +122,7 @@ func (resolution *PolicyResolution) GetDependencyInstanceMap() map[string]string
 }
 
 // SetDependencyInstanceMap overrides existing dependencyInstanceMap
-func (resolution *PolicyResolution) SetDependencyInstanceMap(dMap map[string]string) {
+func (resolution *PolicyResolution) SetDependencyInstanceMap(dMap map[string]*DependencyResolution) {
 	// TODO: we actually need to start saving dependencyInstanceMap into the store. after that we can delete this method
 	resolution.dependencyInstanceMap = dMap
 }
@@ -129,10 +130,7 @@ func (resolution *PolicyResolution) SetDependencyInstanceMap(dMap map[string]str
 // Validate checks that the state is valid, meaning that all objects references are valid. It takes all the instances
 // and verifies that all services exist, all clusters exist, etc
 func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
-	// dependencies point to existing contracts
-	// cannot delete contract without deleting dependencies pointing to it
-
-	// component instances point to valid entitis
+	// component instances must point to valid objects
 	for _, instance := range resolution.ComponentInstanceMap {
 		componentKey := instance.Metadata.Key
 
@@ -182,4 +180,20 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		}
 	}
 	return nil
+}
+
+// AllDependenciesResolvedSuccessfully returns if all dependencies got resolved successfully
+func (resolution *PolicyResolution) AllDependenciesResolvedSuccessfully() bool {
+	return resolution.SuccessfullyResolvedDependencies() == len(resolution.dependencyInstanceMap)
+}
+
+// SuccessfullyResolvedDependencies returns the number of successfully resolved dependencies
+func (resolution *PolicyResolution) SuccessfullyResolvedDependencies() int {
+	result := 0
+	for _, d := range resolution.dependencyInstanceMap {
+		if d.Resolved {
+			result++
+		}
+	}
+	return result
 }

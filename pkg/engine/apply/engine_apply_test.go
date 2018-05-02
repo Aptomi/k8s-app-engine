@@ -145,7 +145,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	dependencyNew := desiredNext.pBuilder.AddDependency(desiredNext.pBuilder.AddUser(), contract)
 	dependencyNew.Labels["param"] = "value1"
 
-	assert.Contains(t, desiredNext.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependencyNew), "Additional dependency should be resolved successfully")
+	assert.Contains(t, desiredNext.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependencyNew), "Additional dependency should be present in policy resolution")
+	assert.True(t, desiredNext.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependencyNew)].Resolved, "Additional dependency should be resolved successfully")
 
 	// Apply to update component times in actual state
 	applier = NewEngineApply(
@@ -320,8 +321,8 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 	t.Helper()
 	eventLog := event.NewLog("test-resolve", false)
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
-	result, err := resolver.ResolveAllDependencies()
-	if !assert.NoError(t, err, "Policy should be resolved without errors") {
+	result := resolver.ResolveAllDependencies()
+	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()

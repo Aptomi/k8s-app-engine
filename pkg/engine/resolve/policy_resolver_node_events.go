@@ -10,7 +10,7 @@ import (
 )
 
 /*
-	Non-critical errors. If any of them occur, the corresponding dependency will not be fulfilled
+	Non-critical errors - if any of them occur, the corresponding dependency will not be fulfilled
 	and engine will move on to processing other dependencies
 */
 
@@ -35,48 +35,45 @@ func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
 	)
 }
 
-/*
-	Critical errors. If one of them occurs, engine will report an error and fail policy processing
-	all together
-*/
-
 func (node *resolutionNode) errorClusterDoesNotExist(clusterName string) error {
-	var err *errors.ErrorWithDetails
 	if len(clusterName) > 0 {
-		err = errors.NewErrorWithDetails(
+		return errors.NewErrorWithDetails(
 			fmt.Sprintf("Cluster '%s/%s' doesn't exist in policy", runtime.SystemNS, clusterName),
 			errors.Details{},
 		)
-	} else {
-		err = errors.NewErrorWithDetails(
-			fmt.Sprintf("Engine needs cluster defined, but cluster is not set"),
-			errors.Details{},
-		)
 	}
-	return NewCriticalError(err)
+	return errors.NewErrorWithDetails(
+		fmt.Sprintf("Engine needs cluster defined, but cluster is not set"),
+		errors.Details{},
+	)
 }
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Service '%s' is not in the same namespace as contract %s", runtime.KeyForStorable(service), runtime.KeyForStorable(node.contract)),
 		errors.Details{},
 	)
-	return NewCriticalError(err)
 }
 
 func (node *resolutionNode) errorWhenTestingContext(context *lang.Context, cause error) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while trying to match context '%s' for contract '%s': %s", context.Name, node.contract.Name, cause),
 		errors.Details{
 			"context": context,
 			"cause":   cause,
 		},
 	)
-	return NewCriticalError(err)
+}
+
+func (node *resolutionNode) errorContextNotMatched() error {
+	return errors.NewErrorWithDetails(
+		fmt.Sprintf("Unable to find matching context within contract: '%s'", node.contract.Name),
+		errors.Details{},
+	)
 }
 
 func (node *resolutionNode) errorWhenTestingComponent(component *lang.ServiceComponent, cause error) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while trying to check component criteria '%s' for service '%s': %s", component.Name, node.service.Name, cause),
 		errors.Details{
 			"service":   node.service,
@@ -84,11 +81,10 @@ func (node *resolutionNode) errorWhenTestingComponent(component *lang.ServiceCom
 			"cause":     cause,
 		},
 	)
-	return NewCriticalError(err)
 }
 
 func (node *resolutionNode) errorWhenProcessingRule(rule *lang.Rule, cause error) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while processing rule '%s' on contract '%s', context '%s', service '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.service.Name, cause),
 		errors.Details{
 			"context": node.context,
@@ -97,21 +93,19 @@ func (node *resolutionNode) errorWhenProcessingRule(rule *lang.Rule, cause error
 			"cause":   cause,
 		},
 	)
-	return NewCriticalError(err)
 }
 
 func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, cause),
 		errors.Details{
 			"cause": cause,
 		},
 	)
-	return NewCriticalError(err)
 }
 
 func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause),
 		errors.Details{
 			"component":       node.component,
@@ -119,11 +113,10 @@ func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
 			"cause":           cause,
 		},
 	)
-	return NewCriticalError(err)
 }
 
 func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, cause),
 		errors.Details{
 			"component":       node.component,
@@ -131,17 +124,15 @@ func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) erro
 			"cause":           cause,
 		},
 	)
-	return NewCriticalError(err)
 }
 
 func (node *resolutionNode) errorServiceCycleDetected() error {
-	err := errors.NewErrorWithDetails(
+	return errors.NewErrorWithDetails(
 		fmt.Sprintf("Error when processing policy, service cycle detected: %s", node.path),
 		errors.Details{
 			"path": node.path,
 		},
 	)
-	return NewCriticalError(err)
 }
 
 /*
@@ -192,10 +183,6 @@ func (node *resolutionNode) logStartMatchingContexts() {
 
 func (node *resolutionNode) logContextMatched(contextMatched *lang.Context) {
 	node.eventLog.WithFields(event.Fields{}).Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
-}
-
-func (node *resolutionNode) logContextNotMatched() {
-	node.eventLog.WithFields(event.Fields{}).Warningf("Unable to find matching context within contract: '%s'", node.contract.Name)
 }
 
 func (node *resolutionNode) logComponentNotMatched(component *lang.ServiceComponent) {

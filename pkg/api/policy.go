@@ -181,22 +181,22 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Verify ACL for updated objects
-	currentPolicy, _, err := api.store.GetPolicy(runtime.LastGen)
+	policy, _, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("Error while loading current policy: %s", err))
 	}
 	for _, obj := range objects {
-		errAdd := currentPolicy.AddObject(obj)
+		errAdd := policy.AddObject(obj)
 		if errAdd != nil {
 			panic(fmt.Sprintf("Error while adding updated object to policy: %s", errAdd))
 		}
-		errManage := currentPolicy.View(user).ManageObject(obj)
+		errManage := policy.View(user).ManageObject(obj)
 		if errManage != nil {
 			panic(fmt.Sprintf("Error while adding updated object to policy: %s", errManage))
 		}
 	}
 
-	err = currentPolicy.Validate()
+	err = policy.Validate()
 	if err != nil {
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
@@ -295,11 +295,7 @@ func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *h
 	// todo: add request id to the event log scope
 	eventLog := event.NewLog("api-policy-update", true)
 	resolver := resolve.NewPolicyResolver(desiredPolicy, api.externalData, eventLog)
-	desiredState, err := resolver.ResolveAllDependencies()
-	if err != nil {
-		panic(fmt.Sprintf("Cannot resolve desiredPolicy: %s", err))
-	}
-
+	desiredState := resolver.ResolveAllDependencies()
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
 
 	actions := make([]string, len(stateDiff.Actions))

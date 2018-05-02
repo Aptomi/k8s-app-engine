@@ -423,21 +423,21 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)
 
-	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), len(desiredState.GetDependencyInstanceMap()), len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), desiredState.SuccessfullyResolvedDependencies(), len(actualState.ComponentInstanceMap))
 }
 
 func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
 	t.Helper()
 	eventLog := event.NewLog("test-resolve", false)
 	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
-	result, err := resolver.ResolveAllDependencies()
-	if !assert.NoError(t, err, "Policy should be resolved without errors") {
+	result := resolver.ResolveAllDependencies()
+	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		panic("Policy resolution error")
 	}
 
-	if expectedNonEmpty && len(result.GetDependencyInstanceMap()) <= 0 {
+	if expectedNonEmpty && result.SuccessfullyResolvedDependencies() <= 0 {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
 		t.FailNow()

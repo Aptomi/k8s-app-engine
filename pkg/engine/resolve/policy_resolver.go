@@ -55,8 +55,15 @@ type PolicyResolver struct {
 	eventLog *event.Log
 }
 
-// NewPolicyResolver creates a new policy resolver
+// NewPolicyResolver creates a new policy resolver. You must call policy.Validate() before calling this method, to
+// ensure that the policy is valid.
 func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLog *event.Log) *PolicyResolver {
+	// Check that the policy is valid
+	policyValidationErr := policy.Validate()
+	if policyValidationErr != nil {
+		panic(fmt.Sprintf("can't create resolver because policy is invalid: %s", policyValidationErr))
+	}
+
 	return &PolicyResolver{
 		policy:          policy,
 		externalData:    externalData,
@@ -69,48 +76,32 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLo
 
 // ResolveAllDependencies takes policy as input and calculates PolicyResolution (desired state) as output.
 //
-// It resolves all recorded claims for consuming contracts ("instantiate <contract> with <labels>"), calculating
+// The method resolves all recorded claims for consuming contracts ("instantiate <contract> with <labels>"), calculating
 // which components have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
 // it can be rendered by the engine diff/apply by deploying and configuring required components in the cloud.
-func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, error) {
-	// Run policy validation before resolution
-	err := resolver.policy.Validate()
-	if err != nil {
-		return nil, err
-	}
-
+//
+// As a result, status of every dependency will be stored in resolution state.
+func (resolver *PolicyResolver) ResolveAllDependencies() *PolicyResolution {
 	// Allocate semaphore, making sure we don't run more than MaxConcurrentGoRoutines go routines at the same time
 	var semaphore = make(chan int, MaxConcurrentGoRoutines)
+	var wg sync.WaitGroup
 	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
-	var errs = make(chan error, len(dependencies))
 
 	// Resolve every declared dependency
 	for _, d := range dependencies {
 		// Start go routine for resolving a given dependency
+		wg.Add(1)
 		semaphore <- 1
 		go func(d *lang.Dependency) {
+			defer wg.Done()
 			node, resolveErr := resolver.resolveDependency(d)
-			errs <- resolver.combineData(node, resolveErr)
+			resolver.combineData(node, resolveErr)
 			<-semaphore
 		}(d.(*lang.Dependency))
 	}
 
-	errMsg := ""
-
 	// Wait for all go routines to end
-	errFound := 0
-	for i := 0; i < len(dependencies); i++ {
-		resolveErr := <-errs
-		if resolveErr != nil {
-			errFound++
-			errMsg += "\n - " + resolveErr.Error()
-		}
-	}
-
-	// See if there were any errors
-	if errFound > 0 {
-		return nil, fmt.Errorf("%d errors occurred during policy resolution: %s", errFound, errMsg)
-	}
+	wg.Wait()
 
 	// Once all components are resolved, print information about them into event log
 	for _, instance := range resolver.resolution.ComponentInstanceMap {
@@ -120,20 +111,11 @@ func (resolver *PolicyResolver) ResolveAllDependencies() (*PolicyResolution, err
 		}
 	}
 
-	// Validate resolution, just in case
-	errValidate := resolver.resolution.Validate(resolver.policy)
-	if errValidate != nil {
-		return nil, errValidate
-	}
-
-	return resolver.resolution, nil
+	return resolver.resolution
 }
 
-// Resolves a single dependency
+// Resolves a single dependency and returns an error if it cannot be resolved
 func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *resolutionNode, resolveErr error) {
-	// create new resolution node
-	node = resolver.newResolutionNode()
-
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
@@ -142,7 +124,10 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 		}
 	}()
 
-	// populate resolution node with data (e.g. put initial set of labels from user & dependency)
+	// create new resolution node
+	node = resolver.newResolutionNode()
+
+	// populate resolution node with data (e.g. construct initial set of labels)
 	resolver.initResolutionNode(node, d)
 
 	// resolve it
@@ -150,8 +135,8 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 	return node, resolveErr
 }
 
-// Combines resolution data into the overall state of the world
-func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr error) error {
+// Combines resolution data into the overall state of the world. If there is a conflict, it will return an error
+func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr error) {
 	// put a lock
 	resolver.combineMutex.Lock()
 
@@ -165,39 +150,40 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 		resolver.combineMutex.Unlock()
 	}()
 
-	// if there was a resolution error, return it
-	if resolutionErr != nil {
-		return resolutionErr
-	}
+	// if there was no resolution error, combine component data
+	if resolutionErr == nil {
+		// aggregate component instance data
+		err := resolver.resolution.AppendData(node.resolution)
 
-	// if node is nil (likely, panic happened), return
-	if node == nil {
-		return resolutionErr
-	}
-
-	// exit if dependency has not been fulfilled. otherwise, proceed to data aggregation
-	if !node.resolved || node.serviceKey == nil {
-		return nil
+		// if there is a conflict (e.g. components have different code params), turn this into an error
+		if err != nil {
+			node.eventLog.LogError(err)
+			resolutionErr = err
+		}
 	}
 
 	// add a record for dependency resolution
-	resolver.resolution.dependencyInstanceMap[runtime.KeyForStorable(node.dependency)] = node.serviceKey.GetKey()
-
-	// append component instance data
-	err := resolver.resolution.AppendData(node.resolution)
-	if err != nil {
-		node.eventLog.LogError(err)
-		return err
-	}
-
-	return nil
+	resolver.resolution.dependencyInstanceMap[runtime.KeyForStorable(node.dependency)] = newDependencyResolution(resolutionErr, node.serviceKey)
 }
 
 // Evaluate evaluates and resolves a single dependency ("<user> needs <service> with <labels>") and calculates component allocations
-// Returns error only if there is an issue with the policy (e.g. it's malformed)
-// Returns nil if there is no error (it may be that nothing was still matched though)
-// If you want to check for successful resolution, use node.resolved flag
-func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
+// Returns error only if there is an issue with the given dependency and it cannot be resolved
+func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr error) {
+	recursiveError := false
+
+	// if this function returns an error, it needs to be logged
+	defer func() {
+		if resolveErr != nil {
+			// Log error
+			if !recursiveError {
+				node.eventLog.LogError(resolveErr)
+			}
+
+			// Log that service or component instance cannot be resolved
+			node.logCannotResolveInstance()
+		}
+	}()
+
 	// Error variable that we will be reusing
 	var err error
 
@@ -208,8 +194,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Locate the user
 	err = node.checkUserExists()
 	if err != nil {
-		// If consumer is not present, let's just say that this dependency cannot be fulfilled
-		return node.cannotResolveInstance(err)
+		return err
 	}
 	node.objectResolved(node.user)
 
@@ -224,22 +209,14 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Match the context
 	node.context, err = node.getMatchedContext(resolver.policy)
 	if err != nil {
-		// Return a policy processing error in case of context resolution failure
-		return node.cannotResolveInstance(err)
-	}
-
-	// If no matching context is found, the dependency cannot be resolved
-	if node.context == nil {
-		// This is considered a normal scenario (no matching context found), so no error is returned
-		return node.cannotResolveInstance(nil)
+		return err
 	}
 	node.objectResolved(node.context)
 
 	// Check that service, which current context is implemented with, exists
 	node.service, err = node.getMatchedService(resolver.policy)
 	if err != nil {
-		// Return a policy processing error in case of context resolution failure
-		return node.cannotResolveInstance(err)
+		return err
 	}
 	node.objectResolved(node.service)
 
@@ -249,30 +226,26 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Resolve allocation keys for the context
 	node.allocationKeysResolved, err = node.resolveAllocationKeys(resolver.policy)
 	if err != nil {
-		// Return an error in case of malformed policy or policy processing error
-		return node.cannotResolveInstance(err)
+		return err
 	}
 
 	// Process global rules before processing service key and dependent component keys
 	ruleResult, err := node.processRules()
 	if err != nil {
-		// Return an error in case of rule processing error
-		return node.cannotResolveInstance(err)
+		return err
 	}
 	// Create service key
 	node.serviceKey, err = node.createComponentKey(nil)
 	if err != nil {
-		// Return an error in case of malformed policy or policy processing error
-		return node.cannotResolveInstance(err)
+		return err
 	}
 	node.objectResolved(node.serviceKey)
 
-	// Check if we've been there already
+	// Check if we've been there already and therefore hit a service cycle
 	cycle := util.ContainsString(node.path, node.serviceKey.GetKey())
 	node.path = append(node.path, node.serviceKey.GetKey())
 	if cycle {
-		err = node.errorServiceCycleDetected()
-		return node.cannotResolveInstance(err)
+		return node.errorServiceCycleDetected()
 	}
 
 	// Store labels for service
@@ -284,8 +257,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	// Now, sort all components in topological order (it should always succeed, as policy has been validated)
 	componentsOrdered, err := node.service.GetComponentsSortedTopologically()
 	if err != nil {
-		// Return an error in case of failed component topological sort
-		return node.cannotResolveInstance(err)
+		return err
 	}
 
 	// Iterate over all service components and resolve them recursively
@@ -294,8 +266,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		// Check if component criteria holds
 		componentMatch, componentMatchErr := node.componentMatches(node.component)
 		if componentMatchErr != nil {
-			// Return an error in case we failed to check component criteria
-			return node.cannotResolveInstance(err)
+			return err
 		}
 
 		// If component criteria doesn't hold, do not proceed further
@@ -303,11 +274,10 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 			continue
 		}
 
-		// Create key
+		// Create component key and check that we were able to form it
 		node.componentKey, err = node.createComponentKey(node.component)
 		if err != nil {
-			// Return an error in case of malformed policy or policy processing error
-			return node.cannotResolveInstance(err)
+			return err
 		}
 
 		// Store edge (service instance -> component instance)
@@ -322,7 +292,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 		// Calculate and store discovery params
 		err := node.calculateAndStoreDiscoveryParams()
 		if err != nil {
-			return node.cannotResolveInstance(err)
+			return err
 		}
 
 		// Print information that we are starting to resolve dependency (on code, or on service)
@@ -332,7 +302,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 			// Evaluate code params
 			err := node.calculateAndStoreCodeParams()
 			if err != nil {
-				return node.cannotResolveInstance(err)
+				return err
 			}
 		} else if node.component.Contract != "" {
 			// Create a child node for dependency resolution
@@ -341,17 +311,13 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 			// Resolve dependency on another contract recursively
 			err := resolver.resolveNode(nodeNext)
 
-			// Combine event logs
+			// Combine event logs first
 			node.eventLogsCombined = append(node.eventLogsCombined, nodeNext.eventLogsCombined...)
 
+			// Then return an error, if there was one
 			if err != nil {
-				return node.cannotResolveInstance(err)
-			}
-
-			// If a sub-dependency has not been fulfilled, then exit
-			if !nodeNext.resolved {
-				// This is considered a normal scenario (sub-dependency not fulfilled), so no error is returned
-				return node.cannotResolveInstance(nil)
+				recursiveError = true
+				return err
 			}
 		}
 
@@ -361,7 +327,6 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) error {
 	}
 
 	// Mark note as resolved and record usage of a given service instance
-	node.resolved = true
 	node.logInstanceSuccessfullyResolved(node.serviceKey)
 	node.resolution.RecordResolved(node.serviceKey, node.dependency, ruleResult)
 

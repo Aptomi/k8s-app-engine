@@ -20,10 +20,7 @@ func TestVisualizationDiagram(t *testing.T) {
 	// unit test policy resolved revision
 	eventLog := event.NewLog("test-resolve", false)
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
-	resolutionNew, err := resolver.ResolveAllDependencies()
-	if !assert.NoError(t, err, "Policy should be resolved without errors") {
-		t.FailNow()
-	}
+	resolutionNew := resolver.ResolveAllDependencies()
 	if !assert.Equal(t, 14, len(resolutionNew.ComponentInstanceMap), "Instances should be resolved") {
 		t.FailNow()
 	}
@@ -37,21 +34,14 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	{
 		data := NewGraphBuilder(b.Policy(), resolutionEmpty, b.External()).Policy(PolicyCfgDefault).GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Policy visualization: generated policy") {
-			debug(t, data)
-		}
-	}
-
-	{
-		data := NewGraphBuilder(b.Policy(), resolutionEmpty, b.External()).DependencyResolution(DependencyResolutionCfgDefault).GetDataJSON()
-		if !assert.Condition(t, func() bool { return 100 < len(data) && len(data) < 800 }, "Policy visualization: generated policy -> empty resolution") {
+		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Policy visualization: non-empty policy") {
 			debug(t, data)
 		}
 	}
 
 	{
 		data := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault).GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Policy visualization: generated policy -> successfully resolved") {
+		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Dependency resolution visualization: non-empty policy") {
 			debug(t, data)
 		}
 	}
@@ -61,7 +51,7 @@ func TestVisualizationDiagram(t *testing.T) {
 		full := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault)
 		full.CalcDelta(empty)
 		data := full.GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Policy visualization diff: empty -> non-empty (adding components)") {
+		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Dependency resolution visualization diff: empty -> non-empty (adding instances)") {
 			debug(t, data)
 		}
 	}
@@ -71,7 +61,7 @@ func TestVisualizationDiagram(t *testing.T) {
 		full := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault)
 		empty.CalcDelta(full)
 		data := empty.GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Policy visualization diff: empty -> non-empty (adding components)") {
+		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Dependency resolution visualization diff: non-empty -> empty (removing instances)") {
 			debug(t, data)
 		}
 	}
