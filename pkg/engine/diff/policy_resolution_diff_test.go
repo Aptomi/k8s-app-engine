@@ -173,7 +173,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 	}{}
 
 	s := []string{}
-	fn := action.WrapSequential(func(act action.Base) error {
+	fn := func(act action.Base) error {
 		switch act.(type) {
 		case *component.CreateAction:
 			cnt.create++
@@ -192,9 +192,9 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 		}
 		s = append(s, fmt.Sprintf("\n%+v", act))
 		return nil
-	})
+	}
 
-	_ = diff.ActionPlan.Apply(fn)
+	_ = diff.ActionPlan.Apply(action.WrapSequential(fn))
 
 	ok := assert.Equal(t, componentInstantiate, cnt.create, "Diff: component instantiations")
 	ok = ok && assert.Equal(t, componentDestruct, cnt.delete, "Diff: component destructions")
