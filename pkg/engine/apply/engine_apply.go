@@ -61,7 +61,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResul
 
 	// initialize progress indicator
 	cnt := apply.actionPlan.Apply(action.Noop()).Success
-	apply.progress.SetTotal(cnt)
+	apply.progress.SetTotal(int(cnt))
 
 	// process all actions
 	context := action.NewContext(
@@ -75,6 +75,12 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResul
 	)
 
 	// TODO: apply in parallel, https://github.com/Aptomi/aptomi/issues/310
+	// Note that this function will be called in different go routines by apply
+	// So we will need to
+	// (1) Remove WrapSequential to make action execution parallel
+	// (2) Restrict the number of parallel actions per cluster (make sure plugin can take care of that)
+	// (3) Ensure that plugins are "thread-safe"
+	// (4) Ensure that when we are updating states (e.g. Desired -> Actual), this is also "thread-safe"
 	result := apply.actionPlan.Apply(action.WrapSequential(func(act action.Base) error {
 		apply.progress.Advance()
 		err := apply.executeAction(act, context)

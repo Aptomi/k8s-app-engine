@@ -9,6 +9,10 @@ type GraphNode struct {
 	// main actions will not be executed
 	Before []*GraphNode
 
+	// BeforeRev is the opposite to Before, indicating which actions have to be executed after this node finishes
+	// execution
+	BeforeRev []*GraphNode
+
 	// Main actions which have to be executed sequentially. If one fails, the rest will not be executed
 	Actions []Base
 }
@@ -23,6 +27,7 @@ func NewGraphNode(key string) *GraphNode {
 // AddBefore adds an action to be executed before the list of main actions
 func (node *GraphNode) AddBefore(that *GraphNode) {
 	node.Before = append(node.Before, that)
+	that.BeforeRev = append(that.BeforeRev, node)
 }
 
 // AddAction adds an action to the list of main actions. If avoidDuplicates is true, then duplicate actions will not be

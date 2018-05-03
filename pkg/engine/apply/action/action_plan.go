@@ -1,10 +1,15 @@
 package action
 
+import (
+	"sync"
+	"sync/atomic"
+)
+
 // ApplyResult is a result of applying actions
 type ApplyResult struct {
-	Success int
-	Failed  int
-	Skipped int
+	Success uint32
+	Failed  uint32
+	Skipped uint32
 }
 
 // Plan is a plan of actions
@@ -13,15 +18,15 @@ type Plan struct {
 	// desired state. Key in the map corresponds to component instance keys.
 	NodeMap map[string]*GraphNode
 
-	// RootNodes determines root nodes in the action graph, from which the apply should start.
-	RootNodes map[string]bool
+	// LeafNodes determines leaf nodes in the action graph (i.e. without dependencies), from which the apply should start.
+	LeafNodes map[string]bool
 }
 
 // NewPlan creates a new Plan
 func NewPlan() *Plan {
 	return &Plan{
 		NodeMap:   make(map[string]*GraphNode),
-		RootNodes: make(map[string]bool),
+		LeafNodes: make(map[string]bool),
 	}
 }
 
@@ -35,51 +40,110 @@ func (plan *Plan) GetActionGraphNode(key string) *GraphNode {
 	return result
 }
 
-// AddRootNode adds a new root node in the action graph
-func (plan *Plan) AddRootNode(key string) {
-	plan.RootNodes[key] = true
+// AddLeafNode adds a new root node in the action graph
+func (plan *Plan) AddLeafNode(key string) {
+	plan.LeafNodes[key] = true
 }
 
 // Apply applies the action plan. It may call fn in multiple go routines, executing the plan in parallel
 func (plan *Plan) Apply(fn ApplyFunction) *ApplyResult {
-	was := make(map[string]bool)
+	deg := make(map[string]int)
 	wasError := make(map[string]error)
+	queue := make(chan string, len(plan.NodeMap))
+	mutex := &sync.RWMutex{}
 	result := &ApplyResult{}
-	for key := range plan.RootNodes {
-		_ = plan.applyNode(key, fn, was, wasError, result)
+
+	// Start from the leaf nodes
+	for key := range plan.LeafNodes {
+		queue <- key
 	}
+
+	// Initialize all degrees
+	var wg sync.WaitGroup
+	for key := range plan.NodeMap {
+		deg[key] = len(plan.NodeMap[key].Before)
+		wg.Add(1)
+	}
+
+	// Start execution
+	var done sync.WaitGroup
+	done.Add(1)
+	go func() {
+		// This will keep running until the queue if not closed
+		for key := range queue {
+			// Take element off the queue, apply the block of actions and put into queue 0-degree nodes which are waiting on us
+			go func(key string) {
+				defer wg.Done()
+				plan.applyActions(key, fn, queue, deg, wasError, mutex, result)
+			}(key)
+		}
+		done.Done()
+	}()
+
+	// Wait for all actions to finish
+	wg.Wait()
+
+	// Close the channel to ensure that the go routine launched above will exit
+	close(queue)
+
+	// Wait for the go routine to finish
+	done.Wait()
+
 	return result
 }
 
-// TODO: change implementation from BFS to DFS (apply in waves for parallelism), https://github.com/Aptomi/aptomi/issues/310
-func (plan *Plan) applyNode(key string, fn ApplyFunction, was map[string]bool, wasError map[string]error, result *ApplyResult) error {
-	// see if we've been here already
-	if was[key] {
-		return wasError[key]
-	}
-	was[key] = true
-
+// This function applies a block of actions and updates nodes which are waiting on this node
+func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, deg map[string]int, wasError map[string]error, mutex *sync.RWMutex, result *ApplyResult) {
 	// locate the node
 	node := plan.NodeMap[key]
 
-	// run all 'before' actions. if one of them fails, don't continue
-	for _, beforeNode := range node.Before {
-		err := plan.applyNode(beforeNode.Key, fn, was, wasError, result)
-		if err != nil {
-			return err
+	// run all actions. if one of them fails, the rest won't be executed
+	// only run them if all dependent nodes succeeded
+	mutex.RLock()
+	var foundErr = wasError[key]
+	mutex.RUnlock()
+	if foundErr == nil {
+		for _, action := range node.Actions {
+			// if an error happened before, all subsequent actions are getting marked as skipped
+			if foundErr != nil {
+				atomic.AddUint32(&result.Skipped, 1)
+			} else {
+				// Otherwise, let's run the action and see if it failed or not
+				err := fn(action)
+				if err != nil {
+					atomic.AddUint32(&result.Failed, 1)
+					foundErr = err
+				} else {
+					atomic.AddUint32(&result.Success, 1)
+				}
+			}
 		}
 	}
 
-	// run all 'main' actions. if one of them fails, don't continue
-	for idx, action := range node.Actions {
-		err := fn(action)
-		if err != nil {
-			result.Failed++
-			result.Skipped += len(node.Actions) - idx - 1
-			return err
-		}
-		result.Success++
+	// mark our node as failed, if we encountered an error
+	if foundErr != nil {
+		mutex.Lock()
+		wasError[key] = foundErr
+		mutex.Unlock()
 	}
 
-	return nil
+	// decrement degrees of nodes which are waiting on us
+	for _, prevNode := range plan.NodeMap[node.Key].BeforeRev {
+		mutex.Lock()
+		deg[prevNode.Key]--
+		if deg[prevNode.Key] < 0 {
+			panic("negative node degree while applying actions in parallel")
+		}
+		if deg[prevNode.Key] == 0 {
+			queue <- prevNode.Key
+		}
+		mutex.Unlock()
+		if foundErr != nil {
+			// Mark prev nodes failed too
+			mutex.Lock()
+			wasError[prevNode.Key] = foundErr
+			mutex.Unlock()
+		}
+	}
+
 }

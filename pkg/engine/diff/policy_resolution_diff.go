@@ -40,14 +40,14 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	allCompInstances := make(map[string]bool)
 	for keyPrev, compPrev := range diff.Prev.ComponentInstanceMap {
 		allCompInstances[keyPrev] = true
-		if len(compPrev.EdgesIn) <= 0 {
-			diff.ActionPlan.AddRootNode(keyPrev)
+		if len(compPrev.EdgesOut) <= 0 {
+			diff.ActionPlan.AddLeafNode(keyPrev)
 		}
 	}
 	for keyNext, compNext := range diff.Next.ComponentInstanceMap {
 		allCompInstances[keyNext] = true
-		if len(compNext.EdgesIn) <= 0 {
-			diff.ActionPlan.AddRootNode(keyNext)
+		if len(compNext.EdgesOut) <= 0 {
+			diff.ActionPlan.AddLeafNode(keyNext)
 		}
 	}
 
