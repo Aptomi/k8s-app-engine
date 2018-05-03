@@ -47,7 +47,7 @@ test:
 
 .PHONY: test-race
 test-race:
-	CGO_ENABLED=1 ${GO} test -race -short -v ./...
+	CGO_ENABLED=1 go test -race -short -v ./...
 	@echo "\nNo race conditions detected. Unit tests passed"
 
 .PHONY: alltest
