@@ -51,17 +51,15 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 }
 
 // Apply method executes all actions, actions call plugins to apply changes and roll them out to the cloud.
-// It returns the updated actual state and event log.
+// It returns the updated actual state inside PolicyResolution and event log, as well as stats about how many actions
+// have been applied successfully vs. failed vs. skipped.
+//
 // As actions get executed, they will instantiate/update/delete components according to the resolved
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
-func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResult, error) {
-	// error count while applying changes
-	foundErrors := false
-
+func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResult) {
 	// initialize progress indicator
-	cnt := apply.actionPlan.Apply(action.Noop()).Success
-	apply.progress.SetTotal(int(cnt))
+	apply.progress.SetTotal(int(apply.actionPlan.NumberOfActions()))
 
 	// process all actions
 	context := action.NewContext(
@@ -87,23 +85,15 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResul
 		if err != nil {
 			err = fmt.Errorf("error while applying action '%s': %s", act, err)
 			apply.eventLog.LogError(err)
-			foundErrors = true
 		}
 		return err
 	}))
 
 	// Finalize progress indicator
-	apply.progress.Done(!foundErrors)
-
-	// Return error if there's been at least one error
-	if foundErrors {
-		err := fmt.Errorf("one or more errors occurred while running actions")
-		apply.eventLog.LogError(err)
-		return apply.actualState, result, err
-	}
+	apply.progress.Done(true)
 
 	// No errors occurred
-	return apply.actualState, result, nil
+	return apply.actualState, result
 }
 
 func (apply *EngineApply) executeAction(action action.Base, context *action.Context) (errResult error) {

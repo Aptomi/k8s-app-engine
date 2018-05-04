@@ -100,7 +100,7 @@ func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, 
 	// run all actions. if one of them fails, the rest won't be executed
 	// only run them if all dependent nodes succeeded
 	mutex.RLock()
-	var foundErr = wasError[key]
+	foundErr := wasError[key]
 	mutex.RUnlock()
 	if foundErr == nil {
 		for _, action := range node.Actions {
@@ -146,4 +146,9 @@ func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, 
 		}
 	}
 
+}
+
+// NumberOfActions returns the total number of actions that is expected to be executed in the whole action graph
+func (plan *Plan) NumberOfActions() uint32 {
+	return plan.Apply(Noop()).Success
 }

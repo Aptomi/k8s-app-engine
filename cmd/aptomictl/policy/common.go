@@ -179,14 +179,14 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 
 	if !finished {
 		progressBar.Done(false)
-		fmt.Printf("Timeout! Revision %d has not been applied in %d seconds\n", rev.GetGeneration(), 60*5)
+		fmt.Printf("Revision %d timeout! Has not been applied in %d seconds\n", rev.GetGeneration(), int(interval.Seconds()*float64(attempts)))
 		panic("timeout")
-	} else if rev.Status == engine.RevisionStatusSuccess {
+	} else if rev.Status == engine.RevisionStatusCompleted {
 		progressBar.Done(true)
-		fmt.Printf("Success. Revision %d applied successfully\n", rev.GetGeneration())
+		fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Stats.Success, rev.Stats.Failed, rev.Stats.Skipped)
 	} else if rev.Status == engine.RevisionStatusError {
 		progressBar.Done(false)
-		fmt.Printf("Error! Revision %d failed with an error and has not been fully applied\n", rev.GetGeneration())
+		fmt.Printf("Revision %d failed\n", rev.GetGeneration())
 		panic("error")
 	}
 

@@ -419,8 +419,7 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		progress.NewNoop(),
 	)
 
-	cnt := applier.actionPlan.Apply(action.Noop()).Success
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: cnt, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
 	timeEnd := time.Now()
 	timeDiff := timeEnd.Sub(timeStart)

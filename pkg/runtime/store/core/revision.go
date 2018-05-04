@@ -84,14 +84,7 @@ func (ds *defaultStore) NewRevision(policyGen runtime.Generation) (*engine.Revis
 		gen = currRevision.GetGeneration().Next()
 	}
 
-	return &engine.Revision{
-		TypeKind: engine.RevisionObject.GetTypeKind(),
-		Metadata: runtime.GenerationMetadata{
-			Generation: gen,
-		},
-		Policy: policyGen,
-		Status: engine.RevisionStatusInProgress,
-	}, nil
+	return engine.NewRevision(gen, policyGen), nil
 }
 
 // SaveRevision saves specified Revision into the store with possibly new generation creation
@@ -142,15 +135,8 @@ func (p *revisionProgressUpdater) Advance() {
 
 func (p *revisionProgressUpdater) Done(success bool) {
 	p.revision.Progress.Current = p.revision.Progress.Total
-
-	status := engine.RevisionStatusSuccess
-	if !success {
-		status = engine.RevisionStatusError
-	}
-	p.revision.Status = status
-
+	p.revision.Status = engine.RevisionStatusCompleted
 	p.revision.AppliedAt = time.Now()
-
 	p.save()
 }
 

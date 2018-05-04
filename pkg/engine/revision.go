@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"time"
@@ -20,13 +21,13 @@ var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, RevisionObject.Kind, ru
 const (
 	// RevisionStatusInProgress represents Revision status with apply in progress
 	RevisionStatusInProgress = "inprogress"
-	// RevisionStatusSuccess represents Revision status with apply successfully finished
-	RevisionStatusSuccess = "success"
-	// RevisionStatusError represents Revision status with apply finished with error
+	// RevisionStatusSuccess represents Revision status with apply finished
+	RevisionStatusCompleted = "completed"
+	// RevisionStatusError represents Revision status when a critical error happened (we should rarely see those)
 	RevisionStatusError = "error"
 )
 
-// Revision is a "milestone" in applying
+// Revision is a "milestone" in applying policy changes
 type Revision struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         runtime.GenerationMetadata
@@ -35,8 +36,10 @@ type Revision struct {
 	Policy runtime.Generation
 
 	Status    string
-	Progress  RevisionProgress
+	Progress  *RevisionProgress
 	AppliedAt time.Time
+
+	Stats *action.ApplyResult
 
 	ResolveLog []*event.APIEvent
 	ApplyLog   []*event.APIEvent
@@ -46,6 +49,20 @@ type Revision struct {
 type RevisionProgress struct {
 	Current int
 	Total   int
+}
+
+// NewRevision creates a new revision
+func NewRevision(gen runtime.Generation, policyGen runtime.Generation) *Revision {
+	return &Revision{
+		TypeKind: RevisionObject.GetTypeKind(),
+		Metadata: runtime.GenerationMetadata{
+			Generation: gen,
+		},
+		Policy:   policyGen,
+		Status:   RevisionStatusInProgress,
+		Progress: &RevisionProgress{},
+		Stats:    &action.ApplyResult{},
+	}
 }
 
 // GetName returns Revision name

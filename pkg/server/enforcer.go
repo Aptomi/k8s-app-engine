@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -81,12 +80,6 @@ func (server *Server) enforce() error {
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
 	desiredState := resolver.ResolveAllDependencies()
 
-	// TODO: get rid of err revisions. revision should not have a global err status
-	if false {
-		server.saveErrRevision(currRevision, desiredPolicyGen, resolveLog)
-		return fmt.Errorf("cannot resolve desiredPolicy: %s", err)
-	}
-
 	stateDiff := diff.NewPolicyResolutionDiff(desiredState, actualState)
 
 	nextRevision, err := server.store.NewRevision(desiredPolicyGen)
@@ -95,8 +88,8 @@ func (server *Server) enforce() error {
 	}
 	nextRevision.ResolveLog = resolveLog.AsAPIEvents()
 
-	// policy changed while no actions needed to achieve desired state
-	actionCnt := stateDiff.ActionPlan.Apply(action.Noop()).Success
+	// policy changes while no actions needed to achieve desired state
+	actionCnt := stateDiff.ActionPlan.NumberOfActions()
 	if actionCnt <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
 		log.Infof("(enforce-%d) No changes, policy gen %d", server.enforcementIdx, desiredPolicyGen)
 		return nil
@@ -118,13 +111,14 @@ func (server *Server) enforce() error {
 	pluginRegistry := server.pluginRegistryFactory()
 	applyLog := event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.GetRevisionProgressUpdater(nextRevision))
-	_, _, err = applier.Apply()
+	_, stats := applier.Apply()
 
 	// reload revision to have progress data saved into it
 	nextRevision, saveErr := server.store.GetRevision(runtime.LastGen)
 	if saveErr != nil {
 		return fmt.Errorf("error while reloading last revision to have progress loaded: %s", saveErr)
 	}
+	nextRevision.Stats = stats
 	nextRevision.ApplyLog = applyLog.AsAPIEvents()
 
 	// save apply log
@@ -133,27 +127,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while saving new revision with apply log: %s", saveErr)
 	}
 
-	if err != nil {
-		return fmt.Errorf("error while applying new revision: %s", err)
-	}
-	log.Infof("(enforce-%d) New revision %d successfully applied, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentInstanceMap))
+	log.Infof("(enforce-%d) New revision %d processed, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentInstanceMap))
 
 	return nil
-}
-
-func (server *Server) saveErrRevision(currRevision *engine.Revision, desiredPolicyGen runtime.Generation, resolveLog *event.Log) {
-	if currRevision == nil || currRevision.Policy != desiredPolicyGen || currRevision.Status != engine.RevisionStatusError {
-		rev, err := server.store.NewRevision(desiredPolicyGen)
-		if err != nil {
-			log.Warnf("(enforce-%d) Error while creating revision to record resolution error: %s", server.enforcementIdx, err)
-		}
-
-		rev.Status = engine.RevisionStatusError
-		rev.ResolveLog = resolveLog.AsAPIEvents()
-
-		err = server.store.SaveRevision(rev)
-		if err != nil {
-			log.Warnf("(enforce-%d) Error while saving revision to record resolution error: %s", server.enforcementIdx, err)
-		}
-	}
 }
