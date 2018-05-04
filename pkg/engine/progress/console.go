@@ -35,7 +35,7 @@ func (progressConsole *Console) createProgressBar() {
 	}
 	progressConsole.progressBar = progressConsole.progress.AddBar(progressConsole.getTotalInternal())
 	progressConsole.progressBar.PrependFunc(func(b *uiprogress.Bar) string {
-		return fmt.Sprintf("  [%d/%d]", b.Current(), b.Total)
+		return fmt.Sprintf("  [%d/%d]", b.Current()-1, b.Total-1)
 	})
 	progressConsole.progressBar.AppendCompleted()
 	progressConsole.progressBar.AppendFunc(func(b *uiprogress.Bar) string {
@@ -50,6 +50,7 @@ func (progressConsole *Console) SetOut(out io.Writer) {
 
 // SetTotal sets the total number of steps in a progress indicator
 func (progressConsole *Console) SetTotal(total int) {
+	// the underlying library can't tolerate zero values for total, so we are setting + 1
 	progressConsole.setTotalInternal(total + 1)
 	progressConsole.createProgressBar()
 	progressConsole.Advance()
