@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -33,7 +33,7 @@ type Revision interface {
 	NewRevision(policyGen runtime.Generation) (*engine.Revision, error)
 	SaveRevision(revision *engine.Revision) error
 	UpdateRevision(revision *engine.Revision) error
-	GetRevisionProgressUpdater(revision *engine.Revision) progress.Indicator
+	NewRevisionResultUpdater(revision *engine.Revision) action.ApplyResultUpdater
 }
 
 // ActualState represents database operations for the actual state handling

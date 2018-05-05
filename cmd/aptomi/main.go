@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/cmd/aptomi/root"
 	"math/rand"
 	"time"
 )
@@ -9,7 +10,7 @@ import (
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	if err := aptomiCmd.Execute(); err != nil {
+	if err := root.Command.Execute(); err != nil {
 		panic(fmt.Errorf("error while executing command: %s", err))
 	}
 }

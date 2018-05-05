@@ -3,12 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
-	log "github.com/Sirupsen/logrus"
-	"math"
-	"time"
 )
 
 // GetRevision returns Revision for specified generation
@@ -105,52 +100,4 @@ func (ds *defaultStore) UpdateRevision(revision *engine.Revision) error {
 	}
 
 	return nil
-}
-
-func (ds *defaultStore) GetRevisionProgressUpdater(revision *engine.Revision) progress.Indicator {
-	return &revisionProgressUpdater{ds, revision}
-}
-
-type revisionProgressUpdater struct {
-	store    store.Core
-	revision *engine.Revision
-}
-
-func (p *revisionProgressUpdater) save() {
-	err := p.store.UpdateRevision(p.revision)
-	if err != nil {
-		log.Warnf("Unable to save revision %s progress with err: %s", p.revision.GetGeneration(), err)
-	}
-}
-
-func (p *revisionProgressUpdater) SetTotal(total int) {
-	p.revision.Progress.Total = total
-	p.save()
-}
-
-func (p *revisionProgressUpdater) Advance() {
-	p.revision.Progress.Current++
-	p.save()
-}
-
-func (p *revisionProgressUpdater) Done(success bool) {
-	p.revision.Progress.Current = p.revision.Progress.Total
-	p.revision.Status = engine.RevisionStatusCompleted
-	p.revision.AppliedAt = time.Now()
-	p.save()
-}
-
-func (p *revisionProgressUpdater) IsDone() bool {
-	return p.revision.Status != engine.RevisionStatusInProgress
-}
-
-func (p *revisionProgressUpdater) GetCompletionPercent() int {
-	if p.revision.Progress.Total <= 0 {
-		return 0
-	}
-	result := int(math.Floor(100.0 * float64(p.revision.Progress.Current) / float64(p.revision.Progress.Total)))
-	if result > 100 {
-		result = 100
-	}
-	return result
 }

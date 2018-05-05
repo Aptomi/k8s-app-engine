@@ -50,7 +50,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("unable to get curr revision: %s", err)
 	}
 
-	// Mark last Revision as failed if it wasn't completed
+	// Mark last Revision as failed if it wasn't completed. If it's in 'waiting' state, that's probably ok
 	if currRevision != nil && currRevision.Status == engine.RevisionStatusInProgress {
 		currRevision.Status = engine.RevisionStatusError
 		currRevision.AppliedAt = time.Now()
@@ -110,19 +110,12 @@ func (server *Server) enforce() error {
 
 	pluginRegistry := server.pluginRegistryFactory()
 	applyLog := event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.GetRevisionProgressUpdater(nextRevision))
-	_, stats := applier.Apply()
-
-	// reload revision to have progress data saved into it
-	nextRevision, saveErr := server.store.GetRevision(runtime.LastGen)
-	if saveErr != nil {
-		return fmt.Errorf("error while reloading last revision to have progress loaded: %s", saveErr)
-	}
-	nextRevision.Stats = stats
-	nextRevision.ApplyLog = applyLog.AsAPIEvents()
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
+	_, _ = applier.Apply()
 
 	// save apply log
-	saveErr = server.store.UpdateRevision(nextRevision)
+	nextRevision.ApplyLog = applyLog.AsAPIEvents()
+	saveErr := server.store.UpdateRevision(nextRevision)
 	if saveErr != nil {
 		return fmt.Errorf("error while saving new revision with apply log: %s", saveErr)
 	}

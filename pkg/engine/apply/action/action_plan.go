@@ -2,31 +2,19 @@ package action
 
 import (
 	"sync"
-	"sync/atomic"
 )
-
-// ApplyResult is a result of applying actions
-type ApplyResult struct {
-	Success uint32
-	Failed  uint32
-	Skipped uint32
-}
 
 // Plan is a plan of actions
 type Plan struct {
 	// NodeMap is a map from key to a graph of actions, which must to be executed in order to get from actual state to
 	// desired state. Key in the map corresponds to component instance keys.
 	NodeMap map[string]*GraphNode
-
-	// LeafNodes determines leaf nodes in the action graph (i.e. without dependencies), from which the apply should start.
-	LeafNodes map[string]bool
 }
 
 // NewPlan creates a new Plan
 func NewPlan() *Plan {
 	return &Plan{
-		NodeMap:   make(map[string]*GraphNode),
-		LeafNodes: make(map[string]bool),
+		NodeMap: make(map[string]*GraphNode),
 	}
 }
 
@@ -40,28 +28,32 @@ func (plan *Plan) GetActionGraphNode(key string) *GraphNode {
 	return result
 }
 
-// AddLeafNode adds a new root node in the action graph
-func (plan *Plan) AddLeafNode(key string) {
-	plan.LeafNodes[key] = true
+// Apply applies the action plan. It may call fn in multiple go routines, executing the plan in parallel
+func (plan *Plan) Apply(fn ApplyFunction, resultUpdater ApplyResultUpdater) *ApplyResult {
+	// update total number of actions and start the revision
+	resultUpdater.SetTotal(plan.NumberOfActions())
+
+	// apply the plan and calculate result (success/failed/skipped actions)
+	plan.applyInternal(fn, resultUpdater)
+
+	// tell results updater that we are done and return the results
+	return resultUpdater.Done()
 }
 
 // Apply applies the action plan. It may call fn in multiple go routines, executing the plan in parallel
-func (plan *Plan) Apply(fn ApplyFunction) *ApplyResult {
+func (plan *Plan) applyInternal(fn ApplyFunction, resultUpdater ApplyResultUpdater) {
 	deg := make(map[string]int)
 	wasError := make(map[string]error)
 	queue := make(chan string, len(plan.NodeMap))
 	mutex := &sync.RWMutex{}
-	result := &ApplyResult{}
 
-	// Start from the leaf nodes
-	for key := range plan.LeafNodes {
-		queue <- key
-	}
-
-	// Initialize all degrees
+	// Initialize all degrees, put 0-degree leaf nodes into the queue
 	var wg sync.WaitGroup
 	for key := range plan.NodeMap {
 		deg[key] = len(plan.NodeMap[key].Before)
+		if deg[key] <= 0 {
+			queue <- key
+		}
 		wg.Add(1)
 	}
 
@@ -74,7 +66,7 @@ func (plan *Plan) Apply(fn ApplyFunction) *ApplyResult {
 			// Take element off the queue, apply the block of actions and put into queue 0-degree nodes which are waiting on us
 			go func(key string) {
 				defer wg.Done()
-				plan.applyActions(key, fn, queue, deg, wasError, mutex, result)
+				plan.applyActions(key, fn, queue, deg, wasError, mutex, resultUpdater)
 			}(key)
 		}
 		done.Done()
@@ -88,12 +80,10 @@ func (plan *Plan) Apply(fn ApplyFunction) *ApplyResult {
 
 	// Wait for the go routine to finish
 	done.Wait()
-
-	return result
 }
 
 // This function applies a block of actions and updates nodes which are waiting on this node
-func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, deg map[string]int, wasError map[string]error, mutex *sync.RWMutex, result *ApplyResult) {
+func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, deg map[string]int, wasError map[string]error, mutex *sync.RWMutex, resultUpdater ApplyResultUpdater) {
 	// locate the node
 	node := plan.NodeMap[key]
 
@@ -102,20 +92,21 @@ func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, 
 	mutex.RLock()
 	foundErr := wasError[key]
 	mutex.RUnlock()
-	if foundErr == nil {
-		for _, action := range node.Actions {
-			// if an error happened before, all subsequent actions are getting marked as skipped
-			if foundErr != nil {
-				atomic.AddUint32(&result.Skipped, 1)
+	for _, action := range node.Actions {
+		// if an error happened before, all subsequent actions are getting marked as skipped
+		if foundErr != nil {
+			// fmt.Println("skipped ", action.GetName())
+			resultUpdater.AddSkipped()
+		} else {
+			// Otherwise, let's run the action and see if it failed or not
+			err := fn(action)
+			if err != nil {
+				// fmt.Println("failed ", action.GetName())
+				resultUpdater.AddFailed()
+				foundErr = err
 			} else {
-				// Otherwise, let's run the action and see if it failed or not
-				err := fn(action)
-				if err != nil {
-					atomic.AddUint32(&result.Failed, 1)
-					foundErr = err
-				} else {
-					atomic.AddUint32(&result.Success, 1)
-				}
+				// fmt.Println("success ", action.GetName())
+				resultUpdater.AddSuccess()
 			}
 		}
 	}
@@ -150,5 +141,11 @@ func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, 
 
 // NumberOfActions returns the total number of actions that is expected to be executed in the whole action graph
 func (plan *Plan) NumberOfActions() uint32 {
-	return plan.Apply(Noop()).Success
+	resultUpdater := NewApplyResultUpdaterImpl()
+
+	// apply the plan and calculate result (success/failed/skipped actions)
+	plan.applyInternal(Noop(), resultUpdater)
+
+	// return the number of success actions (all of them will be success due to Noop() action)
+	return resultUpdater.Result.Success
 }

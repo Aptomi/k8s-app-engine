@@ -305,7 +305,7 @@ func (api *coreAPI) getPolicyUpdateResult(writer http.ResponseWriter, request *h
 	_ = stateDiff.ActionPlan.Apply(action.WrapSequential(func(act action.Base) error {
 		actions = append(actions, act.GetName())
 		return nil
-	}))
+	}), action.NewApplyResultUpdaterImpl())
 
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),

@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
@@ -38,7 +37,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 
 	// check actual state
@@ -77,13 +76,13 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 		mockRegistry(false, failAsPanic),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 	// check actual state
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check for errors
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 0, Failed: 1, Skipped: 2})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 0, Failed: 1, Skipped: 4})
 
 	// check that actual state didn't get updated
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should not be touched by apply()")
@@ -111,7 +110,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 
 	// Check that policy apply finished with expected results
@@ -154,7 +153,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNext.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 
 	// Check that policy apply finished with expected results
@@ -190,7 +189,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNextAfterUpdate.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 
 	// Check that policy apply finished with expected results
@@ -228,7 +227,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(generated.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 
 	// Check that policy apply finished with expected results
@@ -249,11 +248,11 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(reset.resolution(), actualState).ActionPlan,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
 
 	// delete/detach, delete/detach, endpoints/endpoints - 6 actions failed in total
-	actualState = applyAndCheck(t, applierNext, action.ApplyResult{Success: 1, Failed: 1, Skipped: 0})
+	actualState = applyAndCheck(t, applierNext, action.ApplyResult{Success: 1, Failed: 1, Skipped: 2})
 	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should be intact after actions failing")
 }
 
@@ -335,6 +334,7 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult action.Apply
 	ok := assert.Equal(t, expectedResult.Success, result.Success, "Number of successfully executed actions")
 	ok = ok && assert.Equal(t, expectedResult.Failed, result.Failed, "Number of failed actions")
 	ok = ok && assert.Equal(t, expectedResult.Skipped, result.Skipped, "Number of skipped actions")
+	ok = ok && assert.Equal(t, expectedResult.Success+expectedResult.Failed+expectedResult.Skipped, result.Total, "Number of total actions")
 
 	if !ok {
 		// print log into stdout and exit

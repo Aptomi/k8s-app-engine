@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
@@ -19,8 +18,6 @@ import (
 )
 
 func BenchmarkEngineSmall(b *testing.B) {
-	t := &testing.T{}
-
 	// small policy
 	smallPolicy, smallExternalData := NewPolicyGenerator(
 		239,
@@ -36,13 +33,11 @@ func BenchmarkEngineSmall(b *testing.B) {
 	).makePolicyAndExternalData()
 
 	for i := 0; i < b.N; i++ {
-		RunEngine(t, "small", smallPolicy, smallExternalData)
+		RunEngine(b, "small", smallPolicy, smallExternalData)
 	}
 }
 
 func BenchmarkEngineMedium(b *testing.B) {
-	t := &testing.T{}
-
 	// medium policy
 	mediumPolicy, mediumExternalData := NewPolicyGenerator(
 		239,
@@ -58,7 +53,7 @@ func BenchmarkEngineMedium(b *testing.B) {
 	).makePolicyAndExternalData()
 
 	for i := 0; i < b.N; i++ {
-		RunEngine(t, "medium", mediumPolicy, mediumExternalData)
+		RunEngine(b, "medium", mediumPolicy, mediumExternalData)
 	}
 }
 
@@ -396,17 +391,16 @@ func (loader *SecretLoaderImpl) LoadSecretsByUserName(string) map[string]string 
 	return nil
 }
 
-func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, externalData *external.Data) {
+func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, externalData *external.Data) {
 	fmt.Printf("Running engine for '%s'\n", testName)
 
 	timeStart := time.Now()
 
-	actualState := resolvePolicyBenchmark(t, lang.NewPolicy(), externalData, false)
-	desiredState := resolvePolicyBenchmark(t, desiredPolicy, externalData, true)
+	// resolve all dependencies and apply actions
+	actualState := resolvePolicyBenchmark(b, lang.NewPolicy(), externalData, false)
+	desiredState := resolvePolicyBenchmark(b, desiredPolicy, externalData, true)
 
-	// process all actions
 	actions := diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan
-
 	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
@@ -416,33 +410,71 @@ func RunEngine(t *testing.T, testName string, desiredPolicy *lang.Policy, extern
 		mockRegistry(true, false),
 		actions,
 		event.NewLog("test-apply", false),
-		progress.NewNoop(),
+		action.NewApplyResultUpdaterImpl(),
 	)
+	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
+	timeCheckpoint := time.Now()
+	fmt.Printf("[%s] Time = %s, resolving %d dependencies and %d component instances\n", testName, timeCheckpoint.Sub(timeStart).String(), desiredState.SuccessfullyResolvedDependencies(), len(actualState.ComponentInstanceMap))
 
-	timeEnd := time.Now()
-	timeDiff := timeEnd.Sub(timeStart)
+	// now, remove all dependencies and apply actions
+	for _, dependency := range desiredPolicy.GetObjectsByKind(lang.DependencyObject.Kind) {
+		desiredPolicy.RemoveObject(dependency)
+	}
+	desiredState = resolvePolicyBenchmark(b, desiredPolicy, externalData, false)
+	actions = diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan
+	applier = NewEngineApply(
+		desiredPolicy,
+		desiredState,
+		actualState,
+		actual.NewNoOpActionStateUpdater(),
+		externalData,
+		mockRegistry(true, false),
+		actions,
+		event.NewLog("test-apply", false),
+		action.NewApplyResultUpdaterImpl(),
+	)
+	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
-	fmt.Printf("[%s] Time = %s, Resolved = dependencies %d, components %d\n", testName, timeDiff.String(), desiredState.SuccessfullyResolvedDependencies(), len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, deleting all dependencies and component instances\n", testName, time.Now().Sub(timeCheckpoint).String())
 }
 
-func resolvePolicyBenchmark(t *testing.T, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
-	t.Helper()
+func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {
+	b.Helper()
+	actualState, result := apply.Apply()
+
+	t := &testing.T{}
+	ok := assert.Equal(t, expectedResult.Success, result.Success, "Number of successfully executed actions")
+	ok = ok && assert.Equal(t, expectedResult.Failed, result.Failed, "Number of failed actions")
+	ok = ok && assert.Equal(t, expectedResult.Skipped, result.Skipped, "Number of skipped actions")
+	ok = ok && assert.Equal(t, expectedResult.Success+expectedResult.Failed+expectedResult.Skipped, result.Total, "Number of total actions")
+
+	if !ok {
+		// print log into stdout and exit
+		hook := &event.HookConsole{}
+		apply.eventLog.Save(hook)
+		b.Fatal("action counts don't match")
+	}
+
+	return actualState
+}
+
+func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
+	b.Helper()
 	eventLog := event.NewLog("test-resolve", false)
 	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
 	result := resolver.ResolveAllDependencies()
+	t := &testing.T{}
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
-		panic("Policy resolution error")
+		b.Fatal("policy resolution error")
 	}
 
-	if expectedNonEmpty && result.SuccessfullyResolvedDependencies() <= 0 {
+	if expectedNonEmpty != (result.SuccessfullyResolvedDependencies() > 0) {
 		hook := &event.HookConsole{}
 		eventLog.Save(hook)
-		t.FailNow()
-		panic("No dependencies resolved")
+		b.Fatal("no dependencies resolved")
 	}
 
 	return result

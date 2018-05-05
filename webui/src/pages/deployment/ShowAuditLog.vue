@@ -19,7 +19,7 @@
                   <th>Who</th>
                   <th>When</th>
                   <th>Apply Revisions</th>
-                  <th>Apply Status</th>
+                  <th>Last Apply Status</th>
                   <th>Last Apply Run</th>
                   <th>Action</th>
                 </tr>
@@ -34,21 +34,36 @@
                   <td>{{ p['metadata']['updatedat'] | formatDateAgo }} <small>({{ p['metadata']['updatedat'] | formatDate }})</small></td>
                   <td class="col-xs-4">
                     <!-- <span v-if="p['revisions'] == null || p['revisions'].length <= 0" class="label label-success" style="float:left; margin-right: 2px; margin-bottom: 2px">skipped</span> -->
-                    <span @click="showEventLog('apply', r)" v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'success', 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
+                    <span @click="showEventLog('apply', r)" v-for="r in p['revisions']" class="label" v-bind:class="{ 'label-success': r['status'] === 'completed' && r['result']['failed'] <= 0, 'label-primary': r['status'] === 'inprogress', 'label-danger': r['status'] === 'error' || (r['status'] === 'completed' && r['result']['failed'] > 0) }" style="float:left; margin-right: 2px; margin-bottom: 2px">{{ r.metadata.generation }}</span>
                   </td>
                   <td class="align-middle">
                     <div v-for="r, index in p['revisions']" v-if="index === p['revisions'].length - 1" class="progress-group">
+                      <!--
                       <div v-if="r['status'] === 'inprogress'" class="progress progress-xs progress-striped active">
                         <div class="progress-bar progress-bar-primary" v-bind:style="{ width: percent(r) + '%' }"></div>
                       </div>
-                      <div v-if="r['status'] === 'success'" class="progress progress-xs active">
+                      <div v-if="r['status'] === 'completed'" class="progress progress-xs active">
                         <div class="progress-bar progress-bar-success" style="width: 100%"></div>
                       </div>
                       <div v-if="r['status'] === 'error'" class="progress progress-xs active">
                         <div class="progress-bar progress-bar-danger" style="width: 100%"></div>
                       </div>
                       <span class="progress-number"><b>{{ percent(r) }}%</b> ({{r['progress']['current']}}/{{r['progress']['total']}})</span>
+                      -->
+
+                      <!--
+                      {{ r['result'] }}
+                      {{ percents(r) }}
+                      -->
+
+                      <div class="progress">
+                        <progress-bar v-bind:now="percents(r)['success']" v-bind:label="true" type="success" v-bind:striped="r['status'] === 'inprogress'" v-bind:animated="r['status'] === 'inprogress'"></progress-bar>
+                        <progress-bar v-bind:now="percents(r)['failed']" v-bind:label="true" type="danger" v-bind:striped="r['status'] === 'inprogress'" v-bind:animated="r['status'] === 'inprogress'"></progress-bar>
+                        <progress-bar v-bind:now="percents(r)['skipped']" v-bind:label="true" type="warning" v-bind:striped="r['status'] === 'inprogress'" v-bind:animated="r['status'] === 'inprogress'"></progress-bar>
+                        <progress-bar v-bind:now="percents(r)['remaining']" v-bind:label="true" type="primary" v-bind:striped="r['status'] === 'inprogress'" v-bind:animated="r['status'] === 'inprogress'"></progress-bar>
+                      </div>
                     </div>
+
                   </td>
                   <td v-if="p['revisions'].length <= 0">
                     <div>never</div>
@@ -89,6 +104,7 @@
 <script>
   import {getAllPolicies, fetchPolicy, fetchPolicyRevisions} from 'lib/api.js'
   import eventLog from 'pages/components/EventLog'
+  import progressBar from 'vue-strap/src/Progressbar'
 
   export default {
     data () {
@@ -133,11 +149,38 @@
       }, this), 5000)
     },
     methods: {
-      percent (r) {
-        if (r['progress']['total'] <= 0) {
-          return 0
+      percents (r) {
+        if (r['result']['total'] <= 0) {
+          return {
+            'success': 100,
+            'failed': 0,
+            'skipped': 0,
+            'remaining': 0
+          }
         }
-        return Math.round(100.0 * r['progress']['current'] / r['progress']['total'])
+        let p1 = Math.floor(100.0 * r['result']['success'] / r['result']['total'])
+        let p2 = Math.floor(100.0 * r['result']['failed'] / r['result']['total'])
+        let p3 = Math.floor(100.0 * r['result']['skipped'] / r['result']['total'])
+        let p4 = Math.max(0, 100 - (p1 + p2 + p3))
+
+        if (p4 > 0 && (r['status'] === 'completed' || r['status'] === 'failed')) {
+          // there should not be remaining percentage left
+          if (p1 > 0) {
+            p1 += p4
+          } else if (p2 > 0) {
+            p2 += p4
+          } else if (p3 > 0) {
+            p3 += p4
+          }
+          p4 = 0
+        }
+
+        return {
+          'success': p1,
+          'failed': p2,
+          'skipped': p3,
+          'remaining': p4
+        }
       },
       fetchData () {
         this.loading = true
@@ -168,6 +211,9 @@
     },
     beforeDestroy: function () {
       clearInterval(this.interval)
+    },
+    components: {
+      progressBar: progressBar
     }
   }
 </script>

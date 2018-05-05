@@ -1,12 +1,14 @@
-package main
+package server
 
 import (
+	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/server"
 	"github.com/spf13/cobra"
 )
 
-var (
-	serverCmd = &cobra.Command{
+// NewServerCommand returns instance of cobra command that starts the server
+func NewServerCommand(cfg *config.Server) *cobra.Command {
+	return &cobra.Command{
 		Use:   "server",
 		Short: "Start Aptomi server",
 		Long:  "Start Aptomi server",
@@ -15,8 +17,4 @@ var (
 			server.NewServer(cfg).Start()
 		},
 	}
-)
-
-func init() {
-	aptomiCmd.AddCommand(serverCmd)
 }

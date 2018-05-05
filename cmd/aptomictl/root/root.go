@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	// Config is the global instance of the client config
+	// Config is the global instance of client config
 	Config = &config.Client{}
 
 	// ConfigFile is the path to config file used to read config

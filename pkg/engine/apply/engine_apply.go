@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
@@ -29,14 +28,14 @@ type EngineApply struct {
 	// Buffered event log - gets populated while applying changes
 	eventLog *event.Log
 
-	// Progress indicator
-	progress progress.Indicator
+	// Result/progress updater
+	updater action.ApplyResultUpdater
 }
 
 // NewEngineApply creates an instance of EngineApply
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actionPlan *action.Plan, eventLog *event.Log, progress progress.Indicator) *EngineApply {
+func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actionPlan *action.Plan, eventLog *event.Log, updater action.ApplyResultUpdater) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,
 		desiredState:       desiredState,
@@ -46,21 +45,18 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 		plugins:            plugins,
 		actionPlan:         actionPlan,
 		eventLog:           eventLog,
-		progress:           progress,
+		updater:            updater,
 	}
 }
 
 // Apply method executes all actions, actions call plugins to apply changes and roll them out to the cloud.
-// It returns the updated actual state inside PolicyResolution and event log, as well as stats about how many actions
+// It returns the updated actual state inside PolicyResolution and event log, as well as result/stats about how many actions
 // have been applied successfully vs. failed vs. skipped.
 //
 // As actions get executed, they will instantiate/update/delete components according to the resolved
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
 func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResult) {
-	// initialize progress indicator
-	apply.progress.SetTotal(int(apply.actionPlan.NumberOfActions()))
-
 	// process all actions
 	context := action.NewContext(
 		apply.desiredPolicy,
@@ -80,17 +76,13 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResul
 	// (3) Ensure that plugins are "thread-safe"
 	// (4) Ensure that when we are updating states (e.g. Desired -> Actual), this is also "thread-safe"
 	result := apply.actionPlan.Apply(action.WrapSequential(func(act action.Base) error {
-		apply.progress.Advance()
 		err := apply.executeAction(act, context)
 		if err != nil {
 			err = fmt.Errorf("error while applying action '%s': %s", act, err)
 			apply.eventLog.LogError(err)
 		}
 		return err
-	}))
-
-	// Finalize progress indicator
-	apply.progress.Done(true)
+	}), apply.updater)
 
 	// No errors occurred
 	return apply.actualState, result

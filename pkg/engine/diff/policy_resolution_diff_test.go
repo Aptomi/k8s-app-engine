@@ -194,7 +194,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 		return nil
 	}
 
-	_ = diff.ActionPlan.Apply(action.WrapSequential(fn))
+	_ = diff.ActionPlan.Apply(action.WrapSequential(fn), action.NewApplyResultUpdaterImpl())
 
 	ok := assert.Equal(t, componentInstantiate, cnt.create, "Diff: component instantiations")
 	ok = ok && assert.Equal(t, componentDestruct, cnt.delete, "Diff: component destructions")

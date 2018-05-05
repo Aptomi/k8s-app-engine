@@ -164,17 +164,20 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 			return false
 		}
 
-		if progressBar == nil {
-			fmt.Println()
-			progressBar = progress.NewConsole()
-			progressBar.SetTotal(rev.Progress.Total)
-		}
-		for progressLast < rev.Progress.Current {
-			progressBar.Advance()
-			progressLast++
+		// if the engine already started processing the revision, then let's show its progress. Otherwise, just wait
+		if rev.Status != engine.RevisionStatusWaiting {
+			if progressBar == nil {
+				fmt.Println()
+				progressBar = progress.NewConsole()
+				progressBar.SetTotal(int(rev.Result.Total))
+			}
+			for progressLast < int(rev.Result.Success+rev.Result.Failed+rev.Result.Skipped) {
+				progressBar.Advance()
+				progressLast++
+			}
 		}
 
-		return rev.Status != engine.RevisionStatusInProgress
+		return rev.Status == engine.RevisionStatusCompleted || rev.Status == engine.RevisionStatusError
 	})
 
 	if !finished {
@@ -183,10 +186,13 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 		panic("timeout")
 	} else if rev.Status == engine.RevisionStatusCompleted {
 		progressBar.Done(true)
-		fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Stats.Success, rev.Stats.Failed, rev.Stats.Skipped)
+		fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Result.Success, rev.Result.Failed, rev.Result.Skipped)
 	} else if rev.Status == engine.RevisionStatusError {
 		progressBar.Done(false)
 		fmt.Printf("Revision %d failed\n", rev.GetGeneration())
+		panic("error")
+	} else {
+		fmt.Printf("Unexpected revision status '%s' for revision %d\n", rev.Status, rev.GetGeneration())
 		panic("error")
 	}
 

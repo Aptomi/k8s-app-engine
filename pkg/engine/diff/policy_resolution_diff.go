@@ -36,22 +36,16 @@ func NewPolicyResolutionDiff(next *resolve.PolicyResolution, prev *resolve.Polic
 
 // Produce a list of actions
 func (diff *PolicyResolutionDiff) compareAndProduceActions() {
-	// Produce a map of all component instances & root component instances
+	// Produce a map of all component instances
 	allCompInstances := make(map[string]bool)
-	for keyPrev, compPrev := range diff.Prev.ComponentInstanceMap {
+	for keyPrev := range diff.Prev.ComponentInstanceMap {
 		allCompInstances[keyPrev] = true
-		if len(compPrev.EdgesOut) <= 0 {
-			diff.ActionPlan.AddLeafNode(keyPrev)
-		}
 	}
-	for keyNext, compNext := range diff.Next.ComponentInstanceMap {
+	for keyNext := range diff.Next.ComponentInstanceMap {
 		allCompInstances[keyNext] = true
-		if len(compNext.EdgesOut) <= 0 {
-			diff.ActionPlan.AddLeafNode(keyNext)
-		}
 	}
 
-	// Build a flat list of actions for every component key
+	// Build a flat list of actions for every component instance
 	for key := range allCompInstances {
 		diff.buildActions(key)
 	}

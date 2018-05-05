@@ -19,9 +19,11 @@ var RevisionObject = &runtime.Info{
 var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, RevisionObject.Kind, runtime.EmptyName)
 
 const (
+	// RevisionStatusWaiting represents Revision status when it has been created, but apply haven't started yet
+	RevisionStatusWaiting = "waiting"
 	// RevisionStatusInProgress represents Revision status with apply in progress
 	RevisionStatusInProgress = "inprogress"
-	// RevisionStatusSuccess represents Revision status with apply finished
+	// RevisionStatusCompleted represents Revision status with apply finished
 	RevisionStatusCompleted = "completed"
 	// RevisionStatusError represents Revision status when a critical error happened (we should rarely see those)
 	RevisionStatusError = "error"
@@ -36,19 +38,12 @@ type Revision struct {
 	Policy runtime.Generation
 
 	Status    string
-	Progress  *RevisionProgress
 	AppliedAt time.Time
 
-	Stats *action.ApplyResult
+	Result *action.ApplyResult
 
 	ResolveLog []*event.APIEvent
 	ApplyLog   []*event.APIEvent
-}
-
-// RevisionProgress represents revision applying progress
-type RevisionProgress struct {
-	Current int
-	Total   int
 }
 
 // NewRevision creates a new revision
@@ -58,10 +53,9 @@ func NewRevision(gen runtime.Generation, policyGen runtime.Generation) *Revision
 		Metadata: runtime.GenerationMetadata{
 			Generation: gen,
 		},
-		Policy:   policyGen,
-		Status:   RevisionStatusInProgress,
-		Progress: &RevisionProgress{},
-		Stats:    &action.ApplyResult{},
+		Policy: policyGen,
+		Status: RevisionStatusWaiting,
+		Result: &action.ApplyResult{},
 	}
 }
 

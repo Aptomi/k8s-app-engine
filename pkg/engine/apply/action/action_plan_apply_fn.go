@@ -15,7 +15,7 @@ func WrapSequential(fn ApplyFunction) ApplyFunction {
 	}
 }
 
-// Noop is a function that does nothing
+// Noop returns a function that does nothing and returns nil
 func Noop() ApplyFunction {
 	return func(Base) error { return nil }
 }
