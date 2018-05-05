@@ -157,7 +157,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 3, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 2, Failed: 0, Skipped: 0})
 
 	// Check creation/update times
 	times2 := getTimes(t, key.GetKey(), actualState)

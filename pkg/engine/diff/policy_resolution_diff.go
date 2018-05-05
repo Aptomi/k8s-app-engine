@@ -122,7 +122,6 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	for dependencyID := range depKeysNext {
 		if !depKeysPrev[dependencyID] {
 			node.AddAction(component.NewAttachDependencyAction(key, dependencyID), true)
-			endpointsAction = true
 		}
 	}
 
@@ -130,7 +129,6 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	for dependencyID := range depKeysPrev {
 		if !depKeysNext[dependencyID] {
 			node.AddAction(component.NewDetachDependencyAction(key, dependencyID), true)
-			endpointsAction = true
 		}
 	}
 
