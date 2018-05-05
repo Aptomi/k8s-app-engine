@@ -415,7 +415,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
 	timeCheckpoint := time.Now()
-	fmt.Printf("[%s] Time = %s, resolving %d dependencies and %d component instances\n", testName, timeCheckpoint.Sub(timeStart).String(), desiredState.SuccessfullyResolvedDependencies(), len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, resolving %d dependencies and %d component instances\n", testName, time.Since(timeStart).String(), desiredState.SuccessfullyResolvedDependencies(), len(actualState.ComponentInstanceMap))
 
 	// now, remove all dependencies and apply actions
 	for _, dependency := range desiredPolicy.GetObjectsByKind(lang.DependencyObject.Kind) {
@@ -434,9 +434,9 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		event.NewLog("test-apply", false),
 		action.NewApplyResultUpdaterImpl(),
 	)
-	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
+	_ = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
-	fmt.Printf("[%s] Time = %s, deleting all dependencies and component instances\n", testName, time.Now().Sub(timeCheckpoint).String())
+	fmt.Printf("[%s] Time = %s, deleting all dependencies and component instances\n", testName, time.Since(timeCheckpoint).String())
 }
 
 func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {
