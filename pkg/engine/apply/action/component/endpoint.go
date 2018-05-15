@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // EndpointsActionObject is an informational data structure with Kind and Constructor for the action
@@ -44,6 +45,16 @@ func (a *EndpointsAction) Apply(context *action.Context) error {
 
 	// update actual state
 	return updateComponentInActualState(a.ComponentKey, context)
+}
+
+// DescribeChanges returns text-based description of changes that will be applied
+func (a *EndpointsAction) DescribeChanges() util.NestedParameterMap {
+	return util.NestedParameterMap{
+		"kind":       a.Kind,
+		"key":        a.ComponentKey,
+		"pretty":     fmt.Sprintf("[@] %s", a.ComponentKey),
+		"prettyOmit": "true", // do not print endpoint lines in pretty output
+	}
 }
 
 func (a *EndpointsAction) processEndpoints(context *action.Context) error {

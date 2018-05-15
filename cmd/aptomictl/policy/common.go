@@ -150,13 +150,16 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 		return
 	}
 
-	fmt.Print("Waiting for changes to be applied...")
+	// wait for the revision to be processed & applied
+	fmt.Print("Waiting for actions to be applied...")
 	var rev *engine.Revision
 
 	var progressBar progress.Indicator
 	var progressLast = 0
 
+	// query revision status [attempts] x [interval]
 	finished := retry.Do2(attempts, interval, func() bool {
+		// call API
 		var revErr error
 		rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
 		if revErr != nil {
@@ -164,31 +167,43 @@ func waitForApplyToFinish(attempts int, interval time.Duration, client client.Co
 			return false
 		}
 
-		// if the engine already started processing the revision, then let's show its progress. Otherwise, just wait
+		// if the engine already started processing the revision, show its progress
 		if rev.Status != engine.RevisionStatusWaiting {
 			if progressBar == nil {
 				fmt.Println()
-				progressBar = progress.NewConsole()
-				progressBar.SetTotal(int(rev.Result.Total))
+
+				// show progress bar only when there is at least one action present
+				if rev.Result.Total > 0 {
+					progressBar = progress.NewConsole("Applying actions")
+					progressBar.SetTotal(int(rev.Result.Total))
+				}
 			}
-			for progressLast < int(rev.Result.Success+rev.Result.Failed+rev.Result.Skipped) {
+			for progressBar != nil && progressLast < int(rev.Result.Success+rev.Result.Failed+rev.Result.Skipped) {
 				progressBar.Advance()
 				progressLast++
 			}
 		}
 
+		// exit when revision is in completed or error status
 		return rev.Status == engine.RevisionStatusCompleted || rev.Status == engine.RevisionStatusError
 	})
 
+	// stop progress bar
+	if progressBar != nil {
+		progressBar.Done()
+	}
+
+	// print the outcome
 	if !finished {
-		progressBar.Done(false)
 		fmt.Printf("Revision %d timeout! Has not been applied in %d seconds\n", rev.GetGeneration(), int(interval.Seconds()*float64(attempts)))
 		panic("timeout")
 	} else if rev.Status == engine.RevisionStatusCompleted {
-		progressBar.Done(true)
-		fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Result.Success, rev.Result.Failed, rev.Result.Skipped)
+		if rev.Result.Total > 0 {
+			fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Result.Success, rev.Result.Failed, rev.Result.Skipped)
+		} else {
+			fmt.Printf("Revision %d completed\n", rev.GetGeneration())
+		}
 	} else if rev.Status == engine.RevisionStatusError {
-		progressBar.Done(false)
 		fmt.Printf("Revision %d failed\n", rev.GetGeneration())
 		panic("error")
 	} else {

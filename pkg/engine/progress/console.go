@@ -14,10 +14,11 @@ type Console struct {
 	progress    *uiprogress.Progress
 	progressBar *uiprogress.Bar
 	out         io.Writer
+	title       string
 }
 
 // NewConsole creates a new console-based progress indicator
-func NewConsole() *Console {
+func NewConsole(title string) *Console {
 	progress := uiprogress.New()
 	progress.RefreshInterval = time.Second
 	progress.Start()
@@ -25,13 +26,14 @@ func NewConsole() *Console {
 		progressCount: &progressCount{},
 		progress:      progress,
 		out:           os.Stdout,
+		title:         title,
 	}
 }
 
 func (progressConsole *Console) createProgressBar() {
 	progressConsole.progress.SetOut(progressConsole.out)
 	if progressConsole.getTotalInternal() > 0 {
-		fmt.Fprintln(progressConsole.out, "[Applying changes]")
+		fmt.Fprintln(progressConsole.out, "["+progressConsole.title+"]")
 	}
 	progressConsole.progressBar = progressConsole.progress.AddBar(progressConsole.getTotalInternal())
 	progressConsole.progressBar.PrependFunc(func(b *uiprogress.Bar) string {
@@ -63,7 +65,7 @@ func (progressConsole *Console) Advance() {
 }
 
 // Done should be called once done working with progress indicator
-func (progressConsole *Console) Done(success bool) {
+func (progressConsole *Console) Done() {
 	progressConsole.doneInternal()
 	progressConsole.progress.Stop()
 }

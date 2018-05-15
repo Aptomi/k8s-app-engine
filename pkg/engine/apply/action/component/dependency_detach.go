@@ -1,9 +1,11 @@
 package component
 
 import (
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // DetachDependencyActionObject is an informational data structure with Kind and Constructor for the action
@@ -42,4 +44,14 @@ func (a *DetachDependencyAction) Apply(context *action.Context) error {
 		return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
 	}
 	return nil
+}
+
+// DescribeChanges returns text-based description of changes that will be applied
+func (a *DetachDependencyAction) DescribeChanges() util.NestedParameterMap {
+	return util.NestedParameterMap{
+		"kind":       a.Kind,
+		"key":        a.ComponentKey,
+		"dependency": a.DependencyID,
+		"pretty":     fmt.Sprintf("[<] %s = %s", a.ComponentKey, a.DependencyID),
+	}
 }

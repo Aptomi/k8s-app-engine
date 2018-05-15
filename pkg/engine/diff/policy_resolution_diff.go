@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // PolicyResolutionDiff represents a difference between two policy resolution data structs (actual and desired states)
@@ -97,7 +98,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 
 	// See if a component needs to be instantiated
 	if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
-		node.AddAction(component.NewCreateAction(key), true)
+		node.AddAction(component.NewCreateAction(key, nextInstance.CalculatedCodeParams), true)
 		endpointsAction = true
 	}
 
@@ -105,14 +106,14 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	if len(depKeysPrev) > 0 && len(depKeysNext) > 0 && isCodeComponent {
 		sameParams := prevInstance.CalculatedCodeParams.DeepEqual(nextInstance.CalculatedCodeParams)
 		if !sameParams {
-			node.AddAction(component.NewUpdateAction(key), true)
+			node.AddAction(component.NewUpdateAction(key, prevInstance.CalculatedCodeParams, nextInstance.CalculatedCodeParams), true)
 
 			// indicate that a parent service component instance gets updated as well
 			// this is required for adjusting update/creation times of a service with changed component
 			// this may produce duplicate "update" actions for the parent service
 			serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
 			serviceNode := diff.ActionPlan.GetActionGraphNode(serviceKey)
-			serviceNode.AddAction(component.NewUpdateAction(serviceKey), true)
+			serviceNode.AddAction(component.NewUpdateAction(serviceKey, util.NestedParameterMap{}, util.NestedParameterMap{}), true)
 
 			endpointsAction = true
 		}
@@ -134,7 +135,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 
 	// See if a component needs to be destructed
 	if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
-		node.AddAction(component.NewDeleteAction(key), true)
+		node.AddAction(component.NewDeleteAction(key, prevInstance.CalculatedCodeParams), true)
 		endpointsAction = false
 	}
 

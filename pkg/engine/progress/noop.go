@@ -21,7 +21,7 @@ func (progressNoop *Noop) Advance() {
 }
 
 // Done should be called once done working with progress indicator
-func (progressNoop *Noop) Done(success bool) {
+func (progressNoop *Noop) Done() {
 	progressNoop.doneInternal()
 }
 

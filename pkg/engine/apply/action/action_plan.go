@@ -7,7 +7,7 @@ import (
 // Plan is a plan of actions
 type Plan struct {
 	// NodeMap is a map from key to a graph of actions, which must to be executed in order to get from actual state to
-	// desired state. Key in the map corresponds to component instance keys.
+	// desired state. Key in the map corresponds to the key of the GraphNode
 	NodeMap map[string]*GraphNode
 }
 
@@ -148,4 +148,17 @@ func (plan *Plan) NumberOfActions() uint32 {
 
 	// return the number of success actions (all of them will be success due to Noop() action)
 	return resultUpdater.Result.Success
+}
+
+// AsText returns the action plan as array of actions, each represented as text via NestedParameterMap
+func (plan *Plan) AsText() *PlanAsText {
+	result := NewPlanAsText()
+
+	// apply the plan and capture actions as text
+	plan.applyInternal(func(act Base) error {
+		result.Actions = append(result.Actions, act.DescribeChanges())
+		return nil
+	}, NewApplyResultUpdaterImpl())
+
+	return result
 }

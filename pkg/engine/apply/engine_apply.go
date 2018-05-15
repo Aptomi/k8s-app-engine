@@ -25,7 +25,7 @@ type EngineApply struct {
 	// Action plan to be applied
 	actionPlan *action.Plan
 
-	// Buffered event log - gets populated while applying changes
+	// Buffered event log - gets populated while applying actions
 	eventLog *event.Log
 
 	// Result/progress updater

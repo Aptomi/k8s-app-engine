@@ -3,9 +3,11 @@ package common
 import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/config"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,30 +20,40 @@ func TestFormat_Text(t *testing.T) {
 		result := makePolicyUpdateResult(true)
 		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 41 -> 42  \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
-			string(data), "Format should return expected table")
-		// fmt.Println(string(data))
+		expected := "Policy Changes\tAction Plan                                                     \nGen 41 -> 42  \tUpdate Instances                                                \n              \t  [*] cluster#ns#contract#context#keysresolved#component        \n              \tCreate Instances                                                \n              \t  [+] cluster#ns#contract#context#keysresolved#component        \n              \tDestroy Instances                                               \n              \t  [-] cluster#ns#contract#context#keysresolved#component        \n              \tRemove Consumers                                                \n              \t  [<] cluster#ns#contract#context#keysresolved#component = depId\n              \tAdd Consumers                                                   \n              \t  [>] cluster#ns#contract#context#keysresolved#component = depId\n              \t                                                                "
+		if !assert.Equal(t, expected, string(data), "Format should return expected table") {
+			t.Log("Expected:\n", expected)
+			t.Log("Found:\n", string(data))
+			t.Fail()
+		}
 	}
 	{
 		// without policy changes
 		result := makePolicyUpdateResult(false)
 		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		assert.Equal(t, "Policy Changes\tInstance Changes                                      \nGen 42 (none) \t[*] cluster#ns#contract#context#keysresolved#component\n              \t[+] cluster#ns#contract#context#keysresolved#component\n              \t[-] cluster#ns#contract#context#keysresolved#component",
-			string(data), "Format should return expected table")
-		// fmt.Println(string(data))
+		expected := "Policy Changes\tAction Plan                                                     \nGen 42 (none) \tUpdate Instances                                                \n              \t  [*] cluster#ns#contract#context#keysresolved#component        \n              \tCreate Instances                                                \n              \t  [+] cluster#ns#contract#context#keysresolved#component        \n              \tDestroy Instances                                               \n              \t  [-] cluster#ns#contract#context#keysresolved#component        \n              \tRemove Consumers                                                \n              \t  [<] cluster#ns#contract#context#keysresolved#component = depId\n              \tAdd Consumers                                                   \n              \t  [>] cluster#ns#contract#context#keysresolved#component = depId\n              \t                                                                "
+		if !assert.Equal(t, expected, string(data), "Format should return expected table") {
+			t.Log("Expected:\n", expected)
+			t.Log("Found:\n", string(data))
+			t.Fail()
+		}
 	}
+
 	{
 		// empty set of actions
 		result := &api.PolicyUpdateResult{
 			PolicyGeneration: 42,
-			Actions:          []string{},
+			PlanAsText:       action.NewPlanAsText(),
 		}
 		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		assert.Equal(t, "Policy Changes\tInstance Changes\nGen 42 (none) \t(none)          ",
-			string(data), "Format should return expected table")
-		// fmt.Println(string(data))
+		expected := "Policy Changes\tAction Plan\nGen 42 (none) \t(none)     "
+		if !assert.Equal(t, expected, string(data), "Format should return expected table") {
+			t.Log("Expected:\n", expected)
+			t.Log("Found:\n", string(data))
+			t.Fail()
+		}
 	}
 }
 
@@ -54,16 +66,22 @@ func makePolicyUpdateResult(policyChanged bool) *api.PolicyUpdateResult {
 		&lang.Service{Metadata: lang.Metadata{Name: "service"}},
 		&lang.ServiceComponent{Name: "component"},
 	)
+
+	paramsPrev := util.NestedParameterMap{"name": "valuePrev"}
+	params := util.NestedParameterMap{"name": "value"}
+
 	result := &api.PolicyUpdateResult{
 		PolicyGeneration: 42,
 		PolicyChanged:    policyChanged,
-		Actions: []string{
-			component.NewCreateAction(key.GetKey()).GetName(),
-			component.NewUpdateAction(key.GetKey()).GetName(),
-			component.NewDeleteAction(key.GetKey()).GetName(),
-			component.NewDetachDependencyAction(key.GetKey(), "depId").GetName(),
-			component.NewAttachDependencyAction(key.GetKey(), "depId").GetName(),
-			component.NewEndpointsAction(key.GetKey()).GetName(),
+		PlanAsText: &action.PlanAsText{
+			Actions: []util.NestedParameterMap{
+				component.NewCreateAction(key.GetKey(), params).DescribeChanges(),
+				component.NewUpdateAction(key.GetKey(), paramsPrev, params).DescribeChanges(),
+				component.NewDeleteAction(key.GetKey(), paramsPrev).DescribeChanges(),
+				component.NewAttachDependencyAction(key.GetKey(), "depId").DescribeChanges(),
+				component.NewDetachDependencyAction(key.GetKey(), "depId").DescribeChanges(),
+				component.NewEndpointsAction(key.GetKey()).DescribeChanges(),
+			},
 		},
 	}
 	return result

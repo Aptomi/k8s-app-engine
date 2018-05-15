@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // DeleteActionObject is an informational data structure with Kind and Constructor for the action
@@ -19,14 +20,16 @@ type DeleteAction struct {
 	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
+	Params       util.NestedParameterMap
 }
 
 // NewDeleteAction creates new DeleteAction
-func NewDeleteAction(componentKey string) *DeleteAction {
+func NewDeleteAction(componentKey string, params util.NestedParameterMap) *DeleteAction {
 	return &DeleteAction{
 		TypeKind:     DeleteActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(DeleteActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
+		Params:       params,
 	}
 }
 
@@ -40,6 +43,16 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 
 	// update actual state
 	return deleteComponentFromActualState(a.ComponentKey, context)
+}
+
+// DescribeChanges returns text-based description of changes that will be applied
+func (a *DeleteAction) DescribeChanges() util.NestedParameterMap {
+	return util.NestedParameterMap{
+		"kind":   a.Kind,
+		"key":    a.ComponentKey,
+		"params": a.Params,
+		"pretty": fmt.Sprintf("[-] %s", a.ComponentKey),
+	}
 }
 
 func (a *DeleteAction) processDeployment(context *action.Context) error {

@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // UpdateActionObject is an informational data structure with Kind and Constructor for the action
@@ -19,14 +20,18 @@ type UpdateAction struct {
 	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
+	ParamsBefore util.NestedParameterMap
+	Params       util.NestedParameterMap
 }
 
 // NewUpdateAction creates new UpdateAction
-func NewUpdateAction(componentKey string) *UpdateAction {
+func NewUpdateAction(componentKey string, paramsBefore util.NestedParameterMap, params util.NestedParameterMap) *UpdateAction {
 	return &UpdateAction{
 		TypeKind:     UpdateActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(UpdateActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
+		ParamsBefore: paramsBefore,
+		Params:       params,
 	}
 }
 
@@ -40,6 +45,18 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 
 	// update actual state
 	return updateActualStateFromDesired(a.ComponentKey, context, false, true, false)
+}
+
+// DescribeChanges returns text-based description of changes that will be applied
+func (a *UpdateAction) DescribeChanges() util.NestedParameterMap {
+	return util.NestedParameterMap{
+		"kind":         a.Kind,
+		"key":          a.ComponentKey,
+		"paramsBefore": a.ParamsBefore,
+		"params":       a.Params,
+		"paramsDiff":   a.ParamsBefore.Diff(a.Params),
+		"pretty":       fmt.Sprintf("[*] %s", a.ComponentKey),
+	}
 }
 
 func (a *UpdateAction) processDeployment(context *action.Context) error {

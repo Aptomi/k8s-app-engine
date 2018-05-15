@@ -103,9 +103,9 @@ func (server *Server) enforce() error {
 	}
 
 	if server.cfg.Enforcer.Noop {
-		log.Infof("(enforce-%d) Applying changes in noop mode (sleep per action = %s)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
+		log.Infof("(enforce-%d) Applying actions in noop mode (sleep per action = %s)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
 	} else {
-		log.Infof("(enforce-%d) Applying changes", server.enforcementIdx)
+		log.Infof("(enforce-%d) Applying actions", server.enforcementIdx)
 	}
 
 	pluginRegistry := server.pluginRegistryFactory()

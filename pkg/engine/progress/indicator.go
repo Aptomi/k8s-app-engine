@@ -10,8 +10,8 @@ type Indicator interface {
 	// Advance should be called to advance progress indicator by 1 step
 	Advance()
 
-	// Done should be called when you are done using progress indicator (e.g. done, or error happened in the middle)
-	Done(success bool)
+	// Done should be called when you are done using progress indicator
+	Done()
 
 	// IsDone method should be called to check if progress indicator has already been marked as Done()
 	IsDone() bool

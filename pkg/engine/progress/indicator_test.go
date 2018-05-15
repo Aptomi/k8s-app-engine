@@ -9,7 +9,7 @@ import (
 
 func makeProgressIndicators() map[string]Indicator {
 	noop := NewNoop()
-	console := NewConsole()
+	console := NewConsole("Applying /dev/null")
 	console.SetOut(new(bytes.Buffer))
 	return map[string]Indicator{"noop": noop, "console": console}
 }
@@ -34,7 +34,7 @@ func TestProgressNoop(t *testing.T) {
 		// check completion
 		assert.Equal(t, 100, progress.GetCompletionPercent(), "[%s] Progress indicator should be at 100%", key)
 		assert.False(t, progress.IsDone(), "[%s] Progress indicator should not be finished yet", key)
-		progress.Done(true)
+		progress.Done()
 		assert.True(t, progress.IsDone(), "[%s] Progress indicator should be finished", key)
 	}
 }
@@ -47,7 +47,7 @@ func TestProgressNoopOverflow(t *testing.T) {
 		}
 		assert.Equal(t, 100, progress.GetCompletionPercent(), "[%s] Progress indicator should be at 100%", key)
 		assert.False(t, progress.IsDone(), "[%s] Progress indicator should not be finished until marked as such", key)
-		progress.Done(true)
+		progress.Done()
 	}
 }
 
@@ -55,7 +55,7 @@ func TestProgressNoopZeroLen(t *testing.T) {
 	for key, progress := range makeProgressIndicators() {
 		progress.SetTotal(0)
 		assert.False(t, progress.IsDone(), "[%s] Progress indicator should not be finished yet", key)
-		progress.Done(true)
+		progress.Done()
 		assert.True(t, progress.IsDone(), "[%s] Progress indicator should be finished", key)
 	}
 }
