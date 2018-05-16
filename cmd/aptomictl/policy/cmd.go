@@ -14,9 +14,9 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		newShowCommand(cfg),
-		newApplyCommand(cfg),
-		newDeleteCommand(cfg),
+		newShowCommand(cfg),                       // show
+		newHandlePolicyChangesCommand(cfg, true),  // apply
+		newHandlePolicyChangesCommand(cfg, false), // delete
 	)
 
 	return cmd

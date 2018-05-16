@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,7 +19,7 @@ func TestVisualizationDiagram(t *testing.T) {
 	resolutionEmpty := resolve.NewPolicyResolution(true)
 
 	// unit test policy resolved revision
-	eventLog := event.NewLog("test-resolve", false)
+	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve", false)
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
 	resolutionNew := resolver.ResolveAllDependencies()
 	if !assert.Equal(t, 14, len(resolutionNew.ComponentInstanceMap), "Instances should be resolved") {

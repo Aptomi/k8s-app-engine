@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -433,7 +434,7 @@ const (
 
 func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult int, expectedLogMessage string) *PolicyResolution {
 	t.Helper()
-	eventLog := event.NewLog("test-resolve", false)
+	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve", false)
 	resolver := NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 

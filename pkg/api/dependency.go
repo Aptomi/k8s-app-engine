@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
@@ -111,8 +112,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 				continue
 			}
 
-			eventLog := event.NewLog("resources", false)
-			instanceResources, resErr := codePlugin.Resources(instance.GetDeployName(), instance.CalculatedCodeParams, eventLog)
+			instanceResources, resErr := codePlugin.Resources(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources", false))
 			if resErr != nil {
 				panic(fmt.Sprintf("Error while getting deployment resources for component instance %s: %s", instance.GetKey(), resErr))
 			}

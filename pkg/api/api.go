@@ -15,11 +15,11 @@ type coreAPI struct {
 	externalData          *external.Data
 	pluginRegistryFactory plugin.RegistryFactory
 	secret                string
-	policyChanged         chan bool
+	runEnforcement        chan bool
 }
 
 // Serve initializes everything needed by REST API and registers all API endpoints in the provided http router
-func Serve(router *httprouter.Router, store store.Core, externalData *external.Data, pluginRegistryFactory plugin.RegistryFactory, secret string, policyChanged chan bool) {
+func Serve(router *httprouter.Router, store store.Core, externalData *external.Data, pluginRegistryFactory plugin.RegistryFactory, secret string, runEnforcement chan bool) {
 	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(Objects...))
 	api := &coreAPI{
 		contentType:           contentTypeHandler,
@@ -27,7 +27,7 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 		externalData:          externalData,
 		pluginRegistryFactory: pluginRegistryFactory,
 		secret:                secret,
-		policyChanged:         policyChanged,
+		runEnforcement:        runEnforcement,
 	}
 	api.serve(router)
 }
@@ -50,7 +50,9 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 
 	// update policy
 	router.POST("/api/v1/policy", auth(api.handlePolicyUpdate))
+	router.POST("/api/v1/policy/noop/:noop/loglevel/:loglevel", auth(api.handlePolicyUpdate))
 	router.DELETE("/api/v1/policy", auth(api.handlePolicyDelete))
+	router.DELETE("/api/v1/policy/noop/:noop/loglevel/:loglevel", auth(api.handlePolicyDelete))
 
 	// policy & object diagrams
 	router.GET("/api/v1/policy/diagram/object/:ns/:kind/:name", auth(api.handleObjectDiagram))

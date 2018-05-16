@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/version"
+	"github.com/Sirupsen/logrus"
 )
 
 // Core is the Core API client interface
@@ -20,8 +21,8 @@ type Core interface {
 // Policy is the interface for managing Policy
 type Policy interface {
 	Show(gen runtime.Generation) (*engine.PolicyData, error)
-	Apply([]runtime.Object) (*api.PolicyUpdateResult, error)
-	Delete([]runtime.Object) (*api.PolicyUpdateResult, error)
+	Apply([]runtime.Object, bool, logrus.Level) (*api.PolicyUpdateResult, error)
+	Delete([]runtime.Object, bool, logrus.Level) (*api.PolicyUpdateResult, error)
 }
 
 // Endpoints is the interface for getting info about endpoints

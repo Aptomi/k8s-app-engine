@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -150,7 +151,7 @@ func makePolicyBuilderWithServiceSharing() *builder.PolicyBuilder {
 
 func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.PolicyResolution {
 	t.Helper()
-	eventLog := event.NewLog("test-resolve", false)
+	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve", false)
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {

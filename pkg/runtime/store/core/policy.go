@@ -58,7 +58,6 @@ func (ds *defaultStore) getPolicyFromData(policyData *engine.PolicyData) (*lang.
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
 // if there is no policy yet (Aptomi not initialized), it will return nil
 func (ds *defaultStore) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
-	// todo should we use RWMutex for get/update policy?
 	policyData, err := ds.GetPolicyData(gen)
 	if err != nil {
 		return nil, runtime.LastGen, err

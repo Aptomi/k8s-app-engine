@@ -38,7 +38,7 @@ type Server struct {
 
 	httpServer *http.Server
 
-	policyChanged  chan bool
+	runEnforcement chan bool
 	enforcementIdx uint
 }
 
@@ -47,7 +47,7 @@ func NewServer(cfg *config.Server) *Server {
 	s := &Server{
 		cfg:              cfg,
 		backgroundErrors: make(chan string),
-		policyChanged:    make(chan bool, 2048),
+		runEnforcement:   make(chan bool, 2048),
 	}
 
 	return s
@@ -155,7 +155,7 @@ func (server *Server) startHTTPServer() {
 		log.Warnf("The auth.secret not specified in config, using insecure default one")
 	}
 
-	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.policyChanged)
+	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.runEnforcement)
 	server.serveUI(router)
 
 	var handler http.Handler = router

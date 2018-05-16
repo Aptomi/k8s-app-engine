@@ -26,7 +26,7 @@ func (server *Server) enforceLoop() error {
 		// sleep for a specified time or wait until policy has changed, whichever comes first
 		timer := time.NewTimer(server.cfg.Enforcer.Interval)
 		select {
-		case <-server.policyChanged:
+		case <-server.runEnforcement:
 			break // nolint: megacheck
 		case <-timer.C:
 			break // nolint: megacheck
@@ -44,7 +44,6 @@ func (server *Server) enforce() error {
 		}
 	}()
 
-	// todo think about initial state when there is no revision at all
 	currRevision, err := server.store.GetRevision(runtime.LastGen)
 	if err != nil {
 		return fmt.Errorf("unable to get curr revision: %s", err)
@@ -76,7 +75,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	resolveLog := event.NewLog(fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
+	resolveLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
 	desiredState := resolver.ResolveAllDependencies()
 
@@ -96,7 +95,7 @@ func (server *Server) enforce() error {
 	}
 	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.enforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, actionCnt)
 
-	// Save revision
+	// save revision
 	err = server.store.SaveRevision(nextRevision)
 	if err != nil {
 		return fmt.Errorf("error while saving new revision: %s", err)
@@ -109,7 +108,7 @@ func (server *Server) enforce() error {
 	}
 
 	pluginRegistry := server.pluginRegistryFactory()
-	applyLog := event.NewLog(fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
+	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
 	_, _ = applier.Apply()
 

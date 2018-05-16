@@ -16,7 +16,6 @@ type APIEvent struct {
 func (eventLog *Log) AsAPIEvents() []*APIEvent {
 	saver := &HookAPIEvents{}
 	eventLog.Save(saver)
-
 	return saver.events
 }
 

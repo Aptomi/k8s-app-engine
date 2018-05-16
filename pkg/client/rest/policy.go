@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Sirupsen/logrus"
 )
 
 type policyClient struct {
@@ -27,8 +28,8 @@ func (client *policyClient) Show(gen runtime.Generation) (*engine.PolicyData, er
 	return response.(*engine.PolicyData), nil
 }
 
-func (client *policyClient) Apply(updated []runtime.Object) (*api.PolicyUpdateResult, error) {
-	response, err := client.httpClient.POSTSlice("/policy", api.PolicyUpdateResultObject, updated)
+func (client *policyClient) Apply(updated []runtime.Object, noop bool, logLevel logrus.Level) (*api.PolicyUpdateResult, error) {
+	response, err := client.httpClient.POSTSlice(fmt.Sprintf("/policy/noop/%t/loglevel/%s", noop, logLevel.String()), api.PolicyUpdateResultObject, updated)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +41,8 @@ func (client *policyClient) Apply(updated []runtime.Object) (*api.PolicyUpdateRe
 	return response.(*api.PolicyUpdateResult), nil
 }
 
-func (client *policyClient) Delete(updated []runtime.Object) (*api.PolicyUpdateResult, error) {
-	response, err := client.httpClient.DELETESlice("/policy", api.PolicyUpdateResultObject, updated)
+func (client *policyClient) Delete(updated []runtime.Object, noop bool, logLevel logrus.Level) (*api.PolicyUpdateResult, error) {
+	response, err := client.httpClient.DELETESlice(fmt.Sprintf("/policy/noop/%t/loglevel/%s", noop, logLevel.String()), api.PolicyUpdateResultObject, updated)
 	if err != nil {
 		return nil, err
 	}

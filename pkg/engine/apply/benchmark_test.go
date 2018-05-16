@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"strconv"
@@ -409,7 +410,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistry(true, false),
 		actions,
-		event.NewLog("test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply", true),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
@@ -431,7 +432,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistry(true, false),
 		actions,
-		event.NewLog("test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply", true),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	_ = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
@@ -461,7 +462,7 @@ func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult act
 
 func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
 	b.Helper()
-	eventLog := event.NewLog("test-resolve", false)
+	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve", false)
 	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
 	result := resolver.ResolveAllDependencies()
 	t := &testing.T{}

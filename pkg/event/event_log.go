@@ -22,6 +22,7 @@ type Log struct {
 	attachedTo *attachedObjects
 	hookMemory *HookMemory
 	scope      string
+	level      logrus.Level
 	log        bool
 }
 
@@ -29,12 +30,12 @@ type Log struct {
 // Initially it just buffers all entries and doesn't write them.
 // It needs to buffer all entries, so that the context can be later attached to them
 // before they get serialized and written to an external source
-func NewLog(scope string, log bool) *Log {
+func NewLog(level logrus.Level, scope string, log bool) *Log {
 	logger := &logrus.Logger{
 		Out:       ioutil.Discard,
 		Formatter: new(logrus.TextFormatter),
 		Hooks:     make(logrus.LevelHooks),
-		Level:     logrus.DebugLevel,
+		Level:     level,
 	}
 
 	hookMemory := &HookMemory{}
@@ -49,6 +50,7 @@ func NewLog(scope string, log bool) *Log {
 		attachedTo: &attachedObjects{},
 		hookMemory: hookMemory,
 		scope:      scope,
+		level:      level,
 		log:        log,
 	}
 }
@@ -59,6 +61,11 @@ func fieldValue(data interface{}) interface{} {
 		return runtime.KeyForStorable(baseObject)
 	}
 	return data
+}
+
+// GetLevel returns log level for the event log
+func (eventLog *Log) GetLevel() logrus.Level {
+	return eventLog.level
 }
 
 // GetScope returns scope for event log

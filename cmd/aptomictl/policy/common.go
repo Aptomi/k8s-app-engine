@@ -2,22 +2,16 @@ package policy
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/api"
-	"github.com/Aptomi/aptomi/pkg/client"
-	"github.com/Aptomi/aptomi/pkg/engine"
-	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"github.com/Aptomi/aptomi/pkg/util/retry"
 	log "github.com/Sirupsen/logrus"
 	yamlv2 "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
-	"time"
 )
 
 func readLangObjects(policyPaths []string) ([]runtime.Object, error) {
@@ -142,75 +136,6 @@ func findPolicyFiles(policyPaths []string) ([]string, error) {
 	sort.Strings(allFiles)
 
 	return allFiles, nil
-}
-
-func waitForApplyToFinish(attempts int, interval time.Duration, client client.Core, result *api.PolicyUpdateResult) {
-	// if policy hasn't changed, then we don't have to wait. let's exit right away
-	if !result.PolicyChanged {
-		return
-	}
-
-	// wait for the revision to be processed & applied
-	fmt.Print("Waiting for actions to be applied...")
-	var rev *engine.Revision
-
-	var progressBar progress.Indicator
-	var progressLast = 0
-
-	// query revision status [attempts] x [interval]
-	finished := retry.Do2(attempts, interval, func() bool {
-		// call API
-		var revErr error
-		rev, revErr = client.Revision().ShowByPolicy(result.PolicyGeneration)
-		if revErr != nil {
-			fmt.Print(".")
-			return false
-		}
-
-		// if the engine already started processing the revision, show its progress
-		if rev.Status != engine.RevisionStatusWaiting {
-			if progressBar == nil {
-				fmt.Println()
-
-				// show progress bar only when there is at least one action present
-				if rev.Result.Total > 0 {
-					progressBar = progress.NewConsole("Applying actions")
-					progressBar.SetTotal(int(rev.Result.Total))
-				}
-			}
-			for progressBar != nil && progressLast < int(rev.Result.Success+rev.Result.Failed+rev.Result.Skipped) {
-				progressBar.Advance()
-				progressLast++
-			}
-		}
-
-		// exit when revision is in completed or error status
-		return rev.Status == engine.RevisionStatusCompleted || rev.Status == engine.RevisionStatusError
-	})
-
-	// stop progress bar
-	if progressBar != nil {
-		progressBar.Done()
-	}
-
-	// print the outcome
-	if !finished {
-		fmt.Printf("Revision %d timeout! Has not been applied in %d seconds\n", rev.GetGeneration(), int(interval.Seconds()*float64(attempts)))
-		panic("timeout")
-	} else if rev.Status == engine.RevisionStatusCompleted {
-		if rev.Result.Total > 0 {
-			fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Result.Success, rev.Result.Failed, rev.Result.Skipped)
-		} else {
-			fmt.Printf("Revision %d completed\n", rev.GetGeneration())
-		}
-	} else if rev.Status == engine.RevisionStatusError {
-		fmt.Printf("Revision %d failed\n", rev.GetGeneration())
-		panic("error")
-	} else {
-		fmt.Printf("Unexpected revision status '%s' for revision %d\n", rev.Status, rev.GetGeneration())
-		panic("error")
-	}
-
 }
 
 func isK8sObject(data []byte) bool {

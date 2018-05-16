@@ -20,7 +20,7 @@ func TestFormat_Text(t *testing.T) {
 		result := makePolicyUpdateResult(true)
 		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		expected := "Policy Changes\tAction Plan                                                     \nGen 41 -> 42  \tUpdate Instances                                                \n              \t  [*] cluster#ns#contract#context#keysresolved#component        \n              \tCreate Instances                                                \n              \t  [+] cluster#ns#contract#context#keysresolved#component        \n              \tDestroy Instances                                               \n              \t  [-] cluster#ns#contract#context#keysresolved#component        \n              \tRemove Consumers                                                \n              \t  [<] cluster#ns#contract#context#keysresolved#component = depId\n              \tAdd Consumers                                                   \n              \t  [>] cluster#ns#contract#context#keysresolved#component = depId\n              \t                                                                "
+		expected := "Policy Generation\tAction Plan                                                     \n41 -> 42         \tUpdate Instances                                                \n                 \t  [*] cluster#ns#contract#context#keysresolved#component        \n                 \tCreate Instances                                                \n                 \t  [+] cluster#ns#contract#context#keysresolved#component        \n                 \tDestroy Instances                                               \n                 \t  [-] cluster#ns#contract#context#keysresolved#component        \n                 \tRemove Consumers                                                \n                 \t  [<] cluster#ns#contract#context#keysresolved#component = depId\n                 \tAdd Consumers                                                   \n                 \t  [>] cluster#ns#contract#context#keysresolved#component = depId\n                 \t                                                                "
 		if !assert.Equal(t, expected, string(data), "Format should return expected table") {
 			t.Log("Expected:\n", expected)
 			t.Log("Found:\n", string(data))
@@ -32,7 +32,7 @@ func TestFormat_Text(t *testing.T) {
 		result := makePolicyUpdateResult(false)
 		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		expected := "Policy Changes\tAction Plan                                                     \nGen 42 (none) \tUpdate Instances                                                \n              \t  [*] cluster#ns#contract#context#keysresolved#component        \n              \tCreate Instances                                                \n              \t  [+] cluster#ns#contract#context#keysresolved#component        \n              \tDestroy Instances                                               \n              \t  [-] cluster#ns#contract#context#keysresolved#component        \n              \tRemove Consumers                                                \n              \t  [<] cluster#ns#contract#context#keysresolved#component = depId\n              \tAdd Consumers                                                   \n              \t  [>] cluster#ns#contract#context#keysresolved#component = depId\n              \t                                                                "
+		expected := "Policy Generation\tAction Plan                                                     \n42               \tUpdate Instances                                                \n                 \t  [*] cluster#ns#contract#context#keysresolved#component        \n                 \tCreate Instances                                                \n                 \t  [+] cluster#ns#contract#context#keysresolved#component        \n                 \tDestroy Instances                                               \n                 \t  [-] cluster#ns#contract#context#keysresolved#component        \n                 \tRemove Consumers                                                \n                 \t  [<] cluster#ns#contract#context#keysresolved#component = depId\n                 \tAdd Consumers                                                   \n                 \t  [>] cluster#ns#contract#context#keysresolved#component = depId\n                 \t                                                                "
 		if !assert.Equal(t, expected, string(data), "Format should return expected table") {
 			t.Log("Expected:\n", expected)
 			t.Log("Found:\n", string(data))
@@ -48,7 +48,7 @@ func TestFormat_Text(t *testing.T) {
 		}
 		data, err := Format(cfg.Output, true, result)
 		assert.Nil(t, err, "Format should work without error")
-		expected := "Policy Changes\tAction Plan\nGen 42 (none) \t(none)     "
+		expected := "Policy Generation\tAction Plan\n42               \t(none)     "
 		if !assert.Equal(t, expected, string(data), "Format should return expected table") {
 			t.Log("Expected:\n", expected)
 			t.Log("Found:\n", string(data))

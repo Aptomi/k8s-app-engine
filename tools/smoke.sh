@@ -131,64 +131,66 @@ function check_policy_version() {
     check_policy $1 .Metadata.Generation
 }
 
+function change_policy() {
+    cmd="$1"
+    files="$2"
+    expectedVersion="$3"
+
+    # run in noop mode
+    aptomictl --config ${CONF_DIR} policy ${cmd} --noop ${WAIT_FLAGS} ${files}
+    check_policy_version $((expectedVersion-1))
+
+    # run in normal mode
+    aptomictl --config ${CONF_DIR} policy ${cmd} ${WAIT_FLAGS} ${files}
+    check_policy_version ${expectedVersion}
+}
+
 WAIT_FLAGS="--wait --wait-attempts 20"
 
 check_policy_version 1
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters
-check_policy_version 2
+change_policy apply "-f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters" 2
 
 login frank
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/analytics_pipeline
-check_policy_version 3
+change_policy apply "-f ${POLICY_DIR}/policy/analytics_pipeline" 3
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/twitter_stats
-check_policy_version 4
+change_policy apply "-f ${POLICY_DIR}/policy/twitter_stats" 4
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
-check_policy_version 5
+change_policy apply "-f ${POLICY_DIR}/policy/john-prod-ts.yaml" 5
 
 login alice
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-dev-ts.yaml
-check_policy_version 6
+change_policy apply "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 6
 
 login bob
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-dev-ts.yaml
-check_policy_version 7
-
+change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml" 7
 check_policy 3 ".Objects.social.dependency | length"
 
 # delete Alice's dependency
 login alice
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-dev-ts.yaml
-check_policy_version 8
+change_policy delete "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 8
 check_policy 2 ".Objects.social.dependency | length"
 
 # upgrade prod dependency
 sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
-check_policy_version 9
+change_policy apply "-f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml" 9
 
 # apply Carol's dependency
 login carol
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/carol-dev-ts.yaml
-check_policy_version 10
+change_policy apply "-f ${POLICY_DIR}/policy/carol-dev-ts.yaml" 10
 check_policy 3 ".Objects.social.dependency | length"
 
 # delete all dependencies
 login sam
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f "${POLICY_DIR}/policy/*-ts.yaml"
-check_policy_version 11
+change_policy delete "-f \"${POLICY_DIR}/policy/*-ts.yaml\"" 11
 check_policy 0 ".Objects.social.dependency | length"
 
 # delete all definitions
 login sam
-aptomictl --config ${CONF_DIR} policy delete ${WAIT_FLAGS} -f ${POLICY_DIR}/policy
-check_policy_version 12
+change_policy delete "-f ${POLICY_DIR}/policy" 12
 check_policy 0 ".Objects.platform.contract | length"
 check_policy 0 ".Objects.social.contract | length"
 check_policy 0 ".Objects.platform.dependency | length"
@@ -201,28 +203,22 @@ check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
 
 login sam
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters
-check_policy_version 13
+change_policy apply "-f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters" 13
 
 login frank
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/analytics_pipeline
-check_policy_version 14
+change_policy apply "-f ${POLICY_DIR}/policy/analytics_pipeline" 14
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/twitter_stats
-check_policy_version 15
+change_policy apply "-f ${POLICY_DIR}/policy/twitter_stats" 15
 
 login john
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/john-prod-ts.yaml
-check_policy_version 16
+change_policy apply "-f ${POLICY_DIR}/policy/john-prod-ts.yaml" 16
 
 login alice
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/alice-dev-ts.yaml
-check_policy_version 17
+change_policy apply "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 17
 
 login bob
-aptomictl --config ${CONF_DIR} policy apply ${WAIT_FLAGS} -f ${POLICY_DIR}/policy/bob-dev-ts.yaml
-check_policy_version 18
+change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml" 18
 
 check_policy 5 ".Objects.platform.contract | length"
 check_policy 0 ".Objects.platform.dependency | length"

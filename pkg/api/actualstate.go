@@ -13,7 +13,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 	}
 
 	// signal to the channel that policy has changed, that will trigger the enforcement right away
-	api.policyChanged <- true
+	api.runEnforcement <- true
 
 	api.handleRevisionGet(writer, request, params)
 }
