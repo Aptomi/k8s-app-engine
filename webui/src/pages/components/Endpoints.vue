@@ -4,10 +4,6 @@
       <div class="box-header">
         <h3 class="box-title">Endpoints: <b>{{ dependency.namespace }} / {{ dependency.kind }} / {{ dependency.name }}</b></h3>
       </div>
-      <!-- /.box-header -->
-      <div class="overlay" v-if="loading">
-        <i class="fa fa-refresh fa-spin"></i>
-      </div>
       <div class="box-body table-responsive no-padding">
         <table class="table table-hover">
           <thead>
@@ -17,9 +13,6 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-if="error">
-            <td><span class="label label-danger center">Error</span> <i class="text-red">{{ error }}</i></td>
-          </tr>
           <tr v-if="endpoints == null || endpoints.length <= 0">
             <td>No Endpoints Available</td>
           </tr>
@@ -41,15 +34,11 @@
   </div>
 </template>
 <script>
-  import { getEndpoints } from 'lib/api.js'
-
   export default {
     data () {
       // empty data
       return {
-        loading: false,
-        endpoints: null,
-        error: null
+        endpoints: null
       }
     },
     created () {
@@ -64,26 +53,9 @@
         }
       }
     },
-    watch: {
-      'dependency': 'fetchData'
-    },
     methods: {
       fetchData () {
-        this.loading = true
-        this.endpoints = null
-        this.error = null
-
-        const fetchSuccess = $.proxy(function (data) {
-          this.loading = false
-          this.endpoints = data
-        }, this)
-
-        const fetchError = $.proxy(function (err) {
-          this.loading = false
-          this.error = err
-        }, this)
-
-        getEndpoints(this.dependency, fetchSuccess, fetchError)
+        this.endpoints = this.dependency['status']['endpoints']
       }
     }
   }

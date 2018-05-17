@@ -228,17 +228,6 @@ export function fetchDependenciesStatus (objectList) {
   })
 }
 
-// loads all endpoints
-export async function getEndpoints (d, successFunc, errorFunc) {
-  await makeDelay()
-  const handler = ['endpoints', 'dependency', d['metadata']['namespace'], d['metadata']['name']].join('/')
-  callAPI(handler, async, function (data) {
-    successFunc(data['list'])
-  }, function (err) {
-    errorFunc(err)
-  })
-}
-
 // loads dependency deployment status
 export async function getResources (d, successFunc, errorFunc) {
   await makeDelay()
