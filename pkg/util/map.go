@@ -2,6 +2,7 @@ package util
 
 import (
 	"reflect"
+	"sort"
 )
 
 // CountElements returns the number of elements in the structure, processing it recursively
@@ -47,6 +48,8 @@ func GetSortedStringKeys(m interface{}) []string {
 		}
 		result = append(result, k)
 	}
+
+	sort.Strings(result)
 
 	return result
 }

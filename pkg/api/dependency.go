@@ -18,7 +18,7 @@ import (
 type DependencyQueryFlag string
 
 const (
-	DependencyQueryDeploymentStatusOnly         DependencyQueryFlag = "deploy"
+	DependencyQueryDeploymentStatusOnly         DependencyQueryFlag = "deployed"
 	DependencyQueryDeploymentStatusAndReadiness DependencyQueryFlag = "ready"
 )
 
