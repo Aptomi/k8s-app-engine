@@ -61,12 +61,13 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy/diagram/compare/mode/:mode/gen/:gen/genBase/:genBase", auth(api.handlePolicyDiagramCompare))
 
 	// retrieve dependency along with its status
-	router.GET("/api/v1/policy/dependency/:ns/:name/status", auth(api.handleDependencyStatusGet))
-	router.GET("/api/v1/policy/dependency/:ns/:name/resources", auth(api.handleDependencyResourcesGet))
+	router.GET("/api/v1/policy/dependency/status/:queryFlag/:idList", auth(api.handleDependencyStatusGet))
 
-	// retrieve endpoints (all + by dependency)
-	router.GET("/api/v1/endpoints", api.handleEndpointsGet)
-	router.GET("/api/v1/endpoints/dependency/:ns/:name", auth(api.handleEndpointsGet))
+	// TODO: this needs to be fixed ASAP + UI needs to be fixed as well
+	// router.GET("/api/v1/policy/dependency/:ns/:name/status", auth(api.handleDependencyStatusGet))
+	// router.GET("/api/v1/policy/dependency/:ns/:name/resources", auth(api.handleDependencyResourcesGet))
+	// router.GET("/api/v1/endpoints", api.handleEndpointsGet)
+	// router.GET("/api/v1/endpoints/dependency/:ns/:name", auth(api.handleEndpointsGet))
 
 	// retrieve revision (latest + by a given generation)
 	router.GET("/api/v1/revision", auth(api.handleRevisionGet))

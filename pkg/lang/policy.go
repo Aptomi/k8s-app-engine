@@ -79,7 +79,8 @@ func (policy *Policy) GetObjectsByKind(kind string) []Base {
 }
 
 // GetObject looks up and returns an object from the policy, given its kind, locator ([namespace/]name), and current
-// namespace relative to which the call is being made
+// namespace relative to which the call is being made. It may return nil and no error, if an object hasn't been found in the policy.
+// TODO: we need to fix semantics of this method, so that it either returns a non-nil object or an error
 func (policy *Policy) GetObject(kind string, locator string, currentNs string) (runtime.Object, error) {
 	// parse locator: [namespace/]name. we might add [domain/] in the future
 	parts := strings.Split(locator, "/")

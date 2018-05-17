@@ -1,4 +1,4 @@
-package policy
+package io
 
 import (
 	"fmt"
@@ -14,7 +14,8 @@ import (
 	"sort"
 )
 
-func readLangObjects(policyPaths []string) ([]runtime.Object, error) {
+// ReadLangObjects scans the provided files/dirs/stdin, finds Aptomi lang objects, parses and returns them
+func ReadLangObjects(policyPaths []string) ([]runtime.Object, error) {
 	policyReg := runtime.NewRegistry().Append(lang.PolicyObjects...)
 	codec := yaml.NewCodec(policyReg)
 

@@ -2,6 +2,8 @@ package api
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -10,8 +12,125 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"strings"
 )
 
+type DependencyQueryFlag string
+
+const (
+	DependencyQueryDeploymentStatusOnly         DependencyQueryFlag = "deploy"
+	DependencyQueryDeploymentStatusAndReadiness DependencyQueryFlag = "ready"
+)
+
+// DependencyStatusObject is an informational data structure with Kind and Constructor for Dependency Status
+var DependencyStatusObject = &runtime.Info{
+	Kind:        "dependency-status",
+	Constructor: func() runtime.Object { return &DependencyStatus{} },
+}
+
+type DependencyStatus struct {
+	runtime.TypeKind `yaml:",inline"`
+
+	// map containing status by dependency
+	Status map[string]*DependencyStatusIndividual
+}
+
+type DependencyStatusIndividual struct {
+	Found    bool
+	Deployed bool
+	Ready    bool
+}
+
+func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	// parse query mode flag (deployment status vs. readiness status) as well as the list of dependency IDs
+	flag := DependencyQueryFlag(params.ByName("queryFlag"))
+	dependencyIds := strings.Split(params.ByName("idList"), ",")
+
+	// load the latest policy
+	policy, _, err := api.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while loading latest policy from the store: %s", err))
+	}
+
+	// initialize result
+	result := &DependencyStatus{
+		TypeKind: DependencyStatusObject.GetTypeKind(),
+		Status:   make(map[string]*DependencyStatusIndividual),
+	}
+	for _, dId := range dependencyIds {
+		parts := strings.Split(dId, "^")
+		dObj, err := policy.GetObject(lang.DependencyObject.Kind, parts[1], parts[0])
+		if dObj == nil || err != nil {
+			dKey := runtime.KeyFromParts(parts[0], lang.DependencyObject.Kind, parts[1])
+			result.Status[dKey] = &DependencyStatusIndividual{
+				Found:    false,
+				Deployed: false,
+				Ready:    false,
+			}
+			continue
+		}
+
+		d := dObj.(*lang.Dependency)
+		result.Status[runtime.KeyForStorable(d)] = &DependencyStatusIndividual{
+			Found:    true,
+			Deployed: true,
+			Ready:    false, // TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+		}
+	}
+
+	// load actual and desired states
+	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependency-status", false)).ResolveAllDependencies()
+	actualState, err := api.store.GetActualState()
+	if err != nil {
+		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
+	}
+
+	// compare desired vs. actual state and see what's the dependency status for every provided dependency ID
+	diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan.Apply(
+		action.WrapSequential(func(act action.Base) error {
+			key, ok := act.DescribeChanges()["key"].(string)
+			if ok && len(key) > 0 {
+				// we found a component in diff, which is affected by the action. let's see if any of the dependencies are affected
+				affectedDepKeys := make(map[string]bool)
+				{
+					prevInstance := actualState.ComponentInstanceMap[key]
+					if prevInstance != nil {
+						for dKey := range prevInstance.DependencyKeys {
+							affectedDepKeys[dKey] = true
+						}
+					}
+				}
+				{
+					nextInstance := desiredState.ComponentInstanceMap[key]
+					if nextInstance != nil {
+						for dKey := range nextInstance.DependencyKeys {
+							affectedDepKeys[dKey] = true
+						}
+					}
+				}
+
+				// if our dependency is affected, reset its deployed status to false (because actions are pending)
+				for dKey := range affectedDepKeys {
+					if _, ok := result.Status[dKey]; ok {
+						result.Status[dKey].Deployed = false
+					}
+				}
+			}
+			return nil
+		}),
+		action.NewApplyResultUpdaterImpl(),
+	)
+
+	// query readiness state, if we were asked to
+	if flag == DependencyQueryDeploymentStatusAndReadiness {
+		// TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+	}
+
+	// return the result back
+	api.contentType.WriteOne(writer, request, result)
+}
+
+/*
 type dependencyStatusWrapper struct {
 	Data interface{}
 }
@@ -64,6 +183,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 
 	api.contentType.WriteOne(writer, request, &dependencyStatusWrapper{Data: status})
 }
+*/
 
 type dependencyResourcesWrapper struct {
 	Resources plugin.Resources

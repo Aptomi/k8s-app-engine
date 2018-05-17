@@ -20,6 +20,10 @@ func (client *coreClient) Policy() client.Policy {
 	return &policyClient{client.cfg, client.httpClient}
 }
 
+func (client *coreClient) Dependency() client.Dependency {
+	return &dependencyClient{client.cfg, client.httpClient}
+}
+
 func (client *coreClient) Endpoints() client.Endpoints {
 	return &endpointsClient{client.cfg, client.httpClient}
 }

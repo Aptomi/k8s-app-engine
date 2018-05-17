@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/version"
 	"github.com/Sirupsen/logrus"
@@ -12,6 +13,7 @@ import (
 type Core interface {
 	Policy() Policy
 	Endpoints() Endpoints
+	Dependency() Dependency
 	Revision() Revision
 	State() State
 	User() User
@@ -23,6 +25,11 @@ type Policy interface {
 	Show(gen runtime.Generation) (*engine.PolicyData, error)
 	Apply([]runtime.Object, bool, logrus.Level) (*api.PolicyUpdateResult, error)
 	Delete([]runtime.Object, bool, logrus.Level) (*api.PolicyUpdateResult, error)
+}
+
+// Dependency is the interface for managing Dependency
+type Dependency interface {
+	Status([]*lang.Dependency, api.DependencyQueryFlag) (*api.DependencyStatus, error)
 }
 
 // Endpoints is the interface for getting info about endpoints

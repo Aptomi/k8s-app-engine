@@ -2,6 +2,7 @@ package policy
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/cmd/aptomictl/io"
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client"
@@ -36,7 +37,7 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 		Long:  fmt.Sprintf("%s policy long", commandType),
 
 		Run: func(cmd *cobra.Command, args []string) {
-			allObjects, err := readLangObjects(paths)
+			allObjects, err := io.ReadLangObjects(paths)
 			if err != nil {
 				panic(fmt.Sprintf("error while reading policy files: %s", err))
 			}
