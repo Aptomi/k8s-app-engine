@@ -85,7 +85,7 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 	return cmd
 }
 
-// TODO: ideally we should use common.Format() here to support writing into json and yaml, but runtime.Displayable() doesn't blend too well with an external state (i.e. dKey, waitFlag, attempt)
+// TODO: ideally we should use common.Format() here to support writing into json and yaml, but runtime.Displayable() doesn't blend too well with an external state (i.e. dKey, waitFlag, attempt) as well as maps and sorted keys
 func printStatusOfDependencies(cfg *config.Client, dependencies []*lang.Dependency, waitFlag api.DependencyQueryFlag, writer *uilive.Writer, attempt int) (bool, error) { // nolint: interfacer
 	result, errAPI := rest.New(cfg, http.NewClient(cfg)).Dependency().Status(dependencies, waitFlag)
 	if errAPI != nil {
@@ -93,7 +93,8 @@ func printStatusOfDependencies(cfg *config.Client, dependencies []*lang.Dependen
 	}
 
 	table := uitable.New()
-	table.MaxColWidth = 50
+	table.MaxColWidth = 120
+	table.Wrap = true
 	table.AddRow(getHeader(waitFlag)...)
 
 	keepWaiting := false

@@ -15,6 +15,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 
 	cmd.AddCommand(
 		newStatusCommand(cfg),
+		newEndpointsCommand(cfg),
 	)
 
 	return cmd

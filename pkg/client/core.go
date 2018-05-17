@@ -12,7 +12,6 @@ import (
 // Core is the Core API client interface
 type Core interface {
 	Policy() Policy
-	Endpoints() Endpoints
 	Dependency() Dependency
 	Revision() Revision
 	State() State
@@ -30,11 +29,6 @@ type Policy interface {
 // Dependency is the interface for managing Dependency
 type Dependency interface {
 	Status([]*lang.Dependency, api.DependencyQueryFlag) (*api.DependencyStatus, error)
-}
-
-// Endpoints is the interface for getting info about endpoints
-type Endpoints interface {
-	Show() (*api.Endpoints, error)
 }
 
 // Revision is the interface for getting Revisions

@@ -41,9 +41,10 @@ type DependencyStatus struct {
 
 // DependencyStatusIndividual is a struct which holds status information for an individual dependency
 type DependencyStatusIndividual struct {
-	Found    bool
-	Deployed bool
-	Ready    bool
+	Found     bool
+	Deployed  bool
+	Ready     bool
+	Endpoints map[string]map[string]string
 }
 
 func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -68,18 +69,20 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		if dObj == nil || err != nil {
 			dKey := runtime.KeyFromParts(parts[0], lang.DependencyObject.Kind, parts[1])
 			result.Status[dKey] = &DependencyStatusIndividual{
-				Found:    false,
-				Deployed: false,
-				Ready:    false,
+				Found:     false,
+				Deployed:  false,
+				Ready:     false,
+				Endpoints: make(map[string]map[string]string),
 			}
 			continue
 		}
 
 		d := dObj.(*lang.Dependency)
 		result.Status[runtime.KeyForStorable(d)] = &DependencyStatusIndividual{
-			Found:    true,
-			Deployed: true,
-			Ready:    false, // TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+			Found:     true,
+			Deployed:  true,
+			Ready:     false, // TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+			Endpoints: make(map[string]map[string]string),
 		}
 	}
 
@@ -90,6 +93,22 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
 	}
 
+	// fetch deployment status for dependencies
+	fetchDeploymentStatusForDependencies(result, actualState, desiredState)
+
+	// fetch readiness status for dependencies, if we were asked to do so
+	if flag == DependencyQueryDeploymentStatusAndReadiness {
+		fetchReadinessStatusForDependencies(result, actualState, desiredState)
+	}
+
+	// fetch endpoints for dependencies
+	fetchEndpointsForDependencies(result, actualState)
+
+	// return the result back
+	api.contentType.WriteOne(writer, request, result)
+}
+
+func fetchDeploymentStatusForDependencies(result *DependencyStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
 	// compare desired vs. actual state and see what's the dependency status for every provided dependency ID
 	diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan.Apply(
 		action.WrapSequential(func(act action.Base) error {
@@ -126,13 +145,22 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		action.NewApplyResultUpdaterImpl(),
 	)
 
-	// query readiness state, if we were asked to
-	if flag == DependencyQueryDeploymentStatusAndReadiness { // nolint: megacheck
-		// TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
-	}
+}
 
-	// return the result back
-	api.contentType.WriteOne(writer, request, result)
+func fetchReadinessStatusForDependencies(result *DependencyStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
+	// TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+}
+
+func fetchEndpointsForDependencies(result *DependencyStatus, actualState *resolve.PolicyResolution) {
+	for _, instance := range actualState.ComponentInstanceMap {
+		for dKey := range instance.DependencyKeys {
+			if _, ok := result.Status[dKey]; ok {
+				if len(instance.Endpoints) > 0 {
+					result.Status[dKey].Endpoints[instance.GetName()] = instance.Endpoints
+				}
+			}
+		}
+	}
 }
 
 /*

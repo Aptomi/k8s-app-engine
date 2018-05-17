@@ -24,10 +24,6 @@ func (client *coreClient) Dependency() client.Dependency {
 	return &dependencyClient{client.cfg, client.httpClient}
 }
 
-func (client *coreClient) Endpoints() client.Endpoints {
-	return &endpointsClient{client.cfg, client.httpClient}
-}
-
 func (client *coreClient) Revision() client.Revision {
 	return &revisionClient{client.cfg, client.httpClient}
 }

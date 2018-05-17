@@ -3,7 +3,6 @@ package root
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/dependency"
-	"github.com/Aptomi/aptomi/cmd/aptomictl/endpoints"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/gen"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/login"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/policy"
@@ -60,7 +59,6 @@ func init() {
 	Command.AddCommand(
 		login.NewCommand(Config, ConfigFile),
 		dependency.NewCommand(Config),
-		endpoints.NewCommand(Config),
 		policy.NewCommand(Config),
 		revision.NewCommand(Config),
 		state.NewCommand(Config),
