@@ -181,13 +181,50 @@ export async function getPolicyObjectsWithProperties (successFunc, errorFunc, ki
   await makeDelay()
   const handler = ['policy'].join('/')
   callAPI(handler, async, function (data) {
+    // 1. once all objects are received, filter them by kind
     const objectList = filterObjects(data['objects'], null, kindFilter)
+
+    // 2. fetch properties for every object
     for (const idx in objectList) {
       fetchObjectProperties(objectList[idx])
     }
+
+    // 3. fetch status for all dependencies
+    fetchDependenciesStatus(objectList)
+
     successFunc(objectList)
   }, function (err) {
     errorFunc(err)
+  })
+}
+
+// fetches status of all dependencies
+export function fetchDependenciesStatus (objectList) {
+  const depIds = []
+  for (const idx in objectList) {
+    if (objectList[idx]['kind'] === 'dependency') {
+      depIds.push(objectList[idx]['namespace'] + '^' + objectList[idx]['name'])
+    }
+  }
+
+  const handler = ['policy', 'dependency', 'status', 'deployed', depIds.join(',')].join('/')
+  callAPI(handler, sync, function (data) {
+    for (const idx in objectList) {
+      if (objectList[idx]['kind'] === 'dependency') {
+        const key = [objectList[idx]['namespace'], objectList[idx]['kind'], objectList[idx]['name']].join('/')
+        if (key in data['status'] && data['status'][key]['found']) {
+          objectList[idx]['status'] = data['status'][key]
+        } else {
+          objectList[idx]['status_error'] = 'unable to retrieve status'
+        }
+      }
+    }
+  }, function (err) {
+    for (const idx in objectList) {
+      if (objectList[idx]['kind'] === 'dependency') {
+        objectList[idx]['status_error'] = err
+      }
+    }
   })
 }
 
@@ -245,21 +282,6 @@ export function fetchObjectProperties (obj, successFunc = null, errorFunc = null
     if (errorFunc != null) {
       errorFunc(err)
     }
-  })
-
-  if (obj['kind'] === 'dependency') {
-    fetchDependencyStatus(obj)
-  }
-}
-
-// fetches status for a single dependency
-function fetchDependencyStatus (d) {
-  const handler = ['policy', 'dependency', d['metadata']['namespace'], d['metadata']['name'], 'status'].join('/')
-  callAPI(handler, sync, function (data) {
-    d['status'] = data['data']
-  }, function (err) {
-    // can't fetch dependency properties
-    d['status_error'] = 'unable to fetch dependency status: ' + err
   })
 }
 

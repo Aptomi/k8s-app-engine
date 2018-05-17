@@ -64,7 +64,6 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy/dependency/status/:queryFlag/:idList", auth(api.handleDependencyStatusGet))
 
 	// TODO: this needs to be fixed ASAP + UI needs to be fixed as well
-	// router.GET("/api/v1/policy/dependency/:ns/:name/status", auth(api.handleDependencyStatusGet))
 	// router.GET("/api/v1/policy/dependency/:ns/:name/resources", auth(api.handleDependencyResourcesGet))
 	// router.GET("/api/v1/endpoints", api.handleEndpointsGet)
 	// router.GET("/api/v1/endpoints/dependency/:ns/:name", auth(api.handleEndpointsGet))
