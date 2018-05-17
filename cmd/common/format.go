@@ -24,7 +24,7 @@ const (
 func Format(output string, list bool, objs ...runtime.Displayable) ([]byte, error) {
 	switch strings.ToLower(output) {
 	case Text:
-		return textMarshal(list, objs)
+		return textMarshal(objs), nil
 	case YAML:
 		if list {
 			return yaml.Marshal(objs)
@@ -40,7 +40,7 @@ func Format(output string, list bool, objs ...runtime.Displayable) ([]byte, erro
 	panic(fmt.Sprintf("output format not supported: %s", output))
 }
 
-func textMarshal(list bool, objs []runtime.Displayable) ([]byte, error) {
+func textMarshal(objs []runtime.Displayable) []byte {
 	table := uitable.New()
 	table.MaxColWidth = 120
 	table.Wrap = true
@@ -65,5 +65,5 @@ func textMarshal(list bool, objs []runtime.Displayable) ([]byte, error) {
 		table.AddRow(columns...)
 	}
 
-	return table.Bytes(), nil
+	return table.Bytes()
 }
