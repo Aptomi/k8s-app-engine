@@ -7,7 +7,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
@@ -15,10 +14,14 @@ import (
 	"strings"
 )
 
+// DependencyQueryFlag determines whether to query just dependency deployment status, or both deployment + readiness/health checks status
 type DependencyQueryFlag string
 
 const (
-	DependencyQueryDeploymentStatusOnly         DependencyQueryFlag = "deployed"
+	// DependencyQueryDeploymentStatusOnly prescribes only to query dependency deployment status (i.e. actual state = desired state)
+	DependencyQueryDeploymentStatusOnly DependencyQueryFlag = "deployed"
+
+	// DependencyQueryDeploymentStatusAndReadiness prescribes to query both dependency deployment status (i.e. actual state = desired state), as well as readiness status (i.e. health checks = passing)
 	DependencyQueryDeploymentStatusAndReadiness DependencyQueryFlag = "ready"
 )
 
@@ -28,6 +31,7 @@ var DependencyStatusObject = &runtime.Info{
 	Constructor: func() runtime.Object { return &DependencyStatus{} },
 }
 
+// DependencyStatus is a struct which holds status information for a set of given dependencies
 type DependencyStatus struct {
 	runtime.TypeKind `yaml:",inline"`
 
@@ -35,6 +39,7 @@ type DependencyStatus struct {
 	Status map[string]*DependencyStatusIndividual
 }
 
+// DependencyStatusIndividual is a struct which holds status information for an individual dependency
 type DependencyStatusIndividual struct {
 	Found    bool
 	Deployed bool
@@ -47,9 +52,9 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	dependencyIds := strings.Split(params.ByName("idList"), ",")
 
 	// load the latest policy
-	policy, _, err := api.store.GetPolicy(runtime.LastGen)
-	if err != nil {
-		panic(fmt.Sprintf("error while loading latest policy from the store: %s", err))
+	policy, _, errPolicy := api.store.GetPolicy(runtime.LastGen)
+	if errPolicy != nil {
+		panic(fmt.Sprintf("error while loading latest policy from the store: %s", errPolicy))
 	}
 
 	// initialize result
@@ -57,8 +62,8 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		TypeKind: DependencyStatusObject.GetTypeKind(),
 		Status:   make(map[string]*DependencyStatusIndividual),
 	}
-	for _, dId := range dependencyIds {
-		parts := strings.Split(dId, "^")
+	for _, depID := range dependencyIds {
+		parts := strings.Split(depID, "^")
 		dObj, err := policy.GetObject(lang.DependencyObject.Kind, parts[1], parts[0])
 		if dObj == nil || err != nil {
 			dKey := runtime.KeyFromParts(parts[0], lang.DependencyObject.Kind, parts[1])
@@ -122,7 +127,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	)
 
 	// query readiness state, if we were asked to
-	if flag == DependencyQueryDeploymentStatusAndReadiness {
+	if flag == DependencyQueryDeploymentStatusAndReadiness { // nolint: megacheck
 		// TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
 	}
 
@@ -183,7 +188,6 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 
 	api.contentType.WriteOne(writer, request, &dependencyStatusWrapper{Data: status})
 }
-*/
 
 type dependencyResourcesWrapper struct {
 	Resources plugin.Resources
@@ -271,3 +275,4 @@ func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lan
 
 	return plugins.ForCodeType(cluster, component.Code.Type)
 }
+*/

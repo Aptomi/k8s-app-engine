@@ -85,10 +85,10 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 	return cmd
 }
 
-func printStatusOfDependencies(cfg *config.Client, dependencies []*lang.Dependency, waitFlag api.DependencyQueryFlag, writer *uilive.Writer, attempt int) (bool, error) {
-	result, errApi := rest.New(cfg, http.NewClient(cfg)).Dependency().Status(dependencies, waitFlag)
-	if errApi != nil {
-		panic(fmt.Sprintf("error while requesting dependency status: %s", errApi))
+func printStatusOfDependencies(cfg *config.Client, dependencies []*lang.Dependency, waitFlag api.DependencyQueryFlag, writer *uilive.Writer, attempt int) (bool, error) { // nolint: interfacer
+	result, errAPI := rest.New(cfg, http.NewClient(cfg)).Dependency().Status(dependencies, waitFlag)
+	if errAPI != nil {
+		panic(fmt.Sprintf("error while requesting dependency status: %s", errAPI))
 	}
 
 	table := uitable.New()
@@ -133,7 +133,7 @@ func getFoundStr(dsi *api.DependencyStatusIndividual) string {
 	if !dsi.Found {
 		return "no"
 	}
-	return "yes"
+	return "yes" // nolint: goconst
 }
 
 func getDeployedStr(dsi *api.DependencyStatusIndividual, attempt int) string {
@@ -146,7 +146,7 @@ func getDeployedStr(dsi *api.DependencyStatusIndividual, attempt int) string {
 		}
 		return "no"
 	}
-	return "yes"
+	return "yes" // nolint: goconst
 }
 
 func getReadyStr(dsi *api.DependencyStatusIndividual, attempt int) string {
@@ -159,7 +159,7 @@ func getReadyStr(dsi *api.DependencyStatusIndividual, attempt int) string {
 		}
 		return "no"
 	}
-	return "yes"
+	return "yes" // nolint: goconst
 }
 
 func shouldKeepWaiting(dsi *api.DependencyStatusIndividual, waitFlag api.DependencyQueryFlag) (bool, error) {
