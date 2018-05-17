@@ -410,7 +410,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistry(true, false),
 		actions,
-		event.NewLog(logrus.DebugLevel, "test-apply", true),
+		event.NewLog(logrus.DebugLevel, "test-apply", false),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
@@ -432,7 +432,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistry(true, false),
 		actions,
-		event.NewLog(logrus.DebugLevel, "test-apply", true),
+		event.NewLog(logrus.DebugLevel, "test-apply", false),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	_ = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
