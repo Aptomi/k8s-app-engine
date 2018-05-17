@@ -92,8 +92,6 @@ func (policyData *PolicyData) GetDefaultColumns() []string {
 // AsColumns returns PolicyData representation as columns
 func (policyData *PolicyData) AsColumns() map[string]string {
 	result := make(map[string]string)
-
 	result["Policy Version"] = policyData.GetGeneration().String()
-
 	return result
 }
