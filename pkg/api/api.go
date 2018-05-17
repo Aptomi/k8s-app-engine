@@ -62,9 +62,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 
 	// retrieve dependency along with its status
 	router.GET("/api/v1/policy/dependency/status/:queryFlag/:idList", auth(api.handleDependencyStatusGet))
-
-	// TODO: this needs to be fixed ASAP + UI needs to be fixed as well
-	// router.GET("/api/v1/policy/dependency/:ns/:name/resources", auth(api.handleDependencyResourcesGet))
+	router.GET("/api/v1/policy/dependency/resources/:ns/:name", auth(api.handleDependencyResourcesGet))
 
 	// retrieve revision (latest + by a given generation)
 	router.GET("/api/v1/revision", auth(api.handleRevisionGet))

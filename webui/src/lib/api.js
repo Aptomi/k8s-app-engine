@@ -231,7 +231,7 @@ export function fetchDependenciesStatus (objectList) {
 // loads dependency deployment status
 export async function getResources (d, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['policy', 'dependency', d['metadata']['namespace'], d['metadata']['name'], 'resources'].join('/')
+  const handler = ['policy', 'dependency', 'resources', d['metadata']['namespace'], d['metadata']['name']].join('/')
   callAPI(handler, async, function (data) {
     successFunc(data['resources'])
   }, function (err) {
