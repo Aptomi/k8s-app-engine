@@ -101,15 +101,11 @@ if [ -z "$SERVER_RUNNING" ]; then
     exit 1
 fi
 
+WAIT_FLAGS="--wait --wait-attempts 20"
+
 function login() {
     aptomictl --config ${CONF_DIR} login --username $1 --password $1
 }
-
-login alice
-if aptomictl --config ${CONF_DIR} policy apply -f ${POLICY_DIR}/policy &>/dev/null ; then
-    echo "Alice shouldn't be able to upload full policy"
-    exit 1
-fi
 
 function check_policy() {
     expected="$1"
@@ -145,7 +141,16 @@ function change_policy() {
     check_policy_version ${expectedVersion}
 }
 
-WAIT_FLAGS="--wait --wait-attempts 20"
+function check_dependencies() {
+    files="$1"
+    aptomictl --config ${CONF_DIR} dependency status --wait ${files}
+}
+
+login alice
+if aptomictl --config ${CONF_DIR} policy apply -f ${POLICY_DIR}/policy &>/dev/null ; then
+    echo "Alice shouldn't be able to upload full policy"
+    exit 1
+fi
 
 check_policy_version 1
 
@@ -160,13 +165,18 @@ change_policy apply "-f ${POLICY_DIR}/policy/twitter_stats" 4
 
 login john
 change_policy apply "-f ${POLICY_DIR}/policy/john-prod-ts.yaml" 5
+check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml"
 
 login alice
 change_policy apply "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 6
+check_dependencies "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml"
 
 login bob
 change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml" 7
+check_dependencies "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
+
 check_policy 3 ".Objects.social.dependency | length"
+check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
 
 # delete Alice's dependency
 login alice
@@ -213,12 +223,18 @@ change_policy apply "-f ${POLICY_DIR}/policy/twitter_stats" 15
 
 login john
 change_policy apply "-f ${POLICY_DIR}/policy/john-prod-ts.yaml" 16
+check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml"
 
 login alice
 change_policy apply "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 17
+check_dependencies "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml"
 
 login bob
 change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml" 18
+check_dependencies "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
+
+check_policy 3 ".Objects.social.dependency | length"
+check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
 
 check_policy 5 ".Objects.platform.contract | length"
 check_policy 0 ".Objects.platform.dependency | length"
