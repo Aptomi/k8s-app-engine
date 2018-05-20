@@ -28,7 +28,7 @@ type Policy interface {
 
 // Dependency is the interface for managing Dependency
 type Dependency interface {
-	Status([]*lang.Dependency, api.DependencyQueryFlag) (*api.DependencyStatus, error)
+	Status([]*lang.Dependency, api.DependencyQueryFlag) (*api.DependenciesStatus, error)
 }
 
 // Revision is the interface for getting Revisions

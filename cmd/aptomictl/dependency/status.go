@@ -121,7 +121,7 @@ func getHeader(waitFlag api.DependencyQueryFlag) []interface{} {
 	return result
 }
 
-func getRow(dKey string, dStatus *api.DependencyStatusIndividual, waitFlag api.DependencyQueryFlag, attempt int) []interface{} {
+func getRow(dKey string, dStatus *api.DependencyStatus, waitFlag api.DependencyQueryFlag, attempt int) []interface{} {
 	result := []interface{}{dKey, getFoundStr(dStatus), getDeployedStr(dStatus, attempt)}
 	if waitFlag == api.DependencyQueryDeploymentStatusAndReadiness {
 		result = append(result, getReadyStr(dStatus, attempt))
@@ -131,14 +131,14 @@ func getRow(dKey string, dStatus *api.DependencyStatusIndividual, waitFlag api.D
 
 const spinner = "|/-\\"
 
-func getFoundStr(dsi *api.DependencyStatusIndividual) string {
+func getFoundStr(dsi *api.DependencyStatus) string {
 	if !dsi.Found {
 		return "no"
 	}
 	return "yes" // nolint: goconst
 }
 
-func getDeployedStr(dsi *api.DependencyStatusIndividual, attempt int) string {
+func getDeployedStr(dsi *api.DependencyStatus, attempt int) string {
 	if !dsi.Found {
 		return "no"
 	}
@@ -151,7 +151,7 @@ func getDeployedStr(dsi *api.DependencyStatusIndividual, attempt int) string {
 	return "yes" // nolint: goconst
 }
 
-func getReadyStr(dsi *api.DependencyStatusIndividual, attempt int) string {
+func getReadyStr(dsi *api.DependencyStatus, attempt int) string {
 	if !dsi.Found {
 		return "no"
 	}
@@ -164,7 +164,7 @@ func getReadyStr(dsi *api.DependencyStatusIndividual, attempt int) string {
 	return "yes" // nolint: goconst
 }
 
-func shouldKeepWaiting(dsi *api.DependencyStatusIndividual, waitFlag api.DependencyQueryFlag) (bool, error) {
+func shouldKeepWaiting(dsi *api.DependencyStatus, waitFlag api.DependencyQueryFlag) (bool, error) {
 	if !dsi.Found {
 		// if dependency has not been found, it does NOT make sense to continue waiting
 		return false, fmt.Errorf("dependency has not been found")

@@ -25,22 +25,22 @@ const (
 	DependencyQueryDeploymentStatusAndReadiness DependencyQueryFlag = "ready"
 )
 
-// DependencyStatusObject is an informational data structure with Kind and Constructor for Dependency Status
-var DependencyStatusObject = &runtime.Info{
-	Kind:        "dependency-status",
-	Constructor: func() runtime.Object { return &DependencyStatus{} },
+// DependenciesStatusObject is an informational data structure with Kind and Constructor for DependenciesStatus
+var DependenciesStatusObject = &runtime.Info{
+	Kind:        "dependencies-status",
+	Constructor: func() runtime.Object { return &DependenciesStatus{} },
 }
 
-// DependencyStatus is a struct which holds status information for a set of given dependencies
-type DependencyStatus struct {
+// DependenciesStatus is a struct which holds status information for a set of given dependencies
+type DependenciesStatus struct {
 	runtime.TypeKind `yaml:",inline"`
 
 	// map containing status by dependency
-	Status map[string]*DependencyStatusIndividual
+	Status map[string]*DependencyStatus
 }
 
-// DependencyStatusIndividual is a struct which holds status information for an individual dependency
-type DependencyStatusIndividual struct {
+// DependencyStatus is a struct which holds status information for an individual dependency
+type DependencyStatus struct {
 	Found     bool
 	Deployed  bool
 	Ready     bool
@@ -59,16 +59,16 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	}
 
 	// initialize result
-	result := &DependencyStatus{
-		TypeKind: DependencyStatusObject.GetTypeKind(),
-		Status:   make(map[string]*DependencyStatusIndividual),
+	result := &DependenciesStatus{
+		TypeKind: DependenciesStatusObject.GetTypeKind(),
+		Status:   make(map[string]*DependencyStatus),
 	}
 	for _, depID := range dependencyIds {
 		parts := strings.Split(depID, "^")
 		dObj, err := policy.GetObject(lang.DependencyObject.Kind, parts[1], parts[0])
 		if dObj == nil || err != nil {
 			dKey := runtime.KeyFromParts(parts[0], lang.DependencyObject.Kind, parts[1])
-			result.Status[dKey] = &DependencyStatusIndividual{
+			result.Status[dKey] = &DependencyStatus{
 				Found:     false,
 				Deployed:  false,
 				Ready:     false,
@@ -78,7 +78,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		}
 
 		d := dObj.(*lang.Dependency)
-		result.Status[runtime.KeyForStorable(d)] = &DependencyStatusIndividual{
+		result.Status[runtime.KeyForStorable(d)] = &DependencyStatus{
 			Found:     true,
 			Deployed:  true,
 			Ready:     false, // TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
@@ -87,7 +87,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	}
 
 	// load actual and desired states
-	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependency-status", false)).ResolveAllDependencies()
+	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependencies-status", false)).ResolveAllDependencies()
 	actualState, err := api.store.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
@@ -108,7 +108,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	api.contentType.WriteOne(writer, request, result)
 }
 
-func fetchDeploymentStatusForDependencies(result *DependencyStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
+func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
 	// compare desired vs. actual state and see what's the dependency status for every provided dependency ID
 	diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan.Apply(
 		action.WrapSequential(func(act action.Base) error {
@@ -147,11 +147,11 @@ func fetchDeploymentStatusForDependencies(result *DependencyStatus, actualState 
 
 }
 
-func fetchReadinessStatusForDependencies(result *DependencyStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
+func fetchReadinessStatusForDependencies(result *DependenciesStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
 	// TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
 }
 
-func fetchEndpointsForDependencies(result *DependencyStatus, actualState *resolve.PolicyResolution) {
+func fetchEndpointsForDependencies(result *DependenciesStatus, actualState *resolve.PolicyResolution) {
 	for _, instance := range actualState.ComponentInstanceMap {
 		for dKey := range instance.DependencyKeys {
 			if _, ok := result.Status[dKey]; ok {

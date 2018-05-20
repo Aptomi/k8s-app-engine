@@ -15,13 +15,13 @@ type dependencyClient struct {
 	httpClient http.Client
 }
 
-func (client *dependencyClient) Status(dependencies []*lang.Dependency, queryFlag api.DependencyQueryFlag) (*api.DependencyStatus, error) {
+func (client *dependencyClient) Status(dependencies []*lang.Dependency, queryFlag api.DependencyQueryFlag) (*api.DependenciesStatus, error) {
 	dependencyIds := []string{}
 	for _, d := range dependencies {
 		dependencyIds = append(dependencyIds, d.GetNamespace()+"^"+d.GetName())
 	}
 
-	response, err := client.httpClient.GET(fmt.Sprintf("/policy/dependency/status/%s/%s", queryFlag, strings.Join(dependencyIds, ",")), api.DependencyStatusObject)
+	response, err := client.httpClient.GET(fmt.Sprintf("/policy/dependency/status/%s/%s", queryFlag, strings.Join(dependencyIds, ",")), api.DependenciesStatusObject)
 	if err != nil {
 		return nil, err
 	}
@@ -30,5 +30,5 @@ func (client *dependencyClient) Status(dependencies []*lang.Dependency, queryFla
 		return nil, fmt.Errorf("server error: %s", serverError.Error)
 	}
 
-	return response.(*api.DependencyStatus), nil
+	return response.(*api.DependenciesStatus), nil
 }
