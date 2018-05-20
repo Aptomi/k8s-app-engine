@@ -42,6 +42,7 @@ type CodePlugin interface {
 	Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error
 	Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error)
 	Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (Resources, error)
+	Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error)
 }
 
 // CodePluginConstructor represents constructor the the code plugin

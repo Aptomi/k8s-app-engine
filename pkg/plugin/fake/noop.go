@@ -63,6 +63,10 @@ func (plugin *noOpPlugin) Resources(deployName string, params util.NestedParamet
 	return nil, nil
 }
 
+func (plugin *noOpPlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error) {
+	return true, nil
+}
+
 func (plugin *noOpPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
 	return nil
 }

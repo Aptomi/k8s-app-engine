@@ -162,7 +162,7 @@ func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, ev
 	return p.kube.EndpointsForManifests(deployName, targetManifest, eventLog)
 }
 
-// Resources returns list of all resources (like services, config maps, etc.) into the cluster by specified component instance
+// Resources returns list of all resources (like services, config maps, etc.) deployed into the cluster by specified component instance
 func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
 	err := p.init()
 	if err != nil {
@@ -175,4 +175,19 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 	}
 
 	return p.kube.ResourcesForManifest(deployName, targetManifest, eventLog)
+}
+
+// Status returns readiness of all resources (like services, config maps, etc.) deployed into the cluster by specified component instance
+func (p *Plugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error) {
+	err := p.init()
+	if err != nil {
+		return false, err
+	}
+
+	_, ok := params["manifest"].(string)
+	if !ok {
+		return false, fmt.Errorf("manifest is a mandatory parameter")
+	}
+
+	return false, nil
 }
