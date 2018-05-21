@@ -12,6 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strings"
+	"github.com/Aptomi/aptomi/pkg/plugin"
 )
 
 // DependencyQueryFlag determines whether to query just dependency deployment status, or both deployment + readiness/health checks status
@@ -81,7 +82,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		result.Status[runtime.KeyForStorable(d)] = &DependencyStatus{
 			Found:     true,
 			Deployed:  true,
-			Ready:     false, // TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+			Ready:     false,
 			Endpoints: make(map[string]map[string]string),
 		}
 	}
@@ -98,7 +99,8 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 
 	// fetch readiness status for dependencies, if we were asked to do so
 	if flag == DependencyQueryDeploymentStatusAndReadiness {
-		fetchReadinessStatusForDependencies(result, actualState, desiredState)
+		plugins := api.pluginRegistryFactory()
+		fetchReadinessStatusForDependencies(result, plugins, policy, actualState, desiredState)
 	}
 
 	// fetch endpoints for dependencies
@@ -147,8 +149,27 @@ func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualStat
 
 }
 
-func fetchReadinessStatusForDependencies(result *DependenciesStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
-	// TODO: this needs to be implemented. see https://github.com/Aptomi/aptomi/issues/315
+func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plugin.Registry, policy *lang.Policy, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
+	for _, instance := range actualState.ComponentInstanceMap {
+		for dKey := range instance.DependencyKeys {
+			if _, ok := result.Status[dKey]; ok {
+				codePlugin, err := pluginForComponentInstance(instance, policy, plugins)
+				if err != nil {
+					panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), err))
+				}
+				if codePlugin == nil {
+					continue
+				}
+
+				instanceStatus, err := codePlugin.Status(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources-status", false))
+				if err != nil {
+					panic(fmt.Sprintf("Error while getting deployment resources status for component instance %s: %s", instance.GetKey(), err))
+				}
+
+				result.Status[dKey].Ready = instanceStatus
+			}
+		}
+	}
 }
 
 func fetchEndpointsForDependencies(result *DependenciesStatus, actualState *resolve.PolicyResolution) {

@@ -283,10 +283,10 @@ func (p *Plugin) Status(deployName string, params util.NestedParameterMap, event
 
 	releaseName := getReleaseName(deployName)
 
-	_, err = helmClient.ReleaseContent(releaseName)
+	currRelease, err := helmClient.ReleaseContent(releaseName)
 	if err != nil {
 		return false, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	return false, nil
+	return p.kube.ReadinessStatusForManifest(deployName, currRelease.Release.Manifest, eventLog)
 }

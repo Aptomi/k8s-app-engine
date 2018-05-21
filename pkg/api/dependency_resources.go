@@ -53,7 +53,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 		if _, ok := instance.DependencyKeys[depKey]; ok {
 			codePlugin, pluginErr := pluginForComponentInstance(instance, policy, plugins)
 			if pluginErr != nil {
-				panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), err))
+				panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), pluginErr))
 			}
 			if codePlugin == nil {
 				continue

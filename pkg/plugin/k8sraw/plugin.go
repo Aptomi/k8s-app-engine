@@ -184,10 +184,10 @@ func (p *Plugin) Status(deployName string, params util.NestedParameterMap, event
 		return false, err
 	}
 
-	_, ok := params["manifest"].(string)
+	targetManifest, ok := params["manifest"].(string)
 	if !ok {
 		return false, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	return false, nil
+	return p.kube.ReadinessStatusForManifest(deployName, targetManifest, eventLog)
 }
