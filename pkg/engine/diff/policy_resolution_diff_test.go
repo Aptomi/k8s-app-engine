@@ -44,7 +44,7 @@ func TestDiffComponentCreationAndAttachDependency(t *testing.T) {
 
 	// component should not be instantiated again (it's already there), just new dependency should be attached
 	diffAgain := NewPolicyResolutionDiff(resolvedNextAgain, resolvedNext)
-	verifyDiff(t, diffAgain, 0, 0, 0, 2, 0, 0)
+	verifyDiff(t, diffAgain, 0, 0, 0, 2, 0, 1)
 }
 
 func TestDiffComponentUpdate(t *testing.T) {
