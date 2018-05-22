@@ -47,7 +47,7 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 		var obj interface{}
 
 		switch kind := info.Mapping.GroupVersionKind.Kind; kind {
-		case "Service":
+		case "Service": // nolint: goconst
 			obj, getErr = kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "ConfigMap":
 			//obj, getErr = kubeClient.CoreV1().ConfigMaps(p.Namespace).Get(info.Name, meta.GetOptions{})

@@ -3,12 +3,12 @@ package k8s
 import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
-	"k8s.io/client-go/pkg/api/v1"
-	"k8s.io/kubernetes/pkg/kubectl"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/apis/apps"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/kubernetes/pkg/kubectl"
+	"strings"
 )
 
 // ReadinessStatusForManifest returns readiness status of all resources for specified manifest
@@ -28,7 +28,7 @@ func (p *Plugin) ReadinessStatusForManifest(deployName, targetManifest string, e
 	ready := true
 
 	internalClientSet, clientErr := internalclientset.NewForConfig(p.RestConfig)
-	if clientErr!=nil {
+	if clientErr != nil {
 		return false, clientErr
 	}
 
@@ -41,7 +41,7 @@ func (p *Plugin) ReadinessStatusForManifest(deployName, targetManifest string, e
 
 		// todo some objects are missing in this check like DaemonSet, Job, ReplicationController, etc.
 		switch kind := info.Mapping.GroupVersionKind.Kind; kind {
-		case "Service":
+		case "Service": // nolint: goconst
 			svc, getErr := kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				return false, getErr
@@ -100,7 +100,7 @@ func isPersistentVolumeClaimReady(pvc *v1.PersistentVolumeClaim) bool {
 
 func isReadyUsingStatusViewer(internalClientSet *internalclientset.Clientset, groupKind schema.GroupKind, namespace, name string) (bool, error) {
 	statusViewer, err := kubectl.StatusViewerFor(groupKind, internalClientSet)
-	if err!= nil {
+	if err != nil {
 		return false, err
 	}
 

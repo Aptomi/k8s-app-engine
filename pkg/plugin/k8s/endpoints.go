@@ -26,7 +26,7 @@ func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventL
 	endpoints := make(map[string]string)
 
 	for _, info := range infos {
-		if info.Mapping.GroupVersionKind.Kind == "Service" {
+		if info.Mapping.GroupVersionKind.Kind == "Service" { // nolint: goconst
 			service, getErr := kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				return nil, getErr

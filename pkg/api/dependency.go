@@ -7,12 +7,12 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strings"
-	"github.com/Aptomi/aptomi/pkg/plugin"
 )
 
 // DependencyQueryFlag determines whether to query just dependency deployment status, or both deployment + readiness/health checks status
