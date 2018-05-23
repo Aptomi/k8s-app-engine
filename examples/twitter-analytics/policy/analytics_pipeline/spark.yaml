@@ -17,7 +17,7 @@
         params:
           chartRepo: https://mirantisworkloads.storage.googleapis.com
           chartName: spark
-          chartVersion: 3.0.3
+          chartVersion: 3.0.5
 
           spark:
             master:
