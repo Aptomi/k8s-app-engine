@@ -205,7 +205,7 @@ func (instance *ComponentInstance) UpdateTimes(createdAt time.Time, updatedAt ti
 }
 
 func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
-	// List of dependencies which are keeping this component instantiated
+	// Combine dependencies which are keeping this component instantiated
 	for dependencyKey := range ops.DependencyKeys {
 		instance.addDependency(dependencyKey)
 	}
@@ -216,12 +216,13 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	// Combine labels
 	instance.addLabels(ops.CalculatedLabels)
 
-	// Combine code params and discovery params for
+	// Combine discovery params
 	var err = instance.addDiscoveryParams(ops.CalculatedDiscovery)
 	if err != nil {
 		return err
 	}
 
+	// Combine code params
 	err = instance.addCodeParams(ops.CalculatedCodeParams)
 	if err != nil {
 		return err
