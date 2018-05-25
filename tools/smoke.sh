@@ -46,6 +46,14 @@ function stop_server() {
     echo "Stopping server..."
     kill ${SERVER_PID} &>/dev/null || true
 
+    # there should only be several errors in the server log (one related to alice not having permissions, and another one related to carol not having rights to instantiate services)
+    errors=$(grep "error" "${CONF_DIR}/server.log" | grep -v "doesn't have ACL permissions to manage object" | grep -v "do not allow dependency")
+    if [ "errors" != "" ];then
+        echo "Found unexpected errors"
+        echo "$errors"
+        exit 1
+    fi
+
     if [ "yes" == "$DEBUG" ]; then
         [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
     fi
