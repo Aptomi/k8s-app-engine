@@ -24,6 +24,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"os"
+	"os/signal"
+	"runtime/pprof"
+	"syscall"
 	"time"
 )
 
@@ -56,11 +59,11 @@ func NewServer(cfg *config.Server) *Server {
 // Start initializes Aptomi server, starts API & UI processing, and as well as runs the required background jobs for
 // continuous policy resolution and state enforcement
 func (server *Server) Start() {
+	// Init server
+	server.initProfiling()
 	server.initStore()
 	server.initExternalData()
 	server.initPluginRegistryFactory()
-
-	// See if policy initialization needs to happen on the first run
 	server.initPolicyOnFirstRun()
 
 	// Start API, UI and Enforcer
@@ -99,6 +102,27 @@ func (server *Server) initExternalData() {
 		users.NewUserLoaderMultipleSources(userLoaders),
 		secrets.NewSecretLoaderFromDir(server.cfg.SecretsDir),
 	)
+}
+
+func (server *Server) initProfiling() {
+	if len(server.cfg.Profile.CPU) > 0 {
+		// initiate CPU profiler
+		f, err := os.Create(server.cfg.Profile.CPU)
+		if err != nil {
+			panic(fmt.Sprintf("can't create file to write CPU profiling information: %s", server.cfg.Profile.CPU))
+		}
+		pprof.StartCPUProfile(f)
+
+		// CPU profiler needs to be stopped when server exits
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		go func() {
+			for sig := range c {
+				log.Printf("captured %v, stopping CPU profiler", sig)
+				pprof.StopCPUProfile()
+			}
+		}()
+	}
 }
 
 func (server *Server) initStore() {

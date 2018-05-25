@@ -46,6 +46,7 @@ func init() {
 	common.AddStringFlag(Command, "ui.schema", "ui-schema", "", "http", envPrefix+"_SCHEMA", "Server UI schema")
 	common.AddBoolFlag(Command, "ui.enable", "ui", "", true, envPrefix+"_UI", "Enable server to serve UI")
 	common.AddDurationFlag(Command, "enforcer.interval", "enforcer-interval", "", 60*time.Second, envPrefix+"_ENFORCER_INTERVAL", "Enforcer interval")
+	common.AddStringFlag(Command, "profile.cpu", "cpuprofile", "", "", envPrefix+"_CPU_PROFILE", "File to write debug CPU profiling information using Go runtime/pprof")
 
 	Command.AddCommand(
 		version.NewVersionCommand(),

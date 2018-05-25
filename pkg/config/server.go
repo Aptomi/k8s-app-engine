@@ -14,17 +14,18 @@ type Server struct {
 	Enforcer             Enforcer        `validate:"required"`
 	DomainAdminOverrides map[string]bool `validate:"-"`
 	Auth                 ServerAuth      `validate:"-"`
+	Profile              Profile         `validate:"-"`
+}
+
+// IsDebug returns true if debug mode enabled
+func (s Server) IsDebug() bool {
+	return s.Debug
 }
 
 // UserSources represents configs for the user loaders that could be file and LDAP loaders
 type UserSources struct {
 	LDAP []LDAP   `validate:"dive"`
 	File []string `validate:"dive,file"`
-}
-
-// IsDebug returns true if debug mode enabled
-func (s Server) IsDebug() bool {
-	return s.Debug
 }
 
 // DB represents configs for DB
@@ -44,4 +45,9 @@ type Enforcer struct {
 // ServerAuth represents server auth config
 type ServerAuth struct {
 	Secret string `validate:"-"`
+}
+
+// Profile represents profiler config
+type Profile struct {
+	CPU string
 }
