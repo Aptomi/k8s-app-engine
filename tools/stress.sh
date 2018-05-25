@@ -10,12 +10,24 @@ set -eou pipefail
 export PATH=${GOPATH}/bin:$PATH
 DEBUG=${DEBUG:-no}
 DEBUG_MODE=false
+
+# Handle debug mode, if specified in environment variables
 if [ "yes" == "$DEBUG" ]; then
     DEBUG_MODE=true
     set -x
 fi
 
+# Handle profiling mode, if specified
+CPU_PROFILE=${CPU_PROFILE:-""}
+
 CONF_DIR=$(mktemp -d)
+
+# Use existing bolt.db as a starting point, if specified in environment variables
+DB=${DB:-""}
+if [ -f "$DB" ]; then
+    cp "$DB" "${CONF_DIR}/db.bolt"
+fi
+
 POLICY_DIR=$(mktemp -d)
 POLICY_DIR_TMP=$(mktemp -d)
 
@@ -83,7 +95,12 @@ users:
         deactivated: deactivated
 EOL
 
-aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
+if [ -z "$CPU_PROFILE" ]; then
+    aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
+else
+    aptomi server --cpuprofile ${CPU_PROFILE} --config ${CONF_DIR} &>${CONF_DIR}/server.log &
+fi
+
 SERVER_PID=$!
 
 echo "Server PID: ${SERVER_PID}"
