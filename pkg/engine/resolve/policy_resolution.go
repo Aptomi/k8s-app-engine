@@ -78,10 +78,15 @@ func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *Co
 // AppendData appends data to the current PolicyResolution record by aggregating data over component instances.
 // If there is a conflict (e.g. components have different code parameters), then an error will be reported.
 func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) error {
-	for _, instance := range ops.ComponentInstanceMap {
-		err := resolution.GetComponentInstanceEntry(instance.Metadata.Key).appendData(instance)
-		if err != nil {
-			return err
+	for key, instance := range ops.ComponentInstanceMap {
+		// if component doesn't exist, copy it over
+		if _, ok := resolution.ComponentInstanceMap[key]; !ok {
+			resolution.ComponentInstanceMap[key] = instance
+		} else { // otherwise, update data
+			err := resolution.ComponentInstanceMap[key].appendData(instance)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

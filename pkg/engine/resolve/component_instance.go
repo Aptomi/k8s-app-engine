@@ -204,6 +204,8 @@ func (instance *ComponentInstance) UpdateTimes(createdAt time.Time, updatedAt ti
 	}
 }
 
+// appendData gets called to append data for two existing component instances, both of which have been already processed
+// and populated with data
 func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	// Combine dependencies which are keeping this component instantiated
 	for dependencyKey := range ops.DependencyKeys {
@@ -211,6 +213,9 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	}
 
 	// Transfer IsCode bool
+	if instance.IsCode != ops.IsCode {
+		return fmt.Errorf("component %s can't be converted from code to non-code and vice versa", instance.GetKey())
+	}
 	instance.IsCode = instance.IsCode || ops.IsCode
 
 	// Combine labels
