@@ -42,7 +42,7 @@ func (policy *Policy) View(user *User) *PolicyView {
 		if systemNamespace != nil {
 			policy.aclResolver = NewACLResolver(systemNamespace.ACLRules)
 		} else {
-			policy.aclResolver = NewACLResolver(NewGlobalRules())
+			policy.aclResolver = NewACLResolver(make(map[string]*Rule))
 		}
 	})
 	return NewPolicyView(policy, user)

@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestPolicyGetObjects(t *testing.T) {
+func TestPolicy_AddObjectAndGetObjectsByKind(t *testing.T) {
 	namespace, policy := makePolicyWithObjects()
 
 	// retrieve objects
@@ -26,6 +26,55 @@ func TestPolicyGetObjects(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			name := kind + strconv.Itoa(i)
 			getObject(t, policy, kind, name, runtime.SystemNS)
+		}
+	}
+}
+
+func TestPolicy_AddObjectIdempotent(t *testing.T) {
+	// create two identical policies
+	_, policy := makePolicyWithObjects()
+	_, policyUpdated := makePolicyWithObjects()
+
+	// add objects from one to another
+	for _, pObjType := range PolicyObjects {
+		objects := policy.GetObjectsByKind(pObjType.Kind)
+		for _, obj := range objects {
+			policyUpdated.AddObject(obj)
+		}
+	}
+
+	// after addition, policy should stay the same
+	for _, pObjType := range PolicyObjects {
+		objects := policy.GetObjectsByKind(pObjType.Kind)
+		objectsUpdated := policyUpdated.GetObjectsByKind(pObjType.Kind)
+		assert.Equal(t, len(objects), len(objectsUpdated), "Policy should stay the same after calling AddObject() on the existing %s", pObjType.Kind)
+	}
+}
+
+func TestPolicy_RemoveObject(t *testing.T) {
+	// create two identical policies
+	_, policy := makePolicyWithObjects()
+	_, policyUpdated := makePolicyWithObjects()
+
+	// delete objects from the updated policy
+	for _, pObjType := range PolicyObjects {
+		objects := policy.GetObjectsByKind(pObjType.Kind)
+		for _, obj := range objects {
+			assert.True(t, policyUpdated.RemoveObject(obj), "RemoveObject() should return true when removing an existing object")
+		}
+	}
+
+	// after removal, policy should be empty
+	for _, pObjType := range PolicyObjects {
+		objectsUpdated := policyUpdated.GetObjectsByKind(pObjType.Kind)
+		assert.Zero(t, len(objectsUpdated), "Policy should contain 0 %s objects after RemoveObject() is called", pObjType.Kind)
+	}
+
+	// try to delete objects once again from the empty policy
+	for _, pObjType := range PolicyObjects {
+		objects := policy.GetObjectsByKind(pObjType.Kind)
+		for _, obj := range objects {
+			assert.False(t, policyUpdated.RemoveObject(obj), "RemoveObject() should return false when removing a non-existing object")
 		}
 	}
 }

@@ -32,9 +32,11 @@ func (privileges testCaseObjPrivileges) print(t *testing.T, testCase aclTestCase
 }
 
 func runACLTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
-	globalRules := NewGlobalRules()
-	globalRules.addRule(rules...)
-	resolver := NewACLResolver(globalRules)
+	aclRules := make(map[string]*Rule)
+	for _, rule := range rules {
+		aclRules[rule.GetName()] = rule
+	}
+	resolver := NewACLResolver(aclRules)
 	for _, tc := range testCases {
 		roleMap, err := resolver.GetUserRoleMap(tc.user)
 		if !assert.NoError(t, err, "User role map should be retrieved successfully") {

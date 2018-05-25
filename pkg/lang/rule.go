@@ -4,7 +4,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"sort"
-	"sync"
 )
 
 // RuleObject is an informational data structure with Kind and Constructor for Rule
@@ -62,75 +61,26 @@ func (rule *Rule) Matches(params *expression.Parameters, cache *expression.Cache
 	return rule.Criteria.allows(params, cache)
 }
 
-// GlobalRules contains a map of global rules by name, as well as the list of sorted rules
-type GlobalRules struct {
-	// RuleMap is a map[name] -> *Rule
-	RuleMap map[string]*Rule `validate:"dive"`
+type ruleSorter []*Rule
 
-	// Rules is an unsorted list of rules
-	Rules []*Rule `validate:"-"`
-
-	once        sync.Once
-	rulesSorted []*Rule // lazily initialized value
+func (rs ruleSorter) Len() int {
+	return len(rs)
 }
 
-// NewGlobalRules creates and initializes a new empty list of global rules
-func NewGlobalRules() *GlobalRules {
-	return &GlobalRules{
-		RuleMap: make(map[string]*Rule),
-	}
+func (rs ruleSorter) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
 }
 
-func (globalRules *GlobalRules) addRule(rules ...*Rule) {
-	for _, r := range rules {
-		globalRules.RuleMap[r.GetName()] = r
-	}
-
-	globalRules.Rules = append(globalRules.Rules, rules...)
-}
-
-func (globalRules *GlobalRules) removeRule(rules ...*Rule) bool {
-	deleted := false
-
-	for _, rule := range rules {
-		if _, exist := globalRules.RuleMap[rule.GetName()]; exist {
-			deleted = true
-		}
-
-		delete(globalRules.RuleMap, rule.GetName())
-	}
-
-	newRules := make([]*Rule, 0)
-	for _, rule := range globalRules.Rules {
-		for _, deleteRule := range rules {
-			if rule.Name != deleteRule.Name {
-				newRules = append(newRules, rule)
-			}
-		}
-	}
-
-	globalRules.Rules = newRules
-
-	return deleted
+func (rs ruleSorter) Less(i, j int) bool {
+	return rs[i].Weight < rs[j].Weight
 }
 
 // GetRulesSortedByWeight returns all rules sorted by weight
-func (globalRules *GlobalRules) GetRulesSortedByWeight() []*Rule {
-	globalRules.once.Do(func() {
-		globalRules.rulesSorted = append(globalRules.rulesSorted, globalRules.Rules...)
-		sort.Sort(globalRules)
-	})
-	return globalRules.rulesSorted
-}
-
-func (globalRules *GlobalRules) Len() int {
-	return len(globalRules.rulesSorted)
-}
-
-func (globalRules *GlobalRules) Less(i, j int) bool {
-	return globalRules.rulesSorted[i].Weight < globalRules.rulesSorted[j].Weight
-}
-
-func (globalRules *GlobalRules) Swap(i, j int) {
-	globalRules.rulesSorted[i], globalRules.rulesSorted[j] = globalRules.rulesSorted[j], globalRules.rulesSorted[i]
+func GetRulesSortedByWeight(rules map[string]*Rule) []*Rule {
+	result := []*Rule{}
+	for _, rule := range rules {
+		result = append(result, rule)
+	}
+	sort.Sort(ruleSorter(result))
+	return result
 }

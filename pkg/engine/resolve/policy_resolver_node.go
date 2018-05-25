@@ -279,7 +279,7 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 		return nil
 	}
 
-	rules := policyNamespace.Rules.GetRulesSortedByWeight()
+	rules := lang.GetRulesSortedByWeight(policyNamespace.Rules)
 	contextualData := node.getContextualDataForRuleExpression()
 	for _, rule := range rules {
 		matched, err := rule.Matches(contextualData, node.resolver.expressionCache)

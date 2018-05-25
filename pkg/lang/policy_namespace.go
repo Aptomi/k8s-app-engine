@@ -8,13 +8,13 @@ import (
 // PolicyNamespace describes a specific namespace within Aptomi policy.
 // All policy objects get placed in the appropriate maps and structs within PolicyNamespace.
 type PolicyNamespace struct {
-	Name         string               `validate:"identifier"`
-	Services     map[string]*Service  `validate:"dive"`
-	Contracts    map[string]*Contract `validate:"dive"`
-	Clusters     map[string]*Cluster  `validate:"dive"`
-	Rules        *GlobalRules         `validate:"required"`
-	ACLRules     *GlobalRules         `validate:"required"`
-	Dependencies *GlobalDependencies  `validate:"required"`
+	Name         string                 `validate:"identifier"`
+	Services     map[string]*Service    `validate:"dive"`
+	Contracts    map[string]*Contract   `validate:"dive"`
+	Clusters     map[string]*Cluster    `validate:"dive"`
+	Rules        map[string]*Rule       `validate:"dive"`
+	ACLRules     map[string]*Rule       `validate:"dive"`
+	Dependencies map[string]*Dependency `validate:"dive"`
 }
 
 // NewPolicyNamespace creates a new PolicyNamespace
@@ -24,9 +24,9 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 		Services:     make(map[string]*Service),
 		Contracts:    make(map[string]*Contract),
 		Clusters:     make(map[string]*Cluster),
-		Rules:        NewGlobalRules(),
-		ACLRules:     NewGlobalRules(),
-		Dependencies: NewGlobalDependencies(),
+		Rules:        make(map[string]*Rule),
+		ACLRules:     make(map[string]*Rule),
+		Dependencies: make(map[string]*Dependency),
 	}
 }
 
@@ -39,11 +39,11 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	case ClusterObject.Kind:
 		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
 	case RuleObject.Kind:
-		policyNamespace.Rules.addRule(obj.(*Rule))
+		policyNamespace.Rules[obj.GetName()] = obj.(*Rule)
 	case ACLRuleObject.Kind:
-		policyNamespace.ACLRules.addRule(obj.(*Rule))
+		policyNamespace.ACLRules[obj.GetName()] = obj.(*Rule)
 	case DependencyObject.Kind:
-		policyNamespace.Dependencies.addDependency(obj.(*Dependency))
+		policyNamespace.Dependencies[obj.GetName()] = obj.(*Dependency)
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
 	}
@@ -68,11 +68,20 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 			return true
 		}
 	case RuleObject.Kind:
-		return policyNamespace.Rules.removeRule(obj.(*Rule))
+		if _, exist := policyNamespace.Rules[obj.GetName()]; exist {
+			delete(policyNamespace.Rules, obj.GetName())
+			return true
+		}
 	case ACLRuleObject.Kind:
-		return policyNamespace.ACLRules.removeRule(obj.(*Rule))
+		if _, exist := policyNamespace.ACLRules[obj.GetName()]; exist {
+			delete(policyNamespace.ACLRules, obj.GetName())
+			return true
+		}
 	case DependencyObject.Kind:
-		return policyNamespace.Dependencies.removeDependency(obj.(*Dependency))
+		if _, exist := policyNamespace.Dependencies[obj.GetName()]; exist {
+			delete(policyNamespace.Dependencies, obj.GetName())
+			return true
+		}
 	}
 
 	return false
@@ -94,18 +103,16 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 			result = append(result, cluster)
 		}
 	case RuleObject.Kind:
-		for _, rule := range policyNamespace.Rules.Rules {
+		for _, rule := range policyNamespace.Rules {
 			result = append(result, rule)
 		}
 	case ACLRuleObject.Kind:
-		for _, rule := range policyNamespace.ACLRules.Rules {
+		for _, rule := range policyNamespace.ACLRules {
 			result = append(result, rule)
 		}
 	case DependencyObject.Kind:
-		for _, dependencyList := range policyNamespace.Dependencies.DependenciesByContract {
-			for _, dependency := range dependencyList {
-				result = append(result, dependency)
-			}
+		for _, dependency := range policyNamespace.Dependencies {
+			result = append(result, dependency)
 		}
 	default:
 		panic(fmt.Sprintf("not supported by PolicyNamespace.getObjectsByKind(): unknown kind %s", kind))
@@ -130,15 +137,15 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 			return nil, nil
 		}
 	case RuleObject.Kind:
-		if result, ok = policyNamespace.Rules.RuleMap[name]; !ok {
+		if result, ok = policyNamespace.Rules[name]; !ok {
 			return nil, nil
 		}
 	case ACLRuleObject.Kind:
-		if result, ok = policyNamespace.ACLRules.RuleMap[name]; !ok {
+		if result, ok = policyNamespace.ACLRules[name]; !ok {
 			return nil, nil
 		}
 	case DependencyObject.Kind:
-		if result, ok = policyNamespace.Dependencies.DependencyMap[name]; !ok {
+		if result, ok = policyNamespace.Dependencies[name]; !ok {
 			return nil, nil
 		}
 	default:
