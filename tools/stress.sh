@@ -20,6 +20,9 @@ fi
 # Handle profiling mode, if specified
 CPU_PROFILE=${CPU_PROFILE:-""}
 
+# Handle tracing mode, if specified
+TRACE_PROFILE=${TRACE_PROFILE:-""}
+
 CONF_DIR=$(mktemp -d)
 
 # Use existing bolt.db as a starting point, if specified in environment variables
@@ -95,12 +98,15 @@ users:
         deactivated: deactivated
 EOL
 
-if [ -z "$CPU_PROFILE" ]; then
-    aptomi server --config ${CONF_DIR} &>${CONF_DIR}/server.log &
-else
-    aptomi server --cpuprofile ${CPU_PROFILE} --config ${CONF_DIR} &>${CONF_DIR}/server.log &
+SERVER_OPTIONS=""
+if [ ! -z "$CPU_PROFILE" ]; then
+    SERVER_OPTIONS+=" --cpuprofile ${CPU_PROFILE}"
+fi
+if [ ! -z "$TRACE_PROFILE" ]; then
+    SERVER_OPTIONS+=" --traceprofile ${TRACE_PROFILE}"
 fi
 
+aptomi server ${SERVER_OPTIONS} --config ${CONF_DIR} &>${CONF_DIR}/server.log &
 SERVER_PID=$!
 
 echo "Server PID: ${SERVER_PID}"

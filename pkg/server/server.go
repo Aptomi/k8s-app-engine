@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime/pprof"
+	"runtime/trace"
 	"syscall"
 	"time"
 )
@@ -120,6 +121,25 @@ func (server *Server) initProfiling() {
 			for sig := range c {
 				log.Printf("captured %v, stopping CPU profiler", sig)
 				pprof.StopCPUProfile()
+			}
+		}()
+	}
+
+	if len(server.cfg.Profile.Trace) > 0 {
+		// start tracing
+		f, err := os.Create(server.cfg.Profile.Trace)
+		if err != nil {
+			panic(fmt.Sprintf("can't create file to write tracing information: %s", server.cfg.Profile.Trace))
+		}
+		trace.Start(f)
+
+		// Tracing needs to be stopped when server exits
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		go func() {
+			for sig := range c {
+				log.Printf("captured %v, stopping tracing", sig)
+				trace.Stop()
 			}
 		}()
 	}

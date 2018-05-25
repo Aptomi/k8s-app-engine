@@ -49,5 +49,6 @@ type ServerAuth struct {
 
 // Profile represents profiler config
 type Profile struct {
-	CPU string
+	CPU   string
+	Trace string
 }
