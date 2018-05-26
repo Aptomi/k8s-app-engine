@@ -112,7 +112,10 @@ func (server *Server) initProfiling() {
 		if err != nil {
 			panic(fmt.Sprintf("can't create file to write CPU profiling information: %s", server.cfg.Profile.CPU))
 		}
-		pprof.StartCPUProfile(f)
+		err = pprof.StartCPUProfile(f)
+		if err != nil {
+			panic(fmt.Sprintf("can't start CPU profiling: %s", err))
+		}
 
 		// CPU profiler needs to be stopped when server exits
 		c := make(chan os.Signal, 1)
@@ -131,7 +134,10 @@ func (server *Server) initProfiling() {
 		if err != nil {
 			panic(fmt.Sprintf("can't create file to write tracing information: %s", server.cfg.Profile.Trace))
 		}
-		trace.Start(f)
+		err = trace.Start(f)
+		if err != nil {
+			panic(fmt.Sprintf("can't start tracing: %s", err))
+		}
 
 		// Tracing needs to be stopped when server exits
 		c := make(chan os.Signal, 1)
