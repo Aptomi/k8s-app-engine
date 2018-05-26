@@ -1,16 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomi/root"
+	"github.com/Sirupsen/logrus"
 	"math/rand"
+	"runtime/debug"
 	"time"
 )
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Info(string(debug.Stack()))
+			logrus.Fatalf("%s", err) // this will terminate the server
+		}
+	}()
+
 	if err := root.Command.Execute(); err != nil {
-		panic(fmt.Errorf("error while executing command: %s", err))
+		logrus.Fatalf("%s", err) // this will terminate the server
 	}
 }

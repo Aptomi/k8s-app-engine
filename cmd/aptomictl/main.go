@@ -4,7 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/cmd/aptomictl/root"
 	"github.com/Sirupsen/logrus"
 	"math/rand"
-	"os"
+	"runtime/debug"
 	"time"
 )
 
@@ -13,13 +13,12 @@ func main() {
 
 	defer func() {
 		if err := recover(); err != nil {
-			logrus.Fatalf("%s", err)
-			os.Exit(1)
+			logrus.Info(string(debug.Stack()))
+			logrus.Fatalf("%s", err) // this will terminate the client
 		}
 	}()
 
 	if err := root.Command.Execute(); err != nil {
-		logrus.Fatalf("%s", err)
-		os.Exit(1)
+		logrus.Fatalf("%s", err) // this will terminate the client
 	}
 }
