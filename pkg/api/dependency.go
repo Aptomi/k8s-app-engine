@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -114,6 +115,24 @@ func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualStat
 	// compare desired vs. actual state and see what's the dependency status for every provided dependency ID
 	diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan.Apply(
 		action.WrapSequential(func(act action.Base) error {
+			// if it's attach action is pending on component, let's see which particular dependency it affects
+			if dAction, ok := act.(*component.AttachDependencyAction); ok {
+				// reset status of this particular dependency to false
+				if _, affected := result.Status[dAction.DependencyID]; affected {
+					result.Status[dAction.DependencyID].Deployed = false
+					return nil
+				}
+			}
+
+			// if it's detach action is pending on component, let's see which particular dependency it affects
+			if dAction, ok := act.(*component.DetachDependencyAction); ok {
+				// reset status of this particular dependency to false
+				if _, affected := result.Status[dAction.DependencyID]; affected {
+					result.Status[dAction.DependencyID].Deployed = false
+					return nil
+				}
+			}
+
 			key, ok := act.DescribeChanges()["key"].(string)
 			if ok && len(key) > 0 {
 				// we found a component in diff, which is affected by the action. let's see if any of the dependencies are affected
