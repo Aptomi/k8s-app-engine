@@ -452,7 +452,7 @@ func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult act
 
 	if !ok {
 		// print log into stdout and exit
-		hook := &event.HookConsole{}
+		hook := event.NewHookConsole()
 		apply.eventLog.Save(hook)
 		b.Fatal("action counts don't match")
 	}
@@ -467,13 +467,13 @@ func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *ext
 	result := resolver.ResolveAllDependencies()
 	t := &testing.T{}
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := &event.HookConsole{}
+		hook := event.NewHookConsole()
 		eventLog.Save(hook)
 		b.Fatal("policy resolution error")
 	}
 
 	if expectedNonEmpty != (result.SuccessfullyResolvedDependencies() > 0) {
-		hook := &event.HookConsole{}
+		hook := event.NewHookConsole()
 		eventLog.Save(hook)
 		b.Fatal("no dependencies resolved")
 	}

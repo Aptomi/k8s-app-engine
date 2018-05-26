@@ -440,7 +440,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult 
 
 	if !assert.Equal(t, expectedResult != ResSomeDependenciesFailed, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
 		// print log into stdout and exit
-		hook := &event.HookConsole{}
+		hook := event.NewHookConsole()
 		eventLog.Save(hook)
 		t.FailNow()
 		return nil
@@ -450,7 +450,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult 
 	verifier := event.NewLogVerifier(expectedLogMessage, expectedResult == ResSomeDependenciesFailed)
 	resolver.eventLog.Save(verifier)
 	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: %s", expectedLogMessage) {
-		hook := &event.HookConsole{}
+		hook := event.NewHookConsole()
 		resolver.eventLog.Save(hook)
 		t.FailNow()
 	}

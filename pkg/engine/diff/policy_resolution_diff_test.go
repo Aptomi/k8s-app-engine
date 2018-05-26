@@ -155,7 +155,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := &event.HookConsole{}
+		hook := event.NewHookConsole()
 		eventLog.Save(hook)
 		t.FailNow()
 	}

@@ -42,7 +42,7 @@ func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
 	logger.Hooks.Add(hookMemory)
 
 	if logToConsole {
-		logger.Hooks.Add(&HookConsole{})
+		logger.Hooks.Add(NewHookConsole())
 	}
 
 	return &Log{

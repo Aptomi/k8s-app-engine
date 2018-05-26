@@ -1,26 +1,53 @@
 package event
 
 import (
-	"fmt"
 	"github.com/Sirupsen/logrus"
+	"os"
 )
 
 // HookConsole implements event log hook, which prints all event log entries to the console (stdout)
 type HookConsole struct {
+	logger *logrus.Logger
+}
+
+// NewHookConsole creates a new HookConsole
+func NewHookConsole() *HookConsole {
+	return &HookConsole{
+		logger: &logrus.Logger{
+			Out:       os.Stderr,
+			Formatter: new(logrus.TextFormatter),
+			Hooks:     make(logrus.LevelHooks),
+			Level:     logrus.DebugLevel,
+		},
+	}
 }
 
 // Levels defines on which log levels this hook should be fired
-func (buf *HookConsole) Levels() []logrus.Level {
+func (hook *HookConsole) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
 // Fire processes a single log entry
-func (buf *HookConsole) Fire(e *logrus.Entry) error {
+func (hook *HookConsole) Fire(e *logrus.Entry) error {
 	msg := e.Message
 	if scope, ok := e.Data["scope"]; ok {
 		msg = "(" + scope.(string) + ") " + msg
 	}
 
-	fmt.Printf("[%s] %s\n", e.Level, msg)
+	switch e.Level {
+	case logrus.PanicLevel:
+		hook.logger.Panic(msg)
+	case logrus.FatalLevel:
+		hook.logger.Fatal(msg)
+	case logrus.ErrorLevel:
+		hook.logger.Error(msg)
+	case logrus.WarnLevel:
+		hook.logger.Warn(msg)
+	case logrus.InfoLevel:
+		hook.logger.Info(msg)
+	case logrus.DebugLevel:
+		hook.logger.Debug(msg)
+	}
+
 	return nil
 }
