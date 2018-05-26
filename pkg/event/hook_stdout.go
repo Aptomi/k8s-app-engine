@@ -16,6 +16,11 @@ func (buf *HookConsole) Levels() []logrus.Level {
 
 // Fire processes a single log entry
 func (buf *HookConsole) Fire(e *logrus.Entry) error {
-	fmt.Printf("[%s] %s\n", e.Level, e.Message)
+	msg := e.Message
+	if scope, ok := e.Data["scope"]; ok {
+		msg = "(" + scope.(string) + ") " + msg
+	}
+
+	fmt.Printf("[%s] %s\n", e.Level, msg)
 	return nil
 }

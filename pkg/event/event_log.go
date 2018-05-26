@@ -30,7 +30,7 @@ type Log struct {
 // Initially it just buffers all entries and doesn't write them.
 // It needs to buffer all entries, so that the context can be later attached to them
 // before they get serialized and written to an external source
-func NewLog(level logrus.Level, scope string, log bool) *Log {
+func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
 	logger := &logrus.Logger{
 		Out:       ioutil.Discard,
 		Formatter: new(logrus.TextFormatter),
@@ -41,8 +41,8 @@ func NewLog(level logrus.Level, scope string, log bool) *Log {
 	hookMemory := &HookMemory{}
 	logger.Hooks.Add(hookMemory)
 
-	if log {
-		logger.Hooks.Add(&HookLogger{})
+	if logToConsole {
+		logger.Hooks.Add(&HookConsole{})
 	}
 
 	return &Log{
@@ -51,7 +51,7 @@ func NewLog(level logrus.Level, scope string, log bool) *Log {
 		hookMemory: hookMemory,
 		scope:      scope,
 		level:      level,
-		log:        log,
+		log:        logToConsole,
 	}
 }
 
@@ -108,16 +108,6 @@ func (eventLog *Log) AttachTo(object interface{}) {
 
 // Append adds entries to the event logs
 func (eventLog *Log) Append(that *Log) {
-	if eventLog.IsLog() && !that.IsLog() {
-		logger := &HookLogger{}
-		for _, entry := range that.hookMemory.entries {
-			err := logger.Fire(entry)
-			if err != nil {
-				logrus.Panicf("error while firing events during appending event logs: %s", err)
-			}
-		}
-	}
-
 	eventLog.hookMemory.entries = append(eventLog.hookMemory.entries, that.hookMemory.entries...)
 }
 
