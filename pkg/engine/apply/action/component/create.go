@@ -42,7 +42,7 @@ func (a *CreateAction) Apply(context *action.Context) error {
 	}
 
 	// update actual state
-	return updateActualStateFromDesired(a.ComponentKey, context, true, true, true)
+	return createComponentInActualState(a.ComponentKey, context)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied

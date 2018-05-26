@@ -44,7 +44,7 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 	}
 
 	// update actual state
-	return updateActualStateFromDesired(a.ComponentKey, context, false, true, false)
+	return updateComponentInActualState(a.ComponentKey, context)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied
@@ -101,5 +101,12 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 		return err
 	}
 
-	return plugin.Update(instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
+	err = plugin.Update(instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
+	if err != nil {
+		return err
+	}
+
+	context.ActualState.ComponentInstanceMap[a.ComponentKey].CalculatedCodeParams = instance.CalculatedCodeParams
+
+	return nil
 }

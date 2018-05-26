@@ -38,12 +38,11 @@ func (a *DetachDependencyAction) Apply(context *action.Context) error {
 		"dependency":   a.DependencyID,
 	}).Debug("Detaching dependency '" + a.DependencyID + "' from component instance: " + a.ComponentKey)
 
-	// if an instance is still present in desired state (haven't been fully deleted due to other dependencies), then update actual state
-	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
-	if instance != nil {
-		return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
-	}
-	return nil
+	// remove reference to dependency from the actual state
+	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	delete(instance.DependencyKeys, a.DependencyID)
+
+	return updateComponentInActualState(a.ComponentKey, context)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied

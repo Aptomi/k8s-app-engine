@@ -39,7 +39,11 @@ func (a *AttachDependencyAction) Apply(context *action.Context) error {
 		"dependency":   a.DependencyID,
 	}).Debug("Attaching dependency '" + a.DependencyID + "' to component instance: " + a.ComponentKey)
 
-	return updateActualStateFromDesired(a.ComponentKey, context, false, false, false)
+	// add reference to dependency into the actual state
+	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	instance.DependencyKeys[a.DependencyID] = true
+
+	return updateComponentInActualState(a.ComponentKey, context)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied

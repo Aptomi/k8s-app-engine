@@ -91,7 +91,7 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 
 func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	/*
-		Step 1: actual = empty, desired = test policy, check = kafka update/create times
+		Step 1: actual = empty, desired = test policy, check = dependency update/create times
 	*/
 
 	// Create initial empty policy & resolution data
@@ -124,6 +124,11 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	key := resolve.NewComponentInstanceKey(cluster, contract, contract.Contexts[0], nil, service, service.Components[0])
 	keyService := key.GetParentServiceKey()
 
+	// Check that original dependency was resolved successfully
+	dependency := desired.policy().GetObjectsByKind(lang.DependencyObject.Kind)[0].(*lang.Dependency)
+	assert.Contains(t, desired.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
+	assert.True(t, desired.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Original dependency should be resolved successfully")
+
 	// Check creation/update times
 	times1 := getTimes(t, key.GetKey(), actualState)
 	assert.WithinDuration(t, time.Now(), times1.created, time.Second, "Creation time should be initialized correctly")
@@ -136,11 +141,14 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
 
-	// Add another dependency, resolve, calculate difference against prev resolution data
+	// Add another dependency (with the same label, so code parameters won't change), resolve, calculate difference against prev resolution data
 	desiredNext := newTestData(t, makePolicyBuilder())
 	dependencyNew := desiredNext.pBuilder.AddDependency(desiredNext.pBuilder.AddUser(), contract)
 	dependencyNew.Labels["param"] = "value1"
 
+	// Check that both dependencies were resolved successfully
+	assert.Contains(t, desiredNext.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
+	assert.True(t, desiredNext.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Original dependency should be resolved successfully")
 	assert.Contains(t, desiredNext.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependencyNew), "Additional dependency should be present in policy resolution")
 	assert.True(t, desiredNext.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependencyNew)].Resolved, "Additional dependency should be resolved successfully")
 
@@ -158,12 +166,12 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 3, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 2, Failed: 0, Skipped: 0})
 
-	// Check creation/update times
+	// Check creation/update times for the original dependency
 	times2 := getTimes(t, key.GetKey(), actualState)
-	assert.Equal(t, times1.created, times2.created, "Creation time should be carried over to remain the same")
-	assert.Equal(t, times1.updated, times2.updated, "Update time should be carried over to remain the same")
+	assert.Equal(t, times1.created, times2.created, "Creation time should be preserved (i.e. remain the same)")
+	assert.True(t, times2.updated.After(times1.updated), "Update time should be changed (because new dependency is attached to a component)")
 
 	/*
 		Step 3: desired = update user label, check = component update time changed
@@ -196,15 +204,21 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Check that policy apply finished with expected results
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 3, Failed: 0, Skipped: 0})
 
+	// Check that both dependencies were resolved successfully
+	assert.Contains(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
+	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Original dependency should be resolved successfully")
+	assert.Contains(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependencyNew), "Additional dependency should be present in policy resolution")
+	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependencyNew)].Resolved, "Additional dependency should be resolved successfully")
+
 	// Check creation/update times for component
 	componentTimesUpdated := getTimes(t, key.GetKey(), actualState)
-	assert.Equal(t, componentTimes.created, componentTimesUpdated.created, "Creation time for component should be carried over to remain the same")
-	assert.True(t, componentTimesUpdated.updated.After(componentTimes.updated), "Update time for component should be changed")
+	assert.Equal(t, componentTimes.created, componentTimesUpdated.created, "Creation time for component should be preserved (i.e. remain the same)")
+	assert.True(t, componentTimesUpdated.updated.After(componentTimes.updated), "Update time for component should be changed (because component code param is changed)")
 
 	// Check creation/update times for service
 	serviceTimesUpdated := getTimes(t, keyService.GetKey(), actualState)
-	assert.Equal(t, serviceTimes.created, serviceTimesUpdated.created, "Creation time for parent service should be carried over to remain the same")
-	assert.True(t, serviceTimesUpdated.updated.After(serviceTimes.updated), "Update time for parent service should be changed")
+	assert.Equal(t, serviceTimes.created, serviceTimesUpdated.created, "Creation time for parent service should be preserved (i.e. remain the same)")
+	assert.True(t, serviceTimesUpdated.updated.After(serviceTimes.updated), "Update time for parent service should be changed (because component code param is changed)")
 }
 
 func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// NewNoOpActionStateUpdater creates a mock state updater for unit tests, which does nothing
+// NewNoOpActionStateUpdater creates a mock state updater for unit tests, which does not have an underlying object store to save changes to
 func NewNoOpActionStateUpdater() StateUpdater {
 	return &noOpActualStateUpdater{}
 }

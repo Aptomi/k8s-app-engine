@@ -38,12 +38,13 @@ func (a *EndpointsAction) Apply(context *action.Context) error {
 		return fmt.Errorf("unable to get endpoints for component instance '%s': it doesn't exist in actual state", a.ComponentKey)
 	}
 
+	// fetch component endpoints and store them in component instance (actual state)
 	err := a.processEndpoints(context)
 	if err != nil {
 		return fmt.Errorf("unable to get endpoints for component instance '%s': %s", a.ComponentKey, err)
 	}
 
-	// update actual state
+	// update component instance in actual state
 	return updateComponentInActualState(a.ComponentKey, context)
 }
 

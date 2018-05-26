@@ -41,7 +41,7 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 		return fmt.Errorf("unable to delete component instance '%s': %s", a.ComponentKey, err)
 	}
 
-	// update actual state
+	// delete from the actual state
 	return deleteComponentFromActualState(a.ComponentKey, context)
 }
 
@@ -64,11 +64,12 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
-		// This is a service instance. Do nothing
+		// This is a service instance. Do nothing and report successful deletion
 		return nil
 	}
 
 	if component.Code == nil {
+		// This is a non-code component. Do nothing and report successful deletion
 		return nil
 	}
 

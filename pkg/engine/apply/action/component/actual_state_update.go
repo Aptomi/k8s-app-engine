@@ -7,38 +7,21 @@ import (
 	"time"
 )
 
-func updateActualStateFromDesired(componentKey string, context *action.Context, createNow bool, updateNow bool, createIfNotExists bool) error {
-	// get instance from actual state
-	instanceActual := context.ActualState.ComponentInstanceMap[componentKey]
-
-	// if it doesn't exist and we are not forced to create it, then return
-	if instanceActual == nil && !createIfNotExists {
-		return nil
-	}
-
-	// preserve previous CreatedAt/UpdatedAt dates before overwriting
-	timeCreated := time.Now()
-	timeUpdated := time.Now()
-	if instanceActual != nil {
-		if !createNow {
-			timeCreated = instanceActual.CreatedAt
-		}
-		if !updateNow {
-			timeUpdated = instanceActual.UpdatedAt
-		}
-	}
-
+func createComponentInActualState(componentKey string, context *action.Context) error {
 	// get instance from desired state
 	instance := context.DesiredState.ComponentInstanceMap[componentKey]
 	if instance == nil {
 		panic(fmt.Sprintf("component instance not found in desired state: %s", componentKey))
 	}
 
-	// modify create/update times, copy it over to the actual state
-	instance.UpdateTimes(timeCreated, timeUpdated)
+	// update timestamps
+	instance.CreatedAt = time.Now()
+	instance.UpdatedAt = time.Now()
+
+	// move it over to the actual state
 	context.ActualState.ComponentInstanceMap[componentKey] = instance
 
-	// save actual state
+	// save component instance in the actual state store
 	err := context.ActualStateUpdater.Save(instance)
 	if err != nil {
 		return fmt.Errorf("error while updating actual state: %s", err)
@@ -47,7 +30,13 @@ func updateActualStateFromDesired(componentKey string, context *action.Context, 
 }
 
 func updateComponentInActualState(componentKey string, context *action.Context) error {
+	// look up an existing component in the actual state
 	instance := context.ActualState.ComponentInstanceMap[componentKey]
+
+	// update timestamp
+	instance.UpdatedAt = time.Now()
+
+	// save component instance in the actual state store
 	err := context.ActualStateUpdater.Save(instance)
 	if err != nil {
 		return fmt.Errorf("error while updating actual state: %s", err)
@@ -56,8 +45,10 @@ func updateComponentInActualState(componentKey string, context *action.Context) 
 }
 
 func deleteComponentFromActualState(componentKey string, context *action.Context) error {
-	// delete component from the actual state
+	// delete an existing component from the actual state map
 	delete(context.ActualState.ComponentInstanceMap, componentKey)
+
+	// delete an existing component from the actual state store
 	err := context.ActualStateUpdater.Delete(resolve.KeyForComponentKey(componentKey))
 	if err != nil {
 		return fmt.Errorf("error while update actual state: %s", err)
