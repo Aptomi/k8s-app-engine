@@ -1,5 +1,5 @@
-hash: c40c271a412df7fa977a87637e89fd57ec717c65d527196142332703b8d50697
-updated: 2018-05-19T22:23:50.618076146-07:00
+hash: dff171bbb72f82e1504bc0025c0761862fe0492ebb1fb705c93d8562b2b3c437
+updated: 2018-05-26T15:23:45.268146-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -15,6 +15,8 @@ imports:
   version: b26d9c308763d68093482582cea63d69be07a0f0
 - name: github.com/chai2010/gettext-go
   version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
+- name: github.com/coreos/bbolt
+  version: 48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d
 - name: github.com/d4l3k/messagediff
   version: 29f32d820d112dbd66e58492a6ffb7cc3106312b
 - name: github.com/davecgh/go-spew
@@ -261,7 +263,7 @@ imports:
 - name: github.com/ralekseenkov/govaluate
   version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
 - name: github.com/rs/cors
-  version: feef513b9575b32f84bafa580aad89b011259019
+  version: ca016a06a5753f8ba03029c0aa5e54afb1bf713f
 - name: github.com/satori/go.uuid
   version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/Sirupsen/logrus
