@@ -155,10 +155,10 @@ func (plan *Plan) AsText() *PlanAsText {
 	result := NewPlanAsText()
 
 	// apply the plan and capture actions as text
-	plan.applyInternal(func(act Base) error {
+	plan.applyInternal(WrapSequential(func(act Base) error {
 		result.Actions = append(result.Actions, act.DescribeChanges())
 		return nil
-	}, NewApplyResultUpdaterImpl())
+	}), NewApplyResultUpdaterImpl())
 
 	return result
 }
