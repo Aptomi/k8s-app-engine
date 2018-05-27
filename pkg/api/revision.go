@@ -27,25 +27,6 @@ func (api *coreAPI) handleRevisionGet(writer http.ResponseWriter, request *http.
 	}
 }
 
-func (api *coreAPI) handleRevisionGetByPolicy(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	policyGen := params.ByName("policy")
-
-	if len(policyGen) == 0 {
-		policyGen = strconv.Itoa(int(runtime.LastGen))
-	}
-
-	revision, err := api.store.GetFirstRevisionForPolicy(runtime.ParseGeneration(policyGen))
-	if err != nil {
-		panic(fmt.Sprintf("error while getting requested revision: %s", err))
-	}
-
-	if revision == nil {
-		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
-	} else {
-		api.contentType.WriteOne(writer, request, revision)
-	}
-}
-
 type revisionsWrapper struct {
 	Data interface{}
 }

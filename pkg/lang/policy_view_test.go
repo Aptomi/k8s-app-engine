@@ -92,12 +92,12 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 			TypeKind: ACLRuleObject.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
-				Name:      "custom_" + namespaceAdmin.ID,
+				Name:      "custom_" + NamespaceAdmin.ID,
 			},
 			Weight:   1000,
 			Criteria: &Criteria{RequireAll: []string{"role == 'custom'"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{namespaceAdmin.ID: "test"},
+				AddRole: map[string]string{NamespaceAdmin.ID: "test"},
 			},
 		},
 	}
@@ -126,7 +126,7 @@ func makeEmptyPolicyWithACL() *Policy {
 			Weight:   100,
 			Criteria: &Criteria{RequireAll: []string{"is_domain_admin"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{domainAdmin.ID: namespaceAll},
+				AddRole: map[string]string{DomainAdmin.ID: namespaceAll},
 			},
 		},
 		// namespace admins for 'main' namespace
@@ -139,7 +139,7 @@ func makeEmptyPolicyWithACL() *Policy {
 			Weight:   200,
 			Criteria: &Criteria{RequireAll: []string{"is_namespace_admin"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{namespaceAdmin.ID: "main"},
+				AddRole: map[string]string{NamespaceAdmin.ID: "main"},
 			},
 		},
 		// service consumers for 'main' namespace
@@ -152,7 +152,7 @@ func makeEmptyPolicyWithACL() *Policy {
 			Weight:   300,
 			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{serviceConsumer.ID: "main"},
+				AddRole: map[string]string{ServiceConsumer.ID: "main"},
 			},
 		},
 	}

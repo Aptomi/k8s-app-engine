@@ -34,12 +34,11 @@ type Dependency interface {
 // Revision is the interface for getting Revisions
 type Revision interface {
 	Show(gen runtime.Generation) (*engine.Revision, error)
-	ShowByPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 }
 
 // State is the interface for resetting Actual State
 type State interface {
-	Reset() (*engine.Revision, error)
+	Reset(bool) (*api.PolicyUpdateResult, error)
 }
 
 // User is the interface for auth and user management

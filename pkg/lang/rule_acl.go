@@ -86,8 +86,8 @@ var viewAccess = &Privilege{
 // No access privilege
 var noAccess = &Privilege{}
 
-// Domain admin role
-var domainAdmin = &ACLRole{
+// DomainAdmin is a built-in domain admin role
+var DomainAdmin = &ACLRole{
 	ID:   "domain-admin",
 	Name: "Domain Admin",
 	Privileges: &Privileges{
@@ -106,8 +106,8 @@ var domainAdmin = &ACLRole{
 	},
 }
 
-// Namespace admin role
-var namespaceAdmin = &ACLRole{
+// NamespaceAdmin is a built-in admin role
+var NamespaceAdmin = &ACLRole{
 	ID:   "namespace-admin",
 	Name: "Namespace Admin",
 	Privileges: &Privileges{
@@ -125,8 +125,8 @@ var namespaceAdmin = &ACLRole{
 	},
 }
 
-// Service consumer role
-var serviceConsumer = &ACLRole{
+// ServiceConsumer is a built-in service consumer role
+var ServiceConsumer = &ACLRole{
 	ID:   "service-consumer",
 	Name: "Service Consumer",
 	Privileges: &Privileges{
@@ -165,16 +165,16 @@ var nobody = &ACLRole{
 
 // ACLRolesOrderedList represents the ordered list of ACL roles (from most "powerful" to least "powerful")
 var ACLRolesOrderedList = []*ACLRole{
-	domainAdmin,
-	namespaceAdmin,
-	serviceConsumer,
+	DomainAdmin,
+	NamespaceAdmin,
+	ServiceConsumer,
 	nobody,
 }
 
 // ACLRolesMap represents the map of ACL roles (Role ID -> Role)
 var ACLRolesMap = map[string]*ACLRole{
-	domainAdmin.ID:     domainAdmin,
-	namespaceAdmin.ID:  namespaceAdmin,
-	serviceConsumer.ID: serviceConsumer,
+	DomainAdmin.ID:     DomainAdmin,
+	NamespaceAdmin.ID:  NamespaceAdmin,
+	ServiceConsumer.ID: ServiceConsumer,
 	nobody.ID:          nobody,
 }

@@ -70,7 +70,7 @@ func TestAclResolver(t *testing.T) {
 			Weight:   100,
 			Criteria: &Criteria{RequireAll: []string{"is_domain_admin"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{domainAdmin.ID: namespaceAll},
+				AddRole: map[string]string{DomainAdmin.ID: namespaceAll},
 			},
 		},
 		// namespace admins for 'main' namespace
@@ -83,7 +83,7 @@ func TestAclResolver(t *testing.T) {
 			Weight:   200,
 			Criteria: &Criteria{RequireAll: []string{"is_namespace_admin"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{namespaceAdmin.ID: "main"},
+				AddRole: map[string]string{NamespaceAdmin.ID: "main"},
 			},
 		},
 		// service consumers for 'main2' namespace
@@ -96,7 +96,7 @@ func TestAclResolver(t *testing.T) {
 			Weight:   300,
 			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
 			Actions: &RuleActions{
-				AddRole: map[string]string{serviceConsumer.ID: "main1, main2 ,main3,main4"},
+				AddRole: map[string]string{ServiceConsumer.ID: "main1, main2 ,main3,main4"},
 			},
 		},
 		// bogus rule
@@ -117,7 +117,7 @@ func TestAclResolver(t *testing.T) {
 	testCases := []aclTestCase{
 		{
 			user:      &User{Name: "1", Labels: map[string]string{"is_domain_admin": "true"}},
-			role:      domainAdmin,
+			role:      DomainAdmin,
 			namespace: namespaceAll,
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
@@ -127,7 +127,7 @@ func TestAclResolver(t *testing.T) {
 		},
 		{
 			user:      &User{Name: "2", Labels: map[string]string{"is_namespace_admin": "true"}},
-			role:      namespaceAdmin,
+			role:      NamespaceAdmin,
 			namespace: "main",
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
@@ -138,7 +138,7 @@ func TestAclResolver(t *testing.T) {
 		},
 		{
 			user:      &User{Name: "3", Labels: map[string]string{"is_consumer": "true"}},
-			role:      serviceConsumer,
+			role:      ServiceConsumer,
 			namespace: "main2",
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
@@ -170,7 +170,7 @@ func TestAclResolverAdminUser(t *testing.T) {
 	testCases := []aclTestCase{
 		{
 			user:      &User{Name: "1", DomainAdmin: true},
-			role:      domainAdmin,
+			role:      DomainAdmin,
 			namespace: namespaceAll,
 			expected:  true,
 		},

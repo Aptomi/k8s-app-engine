@@ -72,6 +72,7 @@ type PolicyUpdateResult struct {
 	runtime.TypeKind `yaml:",inline"`
 	PolicyGeneration runtime.Generation
 	PolicyChanged    bool
+	WaitForRevision  runtime.Generation
 	PlanAsText       *action.PlanAsText
 	EventLog         []*event.APIEvent
 }
@@ -173,6 +174,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: genCurrent,             // policy generation didn't change
 			PolicyChanged:    false,                  // policy has not been updated in the store
+			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
 		})
@@ -190,10 +192,23 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
+		// If there are changes, we need to wait for the next revision
+		var waitForRevision runtime.Generation
+		if !changed {
+			waitForRevision = runtime.MaxGeneration
+		} else {
+			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
+			if err != nil {
+				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))
+			}
+			waitForRevision = revision.GetGeneration().Next()
+		}
+
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
 			PolicyChanged:    changed,                    // have any policy object in the store been changed or not
+			WaitForRevision:  waitForRevision,            // which revision to wait for
 			PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
 		})
@@ -265,6 +280,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: genCurrent,             // policy generation didn't change
 			PolicyChanged:    false,                  // policy has not been updated in the store
+			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
 		})
@@ -282,10 +298,23 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
+		// If there are changes, we need to wait for the next revision
+		var waitForRevision runtime.Generation
+		if !changed {
+			waitForRevision = runtime.MaxGeneration
+		} else {
+			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
+			if err != nil {
+				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))
+			}
+			waitForRevision = revision.GetGeneration().Next()
+		}
+
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
 			PolicyChanged:    changed,                    // have any policy object in the store been changed or not
+			WaitForRevision:  waitForRevision,            // which revision to wait for
 			PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
 		})

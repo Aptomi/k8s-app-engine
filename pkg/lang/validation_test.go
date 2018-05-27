@@ -245,7 +245,7 @@ func makeACLRule(actionNum int) *Rule {
 	}
 	switch actionNum {
 	case 0:
-		rule.Actions = &RuleActions{AddRole: map[string]string{domainAdmin.ID: namespaceAll, serviceConsumer.ID: "main1, main2 ,main3,main4"}}
+		rule.Actions = &RuleActions{AddRole: map[string]string{DomainAdmin.ID: namespaceAll, ServiceConsumer.ID: "main1, main2 ,main3,main4"}}
 	case Empty:
 		rule.Actions = &RuleActions{}
 	case Nil:

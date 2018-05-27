@@ -2,11 +2,15 @@ package runtime
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 )
 
 // Generation represents object's "version" and starts from 0
 type Generation uint64
+
+// MaxGeneration is a constant which defines max value for a generation
+const MaxGeneration = Generation(math.MaxUint64)
 
 // String returns generation as string to implement Stringer interface
 func (gen Generation) String() string {

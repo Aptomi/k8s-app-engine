@@ -27,16 +27,3 @@ func (client *revisionClient) Show(gen runtime.Generation) (*engine.Revision, er
 
 	return response.(*engine.Revision), nil
 }
-
-func (client *revisionClient) ShowByPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
-	response, err := client.httpClient.GET(fmt.Sprintf("/revision/policy/%d", policyGen), engine.RevisionObject)
-	if err != nil {
-		return nil, err
-	}
-
-	if serverError, ok := response.(*api.ServerError); ok {
-		return nil, fmt.Errorf("server error: %s", serverError.Error)
-	}
-
-	return response.(*engine.Revision), nil
-}

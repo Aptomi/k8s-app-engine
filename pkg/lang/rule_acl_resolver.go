@@ -55,8 +55,8 @@ func (resolver *ACLResolver) GetUserRoleMap(user *User) (map[string]map[string]b
 	result := NewRuleActionResult(NewLabelSet(make(map[string]string)))
 	if user.DomainAdmin {
 		// this user is explicitly specified as domain admin
-		result.RoleMap[domainAdmin.ID] = make(map[string]bool)
-		result.RoleMap[domainAdmin.ID][namespaceAll] = true
+		result.RoleMap[DomainAdmin.ID] = make(map[string]bool)
+		result.RoleMap[DomainAdmin.ID][namespaceAll] = true
 	} else {
 		// we need to run this user through ACL list
 		params := expression.NewParams(user.Labels, nil)
