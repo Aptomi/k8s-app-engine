@@ -20,6 +20,7 @@ if [ "yes" == "$DEBUG" ]; then
     set -x
 fi
 
+FAILED=1
 CONF_DIR=$(mktemp -d)
 POLICY_DIR=$(mktemp -d)
 POLICY_DIR_TMP=$(mktemp -d)
@@ -51,12 +52,26 @@ function stop_server() {
     if [ "$errors" != "" ]; then
         echo "Found unexpected errors"
         echo "$errors"
+        echo "Smoke tests failed"
         exit 1
     fi
 
     echo "No errors found in server logs"
     if [ "yes" == "$DEBUG" ]; then
+        # print the entire server log in debug mode
         [[ -e "${CONF_DIR}/server.log" ]] && awk '{print "[[SERVER]] " $0}' ${CONF_DIR}/server.log || echo "No server log found."
+    else
+        # if smoke tests failed, then print last 100 lines of the server log
+        if [ $FAILED -eq 1 ]; then
+            [[ -e "${CONF_DIR}/server.log" ]] && tail -n 100 ${CONF_DIR}/server.log | awk '{print "[[SERVER]] " $0}' || echo "No server log found."
+            echo "See last 100 lines of the server log above"
+        fi
+    fi
+
+    if [ $FAILED -eq 1 ]; then
+        echo "Smoke tests failed"
+    else
+        echo "Smoke tests passed successfully"
     fi
 }
 
@@ -265,4 +280,4 @@ if [ -z "$SERVER_RUNNING" ]; then
     exit 1
 fi
 
-echo "Smoke tests successfully passed"
+FAILED=0
