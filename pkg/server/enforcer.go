@@ -75,7 +75,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	resolveLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx), true)
+	resolveLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
 	desiredState := resolver.ResolveAllDependencies()
 
@@ -108,7 +108,7 @@ func (server *Server) enforce() error {
 	}
 
 	pluginRegistry := server.pluginRegistryFactory()
-	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.enforcementIdx), true)
+	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.enforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
 	_, _ = applier.Apply()
 

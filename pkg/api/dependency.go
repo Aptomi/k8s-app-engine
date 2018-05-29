@@ -89,7 +89,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	}
 
 	// load actual and desired states
-	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependencies-status", false)).ResolveAllDependencies()
+	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependencies-status")).ResolveAllDependencies()
 	actualState, err := api.store.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
@@ -180,7 +180,7 @@ func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plu
 					continue
 				}
 
-				instanceStatus, err := codePlugin.Status(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources-status", false))
+				instanceStatus, err := codePlugin.Status(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources-status"))
 				if err != nil {
 					panic(fmt.Sprintf("Error while getting deployment resources status for component instance %s: %s", instance.GetKey(), err))
 				}

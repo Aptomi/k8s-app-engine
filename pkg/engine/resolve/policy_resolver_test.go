@@ -434,13 +434,13 @@ const (
 
 func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult int, expectedLogMessage string) *PolicyResolution {
 	t.Helper()
-	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve", false)
+	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 
 	if !assert.Equal(t, expectedResult != ResSomeDependenciesFailed, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
 		// print log into stdout and exit
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
 		t.FailNow()
 		return nil
@@ -450,7 +450,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult 
 	verifier := event.NewLogVerifier(expectedLogMessage, expectedResult == ResSomeDependenciesFailed)
 	resolver.eventLog.Save(verifier)
 	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: %s", expectedLogMessage) {
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		resolver.eventLog.Save(hook)
 		t.FailNow()
 	}

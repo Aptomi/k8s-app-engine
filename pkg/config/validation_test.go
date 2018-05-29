@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -16,6 +17,13 @@ type testStruct struct {
 
 func (t *testStruct) IsDebug() bool {
 	return false
+}
+
+func (t *testStruct) GetLogLevel() logrus.Level {
+	if t.IsDebug() {
+		return logrus.DebugLevel
+	}
+	return logrus.InfoLevel
 }
 
 func displayErrorMessages() bool {

@@ -5,19 +5,19 @@ import (
 	"os"
 )
 
-// HookConsole implements event log hook, which prints all event log entries to the console (stdout)
+// HookConsole implements event log hook, which prints entries to the console
 type HookConsole struct {
 	logger *logrus.Logger
 }
 
 // NewHookConsole creates a new HookConsole
-func NewHookConsole() *HookConsole {
+func NewHookConsole(level logrus.Level) *HookConsole {
 	return &HookConsole{
 		logger: &logrus.Logger{
 			Out:       os.Stderr,
 			Formatter: new(logrus.TextFormatter),
 			Hooks:     make(logrus.LevelHooks),
-			Level:     logrus.DebugLevel,
+			Level:     level,
 		},
 	}
 }

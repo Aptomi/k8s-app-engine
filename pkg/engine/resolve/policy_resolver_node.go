@@ -69,7 +69,7 @@ type resolutionNode struct {
 
 // Creates a new empty resolution node
 func (resolver *PolicyResolver) newResolutionNode() *resolutionNode {
-	eventLog := event.NewLog(resolver.eventLog.GetLevel(), resolver.eventLog.GetScope(), false)
+	eventLog := event.NewLog(resolver.eventLog.GetLevel(), resolver.eventLog.GetScope())
 	return &resolutionNode{
 		resolver:          resolver,
 		eventLog:          eventLog,
@@ -108,7 +108,7 @@ func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, depende
 
 // Creates a new resolution node (as we are processing dependency on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
-	eventLog := event.NewLog(node.eventLog.GetLevel(), node.eventLog.GetScope(), false)
+	eventLog := event.NewLog(node.eventLog.GetLevel(), node.eventLog.GetScope())
 	return &resolutionNode{
 		resolver:          node.resolver,
 		eventLog:          eventLog,

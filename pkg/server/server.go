@@ -205,7 +205,7 @@ func (server *Server) startHTTPServer() {
 		log.Warnf("The auth.secret not specified in config, using insecure default one")
 	}
 
-	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.runEnforcement)
+	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runEnforcement)
 	server.serveUI(router)
 
 	var handler http.Handler = router

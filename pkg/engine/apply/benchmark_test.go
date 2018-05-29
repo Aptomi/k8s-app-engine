@@ -410,7 +410,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistry(true, false),
 		actions,
-		event.NewLog(logrus.DebugLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
@@ -432,7 +432,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 		externalData,
 		mockRegistry(true, false),
 		actions,
-		event.NewLog(logrus.DebugLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	_ = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
@@ -452,7 +452,7 @@ func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult act
 
 	if !ok {
 		// print log into stdout and exit
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		apply.eventLog.Save(hook)
 		b.Fatal("action counts don't match")
 	}
@@ -462,18 +462,18 @@ func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult act
 
 func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *external.Data, expectedNonEmpty bool) *resolve.PolicyResolution {
 	b.Helper()
-	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve", false)
+	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
 	result := resolver.ResolveAllDependencies()
 	t := &testing.T{}
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
 		b.Fatal("policy resolution error")
 	}
 
 	if expectedNonEmpty != (result.SuccessfullyResolvedDependencies() > 0) {
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
 		b.Fatal("no dependencies resolved")
 	}

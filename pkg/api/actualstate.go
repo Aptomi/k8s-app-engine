@@ -56,7 +56,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 	// If we are in noop mode
 	if noop {
 		// See that would happen if we reset the actual state, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logrus.WarnLevel, "api-state-reset-noop", true)
+		eventLog := event.NewLog(logrus.InfoLevel, "api-state-reset-noop").AddConsoleHook(api.logLevel)
 		desiredState := resolve.NewPolicyResolver(policy, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution(true)).ActionPlan
 
@@ -77,7 +77,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 		}
 
 		// Calculate and return resolution log + action plan
-		eventLog := event.NewLog(logrus.WarnLevel, "api-state-reset", true)
+		eventLog := event.NewLog(logrus.InfoLevel, "api-state-reset").AddConsoleHook(api.logLevel)
 		desiredState := resolve.NewPolicyResolver(policy, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution(true)).ActionPlan
 

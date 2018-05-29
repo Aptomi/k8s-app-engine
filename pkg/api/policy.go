@@ -165,8 +165,8 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	// If we are in noop mode
 	if noop {
 		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-update-noop", true)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev", false)).ResolveAllDependencies()
+		eventLog := event.NewLog(logLevel, "api-policy-update-noop").AddConsoleHook(api.logLevel)
+		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
@@ -187,8 +187,8 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		}
 
 		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-update", true)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev", false)).ResolveAllDependencies()
+		eventLog := event.NewLog(logLevel, "api-policy-update").AddConsoleHook(api.logLevel)
+		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
@@ -250,7 +250,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
 
-	desiredStateTmp := resolve.NewPolicyResolver(policyUpdated, api.externalData, event.NewLog(logrus.WarnLevel, "tmp", false)).ResolveAllDependencies()
+	desiredStateTmp := resolve.NewPolicyResolver(policyUpdated, api.externalData, event.NewLog(logrus.WarnLevel, "tmp")).ResolveAllDependencies()
 	err = desiredStateTmp.Validate(policyUpdated)
 	if err != nil {
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
@@ -271,8 +271,8 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	// If we are in noop mode
 	if noop {
 		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-delete-noop", true)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev", false)).ResolveAllDependencies()
+		eventLog := event.NewLog(logLevel, "api-policy-delete-noop").AddConsoleHook(api.logLevel)
+		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
@@ -293,8 +293,8 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		}
 
 		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-delete", true)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev", false)).ResolveAllDependencies()
+		eventLog := event.NewLog(logLevel, "api-policy-delete").AddConsoleHook(api.logLevel)
+		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 

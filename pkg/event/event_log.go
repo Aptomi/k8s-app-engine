@@ -22,7 +22,7 @@ type Log struct {
 // Initially it just buffers all entries and doesn't write them.
 // It needs to buffer all entries, so that the context can be later attached to them
 // before they get serialized and written to an external source
-func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
+func NewLog(level logrus.Level, scope string) *Log {
 	logger := &logrus.Logger{
 		Out:       ioutil.Discard,
 		Formatter: new(logrus.TextFormatter),
@@ -33,10 +33,6 @@ func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
 	hookMemory := &HookMemory{}
 	logger.Hooks.Add(hookMemory)
 
-	if logToConsole {
-		logger.Hooks.Add(NewHookConsole())
-	}
-
 	return &Log{
 		logger:     logger,
 		hookMemory: hookMemory,
@@ -46,6 +42,17 @@ func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
 			"scope": scope,
 		},
 	}
+}
+
+// AddHook puts an additional hook to an existing event log
+func (eventLog *Log) AddHook(hook logrus.Hook) *Log {
+	eventLog.logger.Hooks.Add(hook)
+	return eventLog
+}
+
+// AddConsoleHook puts an additional hook to an existing event log, to mirror logs to the console
+func (eventLog *Log) AddConsoleHook(level logrus.Level) *Log {
+	return eventLog.AddHook(NewHookConsole(level))
 }
 
 // GetLevel returns log level for the event log

@@ -151,11 +151,11 @@ func makePolicyBuilderWithServiceSharing() *builder.PolicyBuilder {
 
 func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.PolicyResolution {
 	t.Helper()
-	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve", false)
+	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
 		t.FailNow()
 	}

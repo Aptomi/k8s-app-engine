@@ -59,7 +59,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 				continue
 			}
 
-			instanceResources, resErr := codePlugin.Resources(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources", false))
+			instanceResources, resErr := codePlugin.Resources(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources"))
 			if resErr != nil {
 				panic(fmt.Sprintf("Error while getting deployment resources for component instance %s: %s", instance.GetKey(), resErr))
 			}

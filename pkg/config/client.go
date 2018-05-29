@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/Sirupsen/logrus"
 	"time"
 )
 
@@ -21,6 +22,14 @@ type HTTP struct {
 // IsDebug returns true if debug mode enabled
 func (c Client) IsDebug() bool {
 	return c.Debug
+}
+
+// GetLogLevel returns log level
+func (c *Client) GetLogLevel() logrus.Level {
+	if c.IsDebug() {
+		return logrus.DebugLevel
+	}
+	return logrus.InfoLevel
 }
 
 // ClientAuth represents client auth configs

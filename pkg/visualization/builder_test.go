@@ -19,7 +19,7 @@ func TestVisualizationDiagram(t *testing.T) {
 	resolutionEmpty := resolve.NewPolicyResolution(true)
 
 	// unit test policy resolved revision
-	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve", false)
+	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
 	resolutionNew := resolver.ResolveAllDependencies()
 	if !assert.Equal(t, 14, len(resolutionNew.ComponentInstanceMap), "Instances should be resolved") {

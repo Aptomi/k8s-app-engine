@@ -37,7 +37,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 		desired.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 
@@ -76,7 +76,7 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 		desired.external(),
 		mockRegistry(false, failAsPanic),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 	// check actual state
@@ -110,7 +110,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		desired.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 
@@ -161,7 +161,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		desiredNext.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNext.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 
@@ -197,7 +197,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		desiredNextAfterUpdate.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNextAfterUpdate.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 
@@ -241,7 +241,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		generated.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(generated.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 
@@ -262,7 +262,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		generated.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(reset.resolution(), actualState).ActionPlan,
-		event.NewLog(logrus.WarnLevel, "test-apply", false),
+		event.NewLog(logrus.DebugLevel, "test-apply"),
 		action.NewApplyResultUpdaterImpl(),
 	)
 
@@ -330,11 +330,11 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolution {
 	t.Helper()
-	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve", false)
+	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
 		t.FailNow()
 	}
@@ -353,7 +353,7 @@ func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult action.Apply
 
 	if !ok {
 		// print log into stdout and exit
-		hook := event.NewHookConsole()
+		hook := event.NewHookConsole(logrus.DebugLevel)
 		apply.eventLog.Save(hook)
 		t.FailNow()
 	}

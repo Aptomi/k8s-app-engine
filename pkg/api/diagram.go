@@ -44,7 +44,7 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	case "desired":
 		// show instances in desired state
 		// todo: add request id to the event log scope
-		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram", true))
+		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
 		state := resolver.ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
@@ -53,7 +53,7 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 		state, _ := api.store.GetActualState()
 		{
 			// since we are not storing dependency keys, calculate them on the fly for actual state
-			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram", true))
+			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
 			desiredState := resolver.ResolveAllDependencies()
 			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
 		}
@@ -98,13 +98,13 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 	case "desired":
 		// show instances in desired state (diff)
 		// todo: add request id to the event log scope
-		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram", true))
+		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
 		state := resolver.ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
 		// todo: add request id to the event log scope
-		resolverBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram", true))
+		resolverBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
 		stateBase := resolverBase.ResolveAllDependencies()
 		graphBuilderBase := visualization.NewGraphBuilder(policyBase, stateBase, api.externalData)
 		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
@@ -115,7 +115,7 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		state, _ := api.store.GetActualState()
 		{
 			// since we are not storing dependency keys, calculate them on the fly for actual state
-			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram", true))
+			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
 			desiredState := resolver.ResolveAllDependencies()
 			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
 		}
@@ -152,7 +152,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 
 	var resolution *resolve.PolicyResolution
 	if kind == lang.DependencyObject.Kind {
-		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-object-diagram", true))
+		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-object-diagram"))
 		resolution = resolver.ResolveAllDependencies()
 	}
 

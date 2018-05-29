@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
+	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -15,11 +16,12 @@ type coreAPI struct {
 	externalData          *external.Data
 	pluginRegistryFactory plugin.RegistryFactory
 	secret                string
+	logLevel              logrus.Level
 	runEnforcement        chan bool
 }
 
 // Serve initializes everything needed by REST API and registers all API endpoints in the provided http router
-func Serve(router *httprouter.Router, store store.Core, externalData *external.Data, pluginRegistryFactory plugin.RegistryFactory, secret string, runEnforcement chan bool) {
+func Serve(router *httprouter.Router, store store.Core, externalData *external.Data, pluginRegistryFactory plugin.RegistryFactory, secret string, logLevel logrus.Level, runEnforcement chan bool) {
 	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(Objects...))
 	api := &coreAPI{
 		contentType:           contentTypeHandler,
@@ -27,6 +29,7 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 		externalData:          externalData,
 		pluginRegistryFactory: pluginRegistryFactory,
 		secret:                secret,
+		logLevel:              logLevel,
 		runEnforcement:        runEnforcement,
 	}
 	api.serve(router)

@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"github.com/Sirupsen/logrus"
+	"time"
+)
 
 // Server represents configs for the server
 type Server struct {
@@ -20,6 +23,14 @@ type Server struct {
 // IsDebug returns true if debug mode enabled
 func (s Server) IsDebug() bool {
 	return s.Debug
+}
+
+// GetLogLevel returns log level
+func (s *Server) GetLogLevel() logrus.Level {
+	if s.IsDebug() {
+		return logrus.DebugLevel
+	}
+	return logrus.InfoLevel
 }
 
 // UserSources represents configs for the user loaders that could be file and LDAP loaders
