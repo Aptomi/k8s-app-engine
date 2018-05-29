@@ -111,16 +111,6 @@ func (eventLog *Log) LogError(err error) {
 	}
 }
 
-// LogWarning logs a warning. Errors with details are processed specially, their details get unfolded as record fields
-func (eventLog *Log) LogWarning(err error) {
-	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
-	if isErrorWithDetails {
-		eventLog.WithFields(Fields(errWithDetails.Details())).Warning(err.Error())
-	} else {
-		eventLog.WithFields(Fields{}).Warning(err.Error())
-	}
-}
-
 // Save takes all buffered event log entries and saves them
 func (eventLog *Log) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hookMemory.entries {
