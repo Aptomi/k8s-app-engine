@@ -2,6 +2,7 @@ package resolve
 
 import (
 	"fmt"
+	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -119,8 +120,7 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
-			resolveErr = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
-			node.eventLog.LogError(resolveErr)
+			node.eventLog.WithFields(event.Fields{}).Errorf("panic: %s\n%s", err, string(debug.Stack()))
 		}
 	}()
 
@@ -153,12 +153,12 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	// if there was no resolution error, combine component data
 	if resolutionErr == nil {
 		// aggregate component instance data
-		err := resolver.resolution.AppendData(node.resolution)
+		appendErr := resolver.resolution.AppendData(node.resolution)
 
 		// if there is a conflict (e.g. components have different code params), turn this into an error
-		if err != nil {
-			node.eventLog.LogError(err)
-			resolutionErr = err
+		if appendErr != nil {
+			logError(node.eventLog, appendErr)
+			resolutionErr = appendErr
 		}
 	}
 
@@ -174,9 +174,9 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	// if this function returns an error, it needs to be logged
 	defer func() {
 		if resolveErr != nil {
-			// Log error
+			// Log resolution error before we exit
 			if !recursiveError {
-				node.eventLog.LogError(resolveErr)
+				logError(node.eventLog, resolveErr)
 			}
 
 			// Log that service or component instance cannot be resolved
@@ -328,4 +328,14 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	node.resolution.RecordResolved(node.serviceKey, node.dependency, ruleResult)
 
 	return nil
+}
+
+// logError logs an error. Errors with details are processed specially, their details get unfolded as record fields
+func logError(eventLog *event.Log, err error) {
+	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
+	if isErrorWithDetails {
+		eventLog.WithFields(event.Fields(errWithDetails.Details())).Error(err.Error())
+	} else {
+		eventLog.WithFields(event.Fields{}).Error(err.Error())
+	}
 }

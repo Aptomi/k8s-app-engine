@@ -101,16 +101,6 @@ func (eventLog *Log) Append(that *Log) {
 	eventLog.hookMemory.entries = append(eventLog.hookMemory.entries, that.hookMemory.entries...)
 }
 
-// LogError logs an error. Errors with details are processed specially, their details get unfolded as record fields
-func (eventLog *Log) LogError(err error) {
-	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
-	if isErrorWithDetails {
-		eventLog.WithFields(Fields(errWithDetails.Details())).Error(err.Error())
-	} else {
-		eventLog.WithFields(Fields{}).Error(err.Error())
-	}
-}
-
 // Save takes all buffered event log entries and saves them
 func (eventLog *Log) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hookMemory.entries {
