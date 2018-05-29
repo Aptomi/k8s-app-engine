@@ -23,7 +23,6 @@ type Log struct {
 	hookMemory *HookMemory
 	scope      string
 	level      logrus.Level
-	log        bool
 }
 
 // NewLog creates a new instance of event log.
@@ -51,16 +50,7 @@ func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
 		hookMemory: hookMemory,
 		scope:      scope,
 		level:      level,
-		log:        logToConsole,
 	}
-}
-
-// Replaces base objects with their string key value
-func fieldValue(data interface{}) interface{} {
-	if baseObject, ok := data.(runtime.Storable); ok {
-		return runtime.KeyForStorable(baseObject)
-	}
-	return data
 }
 
 // GetLevel returns log level for the event log
@@ -73,9 +63,12 @@ func (eventLog *Log) GetScope() string {
 	return eventLog.scope
 }
 
-// IsLog returns true if current event log writes logs on the go
-func (eventLog *Log) IsLog() bool {
-	return eventLog.log
+// Replaces base objects with their string key value
+func fieldValue(data interface{}) interface{} {
+	if baseObject, ok := data.(runtime.Storable); ok {
+		return runtime.KeyForStorable(baseObject)
+	}
+	return data
 }
 
 // WithFields creates a new log entry with a given set of fields
