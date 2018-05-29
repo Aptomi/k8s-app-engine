@@ -196,7 +196,6 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	if err != nil {
 		return err
 	}
-	node.objectResolved(node.user)
 
 	// Locate the contract (it should be always be present, as policy has been validated)
 	node.contract = node.getContract(resolver.policy)
@@ -211,7 +210,6 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	if err != nil {
 		return err
 	}
-	node.objectResolved(node.context)
 
 	// Check that service, which current context is implemented with, exists
 	node.service, err = node.getMatchedService(resolver.policy)
@@ -239,7 +237,6 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	if err != nil {
 		return err
 	}
-	node.objectResolved(node.serviceKey)
 
 	// Check if we've been there already and therefore hit a service cycle
 	cycle := util.ContainsString(node.path, node.serviceKey.GetKey())

@@ -139,13 +139,8 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 }
 
 // As the resolution goes on, this method is called when objects become resolved and available in the context
-// Right now it gets called for as the following get resolved:
-// - dependency
-// - user
-// - contract
-// - context
-// - serviceKey
-func (node *resolutionNode) objectResolved(object interface{}) {
+// Right now we only call it for dependency, contract, and service
+func (node *resolutionNode) objectResolved(object runtime.Storable) {
 	node.eventLog.AttachTo(object)
 }
 
