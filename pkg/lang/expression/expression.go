@@ -50,10 +50,9 @@ func (expression *Expression) EvaluateAsBool(params *Parameters) (bool, error) {
 			return false, nil
 		}
 		return false, errors.NewErrorWithDetails(
-			fmt.Sprintf("Unable to evaluate expression '%s': %s", expression.expressionStr, err),
+			fmt.Sprintf("unable to evaluate expression '%s': %s", expression.expressionStr, err),
 			errors.Details{
-				"expression": expression.expressionStr,
-				"params":     params,
+				"params": params,
 			},
 		)
 	}
@@ -62,10 +61,9 @@ func (expression *Expression) EvaluateAsBool(params *Parameters) (bool, error) {
 	value, ok := result.(bool)
 	if !ok {
 		return false, errors.NewErrorWithDetails(
-			fmt.Sprintf("Expression '%s' didn't evaluate to boolean", expression.expressionStr),
+			fmt.Sprintf("unable to evaluate expression '%s': result is not a bool", expression.expressionStr),
 			errors.Details{
-				"expression": expression.expressionStr,
-				"params":     params,
+				"params": params,
 			},
 		)
 	}

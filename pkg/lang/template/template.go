@@ -76,10 +76,9 @@ func (template *Template) Evaluate(params *Parameters) (string, error) {
 	err := template.templateCompiled.Execute(&doc, params.params)
 	if err != nil {
 		return "", errors.NewErrorWithDetails(
-			fmt.Sprintf("Unable to evaluate template '%s': %s", template.templateStr, err),
+			fmt.Sprintf("unable to evaluate template '%s': %s", template.templateStr, err),
 			errors.Details{
-				"template": template.templateStr,
-				"params":   params,
+				"params": params,
 			},
 		)
 	}
@@ -88,10 +87,9 @@ func (template *Template) Evaluate(params *Parameters) (string, error) {
 	result := doc.String()
 	if strings.Contains(result, "<no value>") {
 		return "", errors.NewErrorWithDetails(
-			fmt.Sprintf("Unable to evaluate template '%s': <no value>", template.templateStr),
+			fmt.Sprintf("unable to evaluate template '%s': <no value>", template.templateStr),
 			errors.Details{
-				"template": template.templateStr,
-				"params":   params,
+				"params": params,
 			},
 		)
 	}

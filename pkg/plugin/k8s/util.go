@@ -24,11 +24,8 @@ func (p *Plugin) NewClient() (kubernetes.Interface, error) {
 func (p *Plugin) NewHelmKube(deployName string, eventLog *event.Log) *kube.Client {
 	client := kube.New(p.ClientConfig)
 	client.Log = func(format string, args ...interface{}) {
-		eventLog.WithFields(event.Fields{
-			"deployName": deployName,
-		}).Debugf(fmt.Sprintf("[instance: %s] ", deployName)+format, args...)
+		eventLog.NewEntry().Debugf(fmt.Sprintf("[instance: %s] ", deployName)+format, args...)
 	}
-
 	return client
 }
 

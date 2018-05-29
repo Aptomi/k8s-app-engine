@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -74,11 +73,7 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 	}
 
 	// Instantiate code component
-	context.EventLog.WithFields(event.Fields{
-		"componentKey": instance.Metadata.Key,
-		"component":    component.Name,
-		"code":         instance.CalculatedCodeParams,
-	}).Info("Deploying new component instance: " + instance.GetKey())
+	context.EventLog.NewEntry().Infof("Deploying new component instance: %s", instance.GetKey())
 
 	clusterName := instance.GetCluster()
 	if len(clusterName) <= 0 {

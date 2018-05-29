@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -73,11 +72,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) error {
 		return nil
 	}
 
-	context.EventLog.WithFields(event.Fields{
-		"componentKey": instance.Metadata.Key,
-		"component":    component.Name,
-		"code":         instance.CalculatedCodeParams,
-	}).Info("Destructing a running component instance: " + instance.GetKey())
+	context.EventLog.NewEntry().Infof("Destructing a running component instance: %s", instance.GetKey())
 
 	clusterName := instance.GetCluster()
 	if len(clusterName) <= 0 {

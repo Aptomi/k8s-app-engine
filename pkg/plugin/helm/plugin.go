@@ -125,14 +125,13 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 	if create {
 		if currRelease != nil {
 			// If a release already exists, let's just go ahead and update it
-			eventLog.NoFields().Infof("Release '%s' already exists. Updating it", releaseName)
+			eventLog.NewEntry().Infof("Release '%s' already exists. Updating it", releaseName)
 		} else {
-			eventLog.WithFields(event.Fields{
-				"release": releaseName,
-				"chart":   chartName,
-				"path":    chartPath,
-				"params":  string(helmParams),
-			}).Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+			// Print parameters on debug level
+			eventLog.NewEntry().Debugf("Installing Helm release '%s', chart '%s', cluster '%s'. Path = %s, Params = %s", releaseName, chartName, cluster.Name, chartPath, string(helmParams))
+
+			// Print installation line on info level
+			eventLog.NewEntry().Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
 			_, err = helmClient.InstallRelease(
 				chartPath,
@@ -147,12 +146,11 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 		}
 	}
 
-	eventLog.WithFields(event.Fields{
-		"release": releaseName,
-		"chart":   chartName,
-		"path":    chartPath,
-		"params":  string(helmParams),
-	}).Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+	// Print parameters on debug level
+	eventLog.NewEntry().Debugf("Updating Helm release '%s', chart '%s', cluster '%s'. Path = %s, Params = %s", releaseName, chartName, cluster.Name, chartPath, string(helmParams))
+
+	// Print update line on info level
+	eventLog.NewEntry().Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
 	status, err := helmClient.ReleaseStatus(releaseName)
 	if err != nil {
@@ -189,12 +187,11 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 		diff = "with diff: \n\n" + diff
 	}
 
-	eventLog.WithFields(event.Fields{
-		"release": releaseName,
-		"chart":   chartName,
-		"path":    chartPath,
-		"params":  string(helmParams),
-	}).Debugf("Updated Helm release '%s', chart '%s', cluster: '%s' %s", releaseName, chartName, cluster.Name, diff)
+	// Print parameters on debug level
+	eventLog.NewEntry().Debugf("Updated Helm release '%s', chart '%s', cluster '%s'. Path = %s, Diff = %s", releaseName, chartName, cluster.Name, chartPath, diff)
+
+	// Print update line on info level
+	eventLog.NewEntry().Infof("Updated Helm release '%s', chart '%s', cluster '%s'", releaseName, chartName, cluster.Name)
 
 	return err
 }
@@ -213,9 +210,7 @@ func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, even
 		return err
 	}
 
-	eventLog.WithFields(event.Fields{
-		"release": releaseName,
-	}).Infof("Deleting Helm release '%s'", releaseName)
+	eventLog.NewEntry().Infof("Deleting Helm release '%s'", releaseName)
 
 	_, err = helmClient.DeleteRelease(
 		releaseName,

@@ -2,7 +2,6 @@ package resolve
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -120,7 +119,8 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
-			node.eventLog.NoFields().Errorf("panic: %s\n%s", err, string(debug.Stack()))
+			resolveErr = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+			node.eventLog.NewEntry().Error(resolveErr)
 		}
 	}()
 
@@ -157,7 +157,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 
 		// if there is a conflict (e.g. components have different code params), turn this into an error
 		if appendErr != nil {
-			logError(node.eventLog, appendErr)
+			node.eventLog.NewEntry().Error(node.printCauseDetailsOnDebug(appendErr))
 			resolutionErr = appendErr
 		}
 	}
@@ -176,7 +176,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		if resolveErr != nil {
 			// Log resolution error before we exit
 			if !recursiveError {
-				logError(node.eventLog, resolveErr)
+				node.eventLog.NewEntry().Error(node.printCauseDetailsOnDebug(resolveErr))
 			}
 
 			// Log that service or component instance cannot be resolved
@@ -328,14 +328,4 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	node.resolution.RecordResolved(node.serviceKey, node.dependency, ruleResult)
 
 	return nil
-}
-
-// logError logs an error. Errors with details are processed specially, their details get unfolded as record fields
-func logError(eventLog *event.Log, err error) {
-	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
-	if isErrorWithDetails {
-		eventLog.WithFields(event.Fields(errWithDetails.Details())).Error(err.Error())
-	} else {
-		eventLog.NoFields().Error(err.Error())
-	}
 }

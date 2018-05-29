@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -75,11 +74,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		return fmt.Errorf("retrieving endpoints for non-code components is not supported")
 	}
 
-	context.EventLog.WithFields(event.Fields{
-		"componentKey": instance.Metadata.Key,
-		"component":    component.Name,
-		"code":         instance.CalculatedCodeParams,
-	}).Info("Getting endpoints for component instance: " + instance.GetKey())
+	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", instance.GetKey())
 
 	clusterName := instance.GetCluster()
 	if len(clusterName) <= 0 {

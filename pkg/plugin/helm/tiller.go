@@ -28,7 +28,7 @@ func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 		return fmt.Errorf("error while pre-flight check for cluster %s: %s", p.cluster.Name, clientErr)
 	}
 
-	eventLog.NoFields().Debugf("Creating k8s tunnel for cluster %s", p.cluster.Name)
+	eventLog.NewEntry().Debugf("Creating k8s tunnel for cluster %s", p.cluster.Name)
 
 	var tunnelErr error
 	ok := retry.Do(120, 5*time.Second, func() bool {
@@ -48,7 +48,7 @@ func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 				}
 			}
 
-			eventLog.NoFields().Debugf("Retrying after error while creating k8s tunnel for cluster %s: %s", p.cluster.Name, tunnelErr)
+			eventLog.NewEntry().Debugf("Retrying after error while creating k8s tunnel for cluster %s: %s", p.cluster.Name, tunnelErr)
 
 			return false
 		}
@@ -59,18 +59,18 @@ func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 		helmClient, err := p.newClient()
 		if err != nil {
 			tunnelErr = fmt.Errorf("can't create helm client for just created k8s tunnel for cluster %s: %s", p.cluster.Name, err)
-			eventLog.NoFields().Debugf("Retrying after error: %s", tunnelErr)
+			eventLog.NewEntry().Debugf("Retrying after error: %s", tunnelErr)
 			return false
 		}
 
 		_, err = helmClient.ListReleases(helm.ReleaseListLimit(1))
 		if err != nil {
 			tunnelErr = fmt.Errorf("can't do helm list using just created k8s tunnel for cluster %s: %s", p.cluster.Name, err)
-			eventLog.NoFields().Debugf("Retrying after error: %s", tunnelErr)
+			eventLog.NewEntry().Debugf("Retrying after error: %s", tunnelErr)
 			return false
 		}
 
-		eventLog.NoFields().Debugf("Created k8s tunnel using local port %d for cluster %s", port, p.cluster.Name)
+		eventLog.NewEntry().Debugf("Created k8s tunnel using local port %d for cluster %s", port, p.cluster.Name)
 
 		return true
 	})
@@ -87,7 +87,7 @@ func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 }
 
 func (p *Plugin) setupTiller(client kubernetes.Interface, eventLog *event.Log) error {
-	eventLog.NoFields().Debugf("Setting up tiller in cluster %s namespace %s", p.cluster.Name, p.tillerNamespace)
+	eventLog.NewEntry().Debugf("Setting up tiller in cluster %s namespace %s", p.cluster.Name, p.tillerNamespace)
 
 	err := p.kube.EnsureNamespace(client, p.tillerNamespace)
 	if err != nil {

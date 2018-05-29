@@ -158,7 +158,7 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	d2.Labels["label1"] = "value1"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResSomeDependenciesFailed, "Unable to find matching context")
+	resolution := resolvePolicy(t, b, ResSomeDependenciesFailed, "unable to find matching context")
 
 	// check that only first dependency got resolved
 	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency with full set of labels should be present in policy resolution")
@@ -310,7 +310,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	d2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting code parameters should result in an error
-	resolvePolicy(t, b, ResSomeDependenciesFailed, "Conflicting code parameters")
+	resolvePolicy(t, b, ResSomeDependenciesFailed, "conflicting code parameters")
 }
 
 func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
@@ -337,7 +337,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	d2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting discovery parameters should result in an error
-	resolvePolicy(t, b, ResSomeDependenciesFailed, "Conflicting discovery parameters")
+	resolvePolicy(t, b, ResSomeDependenciesFailed, "conflicting discovery parameters")
 }
 
 func TestPolicyResolverServiceLoop(t *testing.T) {

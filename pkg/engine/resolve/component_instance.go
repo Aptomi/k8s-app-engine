@@ -150,9 +150,8 @@ func (instance *ComponentInstance) addCodeParams(codeParams util.NestedParameter
 	} else if !instance.CalculatedCodeParams.DeepEqual(codeParams) {
 		// Same component instance, different code parameters
 		return errors.NewErrorWithDetails(
-			fmt.Sprintf("Conflicting code parameters for component instance: %s", instance.GetKey()),
+			fmt.Sprintf("conflicting code parameters for component instance: %s", instance.GetKey()),
 			errors.Details{
-				"instance":             instance.Metadata.Key,
 				"code_params_existing": instance.CalculatedCodeParams,
 				"code_params_new":      codeParams,
 				"diff":                 instance.CalculatedCodeParams.Diff(codeParams),
@@ -169,9 +168,8 @@ func (instance *ComponentInstance) addDiscoveryParams(discoveryParams util.Neste
 	} else if !instance.CalculatedDiscovery.DeepEqual(discoveryParams) {
 		// Same component instance, different discovery parameters
 		return errors.NewErrorWithDetails(
-			fmt.Sprintf("Conflicting discovery parameters for component instance: %s", instance.GetKey()),
+			fmt.Sprintf("conflicting discovery parameters for component instance: %s", instance.GetKey()),
 			errors.Details{
-				"instance":                  instance.Metadata.Key,
 				"discovery_params_existing": instance.CalculatedDiscovery,
 				"discovery_params_new":      discoveryParams,
 				"diff":                      instance.CalculatedDiscovery.Diff(discoveryParams),

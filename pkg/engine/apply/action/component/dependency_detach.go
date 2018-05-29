@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
@@ -33,10 +32,7 @@ func NewDetachDependencyAction(componentKey string, dependencyID string) *Detach
 
 // Apply applies the action
 func (a *DetachDependencyAction) Apply(context *action.Context) error {
-	context.EventLog.WithFields(event.Fields{
-		"componentKey": a.ComponentKey,
-		"dependency":   a.DependencyID,
-	}).Debug("Detaching dependency '" + a.DependencyID + "' from component instance: " + a.ComponentKey)
+	context.EventLog.NewEntry().Debugf("Detaching dependency '%s' from component instance: '%s'", a.DependencyID, a.ComponentKey)
 
 	// remove reference to dependency from the actual state
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]

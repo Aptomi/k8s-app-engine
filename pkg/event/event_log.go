@@ -1,8 +1,6 @@
 package event
 
 import (
-	"github.com/Aptomi/aptomi/pkg/errors"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 )
@@ -60,50 +58,49 @@ func (eventLog *Log) GetScope() string {
 	return eventLog.scope
 }
 
-// Replaces base objects with their string key value
-func fieldValue(data interface{}) interface{} {
-	if baseObject, ok := data.(runtime.Storable); ok {
-		return runtime.KeyForStorable(baseObject)
+// NewEntry creates a new log entry
+func (eventLog *Log) NewEntry() *logrus.Entry {
+	logRusFields := logrus.Fields{}
+
+	// add fixed fields
+	for key, value := range eventLog.fixedFields {
+		logRusFields[key] = value
 	}
-	return data
+
+	// pass to logrus
+	return eventLog.logger.WithFields(logRusFields)
 }
 
-// WithFields creates a new log entry with a given set of fields
-func (eventLog *Log) WithFields(fields Fields) *logrus.Entry {
-	// see if there is any details which have to added to the log from the error
-	for key, value := range fields {
-		if errWithDetails, ok := value.(*errors.ErrorWithDetails); ok {
-			// put details from the error into the same log record
-			for dKey, dValue := range errWithDetails.Details() {
-				fields[dKey] = fieldValue(dValue)
-			}
-			fields[key] = errWithDetails.Error()
-		} else {
-			fields[key] = fieldValue(value)
+// Append adds entries to the event logs
+func (eventLog *Log) Append(that *Log) {
+	for _, thatEntry := range that.hookMemory.entries {
+		entry := &logrus.Entry{
+			Logger:  eventLog.logger,
+			Data:    thatEntry.Data,
+			Time:    thatEntry.Time,
+			Level:   thatEntry.Level,
+			Message: thatEntry.Message,
+		}
+		switch entry.Level {
+		case logrus.PanicLevel:
+			entry.Panic(entry.Message)
+		case logrus.FatalLevel:
+			entry.Fatal(entry.Message)
+		case logrus.ErrorLevel:
+			entry.Error(entry.Message)
+		case logrus.WarnLevel:
+			entry.Warn(entry.Message)
+		case logrus.InfoLevel:
+			entry.Info(entry.Message)
+		case logrus.DebugLevel:
+			entry.Debug(entry.Message)
 		}
 	}
-
-	// always add fixed fields
-	for key, value := range eventLog.fixedFields {
-		fields[key] = value
-	}
-
-	return eventLog.logger.WithFields(logrus.Fields(fields))
-}
-
-// NoFields creates a new log entry
-func (eventLog *Log) NoFields() *logrus.Entry {
-	return eventLog.WithFields(Fields{})
 }
 
 // AddFixedField adds field with name=values to add following entries in the log
 func (eventLog *Log) AddFixedField(name string, value string) {
 	eventLog.fixedFields[name] = value
-}
-
-// Append adds entries to the event logs
-func (eventLog *Log) Append(that *Log) {
-	eventLog.hookMemory.entries = append(eventLog.hookMemory.entries, that.hookMemory.entries...)
 }
 
 // Save takes all buffered event log entries and saves them
