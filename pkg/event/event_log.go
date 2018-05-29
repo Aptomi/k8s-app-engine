@@ -10,19 +10,14 @@ import (
 // Fields is a set of named fields. Fields are attached to every log record
 type Fields map[string]interface{}
 
-// attachedObjects is a list of core aptomi lang objects attached to a set of log records (e.g. dependency, user, contract, context, key)
-type attachedObjects struct {
-	objects []interface{}
-}
-
 // Log is an buffered event log.
 // It stores all log entries in memory first, then allows them to be processed and stored
 type Log struct {
-	logger     *logrus.Logger
-	attachedTo *attachedObjects
-	hookMemory *HookMemory
-	scope      string
-	level      logrus.Level
+	logger      *logrus.Logger
+	hookMemory  *HookMemory
+	level       logrus.Level
+	scope       string
+	fixedFields map[string]string
 }
 
 // NewLog creates a new instance of event log.
@@ -46,10 +41,12 @@ func NewLog(level logrus.Level, scope string, logToConsole bool) *Log {
 
 	return &Log{
 		logger:     logger,
-		attachedTo: &attachedObjects{},
 		hookMemory: hookMemory,
-		scope:      scope,
 		level:      level,
+		scope:      scope,
+		fixedFields: map[string]string{
+			"scope": scope,
+		},
 	}
 }
 
@@ -86,17 +83,17 @@ func (eventLog *Log) WithFields(fields Fields) *logrus.Entry {
 		}
 	}
 
-	if len(eventLog.scope) > 0 {
-		fields["scope"] = eventLog.scope
+	// always add fixed fields
+	for key, value := range eventLog.fixedFields {
+		fields[key] = value
 	}
 
 	return eventLog.logger.WithFields(logrus.Fields(fields))
 }
 
-// AttachTo attaches all entries in this event log to a certain object
-// E.g. dependency, user, contract, context, serviceKey
-func (eventLog *Log) AttachTo(object interface{}) {
-	eventLog.attachedTo.objects = append(eventLog.attachedTo.objects, object)
+// AddFixedField adds field with name=values to add following entries in the log
+func (eventLog *Log) AddFixedField(name string, value string) {
+	eventLog.fixedFields[name] = value
 }
 
 // Append adds entries to the event logs
@@ -127,10 +124,9 @@ func (eventLog *Log) LogWarning(err error) {
 // Save takes all buffered event log entries and saves them
 func (eventLog *Log) Save(hook logrus.Hook) {
 	for _, e := range eventLog.hookMemory.entries {
-		e.Data["attachedTo"] = eventLog.attachedTo
 		err := hook.Fire(e)
 		if err != nil {
-			panic(err) // is it ok to panic here?
+			panic(err)
 		}
 	}
 }
