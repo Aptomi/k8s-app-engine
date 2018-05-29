@@ -37,17 +37,17 @@ func (plugin *failCodePlugin) fail(action string, deployName string) error {
 }
 
 func (plugin *failCodePlugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Infof("[+] %s", deployName)
+	eventLog.NoFields().Infof("[+] %s", deployName)
 	return plugin.fail("create", deployName)
 }
 
 func (plugin *failCodePlugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Infof("[*] %s", deployName)
+	eventLog.NoFields().Infof("[*] %s", deployName)
 	return plugin.fail("update", deployName)
 }
 
 func (plugin *failCodePlugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.WithFields(event.Fields{}).Infof("[-] %s", deployName)
+	eventLog.NoFields().Infof("[-] %s", deployName)
 	return plugin.fail("delete", deployName)
 }
 

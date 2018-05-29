@@ -120,7 +120,7 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
-			node.eventLog.WithFields(event.Fields{}).Errorf("panic: %s\n%s", err, string(debug.Stack()))
+			node.eventLog.NoFields().Errorf("panic: %s\n%s", err, string(debug.Stack()))
 		}
 	}()
 
@@ -336,6 +336,6 @@ func logError(eventLog *event.Log, err error) {
 	if isErrorWithDetails {
 		eventLog.WithFields(event.Fields(errWithDetails.Details())).Error(err.Error())
 	} else {
-		eventLog.WithFields(event.Fields{}).Error(err.Error())
+		eventLog.NoFields().Error(err.Error())
 	}
 }

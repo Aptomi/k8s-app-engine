@@ -91,6 +91,11 @@ func (eventLog *Log) WithFields(fields Fields) *logrus.Entry {
 	return eventLog.logger.WithFields(logrus.Fields(fields))
 }
 
+// NoFields creates a new log entry
+func (eventLog *Log) NoFields() *logrus.Entry {
+	return eventLog.WithFields(Fields{})
+}
+
 // AddFixedField adds field with name=values to add following entries in the log
 func (eventLog *Log) AddFixedField(name string, value string) {
 	eventLog.fixedFields[name] = value

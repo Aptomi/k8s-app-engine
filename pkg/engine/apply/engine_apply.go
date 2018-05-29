@@ -78,7 +78,7 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResul
 	result := apply.actionPlan.Apply(action.WrapSequential(func(act action.Base) error {
 		err := apply.executeAction(act, context)
 		if err != nil {
-			apply.eventLog.WithFields(event.Fields{}).Errorf("error while applying action '%s': %s", act, err)
+			apply.eventLog.NoFields().Errorf("error while applying action '%s': %s", act, err)
 		}
 		return err
 	}), apply.updater)

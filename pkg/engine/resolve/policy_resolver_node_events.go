@@ -142,10 +142,10 @@ func (node *resolutionNode) errorServiceCycleDetected() error {
 func (node *resolutionNode) logStartResolvingDependency() {
 	if node.depth == 0 {
 		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.WithFields(event.Fields{}).Infof("Resolving top-level dependency '%s/%s' ('%s' -> '%s')", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract)
+		node.eventLog.NoFields().Infof("Resolving top-level dependency '%s/%s' ('%s' -> '%s')", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract)
 	} else {
 		// recursively processing sub-dependencies
-		node.eventLog.WithFields(event.Fields{}).Infof("Resolving dependency '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
+		node.eventLog.NoFields().Infof("Resolving dependency '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
@@ -178,15 +178,15 @@ func (node *resolutionNode) logStartMatchingContexts() {
 	for _, context := range node.contract.Contexts {
 		contextNames = append(contextNames, context.Name)
 	}
-	node.eventLog.WithFields(event.Fields{}).Infof("Picking context within contract '%s'. Trying contexts: %s", node.contract.Name, contextNames)
+	node.eventLog.NoFields().Infof("Picking context within contract '%s'. Trying contexts: %s", node.contract.Name, contextNames)
 }
 
 func (node *resolutionNode) logContextMatched(contextMatched *lang.Context) {
-	node.eventLog.WithFields(event.Fields{}).Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
+	node.eventLog.NoFields().Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
 }
 
 func (node *resolutionNode) logComponentNotMatched(component *lang.ServiceComponent) {
-	node.eventLog.WithFields(event.Fields{}).Infof("Component criteria evaluated to 'false', excluding it from processing: service '%s', component '%s'", node.service.Name, node.component.Name)
+	node.eventLog.NoFields().Infof("Component criteria evaluated to 'false', excluding it from processing: service '%s', component '%s'", node.service.Name, node.component.Name)
 }
 
 func (node *resolutionNode) logTestedContextCriteria(context *lang.Context, matched bool) {
@@ -219,11 +219,11 @@ func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys [
 
 func (node *resolutionNode) logResolvingDependencyOnComponent() {
 	if node.component.Code != nil {
-		node.eventLog.WithFields(event.Fields{}).Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
+		node.eventLog.NoFields().Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
 	} else if node.component.Contract != "" {
-		node.eventLog.WithFields(event.Fields{}).Infof("Processing dependency on another contract: %s", node.component.Contract)
+		node.eventLog.NoFields().Infof("Processing dependency on another contract: %s", node.component.Contract)
 	} else {
-		node.eventLog.WithFields(event.Fields{}).Warningf("Skipping unknown component (not code and not contract): %s", node.component.Name)
+		node.eventLog.NoFields().Warningf("Skipping unknown component (not code and not contract): %s", node.component.Name)
 	}
 }
 
@@ -247,11 +247,11 @@ func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstan
 
 func (node *resolutionNode) logCannotResolveInstance() {
 	if node.service == nil {
-		node.eventLog.WithFields(event.Fields{}).Warningf("Cannot resolve instance: contract '%s'", node.contractName)
+		node.eventLog.NoFields().Warningf("Cannot resolve instance: contract '%s'", node.contractName)
 	} else if node.component == nil {
-		node.eventLog.WithFields(event.Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s'", node.contractName, node.service.Name)
+		node.eventLog.NoFields().Warningf("Cannot resolve instance: contract '%s', service '%s'", node.contractName, node.service.Name)
 	} else {
-		node.eventLog.WithFields(event.Fields{}).Warningf("Cannot resolve instance: contract '%s', service '%s', component '%s'", node.contractName, node.service.Name, node.component.Name)
+		node.eventLog.NoFields().Warningf("Cannot resolve instance: contract '%s', service '%s', component '%s'", node.contractName, node.service.Name, node.component.Name)
 	}
 }
 

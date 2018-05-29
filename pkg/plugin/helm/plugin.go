@@ -125,7 +125,7 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 	if create {
 		if currRelease != nil {
 			// If a release already exists, let's just go ahead and update it
-			eventLog.WithFields(event.Fields{}).Infof("Release '%s' already exists. Updating it", releaseName)
+			eventLog.NoFields().Infof("Release '%s' already exists. Updating it", releaseName)
 		} else {
 			eventLog.WithFields(event.Fields{
 				"release": releaseName,
