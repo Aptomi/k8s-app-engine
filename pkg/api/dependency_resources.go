@@ -84,7 +84,7 @@ func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lan
 
 	clusterName := instance.GetCluster()
 	if len(clusterName) <= 0 {
-		return nil, fmt.Errorf("component instance does not have cluster assigned: %v", instance.GetKey())
+		return nil, fmt.Errorf("component instance does not have cluster assigned: %s", instance.GetKey())
 	}
 
 	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
