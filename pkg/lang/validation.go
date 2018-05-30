@@ -354,7 +354,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 		if len(component.Contract) > 0 {
 			obj, err := policy.GetObject(ContractObject.Kind, component.Contract, service.Namespace)
 			if obj == nil || err != nil {
-				sl.ReportError(component.Contract, fmt.Sprintf("Component[%s].Contract[%s]", component.Name, component.Contract), "", "exists", "")
+				sl.ReportError(component.Contract, fmt.Sprintf("Component[%s].Contract[%s/%s]", component.Name, service.Namespace, component.Contract), "", "exists", "")
 				return
 			}
 		}
@@ -395,7 +395,7 @@ func validateDependency(ctx context.Context, sl validator.StructLevel) {
 	// dependency should point to an existing contract
 	obj, err := policy.GetObject(ContractObject.Kind, dependency.Contract, dependency.Namespace)
 	if obj == nil || err != nil {
-		sl.ReportError(dependency.Contract, fmt.Sprintf("Contract[%s]", dependency.Contract), "", "exists", "")
+		sl.ReportError(dependency.Contract, fmt.Sprintf("Contract[%s/%s]", dependency.Namespace, dependency.Contract), "", "exists", "")
 		return
 	}
 }
@@ -413,7 +413,7 @@ func validateContract(ctx context.Context, sl validator.StructLevel) {
 		}
 		obj, err := policy.GetObject(ServiceObject.Kind, serviceName, contract.Namespace)
 		if obj == nil || err != nil {
-			sl.ReportError(serviceName, fmt.Sprintf("Contexts[%s].Service[%s]", contractCtx.Name, serviceName), "", "exists", "")
+			sl.ReportError(serviceName, fmt.Sprintf("Contexts[%s].Service[%s/%s]", contractCtx.Name, contract.Namespace, serviceName), "", "exists", "")
 			return
 		}
 	}
