@@ -100,7 +100,9 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		return err
 	}
 
-	instance.Endpoints = endpoints
+	for k, v := range endpoints {
+		instance.Endpoints[k] = v
+	}
 
 	return nil
 }
