@@ -423,6 +423,48 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 	resolvePolicy(t, b, ResSomeDependenciesFailed, "panic from mock user loader")
 }
 
+func TestPolicyResolverAllocationKeys(t *testing.T) {
+	b := builder.NewPolicyBuilder()
+
+	tc := map[string]bool{
+		"fixedValue":           true,
+		"{{ .User.Name }}":     false,
+		"{{ .Dependency.ID }}": false,
+	}
+
+	for allocationKey, sameInstance := range tc {
+		// create a service and a contract
+		service := b.AddService()
+		b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+		contract := b.AddContract(service, b.CriteriaTrue())
+		contract.Contexts[0].Allocation.Keys = b.AllocationKeys(allocationKey)
+
+		// add rule to set cluster
+		cluster := b.AddCluster()
+		b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+
+		// add dependency (should be resolved to the first context)
+		d1 := b.AddDependency(b.AddUser(), contract)
+
+		// add dependency (should be resolved to the second context)
+		d2 := b.AddDependency(b.AddUser(), contract)
+
+		// policy resolution should be completed successfully
+		resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
+		assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency should be present in policy resolution")
+		assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].Resolved, "Dependency should be successfully resolved")
+		assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency should be present in policy resolution")
+		assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency should be successfully resolved")
+
+		// make sure dependencies point to different instances
+		if sameInstance {
+			assert.Equal(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].ComponentInstanceKey, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].ComponentInstanceKey, "Dependencies should point to same instance")
+		} else {
+			assert.NotEqual(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].ComponentInstanceKey, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].ComponentInstanceKey, "Dependencies should point to different instances")
+		}
+	}
+}
+
 /*
 	Helpers
 */

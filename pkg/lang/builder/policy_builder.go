@@ -203,8 +203,8 @@ func (builder *PolicyBuilder) CriteriaTrue() *lang.Criteria {
 }
 
 // AllocationKeys creates allocation keys
-func (builder *PolicyBuilder) AllocationKeys(key string) []string {
-	return []string{key}
+func (builder *PolicyBuilder) AllocationKeys(key ...string) []string {
+	return key
 }
 
 // UnknownComponent creates an unknown component for a service (not code and not contract)
