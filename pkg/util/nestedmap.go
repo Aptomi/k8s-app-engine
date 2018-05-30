@@ -3,7 +3,6 @@ package util
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
-	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	log "github.com/Sirupsen/logrus"
 	"github.com/d4l3k/messagediff"
 	"io/ioutil"
@@ -89,11 +88,6 @@ func (src NestedParameterMap) Diff(dst NestedParameterMap) string {
 	// second parameter is a result true/false, indicating whether they are equal or not. we can safely ignore it
 	diff, _ := messagediff.PrettyDiff(src, dst)
 	return diff
-}
-
-// ToString returns a string representation of a nested parameter map
-func (src NestedParameterMap) ToString() string {
-	return yaml.SerializeObject(src)
 }
 
 // GetString returns string located by provided key

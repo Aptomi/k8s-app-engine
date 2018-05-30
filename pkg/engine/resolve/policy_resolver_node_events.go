@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/davecgh/go-spew/spew"
 )
 
 /*
@@ -26,9 +27,9 @@ func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
 
 func (node *resolutionNode) errorClusterDoesNotExist(clusterName string) error {
 	if len(clusterName) > 0 {
-		return fmt.Errorf("cluster '%s/%s' doesn't exist in policy", runtime.SystemNS, clusterName)
+		return fmt.Errorf("cluster '%s/%s' doesn't exist in policy (dependency '%s', contract '%s', service '%s')", runtime.SystemNS, clusterName, node.dependency.Name, node.contract.Name, node.service.Name)
 	}
-	return fmt.Errorf("engine needs cluster defined, but cluster is not set")
+	return fmt.Errorf("not sure where components should be deployed, cluster label is not set (dependency '%s', contract '%s', service '%s')", node.dependency.Name, node.contract.Name, node.service.Name)
 }
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
@@ -173,7 +174,8 @@ func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstan
 	}
 	code := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
 	if code != nil {
-		resolver.eventLog.NewEntry().Debugf("Calculated final code params for component '%s': %v", instance.Metadata.Key.GetKey(), instance.CalculatedCodeParams)
+		cs := spew.ConfigState{Indent: "\t"}
+		resolver.eventLog.NewEntry().Debugf("Calculated final code params for component '%s': %s", instance.Metadata.Key.GetKey(), cs.Sdump(instance.CalculatedCodeParams))
 	}
 }
 
@@ -184,7 +186,8 @@ func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentI
 	}
 	code := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
 	if code != nil {
-		resolver.eventLog.NewEntry().Debugf("Calculated final discovery params for component '%s': %v", instance.Metadata.Key.GetKey(), instance.CalculatedDiscovery)
+		cs := spew.ConfigState{Indent: "\t"}
+		resolver.eventLog.NewEntry().Debugf("Calculated final discovery params for component '%s': %s", instance.Metadata.Key.GetKey(), cs.Sdump(instance.CalculatedDiscovery))
 	}
 }
 
@@ -192,7 +195,8 @@ func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentI
 func (node *resolutionNode) printCauseDetailsOnDebug(err error) error {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
-		node.eventLog.NewEntry().Debugf("Error details: %v", errWithDetails.Details())
+		cs := spew.ConfigState{Indent: "\t"}
+		node.eventLog.NewEntry().Debug(cs.Sdump(errWithDetails.Details()))
 	}
 	return err
 }
