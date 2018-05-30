@@ -185,7 +185,7 @@ func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plu
 					panic(fmt.Sprintf("Error while getting deployment resources status for component instance %s: %s", instance.GetKey(), err))
 				}
 
-				result.Status[dKey].Ready = instanceStatus
+				result.Status[dKey].Ready = result.Status[dKey].Deployed && instanceStatus
 			}
 		}
 	}
