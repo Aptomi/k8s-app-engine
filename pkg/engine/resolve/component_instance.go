@@ -98,6 +98,7 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
 		DataForPlugins:       make(map[string]string),
+		Endpoints:            make(map[string]string),
 	}
 }
 
