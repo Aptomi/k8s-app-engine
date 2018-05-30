@@ -31,7 +31,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 				} else {
 					data, err := common.Format(cfg.Output, false, info)
 					if err != nil {
-						panic(fmt.Sprintf("Error while formating policy: %s", err))
+						panic(fmt.Sprintf("error while formating policy: %s", err))
 					}
 
 					log.Infof("Client: ")
@@ -41,7 +41,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 			if server {
 				info, infoErr := rest.New(cfg, http.NewClient(cfg)).Version().Show()
 				if infoErr != nil {
-					panic(fmt.Sprintf("Error while getting server version: %s", infoErr))
+					log.Fatalf("error while getting server version: %s", infoErr)
 				}
 
 				if short {
@@ -49,7 +49,7 @@ func NewCommand(cfg *config.Client) *cobra.Command {
 				} else {
 					data, err := common.Format(cfg.Output, false, info)
 					if err != nil {
-						panic(fmt.Sprintf("Error while formating server version: %s", err))
+						panic(fmt.Sprintf("error while formating server version: %s", err))
 					}
 
 					log.Infof("Server: ")

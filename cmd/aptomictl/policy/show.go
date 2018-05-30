@@ -7,6 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +22,12 @@ func newShowCommand(cfg *config.Client) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			result, err := rest.New(cfg, http.NewClient(cfg)).Policy().Show(runtime.Generation(gen))
 			if err != nil {
-				panic(fmt.Sprintf("Error while showing policy: %s", err))
+				log.Fatalf("error while showing policy: %s", err)
 			}
 
 			data, err := common.Format(cfg.Output, false, result)
 			if err != nil {
-				panic(fmt.Sprintf("Error while formating policy: %s", err))
+				log.Fatalf("error while formatting policy: %s", err)
 			}
 			fmt.Println(string(data))
 		},

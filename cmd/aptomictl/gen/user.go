@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -19,10 +20,10 @@ func newUserCommand(cfg *config.Client) *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(username) <= 0 {
-				panic(fmt.Sprintf("username should be specified"))
+				log.Fatalf("username should be specified")
 			}
 			if len(password) <= 0 {
-				panic(fmt.Sprintf("password should be specified"))
+				log.Fatalf("password should be specified")
 			}
 
 			user := &lang.User{
@@ -32,7 +33,7 @@ func newUserCommand(cfg *config.Client) *cobra.Command {
 
 			data, err := yaml.Marshal(user)
 			if err != nil {
-				panic(fmt.Sprintf("error while marshaling user: %s", err))
+				panic(fmt.Sprintf("error while marshalling user: %s", err))
 			}
 
 			fmt.Println(string(data))

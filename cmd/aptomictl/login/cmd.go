@@ -23,12 +23,12 @@ func NewCommand(cfg *config.Client, cfgFile *string) *cobra.Command {
 		Short: "Login into the Aptomi",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(username) == 0 || len(password) == 0 {
-				panic(fmt.Sprintf("Both username and password should be non-empty"))
+				log.Fatalf("username and password should not be both empty")
 			}
 
 			authSuccess, err := rest.New(cfg, http.NewClient(cfg)).User().Login(username, password)
 			if err != nil {
-				panic(fmt.Sprintf("Error while user login: %s", err))
+				log.Fatalf("error while user login: %s", err)
 			}
 
 			cfg.Auth.Token = authSuccess.Token
@@ -56,14 +56,14 @@ func writeConfig(cfg *config.Client, cfgFile *string) {
 
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
-		panic(fmt.Sprintf("Error marshaling client config: %s", err))
+		panic(fmt.Sprintf("error marshaling client config: %s", err))
 	}
 
 	backupConfigIfDiffers(*cfgFile, data)
 
 	err = ioutil.WriteFile(*cfgFile, data, 0644)
 	if err != nil {
-		panic(fmt.Sprintf("Error while saving config with token to %s: %s", *cfgFile, err))
+		panic(fmt.Sprintf("error while saving config with token to %s: %s", *cfgFile, err))
 	}
 }
 
@@ -91,25 +91,25 @@ func cleanupDefaultsFromConfig(cfg *config.Client) {
 func backupConfigIfDiffers(cfgFile string, newData []byte) {
 	cfg, err := os.Open(cfgFile)
 	if err != nil {
-		panic(fmt.Sprintf("Error while opening current config file %s: %s", cfgFile, err))
+		panic(fmt.Sprintf("error while opening current config file %s: %s", cfgFile, err))
 	}
 	defer func() {
 		closeErr := cfg.Close()
 		if closeErr != nil {
-			panic(fmt.Sprintf("Error while closing current config file %s: %s", cfgFile, err))
+			panic(fmt.Sprintf("error while closing current config file %s: %s", cfgFile, err))
 		}
 	}()
 
 	data, err := ioutil.ReadAll(cfg)
 	if err != nil {
-		panic(fmt.Sprintf("Error while reading current config file %s: %s", cfgFile, err))
+		panic(fmt.Sprintf("error while reading current config file %s: %s", cfgFile, err))
 	}
 
 	if !bytes.Equal(data, newData) {
 		backupCfgFile := cfgFile + ".bak"
 		err = ioutil.WriteFile(backupCfgFile, data, 0644)
 		if err != nil {
-			panic(fmt.Sprintf("Error while writing backup of the current config %s: %s", cfgFile, err))
+			panic(fmt.Sprintf("error while writing backup of the current config %s: %s", cfgFile, err))
 		}
 		log.Infof("Current config saved to: %s", backupCfgFile)
 	}

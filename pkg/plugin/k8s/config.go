@@ -62,7 +62,7 @@ func initKubeConfig(config *ClusterConfig, cluster *lang.Cluster) (*rest.Config,
 	} else {
 		yamlData, err := yaml.Marshal(config.KubeConfig)
 		if err != nil {
-			return nil, nil, "", fmt.Errorf("error while marshaling kube config into bytes: %s", err)
+			return nil, nil, "", fmt.Errorf("error while marshalling kube config into bytes: %s", err)
 		}
 		data = yamlData
 	}

@@ -1,12 +1,11 @@
 package state
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/util"
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -27,11 +26,11 @@ func newEnforceCommand(cfg *config.Client) *cobra.Command {
 			clientObj := rest.New(cfg, http.NewClient(cfg))
 			result, err := clientObj.State().Reset(noop)
 			if err != nil {
-				panic(fmt.Sprintf("error while calling state reset: %s", err))
+				log.Fatalf("error while calling state reset: %s", err)
 			}
 
 			// print policy update result to the screen
-			util.PrintPolicyUpdateResult(result, logrus.WarnLevel, cfg)
+			util.PrintPolicyUpdateResult(result, log.WarnLevel, cfg)
 
 			// wait for actions to finish, if needed
 			if wait {

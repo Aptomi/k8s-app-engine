@@ -29,12 +29,12 @@ func AddDurationFlag(command *cobra.Command, key, flagName, flagShorthand string
 func bindFlagEnv(command *cobra.Command, key, flagName, env string) {
 	err := viper.BindPFlag(key, command.PersistentFlags().Lookup(flagName))
 	if err != nil {
-		panic(fmt.Sprintf("Error while binding flag with key %s: %s", key, err))
+		panic(fmt.Sprintf("error while binding flag with key %s: %s", key, err))
 	}
 	if len(env) > 0 {
 		err = viper.BindEnv(key, env)
 		if err != nil {
-			panic(fmt.Sprintf("Error while binding env var with key %s: %s", key, err))
+			panic(fmt.Sprintf("error while binding env var with key %s: %s", key, err))
 		}
 	}
 }

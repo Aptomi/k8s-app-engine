@@ -10,7 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/progress"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"time"
 )
 
@@ -66,8 +66,7 @@ func WaitForRevisionActionsToFinish(attempts int, interval time.Duration, client
 
 	// print the outcome
 	if !finished {
-		fmt.Printf("Revision %d timeout! Has not been applied in %d seconds\n", rev.GetGeneration(), int(interval.Seconds()*float64(attempts)))
-		panic("timeout")
+		log.Fatalf("Revision %d timeout! Has not been applied in %d seconds\n", rev.GetGeneration(), int(interval.Seconds()*float64(attempts)))
 	} else if rev.Status == engine.RevisionStatusCompleted {
 		if rev.Result.Total > 0 {
 			fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Result.Success, rev.Result.Failed, rev.Result.Skipped)
@@ -75,17 +74,15 @@ func WaitForRevisionActionsToFinish(attempts int, interval time.Duration, client
 			fmt.Printf("Revision %d completed\n", rev.GetGeneration())
 		}
 	} else if rev.Status == engine.RevisionStatusError {
-		fmt.Printf("Revision %d failed\n", rev.GetGeneration())
-		panic("error")
+		log.Fatalf("Revision %d failed\n", rev.GetGeneration())
 	} else {
-		fmt.Printf("Unexpected revision status '%s' for revision %d\n", rev.Status, rev.GetGeneration())
-		panic("error")
+		log.Fatalf("Unexpected revision status '%s' for revision %d\n", rev.Status, rev.GetGeneration())
 	}
 
 }
 
 // PrintPolicyUpdateResult prints PolicyUpdateResult to the console
-func PrintPolicyUpdateResult(result *api.PolicyUpdateResult, logLevelObj logrus.Level, cfg *config.Client) { // nolint: interfacer
+func PrintPolicyUpdateResult(result *api.PolicyUpdateResult, logLevelObj log.Level, cfg *config.Client) { // nolint: interfacer
 	fmt.Printf("Event Log (>%s):\n", logLevelObj.String())
 	if len(result.EventLog) > 0 {
 		for _, entry := range result.EventLog {

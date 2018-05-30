@@ -5,7 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/tools/clientcmd"
@@ -23,10 +23,10 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			if !local && len(sourceContext) == 0 {
-				panic(fmt.Sprintf("context should be specified"))
+				log.Fatalf("context should be specified")
 			}
 			if local && len(sourceContext) > 0 {
-				panic(fmt.Sprintf("one of local or context could be specified"))
+				log.Fatalf("one of local or context could be specified")
 			}
 
 			var clusterConfig *k8s.ClusterConfig
@@ -61,7 +61,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				Config: clusterConfig,
 			}
 
-			logrus.Infof("Generating cluster: %s", clusterName)
+			log.Infof("Generating cluster: %s", clusterName)
 
 			data, err := yaml.Marshal(cluster)
 			if err != nil {

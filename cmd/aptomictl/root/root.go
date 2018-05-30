@@ -1,7 +1,6 @@
 package root
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/dependency"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/gen"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/login"
@@ -71,7 +70,7 @@ func preRun(command *cobra.Command, args []string) {
 	if command.Parent() != nil {
 		err := common.ReadConfig(viper.GetViper(), Config, defaultConfigDir())
 		if err != nil {
-			panic(fmt.Sprintf("error while loading config: %s", err))
+			log.Fatalf("error while loading config: %s", err)
 		}
 
 		usedConfigFile := viper.ConfigFileUsed()
@@ -84,7 +83,7 @@ func preRun(command *cobra.Command, args []string) {
 func defaultConfigDir() string {
 	home, err := homedir.Dir()
 	if err != nil {
-		panic(fmt.Sprintf("can't find home dir: %s", err))
+		log.Fatalf("can't find home dir: %s", err)
 	}
 
 	return path.Join(home, ".aptomi")

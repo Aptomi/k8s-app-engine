@@ -23,7 +23,7 @@ func NewVersionCommand() *cobra.Command {
 			} else {
 				data, err := common.Format(output, false, info)
 				if err != nil {
-					panic(fmt.Sprintf("Error while formating policy: %s", err))
+					panic(fmt.Sprintf("error while formatting policy: %s", err))
 				}
 				fmt.Println(string(data))
 			}

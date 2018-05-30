@@ -8,7 +8,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -34,12 +34,12 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 		Run: func(cmd *cobra.Command, args []string) {
 			allObjects, err := io.ReadLangObjects(paths)
 			if err != nil {
-				panic(fmt.Sprintf("error while reading policy files: %s", err))
+				log.Fatalf("error while reading policy files: %s", err)
 			}
 
-			logLevelObj, err := logrus.ParseLevel(logLevel)
+			logLevelObj, err := log.ParseLevel(logLevel)
 			if err != nil {
-				logLevelObj = logrus.WarnLevel
+				logLevelObj = log.WarnLevel
 			}
 
 			// call API (apply or delete), get policy update result
@@ -51,7 +51,7 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 				result, err = clientObj.Policy().Delete(allObjects, noop, logLevelObj)
 			}
 			if err != nil {
-				panic(fmt.Sprintf("error while calling %s on policy: %s", commandType, err))
+				log.Fatalf("error while calling %s on policy: %s", commandType, err)
 			}
 
 			// print policy update result to the screen
@@ -73,7 +73,7 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until all actions are fully applied")
 	cmd.Flags().DurationVar(&waitInterval, "wait-interval", 2*time.Second, "Seconds to sleep between wait attempts")
 	cmd.Flags().IntVar(&waitAttempts, "wait-attempts", 150, "Number of wait attempts before failing the wait process")
-	cmd.Flags().StringVar(&logLevel, "log-level", logrus.WarnLevel.String(), fmt.Sprintf("Retrieve logs from the server using the specified log level (%s)", logrus.AllLevels))
+	cmd.Flags().StringVar(&logLevel, "log-level", log.WarnLevel.String(), fmt.Sprintf("Retrieve logs from the server using the specified log level (%s)", log.AllLevels))
 
 	return cmd
 }

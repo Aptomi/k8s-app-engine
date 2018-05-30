@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uilive"
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
@@ -69,7 +70,7 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 
 			// if one of the dependencies is not in good state, we should report a non-zero exit code
 			if result != nil {
-				panic(fmt.Sprintf("one or more dependencies didn't reach '%s' state", waitFlag))
+				log.Fatalf("one or more dependencies didn't reach '%s' state", waitFlag)
 			}
 		},
 	}

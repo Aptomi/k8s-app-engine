@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	log "github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ func newShowCommand(cfg *config.Client) *cobra.Command {
 			result, err := rest.New(cfg, http.NewClient(cfg)).Revision().Show(runtime.Generation(gen))
 
 			if err != nil {
-				panic(fmt.Sprintf("Error while showing revision: %s", err))
+				log.Fatalf("error while showing revision: %s", err)
 			}
 
 			// todo(slukjanov): replace with -o yaml / json / etc handler

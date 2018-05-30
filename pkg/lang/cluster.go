@@ -35,12 +35,12 @@ type Cluster struct {
 func (cluster *Cluster) ParseConfigInto(obj interface{}) error {
 	data, err := yaml.Marshal(cluster.Config)
 	if err != nil {
-		return fmt.Errorf("error while marshaling cluster config into bytes using yaml: %s", err)
+		return fmt.Errorf("error while marshalling cluster config into bytes using yaml: %s", err)
 	}
 
 	err = yaml.Unmarshal(data, obj)
 	if err != nil {
-		return fmt.Errorf("error while unmarshaling cluster config into provided object: %s", err)
+		return fmt.Errorf("error while unmarshalling cluster config into provided object: %s", err)
 	}
 
 	return nil
