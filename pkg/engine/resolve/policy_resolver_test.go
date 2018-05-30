@@ -441,7 +441,11 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 
 		// add rule to set cluster
 		cluster := b.AddCluster()
-		b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+		b.AddRule(b.Criteria(
+			"Service.Namespace == 'main' && Dependency.Namespace == 'main'",
+			"true",
+			"false",
+		), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
 
 		// add dependency (should be resolved to the first context)
 		d1 := b.AddDependency(b.AddUser(), contract)

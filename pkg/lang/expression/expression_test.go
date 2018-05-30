@@ -53,7 +53,7 @@ func TestExpressions(t *testing.T) {
 		},
 
 		map[string]interface{}{
-			"service": struct {
+			"Service": struct {
 				Name   string
 				Labels map[string]string
 			}{
@@ -101,10 +101,10 @@ func TestExpressions(t *testing.T) {
 		{"anotherbar == 't'", ResFalse},
 
 		// check that struct expressions work
-		{"service.Name == 'myservicename'", ResTrue},
-		{"service.Name == 'incorrectservicename'", ResFalse},
-		{"service.Labels.Name + 'B' == 'ValueB'", ResTrue},
-		{"serviceMissing.LabelsMissing.Name + 'B' == 'ValueB'", ResFalse},
+		{"Service.Name == 'myservicename'", ResTrue},
+		{"Service.Name == 'incorrectservicename'", ResFalse},
+		{"Service.Labels.Name + 'B' == 'ValueB'", ResTrue},
+		{"ServiceMissing.LabelsMissing.Name + 'B' == 'ValueB'", ResFalse},
 
 		// evaluation error
 		{"foo + 10 + 'test' > 0", ResEvalError},

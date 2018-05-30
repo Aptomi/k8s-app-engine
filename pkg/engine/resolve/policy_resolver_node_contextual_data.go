@@ -41,7 +41,8 @@ func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Par
 	return expression.NewParams(
 		node.labels.Labels,
 		map[string]interface{}{
-			"service": node.proxyService(node.service),
+			"Service":    node.proxyService(node.service),
+			"Dependency": node.proxyDependency(node.dependency),
 		},
 	)
 }
@@ -115,9 +116,11 @@ func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 // How dependency is visible from the policy language
 func (node *resolutionNode) proxyDependency(dependency *lang.Dependency) interface{} {
 	result := struct {
+		lang.Metadata
 		ID interface{}
 	}{
-		ID: runtime.KeyForStorable(dependency),
+		Metadata: dependency.Metadata,
+		ID:       runtime.KeyForStorable(dependency),
 	}
 	return result
 }
