@@ -7,6 +7,10 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "k8s.io/client-go/pkg/api/v1"
 	"strings"
+	"github.com/Aptomi/aptomi/pkg/util/retry"
+	"time"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/kubernetes/pkg/kubectl/resource"
 )
 
 // EndpointsForManifests returns endpoints for specified manifest
@@ -27,12 +31,12 @@ func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventL
 
 	for _, info := range infos {
 		if info.Mapping.GroupVersionKind.Kind == "Service" { // nolint: goconst
-			service, getErr := kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				return nil, getErr
-			}
 
-			p.addEndpointsFromService(service, endpoints)
+
+			endpointsErr := p.addEndpointsFromService(kubeClient, info, endpoints)
+			if endpointsErr != nil {
+				return nil, endpointsErr
+			}
 		}
 	}
 
@@ -40,16 +44,21 @@ func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventL
 }
 
 // addEndpointsFromService searches for the available endpoints in specified service and writes them into provided map
-func (p *Plugin) addEndpointsFromService(service *api.Service, endpoints map[string]string) {
+func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *resource.Info, endpoints map[string]string) error {
+	service, getErr := kubeClient.CoreV1().Services(info.Namespace).Get(info.Name, meta.GetOptions{})
+	if getErr != nil {
+		return getErr
+	}
+
 	// todo(slukjanov): support not only node ports
-	if service.Spec.Type == "NodePort" {
+	if service.Spec.Type == api.ServiceTypeNodePort {
 		for _, port := range service.Spec.Ports {
 			sURL := fmt.Sprintf("%s:%d", p.ExternalAddress, port.NodePort)
 
 			// todo(slukjanov): could we somehow detect real schema? I think no :(
 			if util.StringContainsAny(port.Name, "https") {
 				sURL = "https://" + sURL
-			} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana") {
+			} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana", "service") {
 				sURL = "http://" + sURL
 			}
 
@@ -60,5 +69,61 @@ func (p *Plugin) addEndpointsFromService(service *api.Service, endpoints map[str
 
 			endpoints[name] = sURL
 		}
+	} else if service.Spec.Type == api.ServiceTypeLoadBalancer {
+		ingress := service.Status.LoadBalancer.Ingress
+
+		// wait 10 minutes for LB external IP to be provisioned
+		ok := retry.Do(60, 10*time.Second, func() bool {
+			service, getErr = kubeClient.CoreV1().Services(info.Namespace).Get(info.Name, meta.GetOptions{})
+			if getErr != nil {
+				panic(fmt.Sprintf("Error while getting Service %s in namespace %s", info.Name, info.Namespace))
+			}
+
+			ingress = service.Status.LoadBalancer.Ingress
+			if ingress == nil {
+				return false
+			}
+
+			externalAddress := ""
+			for _, entry := range ingress {
+				if entry.Hostname != "" {
+					externalAddress = entry.Hostname
+				} else if entry.IP != "" {
+					externalAddress = entry.IP
+				}
+				if externalAddress == "" {
+					panic(fmt.Sprintf("Got empty LoadBalancerIngress for Service %s in namespace %s", info.Name, info.Namespace))
+				} else {
+					// handle only first ingress entry for LB
+					break
+				}
+			}
+
+			for _, port := range service.Spec.Ports {
+				sURL := fmt.Sprintf("%s:%d", externalAddress, port.Port)
+
+				// todo(slukjanov): could we somehow detect real schema? I think no :(
+				if util.StringContainsAny(port.Name, "https") {
+					sURL = "https://" + sURL
+				} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana", "service") {
+					sURL = "http://" + sURL
+				}
+
+				name := port.Name
+				if len(name) == 0 {
+					name = port.TargetPort.String()
+				}
+
+				endpoints[name] = sURL
+			}
+
+			return true
+		})
+
+		if ingress == nil || !ok {
+			return fmt.Errorf("unable to get endpoints for Service type LoadBalancer after 10 minutes (%s in %s)", info.Name, info.Name)
+		}
 	}
+
+	return nil
 }
