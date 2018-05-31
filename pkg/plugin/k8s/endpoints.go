@@ -58,8 +58,8 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 	} else if service.Spec.Type == api.ServiceTypeLoadBalancer {
 		ingress := service.Status.LoadBalancer.Ingress
 
-		// wait 10 minutes for LB external IP to be provisioned
-		ok := retry.Do(60, 10*time.Second, func() bool {
+		// wait for LB external IP to be provisioned
+		ok := retry.Do(90, 10*time.Second, func() bool {
 			service, getErr = kubeClient.CoreV1().Services(info.Namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				panic(fmt.Sprintf("Error while getting Service %s in namespace %s", info.Name, info.Namespace))
@@ -94,7 +94,7 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 		})
 
 		if ingress == nil || !ok {
-			return fmt.Errorf("unable to get endpoints for Service type LoadBalancer after 10 minutes (%s in %s)", info.Name, info.Name)
+			return fmt.Errorf("unable to get endpoints for Service type LoadBalancer (%s in %s)", info.Name, info.Name)
 		}
 	}
 
