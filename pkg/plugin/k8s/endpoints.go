@@ -54,20 +54,7 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 	if service.Spec.Type == api.ServiceTypeNodePort {
 		for _, port := range service.Spec.Ports {
 			sURL := fmt.Sprintf("%s:%d", p.ExternalAddress, port.NodePort)
-
-			// todo(slukjanov): could we somehow detect real schema? I think no :(
-			if util.StringContainsAny(port.Name, "https") {
-				sURL = "https://" + sURL
-			} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana", "service") {
-				sURL = "http://" + sURL
-			}
-
-			name := port.Name
-			if len(name) == 0 {
-				name = port.TargetPort.String()
-			}
-
-			endpoints[name] = sURL
+			addEndpointsForServicePort(port, sURL, endpoints)
 		}
 	} else if service.Spec.Type == api.ServiceTypeLoadBalancer {
 		ingress := service.Status.LoadBalancer.Ingress
@@ -101,20 +88,7 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 
 			for _, port := range service.Spec.Ports {
 				sURL := fmt.Sprintf("%s:%d", externalAddress, port.Port)
-
-				// todo(slukjanov): could we somehow detect real schema? I think no :(
-				if util.StringContainsAny(port.Name, "https") {
-					sURL = "https://" + sURL
-				} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana", "service") {
-					sURL = "http://" + sURL
-				}
-
-				name := port.Name
-				if len(name) == 0 {
-					name = port.TargetPort.String()
-				}
-
-				endpoints[name] = sURL
+				addEndpointsForServicePort(port, sURL, endpoints)
 			}
 
 			return true
@@ -126,4 +100,18 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 	}
 
 	return nil
+}
+
+func addEndpointsForServicePort(port api.ServicePort, sURL string, endpoints map[string]string) {
+	// todo(slukjanov): could we somehow detect real schema? I think no :(
+	if util.StringContainsAny(port.Name, "https") {
+		sURL = "https://" + sURL
+	} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana", "service") {
+		sURL = "http://" + sURL
+	}
+	name := port.Name
+	if len(name) == 0 {
+		name = port.TargetPort.String()
+	}
+	endpoints[name] = sURL
 }
