@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/util"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "k8s.io/client-go/pkg/api/v1"
-	"strings"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
-	"time"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	api "k8s.io/client-go/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/kubectl/resource"
+	"strings"
+	"time"
 )
 
 // EndpointsForManifests returns endpoints for specified manifest
@@ -31,7 +31,6 @@ func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventL
 
 	for _, info := range infos {
 		if info.Mapping.GroupVersionKind.Kind == "Service" { // nolint: goconst
-
 
 			endpointsErr := p.addEndpointsFromService(kubeClient, info, endpoints)
 			if endpointsErr != nil {
