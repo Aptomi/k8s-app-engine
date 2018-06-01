@@ -137,7 +137,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 	// See if we need to retrieve component endpoints
 	// - if it doesn't exist in actual state -> retrieve
 	// - if it exists in actual state but endpoints are not up to date -> retrieve
-	if isCodeComponent && (prevInstance == nil || (prevInstance != nil && !prevInstance.EndpointsUpToDate)) {
+	if isCodeComponent && (prevInstance == nil || !prevInstance.EndpointsUpToDate) {
 		node.AddAction(component.NewEndpointsAction(key), diff.Prev, true)
 	}
 
