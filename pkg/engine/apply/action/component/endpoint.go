@@ -3,6 +3,7 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -28,6 +29,11 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 		Metadata:     action.NewMetadata(EndpointsActionObject.Kind, componentKey),
 		ComponentKey: componentKey,
 	}
+}
+
+// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
+func (a *EndpointsAction) AfterCreated(actualState *resolve.PolicyResolution) {
+
 }
 
 // Apply applies the action
@@ -100,9 +106,8 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		return err
 	}
 
-	for k, v := range endpoints {
-		instance.Endpoints[k] = v
-	}
+	instance.EndpointsUpToDate = true
+	instance.Endpoints = endpoints
 
 	return nil
 }

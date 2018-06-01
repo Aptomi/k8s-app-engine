@@ -90,57 +90,61 @@ func (diff *PolicyResolutionDiff) buildActions(key string) {
 		depKeysNext = nextInstance.DependencyKeys
 	}
 
+	/*
+		First of all, let's see if a component needs to be destructed. If so, destruct it and don't proceed to any further actions.
+	*/
+
+	// See if a dependency needs to be detached from a component
+	for dependencyID := range depKeysPrev {
+		if !depKeysNext[dependencyID] {
+			node.AddAction(component.NewDetachDependencyAction(key, dependencyID), diff.Prev, true)
+		}
+	}
+
+	// See if a component needs to be destructed
+	if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
+		node.AddAction(component.NewDeleteAction(key, prevInstance.CalculatedCodeParams), diff.Prev, true)
+		return // exit right away
+	}
+
+	/*
+		Now, let's see if a component needs to be created or updated.
+	*/
+
 	// See if it's a service or component
 	isCodeComponent := (prevInstance != nil && prevInstance.IsCode) || (nextInstance != nil && nextInstance.IsCode)
 
-	// Bool that says that we should retrieve endpoints
-	endpointsAction := false
-
 	// See if a component needs to be instantiated
 	if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
-		node.AddAction(component.NewCreateAction(key, nextInstance.CalculatedCodeParams), true)
-		endpointsAction = true
+		node.AddAction(component.NewCreateAction(key, nextInstance.CalculatedCodeParams), diff.Prev, true)
 	}
 
 	// See if a component needs to be updated
-	if len(depKeysPrev) > 0 && len(depKeysNext) > 0 && isCodeComponent {
+	if isCodeComponent && len(depKeysPrev) > 0 && len(depKeysNext) > 0 {
 		sameParams := prevInstance.CalculatedCodeParams.DeepEqual(nextInstance.CalculatedCodeParams)
 		if !sameParams {
-			node.AddAction(component.NewUpdateAction(key, prevInstance.CalculatedCodeParams, nextInstance.CalculatedCodeParams), true)
+			node.AddAction(component.NewUpdateAction(key, prevInstance.CalculatedCodeParams, nextInstance.CalculatedCodeParams), diff.Prev, true)
 
 			// indicate that a parent service component instance gets updated as well
 			// this is required for adjusting update/creation times of a service with changed component
 			// this may produce duplicate "update" actions for the parent service
 			serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
 			serviceNode := diff.ActionPlan.GetActionGraphNode(serviceKey)
-			serviceNode.AddAction(component.NewUpdateAction(serviceKey, util.NestedParameterMap{}, util.NestedParameterMap{}), true)
-
-			endpointsAction = true
+			serviceNode.AddAction(component.NewUpdateAction(serviceKey, util.NestedParameterMap{}, util.NestedParameterMap{}), diff.Prev, true)
 		}
-	}
-
-	// See if a user needs to be attached to a component
-	for dependencyID := range depKeysNext {
-		if !depKeysPrev[dependencyID] {
-			node.AddAction(component.NewAttachDependencyAction(key, dependencyID), true)
-		}
-	}
-
-	// See if a user needs to be detached from a component
-	for dependencyID := range depKeysPrev {
-		if !depKeysNext[dependencyID] {
-			node.AddAction(component.NewDetachDependencyAction(key, dependencyID), true)
-		}
-	}
-
-	// See if a component needs to be destructed
-	if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
-		node.AddAction(component.NewDeleteAction(key, prevInstance.CalculatedCodeParams), true)
-		endpointsAction = false
 	}
 
 	// See if we need to retrieve component endpoints
-	if endpointsAction && isCodeComponent {
-		node.AddAction(component.NewEndpointsAction(key), true)
+	// - if it doesn't exist in actual state -> retrieve
+	// - if it exists in actual state but endpoints are not up to date -> retrieve
+	if isCodeComponent && (prevInstance == nil || (prevInstance != nil && !prevInstance.EndpointsUpToDate)) {
+		node.AddAction(component.NewEndpointsAction(key), diff.Prev, true)
+	}
+
+	// See if a dependency needs to be attached to a component
+	for dependencyID := range depKeysNext {
+		if !depKeysPrev[dependencyID] {
+			node.AddAction(component.NewAttachDependencyAction(key, dependencyID), diff.Prev, true)
+		}
 	}
 }

@@ -3,6 +3,7 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
@@ -29,6 +30,11 @@ func NewAttachDependencyAction(componentKey string, dependencyID string) *Attach
 		ComponentKey: componentKey,
 		DependencyID: dependencyID,
 	}
+}
+
+// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
+func (a *AttachDependencyAction) AfterCreated(actualState *resolve.PolicyResolution) {
+
 }
 
 // Apply applies the action

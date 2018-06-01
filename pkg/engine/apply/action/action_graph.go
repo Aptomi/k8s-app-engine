@@ -1,5 +1,7 @@
 package action
 
+import "github.com/Aptomi/aptomi/pkg/engine/resolve"
+
 // GraphNode represents a node in the graph of apply actions
 type GraphNode struct {
 	// Key is unique identifier of the node
@@ -32,7 +34,7 @@ func (node *GraphNode) AddBefore(that *GraphNode) {
 
 // AddAction adds an action to the list of main actions. If avoidDuplicates is true, then duplicate actions will not be
 // added (e.g. update action)
-func (node *GraphNode) AddAction(action Base, avoidDuplicates bool) {
+func (node *GraphNode) AddAction(action Base, actualState *resolve.PolicyResolution, avoidDuplicates bool) {
 	add := true
 	if avoidDuplicates {
 		// go over existing actions and make sure we don't add duplicates
@@ -45,6 +47,10 @@ func (node *GraphNode) AddAction(action Base, avoidDuplicates bool) {
 	}
 
 	if add {
+		// call AfterCreated on the action
+		action.AfterCreated(actualState)
+
+		// schedule the action
 		node.Actions = append(node.Actions, action)
 	}
 }

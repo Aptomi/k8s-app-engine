@@ -82,6 +82,9 @@ type ComponentInstance struct {
 	// UpdatedAt is the last time when this component instance was updated
 	UpdatedAt time.Time
 
+	// EndpointsUpToDate is true if endpoints are up to date and false otherwise
+	EndpointsUpToDate bool
+
 	// Endpoints represents all URLs that could be used to access deployed service
 	Endpoints map[string]string
 }

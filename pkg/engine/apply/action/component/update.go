@@ -3,6 +3,7 @@ package component
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
@@ -31,6 +32,15 @@ func NewUpdateAction(componentKey string, paramsBefore util.NestedParameterMap, 
 		ComponentKey: componentKey,
 		ParamsBefore: paramsBefore,
 		Params:       params,
+	}
+}
+
+// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
+func (a *UpdateAction) AfterCreated(actualState *resolve.PolicyResolution) {
+	instance := actualState.ComponentInstanceMap[a.ComponentKey]
+	if instance != nil {
+		// invalidate endpoints
+		instance.EndpointsUpToDate = false
 	}
 }
 
