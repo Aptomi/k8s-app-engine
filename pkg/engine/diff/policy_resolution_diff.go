@@ -72,7 +72,7 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 }
 
 // Traverse a graph for a given component instance
-func (diff *PolicyResolutionDiff) buildActions(key string) {
+func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 	// Get action graph node for a given component key
 	node := diff.ActionPlan.GetActionGraphNode(key)
 
