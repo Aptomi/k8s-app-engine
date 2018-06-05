@@ -19,7 +19,7 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 	var wait bool
 	var noop bool
 	var waitInterval time.Duration
-	var waitAttempts int
+	var waitTime time.Duration
 	var logLevel string
 	commandType := "apply"
 	if !createUpdate {
@@ -59,7 +59,7 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 
 			// wait for actions to finish, if needed
 			if wait {
-				util.WaitForRevisionActionsToFinish(waitAttempts, waitInterval, clientObj, result)
+				util.WaitForRevisionActionsToFinish(waitTime, waitInterval, clientObj, result)
 			}
 
 		},
@@ -72,7 +72,7 @@ func newHandlePolicyChangesCommand(cfg *config.Client, createUpdate bool) *cobra
 	cmd.Flags().BoolVar(&noop, "noop", false, "Produce action plan for the given changes in policy, but do not run any actions to update the state")
 	cmd.Flags().BoolVar(&wait, "wait", false, "Wait until all actions are fully applied")
 	cmd.Flags().DurationVar(&waitInterval, "wait-interval", 2*time.Second, "Seconds to sleep between wait attempts")
-	cmd.Flags().IntVar(&waitAttempts, "wait-attempts", 150, "Number of wait attempts before failing the wait process")
+	cmd.Flags().DurationVar(&waitTime, "wait-time", 10*time.Minute, "Max time to wait before failing the wait process")
 	cmd.Flags().StringVar(&logLevel, "log-level", log.WarnLevel.String(), fmt.Sprintf("Retrieve logs from the server using the specified log level (%s)", log.AllLevels))
 
 	return cmd

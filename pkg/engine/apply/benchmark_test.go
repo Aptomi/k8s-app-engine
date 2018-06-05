@@ -437,7 +437,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	)
 	_ = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
-	fmt.Printf("[%s] Time = %s, deleting all dependencies and component instances\n", testName, time.Since(timeCheckpoint).String())
+	fmt.Printf("[%s] Time = %s, deleting all dependencies and component instances\n", testName, time.Since(timeCheckpoint))
 }
 
 func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {

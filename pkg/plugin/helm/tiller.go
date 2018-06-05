@@ -31,7 +31,7 @@ func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 	eventLog.NewEntry().Debugf("Creating k8s tunnel for cluster %s", p.cluster.Name)
 
 	var tunnelErr error
-	ok := retry.Do(120, 5*time.Second, func() bool {
+	ok := retry.Do(2*time.Minute, 5*time.Second, func() bool {
 		if p.tillerTunnel != nil {
 			p.tillerTunnel.Close()
 		}

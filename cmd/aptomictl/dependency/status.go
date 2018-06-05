@@ -21,7 +21,7 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 	paths := make([]string, 0)
 	var wait bool
 	var waitInterval time.Duration
-	var waitAttempts int
+	var waitTime time.Duration
 	var waitFlag string
 
 	cmd := &cobra.Command{
@@ -55,7 +55,7 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 			} else {
 				// print live updates until dependencies are ready or timeout happens
 				attempt := 0
-				retry.Do(waitAttempts, waitInterval, func() bool {
+				retry.Do(waitTime, waitInterval, func() bool {
 					keepWaiting, _ := printStatusOfDependencies(cfg, dependencies, api.DependencyQueryFlag(waitFlag), writer, attempt) // nolint: gas
 					attempt++
 					return !keepWaiting
@@ -81,7 +81,7 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 		fmt.Sprintf("If set to '%s', the client will query dependency deployment status. If set to '%s', the client query dependency readiness status (all health checks passing)", api.DependencyQueryDeploymentStatusOnly, api.DependencyQueryDeploymentStatusAndReadiness),
 	)
 	cmd.Flags().DurationVar(&waitInterval, "wait-interval", 2*time.Second, "Seconds to sleep between wait attempts")
-	cmd.Flags().IntVar(&waitAttempts, "wait-attempts", 150, "Number of wait attempts before failing the wait process")
+	cmd.Flags().DurationVar(&waitTime, "wait-time", 10*time.Minute, "Max time to wait before failing the wait process")
 
 	return cmd
 }

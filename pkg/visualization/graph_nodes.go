@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"html"
 )
 
@@ -125,7 +124,7 @@ func (n serviceInstanceNode) getLabel() string {
 	result += fmt.Sprintf("\ncluster: <i>%s</i>", html.EscapeString(n.instance.GetCluster()))
 
 	if !n.instance.CreatedAt.IsZero() {
-		result += fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(util.NewTimeDiff(n.instance.GetRunningTime()).Humanize()))
+		result += fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(n.instance.GetRunningTime().String()))
 	}
 
 	return result

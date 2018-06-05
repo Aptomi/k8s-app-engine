@@ -59,7 +59,7 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 		ingress := service.Status.LoadBalancer.Ingress
 
 		// wait for LB external IP to be provisioned
-		ok := retry.Do(90, 10*time.Second, func() bool {
+		ok := retry.Do(15*time.Minute, 10*time.Second, func() bool {
 			service, getErr = kubeClient.CoreV1().Services(info.Namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				panic(fmt.Sprintf("Error while getting Service %s in namespace %s", info.Name, info.Namespace))

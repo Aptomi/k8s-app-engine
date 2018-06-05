@@ -15,7 +15,7 @@ import (
 )
 
 // WaitForRevisionActionsToFinish waits until revision is done (i.e. all of its pending actions are completed)
-func WaitForRevisionActionsToFinish(attempts int, interval time.Duration, clientObj client.Core, result *api.PolicyUpdateResult) {
+func WaitForRevisionActionsToFinish(maxTime time.Duration, interval time.Duration, clientObj client.Core, result *api.PolicyUpdateResult) {
 	// if there is no revision to wait for, then exit
 	if result.WaitForRevision >= runtime.MaxGeneration {
 		return
@@ -28,8 +28,8 @@ func WaitForRevisionActionsToFinish(attempts int, interval time.Duration, client
 	var progressBar progress.Indicator
 	var progressLast = 0
 
-	// query revision status [attempts] x [interval]
-	finished := retry.Do2(attempts, interval, func() bool {
+	// query revision status
+	finished := retry.Do2(maxTime, interval, func() bool {
 		// call API
 		var revErr error
 		rev, revErr = clientObj.Revision().Show(result.WaitForRevision)
@@ -66,7 +66,7 @@ func WaitForRevisionActionsToFinish(attempts int, interval time.Duration, client
 
 	// print the outcome
 	if !finished {
-		log.Fatalf("Revision %d timeout! Has not been applied in %d seconds\n", rev.GetGeneration(), int(interval.Seconds()*float64(attempts)))
+		log.Fatalf("Revision %d timeout! Has not been applied in %s\n", rev.GetGeneration(), maxTime)
 	} else if rev.Status == engine.RevisionStatusCompleted {
 		if rev.Result.Total > 0 {
 			fmt.Printf("Revision %d completed. Actions: %d succeeded, %d failed, %d skipped\n", rev.GetGeneration(), rev.Result.Success, rev.Result.Failed, rev.Result.Skipped)

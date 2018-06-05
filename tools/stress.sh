@@ -119,7 +119,7 @@ if [ -z "$SERVER_RUNNING" ]; then
     exit 1
 fi
 
-WAIT_FLAGS="--wait --wait-attempts 20"
+WAIT_FLAGS="--wait --wait-time 10s"
 
 function login() {
     aptomictl --config ${CONF_DIR} login --username $1 --password $1
