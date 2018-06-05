@@ -193,10 +193,8 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
 		// If there are changes, we need to wait for the next revision
-		var waitForRevision runtime.Generation
-		if !changed {
-			waitForRevision = runtime.MaxGeneration
-		} else {
+		var waitForRevision = runtime.MaxGeneration
+		if changed {
 			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
 			if err != nil {
 				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))
@@ -299,10 +297,8 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
 		// If there are changes, we need to wait for the next revision
-		var waitForRevision runtime.Generation
-		if !changed {
-			waitForRevision = runtime.MaxGeneration
-		} else {
+		var waitForRevision = runtime.MaxGeneration
+		if changed {
 			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
 			if err != nil {
 				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))

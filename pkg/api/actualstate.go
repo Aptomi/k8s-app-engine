@@ -82,10 +82,8 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution(true)).ActionPlan
 
 		// If there are changes, we need to wait for the next revision
-		var waitForRevision runtime.Generation
-		if actionPlan.NumberOfActions() <= 0 {
-			waitForRevision = runtime.MaxGeneration
-		} else {
+		var waitForRevision = runtime.MaxGeneration
+		if actionPlan.NumberOfActions() > 0 {
 			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
 			if err != nil {
 				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))
