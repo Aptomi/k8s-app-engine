@@ -52,7 +52,7 @@ func init() {
 
 	common.AddStringFlag(Command, "output", "output", "o", "text", EnvPrefix+"_OUTPUT", "Output format. One of: text (default), json, yaml")
 
-	common.AddDurationFlag(Command, "http.timeout", "timeout", "", 15*time.Second, EnvPrefix+"_TIMEOUT", "HTTP Timeout")
+	common.AddDurationFlag(Command, "http.timeout", "timeout", "", 60*time.Second, EnvPrefix+"_TIMEOUT", "Specifies time limit for receiving a reply from the server")
 
 	// Add sub commands
 	Command.AddCommand(
