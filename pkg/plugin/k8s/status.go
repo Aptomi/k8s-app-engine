@@ -64,7 +64,7 @@ func (p *Plugin) ReadinessStatusForManifest(namespace, deployName, targetManifes
 			//if getErr != nil {
 			//	return false, getErr
 			//}
-			//ready, statusErr = isReadyUsingStatusViewer(internalClientSet, apps.Kind("StatefulSet"), info.Namespace, info.Name)
+			ready, statusErr = isReadyUsingStatusViewer(internalClientSet, apps.Kind("StatefulSet"), info.Namespace, info.Name)
 		}
 
 		if statusErr != nil {
