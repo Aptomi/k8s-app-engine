@@ -90,7 +90,7 @@ func (result *PolicyUpdateResult) AsColumns() map[string]string {
 	} else {
 		policyChangesStr = fmt.Sprintf("%d", result.PolicyGeneration)
 	}
-	var actionPlanStr = result.PlanAsText.ToString()
+	var actionPlanStr = result.PlanAsText.String()
 	if len(actionPlanStr) <= 0 {
 		actionPlanStr = "(none)"
 	}

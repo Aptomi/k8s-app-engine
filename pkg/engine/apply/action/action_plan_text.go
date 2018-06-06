@@ -31,7 +31,7 @@ func (ks keySorter) Less(i, j int) bool {
 }
 
 // ToString returns human-readable version of the plan
-func (t *PlanAsText) ToString() string {
+func (t *PlanAsText) String() string {
 	// sort actions by pretty text
 	sort.Sort(keySorter(t.Actions))
 
