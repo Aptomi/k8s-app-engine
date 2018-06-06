@@ -37,11 +37,7 @@ func (p *Plugin) Validate() error {
 	}
 
 	_, err = p.NewClient()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // Init parses Kubernetes cluster config and retrieves external address for Kubernetes cluster
