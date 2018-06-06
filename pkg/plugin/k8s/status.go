@@ -12,7 +12,7 @@ import (
 )
 
 // ReadinessStatusForManifest returns readiness status of all resources for specified manifest
-func (p *Plugin) ReadinessStatusForManifest(deployName, targetManifest string, eventLog *event.Log) (bool, error) {
+func (p *Plugin) ReadinessStatusForManifest(namespace, deployName, targetManifest string, eventLog *event.Log) (bool, error) {
 	kubeClient, err := p.NewClient()
 	if err != nil {
 		return false, err
@@ -20,7 +20,7 @@ func (p *Plugin) ReadinessStatusForManifest(deployName, targetManifest string, e
 
 	helmKube := p.NewHelmKube(deployName, eventLog)
 
-	infos, err := helmKube.BuildUnstructured(p.Namespace, strings.NewReader(targetManifest))
+	infos, err := helmKube.BuildUnstructured(namespace, strings.NewReader(targetManifest))
 	if err != nil {
 		return false, err
 	}
@@ -42,13 +42,13 @@ func (p *Plugin) ReadinessStatusForManifest(deployName, targetManifest string, e
 		// todo some objects are missing in this check like DaemonSet, Job, ReplicationController, etc.
 		switch kind := info.Mapping.GroupVersionKind.Kind; kind {
 		case "Service": // nolint: goconst
-			svc, getErr := kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
+			svc, getErr := kubeClient.CoreV1().Services(namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				return false, getErr
 			}
 			ready = isServiceReady(svc)
 		case "PersistentVolumeClaim":
-			pvc, getErr := kubeClient.CoreV1().PersistentVolumeClaims(p.Namespace).Get(info.Name, meta.GetOptions{})
+			pvc, getErr := kubeClient.CoreV1().PersistentVolumeClaims(namespace).Get(info.Name, meta.GetOptions{})
 			if getErr != nil {
 				return false, getErr
 			}

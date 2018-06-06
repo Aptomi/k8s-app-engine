@@ -45,11 +45,11 @@ func TestComponentKeyParent(t *testing.T) {
 func TestComponentKeyUnsafe(t *testing.T) {
 	key := makeKeyUnsafe()
 	k := strings.Split(key.GetKey(), componentInstanceKeySeparator)
-	assert.Equal(t, len(k), 5, "When policy objects are nil, component key should still be generated")
-	for i := 0; i < len(k)-1; i++ {
-		assert.Equal(t, componentUnresolvedName, k[i], "When policy objects are nil, component key should still be generated")
+	expected := []string{componentUnresolvedName, componentUnresolvedName, targetSuffixDefault, componentUnresolvedName, componentUnresolvedName, componentUnresolvedName, componentRootName}
+	assert.Equal(t, len(k), len(expected), "When policy objects are nil, component key with correct number of entries should still be generated: %s", key.GetKey())
+	for i := range expected {
+		assert.Equal(t, expected[i], k[i], "When policy objects are nil, component key should still be generated: %s", key.GetKey())
 	}
-	assert.Equal(t, componentRootName, k[len(k)-1], "When policy objects are nil, component key should still be generated")
 }
 
 func makeKey(root bool) *ComponentInstanceKey {
@@ -64,6 +64,7 @@ func makeKey(root bool) *ComponentInstanceKey {
 	contract := b.AddContract(service, b.CriteriaTrue())
 	key := NewComponentInstanceKey(
 		b.AddCluster(),
+		"suffix",
 		contract,
 		contract.Contexts[0],
 		[]string{"x", "y", "z"},
@@ -76,6 +77,7 @@ func makeKey(root bool) *ComponentInstanceKey {
 func makeKeyUnsafe() *ComponentInstanceKey {
 	return NewComponentInstanceKey(
 		nil,
+		"",
 		nil,
 		nil,
 		nil,

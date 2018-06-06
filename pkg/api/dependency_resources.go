@@ -59,7 +59,15 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 				continue
 			}
 
-			instanceResources, resErr := codePlugin.Resources(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources"))
+			instanceResources, resErr := codePlugin.Resources(
+				&plugin.CodePluginInvocationParams{
+					DeployName:   instance.GetDeployName(),
+					Params:       instance.CalculatedCodeParams,
+					PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
+					EventLog:     event.NewLog(logrus.WarnLevel, "resources"),
+				},
+			)
+
 			if resErr != nil {
 				panic(fmt.Sprintf("Error while getting deployment resources for component instance %s: %s", instance.GetKey(), resErr))
 			}
@@ -82,17 +90,12 @@ func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lan
 		return nil, nil
 	}
 
-	clusterName := instance.GetCluster()
-	if len(clusterName) <= 0 {
-		return nil, fmt.Errorf("component instance does not have cluster assigned: %s", instance.GetKey())
-	}
-
-	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
+	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
 		return nil, err
 	}
 	if clusterObj == nil {
-		return nil, fmt.Errorf("can't find cluster in policy: %s", clusterName)
+		return nil, fmt.Errorf("can't find cluster '%s/%s'", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 

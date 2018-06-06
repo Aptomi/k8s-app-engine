@@ -11,13 +11,13 @@ import (
 
 // Plugin represents Kubernetes cluster plugin
 type Plugin struct {
-	once            sync.Init
-	config          config.K8s
-	Cluster         *lang.Cluster
-	RestConfig      *rest.Config
-	ClientConfig    clientcmd.ClientConfig
-	Namespace       string
-	ExternalAddress string
+	once             sync.Init
+	config           config.K8s
+	Cluster          *lang.Cluster
+	RestConfig       *rest.Config
+	ClientConfig     clientcmd.ClientConfig
+	DefaultNamespace string
+	ExternalAddress  string
 }
 
 var _ plugin.ClusterPlugin = &Plugin{}
@@ -30,7 +30,7 @@ func New(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error
 	}, nil
 }
 
-// Validate checks Kubernetes cluster by connecting to it and ensuring configured namespace
+// Validate checks Kubernetes cluster by connecting to it and ensuring default namespace
 func (p *Plugin) Validate() error {
 	err := p.Init()
 	if err != nil {
@@ -42,7 +42,7 @@ func (p *Plugin) Validate() error {
 		return err
 	}
 
-	return p.EnsureNamespace(client, p.Namespace)
+	return p.EnsureNamespace(client, p.DefaultNamespace)
 }
 
 // Init parses Kubernetes cluster config and retrieves external address for Kubernetes cluster

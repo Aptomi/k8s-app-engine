@@ -13,6 +13,9 @@ const componentInstanceKeySeparator = "#"
 // componentUnresolvedName is placeholder for unresolved entries
 const componentUnresolvedName = "unknown"
 
+// targetSuffixDefault is a placeholder for empty suffix (e.g. default k8s ns(
+const targetSuffixDefault = "default"
+
 // componentRootName is a name of component for service entry (which in turn consists of components)
 const componentRootName = "root"
 
@@ -31,7 +34,9 @@ type ComponentInstanceKey struct {
 	key string
 
 	// required fields
+	ClusterNameSpace    string // mandatory
 	ClusterName         string // mandatory
+	TargetSuffix        string // mandatory
 	Namespace           string // determined from the contract
 	ContractName        string // mandatory
 	ContextName         string // mandatory
@@ -42,15 +47,20 @@ type ComponentInstanceKey struct {
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(cluster *lang.Cluster, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
 	keysResolved := strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
 	contextNameWithKeys := contextName
 	if len(keysResolved) > 0 {
 		contextNameWithKeys = strings.Join([]string{contextNameWithKeys, keysResolved}, componentInstanceKeySeparator)
 	}
+	if len(targetSuffix) <= 0 {
+		targetSuffix = targetSuffixDefault
+	}
 	return &ComponentInstanceKey{
+		ClusterNameSpace:    getClusterNamespaceUnsafe(cluster),
 		ClusterName:         getClusterNameUnsafe(cluster),
+		TargetSuffix:        targetSuffix,
 		Namespace:           getContractNamespaceUnsafe(contract),
 		ContractName:        getContractNameUnsafe(contract),
 		ContextName:         contextName,
@@ -64,7 +74,9 @@ func NewComponentInstanceKey(cluster *lang.Cluster, contract *lang.Contract, con
 // MakeCopy creates a copy of ComponentInstanceKey
 func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	return &ComponentInstanceKey{
+		ClusterNameSpace:    cik.ClusterNameSpace,
 		ClusterName:         cik.ClusterName,
+		TargetSuffix:        cik.TargetSuffix,
 		Namespace:           cik.Namespace,
 		ContractName:        cik.ContractName,
 		ContextName:         cik.ContextName,
@@ -99,7 +111,9 @@ func (cik ComponentInstanceKey) GetKey() string {
 	if cik.key == "" {
 		cik.key = strings.Join(
 			[]string{
+				cik.ClusterNameSpace,
 				cik.ClusterName,
+				cik.TargetSuffix,
 				cik.Namespace,
 				cik.ContractName,
 				cik.ContextNameWithKeys,
@@ -132,6 +146,15 @@ func getClusterNameUnsafe(cluster *lang.Cluster) string {
 		return componentUnresolvedName
 	}
 	return cluster.Name
+}
+
+// If cluster has not been resolved yet and we need a key, generate one
+// Otherwise use cluster space
+func getClusterNamespaceUnsafe(cluster *lang.Cluster) string {
+	if cluster == nil {
+		return componentUnresolvedName
+	}
+	return cluster.Namespace
 }
 
 // If contract has not been resolved yet and we need a key, generate one

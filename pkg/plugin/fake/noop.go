@@ -6,7 +6,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"time"
 )
 
@@ -39,31 +38,31 @@ func (plugin *noOpPlugin) Cleanup() error {
 	return nil
 }
 
-func (plugin *noOpPlugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+func (plugin *noOpPlugin) Create(invocation *plugin.CodePluginInvocationParams) error {
 	time.Sleep(plugin.sleepTime)
 	return nil
 }
 
-func (plugin *noOpPlugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+func (plugin *noOpPlugin) Update(invocation *plugin.CodePluginInvocationParams) error {
 	time.Sleep(plugin.sleepTime)
 	return nil
 }
 
-func (plugin *noOpPlugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+func (plugin *noOpPlugin) Destroy(invocation *plugin.CodePluginInvocationParams) error {
 	time.Sleep(plugin.sleepTime)
 	return nil
 }
 
-func (plugin *noOpPlugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
+func (plugin *noOpPlugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[string]string, error) {
 	time.Sleep(plugin.sleepTime)
 	return make(map[string]string), nil
 }
 
-func (plugin *noOpPlugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
+func (plugin *noOpPlugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugin.Resources, error) {
 	return nil, nil
 }
 
-func (plugin *noOpPlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error) {
+func (plugin *noOpPlugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, error) {
 	return true, nil
 }
 

@@ -14,7 +14,7 @@ import (
 )
 
 // EndpointsForManifests returns endpoints for specified manifest
-func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventLog *event.Log) (map[string]string, error) {
+func (p *Plugin) EndpointsForManifests(namespace, deployName, targetManifest string, eventLog *event.Log) (map[string]string, error) {
 	kubeClient, err := p.NewClient()
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (p *Plugin) EndpointsForManifests(deployName, targetManifest string, eventL
 
 	helmKube := p.NewHelmKube(deployName, eventLog)
 
-	infos, err := helmKube.BuildUnstructured(p.Namespace, strings.NewReader(targetManifest))
+	infos, err := helmKube.BuildUnstructured(namespace, strings.NewReader(targetManifest))
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
@@ -81,24 +82,26 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 	// Instantiate code component
 	context.EventLog.NewEntry().Infof("Deploying new component instance: %s", instance.GetKey())
 
-	clusterName := instance.GetCluster()
-	if len(clusterName) <= 0 {
-		return fmt.Errorf("policy doesn't specify deployment target for component instance")
-	}
-
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
 		return err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("cluster '%s' in not present in policy", clusterName)
+		return fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
-	plugin, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
+	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {
 		return err
 	}
 
-	return plugin.Create(instance.GetDeployName(), instance.CalculatedCodeParams, context.EventLog)
+	return p.Create(
+		&plugin.CodePluginInvocationParams{
+			DeployName:   instance.GetDeployName(),
+			Params:       instance.CalculatedCodeParams,
+			PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
+			EventLog:     context.EventLog,
+		},
+	)
 }

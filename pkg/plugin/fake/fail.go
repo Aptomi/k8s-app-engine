@@ -2,9 +2,7 @@ package fake
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/plugin"
-	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // failCodePlugin is a plugin which fails all of its actions
@@ -36,29 +34,29 @@ func (plugin *failCodePlugin) fail(action string, deployName string) error {
 	return fmt.Errorf(msg)
 }
 
-func (plugin *failCodePlugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.NewEntry().Infof("[+] %s", deployName)
-	return plugin.fail("create", deployName)
+func (plugin *failCodePlugin) Create(invocation *plugin.CodePluginInvocationParams) error {
+	invocation.EventLog.NewEntry().Infof("[+] %s", invocation.DeployName)
+	return plugin.fail("create", invocation.DeployName)
 }
 
-func (plugin *failCodePlugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.NewEntry().Infof("[*] %s", deployName)
-	return plugin.fail("update", deployName)
+func (plugin *failCodePlugin) Update(invocation *plugin.CodePluginInvocationParams) error {
+	invocation.EventLog.NewEntry().Infof("[*] %s", invocation.DeployName)
+	return plugin.fail("update", invocation.DeployName)
 }
 
-func (plugin *failCodePlugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	eventLog.NewEntry().Infof("[-] %s", deployName)
-	return plugin.fail("delete", deployName)
+func (plugin *failCodePlugin) Destroy(invocation *plugin.CodePluginInvocationParams) error {
+	invocation.EventLog.NewEntry().Infof("[-] %s", invocation.DeployName)
+	return plugin.fail("delete", invocation.DeployName)
 }
 
-func (plugin *failCodePlugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
+func (plugin *failCodePlugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[string]string, error) {
 	return make(map[string]string), nil
 }
 
-func (plugin *failCodePlugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
+func (plugin *failCodePlugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugin.Resources, error) {
 	return nil, nil
 }
 
-func (plugin *failCodePlugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error) {
+func (plugin *failCodePlugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, error) {
 	return false, nil
 }

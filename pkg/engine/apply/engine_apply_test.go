@@ -121,7 +121,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)
 	contract := desired.policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract)
 	service := desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service)
-	key := resolve.NewComponentInstanceKey(cluster, contract, contract.Contexts[0], nil, service, service.Components[0])
+	key := resolve.NewComponentInstanceKey(cluster, "", contract, contract.Contexts[0], nil, service, service.Components[0])
 	keyService := key.GetParentServiceKey()
 
 	// Check that original dependency was resolved successfully

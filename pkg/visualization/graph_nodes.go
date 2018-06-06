@@ -121,12 +121,23 @@ func (n serviceInstanceNode) getLabel() string {
 		result += fmt.Sprintf("\nkeys: <i>%s</i>", html.EscapeString(shorten(n.instance.Metadata.Key.KeysResolved)))
 	}
 
-	result += fmt.Sprintf("\ncluster: <i>%s</i>", html.EscapeString(n.instance.GetCluster()))
+	result += fmt.Sprintf("\ntarget: <i>%s</i>", html.EscapeString(getTargetName(n.instance.Metadata.Key)))
 
 	if !n.instance.CreatedAt.IsZero() {
 		result += fmt.Sprintf("\nrunning: <i>%s</i>", html.EscapeString(n.instance.GetRunningTime().String()))
 	}
 
+	return result
+}
+
+func getTargetName(key *resolve.ComponentInstanceKey) string {
+	result := key.ClusterName
+	if key.ClusterNameSpace != runtime.SystemNS {
+		result = key.ClusterNameSpace + "/" + result
+	}
+	if len(key.TargetSuffix) > 0 {
+		result += "." + key.TargetSuffix
+	}
 	return result
 }
 

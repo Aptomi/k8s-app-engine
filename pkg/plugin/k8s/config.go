@@ -12,10 +12,10 @@ import (
 
 // ClusterConfig represents Kubernetes cluster plugin configuration
 type ClusterConfig struct {
-	Namespace  string      `yaml:",omitempty"`
-	Local      bool        `yaml:",omitempty"`
-	Context    string      `yaml:",omitempty"`
-	KubeConfig interface{} `yaml:",omitempty"` // it's just a kubeconfig, we don't need to parse it
+	DefaultNamespace string      `yaml:",omitempty"`
+	Local            bool        `yaml:",omitempty"`
+	Context          string      `yaml:",omitempty"`
+	KubeConfig       interface{} `yaml:",omitempty"` // it's just a kubeconfig, we don't need to parse it
 }
 
 func (p *Plugin) parseClusterConfig() error {
@@ -32,7 +32,7 @@ func (p *Plugin) parseClusterConfig() error {
 	}
 
 	if clusterConfig.KubeConfig != nil {
-		p.RestConfig, p.ClientConfig, p.Namespace, err = initKubeConfig(clusterConfig, cluster)
+		p.RestConfig, p.ClientConfig, p.DefaultNamespace, err = initKubeConfig(clusterConfig, cluster)
 	} else {
 		p.RestConfig, p.ClientConfig, err = initLocalKubeConfig(cluster)
 	}
@@ -45,11 +45,11 @@ func (p *Plugin) parseClusterConfig() error {
 	}
 	p.RestConfig.Timeout = p.config.Timeout
 
-	if len(clusterConfig.Namespace) > 0 {
-		p.Namespace = clusterConfig.Namespace
+	if len(clusterConfig.DefaultNamespace) > 0 {
+		p.DefaultNamespace = clusterConfig.DefaultNamespace
 	}
-	if len(p.Namespace) == 0 {
-		p.Namespace = "default"
+	if len(p.DefaultNamespace) == 0 {
+		p.DefaultNamespace = "default"
 	}
 
 	return nil

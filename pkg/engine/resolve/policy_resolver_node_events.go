@@ -25,11 +25,12 @@ func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
 	return fmt.Errorf("user '%s' not allowed to consume service: %s", node.dependency.User, err)
 }
 
-func (node *resolutionNode) errorClusterDoesNotExist(clusterName string) error {
-	if len(clusterName) > 0 {
-		return fmt.Errorf("cluster '%s/%s' doesn't exist in policy (dependency '%s', contract '%s', service '%s')", runtime.SystemNS, clusterName, node.dependency.Name, node.contract.Name, node.service.Name)
-	}
+func (node *resolutionNode) errorTargetNotSet() error {
 	return fmt.Errorf("not sure where components should be deployed: label 'target' is not set (dependency '%s', contract '%s', service '%s')", node.dependency.Name, node.contract.Name, node.service.Name)
+}
+
+func (node *resolutionNode) errorClusterLookup(clusterName string, cause error) error {
+	return fmt.Errorf("cluster '%s' lookup error: %s (dependency '%s', contract '%s', service '%s')", clusterName, cause, node.dependency.Name, node.contract.Name, node.service.Name)
 }
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {

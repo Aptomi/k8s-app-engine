@@ -180,7 +180,14 @@ func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plu
 					continue
 				}
 
-				instanceStatus, err := codePlugin.Status(instance.GetDeployName(), instance.CalculatedCodeParams, event.NewLog(logrus.WarnLevel, "resources-status"))
+				instanceStatus, err := codePlugin.Status(
+					&plugin.CodePluginInvocationParams{
+						DeployName:   instance.GetDeployName(),
+						Params:       instance.CalculatedCodeParams,
+						PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
+						EventLog:     event.NewLog(logrus.WarnLevel, "resources-status"),
+					},
+				)
 				if err != nil {
 					panic(fmt.Sprintf("Error while getting deployment resources status for component instance %s: %s", instance.GetKey(), err))
 				}

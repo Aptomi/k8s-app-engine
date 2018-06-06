@@ -3,11 +3,9 @@ package k8sraw
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/sync"
 	"strings"
 )
@@ -62,7 +60,7 @@ func (p *Plugin) Cleanup() error {
 }
 
 // Create implements creation of a new component instance in the cloud by deploying raw k8s objects
-func (p *Plugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+func (p *Plugin) Create(invocation *plugin.CodePluginInvocationParams) error {
 	err := p.init()
 	if err != nil {
 		return err
@@ -73,23 +71,28 @@ func (p *Plugin) Create(deployName string, params util.NestedParameterMap, event
 		return err
 	}
 
-	targetManifest, ok := params["manifest"].(string)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	targetManifest, ok := invocation.Params["manifest"].(string)
 	if !ok {
 		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.kube.NewHelmKube(deployName, eventLog)
+	client := p.kube.NewHelmKube(invocation.DeployName, invocation.EventLog)
 
-	err = client.Create(p.kube.Namespace, strings.NewReader(targetManifest), 42, false)
+	err = client.Create(namespace, strings.NewReader(targetManifest), 42, false)
 	if err != nil {
 		return err
 	}
 
-	return p.storeManifest(kubeClient, deployName, targetManifest)
+	return p.storeManifest(kubeClient, invocation.DeployName, targetManifest)
 }
 
 // Update implements update of an existing component instance in the cloud by updating raw k8s objects
-func (p *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+func (p *Plugin) Update(invocation *plugin.CodePluginInvocationParams) error {
 	err := p.init()
 	if err != nil {
 		return err
@@ -100,28 +103,33 @@ func (p *Plugin) Update(deployName string, params util.NestedParameterMap, event
 		return err
 	}
 
-	currentManifest, err := p.loadManifest(kubeClient, deployName)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	currentManifest, err := p.loadManifest(kubeClient, invocation.DeployName)
 	if err != nil {
 		return err
 	}
 
-	targetManifest, ok := params["manifest"].(string)
+	targetManifest, ok := invocation.Params["manifest"].(string)
 	if !ok {
 		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.kube.NewHelmKube(deployName, eventLog)
+	client := p.kube.NewHelmKube(invocation.DeployName, invocation.EventLog)
 
-	err = client.Update(p.kube.Namespace, strings.NewReader(currentManifest), strings.NewReader(targetManifest), false, false, 42, false)
+	err = client.Update(namespace, strings.NewReader(currentManifest), strings.NewReader(targetManifest), false, false, 42, false)
 	if err != nil {
 		return err
 	}
 
-	return p.storeManifest(kubeClient, deployName, targetManifest)
+	return p.storeManifest(kubeClient, invocation.DeployName, targetManifest)
 }
 
 // Destroy implements destruction of an existing component instance in the cloud by deleting raw k8s objects
-func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
+func (p *Plugin) Destroy(invocation *plugin.CodePluginInvocationParams) error {
 	err := p.init()
 	if err != nil {
 		return err
@@ -132,62 +140,82 @@ func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, even
 		return err
 	}
 
-	deleteManifest, ok := params["manifest"].(string)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	deleteManifest, ok := invocation.Params["manifest"].(string)
 	if !ok {
 		return fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	client := p.kube.NewHelmKube(deployName, eventLog)
+	client := p.kube.NewHelmKube(invocation.DeployName, invocation.EventLog)
 
-	err = client.Delete(p.kube.Namespace, strings.NewReader(deleteManifest))
+	err = client.Delete(namespace, strings.NewReader(deleteManifest))
 	if err != nil {
 		return err
 	}
 
-	return p.deleteManifest(kubeClient, deployName)
+	return p.deleteManifest(kubeClient, invocation.DeployName)
 }
 
 // Endpoints returns map from port type to url for all services of the deployed raw k8s objects
-func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
+func (p *Plugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[string]string, error) {
 	err := p.init()
 	if err != nil {
 		return nil, err
 	}
 
-	targetManifest, ok := params["manifest"].(string)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	targetManifest, ok := invocation.Params["manifest"].(string)
 	if !ok {
 		return nil, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	return p.kube.EndpointsForManifests(deployName, targetManifest, eventLog)
+	return p.kube.EndpointsForManifests(namespace, invocation.DeployName, targetManifest, invocation.EventLog)
 }
 
 // Resources returns list of all resources (like services, config maps, etc.) deployed into the cluster by specified component instance
-func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
+func (p *Plugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugin.Resources, error) {
 	err := p.init()
 	if err != nil {
 		return nil, err
 	}
 
-	targetManifest, ok := params["manifest"].(string)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	targetManifest, ok := invocation.Params["manifest"].(string)
 	if !ok {
 		return nil, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	return p.kube.ResourcesForManifest(deployName, targetManifest, eventLog)
+	return p.kube.ResourcesForManifest(namespace, invocation.DeployName, targetManifest, invocation.EventLog)
 }
 
 // Status returns readiness of all resources (like services, config maps, etc.) deployed into the cluster by specified component instance
-func (p *Plugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error) {
+func (p *Plugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, error) {
 	err := p.init()
 	if err != nil {
 		return false, err
 	}
 
-	targetManifest, ok := params["manifest"].(string)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	targetManifest, ok := invocation.Params["manifest"].(string)
 	if !ok {
 		return false, fmt.Errorf("manifest is a mandatory parameter")
 	}
 
-	return p.kube.ReadinessStatusForManifest(deployName, targetManifest, eventLog)
+	return p.kube.ReadinessStatusForManifest(namespace, invocation.DeployName, targetManifest, invocation.EventLog)
 }

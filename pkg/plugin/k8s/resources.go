@@ -14,7 +14,7 @@ import (
 var resourceRegistry = buildResourceRegistry()
 
 // ResourcesForManifest returns resources for specified manifest
-func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLog *event.Log) (plugin.Resources, error) {
+func (p *Plugin) ResourcesForManifest(namespace, deployName, targetManifest string, eventLog *event.Log) (plugin.Resources, error) {
 	kubeClient, err := p.NewClient()
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 
 	helmKube := p.NewHelmKube(deployName, eventLog)
 
-	infos, err := helmKube.BuildUnstructured(p.Namespace, strings.NewReader(targetManifest))
+	infos, err := helmKube.BuildUnstructured(namespace, strings.NewReader(targetManifest))
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 
 		switch kind := info.Mapping.GroupVersionKind.Kind; kind {
 		case "Service": // nolint: goconst
-			obj, getErr = kubeClient.CoreV1().Services(p.Namespace).Get(info.Name, meta.GetOptions{})
+			obj, getErr = kubeClient.CoreV1().Services(namespace).Get(info.Name, meta.GetOptions{})
 		case "ConfigMap":
 			//obj, getErr = kubeClient.CoreV1().ConfigMaps(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "Secret":
@@ -56,9 +56,9 @@ func (p *Plugin) ResourcesForManifest(deployName, targetManifest string, eventLo
 		case "PersistentVolumeClaim":
 			//obj, getErr = kubeClient.CoreV1().PersistentVolumeClaims(p.Namespace).Get(info.Name, meta.GetOptions{})
 		case "Deployment":
-			obj, getErr = kubeClient.AppsV1beta1().Deployments(p.Namespace).Get(info.Name, meta.GetOptions{})
+			obj, getErr = kubeClient.AppsV1beta1().Deployments(namespace).Get(info.Name, meta.GetOptions{})
 		case "StatefulSet":
-			obj, getErr = kubeClient.AppsV1beta1().StatefulSets(p.Namespace).Get(info.Name, meta.GetOptions{})
+			obj, getErr = kubeClient.AppsV1beta1().StatefulSets(namespace).Get(info.Name, meta.GetOptions{})
 		case "Job":
 			//obj, getErr = kubeClient.BatchV1().Jobs(p.Namespace).Get(info.Name, meta.GetOptions{})
 		}

@@ -13,7 +13,7 @@ import (
 )
 
 func newClusterCommand(cfg *config.Client) *cobra.Command {
-	var sourceContext, clusterName, overrideNamespace string
+	var sourceContext, clusterName, defaultNamespace string
 	var local bool
 
 	cmd := &cobra.Command{
@@ -36,7 +36,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				if len(clusterName) == 0 {
 					clusterName = "local"
 				}
-				clusterConfig = &k8s.ClusterConfig{Local: true, Namespace: "default"}
+				clusterConfig = &k8s.ClusterConfig{Local: true, DefaultNamespace: "default"}
 			} else {
 				if len(clusterName) == 0 {
 					clusterName = sourceContext
@@ -47,8 +47,8 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 				panic(err)
 			}
 
-			if len(overrideNamespace) > 0 {
-				clusterConfig.Namespace = overrideNamespace
+			if len(defaultNamespace) > 0 {
+				clusterConfig.DefaultNamespace = defaultNamespace
 			}
 
 			cluster := lang.Cluster{
@@ -74,7 +74,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 
 	cmd.Flags().BoolVarP(&local, "local", "l", false, "Build Aptomi cluster with local kubernetes")
 	cmd.Flags().StringVarP(&sourceContext, "context", "c", "", "Context in kubeconfig to be used for Aptomi cluster creation (run 'kubectl config get-contexts' to get list of available contexts and clusters")
-	cmd.Flags().StringVarP(&overrideNamespace, "namespace", "N", "", "Override k8s namespace in context")
+	cmd.Flags().StringVarP(&defaultNamespace, "default-namespace", "N", "", "Set default k8s namespace for all deployments into this cluster")
 	cmd.Flags().StringVarP(&clusterName, "name", "n", "", "Name of the Aptomi cluster to create")
 
 	return cmd

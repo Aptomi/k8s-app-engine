@@ -37,12 +37,23 @@ type ClusterPluginConstructor func(cluster *lang.Cluster, cfg config.Plugins) (C
 type CodePlugin interface {
 	Base
 
-	Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error
-	Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error
-	Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error
-	Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error)
-	Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (Resources, error)
-	Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error)
+	Create(*CodePluginInvocationParams) error
+	Update(*CodePluginInvocationParams) error
+	Destroy(*CodePluginInvocationParams) error
+	Endpoints(*CodePluginInvocationParams) (map[string]string, error)
+	Resources(*CodePluginInvocationParams) (Resources, error)
+	Status(*CodePluginInvocationParams) (bool, error)
+}
+
+// ParamTargetSuffix it's a plugin-specific parameter, which is additionally specifies where the code should reside (in case of k8s and Helm, it's a string consisting of k8s namespace)
+const ParamTargetSuffix = "target-suffix"
+
+// CodePluginInvocationParams is a struct that will be passed into CodePlugin when invoking its methods
+type CodePluginInvocationParams struct {
+	DeployName   string
+	Params       util.NestedParameterMap
+	PluginParams map[string]string
+	EventLog     *event.Log
 }
 
 // CodePluginConstructor represents constructor the the code plugin

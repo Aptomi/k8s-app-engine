@@ -7,7 +7,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/sync"
 	"github.com/pmezard/go-difflib/difflib"
 	"gopkg.in/yaml.v2"
@@ -70,17 +69,17 @@ func (p *Plugin) Cleanup() error {
 }
 
 // Create implements creation of a new component instance in the cloud by deploying a Helm chart
-func (p *Plugin) Create(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	return p.createOrUpdate(deployName, params, eventLog, true)
+func (p *Plugin) Create(invocation *plugin.CodePluginInvocationParams) error {
+	return p.createOrUpdate(invocation, true)
 }
 
 // Update implements update of an existing component instance in the cloud by updating parameters of a helm chart
-func (p *Plugin) Update(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	return p.createOrUpdate(deployName, params, eventLog, false)
+func (p *Plugin) Update(invocation *plugin.CodePluginInvocationParams) error {
+	return p.createOrUpdate(invocation, false)
 }
 
-func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMap, eventLog *event.Log, create bool) error {
-	err := p.init(eventLog)
+func (p *Plugin) createOrUpdate(invocation *plugin.CodePluginInvocationParams, create bool) error {
+	err := p.init(invocation.EventLog)
 	if err != nil {
 		return err
 	}
@@ -90,13 +89,18 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 		return err
 	}
 
-	err = p.kube.EnsureNamespace(kubeClient, p.kube.Namespace)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	err = p.kube.EnsureNamespace(kubeClient, namespace)
 	if err != nil {
 		return err
 	}
 
-	releaseName := getReleaseName(deployName)
-	chartRepo, chartName, chartVersion, err := getHelmReleaseInfo(params)
+	releaseName := getReleaseName(invocation.DeployName)
+	chartRepo, chartName, chartVersion, err := getHelmReleaseInfo(invocation.Params)
 	if err != nil {
 		return err
 	}
@@ -111,7 +115,7 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 		return err
 	}
 
-	helmParams, err := yaml.Marshal(params)
+	helmParams, err := yaml.Marshal(invocation.Params)
 	if err != nil {
 		return err
 	}
@@ -125,17 +129,17 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 	if create {
 		if currRelease != nil {
 			// If a release already exists, let's just go ahead and update it
-			eventLog.NewEntry().Infof("Release '%s' already exists. Updating it", releaseName)
+			invocation.EventLog.NewEntry().Infof("Release '%s' already exists. Updating it", releaseName)
 		} else {
 			// Print parameters on debug level
-			eventLog.NewEntry().Debugf("Installing Helm release '%s', chart '%s', cluster '%s'. Path = %s, Params = %s", releaseName, chartName, cluster.Name, chartPath, string(helmParams))
+			invocation.EventLog.NewEntry().Debugf("Installing Helm release '%s', chart '%s', cluster '%s'. Path = %s, Params = %s", releaseName, chartName, cluster.Name, chartPath, string(helmParams))
 
 			// Print installation line on info level
-			eventLog.NewEntry().Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+			invocation.EventLog.NewEntry().Infof("Installing Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
 			_, err = helmClient.InstallRelease(
 				chartPath,
-				p.kube.Namespace,
+				namespace,
 				helm.ReleaseName(releaseName),
 				helm.ValueOverrides(helmParams),
 				helm.InstallReuseName(true),
@@ -147,17 +151,16 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 	}
 
 	// Print parameters on debug level
-	eventLog.NewEntry().Debugf("Updating Helm release '%s', chart '%s', cluster '%s'. Path = %s, Params = %s", releaseName, chartName, cluster.Name, chartPath, string(helmParams))
+	invocation.EventLog.NewEntry().Debugf("Updating Helm release '%s', chart '%s', cluster '%s'. Path = %s, Params = %s", releaseName, chartName, cluster.Name, chartPath, string(helmParams))
 
 	// Print update line on info level
-	eventLog.NewEntry().Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
+	invocation.EventLog.NewEntry().Infof("Updating Helm release '%s', chart '%s', cluster: '%s'", releaseName, chartName, cluster.Name)
 
 	status, err := helmClient.ReleaseStatus(releaseName)
 	if err != nil {
 		return fmt.Errorf("error while getting status of current release %s: %s", releaseName, err)
 	}
-	if status.Namespace != p.kube.Namespace {
-		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, p.kube.Namespace)
+	if status.Namespace != namespace {
 	}
 
 	newRelease, err := helmClient.UpdateRelease(
@@ -188,29 +191,29 @@ func (p *Plugin) createOrUpdate(deployName string, params util.NestedParameterMa
 	}
 
 	// Print parameters on debug level
-	eventLog.NewEntry().Debugf("Updated Helm release '%s', chart '%s', cluster '%s'. Path = %s, Diff = %s", releaseName, chartName, cluster.Name, chartPath, diff)
+	invocation.EventLog.NewEntry().Debugf("Updated Helm release '%s', chart '%s', cluster '%s'. Path = %s, Diff = %s", releaseName, chartName, cluster.Name, chartPath, diff)
 
 	// Print update line on info level
-	eventLog.NewEntry().Infof("Updated Helm release '%s', chart '%s', cluster '%s'", releaseName, chartName, cluster.Name)
+	invocation.EventLog.NewEntry().Infof("Updated Helm release '%s', chart '%s', cluster '%s'", releaseName, chartName, cluster.Name)
 
 	return err
 }
 
 // Destroy implements destruction of an existing component instance in the cloud by running "helm delete" on the corresponding helm chart
-func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, eventLog *event.Log) error {
-	err := p.init(eventLog)
+func (p *Plugin) Destroy(invocation *plugin.CodePluginInvocationParams) error {
+	err := p.init(invocation.EventLog)
 	if err != nil {
 		return err
 	}
 
-	releaseName := getReleaseName(deployName)
+	releaseName := getReleaseName(invocation.DeployName)
 
 	helmClient, err := p.newClient()
 	if err != nil {
 		return err
 	}
 
-	eventLog.NewEntry().Infof("Deleting Helm release '%s'", releaseName)
+	invocation.EventLog.NewEntry().Infof("Deleting Helm release '%s'", releaseName)
 
 	_, err = helmClient.DeleteRelease(
 		releaseName,
@@ -221,8 +224,8 @@ func (p *Plugin) Destroy(deployName string, params util.NestedParameterMap, even
 }
 
 // Endpoints returns map from port type to url for all services of the current chart
-func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, eventLog *event.Log) (map[string]string, error) {
-	err := p.init(eventLog)
+func (p *Plugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[string]string, error) {
+	err := p.init(invocation.EventLog)
 	if err != nil {
 		return nil, err
 	}
@@ -232,19 +235,24 @@ func (p *Plugin) Endpoints(deployName string, params util.NestedParameterMap, ev
 		return nil, err
 	}
 
-	releaseName := getReleaseName(deployName)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	releaseName := getReleaseName(invocation.DeployName)
 
 	currRelease, err := helmClient.ReleaseContent(releaseName)
 	if err != nil {
 		return nil, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	return p.kube.EndpointsForManifests(deployName, currRelease.Release.Manifest, eventLog)
+	return p.kube.EndpointsForManifests(namespace, invocation.DeployName, currRelease.Release.Manifest, invocation.EventLog)
 }
 
 // Resources returns list of all resources (like services, config maps, etc.) deployed into the cluster by specified component instance
-func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, eventLog *event.Log) (plugin.Resources, error) {
-	err := p.init(eventLog)
+func (p *Plugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugin.Resources, error) {
+	err := p.init(invocation.EventLog)
 	if err != nil {
 		return nil, err
 	}
@@ -254,19 +262,24 @@ func (p *Plugin) Resources(deployName string, params util.NestedParameterMap, ev
 		return nil, err
 	}
 
-	releaseName := getReleaseName(deployName)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	releaseName := getReleaseName(invocation.DeployName)
 
 	currRelease, err := helmClient.ReleaseContent(releaseName)
 	if err != nil {
 		return nil, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	return p.kube.ResourcesForManifest(deployName, currRelease.Release.Manifest, eventLog)
+	return p.kube.ResourcesForManifest(namespace, invocation.DeployName, currRelease.Release.Manifest, invocation.EventLog)
 }
 
 // Status returns readiness of all resources (like services, config maps, etc.) deployed into the cluster by specified component instance
-func (p *Plugin) Status(deployName string, params util.NestedParameterMap, eventLog *event.Log) (bool, error) {
-	err := p.init(eventLog)
+func (p *Plugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, error) {
+	err := p.init(invocation.EventLog)
 	if err != nil {
 		return false, err
 	}
@@ -276,12 +289,17 @@ func (p *Plugin) Status(deployName string, params util.NestedParameterMap, event
 		return false, err
 	}
 
-	releaseName := getReleaseName(deployName)
+	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
+	if len(namespace) <= 0 {
+		namespace = p.kube.DefaultNamespace
+	}
+
+	releaseName := getReleaseName(invocation.DeployName)
 
 	currRelease, err := helmClient.ReleaseContent(releaseName)
 	if err != nil {
 		return false, fmt.Errorf("error while looking for Helm release %s: %s", releaseName, err)
 	}
 
-	return p.kube.ReadinessStatusForManifest(deployName, currRelease.Release.Manifest, eventLog)
+	return p.kube.ReadinessStatusForManifest(namespace, invocation.DeployName, currRelease.Release.Manifest, invocation.EventLog)
 }
