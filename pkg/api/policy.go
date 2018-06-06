@@ -134,10 +134,18 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("updated policy is invalid: %s", err))
 	}
 
-	// Validate clusters using corresponding cluster plugins if policy is valid
+	// Validate clusters using corresponding cluster plugins and make sure there are no conflicts
 	plugins := api.pluginRegistryFactory()
 	for _, obj := range objects {
+		// if a cluster was supplied, then
 		if cluster, ok := obj.(*lang.Cluster); ok {
+			// if a cluster is already present in the policy, tell a user that it can't be modified
+			objExisting, _ := policy.GetObject(lang.ClusterObject.Kind, cluster.Name, cluster.Namespace)
+			if objExisting != nil {
+				panic(fmt.Sprintf("modification of existing cluster objects is not allowed: %s needs to be deleted first", cluster.Name))
+			}
+
+			// validate via plugin that connection to it can be established
 			plugin, pluginErr := plugins.ForCluster(cluster)
 			if pluginErr != nil {
 				panic(fmt.Sprintf("error while getting cluster plugin for cluster %s of type %s: %s", cluster.Name, cluster.Type, pluginErr))
