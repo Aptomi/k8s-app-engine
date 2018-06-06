@@ -21,11 +21,10 @@
     curl https://raw.githubusercontent.com/Aptomi/aptomi/master/tools/demo-gke.sh | bash /dev/stdin up
     ```
       
-2. Import it into Aptomi as two separate clusters, *cluster-us-east* and *cluster-us-west* (corresponding to two namespaces `east` and `west` in a local k8s cluster):
+2. Import it into Aptomi under name `k8s-example`:
     ```
     aptomictl login -u admin -p admin
-    aptomictl gen cluster -n cluster-us-east -c demo-gke -N east | aptomictl policy apply -f -
-    aptomictl gen cluster -n cluster-us-west -c demo-gke -N west | aptomictl policy apply -f -
+    aptomictl gen cluster -n k8s-example -c demo-gke | aptomictl policy apply -f -
     ```
 
 # Next Steps

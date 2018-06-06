@@ -90,9 +90,9 @@ this in the Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/bro
 
 1. At this point you can see that:
     * Aptomi applied the defined [rules](policy/rules/rules.yaml) and allocated
-        * *analytics_pipeline* in `cluster-us-east`
-        * *dev* instances of `twitter-stats` in `cluster-us-west`
-        * *prod* instances of `twitter-stats` in `cluster-us-east`
+        * *analytics_pipeline* in `east` namespace
+        * *prod* instances of `twitter-stats` in `east` namespace
+        * *dev* instances of `twitter-stats` in `west` namespace
 
     * Aptomi enforced that `analytics pipeline` will be shared by all consumers. See [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State
 

@@ -6,7 +6,7 @@
   actions:
     change-labels:
       set:
-        target: cluster-us-east
+        target: k8s-example.east
 
 - kind: rule
   metadata:
@@ -19,7 +19,7 @@
   actions:
     change-labels:
       set:
-        target: cluster-us-east
+        target: k8s-example.east
 
 - kind: rule
   metadata:
@@ -32,7 +32,7 @@
   actions:
     change-labels:
       set:
-        target: cluster-us-west
+        target: k8s-example.west
 
 - kind: rule
   metadata:

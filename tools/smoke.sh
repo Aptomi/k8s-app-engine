@@ -270,7 +270,7 @@ check_policy 1 ".Objects.platform.rule | length"
 check_policy 1 ".Objects.system.rule | length"
 check_policy 2 ".Objects.social.rule | length"
 check_policy 3 ".Objects.system.aclrule | length"
-check_policy 2 ".Objects.system.cluster | length"
+check_policy 1 ".Objects.system.cluster | length"
 
 sleep 1
 

@@ -5,4 +5,4 @@
   user: Bob
   contract: guestbook
   labels:
-    target: cluster-us-west
+    target: k8s-example.west

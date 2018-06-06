@@ -14,11 +14,10 @@
     kubectl config get-contexts
     ```   
 
-2. Import it into Aptomi as two separate clusters *cluster-us-east* and *cluster-us-west* (corresponding to two namespaces `east` and `west` in a local k8s cluster):
+2. Import it into Aptomi under name `k8s-example`:
     ```
     aptomictl login -u admin -p admin
-    aptomictl gen cluster -n cluster-us-east -c docker-for-desktop -N east | aptomictl policy apply -f -
-    aptomictl gen cluster -n cluster-us-west -c docker-for-desktop -N west | aptomictl policy apply -f -
+    aptomictl gen cluster -n k8s-example -c docker-for-desktop | aptomictl policy apply -f -
     ```
 
 # Next Steps
