@@ -11,7 +11,7 @@
 
     - name: spark
       discovery:
-        url: "spark-master-{{ .Discovery.Instance }}-0.{{ .Cluster.Namespace }}:7077"
+        url: "spark-master-{{ .Discovery.Instance }}-0.{{ .Target.Namespace }}:7077"
       code:
         type: helm
         params:

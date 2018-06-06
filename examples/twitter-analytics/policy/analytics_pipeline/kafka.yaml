@@ -11,7 +11,7 @@
 
     - name: kafka
       discovery:
-        url: "kafka-{{ .Discovery.Instance }}-0.kafka-{{ .Discovery.Instance }}.{{ .Cluster.Namespace }}:9092"
+        url: "kafka-{{ .Discovery.Instance }}-0.kafka-{{ .Discovery.Instance }}.{{ .Target.Namespace }}:9092"
       code:
         type: helm
         params:
