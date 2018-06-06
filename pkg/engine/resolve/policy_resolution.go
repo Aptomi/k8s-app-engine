@@ -152,7 +152,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		}
 
 		// verify that cluster exists
-		clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, componentKey.ClusterName, runtime.SystemNS)
+		clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, componentKey.ClusterName, componentKey.ClusterNameSpace)
 		if clusterObj == nil || err != nil {
 			// component instance points to non-existing cluster, meaning this component instance is now orphan
 			return fmt.Errorf("cluster '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ClusterName, componentKey.GetKey())
