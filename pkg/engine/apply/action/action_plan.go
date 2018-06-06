@@ -95,17 +95,14 @@ func (plan *Plan) applyActions(key string, fn ApplyFunction, queue chan string, 
 	for _, action := range node.Actions {
 		// if an error happened before, all subsequent actions are getting marked as skipped
 		if foundErr != nil {
-			// fmt.Println("skipped ", action.GetName())
 			resultUpdater.AddSkipped()
 		} else {
 			// Otherwise, let's run the action and see if it failed or not
 			err := fn(action)
 			if err != nil {
-				// fmt.Println("failed ", action.GetName())
 				resultUpdater.AddFailed()
 				foundErr = err
 			} else {
-				// fmt.Println("success ", action.GetName())
 				resultUpdater.AddSuccess()
 			}
 		}
