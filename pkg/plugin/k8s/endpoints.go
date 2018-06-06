@@ -56,7 +56,7 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 		ingress := service.Status.LoadBalancer.Ingress
 
 		if ingress == nil {
-			return fmt.Errorf("no Ingress for Service type LoadBalancer (%s in %s)", info.Name, info.Name)
+			return fmt.Errorf("no Ingress for Service type LoadBalancer (%s in %s)", info.Name, info.Namespace)
 		}
 
 		externalAddress := ""
