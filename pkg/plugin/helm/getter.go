@@ -11,6 +11,7 @@ import (
 
 	"k8s.io/helm/pkg/tlsutil"
 	"k8s.io/helm/pkg/urlutil"
+	"time"
 )
 
 // httpGetter is the default HTTP(/S) backend handler
@@ -52,6 +53,7 @@ func newHTTPGetter(URL, CertFile, KeyFile, CAFile string) (getter.Getter, error)
 		tlsConf.ServerName = sni
 
 		client.client = &http.Client{
+			Timeout: 30 * time.Second,
 			Transport: &http.Transport{
 				TLSClientConfig: tlsConf,
 			},
