@@ -13,9 +13,6 @@ const componentInstanceKeySeparator = "#"
 // componentUnresolvedName is placeholder for unresolved entries
 const componentUnresolvedName = "unknown"
 
-// targetSuffixDefault is a placeholder for empty suffix (e.g. default k8s ns(
-const targetSuffixDefault = "default"
-
 // componentRootName is a name of component for service entry (which in turn consists of components)
 const componentRootName = "root"
 
@@ -55,7 +52,7 @@ func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contrac
 		contextNameWithKeys = strings.Join([]string{contextNameWithKeys, keysResolved}, componentInstanceKeySeparator)
 	}
 	if len(targetSuffix) <= 0 {
-		targetSuffix = targetSuffixDefault
+		targetSuffix = componentUnresolvedName
 	}
 	return &ComponentInstanceKey{
 		ClusterNameSpace:    getClusterNamespaceUnsafe(cluster),

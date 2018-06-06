@@ -43,11 +43,11 @@ func TestPolicyResolverSimple(t *testing.T) {
 	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency should be successfully resolved")
 
 	// check instance 1
-	instance1 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[0], nil, service, component, resolution)
+	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component, resolution)
 	assert.Equal(t, 1, len(instance1.DependencyKeys), "Instance should be referenced by one dependency")
 
 	// check instance 2
-	instance2 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[1], nil, service, component, resolution)
+	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[1], nil, service, component, resolution)
 	assert.Equal(t, 1, len(instance2.DependencyKeys), "Instance should be referenced by one dependency")
 }
 
@@ -90,15 +90,15 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency should be successfully resolved")
 
 	// check component 1
-	instance1 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[0], nil, service, component1, resolution)
+	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component1, resolution)
 	assert.Equal(t, 2, len(instance1.DependencyKeys), "Component 1 instance should be used by both dependencies")
 
 	// check component 2
-	instance2 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[0], nil, service, component2, resolution)
+	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component2, resolution)
 	assert.Equal(t, 1, len(instance2.DependencyKeys), "Component 2 instance should be used by only one dependency")
 
 	// check component 3
-	instance3 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[0], nil, service, component3, resolution)
+	instance3 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component3, resolution)
 	assert.Equal(t, 1, len(instance3.DependencyKeys), "Component 3 instance should be used by only one dependency")
 }
 
@@ -204,7 +204,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Dependency should be successfully resolved")
 
 	// check labels for the end service (service2/contract2)
-	serviceInstance := getInstanceByParams(t, cluster, "", contract2, contract2.Contexts[0], nil, service2, nil, resolution)
+	serviceInstance := getInstanceByParams(t, cluster, "k8ns", contract2, contract2.Contexts[0], nil, service2, nil, resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 
 	assert.Equal(t, "value1", labels["label1"], "Label 'label1=value1' should be carried from dependency all the way through the policy")
@@ -257,11 +257,11 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
 
 	// check discovery parameters of component 1
-	instance1 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[0], nil, service, component1, resolution)
+	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component1, resolution)
 	assert.Regexp(t, "^component1-(.+)$", instance1.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// check discovery parameters of component 2
-	instance2 := getInstanceByParams(t, cluster, "", contract, contract.Contexts[0], nil, service, component2, resolution)
+	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component2, resolution)
 	assert.Regexp(t, "^component2-(.+)$", instance2.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// check code parameters of component 2

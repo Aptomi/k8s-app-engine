@@ -177,9 +177,11 @@ func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 		},
 		Type: "kubernetes",
 		Config: struct {
-			Namespace string
+			Namespace        string
+			DefaultNamespace string
 		}{
-			Namespace: "default",
+			Namespace:        "default",
+			DefaultNamespace: "k8ns",
 		},
 	}
 	builder.addObject(builder.domainAdminView, result)

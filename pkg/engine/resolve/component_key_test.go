@@ -45,7 +45,7 @@ func TestComponentKeyParent(t *testing.T) {
 func TestComponentKeyUnsafe(t *testing.T) {
 	key := makeKeyUnsafe()
 	k := strings.Split(key.GetKey(), componentInstanceKeySeparator)
-	expected := []string{componentUnresolvedName, componentUnresolvedName, targetSuffixDefault, componentUnresolvedName, componentUnresolvedName, componentUnresolvedName, componentRootName}
+	expected := []string{componentUnresolvedName, componentUnresolvedName, componentUnresolvedName, componentUnresolvedName, componentUnresolvedName, componentUnresolvedName, componentRootName}
 	assert.Equal(t, len(k), len(expected), "When policy objects are nil, component key with correct number of entries should still be generated: %s", key.GetKey())
 	for i := range expected {
 		assert.Equal(t, expected[i], k[i], "When policy objects are nil, component key should still be generated: %s", key.GetKey())

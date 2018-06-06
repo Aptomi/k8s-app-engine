@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
@@ -255,6 +256,22 @@ func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent)
 	cluster, err := target.GetCluster(node.resolver.policy, node.namespace)
 	if err != nil {
 		return nil, node.errorClusterLookup(target.ClusterName, err)
+	}
+
+	// handle default namespace for kubernetes clusters
+	if len(target.Suffix) <= 0 && cluster.Type == "kubernetes" {
+		k8sClusterConfig := &k8s.ClusterConfig{}
+		err := cluster.ParseConfigInto(k8sClusterConfig)
+
+		// if it's a k8s cluster, let's grab default namespace from it
+		if err == nil {
+			target.Suffix = k8sClusterConfig.DefaultNamespace
+		}
+
+		// if it's still empty, use default
+		if len(target.Suffix) <= 0 {
+			target.Suffix = "default"
+		}
 	}
 
 	return NewComponentInstanceKey(

@@ -91,7 +91,7 @@ func (p *Plugin) createOrUpdate(invocation *plugin.CodePluginInvocationParams, c
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	err = p.kube.EnsureNamespace(kubeClient, namespace)
@@ -237,7 +237,7 @@ func (p *Plugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[s
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return nil, fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	releaseName := getReleaseName(invocation.DeployName)
@@ -264,7 +264,7 @@ func (p *Plugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugi
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return nil, fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	releaseName := getReleaseName(invocation.DeployName)
@@ -291,7 +291,7 @@ func (p *Plugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, er
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return false, fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	releaseName := getReleaseName(invocation.DeployName)

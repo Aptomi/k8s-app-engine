@@ -73,7 +73,7 @@ func (p *Plugin) Create(invocation *plugin.CodePluginInvocationParams) error {
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	targetManifest, ok := invocation.Params["manifest"].(string)
@@ -105,7 +105,7 @@ func (p *Plugin) Update(invocation *plugin.CodePluginInvocationParams) error {
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	currentManifest, err := p.loadManifest(kubeClient, invocation.DeployName)
@@ -142,7 +142,7 @@ func (p *Plugin) Destroy(invocation *plugin.CodePluginInvocationParams) error {
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	deleteManifest, ok := invocation.Params["manifest"].(string)
@@ -169,7 +169,7 @@ func (p *Plugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[s
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return nil, fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	targetManifest, ok := invocation.Params["manifest"].(string)
@@ -189,7 +189,7 @@ func (p *Plugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugi
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return nil, fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	targetManifest, ok := invocation.Params["manifest"].(string)
@@ -209,7 +209,7 @@ func (p *Plugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, er
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
-		namespace = p.kube.DefaultNamespace
+		return false, fmt.Errorf("namespace is a mandatory parameter")
 	}
 
 	targetManifest, ok := invocation.Params["manifest"].(string)
