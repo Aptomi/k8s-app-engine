@@ -52,7 +52,7 @@
               <tr>
                 <th>Name</th>
                 <th>k8s Address</th>
-                <th>k8s Namespace</th>
+                <th>k8s Default Namespace</th>
                 <th>Action</th>
               </tr>
               </thead>
@@ -64,8 +64,11 @@
                 <td>
                   {{d.config.kubeconfig.clusters[0].cluster.server}}
                 </td>
-                <td>
-                  {{d.config.namespace}}
+                <td v-if="d.config.defaultnamespace">
+                  {{d.config.defaultnamespace}}
+                </td>
+                <td v-else>
+                  default
                 </td>
                 <td>
                   <!-- <button type="button" class="btn btn-default btn-xs" @click="showDiagram(d)">Diagram</button> -->
