@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"github.com/Aptomi/aptomi/pkg/util/retry"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	api "k8s.io/client-go/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/kubectl/resource"
 	"strings"
-	"time"
 )
 
 // EndpointsForManifests returns endpoints for specified manifest
@@ -57,43 +55,28 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 	} else if service.Spec.Type == api.ServiceTypeLoadBalancer {
 		ingress := service.Status.LoadBalancer.Ingress
 
-		// wait for LB external IP to be provisioned
-		ok := retry.Do(15*time.Minute, 10*time.Second, func() bool {
-			service, getErr = kubeClient.CoreV1().Services(info.Namespace).Get(info.Name, meta.GetOptions{})
-			if getErr != nil {
-				panic(fmt.Sprintf("Error while getting Service %s in namespace %s", info.Name, info.Namespace))
+		if ingress == nil {
+			return fmt.Errorf("no Ingress for Service type LoadBalancer (%s in %s)", info.Name, info.Name)
+		}
+
+		externalAddress := ""
+		for _, entry := range ingress {
+			if entry.Hostname != "" {
+				externalAddress = entry.Hostname
+			} else if entry.IP != "" {
+				externalAddress = entry.IP
 			}
-
-			ingress = service.Status.LoadBalancer.Ingress
-			if ingress == nil {
-				return false
+			if externalAddress == "" {
+				fmt.Errorf("got empty Ingress for Service type LoadBalancer (%s in %s)", info.Name, info.Namespace)
+			} else {
+				// handle only first ingress entry for LB
+				break
 			}
+		}
 
-			externalAddress := ""
-			for _, entry := range ingress {
-				if entry.Hostname != "" {
-					externalAddress = entry.Hostname
-				} else if entry.IP != "" {
-					externalAddress = entry.IP
-				}
-				if externalAddress == "" {
-					panic(fmt.Sprintf("Got empty LoadBalancerIngress for Service %s in namespace %s", info.Name, info.Namespace))
-				} else {
-					// handle only first ingress entry for LB
-					break
-				}
-			}
-
-			for _, port := range service.Spec.Ports {
-				sURL := fmt.Sprintf("%s:%d", externalAddress, port.Port)
-				addEndpointsForServicePort(port, sURL, endpoints)
-			}
-
-			return true
-		})
-
-		if ingress == nil || !ok {
-			return fmt.Errorf("unable to get endpoints for Service type LoadBalancer (%s in %s)", info.Name, info.Name)
+		for _, port := range service.Spec.Ports {
+			sURL := fmt.Sprintf("%s:%d", externalAddress, port.Port)
+			addEndpointsForServicePort(port, sURL, endpoints)
 		}
 	}
 
