@@ -137,7 +137,6 @@ For example, here is how you would define an application which consists of Wordp
           chartRepo: https://myhelmcharts.com/repo
           chartName: wordpress
           chartVersion: 4.9.1
-          cluster: "{{ .Labels.cluster }}"
           db_url: "{{ .Discovery.mysql_component.url }}"
           db_name: "wp"
       dependencies:
@@ -150,7 +149,6 @@ For example, here is how you would define an application which consists of Wordp
           chartRepo: https://myhelmcharts.com/repo
           chartName: mysql
           chartVersion: 5.7.21
-          cluster: "{{ .Labels.cluster }}"
       discovery:
         url: "mysql-{{ .Discovery.instance }}:3306"
 ```
@@ -159,7 +157,7 @@ For Helm plugin, you need to provide the following parameters under the `params`
 * `chartRepo` - The **URL** of the repository with your Helm charts
 * `chartName` - The **name** of the Helm chart
 * `chartVersion` *(Optional)* - The **version** of the Helm chart. If the chart version is not specified, the latest version will be used
-* `cluster` - The name of the **cluster** to which the code will be deployed
+* `target` - The name of the **cluster** and, optionally, **k8s namespace** to which the code will be deployed
 
 Every parameter under the `params` section can be either a fixed value or an expression that refers to various labels.
 
@@ -234,7 +232,6 @@ use a special **contract component**, which points to a contract instead of the 
           chartRepo: https://myhelmcharts.com/repo
           chartName: wordpress
           chartVersion: 4.9.1
-          cluster: "{{ .Labels.cluster }}"
           db_url: "{{ .Discovery.db_component.database.url }}"
           db_name: "wp"
       dependencies:
@@ -330,8 +327,8 @@ A rule can have user-defined criteria and associated actions. If the criterion e
 * change-labels - change one or more labels
 * dependency - reject dependency and not allow instantiation
 
-The most commonly used rule action in Aptomi is to change a label. For example, by changing a system-level label called `cluster`, you can control which cluster the code will get deployed to. Deploying
-code without setting the `cluster` label will result in an error, because Aptomi won't have a way of knowing where the code should be deployed.
+The most commonly used rule action in Aptomi is to change a label. For example, by changing a system-level label called `target`, you can control which cluster and namespace the code will get deployed to. Deploying
+code without setting the `target` label will result in an error, because Aptomi won't have a way of knowing where the code should be deployed.
 
 For example, the following rule will tell Aptomi to always deploy services with the `blog` label to the cluster named `cluster-us-east`:
 ```yaml
@@ -346,7 +343,7 @@ For example, the following rule will tell Aptomi to always deploy services with 
   actions:
     change-labels:
       set:
-        cluster: cluster-us-east
+        target: cluster-us-east
 ```
 
 Here is another example of a rule, which prohibits users from the `dev` team from instantiating any `blog` services. Even if those users try to declare a dependency, it will not be fulfilled by Aptomi:
@@ -436,7 +433,6 @@ You can reference the following variables in your text templates:
 
 * `{{ .Labels }}` - the current set of labels, e.g.:
   * `{{ .Labels.labelName }}` will return the value of label with name `labelName`
-  * `{{ .Labels.cluster }}` will return the special `cluster` label, which will indicate the name of the cluster in `system` namespace to which the code will get deployed to
 * `{{ .User}}` - the current user who requested a dependency
   * `{{ .User.Name }}` - name of the user
   * `{{ .User.Secrets }}` - a map of user secrets

@@ -119,7 +119,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
 	return b
 }
@@ -139,7 +139,7 @@ func makePolicyBuilderWithServiceSharing() *builder.PolicyBuilder {
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
 	// add dependencies
 	b.AddDependency(b.AddUser(), contract1)

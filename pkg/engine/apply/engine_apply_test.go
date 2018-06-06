@@ -309,8 +309,8 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	b.AddServiceComponent(service,
 		b.CodeComponent(
 			util.NestedParameterMap{
-				"param":   "{{ .Labels.param }}",
-				"cluster": "{{ .Labels.cluster }}",
+				"param": "{{ .Labels.param }}",
+				"debug": "{{ .Labels.target }}",
 			},
 			nil,
 		),
@@ -319,7 +319,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
 	// add dependency
 	dependency := b.AddDependency(b.AddUser(), contract)

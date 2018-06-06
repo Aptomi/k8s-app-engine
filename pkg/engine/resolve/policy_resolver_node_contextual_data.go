@@ -80,7 +80,7 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 			User:      node.proxyUser(node.user),
 			Labels:    node.labels.Labels,
 			Discovery: node.proxyDiscovery(node.discoveryTreeNode, node.componentKey),
-			Cluster:   node.proxyCluster(node.labels.Labels[lang.LabelCluster]),
+			Cluster:   node.proxyCluster(node.labels.Labels[lang.LabelTarget]), // TODO: needs to be changed once #278 is fixed
 		},
 	)
 }
@@ -128,7 +128,7 @@ func (node *resolutionNode) proxyDependency(dependency *lang.Dependency) interfa
 // How cluster is visible from the policy language
 func (node *resolutionNode) proxyCluster(name string) interface{} {
 	// make cluster available
-	clusterName := node.labels.Labels[lang.LabelCluster]
+	clusterName := node.labels.Labels[lang.LabelTarget]
 	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
 	if err != nil || clusterObj == nil {
 		panic(fmt.Sprintf("cluster not set for component instance '%s'", node.componentKey))

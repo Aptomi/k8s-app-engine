@@ -203,7 +203,7 @@ func (gen *PolicyGenerator) makeService() *lang.Service {
 		labelName := gen.generatedLabelKeys[gen.random.Intn(len(gen.generatedLabelKeys))]
 
 		params := util.NestedParameterMap{}
-		params[lang.LabelCluster] = "cluster-test"
+		params[lang.LabelTarget] = "cluster-test"
 		for j := 0; j < gen.codeParams; j++ {
 			name := "param-" + strconv.Itoa(j)
 			value := "prefix-{{ .Labels." + labelName + " }}-suffix"
@@ -255,7 +255,7 @@ func (gen *PolicyGenerator) makeRules() {
 			RequireAll: []string{"true"},
 		},
 		Actions: &lang.RuleActions{
-			ChangeLabels: lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, "cluster-test"),
+			ChangeLabels: lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, "cluster-test"),
 		},
 	})
 }

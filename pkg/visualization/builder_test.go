@@ -89,7 +89,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 		// three components each
 		for j := 0; j < 3; j++ {
-			b.AddServiceComponent(service, b.CodeComponent(util.NestedParameterMap{"cluster": "{{ .Labels.cluster }}"}, nil))
+			b.AddServiceComponent(service, b.CodeComponent(util.NestedParameterMap{"debug": "{{ .Labels.target }}"}, nil))
 		}
 
 		services = append(services, service)
@@ -103,7 +103,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 	// one cluster
 	clusterObj := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, clusterObj.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
 	// several dependencies
 	for i := 0; i < 5; i++ {

@@ -246,7 +246,8 @@ func (node *resolutionNode) componentMatches(component *lang.ServiceComponent) (
 
 // createComponentKey creates a component key
 func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent) (*ComponentInstanceKey, error) {
-	clusterName := node.labels.Labels[lang.LabelCluster]
+	// TODO: needs to be changed once #278 is fixed
+	clusterName := node.labels.Labels[lang.LabelTarget]
 	clusterObj, err := node.resolver.policy.GetObject(lang.ClusterObject.Kind, clusterName, runtime.SystemNS)
 	if err != nil || clusterObj == nil {
 		return nil, node.errorClusterDoesNotExist(clusterName)

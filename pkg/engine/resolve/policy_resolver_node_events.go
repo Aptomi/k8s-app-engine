@@ -29,7 +29,7 @@ func (node *resolutionNode) errorClusterDoesNotExist(clusterName string) error {
 	if len(clusterName) > 0 {
 		return fmt.Errorf("cluster '%s/%s' doesn't exist in policy (dependency '%s', contract '%s', service '%s')", runtime.SystemNS, clusterName, node.dependency.Name, node.contract.Name, node.service.Name)
 	}
-	return fmt.Errorf("not sure where components should be deployed, cluster label is not set (dependency '%s', contract '%s', service '%s')", node.dependency.Name, node.contract.Name, node.service.Name)
+	return fmt.Errorf("not sure where components should be deployed: label 'target' is not set (dependency '%s', contract '%s', service '%s')", node.dependency.Name, node.contract.Name, node.service.Name)
 }
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {

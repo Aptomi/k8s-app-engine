@@ -107,7 +107,8 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 
 // GetCluster returns a cluster where the given component instance should be deployed
 func (instance *ComponentInstance) GetCluster() string {
-	result, ok := instance.CalculatedLabels.Labels[lang.LabelCluster]
+	// TODO: needs to be changed once #278 is fixed
+	result, ok := instance.CalculatedLabels.Labels[lang.LabelTarget]
 	if ok {
 		return result
 	}

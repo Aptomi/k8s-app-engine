@@ -6,7 +6,7 @@
   actions:
     change-labels:
       set:
-        cluster: cluster-us-east
+        target: cluster-us-east
 
 - kind: rule
   metadata:
@@ -19,7 +19,7 @@
   actions:
     change-labels:
       set:
-        cluster: cluster-us-east
+        target: cluster-us-east
 
 - kind: rule
   metadata:
@@ -32,7 +32,7 @@
   actions:
     change-labels:
       set:
-        cluster: cluster-us-west
+        target: cluster-us-west
 
 - kind: rule
   metadata:

@@ -25,7 +25,7 @@ func TestPolicyResolverSimple(t *testing.T) {
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependency (should be resolved to the first context)
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -72,7 +72,7 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependency (should be resolved to use components 1 and 2, but not 3)
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -112,14 +112,14 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 	service1 := b.AddService()
 	b.AddServiceComponent(service1, b.CodeComponent(nil, nil))
 	contract1 := b.AddContract(service1, b.CriteriaTrue())
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// create objects in ns2
 	b.SwitchNamespace("ns2")
 	service2 := b.AddService()
 	b.AddServiceComponent(service2, b.CodeComponent(nil, nil))
 	contract2 := b.AddContract(service2, b.CriteriaTrue())
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// ns1/service1 -> depends on -> ns2/contract2
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
@@ -146,7 +146,7 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependency with full labels (should be resolved successfully)
 	d1 := b.AddDependency(b.AddUser(), contract1)
@@ -188,7 +188,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependency with labels 'label1', 'label2' and 'label3'
 	dependency := b.AddDependency(b.AddUser(), contract1)
@@ -215,7 +215,7 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	assert.Equal(t, "labelValue2", labels["labelExtra2"], "Label 'labelExtra2' should be added on contract match")
 	assert.Equal(t, "labelValue3", labels["labelExtra3"], "Label 'labelExtra3' should be added on context match")
 
-	assert.Equal(t, cluster.Name, labels[lang.LabelCluster], "Label 'cluster' should be set")
+	assert.Equal(t, cluster.Name, labels[lang.LabelTarget], "Label 'cluster' should be set")
 }
 
 func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
@@ -229,13 +229,13 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	)
 	component2 := b.CodeComponent(
 		util.NestedParameterMap{
-			"cluster": "{{ .Labels.cluster }}",
+			"debug":   "{{ .Labels.target }}",
 			"address": fmt.Sprintf("{{ .Discovery.%s.url }}", component1.Name),
 			"nested": util.NestedParameterMap{
 				"param": util.NestedParameterMap{
 					"name1":    "value1",
 					"name2":    "123456789",
-					"name3":    "{{ .Labels.cluster }}",
+					"debug":    "{{ .Labels.target }}",
 					"nameBool": true,
 					"nameInt":  5,
 				},
@@ -248,7 +248,7 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
 	b.AddDependency(b.AddUser(), contract)
@@ -265,11 +265,11 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	assert.Regexp(t, "^component2-(.+)$", instance2.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// check code parameters of component 2
-	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams["cluster"], "Code parameter should be calculated correctly")
+	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams["debug"], "Code parameter should be calculated correctly")
 	assert.Equal(t, instance1.CalculatedDiscovery["url"], instance2.CalculatedCodeParams["address"], "Code parameter should be calculated correctly")
 	assert.Equal(t, "value1", instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name1"], "Code parameter should be calculated correctly")
 	assert.Equal(t, "123456789", instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name2"], "Code parameter should be calculated correctly")
-	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["name3"], "Code parameter should be calculated correctly")
+	assert.Equal(t, cluster.Name, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["debug"], "Code parameter should be calculated correctly")
 	assert.Equal(t, true, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["nameBool"], "Code parameter should be calculated correctly (bool)")
 	assert.Equal(t, 5, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["nameInt"], "Code parameter should be calculated correctly (int)")
 }
@@ -300,7 +300,7 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	)
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -327,7 +327,7 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 
 	contract := b.AddContract(service, b.CriteriaTrue())
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -357,7 +357,7 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	b.AddServiceComponent(service3, b.ContractComponent(contract1))
 
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependency
 	b.AddDependency(b.AddUser(), contract1)
@@ -373,7 +373,7 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	service := b.AddService()
 	b.AddServiceComponent(service,
 		b.CodeComponent(
-			util.NestedParameterMap{lang.LabelCluster: "{{ .Labels.cluster }}"},
+			util.NestedParameterMap{"debug": "{{ .Labels.target }}"},
 			nil,
 		),
 	)
@@ -382,8 +382,8 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	// add rules, which say to deploy to different clusters based on label value
 	cluster1 := b.AddCluster()
 	cluster2 := b.AddCluster()
-	b.AddRule(b.Criteria("label1 == 'value1'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster1.Name)))
-	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster2.Name)))
+	b.AddRule(b.Criteria("label1 == 'value1'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster1.Name)))
+	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster2.Name)))
 
 	// add dependencies
 	d1 := b.AddDependency(b.AddUser(), contract)
@@ -397,8 +397,8 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	// check that both dependencies got resolved and got placed in different clusters
 	instance1 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d1), resolution)
 	instance2 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d2), resolution)
-	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
-	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelCluster], "Cluster should be set correctly via rules")
+	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelTarget], "Cluster should be set correctly via rules")
+	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelTarget], "Cluster should be set correctly via rules")
 }
 
 func TestPolicyResolverInternalPanic(t *testing.T) {
@@ -412,7 +412,7 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
-	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add multiple dependencies
 	for i := 0; i < 10; i++ {
@@ -445,7 +445,7 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 			"Service.Namespace == 'main' && Dependency.Namespace == 'main'",
 			"true",
 			"false",
-		), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelCluster, cluster.Name)))
+		), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 		// add dependency (should be resolved to the first context)
 		d1 := b.AddDependency(b.AddUser(), contract)

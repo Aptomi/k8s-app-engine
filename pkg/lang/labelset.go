@@ -2,8 +2,8 @@ package lang
 
 import "reflect"
 
-// LabelCluster is a special label name where cluster should be stored. It's required by the engine during policy processing
-const LabelCluster = "cluster"
+// LabelTarget is a special label name where cluster should be stored. It's required by the engine during policy processing
+const LabelTarget = "target"
 
 // LabelSet defines the set of labels that will be manipulated throughout policy execution. All labels are stored
 // in a 'key' -> 'value' map

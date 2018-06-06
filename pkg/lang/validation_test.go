@@ -285,7 +285,7 @@ func makeContract(name string, labelOpsNum int, pointToService string) *Contract
 				Name: "context",
 				Allocation: &Allocation{
 					Service: pointToService,
-					Keys:    []string{"simple", "{{ .Labels.cluster }}"},
+					Keys:    []string{"simple", "{{ .Dependency.ID }}"},
 				},
 			},
 		}
@@ -367,7 +367,7 @@ func makeServiceComponents(count int, contract string, codeNum int, discoveryNum
 		case 1:
 			component.Code = &Code{
 				Type:   "helm",
-				Params: util.NestedParameterMap{"a": "aValue", "nested": util.NestedParameterMap{"c": "{{ .Labels.cluster }}"}},
+				Params: util.NestedParameterMap{"a": "aValue", "nested": util.NestedParameterMap{"c": "d"}},
 			}
 		case Empty:
 			// no code defined, empty
@@ -378,7 +378,7 @@ func makeServiceComponents(count int, contract string, codeNum int, discoveryNum
 			// invalid code
 			component.Code = &Code{
 				Type:   "unknown",
-				Params: util.NestedParameterMap{"a": "aValue", "nested": util.NestedParameterMap{"c": "{{ .Labels.cluster }}"}},
+				Params: util.NestedParameterMap{"a": "aValue", "nested": util.NestedParameterMap{"c": "d"}},
 			}
 		case Invalid - 1:
 			// invalid code
@@ -392,7 +392,7 @@ func makeServiceComponents(count int, contract string, codeNum int, discoveryNum
 		case 0:
 			component.Discovery = util.NestedParameterMap{"a": "b"}
 		case 1:
-			component.Discovery = util.NestedParameterMap{"a": "aValue", "nested": util.NestedParameterMap{"c": "{{ .Labels.cluster }}"}}
+			component.Discovery = util.NestedParameterMap{"a": "aValue", "nested": util.NestedParameterMap{"c": "d"}}
 		case Empty:
 			// no discovery defined, empty
 			component.Discovery = util.NestedParameterMap{}
