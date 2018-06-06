@@ -161,6 +161,7 @@ func (p *Plugin) createOrUpdate(invocation *plugin.CodePluginInvocationParams, c
 		return fmt.Errorf("error while getting status of current release %s: %s", releaseName, err)
 	}
 	if status.Namespace != namespace {
+		return fmt.Errorf("it's not allowed to change namespace of the release %s (was %s, requested %s)", releaseName, status.Namespace, namespace)
 	}
 
 	newRelease, err := helmClient.UpdateRelease(
