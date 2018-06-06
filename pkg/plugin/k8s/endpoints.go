@@ -49,7 +49,6 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 		return getErr
 	}
 
-	// todo(slukjanov): support not only node ports
 	if service.Spec.Type == api.ServiceTypeNodePort {
 		for _, port := range service.Spec.Ports {
 			sURL := fmt.Sprintf("%s:%d", p.ExternalAddress, port.NodePort)
@@ -102,7 +101,6 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 }
 
 func addEndpointsForServicePort(port api.ServicePort, sURL string, endpoints map[string]string) {
-	// todo(slukjanov): could we somehow detect real schema? I think no :(
 	if util.StringContainsAny(port.Name, "https") {
 		sURL = "https://" + sURL
 	} else if util.StringContainsAny(port.Name, "ui", "rest", "http", "grafana", "service") {
