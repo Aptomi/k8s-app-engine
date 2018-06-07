@@ -34,21 +34,16 @@ func NewDeleteAction(componentKey string, params util.NestedParameterMap) *Delet
 	}
 }
 
-// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
-func (a *DeleteAction) AfterCreated(actualState *resolve.PolicyResolution) {
-
-}
-
 // Apply applies the action
 func (a *DeleteAction) Apply(context *action.Context) error {
 	// delete from cloud
-	err := a.processDeployment(context)
+	instance, err := a.processDeployment(context)
 	if err != nil {
 		return fmt.Errorf("unable to delete component instance '%s': %s", a.ComponentKey, err)
 	}
 
 	// delete from the actual state
-	return deleteComponentFromActualState(a.ComponentKey, context)
+	return context.ActualStateUpdater.DeleteComponentInstance(instance.GetKey(), context.ActualState)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied
@@ -61,41 +56,45 @@ func (a *DeleteAction) DescribeChanges() util.NestedParameterMap {
 	}
 }
 
-func (a *DeleteAction) processDeployment(context *action.Context) error {
+func (a *DeleteAction) processDeployment(context *action.Context) (*resolve.ComponentInstance, error) {
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	if instance == nil {
+		panic(fmt.Sprintf("component instance not found in actual state: %s", a.ComponentKey))
+	}
+
 	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
-		// This is a service instance. Do nothing and report successful deletion
-		return nil
+		// This is a service instance. Do nothing and proceed with deletion
+		return instance, nil
 	}
 
 	if component.Code == nil {
-		// This is a non-code component. Do nothing and report successful deletion
-		return nil
+		// This is a non-code component. Do nothing and proceed with deletion
+		return instance, nil
 	}
 
 	context.EventLog.NewEntry().Infof("Destructing a running component instance: %s", instance.GetKey())
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
+		return nil, fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
 	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return p.Destroy(
+	return instance, p.Destroy(
 		&plugin.CodePluginInvocationParams{
 			DeployName:   instance.GetDeployName(),
 			Params:       instance.CalculatedCodeParams,

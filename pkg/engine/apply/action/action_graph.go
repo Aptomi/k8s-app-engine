@@ -47,9 +47,6 @@ func (node *GraphNode) AddAction(action Base, actualState *resolve.PolicyResolut
 	}
 
 	if add {
-		// call AfterCreated on the action
-		action.AfterCreated(actualState)
-
 		// schedule the action
 		node.Actions = append(node.Actions, action)
 	}

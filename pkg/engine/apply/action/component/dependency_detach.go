@@ -31,20 +31,13 @@ func NewDetachDependencyAction(componentKey string, dependencyID string) *Detach
 	}
 }
 
-// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
-func (a *DetachDependencyAction) AfterCreated(actualState *resolve.PolicyResolution) {
-
-}
-
 // Apply applies the action
 func (a *DetachDependencyAction) Apply(context *action.Context) error {
 	context.EventLog.NewEntry().Debugf("Detaching dependency '%s' from component instance: '%s'", a.DependencyID, a.ComponentKey)
 
-	// remove reference to dependency from the actual state
-	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	delete(instance.DependencyKeys, a.DependencyID)
-
-	return updateComponentInActualState(a.ComponentKey, context)
+	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, context.ActualState, func(obj *resolve.ComponentInstance) {
+		delete(obj.DependencyKeys, a.DependencyID)
+	})
 }
 
 // DescribeChanges returns text-based description of changes that will be applied

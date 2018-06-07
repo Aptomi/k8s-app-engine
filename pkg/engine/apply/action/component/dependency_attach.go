@@ -32,20 +32,13 @@ func NewAttachDependencyAction(componentKey string, dependencyID string) *Attach
 	}
 }
 
-// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
-func (a *AttachDependencyAction) AfterCreated(actualState *resolve.PolicyResolution) {
-
-}
-
 // Apply applies the action
 func (a *AttachDependencyAction) Apply(context *action.Context) error {
 	context.EventLog.NewEntry().Debugf("Attaching dependency '%s' to component instance: '%s'", a.DependencyID, a.ComponentKey)
 
-	// add reference to dependency into the actual state
-	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
-	instance.DependencyKeys[a.DependencyID] = true
-
-	return updateComponentInActualState(a.ComponentKey, context)
+	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, context.ActualState, func(obj *resolve.ComponentInstance) {
+		obj.DependencyKeys[a.DependencyID] = true
+	})
 }
 
 // DescribeChanges returns text-based description of changes that will be applied

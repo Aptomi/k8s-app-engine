@@ -2,10 +2,8 @@ package core
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
 func (ds *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
@@ -24,28 +22,6 @@ func (ds *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
 	}
 
 	return actualState, nil
-}
-
-func (ds *defaultStore) GetActualStateUpdater() actual.StateUpdater {
-	return &actualStateUpdater{ds.store}
-}
-
-type actualStateUpdater struct {
-	store store.Generic
-}
-
-func (updater *actualStateUpdater) Save(obj runtime.Storable) error {
-	if _, ok := obj.(*resolve.ComponentInstance); !ok {
-		return fmt.Errorf("only ComponentInstances could be updated using actual.StateUpdater, not: %T", obj)
-	}
-
-	_, err := updater.store.Save(obj)
-	return err
-}
-
-// Delete is used for reacting on object delete event (not supported for now)
-func (updater *actualStateUpdater) Delete(key string) error {
-	return updater.store.Delete(key)
 }
 
 func (ds *defaultStore) ResetActualState() error {

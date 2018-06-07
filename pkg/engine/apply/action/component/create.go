@@ -34,21 +34,16 @@ func NewCreateAction(componentKey string, params util.NestedParameterMap) *Creat
 	}
 }
 
-// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
-func (a *CreateAction) AfterCreated(actualState *resolve.PolicyResolution) {
-
-}
-
 // Apply applies the action
 func (a *CreateAction) Apply(context *action.Context) error {
 	// deploy to cloud
-	err := a.processDeployment(context)
+	instance, err := a.processDeployment(context)
 	if err != nil {
 		return fmt.Errorf("unable to deploy component instance '%s': %s", a.ComponentKey, err)
 	}
 
 	// update actual state
-	return createComponentInActualState(a.ComponentKey, context)
+	return context.ActualStateUpdater.CreateComponentInstance(instance, context.ActualState)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied
@@ -61,22 +56,26 @@ func (a *CreateAction) DescribeChanges() util.NestedParameterMap {
 	}
 }
 
-func (a *CreateAction) processDeployment(context *action.Context) error {
+func (a *CreateAction) processDeployment(context *action.Context) (*resolve.ComponentInstance, error) {
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
+	if instance == nil {
+		panic(fmt.Sprintf("component instance not found in desired state: %s", a.ComponentKey))
+	}
+
 	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
-		// If this is a service instance, do nothing
-		return nil
+		// If this is a service instance, do nothing and proceed to object creation
+		return instance, nil
 	}
 
 	if component.Code == nil {
-		// If this is not a code component, do nothing
-		return nil
+		// If this is not a code component, do nothing and proceed to object creation
+		return instance, nil
 	}
 
 	// Instantiate code component
@@ -84,19 +83,19 @@ func (a *CreateAction) processDeployment(context *action.Context) error {
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
+		return nil, fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
 	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return p.Create(
+	return instance, p.Create(
 		&plugin.CodePluginInvocationParams{
 			DeployName:   instance.GetDeployName(),
 			Params:       instance.CalculatedCodeParams,

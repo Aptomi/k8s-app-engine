@@ -45,7 +45,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 5, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 4, Failed: 0, Skipped: 0})
 
 	// check that actual state got updated
 	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should not be empty after apply()")
@@ -83,7 +83,7 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should be empty")
 
 	// check for errors
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 0, Failed: 1, Skipped: 4})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 0, Failed: 1, Skipped: 3})
 
 	// check that actual state didn't get updated
 	assert.Equal(t, 0, len(actualState.ComponentInstanceMap), "Actual state should not be touched by apply()")
@@ -115,7 +115,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 5, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 4, Failed: 0, Skipped: 0})
 
 	// Get key to a component
 	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)
@@ -202,7 +202,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 3, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 2, Failed: 0, Skipped: 0})
 
 	// Check that both dependencies were resolved successfully
 	assert.Contains(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
@@ -246,7 +246,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 	)
 
 	// Check that policy apply finished with expected results
-	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 5, Failed: 0, Skipped: 0})
+	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 4, Failed: 0, Skipped: 0})
 
 	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should have populated with components at this point")
 

@@ -241,8 +241,3 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 
 	return nil
 }
-
-// KeyForComponentKey returns object key by provided component instance key
-func KeyForComponentKey(componentKey string) string {
-	return runtime.KeyFromParts(runtime.SystemNS, ComponentInstanceObject.Kind, componentKey)
-}

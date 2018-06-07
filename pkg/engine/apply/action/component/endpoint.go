@@ -32,26 +32,19 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 	}
 }
 
-// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
-func (a *EndpointsAction) AfterCreated(actualState *resolve.PolicyResolution) {
-
-}
-
 // Apply applies the action
 func (a *EndpointsAction) Apply(context *action.Context) error {
-	// if component for some reason doesn't exist in actual state, report an error
-	if context.ActualState.ComponentInstanceMap[a.ComponentKey] == nil {
-		return fmt.Errorf("unable to get endpoints for component instance '%s': it doesn't exist in actual state", a.ComponentKey)
-	}
-
 	// fetch component endpoints and store them in component instance (actual state)
-	err := a.processEndpoints(context)
+	instance, endpoints, err := a.processEndpoints(context)
 	if err != nil {
 		return fmt.Errorf("unable to get endpoints for component instance '%s': %s", a.ComponentKey, err)
 	}
 
-	// update component instance in actual state
-	return updateComponentInActualState(a.ComponentKey, context)
+	// update component endpoints in actual state
+	return context.ActualStateUpdater.UpdateComponentInstance(instance.GetKey(), context.ActualState, func(obj *resolve.ComponentInstance) {
+		obj.EndpointsUpToDate = true
+		obj.Endpoints = endpoints
+	})
 }
 
 // DescribeChanges returns text-based description of changes that will be applied
@@ -64,37 +57,41 @@ func (a *EndpointsAction) DescribeChanges() util.NestedParameterMap {
 	}
 }
 
-func (a *EndpointsAction) processEndpoints(context *action.Context) error {
+func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.ComponentInstance, map[string]string, error) {
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	if instance == nil {
+		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)
+	}
+
 	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
-		return fmt.Errorf("retrieving endpoints for service instance is not supported")
+		return nil, nil, fmt.Errorf("retrieving endpoints for service instance is not supported")
 	}
 
 	// endpoints could be calculated only for components with code
 	if component.Code == nil {
-		return fmt.Errorf("retrieving endpoints for non-code components is not supported")
+		return nil, nil, fmt.Errorf("retrieving endpoints for non-code components is not supported")
 	}
 
 	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", instance.GetKey())
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
+		return nil, nil, fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
 	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	endpoints, err := p.Endpoints(
@@ -106,11 +103,8 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) error {
 		},
 	)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	instance.EndpointsUpToDate = true
-	instance.Endpoints = endpoints
-
-	return nil
+	return instance, endpoints, err
 }

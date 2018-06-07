@@ -36,25 +36,23 @@ func NewUpdateAction(componentKey string, paramsBefore util.NestedParameterMap, 
 	}
 }
 
-// AfterCreated allows to modify actual state after an action has been created and added to the tree of actions, but before it got executed
-func (a *UpdateAction) AfterCreated(actualState *resolve.PolicyResolution) {
-	instance := actualState.ComponentInstanceMap[a.ComponentKey]
-	if instance != nil {
-		// invalidate endpoints
-		instance.EndpointsUpToDate = false
-	}
-}
-
 // Apply applies the action
 func (a *UpdateAction) Apply(context *action.Context) error {
 	// update in the cloud
-	err := a.processDeployment(context)
+	instance, err := a.processDeployment(context)
 	if err != nil {
 		return fmt.Errorf("unable to update component instance '%s': %s", a.ComponentKey, err)
 	}
 
-	// update actual state
-	return updateComponentInActualState(a.ComponentKey, context)
+	// update component instance code params in actual state
+	if instance.CalculatedCodeParams != nil {
+		return context.ActualStateUpdater.UpdateComponentInstance(instance.GetKey(), context.ActualState, func(obj *resolve.ComponentInstance) {
+			obj.EndpointsUpToDate = false // invalidate endpoints, so we retrieve them again later
+			obj.CalculatedCodeParams = instance.CalculatedCodeParams
+		})
+	}
+
+	return nil
 }
 
 // DescribeChanges returns text-based description of changes that will be applied
@@ -69,40 +67,45 @@ func (a *UpdateAction) DescribeChanges() util.NestedParameterMap {
 	}
 }
 
-func (a *UpdateAction) processDeployment(context *action.Context) error {
+func (a *UpdateAction) processDeployment(context *action.Context) (*resolve.ComponentInstance, error) {
 	instance := context.DesiredState.ComponentInstanceMap[a.ComponentKey]
+	if instance == nil {
+		return nil, fmt.Errorf("component instance not found desired state: %s", a.ComponentKey)
+	}
+
 	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
 
 	if component == nil {
-		// This is a service instance. Do nothing
-		return nil
+		// This is a service instance. Do nothing and proceed with object update
+		return instance, nil
 	}
 
 	if component.Code == nil {
-		return nil
+		// This is a service instance. Do nothing and proceed with object update
+		return instance, nil
 	}
 
 	context.EventLog.NewEntry().Infof("Updating a running component instance: %s ", instance.GetKey())
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if clusterObj == nil {
-		return fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
+		return nil, fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
 	cluster := clusterObj.(*lang.Cluster)
 
 	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = p.Update(
+	return instance, p.Update(
 		&plugin.CodePluginInvocationParams{
 			DeployName:   instance.GetDeployName(),
 			Params:       instance.CalculatedCodeParams,
@@ -110,12 +113,4 @@ func (a *UpdateAction) processDeployment(context *action.Context) error {
 			EventLog:     context.EventLog,
 		},
 	)
-
-	if err != nil {
-		return err
-	}
-
-	context.ActualState.ComponentInstanceMap[a.ComponentKey].CalculatedCodeParams = instance.CalculatedCodeParams
-
-	return nil
 }
