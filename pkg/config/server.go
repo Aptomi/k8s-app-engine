@@ -45,12 +45,13 @@ type DB struct {
 }
 
 // Enforcer represents configs for Enforcer background process that periodically gets latest policy, calculating
-// difference between it and actual state and then applying calculated actions.
+// difference between it and actual state and then applying calculated actions
 type Enforcer struct {
-	Interval  time.Duration `validate:"-"`
-	Disabled  bool          `validate:"-"`
-	Noop      bool          `validate:"-"`
-	NoopSleep time.Duration `validate:"-"`
+	Interval             time.Duration `validate:"-"`
+	Disabled             bool          `validate:"-"`
+	Noop                 bool          `validate:"-"`
+	NoopSleep            time.Duration `validate:"-"`
+	MaxConcurrentActions int           `validate:"-"`
 }
 
 // ServerAuth represents server auth config

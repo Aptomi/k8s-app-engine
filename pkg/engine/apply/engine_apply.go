@@ -56,7 +56,7 @@ func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyReso
 // As actions get executed, they will instantiate/update/delete components according to the resolved
 // policy, as well as configure the underlying cloud components appropriately. In case of errors (e.g. cloud is not
 // available), actual state may not be equal to desired state after performing all the actions.
-func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResult) {
+func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolution, *action.ApplyResult) {
 	// process all actions
 	context := action.NewContext(
 		apply.desiredPolicy,
@@ -68,14 +68,8 @@ func (apply *EngineApply) Apply() (*resolve.PolicyResolution, *action.ApplyResul
 		apply.eventLog,
 	)
 
-	// TODO: apply in parallel, https://github.com/Aptomi/aptomi/issues/310
-	// Note that this function will be called in different go routines by apply
-	// So we will need to
-	// (1) Remove WrapSequential to make action execution parallel
-	// (2) Restrict the number of parallel actions per cluster (make sure plugin can take care of that)
-	// (3) Ensure that plugins are "thread-safe"
-	// (4) Ensure that when we are updating states (e.g. Desired -> Actual), this is also "thread-safe"
-	result := apply.actionPlan.Apply(action.WrapSequential(func(act action.Base) error {
+	// Note that the action plan will call function in different go routines by apply
+	result := apply.actionPlan.Apply(action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Base) error {
 		err := apply.executeAction(act, context)
 		if err != nil {
 			apply.eventLog.NewEntry().Errorf("error while applying action '%s': %s", act, err)

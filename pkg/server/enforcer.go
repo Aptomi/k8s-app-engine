@@ -110,7 +110,7 @@ func (server *Server) enforce() error {
 	pluginRegistry := server.pluginRegistryFactory()
 	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.enforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
-	_, _ = applier.Apply()
+	_, _ = applier.Apply(server.cfg.Enforcer.MaxConcurrentActions)
 
 	// save apply log
 	nextRevision.ApplyLog = applyLog.AsAPIEvents()

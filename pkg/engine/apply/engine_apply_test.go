@@ -344,7 +344,7 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 
 func applyAndCheck(t *testing.T, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {
 	t.Helper()
-	actualState, result := apply.Apply()
+	actualState, result := apply.Apply(50)
 
 	ok := assert.Equal(t, expectedResult.Success, result.Success, "Number of successfully executed actions")
 	ok = ok && assert.Equal(t, expectedResult.Failed, result.Failed, "Number of failed actions")

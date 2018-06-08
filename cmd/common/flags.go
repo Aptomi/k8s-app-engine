@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+// AddIntFlag adds int flag to provided cobra command and registers with provided env variable name
+func AddIntFlag(command *cobra.Command, key, flagName, flagShorthand string, defaultValue int, env, usage string) {
+	command.PersistentFlags().IntP(flagName, flagShorthand, defaultValue, usage)
+	bindFlagEnv(command, key, flagName, env)
+}
+
 // AddStringFlag adds string flag to provided cobra command and registers with provided env variable name
 func AddStringFlag(command *cobra.Command, key, flagName, flagShorthand, defaultValue, env, usage string) {
 	command.PersistentFlags().StringP(flagName, flagShorthand, defaultValue, usage)

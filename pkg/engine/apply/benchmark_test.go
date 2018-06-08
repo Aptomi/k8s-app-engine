@@ -442,7 +442,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 
 func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {
 	b.Helper()
-	actualState, result := apply.Apply()
+	actualState, result := apply.Apply(50)
 
 	t := &testing.T{}
 	ok := assert.Equal(t, expectedResult.Success, result.Success, "Number of successfully executed actions")
