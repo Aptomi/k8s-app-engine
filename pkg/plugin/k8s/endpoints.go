@@ -68,10 +68,10 @@ func (p *Plugin) addEndpointsFromService(kubeClient kubernetes.Interface, info *
 			}
 			if externalAddress == "" {
 				return fmt.Errorf("got empty Ingress for Service type LoadBalancer (%s in %s)", info.Name, info.Namespace)
-			} else {
-				// handle only first ingress entry for LB
-				break
 			}
+
+			// handle only first ingress entry for LB
+			break
 		}
 
 		for _, port := range service.Spec.Ports {
