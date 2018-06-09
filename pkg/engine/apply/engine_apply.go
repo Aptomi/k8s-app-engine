@@ -1,7 +1,6 @@
 package apply
 
 import (
-	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -9,7 +8,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
-	"runtime/debug"
 )
 
 // EngineApply executes actions to get from an actual state to desired state
@@ -70,7 +68,7 @@ func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolu
 
 	// Note that the action plan will call function in different go routines by apply
 	result := apply.actionPlan.Apply(action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Base) error {
-		err := apply.executeAction(act, context)
+		err := act.Apply(context)
 		if err != nil {
 			apply.eventLog.NewEntry().Errorf("error while applying action '%s': %s", act, err)
 		}
@@ -79,15 +77,4 @@ func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolu
 
 	// No errors occurred
 	return apply.actualState, result
-}
-
-func (apply *EngineApply) executeAction(action action.Base, context *action.Context) (errResult error) {
-	// make sure we are converting panics into errors
-	defer func() {
-		if err := recover(); err != nil {
-			errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
-		}
-	}()
-
-	return action.Apply(context)
 }

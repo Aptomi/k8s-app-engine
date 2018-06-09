@@ -1,6 +1,8 @@
 package action
 
 import (
+	"fmt"
+	"runtime/debug"
 	"sync"
 )
 
@@ -30,11 +32,21 @@ func (plan *Plan) GetActionGraphNode(key string) *GraphNode {
 
 // Apply applies the action plan. It may call fn in multiple go routines, executing the plan in parallel
 func (plan *Plan) Apply(fn ApplyFunction, resultUpdater ApplyResultUpdater) *ApplyResult {
+	// make sure we are converting panics into errors
+	fnModified := func(act Base) (errResult error) {
+		defer func() {
+			if err := recover(); err != nil {
+				errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+			}
+		}()
+		return fn(act)
+	}
+
 	// update total number of actions and start the revision
 	resultUpdater.SetTotal(plan.NumberOfActions())
 
 	// apply the plan and calculate result (success/failed/skipped actions)
-	plan.applyInternal(fn, resultUpdater)
+	plan.applyInternal(fnModified, resultUpdater)
 
 	// tell results updater that we are done and return the results
 	return resultUpdater.Done()
