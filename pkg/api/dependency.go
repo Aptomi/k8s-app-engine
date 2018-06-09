@@ -13,7 +13,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"runtime/debug"
 	"strings"
+	"sync"
 )
 
 // DependencyQueryFlag determines whether to query just dependency deployment status, or both deployment + readiness/health checks status
@@ -83,7 +85,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		result.Status[runtime.KeyForStorable(d)] = &DependencyStatus{
 			Found:     true,
 			Deployed:  true,
-			Ready:     false,
+			Ready:     true,
 			Endpoints: make(map[string]map[string]string),
 		}
 	}
@@ -101,7 +103,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	// fetch readiness status for dependencies, if we were asked to do so
 	if flag == DependencyQueryDeploymentStatusAndReadiness {
 		plugins := api.pluginRegistryFactory()
-		fetchReadinessStatusForDependencies(result, plugins, policy, actualState, desiredState)
+		fetchReadinessStatusForDependencies(result, plugins, policy, actualState)
 	}
 
 	// fetch endpoints for dependencies
@@ -166,35 +168,107 @@ func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualStat
 		action.NewApplyResultUpdaterImpl(),
 	)
 
-}
+	// TODO: once endpoints are retrieved in a separate go routing, we need to uncomment this
 
-func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plugin.Registry, policy *lang.Policy, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
-	for _, instance := range actualState.ComponentInstanceMap {
-		for dKey := range instance.DependencyKeys {
-			if _, ok := result.Status[dKey]; ok {
-				codePlugin, err := pluginForComponentInstance(instance, policy, plugins)
-				if err != nil {
-					panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), err))
+	/*
+		for _, instance := range actualState.ComponentInstanceMap {
+			if instance.IsCode && !instance.EndpointsUpToDate {
+				for dKey := range instance.DependencyKeys {
+					if _, ok := result.Status[dKey]; ok {
+						result.Status[dKey].Deployed = false
+					}
 				}
-				if codePlugin == nil {
-					continue
-				}
-
-				instanceStatus, err := codePlugin.Status(
-					&plugin.CodePluginInvocationParams{
-						DeployName:   instance.GetDeployName(),
-						Params:       instance.CalculatedCodeParams,
-						PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
-						EventLog:     event.NewLog(logrus.WarnLevel, "resources-status"),
-					},
-				)
-				if err != nil {
-					panic(fmt.Sprintf("Error while getting deployment resources status for component instance %s: %s", instance.GetKey(), err))
-				}
-
-				result.Status[dKey].Ready = result.Status[dKey].Deployed && instanceStatus
 			}
 		}
+	*/
+}
+
+func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plugin.Registry, policy *lang.Policy, actualState *resolve.PolicyResolution) {
+	// if dependency is not deployed, it means it's not ready
+	for dKey := range result.Status {
+		result.Status[dKey].Ready = result.Status[dKey].Ready && result.Status[dKey].Deployed
+	}
+
+	// update readiness
+	dUpdateMutex := sync.Mutex{}
+	var wg sync.WaitGroup
+	errors := make(chan error, 1)
+	for _, instance := range actualState.ComponentInstanceMap {
+		// if component instance is not code, skip it
+		if !instance.IsCode {
+			continue
+		}
+
+		// we only need to query status of this component, if at least one dependency is still Ready
+		foundDependenciesToCheck := false
+		for dKey := range instance.DependencyKeys {
+			if _, ok := result.Status[dKey]; ok && result.Status[dKey].Ready {
+				foundDependenciesToCheck = true
+				break
+			}
+		}
+
+		// if we don't need to query status of this component instance, let's just return
+		if !foundDependenciesToCheck {
+			return
+		}
+
+		wg.Add(1)
+		go func(instance *resolve.ComponentInstance) {
+			// make sure we are converting panics into errors
+			defer wg.Done()
+			defer func() {
+				if err := recover(); err != nil {
+					select {
+					case errors <- fmt.Errorf("panic: %s\n%s", err, string(debug.Stack())):
+						// message sent
+					default:
+						// error was already there before, do nothing (but we have to keep an empty default block)
+					}
+				}
+			}()
+
+			// query status of this component instance
+			codePlugin, err := pluginForComponentInstance(instance, policy, plugins)
+			if err != nil {
+				panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), err))
+			}
+			if codePlugin == nil {
+				return
+			}
+
+			instanceStatus, err := codePlugin.Status(
+				&plugin.CodePluginInvocationParams{
+					DeployName:   instance.GetDeployName(),
+					Params:       instance.CalculatedCodeParams,
+					PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
+					EventLog:     event.NewLog(logrus.WarnLevel, "resources-status"),
+				},
+			)
+			if err != nil {
+				panic(fmt.Sprintf("Error while getting deployment resources status for component instance %s: %s", instance.GetKey(), err))
+			}
+
+			// update status of dependencies
+			dUpdateMutex.Lock()
+			defer dUpdateMutex.Unlock()
+			for dKey := range instance.DependencyKeys {
+				if _, ok := result.Status[dKey]; ok {
+					result.Status[dKey].Ready = result.Status[dKey].Ready && instanceStatus
+				}
+			}
+		}(instance)
+	}
+
+	// wait until all go routines are over
+	wg.Wait()
+
+	// see if there were any errors
+	select {
+	case err := <-errors:
+		panic(err)
+	default:
+		// no error, do nothing (but we have to keep an empty default block)
 	}
 }
 
