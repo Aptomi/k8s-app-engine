@@ -208,7 +208,7 @@ func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plu
 
 		// if we don't need to query status of this component instance, let's just return
 		if !foundDependenciesToCheck {
-			return
+			continue
 		}
 
 		wg.Add(1)
