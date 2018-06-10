@@ -62,6 +62,13 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		panic(fmt.Sprintf("error while loading latest policy from the store: %s", errPolicy))
 	}
 
+	// load actual and desired states
+	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependencies-status")).ResolveAllDependencies()
+	actualState, err := api.store.GetActualState()
+	if err != nil {
+		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
+	}
+
 	// initialize result
 	result := &DependenciesStatus{
 		TypeKind: DependenciesStatusObject.GetTypeKind(),
@@ -82,19 +89,13 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		}
 
 		d := dObj.(*lang.Dependency)
+		resolved := desiredState.GetDependencyInstanceMap()[runtime.KeyForStorable(d)].Resolved
 		result.Status[runtime.KeyForStorable(d)] = &DependencyStatus{
 			Found:     true,
-			Deployed:  true,
-			Ready:     true,
+			Deployed:  resolved,
+			Ready:     resolved,
 			Endpoints: make(map[string]map[string]string),
 		}
-	}
-
-	// load actual and desired states
-	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependencies-status")).ResolveAllDependencies()
-	actualState, err := api.store.GetActualState()
-	if err != nil {
-		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
 	}
 
 	// fetch deployment status for dependencies
@@ -115,7 +116,8 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 
 func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualState *resolve.PolicyResolution, desiredState *resolve.PolicyResolution) {
 	// compare desired vs. actual state and see what's the dependency status for every provided dependency ID
-	diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan.Apply(
+	actionPlan := diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan
+	actionPlan.Apply(
 		action.WrapSequential(func(act action.Base) error {
 			// if it's attach action is pending on component, let's see which particular dependency it affects
 			if dAction, ok := act.(*component.AttachDependencyAction); ok {
