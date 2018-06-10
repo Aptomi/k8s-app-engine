@@ -10,6 +10,8 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"runtime/debug"
+	"sync"
 )
 
 type dependencyResourcesWrapper struct {
@@ -49,31 +51,68 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 	plugins := api.pluginRegistryFactory()
 	depKey := runtime.KeyForStorable(dependency)
 	resources := make(plugin.Resources)
+	rMergeMutex := sync.Mutex{}
+	var wg sync.WaitGroup
+	errors := make(chan error, 1)
 	for _, instance := range actualState.ComponentInstanceMap {
 		if _, ok := instance.DependencyKeys[depKey]; ok {
-			codePlugin, pluginErr := pluginForComponentInstance(instance, policy, plugins)
-			if pluginErr != nil {
-				panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), pluginErr))
-			}
-			if codePlugin == nil {
+			// if component instance is not code, skip it
+			if !instance.IsCode {
 				continue
 			}
 
-			instanceResources, resErr := codePlugin.Resources(
-				&plugin.CodePluginInvocationParams{
-					DeployName:   instance.GetDeployName(),
-					Params:       instance.CalculatedCodeParams,
-					PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
-					EventLog:     event.NewLog(logrus.WarnLevel, "resources"),
-				},
-			)
+			wg.Add(1)
+			go func(instance *resolve.ComponentInstance) {
+				// make sure we are converting panics into errors
+				defer wg.Done()
+				defer func() {
+					if err := recover(); err != nil {
+						select {
+						case errors <- fmt.Errorf("panic: %s\n%s", err, string(debug.Stack())):
+							// message sent
+						default:
+							// error was already there before, do nothing (but we have to keep an empty default block)
+						}
+					}
+				}()
 
-			if resErr != nil {
-				panic(fmt.Sprintf("Error while getting deployment resources for component instance %s: %s", instance.GetKey(), resErr))
-			}
+				codePlugin, pluginErr := pluginForComponentInstance(instance, policy, plugins)
+				if pluginErr != nil {
+					panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), pluginErr))
+				}
 
-			resources.Merge(instanceResources)
+				instanceResources, resErr := codePlugin.Resources(
+					&plugin.CodePluginInvocationParams{
+						DeployName:   instance.GetDeployName(),
+						Params:       instance.CalculatedCodeParams,
+						PluginParams: map[string]string{plugin.ParamTargetSuffix: instance.Metadata.Key.TargetSuffix},
+						EventLog:     event.NewLog(logrus.WarnLevel, "resources"),
+					},
+				)
+
+				if resErr != nil {
+					panic(fmt.Sprintf("Error while getting deployment resources for component instance %s: %s", instance.GetKey(), resErr))
+				}
+
+				// merge resources
+				rMergeMutex.Lock()
+				defer rMergeMutex.Unlock()
+				resources.Merge(instanceResources)
+
+			}(instance)
+
 		}
+	}
+
+	// wait until all go routines are over
+	wg.Wait()
+
+	// see if there were any errors
+	select {
+	case err := <-errors:
+		panic(err)
+	default:
+		// no error, do nothing (but we have to keep an empty default block)
 	}
 
 	api.contentType.WriteOne(writer, request, &dependencyResourcesWrapper{resources})
