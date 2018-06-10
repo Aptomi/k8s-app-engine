@@ -1,5 +1,5 @@
-hash: 74542088413a5134b0597abcf770f687ff68d2eb03a51b245fcdc6b1fe78515b
-updated: 2018-06-10T00:59:37.373239-07:00
+hash: 479f76e6df56e0b395d43ad9a2b8daf559952ff6d360b53337ad953fb74178bc
+updated: 2018-06-10T01:15:13.46796-07:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -13,8 +13,6 @@ imports:
   version: fd01fc79c553a8e99d512a07e8e0c63d4a3ccfc5
 - name: github.com/BurntSushi/toml
   version: b26d9c308763d68093482582cea63d69be07a0f0
-- name: github.com/chai2010/gettext-go
-  version: bf70f2a70fb1b1f36d90d671a72795984eab0fcb
 - name: github.com/coreos/bbolt
   version: 48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d
 - name: github.com/d4l3k/messagediff
@@ -92,8 +90,6 @@ imports:
   version: 13c6e3589ad90f49bd3e3bbe2c2cb3d7a4142272
 - name: github.com/go-openapi/spec
   version: 1de3e0542de65ad8d75452a595886fdd0befb363
-- name: github.com/go-openapi/strfmt
-  version: 481808443b00a14745fada967cb5eeff0f9b1df2
 - name: github.com/go-openapi/swag
   version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
 - name: github.com/go-playground/locales
@@ -227,8 +223,6 @@ imports:
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/mitchellh/mapstructure
   version: bb74f1db0675b241733089d5a1faa5dd8b0ef57b
-- name: github.com/naoina/go-stringutil
-  version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
 - name: github.com/opencontainers/go-digest
   version: a6d0ee40d4207ea02364bd3b9e8e77b9159ba1eb
 - name: github.com/opencontainers/image-spec
@@ -396,10 +390,6 @@ imports:
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ldap.v2
   version: bb7a9ca6e4fbc2129e3db588a34bc970ffe811a9
-- name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
-  subpackages:
-  - bson
 - name: gopkg.in/square/go-jose.v2
   version: f8f38de21b4dcd69d0413faf231983f5fd6634b1
   subpackages:
@@ -852,8 +842,6 @@ imports:
   - exec/testing
 - name: vbom.ml/util
   version: db5cfe13f5cc80a4990d98e2e1b0707a4d1a5394
-  repo: https://github.com/fvbommel/util.git
-  vcs: git
   subpackages:
   - sortorder
 testImports:
