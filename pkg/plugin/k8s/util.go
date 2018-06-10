@@ -3,10 +3,10 @@ package k8s
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/event"
+	api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	api "k8s.io/api/core/v1"
 	"k8s.io/helm/pkg/kube"
 )
 
