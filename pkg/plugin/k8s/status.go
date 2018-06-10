@@ -102,9 +102,8 @@ func isPersistentVolumeClaimReady(pvc *v1.PersistentVolumeClaim) bool {
 func isReadyUsingStatusViewer(internalClientSet kubernetes.Interface, groupKind schema.GroupKind, namespace, name string) (bool, error) {
 	statusViewer, err := kubectl.StatusViewerFor(groupKind, internalClientSet)
 	if err != nil {
-		if util.StringContainsAny(err.Error(), "no status viewer has been implemented",
-			"Status is available only for RollingUpdate strategy type", "updateStrategy does not have a Status") {
-			// skip errors for unsupported objects and strategies
+		if util.StringContainsAny(err.Error(), "no status viewer has been implemented") {
+			// skip errors for unsupported objects
 			return true, nil
 		}
 
@@ -113,6 +112,11 @@ func isReadyUsingStatusViewer(internalClientSet kubernetes.Interface, groupKind 
 
 	_, ready, err := statusViewer.Status(namespace, name, 0)
 	if err != nil {
+		if util.StringContainsAny(err.Error(), "Status is available only for RollingUpdate strategy type", "updateStrategy does not have a Status") {
+			// skip errors for unsupported strategies
+			return true, nil
+		}
+
 		return false, err
 	}
 
