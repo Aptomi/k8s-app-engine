@@ -1,5 +1,5 @@
-hash: 479f76e6df56e0b395d43ad9a2b8daf559952ff6d360b53337ad953fb74178bc
-updated: 2018-06-10T01:15:13.46796-07:00
+hash: f2231ddd072d3f25016d6e4c431b21eb0a9890a41d4cf684ebc34613bfa213ec
+updated: 2018-06-10T01:24:41.946478-07:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -130,10 +130,6 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/btree
   version: 7d79101e329e5a3adf994758c578dab82b90c017
-- name: github.com/google/go-cmp
-  version: 3af367b6b30c263d47e8895973edcca9a49cf029
-  subpackages:
-  - cmp
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/googleapis/gnostic
@@ -183,8 +179,6 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/json-iterator/go
   version: 13f86432b882000a51c6e610c620974462691a97
-- name: github.com/juju/ratelimit
-  version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
 - name: github.com/julienschmidt/httprouter
   version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/kr/fs
@@ -272,8 +266,6 @@ imports:
   version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
 - name: github.com/russross/blackfriday
   version: 300106c228d52c8941d4b3de6054a6062a86dda3
-- name: github.com/satori/go.uuid
-  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/shurcooL/sanitized_anchor_name
   version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
 - name: github.com/sirupsen/logrus
@@ -293,8 +285,6 @@ imports:
   version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: github.com/spf13/viper
   version: b5e8006cbee93ec955a89ab31e0e3ce3204f3736
-- name: github.com/technosophos/moniker
-  version: a5dbd03a2245d554160e3ae6bfdcf969fe58b431
 - name: golang.org/x/crypto
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
@@ -325,8 +315,6 @@ imports:
   - trace
   - webdav
   - webdav/internal/xml
-- name: golang.org/x/oauth2
-  version: 1e0a3fa8ba9a5c9eb35c271780101fdaf1b205d7
 - name: golang.org/x/sys
   version: 95c6576299259db960f6c5b9b69ea52422860fce
   subpackages:
