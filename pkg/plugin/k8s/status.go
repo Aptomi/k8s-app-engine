@@ -6,9 +6,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/api/core/v1"
 	"k8s.io/kubernetes/pkg/apis/apps"
-	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/kubectl"
 	"strings"
+	"k8s.io/client-go/kubernetes"
 )
 
 // ReadinessStatusForManifest returns readiness status of all resources for specified manifest
@@ -27,7 +27,7 @@ func (p *Plugin) ReadinessStatusForManifest(namespace, deployName, targetManifes
 
 	ready := true
 
-	internalClientSet, clientErr := internalclientset.NewForConfig(p.RestConfig)
+	internalClientSet, clientErr := kubernetes.NewForConfig(p.RestConfig)
 	if clientErr != nil {
 		return false, clientErr
 	}
@@ -98,7 +98,7 @@ func isPersistentVolumeClaimReady(pvc *v1.PersistentVolumeClaim) bool {
 	return pvc.Status.Phase == v1.ClaimBound
 }
 
-func isReadyUsingStatusViewer(internalClientSet *internalclientset.Clientset, groupKind schema.GroupKind, namespace, name string) (bool, error) {
+func isReadyUsingStatusViewer(internalClientSet kubernetes.Interface, groupKind schema.GroupKind, namespace, name string) (bool, error) {
 	statusViewer, err := kubectl.StatusViewerFor(groupKind, internalClientSet)
 	if err != nil {
 		return false, err
