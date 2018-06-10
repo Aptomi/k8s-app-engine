@@ -229,9 +229,6 @@ func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plu
 			if err != nil {
 				panic(fmt.Sprintf("Can't get plugin for component instance %s: %s", instance.GetKey(), err))
 			}
-			if codePlugin == nil {
-				return
-			}
 
 			instanceStatus, err := codePlugin.Status(
 				&plugin.CodePluginInvocationParams{
