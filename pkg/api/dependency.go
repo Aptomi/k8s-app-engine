@@ -168,19 +168,15 @@ func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualStat
 		action.NewApplyResultUpdaterImpl(),
 	)
 
-	// TODO: once endpoints are retrieved in a separate go routing, we need to uncomment this
-
-	/*
-		for _, instance := range actualState.ComponentInstanceMap {
-			if instance.IsCode && !instance.EndpointsUpToDate {
-				for dKey := range instance.DependencyKeys {
-					if _, ok := result.Status[dKey]; ok {
-						result.Status[dKey].Deployed = false
-					}
+	for _, instance := range actualState.ComponentInstanceMap {
+		if instance.IsCode && !instance.EndpointsUpToDate {
+			for dKey := range instance.DependencyKeys {
+				if _, ok := result.Status[dKey]; ok {
+					result.Status[dKey].Deployed = false
 				}
 			}
 		}
-	*/
+	}
 }
 
 func fetchReadinessStatusForDependencies(result *DependenciesStatus, plugins plugin.Registry, policy *lang.Policy, actualState *resolve.PolicyResolution) {

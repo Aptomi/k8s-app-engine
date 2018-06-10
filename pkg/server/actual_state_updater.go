@@ -1,7 +1,18 @@
 package server
 
 import (
+	"fmt"
+	"github.com/Aptomi/aptomi/pkg/engine/actual"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
+	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/plugin"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/Sirupsen/logrus"
+	"runtime/debug"
+	"sync"
 	"time"
 )
 
@@ -33,7 +44,77 @@ func (server *Server) actualStateUpdate() error {
 		}
 	}()
 
+	// Get desired policy
+	desiredPolicy, _, err := server.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		return fmt.Errorf("error while getting last policy: %s", err)
+	}
+
+	// if policy is not found, it means it somehow was not initialized correctly. let's return error
+	if desiredPolicy == nil {
+		return fmt.Errorf("last policy is nil, does not exist in the store")
+	}
+
+	// Get actual state
+	actualState, err := server.store.GetActualState()
+	if err != nil {
+		return fmt.Errorf("error while getting actual state: %s", err)
+	}
+
+	// Make an event log
+	eventLog := event.NewLog(log.DebugLevel, fmt.Sprintf("update-%d", server.actualStateUpdateIdx)).AddConsoleHook(server.cfg.GetLogLevel())
+
+	// Load endpoints for all components
+	refreshEndpoints(desiredPolicy, actualState, server.store.GetActualStateUpdater(), server.pluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions)
+
 	log.Infof("(update-%d) Actual state updated", server.actualStateUpdateIdx)
 
 	return nil
+}
+
+func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, plugins plugin.Registry, eventLog *event.Log, maxConcurrentActions int) {
+	context := action.NewContext(
+		desiredPolicy,
+		nil, // not needed for endpoints action
+		actualState,
+		actualStateUpdater,
+		nil, // not needed for endpoints action
+		plugins,
+		eventLog,
+	)
+
+	// make sure we are converting panics into errors
+	fn := action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Base) (errResult error) {
+		defer func() {
+			if err := recover(); err != nil {
+				errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+			}
+		}()
+		err := act.Apply(context)
+		if err != nil {
+			context.EventLog.NewEntry().Errorf("error while applying action '%s': %s", act, err)
+		}
+		return err
+	})
+
+	// generate the list of actions
+	actions := []action.Base{}
+	for _, instance := range actualState.ComponentInstanceMap {
+		if instance.IsCode && !instance.EndpointsUpToDate {
+			actions = append(actions, component.NewEndpointsAction(instance.GetKey()))
+		}
+	}
+
+	// run actions
+	var wg sync.WaitGroup
+	for _, act := range actions {
+		wg.Add(1)
+		go func(act action.Base) {
+			defer wg.Done()
+			_ = fn(act)
+		}(act)
+	}
+
+	// wait until all go routines are over
+	wg.Wait()
 }

@@ -58,6 +58,8 @@ func (a *EndpointsAction) DescribeChanges() util.NestedParameterMap {
 }
 
 func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.ComponentInstance, map[string]string, error) {
+	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", a.ComponentKey)
+
 	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
 	if instance == nil {
 		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)
@@ -77,8 +79,6 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 	if component.Code == nil {
 		return nil, nil, fmt.Errorf("retrieving endpoints for non-code components is not supported")
 	}
-
-	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", instance.GetKey())
 
 	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
@@ -105,6 +105,8 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 	if err != nil {
 		return nil, nil, err
 	}
+
+	context.EventLog.NewEntry().Infof("Received %d endpoints for component instance: %s", len(endpoints), a.ComponentKey)
 
 	return instance, endpoints, err
 }

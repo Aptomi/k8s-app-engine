@@ -58,12 +58,12 @@ func (server *Server) desiredStateEnforce() error {
 
 	desiredPolicy, desiredPolicyGen, err := server.store.GetPolicy(runtime.LastGen)
 	if err != nil {
-		return fmt.Errorf("error while getting desiredPolicy: %s", err)
+		return fmt.Errorf("error while getting last policy: %s", err)
 	}
 
 	// if policy is not found, it means it somehow was not initialized correctly. let's return error
 	if desiredPolicy == nil {
-		return fmt.Errorf("desiredPolicy is nil, does not exist in the store")
+		return fmt.Errorf("last policy is nil, does not exist in the store")
 	}
 
 	actualState, err := server.store.GetActualState()
