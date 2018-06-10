@@ -2,13 +2,14 @@ package k8s
 
 import (
 	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/Aptomi/aptomi/pkg/util"
+	"k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/pkg/apis/apps"
 	"k8s.io/kubernetes/pkg/kubectl"
 	"strings"
-	"k8s.io/client-go/kubernetes"
 )
 
 // ReadinessStatusForManifest returns readiness status of all resources for specified manifest
@@ -101,6 +102,12 @@ func isPersistentVolumeClaimReady(pvc *v1.PersistentVolumeClaim) bool {
 func isReadyUsingStatusViewer(internalClientSet kubernetes.Interface, groupKind schema.GroupKind, namespace, name string) (bool, error) {
 	statusViewer, err := kubectl.StatusViewerFor(groupKind, internalClientSet)
 	if err != nil {
+		if util.StringContainsAny(err.Error(), "no status viewer has been implemented",
+			"Status is available only for RollingUpdate strategy type", "updateStrategy does not have a Status") {
+			// skip errors for unsupported objects and strategies
+			return true, nil
+		}
+
 		return false, err
 	}
 
