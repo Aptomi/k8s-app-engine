@@ -39,6 +39,11 @@ func (p *Plugin) EnsureNamespace(client kubernetes.Interface, namespace string) 
 			},
 		}
 		_, createErr := client.CoreV1().Namespaces().Create(ns)
+		// it's okay if namespace was already created by somebody else in background
+		if createErr != nil && errors.IsAlreadyExists(createErr) {
+			return nil
+		}
+
 		return createErr
 	}
 
