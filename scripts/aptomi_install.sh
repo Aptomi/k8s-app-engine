@@ -243,7 +243,10 @@ db:
   connection: ${APTOMI_DB_DIR}/db.bolt
 
 enforcer:
-  noop: false
+  interval: 60s
+
+updater:
+  interval: 60s
 
 users:
   file:

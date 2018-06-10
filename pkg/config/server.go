@@ -7,17 +7,18 @@ import (
 
 // Server represents configs for the server
 type Server struct {
-	Debug                bool            `validate:"-"`
-	API                  API             `validate:"required"`
-	UI                   UI              `validate:"omitempty"` // if UI is not defined, then UI will not be started
-	DB                   DB              `validate:"required"`
-	Plugins              Plugins         `validate:"required"`
-	Users                UserSources     `validate:"required"`
-	SecretsDir           string          `validate:"omitempty,dir"` // secrets is not a first-class citizen yet, so it's not required
-	Enforcer             Enforcer        `validate:"required"`
-	DomainAdminOverrides map[string]bool `validate:"-"`
-	Auth                 ServerAuth      `validate:"-"`
-	Profile              Profile         `validate:"-"`
+	Debug                bool                 `validate:"-"`
+	API                  API                  `validate:"required"`
+	UI                   UI                   `validate:"omitempty"` // if UI is not defined, then UI will not be started
+	DB                   DB                   `validate:"required"`
+	Plugins              Plugins              `validate:"required"`
+	Users                UserSources          `validate:"required"`
+	SecretsDir           string               `validate:"omitempty,dir"` // secrets is not a first-class citizen yet, so it's not required
+	Enforcer             DesiredStateEnforcer `validate:"required"`
+	Updater              ActualStateUpdater   `validate:"required"`
+	DomainAdminOverrides map[string]bool      `validate:"-"`
+	Auth                 ServerAuth           `validate:"-"`
+	Profile              Profile              `validate:"-"`
 }
 
 // IsDebug returns true if debug mode enabled
@@ -44,13 +45,21 @@ type DB struct {
 	Connection string `validate:"required"`
 }
 
-// Enforcer represents configs for Enforcer background process that periodically gets latest policy, calculating
+// DesiredStateEnforcer represents config for desired state enforcer background process that periodically gets latest policy, calculating
 // difference between it and actual state and then applying calculated actions
-type Enforcer struct {
-	Interval             time.Duration `validate:"-"`
+type DesiredStateEnforcer struct {
 	Disabled             bool          `validate:"-"`
+	Interval             time.Duration `validate:"-"`
 	Noop                 bool          `validate:"-"`
 	NoopSleep            time.Duration `validate:"-"`
+	MaxConcurrentActions int           `validate:"-"`
+}
+
+// ActualStateUpdater represents config for actual state updater background process that periodically refreshes actual state
+// (e.g. retrieves endpoints for all components)
+type ActualStateUpdater struct {
+	Disabled             bool          `validate:"-"`
+	Interval             time.Duration `validate:"-"`
 	MaxConcurrentActions int           `validate:"-"`
 }
 

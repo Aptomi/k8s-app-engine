@@ -101,7 +101,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 		})
 
 		// signal to the channel that actual state has changed, that will trigger the enforcement right away
-		api.runEnforcement <- true
+		api.runDesiredStateEnforcement <- true
 	}
 
 }

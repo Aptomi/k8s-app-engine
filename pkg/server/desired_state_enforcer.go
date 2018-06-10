@@ -12,21 +12,17 @@ import (
 	"time"
 )
 
-func logError(err interface{}) {
-	log.Errorf("Error while enforcing policy: %s", err)
-}
-
-func (server *Server) enforceLoop() error {
+func (server *Server) desiredStateEnforceLoop() error {
 	for {
-		err := server.enforce()
+		err := server.desiredStateEnforce()
 		if err != nil {
-			logError(err)
+			log.Errorf("error while enforcing desired state: %s", err)
 		}
 
 		// sleep for a specified time or wait until policy has changed, whichever comes first
 		timer := time.NewTimer(server.cfg.Enforcer.Interval)
 		select {
-		case <-server.runEnforcement:
+		case <-server.runDesiredStateEnforcement:
 			break // nolint: megacheck
 		case <-timer.C:
 			break // nolint: megacheck
@@ -35,12 +31,12 @@ func (server *Server) enforceLoop() error {
 	}
 }
 
-func (server *Server) enforce() error {
-	server.enforcementIdx++
+func (server *Server) desiredStateEnforce() error {
+	server.desiredStateEnforcementIdx++
 
 	defer func() {
 		if err := recover(); err != nil {
-			logError(err)
+			log.Errorf("panic while enforcing desired state: %s", err)
 		}
 	}()
 
@@ -55,9 +51,9 @@ func (server *Server) enforce() error {
 		currRevision.AppliedAt = time.Now()
 		revErr := server.store.UpdateRevision(currRevision)
 		if revErr != nil {
-			log.Warnf("(enforce-%d) Error while setting current revision that is in progress to error state: %s", server.enforcementIdx, revErr)
+			log.Warnf("(enforce-%d) Error while setting current revision that is in progress to error state: %s", server.desiredStateEnforcementIdx, revErr)
 		}
-		log.Infof("(enforce-%d) Current revision that is in progress was reset to error state", server.enforcementIdx)
+		log.Infof("(enforce-%d) Current revision that is in progress was reset to error state", server.desiredStateEnforcementIdx)
 	}
 
 	desiredPolicy, desiredPolicyGen, err := server.store.GetPolicy(runtime.LastGen)
@@ -75,7 +71,7 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
 
-	resolveLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-resolve", server.enforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
+	resolveLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-resolve", server.desiredStateEnforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 	resolver := resolve.NewPolicyResolver(desiredPolicy, server.externalData, resolveLog)
 	desiredState := resolver.ResolveAllDependencies()
 
@@ -90,10 +86,10 @@ func (server *Server) enforce() error {
 	// policy changes while no actions needed to achieve desired state
 	actionCnt := stateDiff.ActionPlan.NumberOfActions()
 	if actionCnt <= 0 && currRevision != nil && currRevision.Policy == nextRevision.Policy {
-		log.Infof("(enforce-%d) No changes, policy gen %d", server.enforcementIdx, desiredPolicyGen)
+		log.Infof("(enforce-%d) No changes, policy gen %d", server.desiredStateEnforcementIdx, desiredPolicyGen)
 		return nil
 	}
-	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.enforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, actionCnt)
+	log.Infof("(enforce-%d) New revision %d, policy gen %d, %d actions need to be applied", server.desiredStateEnforcementIdx, nextRevision.GetGeneration(), desiredPolicyGen, actionCnt)
 
 	// save revision
 	err = server.store.SaveRevision(nextRevision)
@@ -102,13 +98,13 @@ func (server *Server) enforce() error {
 	}
 
 	if server.cfg.Enforcer.Noop {
-		log.Infof("(enforce-%d) Applying actions in noop mode (sleep per action = %s)", server.enforcementIdx, server.cfg.Enforcer.NoopSleep)
+		log.Infof("(enforce-%d) Applying actions in noop mode (sleep per action = %s)", server.desiredStateEnforcementIdx, server.cfg.Enforcer.NoopSleep)
 	} else {
-		log.Infof("(enforce-%d) Applying actions", server.enforcementIdx)
+		log.Infof("(enforce-%d) Applying actions", server.desiredStateEnforcementIdx)
 	}
 
 	pluginRegistry := server.pluginRegistryFactory()
-	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.enforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
+	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.desiredStateEnforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
 	_, _ = applier.Apply(server.cfg.Enforcer.MaxConcurrentActions)
 
@@ -119,7 +115,10 @@ func (server *Server) enforce() error {
 		return fmt.Errorf("error while saving new revision with apply log: %s", saveErr)
 	}
 
-	log.Infof("(enforce-%d) New revision %d processed, %d component instances", server.enforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentInstanceMap))
+	log.Infof("(enforce-%d) New revision %d processed, %d component instances", server.desiredStateEnforcementIdx, nextRevision.GetGeneration(), len(desiredState.ComponentInstanceMap))
+
+	// trigger actual state update
+	server.runActualStateUpdate <- true
 
 	return nil
 }

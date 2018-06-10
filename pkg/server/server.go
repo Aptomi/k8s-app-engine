@@ -42,16 +42,20 @@ type Server struct {
 
 	httpServer *http.Server
 
-	runEnforcement chan bool
-	enforcementIdx uint
+	runDesiredStateEnforcement chan bool
+	desiredStateEnforcementIdx uint
+
+	runActualStateUpdate chan bool
+	actualStateUpdateIdx uint
 }
 
 // NewServer creates a new Aptomi Server
 func NewServer(cfg *config.Server) *Server {
 	s := &Server{
-		cfg:              cfg,
-		backgroundErrors: make(chan string),
-		runEnforcement:   make(chan bool, 2048),
+		cfg:                        cfg,
+		backgroundErrors:           make(chan string),
+		runDesiredStateEnforcement: make(chan bool, 2048),
+		runActualStateUpdate:       make(chan bool, 2048),
 	}
 
 	return s
@@ -67,9 +71,10 @@ func (server *Server) Start() {
 	server.initPluginRegistryFactory()
 	server.initPolicyOnFirstRun()
 
-	// Start API, UI and Enforcer
+	// Start API, UI, Enforcer and ActualStateUpdater
 	server.startHTTPServer()
-	server.startEnforcer()
+	server.startDesiredStateEnforcer()
+	server.startActualStateUpdater()
 
 	// Wait for jobs to complete (it essentially hangs forever)
 	server.wait()
@@ -205,7 +210,7 @@ func (server *Server) startHTTPServer() {
 		log.Warnf("The auth.secret not specified in config, using insecure default one")
 	}
 
-	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runEnforcement)
+	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runDesiredStateEnforcement)
 	server.serveUI(router)
 
 	var handler http.Handler = router
@@ -253,11 +258,20 @@ func (server *Server) serveUI(router *httprouter.Router) {
 	})
 }
 
-func (server *Server) startEnforcer() {
+func (server *Server) startDesiredStateEnforcer() {
 	// Start policy enforcement job
 	if !server.cfg.Enforcer.Disabled {
-		server.runInBackground("Policy Enforcer", true, func() {
-			panic(server.enforceLoop())
+		server.runInBackground("Desired State Enforcer", true, func() {
+			panic(server.desiredStateEnforceLoop())
+		})
+	}
+}
+
+func (server *Server) startActualStateUpdater() {
+	// Start policy enforcement job
+	if !server.cfg.Updater.Disabled {
+		server.runInBackground("Actual State Updater", true, func() {
+			panic(server.actualStateUpdateLoop())
 		})
 	}
 }

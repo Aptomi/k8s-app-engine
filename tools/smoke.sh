@@ -88,7 +88,11 @@ db:
   connection: ${CONF_DIR}/db.bolt
 
 enforcer:
+  disabled: false
   noop: true
+
+updater:
+  disabled: true
 
 domainAdminOverrides:
   Sam: true

@@ -45,8 +45,10 @@ func init() {
 	common.AddStringFlag(Command, "db.connection", "db", "", "/var/lib/aptomi/db.bolt", envPrefix+"_DB_CONN", "DB connection string")
 	common.AddStringFlag(Command, "ui.schema", "ui-schema", "", "http", envPrefix+"_SCHEMA", "Server UI schema")
 	common.AddBoolFlag(Command, "ui.enable", "ui", "", true, envPrefix+"_UI", "Enable server to serve UI")
-	common.AddDurationFlag(Command, "enforcer.interval", "enforcer-interval", "", 60*time.Second, envPrefix+"_ENFORCER_INTERVAL", "Enforcer interval")
-	common.AddIntFlag(Command, "enforcer.maxConcurrentActions", "enforcer-max-concurrent-actions", "", 30, envPrefix+"_ENFORCER_MAX_CONCURRENT_ACTIONS", "Enforcer max concurrent actions")
+	common.AddDurationFlag(Command, "enforcer.interval", "enforcer-interval", "", 60*time.Second, envPrefix+"_ENFORCER_INTERVAL", "Desired state enforcer interval")
+	common.AddIntFlag(Command, "enforcer.maxConcurrentActions", "enforcer-max-concurrent-actions", "", 30, envPrefix+"_ENFORCER_MAX_CONCURRENT_ACTIONS", "Desired state enforcer max concurrent actions")
+	common.AddDurationFlag(Command, "updater.interval", "updater-interval", "", 60*time.Second, envPrefix+"_UPDATER_INTERVAL", "Actual state updater interval")
+	common.AddIntFlag(Command, "updater.maxConcurrentActions", "updater-max-concurrent-actions", "", 30, envPrefix+"_UPDATER_MAX_CONCURRENT_ACTIONS", "Actual state updater max concurrent actions")
 	common.AddStringFlag(Command, "profile.cpu", "cpuprofile", "", "", envPrefix+"_CPU_PROFILE", "File to write debug CPU profiling information using Go runtime/pprof")
 	common.AddStringFlag(Command, "profile.trace", "traceprofile", "", "", envPrefix+"_TRACE_PROFILE", "File to write debug tracing information using Go runtime/trace")
 

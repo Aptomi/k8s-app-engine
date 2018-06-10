@@ -221,7 +221,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 
 		if changed {
 			// signal to the channel that policy has changed, that will trigger the enforcement right away
-			api.runEnforcement <- true
+			api.runDesiredStateEnforcement <- true
 		}
 	}
 }
@@ -325,7 +325,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 
 		if changed {
 			// signal to the channel that policy has changed, that will trigger the enforcement right away
-			api.runEnforcement <- true
+			api.runDesiredStateEnforcement <- true
 		}
 	}
 
