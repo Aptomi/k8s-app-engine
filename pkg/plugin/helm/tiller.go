@@ -107,7 +107,7 @@ func (p *Plugin) setupTiller(client kubernetes.Interface, eventLog *event.Log) e
 
 	return installer.Install(client, &installer.Options{
 		Namespace:      p.tillerNamespace,
-		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.6.2",
+		ImageSpec:      "gcr.io/kubernetes-helm/tiller:v2.9.1",
 		ServiceAccount: saName,
 	})
 }
