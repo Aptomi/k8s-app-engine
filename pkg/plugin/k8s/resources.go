@@ -5,8 +5,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/pkg/api/v1"
-	"k8s.io/client-go/pkg/apis/apps/v1beta1"
+	"k8s.io/api/core/v1"
+	"k8s.io/api/apps/v1beta1"
 	"strconv"
 	"strings"
 )
