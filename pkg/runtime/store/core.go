@@ -40,6 +40,6 @@ type Revision interface {
 // ActualState represents database operations for the actual state handling
 type ActualState interface {
 	GetActualState() (*resolve.PolicyResolution, error)
-	GetActualStateUpdater() actual.StateUpdater
+	NewActualStateUpdater(*resolve.PolicyResolution) actual.StateUpdater
 	ResetActualState() error
 }

@@ -15,7 +15,6 @@ type EngineApply struct {
 	// References to desired/actual objects
 	desiredPolicy      *lang.Policy
 	desiredState       *resolve.PolicyResolution
-	actualState        *resolve.PolicyResolution
 	actualStateUpdater actual.StateUpdater
 	externalData       *external.Data
 	plugins            plugin.Registry
@@ -33,11 +32,10 @@ type EngineApply struct {
 // NewEngineApply creates an instance of EngineApply
 // todo(slukjanov): make sure that plugins are created once per revision, b/c we need to cache only for single policy, when it changed some credentials could change as well
 // todo(slukjanov): run cleanup on all plugins after apply done for the revision
-func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actionPlan *action.Plan, eventLog *event.Log, updater action.ApplyResultUpdater) *EngineApply {
+func NewEngineApply(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, actionPlan *action.Plan, eventLog *event.Log, updater action.ApplyResultUpdater) *EngineApply {
 	return &EngineApply{
 		desiredPolicy:      desiredPolicy,
 		desiredState:       desiredState,
-		actualState:        actualState,
 		actualStateUpdater: actualStateUpdater,
 		externalData:       externalData,
 		plugins:            plugins,
@@ -59,7 +57,6 @@ func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolu
 	context := action.NewContext(
 		apply.desiredPolicy,
 		apply.desiredState,
-		apply.actualState,
 		apply.actualStateUpdater,
 		apply.externalData,
 		apply.plugins,
@@ -76,5 +73,5 @@ func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolu
 	}), apply.updater)
 
 	// No errors occurred
-	return apply.actualState, result
+	return apply.actualStateUpdater.GetUpdatedActualState(), result
 }

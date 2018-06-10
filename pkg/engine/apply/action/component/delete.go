@@ -43,7 +43,7 @@ func (a *DeleteAction) Apply(context *action.Context) error {
 	}
 
 	// delete from the actual state
-	return context.ActualStateUpdater.DeleteComponentInstance(instance.GetKey(), context.ActualState)
+	return context.ActualStateUpdater.DeleteComponentInstance(instance.GetKey())
 }
 
 // DescribeChanges returns text-based description of changes that will be applied
@@ -57,7 +57,7 @@ func (a *DeleteAction) DescribeChanges() util.NestedParameterMap {
 }
 
 func (a *DeleteAction) processDeployment(context *action.Context) (*resolve.ComponentInstance, error) {
-	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	instance := context.ActualStateUpdater.GetComponentInstance(a.ComponentKey)
 	if instance == nil {
 		panic(fmt.Sprintf("component instance not found in actual state: %s", a.ComponentKey))
 	}

@@ -43,7 +43,7 @@ func (a *CreateAction) Apply(context *action.Context) error {
 	}
 
 	// update actual state
-	return context.ActualStateUpdater.CreateComponentInstance(instance, context.ActualState)
+	return context.ActualStateUpdater.CreateComponentInstance(instance)
 }
 
 // DescribeChanges returns text-based description of changes that will be applied

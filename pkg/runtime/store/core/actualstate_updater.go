@@ -10,12 +10,22 @@ import (
 )
 
 type actualStateUpdater struct {
-	store store.Generic
-	mutex sync.Mutex
+	store       store.Generic
+	mutex       sync.Mutex
+	actualState *resolve.PolicyResolution
+}
+
+// GetComponentInstance returns component instance by key from the underlying store
+func (updater *actualStateUpdater) GetComponentInstance(key string) *resolve.ComponentInstance {
+	// make sure all changes to actual state are synchronized
+	updater.mutex.Lock()
+	defer updater.mutex.Unlock()
+
+	return updater.actualState.ComponentInstanceMap[key]
 }
 
 // CreateComponentInstance creates a new component instance in the actual state, as well as in the underlying store (with appropriate synchronization)
-func (updater *actualStateUpdater) CreateComponentInstance(instance *resolve.ComponentInstance, actualState *resolve.PolicyResolution) error {
+func (updater *actualStateUpdater) CreateComponentInstance(instance *resolve.ComponentInstance) error {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
 	defer updater.mutex.Unlock()
@@ -31,13 +41,13 @@ func (updater *actualStateUpdater) CreateComponentInstance(instance *resolve.Com
 	}
 
 	// move it over to the actual state
-	actualState.ComponentInstanceMap[instance.GetKey()] = instance
+	updater.actualState.ComponentInstanceMap[instance.GetKey()] = instance
 
 	return nil
 }
 
 // UpdateComponentInstance updates an existing component instance in the actual state, as well as in the underlying store by calling function makeChanges (with appropriate synchronization)
-func (updater *actualStateUpdater) UpdateComponentInstance(key string, actualState *resolve.PolicyResolution, makeChanges func(instance *resolve.ComponentInstance)) error {
+func (updater *actualStateUpdater) UpdateComponentInstance(key string, makeChanges func(instance *resolve.ComponentInstance)) error {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
 	defer updater.mutex.Unlock()
@@ -61,13 +71,13 @@ func (updater *actualStateUpdater) UpdateComponentInstance(key string, actualSta
 	}
 
 	// move it over to the actual state
-	actualState.ComponentInstanceMap[instance.GetKey()] = instance
+	updater.actualState.ComponentInstanceMap[instance.GetKey()] = instance
 
 	return nil
 }
 
 // DeleteComponentInstance deletes an existing component instance from the actual state, as well as from the underlying store (with appropriate synchronization)
-func (updater *actualStateUpdater) DeleteComponentInstance(key string, actualState *resolve.PolicyResolution) error {
+func (updater *actualStateUpdater) DeleteComponentInstance(key string) error {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
 	defer updater.mutex.Unlock()
@@ -79,9 +89,14 @@ func (updater *actualStateUpdater) DeleteComponentInstance(key string, actualSta
 	}
 
 	// delete an existing component from the actual state map
-	delete(actualState.ComponentInstanceMap, key)
+	delete(updater.actualState.ComponentInstanceMap, key)
 
 	return nil
+}
+
+// GetUpdatedActualState returns the updated actual state
+func (updater *actualStateUpdater) GetUpdatedActualState() *resolve.PolicyResolution {
+	return updater.actualState
 }
 
 func storableKeyForComponent(componentKey string) string {

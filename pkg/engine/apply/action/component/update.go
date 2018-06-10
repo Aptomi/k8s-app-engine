@@ -46,7 +46,7 @@ func (a *UpdateAction) Apply(context *action.Context) error {
 
 	// update component instance code params in actual state
 	if instance.CalculatedCodeParams != nil {
-		return context.ActualStateUpdater.UpdateComponentInstance(instance.GetKey(), context.ActualState, func(obj *resolve.ComponentInstance) {
+		return context.ActualStateUpdater.UpdateComponentInstance(instance.GetKey(), func(obj *resolve.ComponentInstance) {
 			obj.EndpointsUpToDate = false // invalidate endpoints, so we retrieve them again later
 			obj.CalculatedCodeParams = instance.CalculatedCodeParams
 		})

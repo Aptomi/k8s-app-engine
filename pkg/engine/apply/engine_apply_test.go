@@ -32,8 +32,7 @@ func TestApplyComponentCreateSuccess(t *testing.T) {
 	applier := NewEngineApply(
 		desired.policy(),
 		desired.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		desired.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
@@ -71,8 +70,7 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 	applier := NewEngineApply(
 		desired.policy(),
 		desired.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		desired.external(),
 		mockRegistry(false, failAsPanic),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
@@ -105,8 +103,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	applier := NewEngineApply(
 		desired.policy(),
 		desired.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		desired.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desired.resolution(), actualState).ActionPlan,
@@ -156,8 +153,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	applier = NewEngineApply(
 		desiredNext.policy(),
 		desiredNext.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		desiredNext.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNext.resolution(), actualState).ActionPlan,
@@ -192,8 +188,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	applier = NewEngineApply(
 		desiredNextAfterUpdate.policy(),
 		desiredNextAfterUpdate.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		desiredNextAfterUpdate.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(desiredNextAfterUpdate.resolution(), actualState).ActionPlan,
@@ -236,8 +231,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 	applier := NewEngineApply(
 		generated.policy(),
 		generated.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		generated.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(generated.resolution(), actualState).ActionPlan,
@@ -257,8 +251,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 	applierNext := NewEngineApply(
 		reset.policy(),
 		reset.resolution(),
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		generated.external(),
 		mockRegistry(true, false),
 		diff.NewPolicyResolutionDiff(reset.resolution(), actualState).ActionPlan,

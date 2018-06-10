@@ -105,7 +105,7 @@ func (server *Server) desiredStateEnforce() error {
 
 	pluginRegistry := server.enforcerPluginRegistryFactory()
 	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.desiredStateEnforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
-	applier := apply.NewEngineApply(desiredPolicy, desiredState, actualState, server.store.GetActualStateUpdater(), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
+	applier := apply.NewEngineApply(desiredPolicy, desiredState, server.store.NewActualStateUpdater(actualState), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(nextRevision))
 	_, _ = applier.Apply(server.cfg.Enforcer.MaxConcurrentActions)
 
 	// save apply log

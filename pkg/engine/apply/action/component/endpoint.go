@@ -41,7 +41,7 @@ func (a *EndpointsAction) Apply(context *action.Context) error {
 	}
 
 	// update component endpoints in actual state
-	return context.ActualStateUpdater.UpdateComponentInstance(instance.GetKey(), context.ActualState, func(obj *resolve.ComponentInstance) {
+	return context.ActualStateUpdater.UpdateComponentInstance(instance.GetKey(), func(obj *resolve.ComponentInstance) {
 		obj.EndpointsUpToDate = true
 		obj.Endpoints = endpoints
 	})
@@ -60,7 +60,7 @@ func (a *EndpointsAction) DescribeChanges() util.NestedParameterMap {
 func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.ComponentInstance, map[string]string, error) {
 	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", a.ComponentKey)
 
-	instance := context.ActualState.ComponentInstanceMap[a.ComponentKey]
+	instance := context.ActualStateUpdater.GetComponentInstance(a.ComponentKey)
 	if instance == nil {
 		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)
 	}

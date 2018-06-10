@@ -35,7 +35,7 @@ func NewDetachDependencyAction(componentKey string, dependencyID string) *Detach
 func (a *DetachDependencyAction) Apply(context *action.Context) error {
 	context.EventLog.NewEntry().Debugf("Detaching dependency '%s' from component instance: '%s'", a.DependencyID, a.ComponentKey)
 
-	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, context.ActualState, func(obj *resolve.ComponentInstance) {
+	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, func(obj *resolve.ComponentInstance) {
 		delete(obj.DependencyKeys, a.DependencyID)
 	})
 }

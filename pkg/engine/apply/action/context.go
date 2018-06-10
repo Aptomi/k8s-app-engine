@@ -14,7 +14,6 @@ import (
 type Context struct {
 	DesiredPolicy      *lang.Policy
 	DesiredState       *resolve.PolicyResolution
-	ActualState        *resolve.PolicyResolution
 	ActualStateUpdater actual.StateUpdater
 	ExternalData       *external.Data
 	Plugins            plugin.Registry
@@ -22,14 +21,10 @@ type Context struct {
 }
 
 // NewContext creates a new instance of Context
-func NewContext(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution,
-	actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data,
-	plugins plugin.Registry, eventLog *event.Log) *Context {
-
+func NewContext(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, externalData *external.Data, plugins plugin.Registry, eventLog *event.Log) *Context {
 	return &Context{
 		DesiredPolicy:      desiredPolicy,
 		DesiredState:       desiredState,
-		ActualState:        actualState,
 		ActualStateUpdater: actualStateUpdater,
 		ExternalData:       externalData,
 		Plugins:            plugins,

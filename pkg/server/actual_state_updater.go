@@ -65,7 +65,7 @@ func (server *Server) actualStateUpdate() error {
 	eventLog := event.NewLog(log.DebugLevel, fmt.Sprintf("update-%d", server.actualStateUpdateIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 
 	// Load endpoints for all components
-	refreshEndpoints(desiredPolicy, actualState, server.store.GetActualStateUpdater(), server.updaterPluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions, server.cfg.Updater.Noop)
+	refreshEndpoints(desiredPolicy, actualState, server.store.NewActualStateUpdater(actualState), server.updaterPluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions, server.cfg.Updater.Noop)
 
 	log.Infof("(update-%d) Actual state updated", server.actualStateUpdateIdx)
 
@@ -76,7 +76,6 @@ func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyRes
 	context := action.NewContext(
 		desiredPolicy,
 		nil, // not needed for endpoints action
-		actualState,
 		actualStateUpdater,
 		nil, // not needed for endpoints action
 		plugins,

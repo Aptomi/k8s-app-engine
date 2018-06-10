@@ -405,8 +405,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	applier := NewEngineApply(
 		desiredPolicy,
 		desiredState,
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		externalData,
 		mockRegistry(true, false),
 		actions,
@@ -427,8 +426,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	applier = NewEngineApply(
 		desiredPolicy,
 		desiredState,
-		actualState,
-		actual.NewNoOpActionStateUpdater(),
+		actual.NewNoOpActionStateUpdater(actualState),
 		externalData,
 		mockRegistry(true, false),
 		actions,
