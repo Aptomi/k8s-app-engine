@@ -55,14 +55,17 @@ func newStatusCommand(cfg *config.Client) *cobra.Command {
 			} else {
 				// print live updates until dependencies are ready or timeout happens
 				attempt := 0
-				retry.Do(waitTime, waitInterval, func() bool {
-					keepWaiting, _ := printStatusOfDependencies(cfg, dependencies, api.DependencyQueryFlag(waitFlag), writer, attempt) // nolint: gas
+				ok := retry.Do(waitTime, waitInterval, func() bool {
+					var keepWaiting bool
+					keepWaiting, result = printStatusOfDependencies(cfg, dependencies, api.DependencyQueryFlag(waitFlag), writer, attempt) // nolint: gas
 					attempt++
 					return !keepWaiting
 				})
 
-				// print final results
-				_, result = printStatusOfDependencies(cfg, dependencies, api.DependencyQueryFlag(waitFlag), writer, -1)
+				// if they are still not ready, let's print final results one more time (replacing progress indicators with "no")
+				if !ok {
+					_, result = printStatusOfDependencies(cfg, dependencies, api.DependencyQueryFlag(waitFlag), writer, -1)
+				}
 			}
 
 			// stop live updates
