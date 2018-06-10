@@ -2,12 +2,13 @@ package: github.com/Aptomi/aptomi
 ignore:
 - k8s.io/client-go
 - k8s.io/apimachinery
+- github.com/Sirupsen/logrus
 import:
 - package: gopkg.in/yaml.v2
 - package: github.com/ralekseenkov/govaluate
   version: fe2a16467e94c6cdacc2f06d6ad1a762f8cae65a
 - package: github.com/mattn/go-zglob
-- package: github.com/Sirupsen/logrus
+- package: github.com/sirupsen/logrus
   version: 8c0189d9f6bbf301e5d055d34268156b317016af
 - package: github.com/gosuri/uiprogress
 - package: github.com/gosuri/uilive
@@ -123,4 +124,3 @@ import:
   version: ~1.0.0
 - package: github.com/davecgh/go-spew
   version: 8991bc29aa16c548c550c7ff78260e27b9ab7c73
-
