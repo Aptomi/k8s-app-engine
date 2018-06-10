@@ -99,12 +99,12 @@ import:
   version: 8991bc29aa16c548c550c7ff78260e27b9ab7c73
 
 - package: k8s.io/kubernetes
-  version: 1.10.0
+  version: release-1.10
 - package: k8s.io/client-go
-  version: kubernetes-1.10.0
+  version: kubernetes-1.10.4
 - package: k8s.io/api
-  version: kubernetes-1.10.0
+  version: release-1.10
 - package: k8s.io/apimachinery
-  version: kubernetes-1.10.0
+  version: release-1.10
 - package: k8s.io/apiserver
-  version: kubernetes-1.10.0
+  version: release-1.10

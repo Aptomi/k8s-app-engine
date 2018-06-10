@@ -1,5 +1,5 @@
-hash: 771e075c65df0f0da3807ee0ba14ae4b228bfa5d4bb5e3426349b472a9191d2c
-updated: 2018-06-10T00:49:21.077127-07:00
+hash: 8e417bc340e3bd1e4b9c7430fa3271c8615d84928e6d0e9e5c65b1c65a8247f6
+updated: 2018-06-10T00:56:08.289042-07:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -411,7 +411,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 - name: k8s.io/api
-  version: 73d903622b7391f3312dcbac6483fed484e185f8
+  version: 8b7507fac302640dd5f1efbf9643199952cc58db
   subpackages:
   - admission/v1beta1
   - admissionregistration/v1alpha1
@@ -448,7 +448,7 @@ imports:
   subpackages:
   - pkg/features
 - name: k8s.io/apimachinery
-  version: 302974c03f7e50f16561ba237db776ab93594ef6
+  version: 17529ec7eadb8de8e7dc835201455f53571f655a
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -505,7 +505,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 5ae41ac86efd753e2ba012f097b83a914b268236
+  version: 8378ef881d4fa7d3ca5c5e7e5309592ec69b11e4
   subpackages:
   - pkg/apis/audit
   - pkg/authentication/authenticator
@@ -516,7 +516,7 @@ imports:
   - pkg/util/feature
   - pkg/util/flag
 - name: k8s.io/client-go
-  version: 23781f4d6632d88e869066eaebb743857aa1ef9b
+  version: 26a26f55b28aa1b338fbaf6fbbe0bcd76aed05e0
   subpackages:
   - discovery
   - dynamic
@@ -677,12 +677,12 @@ imports:
   - pkg/urlutil
   - pkg/version
 - name: k8s.io/kube-openapi
-  version: 50ae88d24ede7b8bad68e23c805b5d3da5c8abaf
+  version: 39cb288412c48cb533ba4be5d6c28620b9a0c1b4
   subpackages:
   - pkg/util/proto
   - pkg/util/proto/validation
 - name: k8s.io/kubernetes
-  version: fc32d2f3698e36b93322a3465f63a14e9f0eaead
+  version: 2e433e8166b4314bc4debca9bcf15946614308eb
   subpackages:
   - pkg/api/events
   - pkg/api/legacyscheme
