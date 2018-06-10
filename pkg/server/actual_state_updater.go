@@ -65,14 +65,14 @@ func (server *Server) actualStateUpdate() error {
 	eventLog := event.NewLog(log.DebugLevel, fmt.Sprintf("update-%d", server.actualStateUpdateIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 
 	// Load endpoints for all components
-	refreshEndpoints(desiredPolicy, actualState, server.store.GetActualStateUpdater(), server.pluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions)
+	refreshEndpoints(desiredPolicy, actualState, server.store.GetActualStateUpdater(), server.updaterPluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions, server.cfg.Updater.Noop)
 
 	log.Infof("(update-%d) Actual state updated", server.actualStateUpdateIdx)
 
 	return nil
 }
 
-func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, plugins plugin.Registry, eventLog *event.Log, maxConcurrentActions int) {
+func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyResolution, actualStateUpdater actual.StateUpdater, plugins plugin.Registry, eventLog *event.Log, maxConcurrentActions int, noop bool) {
 	context := action.NewContext(
 		desiredPolicy,
 		nil, // not needed for endpoints action
@@ -101,7 +101,13 @@ func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyRes
 	actions := []action.Base{}
 	for _, instance := range actualState.ComponentInstanceMap {
 		if instance.IsCode && !instance.EndpointsUpToDate {
-			actions = append(actions, component.NewEndpointsAction(instance.GetKey()))
+			var act action.Base
+			if !noop {
+				act = component.NewEndpointsAction(instance.GetKey())
+			} else {
+				act = component.NewEndpointsAction(instance.GetKey())
+			}
+			actions = append(actions, act)
 		}
 	}
 

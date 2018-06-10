@@ -36,17 +36,18 @@ type Server struct {
 	cfg              *config.Server
 	backgroundErrors chan string
 
-	externalData          *external.Data
-	store                 store.Core
-	pluginRegistryFactory plugin.RegistryFactory
+	externalData *external.Data
+	store        store.Core
 
 	httpServer *http.Server
 
-	runDesiredStateEnforcement chan bool
-	desiredStateEnforcementIdx uint
+	runDesiredStateEnforcement    chan bool
+	desiredStateEnforcementIdx    uint
+	enforcerPluginRegistryFactory plugin.RegistryFactory
 
-	runActualStateUpdate chan bool
-	actualStateUpdateIdx uint
+	runActualStateUpdate         chan bool
+	actualStateUpdateIdx         uint
+	updaterPluginRegistryFactory plugin.RegistryFactory
 }
 
 // NewServer creates a new Aptomi Server
@@ -167,37 +168,40 @@ func (server *Server) initStore() {
 }
 
 func (server *Server) initPluginRegistryFactory() {
-	server.pluginRegistryFactory = func() plugin.Registry {
-		clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
-		codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
+	fn := func(noop bool, noopSleep time.Duration) func() plugin.Registry {
+		return func() plugin.Registry {
+			clusterTypes := make(map[string]plugin.ClusterPluginConstructor)
+			codeTypes := make(map[string]map[string]plugin.CodePluginConstructor)
 
-		if !server.cfg.Enforcer.Noop {
-			clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
-				return k8s.New(cluster, cfg)
+			if !noop {
+				clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
+					return k8s.New(cluster, cfg)
+				}
+
+				codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
+				codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+					return helm.New(cluster, cfg)
+				}
+				codeTypes["kubernetes"]["raw"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+					return k8sraw.New(cluster, cfg)
+				}
+			} else {
+				clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
+					return fake.NewNoOpClusterPlugin(noopSleep), nil
+				}
+
+				codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
+				codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
+					return fake.NewNoOpCodePlugin(noopSleep), nil
+				}
 			}
 
-			codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
-			codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
-				return helm.New(cluster, cfg)
-			}
-			codeTypes["kubernetes"]["raw"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
-				return k8sraw.New(cluster, cfg)
-			}
-		} else {
-			sleepTime := server.cfg.Enforcer.NoopSleep
-
-			clusterTypes["kubernetes"] = func(cluster *lang.Cluster, cfg config.Plugins) (plugin.ClusterPlugin, error) {
-				return fake.NewNoOpClusterPlugin(sleepTime), nil
-			}
-
-			codeTypes["kubernetes"] = make(map[string]plugin.CodePluginConstructor)
-			codeTypes["kubernetes"]["helm"] = func(cluster plugin.ClusterPlugin, cfg config.Plugins) (plugin.CodePlugin, error) {
-				return fake.NewNoOpCodePlugin(sleepTime), nil
-			}
+			return plugin.NewRegistry(server.cfg.Plugins, clusterTypes, codeTypes)
 		}
-
-		return plugin.NewRegistry(server.cfg.Plugins, clusterTypes, codeTypes)
 	}
+
+	server.enforcerPluginRegistryFactory = fn(server.cfg.Enforcer.Noop, server.cfg.Enforcer.NoopSleep)
+	server.updaterPluginRegistryFactory = fn(server.cfg.Updater.Noop, server.cfg.Updater.NoopSleep)
 }
 
 func (server *Server) startHTTPServer() {
@@ -210,7 +214,7 @@ func (server *Server) startHTTPServer() {
 		log.Warnf("The auth.secret not specified in config, using insecure default one")
 	}
 
-	api.Serve(router, server.store, server.externalData, server.pluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runDesiredStateEnforcement)
+	api.Serve(router, server.store, server.externalData, server.enforcerPluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runDesiredStateEnforcement)
 	server.serveUI(router)
 
 	var handler http.Handler = router

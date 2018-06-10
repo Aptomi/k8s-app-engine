@@ -60,6 +60,8 @@ type DesiredStateEnforcer struct {
 type ActualStateUpdater struct {
 	Disabled             bool          `validate:"-"`
 	Interval             time.Duration `validate:"-"`
+	Noop                 bool          `validate:"-"`
+	NoopSleep            time.Duration `validate:"-"`
 	MaxConcurrentActions int           `validate:"-"`
 }
 

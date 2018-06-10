@@ -1,10 +1,6 @@
 package fake
 
 import (
-	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/external"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"time"
 )
@@ -55,7 +51,9 @@ func (plugin *noOpPlugin) Destroy(invocation *plugin.CodePluginInvocationParams)
 
 func (plugin *noOpPlugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[string]string, error) {
 	time.Sleep(plugin.sleepTime)
-	return make(map[string]string), nil
+	return map[string]string{
+		"http": "endpoint_fake",
+	}, nil
 }
 
 func (plugin *noOpPlugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugin.Resources, error) {
@@ -64,8 +62,4 @@ func (plugin *noOpPlugin) Resources(invocation *plugin.CodePluginInvocationParam
 
 func (plugin *noOpPlugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, error) {
 	return true, nil
-}
-
-func (plugin *noOpPlugin) Process(desiredPolicy *lang.Policy, desiredState *resolve.PolicyResolution, externalData *external.Data, eventLog *event.Log) error {
-	return nil
 }

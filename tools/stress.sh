@@ -78,7 +78,8 @@ enforcer:
   noop: true
 
 updater:
-  disabled: true
+  disabled: false
+  noop: true
 
 domainAdminOverrides:
   Sam: true
