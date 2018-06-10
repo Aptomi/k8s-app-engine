@@ -92,8 +92,6 @@ import:
 - package: gopkg.in/mgo.v2
   subpackages:
   - bson
-- package: github.com/rs/cors
-  version: ^1.2.0
 - package: github.com/pmezard/go-difflib
 - package: github.com/davecgh/go-spew
   version: 8991bc29aa16c548c550c7ff78260e27b9ab7c73
