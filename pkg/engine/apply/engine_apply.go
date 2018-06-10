@@ -70,7 +70,7 @@ func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolu
 	result := apply.actionPlan.Apply(action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Base) error {
 		err := act.Apply(context)
 		if err != nil {
-			apply.eventLog.NewEntry().Errorf("error while applying action '%s': %s", act, err)
+			context.EventLog.NewEntry().Errorf("error while applying action '%s': %s", act, err)
 		}
 		return err
 	}), apply.updater)
