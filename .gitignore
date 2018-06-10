@@ -16,6 +16,8 @@ profile*
 .ui_hash_current
 .ui_hash_previous
 
+.aptomi-install-cache
+
 /db
 
 webui-vis-tmp/output.json
