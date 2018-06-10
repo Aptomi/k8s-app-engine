@@ -15,7 +15,6 @@ ifndef JENKINS_HOME
 else
 	${GOENV} glide --no-color install --strip-vendor
 endif
-	tools/setup-apimachinery.sh
 	cd webui; npm install
 
 .PHONY: profile-engine
