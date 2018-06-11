@@ -20,25 +20,25 @@ var PolicyCfgDefault = &PolicyCfg{
 // Policy produces just a policy graph without showing any resolution data
 func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 	// we need to find all top-level contracts
-	edgesIn := make(map[string]int)
+	contractDegIn := make(map[string]int)
 	for _, contractObj := range b.policy.GetObjectsByKind(lang.ContractObject.Kind) {
 		contract := contractObj.(*lang.Contract)
-		b.findEdgesIn(contract, edgesIn)
+		b.findEdgesIn(contract, contractDegIn)
 	}
 
 	// trace all top-level contracts
 	for _, contractObj := range b.policy.GetObjectsByKind(lang.ContractObject.Kind) {
 		contract := contractObj.(*lang.Contract)
-		if edgesIn[runtime.KeyForStorable(contract)] <= 0 {
+		if contractDegIn[runtime.KeyForStorable(contract)] <= 0 {
 			b.traceContract(contract, nil, "", 0, cfg)
 		}
 	}
 	return b.graph
 }
 
-func (b *GraphBuilder) findEdgesIn(contract *lang.Contract, edgesIn map[string]int) {
-	for _, context := range contract.Contexts {
-		serviceObj, errService := b.policy.GetObject(lang.ServiceObject.Kind, context.Allocation.Service, contract.Namespace)
+func (b *GraphBuilder) findEdgesIn(contractFrom *lang.Contract, contractDegIn map[string]int) {
+	for _, context := range contractFrom.Contexts {
+		serviceObj, errService := b.policy.GetObject(lang.ServiceObject.Kind, context.Allocation.Service, contractFrom.Namespace)
 		if errService != nil {
 			continue
 		}
@@ -50,8 +50,8 @@ func (b *GraphBuilder) findEdgesIn(contract *lang.Contract, edgesIn map[string]i
 				if errContract != nil {
 					continue
 				}
-				contract := contractObjNew.(*lang.Contract)
-				edgesIn[runtime.KeyForStorable(contract)]++
+				contractTo := contractObjNew.(*lang.Contract)
+				contractDegIn[runtime.KeyForStorable(contractTo)]++
 			}
 		}
 	}
