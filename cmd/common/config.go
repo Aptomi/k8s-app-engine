@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	vp "github.com/spf13/viper"
 	"os"
 	"path"

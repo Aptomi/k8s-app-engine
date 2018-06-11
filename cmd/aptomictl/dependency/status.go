@@ -10,9 +10,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gosuri/uilive"
 	"github.com/gosuri/uitable"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"time"
 )

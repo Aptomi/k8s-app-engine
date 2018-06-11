@@ -10,7 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"runtime/debug"
 	"sync"
 	"time"

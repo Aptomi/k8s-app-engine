@@ -3,9 +3,9 @@ package secrets
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-zglob"
 	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 	"path/filepath"
 	"sort"
 	"strings"

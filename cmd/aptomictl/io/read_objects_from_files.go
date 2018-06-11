@@ -6,7 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/util"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	yamlv2 "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

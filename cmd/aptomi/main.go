@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Aptomi/aptomi/cmd/aptomi/root"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"math/rand"
 	"runtime/debug"
 	"time"

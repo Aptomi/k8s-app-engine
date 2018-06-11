@@ -3,8 +3,8 @@ package util
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
-	log "github.com/Sirupsen/logrus"
 	"github.com/d4l3k/messagediff"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
 	"reflect"

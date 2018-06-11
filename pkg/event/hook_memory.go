@@ -1,7 +1,7 @@
 package event
 
 import (
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // HookMemory implements event log hook, which buffers all event log entries in hookMemory
