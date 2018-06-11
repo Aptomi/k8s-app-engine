@@ -9,7 +9,7 @@ APTOMI_SERVER_CONFIG_DIR="/etc/aptomi"
 APTOMI_CLIENT_CONFIG_DIR="$HOME/.aptomi"
 APTOMI_INSTALL_CACHE="$HOME/.aptomi-install-cache"
 APTOMI_DB_DIR="/var/lib/aptomi"
-REPO_NAME='Aptomi/aptomi'
+REPO_NAME="Aptomi/aptomi"
 SCRIPT_NAME=`basename "$0"`
 UPLOAD_EXAMPLE=0
 CLIENT_ONLY=0
@@ -232,6 +232,14 @@ function create_server_config() {
         log_warn "Config for Aptomi server already exists. Keeping ${APTOMI_SERVER_CONFIG_DIR}/config.yaml"
     else
         log_sub "Creating config for Aptomi server: $COLOR_GREEN${APTOMI_SERVER_CONFIG_DIR}/config.yaml$COLOR_RESET"
+
+        # If we are in example mode, disable enforcer
+        local NOOP="false"
+        if [ $UPLOAD_EXAMPLE -eq 1 ]; then
+            log_sub "Disabling all state updates (as we are running in example mode)"
+            NOOP="true"
+        fi
+
         cat >${TMP_DIR}/config.yaml <<EOL
 debug: true
 
@@ -243,9 +251,11 @@ db:
   connection: ${APTOMI_DB_DIR}/db.bolt
 
 enforcer:
+  noop: ${NOOP}
   interval: 60s
 
 updater:
+  noop: ${NOOP}
   interval: 60s
 
 users:
@@ -271,17 +281,6 @@ users:
 EOL
         run_as_root mkdir -p ${APTOMI_SERVER_CONFIG_DIR}
         run_as_root cp ${TMP_DIR}/config.yaml ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
-
-        # If we are in example mode, disable enforcer
-        if [ $UPLOAD_EXAMPLE -eq 1 ]; then
-            log_sub "Disabling enforcer (as we are running in example mode)"
-
-            if [ $EUID -ne 0 ]; then
-                sudo sed -i.bak -e "s/noop: false/noop: true/" ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
-            else
-                sed -i.bak -e "s/noop: false/noop: true/" ${APTOMI_SERVER_CONFIG_DIR}/config.yaml
-            fi
-        fi
     fi
 
     if [ -f ${APTOMI_SERVER_CONFIG_DIR}/users_builtin.yaml ]; then
@@ -492,7 +491,7 @@ function example_run_line() {
     # Run actual command
     local CMD_RUN="aptomictl --config ${APTOMI_CLIENT_CONFIG_DIR} policy apply --wait -f ${APTOMI_CLIENT_CONFIG_DIR}/examples/$2"
     log_sub "${CMD_RUN}"
-    ${APTOMI_INSTALL_DIR}/$CMD_RUN 1>/dev/null 2>&1
+    ${APTOMI_INSTALL_DIR}/$CMD_RUN
 }
 
 function upload_example() {
