@@ -43,25 +43,22 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 		graph = graphBuilder.Policy(visualization.PolicyCfgDefault)
 	case "desired":
 		// show instances in desired state
-		// todo: add request id to the event log scope
-		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
-		state := resolver.ResolveAllDependencies()
-		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
+		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 	case "actual":
 		// show instances in actual state
 		state, _ := api.store.GetActualState()
 		{
 			// since we are not storing dependency keys, calculate them on the fly for actual state
-			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
-			desiredState := resolver.ResolveAllDependencies()
+			desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
 			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
 		}
 
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 	default:
-		panic("uknown mode: " + mode)
+		panic("unknown mode: " + mode)
 	}
 
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
@@ -91,45 +88,45 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 	var graph *visualization.Graph
 	switch strings.ToLower(mode) {
 	case "policy":
-		// show just policy diff
+		// policy & policy base
 		graph = visualization.NewGraphBuilder(policy, nil, nil).Policy(visualization.PolicyCfgDefault)
 		graphBase := visualization.NewGraphBuilder(policyBase, nil, nil).Policy(visualization.PolicyCfgDefault)
+
+		// diff
 		graph.CalcDelta(graphBase)
 	case "desired":
-		// show instances in desired state (diff)
-		// todo: add request id to the event log scope
-		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
-		state := resolver.ResolveAllDependencies()
-		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		// desired state (next)
+		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
+		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
-		// todo: add request id to the event log scope
-		resolverBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
-		stateBase := resolverBase.ResolveAllDependencies()
-		graphBuilderBase := visualization.NewGraphBuilder(policyBase, stateBase, api.externalData)
+		// desired state (prev)
+		desiredStateBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
+		graphBuilderBase := visualization.NewGraphBuilder(policyBase, desiredStateBase, api.externalData)
 		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
+		// diff
 		graph.CalcDelta(graphBase)
 	case "actual":
-		// show instances in actual state (diff)
-		state, _ := api.store.GetActualState()
+		// actual state
+		actualState, _ := api.store.GetActualState()
 		{
 			// since we are not storing dependency keys, calculate them on the fly for actual state
-			resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram"))
-			desiredState := resolver.ResolveAllDependencies()
-			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
+			desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
+			actualState.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
 		}
 
-		// show instances in desired state (diff)
-		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
+		// desired state
+		graphBuilder := visualization.NewGraphBuilder(policy, actualState, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
-		graphBuilderBase := visualization.NewGraphBuilder(policyBase, state, api.externalData)
+		graphBuilderBase := visualization.NewGraphBuilder(policyBase, actualState, api.externalData)
 		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
+		// diff
 		graph.CalcDelta(graphBase)
 	default:
-		panic("uknown mode: " + mode)
+		panic("unknown mode: " + mode)
 	}
 
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
@@ -150,14 +147,13 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 		panic(fmt.Sprintf("error while getting object from policy: %s", err))
 	}
 
-	var resolution *resolve.PolicyResolution
+	var desiredState *resolve.PolicyResolution
 	if kind == lang.DependencyObject.Kind {
-		resolver := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-object-diagram"))
-		resolution = resolver.ResolveAllDependencies()
+		desiredState = resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-object-diagram")).ResolveAllDependencies()
 	}
 
 	var graph *visualization.Graph
-	graphBuilder := visualization.NewGraphBuilder(policy, resolution, api.externalData)
+	graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
 	graph = graphBuilder.Object(obj)
 
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
