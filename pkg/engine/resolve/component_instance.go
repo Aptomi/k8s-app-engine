@@ -39,7 +39,7 @@ const AllowIngres = "allow_ingress"
 // what component instances depend on us), creation/update times, and endpoints retrieved from the underlying cloud.
 type ComponentInstance struct {
 	/*
-		These fields get populated during policy resolution.
+		These fields get populated during policy resolution as a part of desired state.
 		When adding new fields to this object, it's crucial to modify appendData() method as well (!).
 	*/
 
@@ -63,17 +63,18 @@ type ComponentInstance struct {
 	// CalculatedCodeParams is a set of calculated code parameters for the component (non-conflicting over all uses of this component)
 	CalculatedCodeParams util.NestedParameterMap
 
-	// EdgesIn is a set of incoming graph edges ('key' -> true) into this component instance. Storing for observability and reporting, so we can reconstruct the graph
-	EdgesIn map[string]bool
-
-	// EdgesOut is a set of outgoing graph edges ('key' -> true) from this component instance. Storing for observability and reporting, so we can reconstruct the graph
-	EdgesOut map[string]bool
-
 	// DataForPlugins is an additional data recorded for use in plugins
 	DataForPlugins map[string]string
 
 	/*
-		These fields get populated during apply and desired -> actual state reconciliation
+		These fields only make sense for the desired state. They will NOT be present in actual state
+	*/
+
+	// EdgesOut is a set of outgoing graph edges ('key' -> true) from this component instance. Only makes sense as a part of desired state
+	EdgesOut map[string]bool
+
+	/*
+		These fields only make sense for the actual state. They will NOT be present in desired state
 	*/
 
 	// CreatedAt is when this component instance was created
@@ -98,7 +99,6 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  util.NestedParameterMap{},
 		CalculatedCodeParams: util.NestedParameterMap{},
-		EdgesIn:              make(map[string]bool),
 		EdgesOut:             make(map[string]bool),
 		DataForPlugins:       make(map[string]string),
 		Endpoints:            make(map[string]string),
@@ -179,10 +179,6 @@ func (instance *ComponentInstance) addLabels(labels *lang.LabelSet) {
 	instance.CalculatedLabels.AddLabels(labels.Labels)
 }
 
-func (instance *ComponentInstance) addEdgeIn(srcKey string) {
-	instance.EdgesIn[srcKey] = true
-}
-
 func (instance *ComponentInstance) addEdgeOut(dstKey string) {
 	instance.EdgesOut[dstKey] = true
 }
@@ -226,10 +222,7 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 		return err
 	}
 
-	// Incoming and outgoing graph edges (instance: key -> true) as we are traversing the graph
-	for key := range ops.EdgesIn {
-		instance.addEdgeIn(key)
-	}
+	// Outgoing graph edges (instance: key -> true) as we are traversing the graph
 	for keyDst := range ops.EdgesOut {
 		instance.addEdgeOut(keyDst)
 	}

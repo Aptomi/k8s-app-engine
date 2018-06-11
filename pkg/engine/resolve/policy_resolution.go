@@ -71,7 +71,6 @@ func (resolution *PolicyResolution) StoreEdge(src *ComponentInstanceKey, dst *Co
 	// Arrival key can be empty at the very top of the recursive function in engine, so let's check for that
 	if src != nil && dst != nil {
 		resolution.GetComponentInstanceEntry(src).addEdgeOut(dst.GetKey())
-		resolution.GetComponentInstanceEntry(dst).addEdgeIn(src.GetKey())
 	}
 }
 
