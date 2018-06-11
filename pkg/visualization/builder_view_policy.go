@@ -23,7 +23,7 @@ func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 	contractDegIn := make(map[string]int)
 	for _, contractObj := range b.policy.GetObjectsByKind(lang.ContractObject.Kind) {
 		contract := contractObj.(*lang.Contract)
-		b.findEdgesIn(contract, contractDegIn)
+		b.calcContractDegIn(contract, contractDegIn)
 	}
 
 	// trace all top-level contracts
@@ -36,7 +36,7 @@ func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 	return b.graph
 }
 
-func (b *GraphBuilder) findEdgesIn(contractFrom *lang.Contract, contractDegIn map[string]int) {
+func (b *GraphBuilder) calcContractDegIn(contractFrom *lang.Contract, contractDegIn map[string]int) {
 	for _, context := range contractFrom.Contexts {
 		serviceObj, errService := b.policy.GetObject(lang.ServiceObject.Kind, context.Allocation.Service, contractFrom.Namespace)
 		if errService != nil {
