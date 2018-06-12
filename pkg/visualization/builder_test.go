@@ -16,7 +16,7 @@ func TestVisualizationDiagram(t *testing.T) {
 
 	// empty policy and empty resolution result
 	policyEmpty := lang.NewPolicy()
-	resolutionEmpty := resolve.NewPolicyResolution(true)
+	resolutionEmpty := resolve.NewPolicyResolution()
 
 	// unit test policy resolved revision
 	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve")

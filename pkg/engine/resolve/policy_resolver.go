@@ -68,7 +68,7 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLo
 		externalData:    externalData,
 		expressionCache: expression.NewCache(),
 		templateCache:   template.NewCache(),
-		resolution:      NewPolicyResolution(true),
+		resolution:      NewPolicyResolution(),
 		eventLog:        eventLog,
 	}
 }

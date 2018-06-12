@@ -58,7 +58,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 		// See that would happen if we reset the actual state, calculate and return resolution log + action plan
 		eventLog := event.NewLog(logrus.InfoLevel, "api-state-reset-noop").AddConsoleHook(api.logLevel)
 		desiredState := resolve.NewPolicyResolver(policy, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution(true)).ActionPlan
+		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution()).ActionPlan
 
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
@@ -79,7 +79,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 		// Calculate and return resolution log + action plan
 		eventLog := event.NewLog(logrus.InfoLevel, "api-state-reset").AddConsoleHook(api.logLevel)
 		desiredState := resolve.NewPolicyResolver(policy, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution(true)).ActionPlan
+		actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution()).ActionPlan
 
 		// If there are changes, we need to wait for the next revision
 		var waitForRevision = runtime.MaxGeneration

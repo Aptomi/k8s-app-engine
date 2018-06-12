@@ -7,7 +7,7 @@ import (
 )
 
 func (ds *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
-	actualState := resolve.NewPolicyResolution(false)
+	actualState := resolve.NewPolicyResolution()
 
 	instances, err := ds.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
 	if err != nil {
