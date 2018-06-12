@@ -76,7 +76,7 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	// retrieve revision(s) (for a given policy)
 	router.GET("/api/v1/revisions/policy/:policy", auth(api.handleRevisionsGetByPolicy))
 
-	router.DELETE("/api/v1/actualstate/noop/:noop", auth(api.handleActualStateReset))
+	router.POST("/api/v1/state/enforce/noop/:noop", auth(api.handleStateEnforce))
 
 	// return aptomi version
 	router.GET("/version", api.handleVersion)

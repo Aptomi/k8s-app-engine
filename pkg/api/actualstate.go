@@ -34,7 +34,7 @@ func isDomainAdmin(user *lang.User, policy *lang.Policy) bool {
 	return false
 }
 
-func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	// Load current policy
 	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
@@ -54,7 +54,7 @@ func (api *coreAPI) handleActualStateReset(writer http.ResponseWriter, request *
 	}
 
 	// See that would happen if we reset the actual state, calculate resolution log and action plan
-	resolveLog := event.NewLog(logrus.InfoLevel, "api-state-reset").AddConsoleHook(api.logLevel)
+	resolveLog := event.NewLog(logrus.InfoLevel, "api-state-enforce").AddConsoleHook(api.logLevel)
 	desiredState := resolve.NewPolicyResolver(policy, api.externalData, resolveLog).ResolveAllDependencies()
 	actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution()).ActionPlan
 
