@@ -28,7 +28,6 @@ type Policy interface {
 // Revision represents database operations for Revision object
 type Revision interface {
 	GetRevision(gen runtime.Generation) (*engine.Revision, error)
-	GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 	GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 	GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error)
 	NewRevision(policyGen runtime.Generation) (*engine.Revision, error)

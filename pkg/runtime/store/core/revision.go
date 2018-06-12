@@ -24,30 +24,6 @@ func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, e
 	return data, nil
 }
 
-// GetFirstRevisionForPolicy returns first revision for specified policy generation in chronological order
-func (ds *defaultStore) GetFirstRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
-	// TODO: this method is slow, needs indexes
-	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
-	if err != nil {
-		return nil, err
-	}
-
-	var result *engine.Revision
-	for _, revisionObj := range revisionObjs {
-		revision := revisionObj.(*engine.Revision)
-
-		if revision.Policy != policyGen {
-			continue
-		}
-
-		if result == nil || revision.GetGeneration() < result.GetGeneration() {
-			result = revision
-		}
-	}
-
-	return result, nil
-}
-
 // GetLastRevisionForPolicy returns last revision for specified policy generation in chronological order
 func (ds *defaultStore) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
