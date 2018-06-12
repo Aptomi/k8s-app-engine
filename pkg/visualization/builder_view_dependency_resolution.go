@@ -1,6 +1,7 @@
 package visualization
 
 import (
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
@@ -17,17 +18,23 @@ var DependencyResolutionCfgDefault = &DependencyResolutionCfg{
 	showContracts:        false,
 }
 
-// DependencyResolution produces policy resolution graph by tracing every dependency and displaying what got allocated
-func (b *GraphBuilder) DependencyResolution(cfg *DependencyResolutionCfg) *Graph {
+// DependencyResolutionWithFunc produces policy resolution graph by tracing every dependency and displaying what got allocated,
+// which checking that instances exist (e.g. in actual state)
+func (b *GraphBuilder) DependencyResolutionWithFunc(cfg *DependencyResolutionCfg, exists func(*resolve.ComponentInstance) bool) *Graph {
 	// trace all dependencies
 	for _, dependencyObj := range b.policy.GetObjectsByKind(lang.DependencyObject.Kind) {
 		dependency := dependencyObj.(*lang.Dependency)
-		b.traceDependencyResolution("", dependency, nil, 0, cfg)
+		b.traceDependencyResolution("", dependency, nil, 0, cfg, exists)
 	}
 	return b.graph
 }
 
-func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang.Dependency, last graphNode, level int, cfg *DependencyResolutionCfg) {
+// DependencyResolution produces policy resolution graph by tracing every dependency and displaying what got allocated
+func (b *GraphBuilder) DependencyResolution(cfg *DependencyResolutionCfg) *Graph {
+	return b.DependencyResolutionWithFunc(cfg, func(*resolve.ComponentInstance) bool { return true })
+}
+
+func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang.Dependency, last graphNode, level int, cfg *DependencyResolutionCfg, exists func(*resolve.ComponentInstance) bool) {
 	var edgesOut map[string]bool
 	if len(keySrc) <= 0 {
 		// create a dependency node
@@ -54,6 +61,11 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 		// check that instance contains our dependency
 		depKey := runtime.KeyForStorable(dependency)
 		if _, found := instanceCurrent.DependencyKeys[depKey]; !found {
+			continue
+		}
+
+		// check that instance exists
+		if !exists(instanceCurrent) {
 			continue
 		}
 
@@ -87,19 +99,19 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 				b.graph.addEdge(newEdge(ctrNode, svcInstNode, instanceCurrent.Metadata.Key.ContextNameWithKeys))
 
 				// continue tracing
-				b.traceDependencyResolution(keyDst, dependency, svcInstNode, level+2, cfg)
+				b.traceDependencyResolution(keyDst, dependency, svcInstNode, level+2, cfg, exists)
 			} else {
 				// skip contract, show just 'last' -> 'serviceInstance' -> (continue)
 				b.graph.addNode(svcInstNode, level)
 				b.graph.addEdge(newEdge(last, svcInstNode, ""))
 
 				// continue tracing
-				b.traceDependencyResolution(keyDst, dependency, svcInstNode, level+1, cfg)
+				b.traceDependencyResolution(keyDst, dependency, svcInstNode, level+1, cfg, exists)
 			}
 		} else {
 			// if it's a component, we don't need to show any additional nodes, let's just continue
 			// though, we could introduce additional flag which allows to render components, if needed
-			b.traceDependencyResolution(keyDst, dependency, last, level, cfg)
+			b.traceDependencyResolution(keyDst, dependency, last, level, cfg, exists)
 		}
 	}
 }

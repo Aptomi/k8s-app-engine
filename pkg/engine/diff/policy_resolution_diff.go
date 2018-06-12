@@ -54,11 +54,6 @@ func (diff *PolicyResolutionDiff) compareAndProduceActions() {
 	// Generate dependencies between actions
 	for key := range allCompInstances {
 		outgoing := make(map[string]bool)
-		if diff.Prev.ComponentInstanceMap[key] != nil {
-			for keyOutPrev := range diff.Prev.ComponentInstanceMap[key].EdgesOut {
-				outgoing[keyOutPrev] = true
-			}
-		}
 		if diff.Next.ComponentInstanceMap[key] != nil {
 			for keyOutNext := range diff.Next.ComponentInstanceMap[key].EdgesOut {
 				outgoing[keyOutNext] = true

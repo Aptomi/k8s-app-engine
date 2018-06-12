@@ -17,7 +17,7 @@
             <!-- /.form-group -->
           </div>
           <div class="col-xs-3">
-            <div class="form-group">
+            <div class="form-group" v-if="selectedMode['mode'] !== 'actual'">
               <label>Policy Version</label>
               <v-select placeholder="Select Policy Version" v-model="selectedPolicyVersion" :options.sync="policyVersions" :allow-empty="false" deselect-label="Selected"></v-select>
             </div>
@@ -94,7 +94,7 @@
         return this.modes[0]
       },
       selectedPolicyVersionBaseComputed: function () {
-        if (this.compareEnabled) {
+        if (this.compareEnabled && this.selectedMode['mode'] !== 'actual') {
           return this.selectedPolicyVersionBase
         }
         return null

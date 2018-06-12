@@ -30,27 +30,43 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 		gen = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
-	if err != nil {
-		panic(fmt.Sprintf("error while getting requested policy: %s", err))
-	}
-
 	var graph *visualization.Graph
 	switch strings.ToLower(mode) {
 	case "policy":
+		policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
+		if err != nil {
+			panic(fmt.Sprintf("error while getting requested policy: %s", err))
+		}
+
 		// show just policy
 		graphBuilder := visualization.NewGraphBuilder(policy, nil, nil)
 		graph = graphBuilder.Policy(visualization.PolicyCfgDefault)
 	case "desired":
+		policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
+		if err != nil {
+			panic(fmt.Sprintf("error while getting requested policy: %s", err))
+		}
+
 		// show instances in desired state
 		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 	case "actual":
+		// TODO: actual may not work correctly in all cases (e.g. after policy delete on a cluster which is not available, desired state has less components, these components are still in actual state but will not be shown on UI)
+		//       we probably need to separate out actual state into its own screen with its own logic
+		policy, _, err := api.store.GetPolicy(runtime.LastGen)
+		if err != nil {
+			panic(fmt.Sprintf("error while getting requested policy: %s", err))
+		}
+
 		// show instances in actual state
-		state, _ := api.store.GetActualState()
-		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
-		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+		actualState, _ := api.store.GetActualState()
+		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
+		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
+		graph = graphBuilder.DependencyResolutionWithFunc(visualization.DependencyResolutionCfgDefault, func(instance *resolve.ComponentInstance) bool {
+			_, found := actualState.ComponentInstanceMap[instance.GetKey()]
+			return found
+		})
 	default:
 		panic("unknown mode: " + mode)
 	}
@@ -97,19 +113,6 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		// desired state (prev)
 		desiredStateBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
 		graphBuilderBase := visualization.NewGraphBuilder(policyBase, desiredStateBase, api.externalData)
-		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
-
-		// diff
-		graph.CalcDelta(graphBase)
-	case "actual":
-		// actual state
-		actualState, _ := api.store.GetActualState()
-
-		// desired state
-		graphBuilder := visualization.NewGraphBuilder(policy, actualState, api.externalData)
-		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
-
-		graphBuilderBase := visualization.NewGraphBuilder(policyBase, actualState, api.externalData)
 		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 
 		// diff

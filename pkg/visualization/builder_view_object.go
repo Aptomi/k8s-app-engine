@@ -1,6 +1,7 @@
 package visualization
 
 import (
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
@@ -14,7 +15,7 @@ func (b *GraphBuilder) Object(obj runtime.Object) *Graph {
 		b.traceContract(contract, nil, "", 0, PolicyCfgDefault)
 	}
 	if dependency, ok := obj.(*lang.Dependency); ok {
-		b.traceDependencyResolution("", dependency, nil, 0, DependencyResolutionCfgDefault)
+		b.traceDependencyResolution("", dependency, nil, 0, DependencyResolutionCfgDefault, func(*resolve.ComponentInstance) bool { return true })
 	}
 	return b.graph
 }
