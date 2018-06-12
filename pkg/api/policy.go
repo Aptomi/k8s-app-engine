@@ -100,18 +100,30 @@ func (result *PolicyUpdateResult) AsColumns() map[string]string {
 	}
 }
 
-func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) { // nolint: gocyclo
 	objects := api.readLang(request)
 	user := api.getUserRequired(request)
 
-	// Load current policy
-	policyUpdated, genCurrent, err := api.store.GetPolicy(runtime.LastGen)
+	// Load the latest policy
+	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
 
-	// Store copy of the current policy before we modify it
-	policy, _, err := api.store.GetPolicy(genCurrent)
+	// load the latest revision for the given policy
+	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while loading latest revision from the store: %s", err))
+	}
+
+	// load desired state
+	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	if err != nil {
+		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
+	}
+
+	// Make a copy of the latest policy, so we can apply changes to it
+	policyUpdated, _, err := api.store.GetPolicy(policyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -170,79 +182,89 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		logLevel = logrus.WarnLevel
 	}
 
-	// If we are in noop mode
-	if noop {
-		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-update-noop").AddConsoleHook(api.logLevel)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
-		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
+	// Process policy changes, calculate resolution log and action plan
+	eventLog := event.NewLog(logLevel, "api-policy-update").AddConsoleHook(api.logLevel)
+	desiredStateUpdated := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
+	err = desiredStateUpdated.Validate(policyUpdated)
+	if err != nil {
+		panic(fmt.Sprintf("policy change cannon be made: %s", err))
+	}
 
+	actionPlan := diff.NewPolicyResolutionDiff(desiredStateUpdated, desiredState).ActionPlan
+
+	// If we are in noop mode, just return expected changes in a form of an action plan
+	if noop {
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-			PolicyGeneration: genCurrent,             // policy generation didn't change
+			PolicyGeneration: policyGen,              // policy generation didn't change
 			PolicyChanged:    false,                  // policy has not been updated in the store
 			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
 		})
-
-	} else {
-		// Process policy changes, calculate resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-update").AddConsoleHook(api.logLevel)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
-		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
-
-		// If there are components with error status (e.g. conflicting code/discovery parameters), don't allow this policy change to happen
-		if desiredState.HasComponentsWithErrors() {
-			panic("policy change is not allowed due to component errors")
-		}
-
-		// Make object changes in the store
-		changed, policyData, err := api.store.UpdatePolicy(objects, user.Name)
-		if err != nil {
-			panic(fmt.Sprintf("error while updating objects in policy: %s", err))
-		}
-
-		// If there are changes, we need to wait for the next revision
-		var waitForRevision = runtime.MaxGeneration
-		if changed {
-			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
-			if err != nil {
-				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))
-			}
-			waitForRevision = revision.GetGeneration().Next()
-		}
-
-		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-			PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
-			PolicyChanged:    changed,                    // have any policy object in the store been changed or not
-			WaitForRevision:  waitForRevision,            // which revision to wait for
-			PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
-			EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
-		})
-
-		if changed {
-			// signal to the channel that policy has changed, that will trigger the enforcement right away
-			api.runDesiredStateEnforcement <- true
-		}
+		return
 	}
+
+	// Here we need to take mutex to handle policy and revision updates
+	api.policyAndRevisionUpdateMutex.Lock()
+	defer api.policyAndRevisionUpdateMutex.Unlock()
+
+	// Make object changes in the store
+	changed, policyData, err := api.store.UpdatePolicy(objects, user.Name)
+	if err != nil {
+		panic(fmt.Sprintf("error while updating objects in policy: %s", err))
+	}
+
+	// If there are changes, create a new revision and say that we should wait for it
+	waitForRevision := runtime.MaxGeneration
+	if changed {
+		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredState, false)
+		if newRevisionErr != nil {
+			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
+		}
+		waitForRevision = newRevision.GetGeneration()
+	}
+
+	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
+		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+		PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
+		PolicyChanged:    changed,                    // have any policy object in the store been changed or not
+		WaitForRevision:  waitForRevision,            // which revision to wait for
+		PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
+		EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
+	})
+
+	if changed {
+		// signal to the channel that policy has changed, that will trigger the enforcement right away
+		api.runDesiredStateEnforcement <- true
+	}
+
 }
 
 func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	objects := api.readLang(request)
 	user := api.getUserRequired(request)
 
-	// Load current policy
-	policyUpdated, genCurrent, err := api.store.GetPolicy(runtime.LastGen)
+	// Load the latest policy
+	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
 
-	// Store copy of the current policy before we modify it
-	policy, _, err := api.store.GetPolicy(genCurrent)
+	// Load the latest revision for the given policy
+	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while loading latest revision from the store: %s", err))
+	}
+
+	// Load desired state
+	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	if err != nil {
+		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
+	}
+
+	// Make a copy of the latest policy, so we can apply changes to it
+	policyUpdated, _, err := api.store.GetPolicy(policyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -261,12 +283,6 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
 	}
 
-	desiredStateTmp := resolve.NewPolicyResolver(policyUpdated, api.externalData, event.NewLog(logrus.WarnLevel, "tmp")).ResolveAllDependencies()
-	err = desiredStateTmp.Validate(policyUpdated)
-	if err != nil {
-		panic(fmt.Sprintf("Updated policy is invalid: %s", err))
-	}
-
 	// See if noop flag is set
 	noop, noopErr := strconv.ParseBool(params.ByName("noop"))
 	if noopErr != nil {
@@ -279,64 +295,61 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		logLevel = logrus.WarnLevel
 	}
 
-	// If we are in noop mode
-	if noop {
-		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-delete-noop").AddConsoleHook(api.logLevel)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
-		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
+	// Process policy changes, calculate and return resolution log + action plan
+	eventLog := event.NewLog(logLevel, "api-policy-delete").AddConsoleHook(api.logLevel)
+	desiredStateUpdated := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
+	err = desiredStateUpdated.Validate(policyUpdated)
+	if err != nil {
+		panic(fmt.Sprintf("policy change cannon be made: %s", err))
+	}
 
+	actionPlan := diff.NewPolicyResolutionDiff(desiredStateUpdated, desiredState).ActionPlan
+
+	// If we are in noop mode, just return expected changes in a form of an action plan
+	if noop {
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-			PolicyGeneration: genCurrent,             // policy generation didn't change
+			PolicyGeneration: policyGen,              // policy generation didn't change
 			PolicyChanged:    false,                  // policy has not been updated in the store
 			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
 		})
+		return
+	}
 
-	} else {
-		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-delete").AddConsoleHook(api.logLevel)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
-		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
+	// Here we need to take mutex to handle policy and revision updates
+	api.policyAndRevisionUpdateMutex.Lock()
+	defer api.policyAndRevisionUpdateMutex.Unlock()
 
-		// If there are components with error status (e.g. conflicting code/discovery parameters), don't allow this policy change to happen
-		if desiredState.HasComponentsWithErrors() {
-			panic("policy change is not allowed due to component errors")
+	// Make object changes in the store
+	changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
+	if err != nil {
+		panic(fmt.Sprintf("error while deleting objects from policy: %s", err))
+	}
+
+	// If there are changes, create a new revision and say that we should wait for it
+	waitForRevision := runtime.MaxGeneration
+	if changed {
+		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredState, false)
+		if newRevisionErr != nil {
+			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
 		}
+		waitForRevision = newRevision.GetGeneration()
+	}
 
-		// Make object changes in the store
-		changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
-		if err != nil {
-			panic(fmt.Sprintf("error while deleting objects from policy: %s", err))
-		}
+	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
+		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+		PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
+		PolicyChanged:    changed,                    // have any policy object in the store been changed or not
+		WaitForRevision:  waitForRevision,            // which revision to wait for
+		PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
+		EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
+	})
 
-		// If there are changes, we need to wait for the next revision
-		var waitForRevision = runtime.MaxGeneration
-		if changed {
-			revision, err := api.store.GetLastRevisionForPolicy(genCurrent)
-			if err != nil {
-				panic(fmt.Sprintf("error while loading last revision of the current policy: %s", err))
-			}
-			waitForRevision = revision.GetGeneration().Next()
-		}
-
-		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-			PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
-			PolicyChanged:    changed,                    // have any policy object in the store been changed or not
-			WaitForRevision:  waitForRevision,            // which revision to wait for
-			PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
-			EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
-		})
-
-		if changed {
-			// signal to the channel that policy has changed, that will trigger the enforcement right away
-			api.runDesiredStateEnforcement <- true
-		}
+	if changed {
+		// signal to the channel that policy has changed, that will trigger the enforcement right away
+		api.runDesiredStateEnforcement <- true
 	}
 
 }

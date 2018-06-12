@@ -36,6 +36,8 @@ func NewCreateAction(componentKey string, params util.NestedParameterMap) *Creat
 
 // Apply applies the action
 func (a *CreateAction) Apply(context *action.Context) error {
+	context.EventLog.NewEntry().Debugf("Creating component instance: %s", a.ComponentKey)
+
 	// deploy to cloud
 	instance, err := a.processDeployment(context)
 	if err != nil {

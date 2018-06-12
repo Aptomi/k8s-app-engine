@@ -102,19 +102,17 @@ func (resolution *PolicyResolution) GetDependencyResolution(dependency *lang.Dep
 	return newDependencyResolution(dError == nil && len(dComponentKey) > 0, dComponentKey)
 }
 
-// HasComponentsWithErrors returns is policy resolution has components with error status (e.g. conflicting code/discovery params)
-func (resolution *PolicyResolution) HasComponentsWithErrors() bool {
+// Validate checks that the state is valid, meaning that all objects references are valid and all components are valid
+//  - it takes all the instances and verifies that all services exist, all clusters exist, etc
+//  - it also verifies that there are no components with global errors (e.g. conflicting code/discovery params)
+func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
+	// component instances must not have global errors (e.g. conflicting code/discovery params)
 	for _, instance := range resolution.ComponentInstanceMap {
 		if instance.Error != nil {
-			return true
+			return instance.Error
 		}
 	}
-	return false
-}
 
-// Validate checks that the state is valid, meaning that all objects references are valid. It takes all the instances
-// and verifies that all services exist, all clusters exist, etc
-func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 	// component instances must point to valid objects
 	for _, instance := range resolution.ComponentInstanceMap {
 		componentKey := instance.Metadata.Key
@@ -164,5 +162,6 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 			return fmt.Errorf("cluster '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ClusterName, componentKey.GetKey())
 		}
 	}
+
 	return nil
 }

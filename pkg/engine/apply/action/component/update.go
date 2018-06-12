@@ -38,6 +38,8 @@ func NewUpdateAction(componentKey string, paramsBefore util.NestedParameterMap, 
 
 // Apply applies the action
 func (a *UpdateAction) Apply(context *action.Context) error {
+	context.EventLog.NewEntry().Debugf("Updating component instance: %s", a.ComponentKey)
+
 	// update in the cloud
 	instance, err := a.processDeployment(context)
 	if err != nil {

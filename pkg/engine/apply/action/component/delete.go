@@ -36,6 +36,8 @@ func NewDeleteAction(componentKey string, params util.NestedParameterMap) *Delet
 
 // Apply applies the action
 func (a *DeleteAction) Apply(context *action.Context) error {
+	context.EventLog.NewEntry().Debugf("Deleting component instance: %s", a.ComponentKey)
+
 	// delete from cloud
 	instance, err := a.processDeployment(context)
 	if err != nil {

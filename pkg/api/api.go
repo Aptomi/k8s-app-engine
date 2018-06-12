@@ -8,16 +8,18 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
+	"sync"
 )
 
 type coreAPI struct {
-	contentType                *codec.ContentTypeHandler
-	store                      store.Core
-	externalData               *external.Data
-	pluginRegistryFactory      plugin.RegistryFactory
-	secret                     string
-	logLevel                   logrus.Level
-	runDesiredStateEnforcement chan bool
+	contentType                  *codec.ContentTypeHandler
+	store                        store.Core
+	externalData                 *external.Data
+	pluginRegistryFactory        plugin.RegistryFactory
+	secret                       string
+	logLevel                     logrus.Level
+	runDesiredStateEnforcement   chan bool
+	policyAndRevisionUpdateMutex sync.Mutex
 }
 
 // Serve initializes everything needed by REST API and registers all API endpoints in the provided http router

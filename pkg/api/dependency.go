@@ -57,13 +57,24 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	dependencyIds := strings.Split(params.ByName("idList"), ",")
 
 	// load the latest policy
-	policy, _, errPolicy := api.store.GetPolicy(runtime.LastGen)
-	if errPolicy != nil {
-		panic(fmt.Sprintf("error while loading latest policy from the store: %s", errPolicy))
+	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while loading latest policy from the store: %s", err))
 	}
 
-	// load actual and desired states
-	desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-dependencies-status")).ResolveAllDependencies()
+	// load the latest revision for the given policy
+	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while loading latest revision from the store: %s", err))
+	}
+
+	// load desired state
+	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	if err != nil {
+		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
+	}
+
+	// load actual state
 	actualState, err := api.store.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("can't load actual state from the store: %s", err))

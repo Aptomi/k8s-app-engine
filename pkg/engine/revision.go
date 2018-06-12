@@ -34,28 +34,32 @@ type Revision struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         runtime.GenerationMetadata
 
-	// Policy represents generation of the corresponding policy
-	Policy runtime.Generation
+	// Policy to which this revision is attached to
+	PolicyGen runtime.Generation
 
-	Status    string
+	Status         string
+	CreatedAt      time.Time
+	RecalculateAll bool
+
+	Result    *action.ApplyResult
 	AppliedAt time.Time
 
-	Result *action.ApplyResult
-
-	ResolveLog []*event.APIEvent
-	ApplyLog   []*event.APIEvent
+	// TODO: do not store apply log in revision
+	ApplyLog []*event.APIEvent
 }
 
 // NewRevision creates a new revision
-func NewRevision(gen runtime.Generation, policyGen runtime.Generation) *Revision {
+func NewRevision(gen runtime.Generation, policyGen runtime.Generation, recalculateAll bool) *Revision {
 	return &Revision{
 		TypeKind: RevisionObject.GetTypeKind(),
 		Metadata: runtime.GenerationMetadata{
 			Generation: gen,
 		},
-		Policy: policyGen,
-		Status: RevisionStatusWaiting,
-		Result: &action.ApplyResult{},
+		PolicyGen:      policyGen,
+		Status:         RevisionStatusWaiting,
+		CreatedAt:      time.Now(),
+		RecalculateAll: recalculateAll,
+		Result:         &action.ApplyResult{},
 	}
 }
 

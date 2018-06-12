@@ -3,12 +3,10 @@ package api
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/visualization"
 	"github.com/julienschmidt/httprouter"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
@@ -30,38 +28,46 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 		gen = strconv.Itoa(int(runtime.LastGen))
 	}
 
+	// see which policy generation we need to load
+	policyGen := runtime.ParseGeneration(gen)
+	if strings.ToLower(mode) == "actual" {
+		policyGen = runtime.LastGen
+	}
+
+	// load policy by gen
+	policy, policyGen, err := api.store.GetPolicy(policyGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while getting requested policy: %s", err))
+	}
+
+	// load revision
+	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	if err != nil {
+		panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+	}
+
+	// load desired state
+	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	if err != nil {
+		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
+	}
+
+	// load actual state
+	actualState, _ := api.store.GetActualState()
+
 	var graph *visualization.Graph
 	switch strings.ToLower(mode) {
 	case "policy":
-		policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
-		if err != nil {
-			panic(fmt.Sprintf("error while getting requested policy: %s", err))
-		}
-
 		// show just policy
 		graphBuilder := visualization.NewGraphBuilder(policy, nil, nil)
 		graph = graphBuilder.Policy(visualization.PolicyCfgDefault)
 	case "desired":
-		policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
-		if err != nil {
-			panic(fmt.Sprintf("error while getting requested policy: %s", err))
-		}
-
 		// show instances in desired state
-		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 	case "actual":
 		// TODO: actual may not work correctly in all cases (e.g. after policy delete on a cluster which is not available, desired state has less components, these components are still in actual state but will not be shown on UI)
-		//       we probably need to separate out actual state into its own screen with its own logic
-		policy, _, err := api.store.GetPolicy(runtime.LastGen)
-		if err != nil {
-			panic(fmt.Sprintf("error while getting requested policy: %s", err))
-		}
-
 		// show instances in actual state
-		actualState, _ := api.store.GetActualState()
-		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
 		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
 		graph = graphBuilder.DependencyResolutionWithFunc(visualization.DependencyResolutionCfgDefault, func(instance *resolve.ComponentInstance) bool {
 			_, found := actualState.ComponentInstanceMap[instance.GetKey()]
@@ -86,11 +92,11 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		genBase = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
+	policy, policyGen, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
-	policyBase, _, err := api.store.GetPolicy(runtime.ParseGeneration(genBase))
+	policyBase, policyBaseGen, err := api.store.GetPolicy(runtime.ParseGeneration(genBase))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
@@ -106,14 +112,37 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		graph.CalcDelta(graphBase)
 	case "desired":
 		// desired state (next)
-		desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
-		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
-		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+		{
+			revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+			if err != nil {
+				panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+			}
+
+			desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+			if err != nil {
+				panic(fmt.Sprintf("can't load desired from revision: %s", err))
+			}
+
+			graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
+			graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+		}
 
 		// desired state (prev)
-		desiredStateBase := resolve.NewPolicyResolver(policyBase, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
-		graphBuilderBase := visualization.NewGraphBuilder(policyBase, desiredStateBase, api.externalData)
-		graphBase := graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+		var graphBase *visualization.Graph
+		{
+			revisionBase, err := api.store.GetLastRevisionForPolicy(policyBaseGen)
+			if err != nil {
+				panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+			}
+
+			desiredStateBase, err := api.store.GetDesiredState(revisionBase, policy, api.externalData)
+			if err != nil {
+				panic(fmt.Sprintf("can't load desired state from revision: %s", err))
+			}
+
+			graphBuilderBase := visualization.NewGraphBuilder(policyBase, desiredStateBase, api.externalData)
+			graphBase = graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+		}
 
 		// diff
 		graph.CalcDelta(graphBase)
@@ -129,7 +158,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 	kind := params.ByName("kind")
 	name := params.ByName("name")
 
-	policy, _, err := api.store.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting policy: %s", err))
 	}
@@ -141,12 +170,21 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 
 	var desiredState *resolve.PolicyResolution
 	if kind == lang.DependencyObject.Kind {
-		desiredState = resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-object-diagram")).ResolveAllDependencies()
+		// load revision
+		revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+		if err != nil {
+			panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+		}
+
+		// load desired state
+		desiredState, err = api.store.GetDesiredState(revision, policy, api.externalData)
+		if err != nil {
+			panic(fmt.Sprintf("can't load desired state from revision: %s", err))
+		}
 	}
 
-	var graph *visualization.Graph
 	graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
-	graph = graphBuilder.Object(obj)
+	graph := graphBuilder.Object(obj)
 
 	api.contentType.WriteOne(writer, request, &graphWrapper{Data: graph.GetData()})
 }

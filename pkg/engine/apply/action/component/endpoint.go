@@ -34,6 +34,8 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 
 // Apply applies the action
 func (a *EndpointsAction) Apply(context *action.Context) error {
+	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", a.ComponentKey)
+
 	// fetch component endpoints and store them in component instance (actual state)
 	instance, endpoints, err := a.processEndpoints(context)
 	if err != nil {
@@ -58,8 +60,6 @@ func (a *EndpointsAction) DescribeChanges() util.NestedParameterMap {
 }
 
 func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.ComponentInstance, map[string]string, error) {
-	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", a.ComponentKey)
-
 	instance := context.ActualStateUpdater.GetComponentInstance(a.ComponentKey)
 	if instance == nil {
 		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)

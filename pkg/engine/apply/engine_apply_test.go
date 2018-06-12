@@ -236,7 +236,7 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 	// Check that policy apply finished with expected results
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 4, Failed: 0, Skipped: 0})
 
-	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should have populated with components at this point")
+	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state have components instances transferred to it")
 
 	// Reset policy back to empty
 	reset := newTestData(t, builder.NewPolicyBuilder())
@@ -253,9 +253,9 @@ func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testi
 		action.NewApplyResultUpdaterImpl(),
 	)
 
-	// delete/detach, delete/detach, endpoints/endpoints - 6 actions failed in total
-	actualState = applyAndCheck(t, applierNext, action.ApplyResult{Success: 1, Failed: 1, Skipped: 2})
-	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should be intact after actions failing")
+	// detach successful, deletion fails
+	actualState = applyAndCheck(t, applierNext, action.ApplyResult{Success: 2, Failed: 2, Skipped: 0})
+	assert.Equal(t, 2, len(actualState.ComponentInstanceMap), "Actual state should still have component instances after actions failing")
 }
 
 /*

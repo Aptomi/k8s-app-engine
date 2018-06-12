@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"time"
@@ -76,7 +77,7 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, performedBy str
 		return false, nil, err
 	}
 	if policyData == nil {
-		panic(fmt.Sprintf("Cannot retrieve last policy from the store, policyData is nil"))
+		panic(fmt.Sprintf("cannot retrieve last policy from the store, policyData is nil"))
 	}
 
 	changed := false
@@ -123,8 +124,15 @@ func (ds *defaultStore) InitPolicy() error {
 		},
 		Objects: make(map[string]map[string]map[string]runtime.Generation),
 	}
+
 	// save policy data
 	_, err := ds.store.Save(initialPolicyData)
+	if err != nil {
+		return err
+	}
+
+	// create a new revision as well
+	_, err = ds.NewRevision(initialPolicyData.GetGeneration(), resolve.NewPolicyResolution(), false)
 	return err
 }
 
