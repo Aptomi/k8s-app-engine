@@ -154,10 +154,14 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
-	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := event.NewHookConsole(logrus.DebugLevel)
-		eventLog.Save(hook)
-		t.FailNow()
+
+	dependencies := builder.Policy().GetObjectsByKind(lang.DependencyObject.Kind)
+	for _, d := range dependencies {
+		if !assert.True(t, result.GetDependencyResolution(d.(*lang.Dependency)).Resolved, "Dependency resolution status should be correct for %v", d) {
+			hook := event.NewHookConsole(logrus.DebugLevel)
+			eventLog.Save(hook)
+			t.FailNow()
+		}
 	}
 	return result
 }

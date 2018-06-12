@@ -48,8 +48,11 @@ type ComponentInstance struct {
 	// Metadata is an object metadata for component instance
 	Metadata *ComponentInstanceMetadata
 
-	// DependencyKeys is a list of dependency keys which are keeping this component instantiated
-	DependencyKeys map[string]bool
+	// Error means that a critical error happened with a component (e.g. conflict of parameters)
+	Error error
+
+	// DependencyKeys is a list of dependency keys which are keeping this component instantiated (if dependency resolves to this component directly, then the value is 0. otherwise it's depth in policy resolution)
+	DependencyKeys map[string]int
 
 	// IsCode means the component is code
 	IsCode bool
@@ -95,7 +98,7 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
 		TypeKind:             ComponentInstanceObject.GetTypeKind(),
 		Metadata:             &ComponentInstanceMetadata{cik},
-		DependencyKeys:       make(map[string]bool),
+		DependencyKeys:       make(map[string]int),
 		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  util.NestedParameterMap{},
 		CalculatedCodeParams: util.NestedParameterMap{},
@@ -130,8 +133,8 @@ func (instance *ComponentInstance) GetRunningTime() time.Duration {
 	return time.Since(instance.CreatedAt)
 }
 
-func (instance *ComponentInstance) addDependency(dependencyKey string) {
-	instance.DependencyKeys[dependencyKey] = true
+func (instance *ComponentInstance) addDependency(dependencyKey string, depth int) {
+	instance.DependencyKeys[dependencyKey] = depth
 }
 
 func (instance *ComponentInstance) addRuleInformation(result *lang.RuleActionResult) {
@@ -195,15 +198,16 @@ func (instance *ComponentInstance) UpdateTimes(createdAt time.Time, updatedAt ti
 
 // appendData gets called to append data for two existing component instances, both of which have been already processed
 // and populated with data
-func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
+func (instance *ComponentInstance) appendData(ops *ComponentInstance) {
 	// Combine dependencies which are keeping this component instantiated
-	for dependencyKey := range ops.DependencyKeys {
-		instance.addDependency(dependencyKey)
+	for dependencyKey, depth := range ops.DependencyKeys {
+		instance.addDependency(dependencyKey, depth)
 	}
 
 	// Transfer IsCode bool
 	if instance.IsCode != ops.IsCode {
-		return fmt.Errorf("component %s can't be converted from code to non-code and vice versa", instance.GetKey())
+		instance.Error = fmt.Errorf("component %s can't be converted from code to non-code and vice versa", instance.GetKey())
+		return
 	}
 	instance.IsCode = instance.IsCode || ops.IsCode
 
@@ -213,13 +217,15 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	// Combine discovery params
 	var err = instance.addDiscoveryParams(ops.CalculatedDiscovery)
 	if err != nil {
-		return err
+		instance.Error = err
+		return
 	}
 
 	// Combine code params
 	err = instance.addCodeParams(ops.CalculatedCodeParams)
 	if err != nil {
-		return err
+		instance.Error = err
+		return
 	}
 
 	// Outgoing graph edges (instance: key -> true) as we are traversing the graph
@@ -231,6 +237,4 @@ func (instance *ComponentInstance) appendData(ops *ComponentInstance) error {
 	for k, v := range ops.DataForPlugins {
 		instance.DataForPlugins[k] = v
 	}
-
-	return nil
 }

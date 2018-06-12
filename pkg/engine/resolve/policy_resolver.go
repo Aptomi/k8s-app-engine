@@ -7,7 +7,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	sysruntime "runtime"
 	"runtime/debug"
@@ -106,8 +105,7 @@ func (resolver *PolicyResolver) ResolveAllDependencies() *PolicyResolution {
 	// Once all components are resolved, print information about them into event log
 	for _, instance := range resolver.resolution.ComponentInstanceMap {
 		if instance.Metadata.Key.IsComponent() {
-			resolver.logComponentCodeParams(instance)
-			resolver.logComponentDiscoveryParams(instance)
+			resolver.logComponentParams(instance)
 		}
 	}
 
@@ -153,17 +151,8 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	// if there was no resolution error, combine component data
 	if resolutionErr == nil {
 		// aggregate component instance data
-		appendErr := resolver.resolution.AppendData(node.resolution)
-
-		// if there is a conflict (e.g. components have different code params), turn this into an error
-		if appendErr != nil {
-			node.eventLog.NewEntry().Error(node.printCauseDetailsOnDebug(appendErr))
-			resolutionErr = appendErr
-		}
+		resolver.resolution.AppendData(node.resolution)
 	}
-
-	// add a record for dependency resolution
-	resolver.resolution.dependencyInstanceMap[runtime.KeyForStorable(node.dependency)] = newDependencyResolution(resolutionErr, node.serviceKey)
 }
 
 // Evaluate evaluates and resolves a single dependency ("<user> needs <service> with <labels>") and calculates component allocations
@@ -176,7 +165,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		if resolveErr != nil {
 			// Log resolution error before we exit
 			if !recursiveError {
-				node.eventLog.NewEntry().Error(node.printCauseDetailsOnDebug(resolveErr))
+				node.eventLog.NewEntry().Error(printCauseDetailsOnDebug(resolveErr, node.eventLog))
 			}
 
 			// Log that service or component instance cannot be resolved
@@ -320,12 +309,12 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 
 		// Record usage of a given component instance
 		node.logInstanceSuccessfullyResolved(node.componentKey)
-		node.resolution.RecordResolved(node.componentKey, node.dependency, ruleResult)
+		node.resolution.RecordResolved(node.componentKey, node.dependency, node.depth, ruleResult)
 	}
 
 	// Mark note as resolved and record usage of a given service instance
 	node.logInstanceSuccessfullyResolved(node.serviceKey)
-	node.resolution.RecordResolved(node.serviceKey, node.dependency, ruleResult)
+	node.resolution.RecordResolved(node.serviceKey, node.dependency, node.depth, ruleResult)
 
 	return nil
 }

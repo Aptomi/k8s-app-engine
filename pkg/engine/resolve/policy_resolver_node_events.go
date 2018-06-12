@@ -3,6 +3,7 @@ package resolve
 import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/errors"
+	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/davecgh/go-spew/spew"
@@ -38,7 +39,7 @@ func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *
 }
 
 func (node *resolutionNode) errorWhenTestingContext(context *lang.Context, cause error) error {
-	return fmt.Errorf("error while trying to match context '%s' for contract '%s': %s", context.Name, node.contract.Name, node.printCauseDetailsOnDebug(cause))
+	return fmt.Errorf("error while trying to match context '%s' for contract '%s': %s", context.Name, node.contract.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorContextNotMatched() error {
@@ -46,23 +47,23 @@ func (node *resolutionNode) errorContextNotMatched() error {
 }
 
 func (node *resolutionNode) errorWhenTestingComponent(component *lang.ServiceComponent, cause error) error {
-	return fmt.Errorf("error while checking component criteria '%s' for service '%s': %s", component.Name, node.service.Name, node.printCauseDetailsOnDebug(cause))
+	return fmt.Errorf("error while checking component criteria '%s' for service '%s': %s", component.Name, node.service.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenProcessingRule(rule *lang.Rule, cause error) error {
-	return fmt.Errorf("error while processing rule '%s' on contract '%s', context '%s', service '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.service.Name, node.printCauseDetailsOnDebug(cause))
+	return fmt.Errorf("error while processing rule '%s' on contract '%s', context '%s', service '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.service.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error {
-	return fmt.Errorf("error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, node.printCauseDetailsOnDebug(cause))
+	return fmt.Errorf("error while resolving allocation keys for contract '%s', context '%s': %s", node.contract.Name, node.context.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
-	return fmt.Errorf("error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, node.printCauseDetailsOnDebug(cause))
+	return fmt.Errorf("error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) error {
-	return fmt.Errorf("error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, node.printCauseDetailsOnDebug(cause))
+	return fmt.Errorf("error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorServiceCycleDetected() error {
@@ -168,36 +169,35 @@ func (node *resolutionNode) logCannotResolveInstance() {
 	}
 }
 
-func (resolver *PolicyResolver) logComponentCodeParams(instance *ComponentInstance) {
+func (resolver *PolicyResolver) logComponentParams(instance *ComponentInstance) {
 	serviceObj, err := resolver.policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting service '%s/%s' from the policy: %s", instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace, err))
 	}
-	code := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
-	if code != nil {
-		cs := spew.ConfigState{Indent: "\t"}
-		resolver.eventLog.NewEntry().Debugf("Calculated final code params for component '%s': %s", instance.Metadata.Key.GetKey(), cs.Sdump(instance.CalculatedCodeParams))
-	}
-}
 
-func (resolver *PolicyResolver) logComponentDiscoveryParams(instance *ComponentInstance) {
-	serviceObj, err := resolver.policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
-	if err != nil {
-		panic(fmt.Sprintf("error while getting service '%s/%s' from the policy: %s", instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace, err))
+	// if there is a conflict (e.g. components have different code params), turn this into an error
+	if instance.Error != nil {
+		resolver.eventLog.NewEntry().Error(printCauseDetailsOnDebug(instance.Error, resolver.eventLog))
 	}
+
 	code := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
 	if code != nil {
 		cs := spew.ConfigState{Indent: "\t"}
+
+		// log code params
+		resolver.eventLog.NewEntry().Debugf("Calculated final code params for component '%s': %s", instance.Metadata.Key.GetKey(), cs.Sdump(instance.CalculatedCodeParams))
+
+		// log discovery params
 		resolver.eventLog.NewEntry().Debugf("Calculated final discovery params for component '%s': %s", instance.Metadata.Key.GetKey(), cs.Sdump(instance.CalculatedDiscovery))
 	}
 }
 
 // if the given argument is ErrorWithDetails, it logs its details on debug mode
-func (node *resolutionNode) printCauseDetailsOnDebug(err error) error {
+func printCauseDetailsOnDebug(err error, eventLog *event.Log) error {
 	errWithDetails, isErrorWithDetails := err.(*errors.ErrorWithDetails)
 	if isErrorWithDetails {
 		cs := spew.ConfigState{Indent: "\t"}
-		node.eventLog.NewEntry().Debug(cs.Sdump(errWithDetails.Details()))
+		eventLog.NewEntry().Debug(cs.Sdump(errWithDetails.Details()))
 	}
 	return err
 }

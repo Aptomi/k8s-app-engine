@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -36,11 +35,10 @@ func TestPolicyResolverSimple(t *testing.T) {
 	d2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].Resolved, "Dependency should be successfully resolved")
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency should be successfully resolved")
+	resolution := resolvePolicy(t, b, []verifyDependency{
+		{d: d1, resolved: true},
+		{d: d2, resolved: true},
+	})
 
 	// check instance 1
 	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component, resolution)
@@ -83,11 +81,10 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 	d1.Labels["param3"] = "value3"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].Resolved, "Dependency should be successfully resolved")
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency should be successfully resolved")
+	resolution := resolvePolicy(t, b, []verifyDependency{
+		{d: d1, resolved: true},
+		{d: d2, resolved: true},
+	})
 
 	// check component 1
 	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component1, resolution)
@@ -129,9 +126,9 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 	d := b.AddDependency(b.AddUserDomainAdmin(), contract1)
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d), "Dependency should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d)].Resolved, "Dependency should be successfully resolved")
+	resolvePolicy(t, b, []verifyDependency{
+		{d: d, resolved: true},
+	})
 }
 
 func TestPolicyResolverPartialMatching(t *testing.T) {
@@ -158,14 +155,10 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	d2.Labels["label1"] = "value1"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResSomeDependenciesFailed, "unable to find matching context")
-
-	// check that only first dependency got resolved
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency with full set of labels should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].Resolved, "Dependency with full set of labels should be successfully resolved")
-
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency with partial set of labels should be present in policy resolution")
-	assert.False(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency with partial set of labels should not be successfully resolved")
+	resolvePolicy(t, b, []verifyDependency{
+		{d: d1, resolved: true},
+		{d: d2, resolved: false, logMessage: "unable to find matching context"},
+	})
 }
 
 func TestPolicyResolverCalculatedLabels(t *testing.T) {
@@ -197,11 +190,9 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	dependency.Labels["label3"] = "value3"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
-
-	// check that dependency got resolved
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Dependency should be present in policy resolution")
-	assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Dependency should be successfully resolved")
+	resolution := resolvePolicy(t, b, []verifyDependency{
+		{d: dependency, resolved: true},
+	})
 
 	// check labels for the end service (service2/contract2)
 	serviceInstance := getInstanceByParams(t, cluster, "k8ns", contract2, contract2.Contexts[0], nil, service2, nil, resolution)
@@ -251,10 +242,12 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependencies which feed conflicting labels into a given component
-	b.AddDependency(b.AddUser(), contract)
+	dependency := b.AddDependency(b.AddUser(), contract)
 
 	// policy should be resolved successfully
-	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
+	resolution := resolvePolicy(t, b, []verifyDependency{
+		{d: dependency, resolved: true},
+	})
 
 	// check discovery parameters of component 1
 	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component1, resolution)
@@ -282,9 +275,9 @@ func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
 	dependency := b.AddDependency(user, contract)
 
 	// dependency declared by non-existing consumer should result in dependency error
-	resolution := resolvePolicy(t, b, ResSomeDependenciesFailed, "non-existing user")
-	assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Dependency should be present in policy resolution")
-	assert.False(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Dependency should not be successfully resolved")
+	resolvePolicy(t, b, []verifyDependency{
+		{d: dependency, resolved: false, logMessage: "non-existing user"},
+	})
 }
 
 func TestPolicyResolverConflictingCodeParams(t *testing.T) {
@@ -305,12 +298,14 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	// add dependencies which feed conflicting labels into a given component
 	d1 := b.AddDependency(b.AddUser(), contract)
 	d1.Labels["deplabel"] = "1"
-
 	d2 := b.AddDependency(b.AddUser(), contract)
 	d2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting code parameters should result in an error
-	resolvePolicy(t, b, ResSomeDependenciesFailed, "conflicting code parameters")
+	resolvePolicy(t, b, []verifyDependency{
+		{d: d1, resolved: false, logMessage: "conflicting code parameters"},
+		{d: d2, resolved: false, logMessage: "conflicting code parameters"},
+	})
 }
 
 func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
@@ -332,12 +327,14 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	// add dependencies which feed conflicting labels into a given component
 	d1 := b.AddDependency(b.AddUser(), contract)
 	d1.Labels["deplabel"] = "1"
-
 	d2 := b.AddDependency(b.AddUser(), contract)
 	d2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting discovery parameters should result in an error
-	resolvePolicy(t, b, ResSomeDependenciesFailed, "conflicting discovery parameters")
+	resolvePolicy(t, b, []verifyDependency{
+		{d: d1, resolved: false, logMessage: "conflicting discovery parameters"},
+		{d: d2, resolved: false, logMessage: "conflicting discovery parameters"},
+	})
 }
 
 func TestPolicyResolverServiceLoop(t *testing.T) {
@@ -360,10 +357,12 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add dependency
-	b.AddDependency(b.AddUser(), contract1)
+	dependency := b.AddDependency(b.AddUser(), contract1)
 
 	// policy resolution with service dependency cycle should should result in an error
-	resolvePolicy(t, b, ResSomeDependenciesFailed, "service cycle detected")
+	resolvePolicy(t, b, []verifyDependency{
+		{d: dependency, resolved: false, logMessage: "service cycle detected"},
+	})
 }
 
 func TestPolicyResolverPickClusterViaRules(t *testing.T) {
@@ -392,11 +391,14 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	d2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
+	resolution := resolvePolicy(t, b, []verifyDependency{
+		{d: d1, resolved: true},
+		{d: d2, resolved: true},
+	})
 
 	// check that both dependencies got resolved and got placed in different clusters
-	instance1 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d1), resolution)
-	instance2 := getInstanceByDependencyKey(t, runtime.KeyForStorable(d2), resolution)
+	instance1 := resolution.ComponentInstanceMap[resolution.GetDependencyResolution(d1).ComponentInstanceKey]
+	instance2 := resolution.ComponentInstanceMap[resolution.GetDependencyResolution(d2).ComponentInstanceKey]
 	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelTarget], "Cluster should be set correctly via rules")
 	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelTarget], "Cluster should be set correctly via rules")
 }
@@ -415,12 +417,16 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add multiple dependencies
+	dExpected := []verifyDependency{}
 	for i := 0; i < 10; i++ {
-		b.AddDependency(b.AddUser(), contract)
+		dependency := b.AddDependency(b.AddUser(), contract)
+		dExpected = append(dExpected, verifyDependency{
+			d: dependency, resolved: false, logMessage: "panic from mock user loader",
+		})
 	}
 
 	// policy resolution should result in an error
-	resolvePolicy(t, b, ResSomeDependenciesFailed, "panic from mock user loader")
+	resolvePolicy(t, b, dExpected)
 }
 
 func TestPolicyResolverAllocationKeys(t *testing.T) {
@@ -454,17 +460,16 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 		d2 := b.AddDependency(b.AddUser(), contract)
 
 		// policy resolution should be completed successfully
-		resolution := resolvePolicy(t, b, ResAllDependenciesResolvedSuccessfully, "Successfully resolved")
-		assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d1), "Dependency should be present in policy resolution")
-		assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].Resolved, "Dependency should be successfully resolved")
-		assert.Contains(t, resolution.GetDependencyInstanceMap(), runtime.KeyForStorable(d2), "Dependency should be present in policy resolution")
-		assert.True(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].Resolved, "Dependency should be successfully resolved")
+		resolution := resolvePolicy(t, b, []verifyDependency{
+			{d: d1, resolved: true},
+			{d: d2, resolved: true},
+		})
 
 		// make sure dependencies point to different instances
 		if sameInstance {
-			assert.Equal(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].ComponentInstanceKey, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].ComponentInstanceKey, "Dependencies should point to same instance")
+			assert.Equal(t, resolution.GetDependencyResolution(d1).ComponentInstanceKey, resolution.GetDependencyResolution(d2).ComponentInstanceKey, "Dependencies should point to same instance")
 		} else {
-			assert.NotEqual(t, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d1)].ComponentInstanceKey, resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(d2)].ComponentInstanceKey, "Dependencies should point to different instances")
+			assert.NotEqual(t, resolution.GetDependencyResolution(d1).ComponentInstanceKey, resolution.GetDependencyResolution(d2).ComponentInstanceKey, "Dependencies should point to different instances")
 		}
 	}
 }
@@ -473,49 +478,41 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 	Helpers
 */
 
-const (
-	ResAllDependenciesResolvedSuccessfully = iota
-	ResSomeDependenciesFailed              = iota
-)
+type verifyDependency struct {
+	d          *lang.Dependency
+	resolved   bool
+	logMessage string
+}
 
-func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expectedResult int, expectedLogMessage string) *PolicyResolution {
+func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expected []verifyDependency) *PolicyResolution {
 	t.Helper()
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
 
-	if !assert.Equal(t, expectedResult != ResSomeDependenciesFailed, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		// print log into stdout and exit
-		hook := event.NewHookConsole(logrus.DebugLevel)
-		eventLog.Save(hook)
-		t.FailNow()
-		return nil
-	}
-
-	// check for error message
-	verifier := event.NewLogVerifier(expectedLogMessage, expectedResult == ResSomeDependenciesFailed)
-	resolver.eventLog.Save(verifier)
-	if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: %s", expectedLogMessage) {
-		hook := event.NewHookConsole(logrus.DebugLevel)
-		resolver.eventLog.Save(hook)
-		t.FailNow()
+	// check status of all dependencies
+	for _, check := range expected {
+		// check status first
+		if !assert.Equal(t, check.resolved, result.GetDependencyResolution(check.d).Resolved, "Dependency resolution status should be correct for %v", check.d) {
+			// print log into stdout and exit
+			hook := event.NewHookConsole(logrus.DebugLevel)
+			eventLog.Save(hook)
+			t.FailNow()
+			return nil
+		}
+		// check for log message
+		if len(check.logMessage) > 0 {
+			verifier := event.NewLogVerifier(check.logMessage, !check.resolved)
+			resolver.eventLog.Save(verifier)
+			if !assert.True(t, verifier.MatchedErrorsCount() > 0, "Event log should have an error message containing words: %s", check.logMessage) {
+				hook := event.NewHookConsole(logrus.DebugLevel)
+				resolver.eventLog.Save(hook)
+				t.FailNow()
+			}
+		}
 	}
 
 	return result
-}
-
-func getInstanceByDependencyKey(t *testing.T, dependencyID string, resolution *PolicyResolution) *ComponentInstance {
-	t.Helper()
-	dResolution := resolution.GetDependencyInstanceMap()[dependencyID]
-	if !assert.True(t, dResolution.Resolved, "Dependency %s should be resolved", dependencyID) {
-		t.Log(resolution.GetDependencyInstanceMap())
-		t.FailNow()
-	}
-	instance, ok := resolution.ComponentInstanceMap[dResolution.ComponentInstanceKey]
-	if !assert.True(t, ok, "Component instance '%s' should be present in resolution data", dResolution.ComponentInstanceKey) {
-		t.FailNow()
-	}
-	return instance
 }
 
 func getInstanceByParams(t *testing.T, cluster *lang.Cluster, namespace string, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, service *lang.Service, component *lang.ServiceComponent, resolution *PolicyResolution) *ComponentInstance {

@@ -17,7 +17,7 @@ type dependencyNode struct {
 }
 
 func (n dependencyNode) getGroup() string {
-	dResolution := n.b.resolution.GetDependencyInstanceMap()[runtime.KeyForStorable(n.dependency)]
+	dResolution := n.b.resolution.GetDependencyResolution(n.dependency)
 	if dResolution.Resolved {
 		return "dependency"
 	}

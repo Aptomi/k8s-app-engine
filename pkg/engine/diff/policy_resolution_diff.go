@@ -77,14 +77,14 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 	node := diff.ActionPlan.GetActionGraphNode(key)
 
 	// Get previous dependency keys
-	var depKeysPrev map[string]bool
+	var depKeysPrev map[string]int
 	prevInstance := diff.Prev.ComponentInstanceMap[key]
 	if prevInstance != nil {
 		depKeysPrev = prevInstance.DependencyKeys
 	}
 
 	// Get next dependency keys
-	var depKeysNext map[string]bool
+	var depKeysNext map[string]int
 	nextInstance := diff.Next.ComponentInstanceMap[key]
 	if nextInstance != nil {
 		depKeysNext = nextInstance.DependencyKeys
@@ -96,7 +96,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 
 	// See if a dependency needs to be detached from a component
 	for dependencyID := range depKeysPrev {
-		if !depKeysNext[dependencyID] {
+		if _, found := depKeysNext[dependencyID]; !found {
 			node.AddAction(component.NewDetachDependencyAction(key, dependencyID), diff.Prev, true)
 		}
 	}
@@ -135,9 +135,9 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 	}
 
 	// See if a dependency needs to be attached to a component
-	for dependencyID := range depKeysNext {
-		if !depKeysPrev[dependencyID] {
-			node.AddAction(component.NewAttachDependencyAction(key, dependencyID), diff.Prev, true)
+	for dependencyID, depth := range depKeysNext {
+		if _, found := depKeysPrev[dependencyID]; !found {
+			node.AddAction(component.NewAttachDependencyAction(key, dependencyID, depth), diff.Prev, true)
 		}
 	}
 }

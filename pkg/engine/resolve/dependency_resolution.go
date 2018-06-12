@@ -12,15 +12,9 @@ type DependencyResolution struct {
 }
 
 // Creates a new dependency resolution
-func newDependencyResolution(resolveErr error, key *ComponentInstanceKey) *DependencyResolution {
-	if resolveErr != nil {
-		return &DependencyResolution{
-			Resolved: false,
-		}
-	}
-
+func newDependencyResolution(resolved bool, key string) *DependencyResolution {
 	return &DependencyResolution{
-		Resolved:             true,
-		ComponentInstanceKey: key.GetKey(),
+		Resolved:             resolved,
+		ComponentInstanceKey: key,
 	}
 }

@@ -20,15 +20,17 @@ type AttachDependencyAction struct {
 	*action.Metadata
 	ComponentKey string
 	DependencyID string
+	Depth        int
 }
 
 // NewAttachDependencyAction creates new AttachDependencyAction
-func NewAttachDependencyAction(componentKey string, dependencyID string) *AttachDependencyAction {
+func NewAttachDependencyAction(componentKey string, dependencyID string, depth int) *AttachDependencyAction {
 	return &AttachDependencyAction{
 		TypeKind:     AttachDependencyActionObject.GetTypeKind(),
 		Metadata:     action.NewMetadata(AttachDependencyActionObject.Kind, componentKey, dependencyID),
 		ComponentKey: componentKey,
 		DependencyID: dependencyID,
+		Depth:        depth,
 	}
 }
 
@@ -37,7 +39,7 @@ func (a *AttachDependencyAction) Apply(context *action.Context) error {
 	context.EventLog.NewEntry().Debugf("Attaching dependency '%s' to component instance: '%s'", a.DependencyID, a.ComponentKey)
 
 	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, func(obj *resolve.ComponentInstance) {
-		obj.DependencyKeys[a.DependencyID] = true
+		obj.DependencyKeys[a.DependencyID] = a.Depth
 	})
 }
 

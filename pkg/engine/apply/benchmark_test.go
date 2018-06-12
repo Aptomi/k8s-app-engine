@@ -415,7 +415,8 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
 	timeCheckpoint := time.Now()
-	fmt.Printf("[%s] Time = %s, resolving %d dependencies and %d component instances\n", testName, time.Since(timeStart).String(), desiredState.SuccessfullyResolvedDependencies(), len(actualState.ComponentInstanceMap))
+	depCnt := len(desiredPolicy.GetObjectsByKind(lang.DependencyObject.Kind))
+	fmt.Printf("[%s] Time = %s, resolving %d dependencies and %d component instances\n", testName, time.Since(timeStart).String(), depCnt, len(actualState.ComponentInstanceMap))
 
 	// now, remove all dependencies and apply actions
 	for _, dependency := range desiredPolicy.GetObjectsByKind(lang.DependencyObject.Kind) {
@@ -464,13 +465,17 @@ func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *ext
 	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
 	result := resolver.ResolveAllDependencies()
 	t := &testing.T{}
-	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := event.NewHookConsole(logrus.DebugLevel)
-		eventLog.Save(hook)
-		b.Fatal("policy resolution error")
+
+	dependencies := policy.GetObjectsByKind(lang.DependencyObject.Kind)
+	for _, d := range dependencies {
+		if !assert.True(t, result.GetDependencyResolution(d.(*lang.Dependency)).Resolved, "Dependency resolution status should be correct for %v", d) {
+			hook := event.NewHookConsole(logrus.DebugLevel)
+			eventLog.Save(hook)
+			b.Fatal("policy resolution error")
+		}
 	}
 
-	if expectedNonEmpty != (result.SuccessfullyResolvedDependencies() > 0) {
+	if expectedNonEmpty != (len(dependencies) > 0) {
 		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
 		b.Fatal("no dependencies resolved")

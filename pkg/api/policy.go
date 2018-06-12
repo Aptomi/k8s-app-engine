@@ -188,17 +188,22 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		})
 
 	} else {
+		// Process policy changes, calculate resolution log + action plan
+		eventLog := event.NewLog(logLevel, "api-policy-update").AddConsoleHook(api.logLevel)
+		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
+		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
+		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
+
+		// If there are components with error status (e.g. conflicting code/discovery parameters), don't allow this policy change to happen
+		if desiredState.HasComponentsWithErrors() {
+			panic("policy change is not allowed due to component errors")
+		}
+
 		// Make object changes in the store
 		changed, policyData, err := api.store.UpdatePolicy(objects, user.Name)
 		if err != nil {
 			panic(fmt.Sprintf("error while updating objects in policy: %s", err))
 		}
-
-		// Process policy changes, calculate and return resolution log + action plan
-		eventLog := event.NewLog(logLevel, "api-policy-update").AddConsoleHook(api.logLevel)
-		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
-		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
-		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
 
 		// If there are changes, we need to wait for the next revision
 		var waitForRevision = runtime.MaxGeneration
@@ -292,17 +297,22 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		})
 
 	} else {
-		// Make object changes in the store
-		changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
-		if err != nil {
-			panic(fmt.Sprintf("error while deleting objects from policy: %s", err))
-		}
-
 		// Process policy changes, calculate and return resolution log + action plan
 		eventLog := event.NewLog(logLevel, "api-policy-delete").AddConsoleHook(api.logLevel)
 		desiredStatePrev := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "prev")).ResolveAllDependencies()
 		desiredState := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
 		actionPlan := diff.NewPolicyResolutionDiff(desiredState, desiredStatePrev).ActionPlan
+
+		// If there are components with error status (e.g. conflicting code/discovery parameters), don't allow this policy change to happen
+		if desiredState.HasComponentsWithErrors() {
+			panic("policy change is not allowed due to component errors")
+		}
+
+		// Make object changes in the store
+		changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
+		if err != nil {
+			panic(fmt.Sprintf("error while deleting objects from policy: %s", err))
+		}
 
 		// If there are changes, we need to wait for the next revision
 		var waitForRevision = runtime.MaxGeneration

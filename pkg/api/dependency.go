@@ -89,7 +89,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 		}
 
 		d := dObj.(*lang.Dependency)
-		resolved := desiredState.GetDependencyInstanceMap()[runtime.KeyForStorable(d)].Resolved
+		resolved := desiredState.GetDependencyResolution(d).Resolved
 		result.Status[runtime.KeyForStorable(d)] = &DependencyStatus{
 			Found:     true,
 			Deployed:  resolved,

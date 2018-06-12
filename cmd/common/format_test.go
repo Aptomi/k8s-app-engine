@@ -79,7 +79,7 @@ func makePolicyUpdateResult(policyChanged bool) *api.PolicyUpdateResult {
 				component.NewCreateAction(key.GetKey(), params).DescribeChanges(),
 				component.NewUpdateAction(key.GetKey(), paramsPrev, params).DescribeChanges(),
 				component.NewDeleteAction(key.GetKey(), paramsPrev).DescribeChanges(),
-				component.NewAttachDependencyAction(key.GetKey(), "depId").DescribeChanges(),
+				component.NewAttachDependencyAction(key.GetKey(), "depId", 0).DescribeChanges(),
 				component.NewDetachDependencyAction(key.GetKey(), "depId").DescribeChanges(),
 				component.NewEndpointsAction(key.GetKey()).DescribeChanges(),
 			},

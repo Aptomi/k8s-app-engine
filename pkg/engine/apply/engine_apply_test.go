@@ -12,7 +12,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/fake"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -123,8 +122,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 
 	// Check that original dependency was resolved successfully
 	dependency := desired.policy().GetObjectsByKind(lang.DependencyObject.Kind)[0].(*lang.Dependency)
-	assert.Contains(t, desired.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
-	assert.True(t, desired.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Original dependency should be resolved successfully")
+	assert.True(t, desired.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
 
 	// Check creation/update times
 	times1 := getTimes(t, key.GetKey(), actualState)
@@ -144,10 +142,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	dependencyNew.Labels["param"] = "value1"
 
 	// Check that both dependencies were resolved successfully
-	assert.Contains(t, desiredNext.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
-	assert.True(t, desiredNext.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Original dependency should be resolved successfully")
-	assert.Contains(t, desiredNext.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependencyNew), "Additional dependency should be present in policy resolution")
-	assert.True(t, desiredNext.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependencyNew)].Resolved, "Additional dependency should be resolved successfully")
+	assert.True(t, desiredNext.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
+	assert.True(t, desiredNext.resolution().GetDependencyResolution(dependencyNew).Resolved, "Additional dependency should be resolved successfully")
 
 	// Apply to update component times in actual state
 	applier = NewEngineApply(
@@ -200,10 +196,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 2, Failed: 0, Skipped: 0})
 
 	// Check that both dependencies were resolved successfully
-	assert.Contains(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependency), "Original dependency should be present in policy resolution")
-	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependency)].Resolved, "Original dependency should be resolved successfully")
-	assert.Contains(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap(), runtime.KeyForStorable(dependencyNew), "Additional dependency should be present in policy resolution")
-	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyInstanceMap()[runtime.KeyForStorable(dependencyNew)].Resolved, "Additional dependency should be resolved successfully")
+	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
+	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyResolution(dependencyNew).Resolved, "Additional dependency should be resolved successfully")
 
 	// Check creation/update times for component
 	componentTimesUpdated := getTimes(t, key.GetKey(), actualState)
@@ -326,10 +320,14 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
 	result := resolver.ResolveAllDependencies()
-	if !assert.True(t, result.AllDependenciesResolvedSuccessfully(), "All dependencies should be resolved successfully") {
-		hook := event.NewHookConsole(logrus.DebugLevel)
-		eventLog.Save(hook)
-		t.FailNow()
+
+	dependencies := b.Policy().GetObjectsByKind(lang.DependencyObject.Kind)
+	for _, d := range dependencies {
+		if !assert.True(t, result.GetDependencyResolution(d.(*lang.Dependency)).Resolved, "Dependency resolution status should be correct for %v", d) {
+			hook := event.NewHookConsole(logrus.DebugLevel)
+			eventLog.Save(hook)
+			t.FailNow()
+		}
 	}
 
 	return result

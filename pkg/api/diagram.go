@@ -49,12 +49,6 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	case "actual":
 		// show instances in actual state
 		state, _ := api.store.GetActualState()
-		{
-			// since we are not storing dependency keys, calculate them on the fly for actual state
-			desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
-			state.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
-		}
-
 		graphBuilder := visualization.NewGraphBuilder(policy, state, api.externalData)
 		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
 	default:
@@ -110,11 +104,6 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 	case "actual":
 		// actual state
 		actualState, _ := api.store.GetActualState()
-		{
-			// since we are not storing dependency keys, calculate them on the fly for actual state
-			desiredState := resolve.NewPolicyResolver(policy, api.externalData, event.NewLog(logrus.WarnLevel, "api-policy-diagram")).ResolveAllDependencies()
-			actualState.SetDependencyInstanceMap(desiredState.GetDependencyInstanceMap())
-		}
 
 		// desired state
 		graphBuilder := visualization.NewGraphBuilder(policy, actualState, api.externalData)
