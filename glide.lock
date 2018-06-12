@@ -1,5 +1,5 @@
 hash: 78a5d6a96db7110b7c99b9f1a1ab7a64e93482a0cd2517950d5957c0b6aeba82
-updated: 2018-06-11T13:46:27.032049-07:00
+updated: 2018-06-12T08:56:50.528412-07:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -658,7 +658,7 @@ imports:
   - pkg/util/proto
   - pkg/util/proto/validation
 - name: k8s.io/kubernetes
-  version: 0e7c3d64ed4422efa428f4d50b21b49cb72784bc
+  version: e0740b1157343e008a1a643e1c7f76d7321f73c0
   subpackages:
   - pkg/api/events
   - pkg/api/legacyscheme
