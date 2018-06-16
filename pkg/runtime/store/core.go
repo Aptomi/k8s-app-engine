@@ -5,7 +5,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
@@ -29,14 +28,13 @@ type Policy interface {
 // Revision represents database operations for Revision object
 type Revision interface {
 	NewRevision(policyGen runtime.Generation, desiredState *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error)
+	GetDesiredState(*engine.Revision) (*resolve.PolicyResolution, error)
 	GetRevision(gen runtime.Generation) (*engine.Revision, error)
 	UpdateRevision(revision *engine.Revision) error
 	NewRevisionResultUpdater(revision *engine.Revision) action.ApplyResultUpdater
-
 	GetFirstUnprocessedRevision() (*engine.Revision, error)
 	GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error)
 	GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error)
-	GetDesiredState(*engine.Revision, *lang.Policy, *external.Data) (*resolve.PolicyResolution, error)
 }
 
 // ActualState represents database operations for the actual state handling

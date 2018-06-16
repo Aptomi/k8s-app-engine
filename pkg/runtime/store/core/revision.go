@@ -4,11 +4,7 @@ import (
 	"fmt"
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/event"
-	"github.com/Aptomi/aptomi/pkg/external"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/sirupsen/logrus"
 )
 
 // GetRevision returns Revision for specified generation
@@ -31,7 +27,7 @@ func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, e
 
 // NewRevision creates a new revision and saves it to the database
 // TODO: this method should save desiredState for this revision in the store (https://github.com/Aptomi/aptomi/issues/318)
-func (ds *defaultStore) NewRevision(policyGen runtime.Generation, desiredState *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
+func (ds *defaultStore) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
 	currRevision, err := ds.GetRevision(runtime.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting last revision: %s", err)
@@ -51,6 +47,13 @@ func (ds *defaultStore) NewRevision(policyGen runtime.Generation, desiredState *
 	_, err = ds.store.Save(revision)
 	if err != nil {
 		return nil, fmt.Errorf("error while saving new revision: %s", err)
+	}
+
+	// save desired state
+	desiredState := engine.NewDesiredState(revision, resolution)
+	_, err = ds.store.Save(desiredState)
+	if err != nil {
+		return nil, fmt.Errorf("error while saving desired state for new revision: %s", err)
 	}
 
 	return revision, nil
@@ -135,7 +138,15 @@ func (ds *defaultStore) GetFirstUnprocessedRevision() (*engine.Revision, error) 
 }
 
 // GetDesiredState returns desired state associated with the revision
-// TODO: policy and external data need to be removed from the signature of this method, once it starts loading desired state from revision instead of calculating it on the fly https://github.com/Aptomi/aptomi/issues/318
-func (ds *defaultStore) GetDesiredState(revision *engine.Revision, policy *lang.Policy, externalData *external.Data) (*resolve.PolicyResolution, error) {
-	return resolve.NewPolicyResolver(policy, externalData, event.NewLog(logrus.DebugLevel, fmt.Sprintf("revision-%d-desired-state", revision.GetGeneration()))).ResolveAllDependencies(), nil
+func (ds *defaultStore) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
+	obj, err := ds.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.DesiredStateObject.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
+	if err != nil {
+		return nil, err
+	}
+	desiredState, ok := obj.(*engine.DesiredState)
+	if !ok {
+		return nil, fmt.Errorf("tried to load desired state from the store, but loaded %v", desiredState)
+	}
+
+	return &desiredState.Resolution, nil
 }

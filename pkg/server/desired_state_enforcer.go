@@ -67,7 +67,7 @@ func (server *Server) desiredStateEnforce() error {
 	}
 
 	// load desired state
-	desiredState, err := server.store.GetDesiredState(revision, policy, server.externalData)
+	desiredState, err := server.store.GetDesiredState(revision)
 	if err != nil {
 		return fmt.Errorf("can't load desired state from revision: %s", err)
 	}

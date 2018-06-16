@@ -21,6 +21,7 @@ var (
 	Objects = runtime.AppendAll([]*runtime.Info{
 		PolicyDataObject,
 		RevisionObject,
+		DesiredStateObject,
 		resolve.ComponentInstanceObject,
 	}, ActionObjects)
 )

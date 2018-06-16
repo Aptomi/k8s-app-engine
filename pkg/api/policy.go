@@ -117,7 +117,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	}
 
 	// load desired state
-	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	desiredState, err := api.store.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}
@@ -245,8 +245,8 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	objects := api.readLang(request)
 	user := api.getUserRequired(request)
 
-	// Load the latest policy
-	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	// Load the latest policy gen
+	_, policyGen, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -258,7 +258,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	}
 
 	// Load desired state
-	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	desiredState, err := api.store.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}

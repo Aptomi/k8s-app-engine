@@ -69,7 +69,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 	}
 
 	// load desired state
-	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	desiredState, err := api.store.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}

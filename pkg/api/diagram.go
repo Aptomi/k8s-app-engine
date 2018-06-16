@@ -47,7 +47,7 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	}
 
 	// load desired state
-	desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+	desiredState, err := api.store.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}
@@ -118,7 +118,7 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 				panic(fmt.Sprintf("error while loading revision from the store: %s", err))
 			}
 
-			desiredState, err := api.store.GetDesiredState(revision, policy, api.externalData)
+			desiredState, err := api.store.GetDesiredState(revision)
 			if err != nil {
 				panic(fmt.Sprintf("can't load desired from revision: %s", err))
 			}
@@ -135,7 +135,7 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 				panic(fmt.Sprintf("error while loading revision from the store: %s", err))
 			}
 
-			desiredStateBase, err := api.store.GetDesiredState(revisionBase, policy, api.externalData)
+			desiredStateBase, err := api.store.GetDesiredState(revisionBase)
 			if err != nil {
 				panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 			}
@@ -177,7 +177,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 		}
 
 		// load desired state
-		desiredState, err = api.store.GetDesiredState(revision, policy, api.externalData)
+		desiredState, err = api.store.GetDesiredState(revision)
 		if err != nil {
 			panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 		}
