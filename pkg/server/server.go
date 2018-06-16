@@ -263,7 +263,6 @@ func (server *Server) serveUI(router *httprouter.Router) {
 }
 
 func (server *Server) startDesiredStateEnforcer() {
-	// Start policy enforcement job
 	if !server.cfg.Enforcer.Disabled {
 		server.runInBackground("Desired State Enforcer", true, func() {
 			panic(server.desiredStateEnforceLoop())
@@ -272,7 +271,6 @@ func (server *Server) startDesiredStateEnforcer() {
 }
 
 func (server *Server) startActualStateUpdater() {
-	// Start policy enforcement job
 	if !server.cfg.Updater.Disabled {
 		server.runInBackground("Actual State Updater", true, func() {
 			panic(server.actualStateUpdateLoop())
