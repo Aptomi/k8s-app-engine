@@ -109,7 +109,27 @@ clean:
 	${GO} clean -r -i
 
 .PHONY: lint
-lint: prepare_gometalinter
+lint: prepare_golangci_lint
+ifdef JENKINS_HOME
+	${GOENV} golangci-lint run --out-format checkstyle > checkstyle.xml
+else
+	${GOENV} golangci-lint run
+endif
+
+.PHONY: lint-all
+lint-all: prepare_golangci_lint
+	${GOENV} golangci-lint run --new-from-rev=""
+
+HAS_GOLANGCI_LINT := $(shell command -v golangci-lint)
+
+.PHONY: prepare_golangci_lint
+prepare_golangci_lint:
+ifndef HAS_GOLANGCI_LINT
+	${GO} get -u -v gopkg.in/golangci/golangci-lint.v1/cmd/golangci-lint
+endif
+
+.PHONY: lint-old
+lint-old: prepare_gometalinter
 ifdef JENKINS_HOME
 	${GOENV} gometalinter --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
 else
