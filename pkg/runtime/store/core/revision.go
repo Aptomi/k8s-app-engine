@@ -26,7 +26,6 @@ func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, e
 }
 
 // NewRevision creates a new revision and saves it to the database
-// TODO: this method should save desiredState for this revision in the store (https://github.com/Aptomi/aptomi/issues/318)
 func (ds *defaultStore) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
 	currRevision, err := ds.GetRevision(runtime.LastGen)
 	if err != nil {
