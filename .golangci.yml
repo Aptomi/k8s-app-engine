@@ -1,0 +1,52 @@
+run:
+  deadline: 2m
+  skip-dirs:
+    - .git
+    - .idea
+    - pkg/server/ui
+    - vendor
+    - webui
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  govet:
+    check-shadowing: true
+  gofmt:
+    simplify: true
+  gocyclo:
+#   todo: switch to 10 as more appropriate complexity
+    min-complexity: 20
+  maligned:
+    suggest-new: true
+  dupl:
+#   todo: switch to 50 as more appropriate duplication threshold
+    threshold: 200
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  depguard:
+    list-type: blacklist
+#    include-go-root: false
+#    packages:
+#      - github.com/davecgh/go-spew/spew
+
+linters:
+  enable-all: true
+  disable:
+    # enable to optimize struct size in memory
+    - maligned
+    # enable for better imports structure
+    - goimports
+
+issues:
+  exclude-use-default: false
+  exclude:
+    # [gas] Duplicated errcheck checks
+    - G104
+    # [gas] False positive is triggered by 'src, err := ioutil.ReadFile(filename)'
+    - Potential file inclusion via variable
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new-from-rev: "445eda78f1785a5c563781e24699a2c5e3757783"
