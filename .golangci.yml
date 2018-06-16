@@ -37,8 +37,6 @@ linters:
   disable:
     # enable to optimize struct size in memory
     - maligned
-    # enable for better imports structure
-    - goimports
 
 issues:
   exclude-use-default: false

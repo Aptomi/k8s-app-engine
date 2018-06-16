@@ -102,6 +102,7 @@ release: prepare_goreleaser
 .PHONY: fmt
 fmt:
 	${GO} fmt ./...
+	${GOENV} goimports -w cmd examples pkg
 
 .PHONY: clean
 clean:
