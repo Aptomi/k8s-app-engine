@@ -2,6 +2,8 @@ package dependency
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/cmd/aptomictl/io"
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client/rest"
@@ -14,7 +16,6 @@ import (
 	"github.com/gosuri/uitable"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 func newStatusCommand(cfg *config.Client) *cobra.Command {

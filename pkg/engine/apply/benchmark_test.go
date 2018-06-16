@@ -2,6 +2,11 @@ package apply
 
 import (
 	"fmt"
+	"math/rand"
+	"strconv"
+	"testing"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
@@ -12,10 +17,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"math/rand"
-	"strconv"
-	"testing"
-	"time"
 )
 
 func BenchmarkEngineSmall(b *testing.B) {

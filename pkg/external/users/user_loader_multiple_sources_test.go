@@ -1,11 +1,12 @@
 package users
 
 import (
-	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/stretchr/testify/assert"
 )
 
 func makeUserLoader(offset, users int) UserLoader {

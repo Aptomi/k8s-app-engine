@@ -1,6 +1,9 @@
 package apply
 
 import (
+	"testing"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
@@ -15,8 +18,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestApplyComponentCreateSuccess(t *testing.T) {

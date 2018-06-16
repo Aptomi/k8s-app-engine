@@ -2,6 +2,8 @@ package util
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client"
@@ -11,7 +13,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 // WaitForRevisionActionsToFinish waits until revision is done (i.e. all of its pending actions are completed)

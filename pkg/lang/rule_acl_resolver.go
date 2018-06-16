@@ -2,8 +2,9 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"sync"
+
+	"github.com/Aptomi/aptomi/pkg/lang/expression"
 )
 
 // ACLResolver is a struct which allows to perform ACL resolution, allowing to retrieve user privileges for the

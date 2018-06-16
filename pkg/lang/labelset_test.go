@@ -1,8 +1,9 @@
 package lang
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLabelSetOperations(t *testing.T) {

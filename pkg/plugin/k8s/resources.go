@@ -2,13 +2,14 @@ package k8s
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"k8s.io/api/apps/v1beta1"
 	"k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strconv"
-	"strings"
 )
 
 var resourceRegistry = buildResourceRegistry()

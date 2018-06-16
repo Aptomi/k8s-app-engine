@@ -5,13 +5,14 @@ package bolt
 import (
 	"bytes"
 	"fmt"
+	"reflect"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/boltdb/bolt"
-	"reflect"
-	"time"
 )
 
 // NewGenericStore creates a new object store based on BoltDB

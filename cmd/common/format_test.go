@@ -1,6 +1,8 @@
 package common
 
 import (
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
@@ -9,7 +11,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestFormat_Text(t *testing.T) {

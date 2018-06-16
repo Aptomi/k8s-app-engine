@@ -1,9 +1,10 @@
 package lang
 
 import (
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestServiceComponentCriteria(t *testing.T) {

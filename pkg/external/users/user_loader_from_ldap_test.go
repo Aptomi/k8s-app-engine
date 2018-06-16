@@ -1,11 +1,12 @@
 package users
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 var integrationTestsLDAP = config.LDAP{

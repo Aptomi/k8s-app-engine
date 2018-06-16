@@ -2,9 +2,10 @@ package users
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"strconv"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/lang"
 )
 
 // UserLoaderMultipleSources allows to combine different user sources into a single loader

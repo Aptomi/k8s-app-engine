@@ -1,6 +1,8 @@
 package api
 
 import (
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/api/codec"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/plugin"
@@ -8,7 +10,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 type coreAPI struct {

@@ -2,12 +2,13 @@ package k8s
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"time"
 )
 
 // ClusterConfig represents Kubernetes cluster plugin configuration

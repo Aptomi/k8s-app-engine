@@ -2,14 +2,15 @@ package users
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/Aptomi/aptomi/pkg/lang/yaml"
-	"github.com/Aptomi/aptomi/pkg/util"
-	"github.com/patrickmn/go-cache"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/lang/yaml"
+	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/patrickmn/go-cache"
 )
 
 // UserLoaderFromFile allows aptomi to load users from a file

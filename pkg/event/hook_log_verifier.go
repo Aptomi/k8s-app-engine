@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/sirupsen/logrus"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // LogVerifier is a mock logger and a unit test helper for verifying event log messages

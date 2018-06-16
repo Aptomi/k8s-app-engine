@@ -2,10 +2,11 @@ package progress
 
 import (
 	"fmt"
-	"github.com/gosuri/uiprogress"
 	"io"
 	"os"
 	"time"
+
+	"github.com/gosuri/uiprogress"
 )
 
 // Console is a console-based progress indicator

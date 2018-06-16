@@ -1,10 +1,11 @@
 package lang
 
 import (
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestObjectsInstantiate(t *testing.T) {

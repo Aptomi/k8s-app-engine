@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 type userRolesWrapper struct {

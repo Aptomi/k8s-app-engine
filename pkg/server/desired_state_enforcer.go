@@ -2,13 +2,14 @@ package server
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 func (server *Server) desiredStateEnforceLoop() error {

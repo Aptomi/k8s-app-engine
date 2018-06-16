@@ -1,10 +1,11 @@
 package lang
 
 import (
-	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPolicy_AddObjectAndGetObjectsByKind(t *testing.T) {

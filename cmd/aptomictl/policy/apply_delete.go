@@ -2,6 +2,8 @@ package policy
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/cmd/aptomictl/io"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/util"
 	"github.com/Aptomi/aptomi/pkg/api"
@@ -10,7 +12,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 // if apply is true, it will apply policy changes. otherwise it will

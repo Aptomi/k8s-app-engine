@@ -1,11 +1,12 @@
 package config
 
 import (
+	"os"
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 type testStruct struct {

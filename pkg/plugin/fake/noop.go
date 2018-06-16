@@ -1,8 +1,9 @@
 package fake
 
 import (
-	"github.com/Aptomi/aptomi/pkg/plugin"
 	"time"
+
+	"github.com/Aptomi/aptomi/pkg/plugin"
 )
 
 type noOpPlugin struct {

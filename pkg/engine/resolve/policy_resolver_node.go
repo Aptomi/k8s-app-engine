@@ -2,6 +2,7 @@ package resolve
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"

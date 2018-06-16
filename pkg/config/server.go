@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Server represents configs for the server

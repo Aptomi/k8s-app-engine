@@ -1,9 +1,10 @@
 package engine
 
 import (
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"time"
 )
 
 // PolicyDataObject is an informational data structure with Kind and Constructor for PolicyData

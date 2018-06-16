@@ -1,9 +1,10 @@
 package action
 
 import (
-	"github.com/Aptomi/aptomi/pkg/util"
 	"sort"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/util"
 )
 
 // PlanAsText is a plan of actions, represented as text

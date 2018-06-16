@@ -2,8 +2,9 @@ package helm
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/util"
 	"io/ioutil"
+
+	"github.com/Aptomi/aptomi/pkg/util"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/repo"
 )

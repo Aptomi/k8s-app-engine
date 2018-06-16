@@ -2,6 +2,9 @@ package helm
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/util/retry"
 	api "k8s.io/api/core/v1"
@@ -12,8 +15,6 @@ import (
 	"k8s.io/helm/cmd/helm/installer"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/helm/portforwarder"
-	"strings"
-	"time"
 )
 
 func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {

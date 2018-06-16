@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"strconv"
 	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // AddIntFlag adds int flag to provided cobra command and registers with provided env variable name

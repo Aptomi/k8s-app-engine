@@ -3,10 +3,11 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/gosuri/uitable"
 	"gopkg.in/yaml.v2"
-	"strings"
 )
 
 const (

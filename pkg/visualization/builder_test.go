@@ -1,6 +1,8 @@
 package visualization
 
 import (
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -8,7 +10,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestVisualizationDiagram(t *testing.T) {

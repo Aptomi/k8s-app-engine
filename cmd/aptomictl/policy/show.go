@@ -2,6 +2,7 @@ package policy
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"

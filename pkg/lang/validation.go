@@ -3,6 +3,10 @@ package lang
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"regexp"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -11,9 +15,6 @@ import (
 	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/go-playground/validator.v9/translations/en"
-	"reflect"
-	"regexp"
-	"strings"
 )
 
 // Constants

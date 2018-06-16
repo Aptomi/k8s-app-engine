@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"time"
 )
 
 // RevisionObject is Info for Revision

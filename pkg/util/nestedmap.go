@@ -2,13 +2,14 @@ package util
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang/template"
-	"github.com/d4l3k/messagediff"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/lang/template"
+	"github.com/d4l3k/messagediff"
+	log "github.com/sirupsen/logrus"
 )
 
 // NestedParameterMap is a nested map of parameters, which allows to work with maps [string][string]...[string] -> string, int, bool values

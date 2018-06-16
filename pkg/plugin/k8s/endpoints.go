@@ -2,13 +2,14 @@ package k8s
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/util"
 	api "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/pkg/kubectl/resource"
-	"strings"
 )
 
 // EndpointsForManifests returns endpoints for specified manifest

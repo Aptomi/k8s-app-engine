@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -9,8 +12,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
 )
 
 func isDomainAdmin(user *lang.User, policy *lang.Policy) bool {

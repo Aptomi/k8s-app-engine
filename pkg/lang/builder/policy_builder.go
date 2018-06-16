@@ -1,14 +1,15 @@
 package builder
 
 import (
+	"math/rand"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/external/secrets"
 	"github.com/Aptomi/aptomi/pkg/external/users"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"math/rand"
-	"strings"
 )
 
 var randSeed = int64(239)

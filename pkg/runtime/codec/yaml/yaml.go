@@ -2,6 +2,7 @@ package yaml
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	utilyaml "github.com/ghodss/yaml"
 	"gopkg.in/yaml.v2"

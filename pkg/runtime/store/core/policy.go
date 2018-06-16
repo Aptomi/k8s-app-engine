@@ -2,11 +2,12 @@ package core
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"time"
 )
 
 // GetPolicyData retrieves PolicyData given its generation

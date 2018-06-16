@@ -2,9 +2,10 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"strings"
 	"sync"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // Policy describes the entire Aptomi policy.

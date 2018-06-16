@@ -2,12 +2,14 @@ package rest
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"strings"
 )
 
 type dependencyClient struct {

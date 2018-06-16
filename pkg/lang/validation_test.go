@@ -1,12 +1,13 @@
 package lang
 
 import (
+	"strconv"
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/stretchr/testify/assert"
-	"strconv"
-	"testing"
 )
 
 const (

@@ -3,13 +3,14 @@ package http
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/api/codec"
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"io"
-	"io/ioutil"
-	"net/http"
 )
 
 // Client is the interface for doing HTTP requests that operates using runtime objects

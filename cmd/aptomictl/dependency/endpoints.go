@@ -2,6 +2,7 @@ package dependency
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/cmd/aptomictl/io"
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client/rest"

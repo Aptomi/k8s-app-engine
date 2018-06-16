@@ -3,10 +3,11 @@ package template
 import (
 	"bytes"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/errors"
 	"reflect"
 	"strings"
 	t "text/template"
+
+	"github.com/Aptomi/aptomi/pkg/errors"
 )
 
 // Template struct contains text template string as well as its compiled version

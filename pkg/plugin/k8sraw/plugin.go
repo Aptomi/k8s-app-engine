@@ -2,12 +2,13 @@ package k8sraw
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/util/sync"
-	"strings"
 )
 
 // Plugin represents Kubernetes Raw code plugin that supports deploying specified k8s objects into the cluster

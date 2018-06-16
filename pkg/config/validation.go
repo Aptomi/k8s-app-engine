@@ -2,13 +2,14 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+
 	english "github.com/go-playground/locales/en"
 	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/go-playground/validator.v9/translations/en"
-	"os"
-	"reflect"
-	"strings"
 )
 
 // Custom error for config validation

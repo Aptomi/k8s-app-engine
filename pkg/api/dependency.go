@@ -2,6 +2,11 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"runtime/debug"
+	"strings"
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
@@ -12,10 +17,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"runtime/debug"
-	"strings"
-	"sync"
 )
 
 // DependencyQueryFlag determines whether to query just dependency deployment status, or both deployment + readiness/health checks status

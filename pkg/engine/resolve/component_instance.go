@@ -2,12 +2,13 @@ package resolve
 
 import (
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"strconv"
-	"time"
 )
 
 // ComponentInstanceObject is an informational data structure with Kind and Constructor for component instance object

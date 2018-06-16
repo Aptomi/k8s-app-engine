@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/engine"

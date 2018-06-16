@@ -1,6 +1,9 @@
 package root
 
 import (
+	"os"
+	"time"
+
 	"github.com/Aptomi/aptomi/cmd/aptomi/server"
 	"github.com/Aptomi/aptomi/cmd/aptomi/version"
 	"github.com/Aptomi/aptomi/cmd/common"
@@ -8,8 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"time"
 )
 
 const (

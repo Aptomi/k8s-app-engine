@@ -1,8 +1,9 @@
 package action
 
 import (
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // Metadata is an object metadata for all state update actions

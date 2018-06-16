@@ -6,12 +6,14 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"k8s.io/helm/pkg/getter"
 	"net/http"
+
+	"k8s.io/helm/pkg/getter"
+
+	"time"
 
 	"k8s.io/helm/pkg/tlsutil"
 	"k8s.io/helm/pkg/urlutil"
-	"time"
 )
 
 // httpGetter is the default HTTP(/S) backend handler

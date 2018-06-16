@@ -1,8 +1,9 @@
 package util
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"hash/fnv"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // HashFnv calculates 32-bit fnv.New32a hash, given a string s

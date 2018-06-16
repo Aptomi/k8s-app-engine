@@ -2,10 +2,11 @@ package visualization
 
 import (
 	"fmt"
+	"html"
+
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"html"
 )
 
 /*

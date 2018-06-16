@@ -2,6 +2,7 @@ package resolve
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"

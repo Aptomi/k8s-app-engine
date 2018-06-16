@@ -2,9 +2,10 @@ package plugin
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang"
-	"sync"
 )
 
 const (

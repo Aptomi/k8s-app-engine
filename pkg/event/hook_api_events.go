@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // APIEvent represents simplified Event object to be returned from the API

@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/julienschmidt/httprouter"
 )
 
 func (api *coreAPI) handleRevisionGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {

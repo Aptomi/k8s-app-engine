@@ -2,11 +2,12 @@ package core
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
-	"sync"
-	"time"
 )
 
 type actualStateUpdater struct {

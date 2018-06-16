@@ -2,10 +2,11 @@ package codec
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 )
 
 const (

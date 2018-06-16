@@ -3,14 +3,15 @@ package users
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/config"
-	"github.com/Aptomi/aptomi/pkg/lang"
-	"github.com/patrickmn/go-cache"
-	"gopkg.in/ldap.v2"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Aptomi/aptomi/pkg/config"
+	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/patrickmn/go-cache"
+	"gopkg.in/ldap.v2"
 )
 
 // UserLoaderFromLDAP allows aptomi to load users from LDAP

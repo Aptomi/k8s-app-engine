@@ -2,6 +2,7 @@ package component
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"

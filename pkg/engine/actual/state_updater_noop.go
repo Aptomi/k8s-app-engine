@@ -2,9 +2,10 @@ package actual
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"sync"
 	"time"
+
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 )
 
 type noOpActualStateUpdater struct {

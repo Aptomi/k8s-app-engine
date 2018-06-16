@@ -2,10 +2,11 @@ package lang
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
-	"sync"
 )
 
 // ServiceObject is an informational data structure with Kind and Constructor for Service

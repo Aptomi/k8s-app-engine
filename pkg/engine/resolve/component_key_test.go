@@ -1,11 +1,12 @@
 package resolve
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 func TestComponentKeyCopy(t *testing.T) {

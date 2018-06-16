@@ -2,6 +2,10 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"runtime/debug"
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -9,9 +13,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"runtime/debug"
-	"sync"
 )
 
 type dependencyResourcesWrapper struct {

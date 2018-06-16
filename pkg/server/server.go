@@ -2,6 +2,14 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"runtime/pprof"
+	"runtime/trace"
+	"syscall"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/api/middleware"
 	"github.com/Aptomi/aptomi/pkg/config"
@@ -22,13 +30,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"os/signal"
-	"runtime/pprof"
-	"runtime/trace"
-	"syscall"
-	"time"
 )
 
 // Server is Aptomi server. It serves UI front-end, API calls, as well as does policy resolution & continuous state enforcement

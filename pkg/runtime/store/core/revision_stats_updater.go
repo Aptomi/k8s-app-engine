@@ -2,12 +2,13 @@ package core
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/engine"
-	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
+	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
 // RevisionResultUpdaterImpl is a default thread-safe implementation of ApplyResultUpdater

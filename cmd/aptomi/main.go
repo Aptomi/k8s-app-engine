@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/Aptomi/aptomi/cmd/aptomi/root"
-	"github.com/sirupsen/logrus"
 	"math/rand"
 	"runtime/debug"
 	"time"
+
+	"github.com/Aptomi/aptomi/cmd/aptomi/root"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {

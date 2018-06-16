@@ -2,8 +2,9 @@ package lang
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // Target represents a deployment target in Aptomi

@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
+	"runtime/debug"
+
 	"github.com/Aptomi/aptomi/pkg/api"
 	"github.com/Aptomi/aptomi/pkg/api/codec"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"runtime/debug"
 )
 
 type panicHandler struct {

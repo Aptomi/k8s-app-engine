@@ -2,9 +2,10 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"net/http"
 )
 
 func (api *coreAPI) readLang(request *http.Request) []lang.Base {

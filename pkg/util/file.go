@@ -2,10 +2,11 @@ package util
 
 import (
 	"fmt"
-	"github.com/mattn/go-zglob"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/mattn/go-zglob"
 )
 
 // WriteTempFile creates a temporary file, writes given data into it and returns its name.

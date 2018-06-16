@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Fields is a set of named fields. Fields are attached to every log record

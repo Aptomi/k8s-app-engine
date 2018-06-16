@@ -3,6 +3,9 @@ package login
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/Aptomi/aptomi/cmd/common"
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
@@ -10,8 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 // NewCommand returns instance of cobra command that allows to login into aptomi

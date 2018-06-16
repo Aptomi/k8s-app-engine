@@ -2,6 +2,7 @@ package revision
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/client/rest"
 	"github.com/Aptomi/aptomi/pkg/client/rest/http"
 	"github.com/Aptomi/aptomi/pkg/config"

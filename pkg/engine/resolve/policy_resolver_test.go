@@ -2,13 +2,14 @@ package resolve
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/builder"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPolicyResolverSimple(t *testing.T) {

@@ -1,9 +1,10 @@
 package lang
 
 import (
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPolicyViewCommonObjects(t *testing.T) {

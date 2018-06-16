@@ -2,6 +2,8 @@ package diff
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -11,7 +13,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDiffEmpty(t *testing.T) {

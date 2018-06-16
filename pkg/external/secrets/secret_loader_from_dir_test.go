@@ -1,8 +1,9 @@
 package secrets
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadSecrets(t *testing.T) {

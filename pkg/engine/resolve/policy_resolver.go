@@ -2,15 +2,16 @@ package resolve
 
 import (
 	"fmt"
+	sysruntime "runtime"
+	"runtime/debug"
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/Aptomi/aptomi/pkg/util"
-	sysruntime "runtime"
-	"runtime/debug"
-	"sync"
 )
 
 // MaxConcurrentGoRoutines is the number of concurrently running goroutines for policy evaluation and processing.

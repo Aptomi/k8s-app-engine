@@ -2,15 +2,16 @@ package secrets
 
 import (
 	"fmt"
-	"github.com/Aptomi/aptomi/pkg/lang/yaml"
-	"github.com/mattn/go-zglob"
-	"github.com/patrickmn/go-cache"
-	log "github.com/sirupsen/logrus"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Aptomi/aptomi/pkg/lang/yaml"
+	"github.com/mattn/go-zglob"
+	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 )
 
 // SecretLoaderFromDir allows to load secrets for users from a given directory

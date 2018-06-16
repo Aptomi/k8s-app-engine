@@ -2,6 +2,7 @@ package expression
 
 import (
 	"fmt"
+
 	"github.com/Aptomi/aptomi/pkg/errors"
 	"github.com/ralekseenkov/govaluate"
 )

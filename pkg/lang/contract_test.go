@@ -1,10 +1,11 @@
 package lang
 
 import (
+	"testing"
+
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/lang/template"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (

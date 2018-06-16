@@ -2,6 +2,10 @@ package server
 
 import (
 	"fmt"
+	"runtime/debug"
+	"sync"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action/component"
@@ -11,9 +15,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	log "github.com/sirupsen/logrus"
-	"runtime/debug"
-	"sync"
-	"time"
 )
 
 func (server *Server) actualStateUpdateLoop() error {

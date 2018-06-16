@@ -2,14 +2,15 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/visualization"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 type graphWrapper struct {

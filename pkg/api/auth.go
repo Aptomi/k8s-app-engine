@@ -3,13 +3,14 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/dgrijalva/jwt-go"
 	jwtreq "github.com/dgrijalva/jwt-go/request"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"time"
 )
 
 // AuthSuccessObject contains Info for the AuthSuccess type

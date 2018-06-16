@@ -2,13 +2,14 @@ package common
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/lang/yaml"
 	log "github.com/sirupsen/logrus"
 	vp "github.com/spf13/viper"
-	"os"
-	"path"
-	"path/filepath"
 )
 
 // ReadConfig reads configuration from CLI flags, default or specified file path into provided config object using the

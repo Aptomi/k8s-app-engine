@@ -1,9 +1,10 @@
 package users
 
 import (
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"strconv"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/lang"
 )
 
 // UserLoaderMock allows to mock user loader and use in-memory user storage.

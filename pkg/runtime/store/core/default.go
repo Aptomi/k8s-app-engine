@@ -1,10 +1,11 @@
 package core
 
 import (
+	"sync"
+
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
-	"sync"
 )
 
 // defaultStore is the generic store implementation that is the glue layer for saving

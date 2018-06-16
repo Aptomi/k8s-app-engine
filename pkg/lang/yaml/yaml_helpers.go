@@ -2,9 +2,10 @@ package yaml
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 // SerializeObject serializes object into YAML

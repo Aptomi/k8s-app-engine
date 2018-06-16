@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 // HookConsole implements event log hook, which prints entries to the console

@@ -1,6 +1,9 @@
 package root
 
 import (
+	"path"
+	"time"
+
 	"github.com/Aptomi/aptomi/cmd/aptomictl/dependency"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/gen"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/login"
@@ -14,8 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"path"
-	"time"
 )
 
 const (

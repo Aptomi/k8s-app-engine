@@ -1,9 +1,10 @@
 package lang
 
 import (
+	"sort"
+
 	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"sort"
 )
 
 // RuleObject is an informational data structure with Kind and Constructor for Rule

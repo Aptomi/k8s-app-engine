@@ -2,9 +2,10 @@ package resolve
 
 import (
 	"encoding/base32"
-	"github.com/Aptomi/aptomi/pkg/lang"
 	"hash/fnv"
 	"strings"
+
+	"github.com/Aptomi/aptomi/pkg/lang"
 )
 
 // componentInstanceKeySeparator is a separator between strings in ComponentInstanceKey

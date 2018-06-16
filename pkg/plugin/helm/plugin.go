@@ -2,6 +2,8 @@ package helm
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/lang"
@@ -12,7 +14,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/kube"
-	"strings"
 )
 
 // Plugin represents Helm code plugin for Kubernetes cluster

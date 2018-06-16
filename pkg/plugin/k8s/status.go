@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"strings"
+
 	"github.com/Aptomi/aptomi/pkg/event"
 	"github.com/Aptomi/aptomi/pkg/util"
 	"k8s.io/api/core/v1"
@@ -9,7 +11,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/pkg/apis/apps"
 	"k8s.io/kubernetes/pkg/kubectl"
-	"strings"
 )
 
 // ReadinessStatusForManifest returns readiness status of all resources for specified manifest
