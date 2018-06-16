@@ -218,7 +218,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	// If there are changes, create a new revision and say that we should wait for it
 	waitForRevision := runtime.MaxGeneration
 	if changed {
-		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredState, false)
+		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
 		if newRevisionErr != nil {
 			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
 		}
@@ -331,7 +331,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	// If there are changes, create a new revision and say that we should wait for it
 	waitForRevision := runtime.MaxGeneration
 	if changed {
-		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredState, false)
+		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
 		if newRevisionErr != nil {
 			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
 		}
