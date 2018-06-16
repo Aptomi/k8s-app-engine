@@ -6,6 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
+// DesiredStateObject is an informational data structure with Kind and Constructor for DesiredState
 var DesiredStateObject = &runtime.Info{
 	Kind:        "desired-state",
 	Storable:    true,
@@ -13,6 +14,7 @@ var DesiredStateObject = &runtime.Info{
 	Constructor: func() runtime.Object { return &DesiredState{} },
 }
 
+// DesiredState represents snapshot of the state to be achieved by specific revision
 type DesiredState struct {
 	runtime.TypeKind `yaml:",inline"`
 
@@ -20,6 +22,7 @@ type DesiredState struct {
 	Resolution  resolve.PolicyResolution
 }
 
+// NewDesiredState creates new DesiredState instance from revision and policy resolution
 func NewDesiredState(revision *Revision, resolution *resolve.PolicyResolution) *DesiredState {
 	return &DesiredState{
 		TypeKind:    DesiredStateObject.GetTypeKind(),
@@ -28,14 +31,17 @@ func NewDesiredState(revision *Revision, resolution *resolve.PolicyResolution) *
 	}
 }
 
+// GetName returns name of the DesiredState
 func (ds *DesiredState) GetName() string {
 	return GetDesiredStateName(ds.RevisionGen)
 }
 
+// GetNamespace returns namespace of the DesiredState
 func (ds *DesiredState) GetNamespace() string {
 	return runtime.SystemNS
 }
 
+// GetDesiredStateName returns name of the DesiredState for specific Revision generations
 func GetDesiredStateName(revisionGen runtime.Generation) string {
 	return fmt.Sprintf("revision-%s-desired-state", revisionGen)
 }
