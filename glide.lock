@@ -1,5 +1,5 @@
-hash: 78a5d6a96db7110b7c99b9f1a1ab7a64e93482a0cd2517950d5957c0b6aeba82
-updated: 2018-06-12T08:56:50.528412-07:00
+hash: f81186d5bf7910e9405d26bb4126d072ca76cf9a5d8132bdce39eeb1afb0e10a
+updated: 2018-06-19T00:26:40.017871-07:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -75,7 +75,7 @@ imports:
   subpackages:
   - spdy
 - name: github.com/evanphx/json-patch
-  version: 944e07253867aacae43c04b2e6a239005443f33a
+  version: 94e38aa1586e8a6c8a75770bddf5ff84c48a106b
 - name: github.com/exponent-io/jsonpath
   version: d6023ce2651d8eafb5c75bb0c7167536102ec9f5
 - name: github.com/fatih/camelcase
@@ -244,6 +244,7 @@ imports:
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - prometheus
+  - prometheus/promhttp
 - name: github.com/prometheus/client_model
   version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
   subpackages:
@@ -420,11 +421,11 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apiextensions-apiserver
-  version: a01914bc74d2605fef74a0248d2eec998f0bb093
+  version: 003acb65be70b07acafe3b5eb4f13a6d0fe47154
   subpackages:
   - pkg/features
 - name: k8s.io/apimachinery
-  version: 17529ec7eadb8de8e7dc835201455f53571f655a
+  version: f6313580a4d36c7c74a3d845dda6e116642c4f90
   subpackages:
   - pkg/api/equality
   - pkg/api/errors
@@ -481,7 +482,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 8378ef881d4fa7d3ca5c5e7e5309592ec69b11e4
+  version: f7914ed3085badf66a1b6f3a5218ada28f7bd084
   subpackages:
   - pkg/apis/audit
   - pkg/authentication/authenticator
@@ -658,7 +659,7 @@ imports:
   - pkg/util/proto
   - pkg/util/proto/validation
 - name: k8s.io/kubernetes
-  version: e0740b1157343e008a1a643e1c7f76d7321f73c0
+  version: a21d351a96330c1307f9c22e457439cb1cc706f0
   subpackages:
   - pkg/api/events
   - pkg/api/legacyscheme
