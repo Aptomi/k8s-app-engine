@@ -9,6 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/julienschmidt/httprouter"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 )
 
@@ -40,6 +41,10 @@ func Serve(router *httprouter.Router, store store.Core, externalData *external.D
 
 func (api *coreAPI) serve(router *httprouter.Router) {
 	auth := api.auth
+
+	// todo consider moving to a separate port for security (should be nothing sensetive?)
+	// prometheus metrics handler
+	router.Handler("GET", "/metrics", promhttp.Handler())
 
 	// authenticate user
 	router.POST("/api/v1/user/login", api.handleLogin)
