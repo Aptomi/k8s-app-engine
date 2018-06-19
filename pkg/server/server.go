@@ -230,7 +230,7 @@ func (server *Server) startHTTPServer() {
 
 	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
-	handler = middleware.NewPrometheusHandler(serviceName, handler)
+	handler = middleware.NewMetricsHandler(serviceName, handler)
 	handler = middleware.NewPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client
