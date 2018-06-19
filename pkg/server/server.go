@@ -55,7 +55,8 @@ type Server struct {
 	actualStateUpdateIdx         uint
 	updaterPluginRegistryFactory plugin.RegistryFactory
 
-	desiredStateEnforcements prometheus.Counter
+	desiredStateEnforcements        prometheus.Counter
+	desiredStateEnforcementDuration prometheus.Histogram
 }
 
 // NewServer creates a new Aptomi Server

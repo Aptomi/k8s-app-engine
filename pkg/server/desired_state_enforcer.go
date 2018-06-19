@@ -23,6 +23,16 @@ func (server *Server) desiredStateEnforceLoop() error {
 	)
 	prometheus.MustRegister(server.desiredStateEnforcements)
 
+	// todo consider converting into histogram vector and labeling with stage (no rev, no changes), policy and rev gens
+	server.desiredStateEnforcementDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name:        "aptomi_desired_state_enforcement_duration_seconds",
+		Help:        "Duration of the completed desired state enforcements",
+		ConstLabels: prometheus.Labels{"service": serviceName},
+		Buckets:     []float64{.1, 1, 10, 20, 30, 60, 120, 180, 300, 600},
+	},
+	)
+	prometheus.MustRegister(server.desiredStateEnforcementDuration)
+
 	for {
 		err := server.desiredStateEnforce()
 		if err != nil {
@@ -42,10 +52,12 @@ func (server *Server) desiredStateEnforceLoop() error {
 }
 
 func (server *Server) desiredStateEnforce() error {
+	start := time.Now()
 	server.desiredStateEnforcementIdx++
 
 	defer func() {
 		server.desiredStateEnforcements.Inc()
+		server.desiredStateEnforcementDuration.Observe(time.Since(start).Seconds())
 
 		if err := recover(); err != nil {
 			log.Errorf("panic while enforcing desired state: %s", err)
