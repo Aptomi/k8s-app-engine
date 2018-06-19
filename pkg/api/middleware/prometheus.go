@@ -14,6 +14,7 @@ type prometheusHandler struct {
 	responseSize *prometheus.HistogramVec
 }
 
+// NewPrometheusHandler returns middleware that collects HTTP req/resp specific metrics
 func NewPrometheusHandler(serviceName string, handler http.Handler) http.Handler {
 	requests := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
