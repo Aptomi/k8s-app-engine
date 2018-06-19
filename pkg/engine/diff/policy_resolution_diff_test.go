@@ -179,7 +179,7 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 	}{}
 
 	s := []string{}
-	fn := func(act action.Base) error {
+	fn := func(act action.Interface) error {
 		switch act.(type) {
 		case *component.CreateAction:
 			cnt.create++

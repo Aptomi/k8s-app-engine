@@ -5,8 +5,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// Base interface for all actions which perform actual state updates
-type Base interface {
+// Interface interface for all actions which perform actual state updates
+type Interface interface {
 	runtime.Storable
 	Apply(*Context) error
 	DescribeChanges() util.NestedParameterMap

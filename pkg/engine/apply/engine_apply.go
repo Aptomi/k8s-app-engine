@@ -64,7 +64,7 @@ func (apply *EngineApply) Apply(maxConcurrentActions int) (*resolve.PolicyResolu
 	)
 
 	// Note that the action plan will call function in different go routines by apply
-	result := apply.actionPlan.Apply(action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Base) error {
+	result := apply.actionPlan.Apply(action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Interface) error {
 		err := act.Apply(context)
 		if err != nil {
 			context.EventLog.NewEntry().Errorf("error while applying action '%s': %s", act, err)

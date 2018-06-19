@@ -130,7 +130,7 @@ func fetchDeploymentStatusForDependencies(result *DependenciesStatus, actualStat
 	// compare desired vs. actual state and see what's the dependency status for every provided dependency ID
 	actionPlan := diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan
 	actionPlan.Apply(
-		action.WrapSequential(func(act action.Base) error {
+		action.WrapSequential(func(act action.Interface) error {
 			// if it's attach action is pending on component, let's see which particular dependency it affects
 			if dAction, ok := act.(*component.AttachDependencyAction); ok {
 				// reset status of this particular dependency to false

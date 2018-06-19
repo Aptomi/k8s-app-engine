@@ -84,7 +84,7 @@ func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyRes
 	)
 
 	// make sure we are converting panics into errors
-	fn := action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Base) (errResult error) {
+	fn := action.WrapParallelWithLimit(maxConcurrentActions, func(act action.Interface) (errResult error) {
 		defer func() {
 			if err := recover(); err != nil {
 				errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
@@ -98,10 +98,10 @@ func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyRes
 	})
 
 	// generate the list of actions
-	actions := []action.Base{}
+	actions := []action.Interface{}
 	for _, instance := range actualState.ComponentInstanceMap {
 		if instance.IsCode && !instance.EndpointsUpToDate {
-			var act action.Base
+			var act action.Interface
 			if !noop {
 				act = component.NewEndpointsAction(instance.GetKey())
 			} else {
@@ -115,7 +115,7 @@ func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyRes
 	var wg sync.WaitGroup
 	for _, act := range actions {
 		wg.Add(1)
-		go func(act action.Base) {
+		go func(act action.Interface) {
 			defer wg.Done()
 			_ = fn(act)
 		}(act)

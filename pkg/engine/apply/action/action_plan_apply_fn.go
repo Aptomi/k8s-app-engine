@@ -5,12 +5,12 @@ import (
 )
 
 // ApplyFunction is a function which applies an action
-type ApplyFunction func(Base) error
+type ApplyFunction func(Interface) error
 
 // WrapSequential wraps apply function to be sequential
 func WrapSequential(fn ApplyFunction) ApplyFunction {
 	mutex := sync.Mutex{}
-	return func(act Base) error {
+	return func(act Interface) error {
 		mutex.Lock()
 		defer mutex.Unlock()
 		return fn(act)
@@ -21,7 +21,7 @@ func WrapSequential(fn ApplyFunction) ApplyFunction {
 // concurrent go routines
 func WrapParallelWithLimit(maxConcurrentGoRoutines int, fn ApplyFunction) ApplyFunction {
 	var semaphore = make(chan int, maxConcurrentGoRoutines)
-	return func(act Base) error {
+	return func(act Interface) error {
 		semaphore <- 1
 		defer func() { <-semaphore }()
 		return fn(act)
@@ -30,5 +30,5 @@ func WrapParallelWithLimit(maxConcurrentGoRoutines int, fn ApplyFunction) ApplyF
 
 // Noop returns a function that does nothing and returns nil
 func Noop() ApplyFunction {
-	return func(Base) error { return nil }
+	return func(Interface) error { return nil }
 }

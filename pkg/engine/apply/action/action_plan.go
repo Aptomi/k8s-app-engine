@@ -33,7 +33,7 @@ func (plan *Plan) GetActionGraphNode(key string) *GraphNode {
 // Apply applies the action plan. It may call fn in multiple go routines, executing the plan in parallel
 func (plan *Plan) Apply(fn ApplyFunction, resultUpdater ApplyResultUpdater) *ApplyResult {
 	// make sure we are converting panics into errors
-	fnModified := func(act Base) (errResult error) {
+	fnModified := func(act Interface) (errResult error) {
 		defer func() {
 			if err := recover(); err != nil {
 				errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
@@ -164,7 +164,7 @@ func (plan *Plan) AsText() *PlanAsText {
 	result := NewPlanAsText()
 
 	// apply the plan and capture actions as text
-	plan.applyInternal(WrapSequential(func(act Base) error {
+	plan.applyInternal(WrapSequential(func(act Interface) error {
 		result.Actions = append(result.Actions, act.DescribeChanges())
 		return nil
 	}), NewApplyResultUpdaterImpl())

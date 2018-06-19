@@ -16,7 +16,7 @@ type GraphNode struct {
 	BeforeRev []*GraphNode
 
 	// Main actions which have to be executed sequentially. If one fails, the rest will not be executed
-	Actions []Base
+	Actions []Interface
 }
 
 // NewGraphNode creates a new GraphNode of apply actions
@@ -34,7 +34,7 @@ func (node *GraphNode) AddBefore(that *GraphNode) {
 
 // AddAction adds an action to the list of main actions. If avoidDuplicates is true, then duplicate actions will not be
 // added (e.g. update action)
-func (node *GraphNode) AddAction(action Base, actualState *resolve.PolicyResolution, avoidDuplicates bool) {
+func (node *GraphNode) AddAction(action Interface, actualState *resolve.PolicyResolution, avoidDuplicates bool) {
 	add := true
 	if avoidDuplicates {
 		// go over existing actions and make sure we don't add duplicates
