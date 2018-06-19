@@ -29,7 +29,12 @@ import (
 	"github.com/Aptomi/aptomi/pkg/server/ui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	serviceName = "aptomi"
 )
 
 // Server is Aptomi server. It serves UI front-end, API calls, as well as does policy resolution & continuous state enforcement
@@ -49,6 +54,8 @@ type Server struct {
 	runActualStateUpdate         chan bool
 	actualStateUpdateIdx         uint
 	updaterPluginRegistryFactory plugin.RegistryFactory
+
+	desiredStateEnforcements prometheus.Counter
 }
 
 // NewServer creates a new Aptomi Server
@@ -222,6 +229,7 @@ func (server *Server) startHTTPServer() {
 
 	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
+	handler = middleware.NewPrometheusHandler(serviceName, handler)
 	handler = middleware.NewPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client

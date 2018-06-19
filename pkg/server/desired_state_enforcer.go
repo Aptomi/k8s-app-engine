@@ -9,10 +9,20 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
 func (server *Server) desiredStateEnforceLoop() error {
+	server.desiredStateEnforcements = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name:        "aptomi_desired_state_enforcements_total",
+			Help:        "Total number of completed desired state enforcements",
+			ConstLabels: prometheus.Labels{"service": serviceName},
+		},
+	)
+	prometheus.MustRegister(server.desiredStateEnforcements)
+
 	for {
 		err := server.desiredStateEnforce()
 		if err != nil {
@@ -35,6 +45,8 @@ func (server *Server) desiredStateEnforce() error {
 	server.desiredStateEnforcementIdx++
 
 	defer func() {
+		server.desiredStateEnforcements.Inc()
+
 		if err := recover(); err != nil {
 			log.Errorf("panic while enforcing desired state: %s", err)
 		}
