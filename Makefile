@@ -37,7 +37,7 @@ coverage-full:
 
 .PHONY: coverage-publish
 coverage-publish: prepare_goveralls
-	goveralls -coverprofile coverage.out
+	BUILD_NUMBER="" goveralls -coverprofile coverage.out
 
 .PHONY: test
 test:
