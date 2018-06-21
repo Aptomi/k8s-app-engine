@@ -19,7 +19,7 @@ make vendor
 
 tools/demo-ldap.sh
 
-make build lint
+make lint
 
 DEBUG=yes make smoke
 

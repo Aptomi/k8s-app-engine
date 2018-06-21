@@ -110,7 +110,7 @@ clean:
 	${GO} clean -r -i
 
 .PHONY: lint
-lint: prepare_golangci_lint
+lint: prepare_golangci_lint embed-ui
 ifdef JENKINS_HOME
 	${GOENV} golangci-lint run --out-format checkstyle > checkstyle.xml
 else
