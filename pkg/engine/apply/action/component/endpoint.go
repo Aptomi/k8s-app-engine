@@ -2,6 +2,8 @@ package component
 
 import (
 	"fmt"
+	"runtime/debug"
+	"time"
 
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -34,7 +36,16 @@ func NewEndpointsAction(componentKey string) *EndpointsAction {
 }
 
 // Apply applies the action
-func (a *EndpointsAction) Apply(context *action.Context) error {
+func (a *EndpointsAction) Apply(context *action.Context) (errResult error) {
+	start := time.Now()
+	defer func() {
+		if err := recover(); err != nil {
+			errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+		}
+
+		action.CollectMetricsFor(a, start, errResult)
+	}()
+
 	context.EventLog.NewEntry().Infof("Getting endpoints for component instance: %s", a.ComponentKey)
 
 	// fetch component endpoints and store them in component instance (actual state)

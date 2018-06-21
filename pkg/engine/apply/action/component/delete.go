@@ -2,6 +2,8 @@ package component
 
 import (
 	"fmt"
+	"runtime/debug"
+	"time"
 
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -36,7 +38,16 @@ func NewDeleteAction(componentKey string, params util.NestedParameterMap) *Delet
 }
 
 // Apply applies the action
-func (a *DeleteAction) Apply(context *action.Context) error {
+func (a *DeleteAction) Apply(context *action.Context) (errResult error) {
+	start := time.Now()
+	defer func() {
+		if err := recover(); err != nil {
+			errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+		}
+
+		action.CollectMetricsFor(a, start, errResult)
+	}()
+
 	context.EventLog.NewEntry().Debugf("Deleting component instance: %s", a.ComponentKey)
 
 	// delete from cloud

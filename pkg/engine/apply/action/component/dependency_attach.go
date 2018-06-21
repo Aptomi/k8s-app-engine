@@ -2,6 +2,8 @@ package component
 
 import (
 	"fmt"
+	"runtime/debug"
+	"time"
 
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -36,7 +38,16 @@ func NewAttachDependencyAction(componentKey string, dependencyID string, depth i
 }
 
 // Apply applies the action
-func (a *AttachDependencyAction) Apply(context *action.Context) error {
+func (a *AttachDependencyAction) Apply(context *action.Context) (errResult error) {
+	start := time.Now()
+	defer func() {
+		if err := recover(); err != nil {
+			errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+		}
+
+		action.CollectMetricsFor(a, start, errResult)
+	}()
+
 	context.EventLog.NewEntry().Debugf("Attaching dependency '%s' to component instance: '%s'", a.DependencyID, a.ComponentKey)
 
 	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, func(obj *resolve.ComponentInstance) {

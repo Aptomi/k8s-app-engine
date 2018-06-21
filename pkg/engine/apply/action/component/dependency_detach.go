@@ -2,6 +2,8 @@ package component
 
 import (
 	"fmt"
+	"runtime/debug"
+	"time"
 
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -33,7 +35,16 @@ func NewDetachDependencyAction(componentKey string, dependencyID string) *Detach
 }
 
 // Apply applies the action
-func (a *DetachDependencyAction) Apply(context *action.Context) error {
+func (a *DetachDependencyAction) Apply(context *action.Context) (errResult error) {
+	start := time.Now()
+	defer func() {
+		if err := recover(); err != nil {
+			errResult = fmt.Errorf("panic: %s\n%s", err, string(debug.Stack()))
+		}
+
+		action.CollectMetricsFor(a, start, errResult)
+	}()
+
 	context.EventLog.NewEntry().Debugf("Detaching dependency '%s' from component instance: '%s'", a.DependencyID, a.ComponentKey)
 
 	return context.ActualStateUpdater.UpdateComponentInstance(a.ComponentKey, func(obj *resolve.ComponentInstance) {
