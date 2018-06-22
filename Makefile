@@ -129,23 +129,6 @@ ifndef HAS_GOLANGCI_LINT
 	${GO} get -u -v gopkg.in/golangci/golangci-lint.v1/cmd/golangci-lint
 endif
 
-.PHONY: lint-old
-lint-old: prepare_gometalinter
-ifdef JENKINS_HOME
-	${GOENV} gometalinter --config=gometalinter.json --checkstyle ./pkg/... ./cmd/... | tee checkstyle.xml
-else
-	${GOENV} gometalinter --concurrency=2 --config=gometalinter.json ./pkg/... ./cmd/...
-endif
-
-HAS_GOMETALINTER := $(shell command -v gometalinter)
-
-.PHONY: prepare_gometalinter
-prepare_gometalinter:
-ifndef HAS_GOMETALINTER
-	${GO} get -u -v github.com/alecthomas/gometalinter
-	gometalinter --install
-endif
-
 .PHONY: toc
 toc: prepare_doctoc
 	doctoc README.md
