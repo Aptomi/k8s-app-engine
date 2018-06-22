@@ -163,7 +163,6 @@ function change_policy() {
 
     # run in noop mode
     aptomictl --config ${CONF_DIR} policy ${cmd} --noop ${WAIT_FLAGS} ${files}
-    check_policy_version $((expectedVersion-1))
 
     # run in normal mode
     aptomictl --config ${CONF_DIR} policy ${cmd} ${WAIT_FLAGS} ${files}
@@ -185,6 +184,9 @@ check_policy_version 1
 
 login sam
 change_policy apply "-f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters" 2
+
+# adding the same clusters should not result in an error
+change_policy apply "-f ${POLICY_DIR}/policy/clusters" 2
 
 login frank
 change_policy apply "-f ${POLICY_DIR}/policy/analytics_pipeline" 3

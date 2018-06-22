@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"gopkg.in/yaml.v2"
 )
 
 // PolicyNamespace describes a specific namespace within Aptomi policy.
@@ -38,6 +39,28 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	case ContractObject.Kind:
 		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract)
 	case ClusterObject.Kind:
+		// cluster is a special object, which we don't allow to update certain parts of (e.g. type and config)
+		clusterUpdated, ok := obj.(*Cluster)
+		if !ok {
+			panic(fmt.Sprintf("can't cast cluster %s to *lang.Cluster", clusterUpdated.GetName()))
+		}
+		clusterExisting, present := policyNamespace.Clusters[obj.GetName()]
+		if present {
+			// we can't really use reflect.DeepEqual here, because it treats nil and empty maps differently
+			configExisting, err := yaml.Marshal(clusterExisting.Config)
+			if err != nil {
+				return err
+			}
+			configUpdated, err := yaml.Marshal(clusterUpdated.Config)
+			if err != nil {
+				return err
+			}
+
+			// we can't change type or config
+			if clusterUpdated.Type != clusterExisting.Type || string(configUpdated) != string(configExisting) {
+				return fmt.Errorf("modification of cluster type or config is not allowed: %s needs to be deleted first", obj.GetName())
+			}
+		}
 		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
 	case RuleObject.Kind:
 		policyNamespace.Rules[obj.GetName()] = obj.(*Rule)

@@ -132,7 +132,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Load the latest policy
-	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	_, policyGen, err := api.store.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -179,12 +179,6 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	for _, obj := range objects {
 		// if a cluster was supplied, then
 		if cluster, ok := obj.(*lang.Cluster); ok {
-			// if a cluster is already present in the policy, tell a user that it can't be modified
-			objExisting, _ := policy.GetObject(lang.ClusterObject.Kind, cluster.Name, cluster.Namespace)
-			if objExisting != nil {
-				panic(fmt.Sprintf("modification of existing cluster objects is not allowed: %s needs to be deleted first", cluster.Name))
-			}
-
 			// validate via plugin that connection to it can be established
 			plugin, pluginErr := plugins.ForCluster(cluster)
 			if pluginErr != nil {
