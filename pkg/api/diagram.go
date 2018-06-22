@@ -54,7 +54,10 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	}
 
 	// load actual state
-	actualState, _ := api.store.GetActualState()
+	actualState, err := api.store.GetActualState()
+	if err != nil {
+		panic(fmt.Sprintf("can't load actual state: %s", err))
+	}
 
 	var graph *visualization.Graph
 	switch strings.ToLower(mode) {

@@ -37,8 +37,8 @@ func NewValidator(config Base) *Validator {
 	result := validator.New()
 
 	// independent validators
-	_ = result.RegisterValidation("dir", validateDir)
-	_ = result.RegisterValidation("file", validateFile)
+	result.RegisterValidation("dir", validateDir)   // nolint: errcheck
+	result.RegisterValidation("file", validateFile) // nolint: errcheck
 
 	// default translations
 	eng := english.New()
@@ -106,7 +106,7 @@ func (v *Validator) Validate() error {
 
 	// collect human-readable errors
 	result := configValidationError{}
-	vErrors := err.(validator.ValidationErrors)
+	vErrors := err.(validator.ValidationErrors) // nolint: errcheck
 	for _, vErr := range vErrors {
 		errStr := fmt.Sprintf("%s: %s", vErr.Namespace(), vErr.Translate(v.trans))
 		result.addError(errStr)

@@ -23,7 +23,7 @@ var DependencyResolutionCfgDefault = &DependencyResolutionCfg{
 func (b *GraphBuilder) DependencyResolutionWithFunc(cfg *DependencyResolutionCfg, exists func(*resolve.ComponentInstance) bool) *Graph {
 	// trace all dependencies
 	for _, dependencyObj := range b.policy.GetObjectsByKind(lang.DependencyObject.Kind) {
-		dependency := dependencyObj.(*lang.Dependency)
+		dependency := dependencyObj.(*lang.Dependency) // nolint: errcheck
 		b.traceDependencyResolution("", dependency, nil, 0, cfg, exists)
 	}
 	return b.graph
@@ -76,7 +76,7 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 				b.graph.addNode(errorNode{err: errContract}, level)
 				continue
 			}
-			contract := contractObj.(*lang.Contract)
+			contract := contractObj.(*lang.Contract) // nolint: errcheck
 			ctrNode := contractNode{contract: contract}
 
 			// then create a service instance node
@@ -85,7 +85,7 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 				b.graph.addNode(errorNode{err: errService}, level)
 				continue
 			}
-			service := serviceObj.(*lang.Service)
+			service := serviceObj.(*lang.Service) // nolint: errcheck
 			svcInstNode := serviceInstanceNode{instance: instanceCurrent, service: service}
 
 			// let's see if we need to show last -> contract -> serviceInstance, or skip contract all together

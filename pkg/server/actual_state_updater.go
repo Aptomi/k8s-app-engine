@@ -117,7 +117,9 @@ func refreshEndpoints(desiredPolicy *lang.Policy, actualState *resolve.PolicyRes
 		wg.Add(1)
 		go func(act action.Interface) {
 			defer wg.Done()
-			_ = fn(act)
+
+			// if an error or panic happened in the action, we don't have to do anything special, we will just retry it next time
+			fn(act) // nolint: errcheck
 		}(act)
 	}
 

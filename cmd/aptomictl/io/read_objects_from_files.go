@@ -115,7 +115,7 @@ FILES:
 		log.Infof("  [*] %s", file)
 
 		for _, obj := range objects {
-			langObj := obj.(lang.Base)
+			langObj := obj.(lang.Base) // nolint: errcheck
 			log.Infof("\t -> %s %s in %s", langObj.GetKind(), langObj.GetName(), langObj.GetNamespace())
 		}
 

@@ -81,7 +81,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 	if err != nil {
 		return nil, nil, err
 	}
-	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
+	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName] // nolint: errcheck
 
 	if component == nil {
 		return nil, nil, fmt.Errorf("retrieving endpoints for service instance is not supported")
@@ -99,7 +99,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 	if clusterObj == nil {
 		return nil, nil, fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
-	cluster := clusterObj.(*lang.Cluster)
+	cluster := clusterObj.(*lang.Cluster) // nolint: errcheck
 
 	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {

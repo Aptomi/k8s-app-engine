@@ -68,7 +68,7 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 		policyView := policy.View(users[i])
 		for _, obj := range objList {
 			if obj.GetKind() == ServiceObject.Kind {
-				service := obj.(*Service)
+				service := obj.(*Service) // nolint: errcheck
 				if _, err := policyView.CanConsume(service); err != nil {
 					errCntConsume[i]++
 				}

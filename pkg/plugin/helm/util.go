@@ -29,7 +29,10 @@ func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, versi
 		// version is optional. this will use the latest
 		version = ""
 	} else {
-		version = params["chartVersion"].(string)
+		if version, ok = params["chartVersion"].(string); !ok {
+			err = fmt.Errorf("chartVersion is not a valid string")
+			return
+		}
 	}
 
 	return

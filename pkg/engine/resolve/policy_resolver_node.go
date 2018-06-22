@@ -160,7 +160,7 @@ func (node *resolutionNode) getContract(policy *lang.Policy) *lang.Contract {
 	if contractObj == nil || err != nil {
 		panic(fmt.Sprintf("Can't get contract '%s/%s': %s", node.namespace, node.contractName, err))
 	}
-	contract := contractObj.(*lang.Contract)
+	contract := contractObj.(*lang.Contract) // nolint: errcheck
 	node.logContractFound(contract)
 	return contract
 }
@@ -202,7 +202,7 @@ func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Servic
 		panic(fmt.Sprintf("Can't get service '%s/%s': %s", node.namespace, node.context.Allocation.Service, err))
 	}
 
-	service := serviceObj.(*lang.Service)
+	service := serviceObj.(*lang.Service) // nolint: errcheck
 
 	// Service should be located in the same namespace as contract
 	if service.Namespace != node.contract.Namespace {

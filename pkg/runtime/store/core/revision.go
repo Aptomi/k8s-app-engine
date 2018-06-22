@@ -79,7 +79,7 @@ func (ds *defaultStore) GetLastRevisionForPolicy(policyGen runtime.Generation) (
 
 	var result *engine.Revision
 	for _, revisionObj := range revisionObjs {
-		revision := revisionObj.(*engine.Revision)
+		revision := revisionObj.(*engine.Revision) // nolint: errcheck
 
 		if revision.PolicyGen != policyGen {
 			continue
@@ -103,7 +103,7 @@ func (ds *defaultStore) GetAllRevisionsForPolicy(policyGen runtime.Generation) (
 
 	result := []*engine.Revision{}
 	for _, revisionObj := range revisionObjs {
-		revision := revisionObj.(*engine.Revision)
+		revision := revisionObj.(*engine.Revision) // nolint: errcheck
 		if revision.PolicyGen == policyGen {
 			result = append(result, revision)
 		}
@@ -122,7 +122,7 @@ func (ds *defaultStore) GetFirstUnprocessedRevision() (*engine.Revision, error) 
 
 	var result *engine.Revision
 	for _, revisionObj := range revisionObjs {
-		revision := revisionObj.(*engine.Revision)
+		revision := revisionObj.(*engine.Revision) // nolint: errcheck
 
 		// if this revision has been processed, we don't need to consider it
 		if revision.Status == engine.RevisionStatusCompleted || revision.Status == engine.RevisionStatusError {

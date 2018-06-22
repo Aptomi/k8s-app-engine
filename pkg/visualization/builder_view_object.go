@@ -37,7 +37,7 @@ func (b *GraphBuilder) traceContract(contract *lang.Contract, last graphNode, la
 			b.graph.addNode(errorNode{err: errService}, level)
 			continue
 		}
-		service := serviceObj.(*lang.Service)
+		service := serviceObj.(*lang.Service) // nolint: errcheck
 
 		// context -> service
 		contextName := context.Name

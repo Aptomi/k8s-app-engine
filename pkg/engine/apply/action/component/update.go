@@ -91,7 +91,7 @@ func (a *UpdateAction) processDeployment(context *action.Context) (*resolve.Comp
 	if err != nil {
 		return nil, err
 	}
-	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName]
+	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName] // nolint: errcheck
 
 	if component == nil {
 		// This is a service instance. Do nothing and proceed with object update
@@ -112,7 +112,7 @@ func (a *UpdateAction) processDeployment(context *action.Context) (*resolve.Comp
 	if clusterObj == nil {
 		return nil, fmt.Errorf("cluster '%s/%s' in not present in policy", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
-	cluster := clusterObj.(*lang.Cluster)
+	cluster := clusterObj.(*lang.Cluster) // nolint: errcheck
 
 	p, err := context.Plugins.ForCodeType(cluster, component.Code.Type)
 	if err != nil {

@@ -122,7 +122,11 @@ func (api *coreAPI) checkToken(request *http.Request) error {
 		return fmt.Errorf("unexpected token signing method: %s", token.Header["alg"])
 	}
 
-	claims := token.Claims.(*Claims)
+	claims, ok := token.Claims.(*Claims)
+	if !ok {
+		return fmt.Errorf("unexpected token claims, can't be casted to *Claims: %s", token.Claims)
+	}
+
 	user := api.externalData.UserLoader.LoadUserByName(claims.Name)
 	if user == nil {
 		return fmt.Errorf("token refers to non-existing user: %s", claims.Name)

@@ -115,14 +115,14 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 4, Failed: 0, Skipped: 0})
 
 	// Get key to a component
-	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)
-	contract := desired.policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract)
-	service := desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service)
+	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)    // nolint: errcheck
+	contract := desired.policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract) // nolint: errcheck
+	service := desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service)    // nolint: errcheck
 	key := resolve.NewComponentInstanceKey(cluster, "k8ns", contract, contract.Contexts[0], nil, service, service.Components[0])
 	keyService := key.GetParentServiceKey()
 
 	// Check that original dependency was resolved successfully
-	dependency := desired.policy().GetObjectsByKind(lang.DependencyObject.Kind)[0].(*lang.Dependency)
+	dependency := desired.policy().GetObjectsByKind(lang.DependencyObject.Kind)[0].(*lang.Dependency) // nolint: errcheck
 	assert.True(t, desired.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
 
 	// Check creation/update times

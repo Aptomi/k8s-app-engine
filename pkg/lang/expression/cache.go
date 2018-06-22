@@ -21,7 +21,7 @@ func (cache *Cache) EvaluateAsBool(expressionStr string, params *Parameters) (bo
 	var expression *Expression
 	expressionCached, ok := cache.eCache.Load(expressionStr)
 	if ok {
-		expression = expressionCached.(*Expression)
+		expression = expressionCached.(*Expression) // nolint: errcheck
 	} else {
 		// Compile expression, if not found
 		// This might happen a several times in parallel, that's okay

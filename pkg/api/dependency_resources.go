@@ -43,7 +43,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 	}
 
 	// once dependency is loaded, we need to find its state in the actual state
-	dependency := obj.(*lang.Dependency)
+	dependency := obj.(*lang.Dependency) // nolint: errcheck
 	actualState, err := api.store.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("Can't load actual state to get endpoints: %s", err))
@@ -137,7 +137,7 @@ func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lan
 	if clusterObj == nil {
 		return nil, fmt.Errorf("can't find cluster '%s/%s'", instance.Metadata.Key.ClusterNameSpace, instance.Metadata.Key.ClusterName)
 	}
-	cluster := clusterObj.(*lang.Cluster)
+	cluster := clusterObj.(*lang.Cluster) // nolint: errcheck
 
 	return plugins.ForCodeType(cluster, component.Code.Type)
 }

@@ -22,13 +22,13 @@ func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 	// we need to find all top-level contracts
 	contractDegIn := make(map[string]int)
 	for _, contractObj := range b.policy.GetObjectsByKind(lang.ContractObject.Kind) {
-		contract := contractObj.(*lang.Contract)
+		contract := contractObj.(*lang.Contract) // nolint: errcheck
 		b.calcContractDegIn(contract, contractDegIn)
 	}
 
 	// trace all top-level contracts
 	for _, contractObj := range b.policy.GetObjectsByKind(lang.ContractObject.Kind) {
-		contract := contractObj.(*lang.Contract)
+		contract := contractObj.(*lang.Contract) // nolint: errcheck
 		if contractDegIn[runtime.KeyForStorable(contract)] <= 0 {
 			b.traceContract(contract, nil, "", 0, cfg)
 		}
@@ -42,7 +42,7 @@ func (b *GraphBuilder) calcContractDegIn(contractFrom *lang.Contract, contractDe
 		if errService != nil {
 			continue
 		}
-		service := serviceObj.(*lang.Service)
+		service := serviceObj.(*lang.Service) // nolint: errcheck
 
 		for _, component := range service.Components {
 			if len(component.Contract) > 0 {
@@ -50,7 +50,7 @@ func (b *GraphBuilder) calcContractDegIn(contractFrom *lang.Contract, contractDe
 				if errContract != nil {
 					continue
 				}
-				contractTo := contractObjNew.(*lang.Contract)
+				contractTo := contractObjNew.(*lang.Contract) // nolint: errcheck
 				contractDegIn[runtime.KeyForStorable(contractTo)]++
 			}
 		}

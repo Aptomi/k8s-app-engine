@@ -21,7 +21,7 @@ func (cache *Cache) Evaluate(templateStr string, params *Parameters) (string, er
 	var template *Template
 	templateCached, ok := cache.tCache.Load(templateStr)
 	if ok {
-		template = templateCached.(*Template)
+		template = templateCached.(*Template) // nolint: errcheck
 	} else {
 		// Compile template, if not found
 		// This might happen a several times in parallel, that's okay

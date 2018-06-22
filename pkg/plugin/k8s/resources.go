@@ -102,7 +102,10 @@ var serviceResourceHeaders = []string{
 }
 
 func serviceResourceHandler(obj interface{}) []string {
-	service := obj.(*v1.Service)
+	service, ok := obj.(*v1.Service)
+	if !ok {
+		panic(fmt.Sprintf("object is not a valid kubernetes v1.Service: %+v", obj))
+	}
 	parts := make([]string, len(service.Spec.Ports))
 	for idx, port := range service.Spec.Ports {
 		if port.NodePort > 0 {
@@ -134,7 +137,10 @@ var deploymentResourceHeaders = []string{
 }
 
 func deploymentResourceHandler(obj interface{}) []string {
-	deployment := obj.(*v1beta1.Deployment)
+	deployment, ok := obj.(*v1beta1.Deployment)
+	if !ok {
+		panic(fmt.Sprintf("object is not a valid kubernetes v1beta1.Deployment: %+v", obj))
+	}
 
 	desiredReplicas := fmt.Sprintf("%d", *deployment.Spec.Replicas)
 	currentReplicas := fmt.Sprintf("%d", deployment.Status.Replicas)
@@ -158,7 +164,10 @@ var statefulSetResourceHeaders = []string{
 }
 
 func statefulSetResourceHandler(obj interface{}) []string {
-	statefulSet := obj.(*v1beta1.StatefulSet)
+	statefulSet, ok := obj.(*v1beta1.StatefulSet)
+	if !ok {
+		panic(fmt.Sprintf("object is not a valid kubernetes v1beta1.StatefulSet: %+v", obj))
+	}
 
 	desiredReplicas := fmt.Sprintf("%d", *statefulSet.Spec.Replicas)
 	currentReplicas := fmt.Sprintf("%d", statefulSet.Status.Replicas)

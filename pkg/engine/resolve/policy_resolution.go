@@ -126,7 +126,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		}
 
 		// verify that context within a contract exists
-		contract := contractObj.(*lang.Contract)
+		contract := contractObj.(*lang.Contract) // nolint: errcheck
 		contextExists := false
 		for _, context := range contract.Contexts {
 			if context.Name == componentKey.ContextName {
@@ -148,7 +148,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 
 		if componentKey.ComponentName != componentRootName {
 			// verify that component within a service exists
-			service := serviceObj.(*lang.Service)
+			service := serviceObj.(*lang.Service) // nolint: errcheck
 			component, found := service.GetComponentsMap()[componentKey.ComponentName]
 			if component == nil || !found {
 				// component instance points to non-existing component within a service, meaning this component instance is now orphan

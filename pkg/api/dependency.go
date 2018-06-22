@@ -100,7 +100,7 @@ func (api *coreAPI) handleDependencyStatusGet(writer http.ResponseWriter, reques
 			continue
 		}
 
-		d := dObj.(*lang.Dependency)
+		d := dObj.(*lang.Dependency) // nolint: errcheck
 		resolved := desiredState.GetDependencyResolution(d).Resolved
 		result.Status[runtime.KeyForStorable(d)] = &DependencyStatus{
 			Found:     true,

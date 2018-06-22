@@ -4,7 +4,9 @@ import (
 	"sort"
 	"strings"
 
+	"fmt"
 	"github.com/Aptomi/aptomi/pkg/util"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // PlanAsText is a plan of actions, represented as text
@@ -60,7 +62,11 @@ func (t *PlanAsText) String() string {
 		}
 
 		// get pretty string
-		pretty := pMap["pretty"].(string)
+		pretty, prettyOk := pMap["pretty"].(string)
+		if !prettyOk {
+			cs := spew.ConfigState{Indent: "\t"}
+			panic(fmt.Sprintf("action doesn't have 'pretty' key in it: %s", cs.Sdump(pMap)))
+		}
 
 		// add action category if needed
 		actionDescription := actionDescriptionMap[pretty[:3]]

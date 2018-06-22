@@ -62,16 +62,16 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 	result := validator.New()
 
 	// independent validators
-	_ = result.RegisterValidationCtx("identifier", validateIdentifier)
-	_ = result.RegisterValidationCtx("clustertype", validateClusterType)
-	_ = result.RegisterValidationCtx("codetype", validateCodeType)
-	_ = result.RegisterValidationCtx("expression", validateExpression)
-	_ = result.RegisterValidationCtx("template", validateTemplate)
-	_ = result.RegisterValidationCtx("templateNestedMap", validateTemplateNestedMap)
-	_ = result.RegisterValidationCtx("labels", validateLabels)
-	_ = result.RegisterValidationCtx("labelOperations", validateLabelOperations)
-	_ = result.RegisterValidationCtx("allowReject", validateAllowRejectAction)
-	_ = result.RegisterValidationCtx("addRoleNS", validateACLRoleActionMap)
+	result.RegisterValidationCtx("identifier", validateIdentifier)               // nolint: errcheck
+	result.RegisterValidationCtx("clustertype", validateClusterType)             // nolint: errcheck
+	result.RegisterValidationCtx("codetype", validateCodeType)                   // nolint: errcheck
+	result.RegisterValidationCtx("expression", validateExpression)               // nolint: errcheck
+	result.RegisterValidationCtx("template", validateTemplate)                   // nolint: errcheck
+	result.RegisterValidationCtx("templateNestedMap", validateTemplateNestedMap) // nolint: errcheck
+	result.RegisterValidationCtx("labels", validateLabels)                       // nolint: errcheck
+	result.RegisterValidationCtx("labelOperations", validateLabelOperations)     // nolint: errcheck
+	result.RegisterValidationCtx("allowReject", validateAllowRejectAction)       // nolint: errcheck
+	result.RegisterValidationCtx("addRoleNS", validateACLRoleActionMap)          // nolint: errcheck
 
 	// validators with context containing policy
 	result.RegisterStructValidation(validateRule, Rule{})
@@ -212,7 +212,7 @@ func (v *PolicyValidator) Validate() error {
 
 	// collect human-readable errors
 	result := policyValidationError{}
-	vErrors := err.(validator.ValidationErrors)
+	vErrors := err.(validator.ValidationErrors) // nolint: errcheck
 	for _, vErr := range vErrors {
 		errStr := fmt.Sprintf("%s: %s", vErr.Namespace(), vErr.Translate(v.trans))
 		result.addError(errStr)
@@ -278,7 +278,7 @@ func validateTemplate(ctx context.Context, fl validator.FieldLevel) bool {
 
 // checks if a given nested map is a valid map of text templates (e.g. code parameters, discovery parameters, etc)
 func validateTemplateNestedMap(ctx context.Context, fl validator.FieldLevel) bool {
-	pMap := fl.Field().Interface().(util.NestedParameterMap)
+	pMap := fl.Field().Interface().(util.NestedParameterMap) // nolint: errcheck
 	_, err := util.ProcessParameterTree(pMap, nil, nil, util.ModeCompile)
 	if err != nil {
 		attachErrorToContext(ctx, fl, err.Error())
@@ -288,7 +288,7 @@ func validateTemplateNestedMap(ctx context.Context, fl validator.FieldLevel) boo
 
 // checks if a given map is a valid map of label operations (contains only set/remove, and also label names are valid)
 func validateLabelOperations(ctx context.Context, fl validator.FieldLevel) bool {
-	ops := fl.Field().Interface().(LabelOperations)
+	ops := fl.Field().Interface().(LabelOperations) // nolint: errcheck
 	for opType, operations := range ops {
 		if !util.ContainsString(labelOpsKeys, opType) {
 			return false
@@ -304,7 +304,7 @@ func validateLabelOperations(ctx context.Context, fl validator.FieldLevel) bool 
 
 // checks if a given map is a valid map of setting ACL Role actions
 func validateACLRoleActionMap(ctx context.Context, fl validator.FieldLevel) bool {
-	addRoleMap := fl.Field().Interface().(map[string]string)
+	addRoleMap := fl.Field().Interface().(map[string]string) // nolint: errcheck
 	for roleID, namespaceList := range addRoleMap {
 		role := ACLRolesMap[roleID]
 		if role == nil {

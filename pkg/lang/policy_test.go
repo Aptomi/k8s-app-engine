@@ -40,7 +40,8 @@ func TestPolicy_AddObjectIdempotent(t *testing.T) {
 	for _, pObjType := range PolicyObjects {
 		objects := policy.GetObjectsByKind(pObjType.Kind)
 		for _, obj := range objects {
-			policyUpdated.AddObject(obj)
+			err := policyUpdated.AddObject(obj)
+			assert.NoError(t, err, "Add object should be successful")
 		}
 	}
 
