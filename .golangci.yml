@@ -47,4 +47,3 @@ issues:
     - Potential file inclusion via variable
   max-issues-per-linter: 0
   max-same-issues: 0
-  new-from-rev: "445eda78f1785a5c563781e24699a2c5e3757783"

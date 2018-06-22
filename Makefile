@@ -117,10 +117,6 @@ else
 	${GOENV} golangci-lint run
 endif
 
-.PHONY: lint-all
-lint-all: prepare_golangci_lint
-	${GOENV} golangci-lint run --new-from-rev=""
-
 HAS_GOLANGCI_LINT := $(shell command -v golangci-lint)
 
 .PHONY: prepare_golangci_lint
