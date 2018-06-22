@@ -227,7 +227,7 @@ login sam
 change_policy delete "-f \"${POLICY_DIR}/policy/*-ts.yaml\"" 11
 check_policy 0 ".Objects.social.dependency | length"
 
-# delete all definitions
+# delete the rest of the objects
 login sam
 change_policy delete "-f ${POLICY_DIR}/policy" 12
 check_policy 0 ".Objects.platform.contract | length"
@@ -241,41 +241,25 @@ check_policy 0 ".Objects.social.service | length"
 check_policy 0 ".Objects.system.aclrule | length"
 check_policy 0 ".Objects.system.cluster | length"
 
+# import all objects at once
 login sam
-change_policy apply "-f ${POLICY_DIR}/policy/rules -f ${POLICY_DIR}/policy/clusters" 13
+change_policy apply "-f ${POLICY_DIR}/policy" 13
 
-login frank
-change_policy apply "-f ${POLICY_DIR}/policy/analytics_pipeline" 14
-
-login john
-change_policy apply "-f ${POLICY_DIR}/policy/twitter_stats" 15
-
-login john
-change_policy apply "-f ${POLICY_DIR}/policy/john-prod-ts.yaml" 16
-check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml"
-
-login alice
-change_policy apply "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 17
-check_dependencies "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml"
-
-login bob
-change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml" 18
-check_dependencies "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
-
-check_policy 3 ".Objects.social.dependency | length"
-check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
-
+# check object counts
+check_policy 4 ".Objects.social.dependency | length"
 check_policy 5 ".Objects.platform.contract | length"
 check_policy 0 ".Objects.platform.dependency | length"
 check_policy 5 ".Objects.platform.service | length"
 check_policy 1 ".Objects.social.contract | length"
-check_policy 3 ".Objects.social.dependency | length"
 check_policy 1 ".Objects.social.service | length"
 check_policy 1 ".Objects.platform.rule | length"
 check_policy 1 ".Objects.system.rule | length"
 check_policy 2 ".Objects.social.rule | length"
 check_policy 3 ".Objects.system.aclrule | length"
 check_policy 1 ".Objects.system.cluster | length"
+
+# check dependencies
+check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
 
 sleep 1
 

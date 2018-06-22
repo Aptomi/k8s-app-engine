@@ -24,9 +24,9 @@ type Policy struct {
 	// Namespace is a map from namespace name into a PolicyNamespace
 	Namespace map[string]*PolicyNamespace `validate:"dive"`
 
-	// Access control rules for different policy namespaces
-	once        sync.Once
-	aclResolver *ACLResolver // lazily initialized value
+	// Access control rules (who can access which objects in which policy namespaces)
+	aclMutex    sync.Mutex
+	aclResolver *ACLResolver
 }
 
 // NewPolicy creates a new Policy
@@ -34,19 +34,33 @@ func NewPolicy() *Policy {
 	return &Policy{Namespace: make(map[string]*PolicyNamespace)}
 }
 
-// View returns a policy view object, which allows to make all policy operations on behalf of a certain user
-// Policy view object will enforce all ACLs, allowing the user to only perform actions which he is allowed to perform
-// All ACL rules should be loaded and added to the policy before this method gets called
-func (policy *Policy) View(user *User) *PolicyView {
-	policy.once.Do(func() {
+// invalidateCachedACLResolver just resets the cached version of access control rules
+func (policy *Policy) invalidateCachedACLResolver() {
+	policy.aclMutex.Lock()
+	defer policy.aclMutex.Unlock()
+	policy.aclResolver = nil
+}
+
+// getCachedACLResolver returns a cached version of ACLResolver, or lazily initializes it if the cache is empty
+func (policy *Policy) getCachedACLResolver() *ACLResolver {
+	policy.aclMutex.Lock()
+	defer policy.aclMutex.Unlock()
+	if policy.aclResolver == nil {
 		systemNamespace := policy.Namespace[runtime.SystemNS]
 		if systemNamespace != nil {
 			policy.aclResolver = NewACLResolver(systemNamespace.ACLRules)
 		} else {
 			policy.aclResolver = NewACLResolver(make(map[string]*Rule))
 		}
-	})
-	return NewPolicyView(policy, user)
+	}
+	return policy.aclResolver
+}
+
+// View returns a policy view object, which allows to make all policy operations on behalf of a certain user
+// Policy view object will enforce all ACLs, allowing the user to only perform actions which he is allowed to perform
+// All ACL rules should be loaded and added to the policy before this method gets called
+func (policy *Policy) View(user *User) *PolicyView {
+	return NewPolicyView(policy, user, policy.getCachedACLResolver())
 }
 
 // AddObject adds a given object into the policy. When you add objects to the policy, they get added to the corresponding
@@ -57,7 +71,14 @@ func (policy *Policy) AddObject(obj Base) error {
 		policyNamespace = NewPolicyNamespace(obj.GetNamespace())
 		policy.Namespace[obj.GetNamespace()] = policyNamespace
 	}
-	return policyNamespace.addObject(obj)
+	err := policyNamespace.addObject(obj)
+
+	// if we just added ACLRule, we need to invalidate cached aclResolver
+	if obj.GetKind() == ACLRuleObject.Kind {
+		policy.invalidateCachedACLResolver()
+	}
+
+	return err
 }
 
 // RemoveObject removes a given object from the policy. Returns true if removed and false if nothing got removed.

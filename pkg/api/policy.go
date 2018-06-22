@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"sort"
+
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -101,6 +103,30 @@ func (result *PolicyUpdateResult) AsColumns() map[string]string {
 	}
 }
 
+type apiObjectSorter []lang.Base
+
+func (rs apiObjectSorter) Len() int {
+	return len(rs)
+}
+
+func (rs apiObjectSorter) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
+}
+
+func (rs apiObjectSorter) Less(i, j int) bool {
+	return rs.Weight(rs[i]) < rs.Weight(rs[j])
+}
+
+func (rs apiObjectSorter) Weight(obj lang.Base) int { // nolint: interfacer
+	// ACL rules have to come in the first place
+	if obj.GetKind() == lang.ACLRuleObject.Kind {
+		return 0
+	}
+
+	// All other objects can be added in any order
+	return 1
+}
+
 func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http.Request, params httprouter.Params) { // nolint: gocyclo
 	objects := api.readLang(request)
 	user := api.getUserRequired(request)
@@ -129,7 +155,8 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
 
-	// Verify that user has permissions to create and update objects
+	// Add objects to the policy in a sorted order (e.g. make sure ACL Rules go first)
+	sort.Sort(apiObjectSorter(objects))
 	for _, obj := range objects {
 		errAdd := policyUpdated.AddObject(obj)
 		if errAdd != nil {
@@ -270,7 +297,8 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
 
-	// Verify that user has permissions to delete objects
+	// Delete objects from the policy in a reversed sorted order (e.g. make sure ACL Rules go last)
+	sort.Sort(sort.Reverse(apiObjectSorter(objects)))
 	for _, obj := range objects {
 		errManage := policyUpdated.View(user).ManageObject(obj)
 		if errManage != nil {
