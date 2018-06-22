@@ -42,6 +42,7 @@ func (server *Server) actualStateUpdate() error {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorf("panic while updating actual state: %s", err)
+			log.Errorf(string(debug.Stack()))
 		}
 	}()
 
