@@ -7,6 +7,7 @@ import (
 
 	"sort"
 
+	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
@@ -227,33 +228,17 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		return
 	}
 
-	// Here we need to take mutex to handle policy and revision updates
-	api.policyAndRevisionUpdateMutex.Lock()
-	defer api.policyAndRevisionUpdateMutex.Unlock()
+	// Update policy
+	changed, policyGen, revisionGen := api.changePolicy(objects, user, desiredStateUpdated, false)
 
-	// Make object changes in the store
-	changed, policyData, err := api.store.UpdatePolicy(objects, user.Name)
-	if err != nil {
-		panic(fmt.Sprintf("error while updating objects in policy: %s", err))
-	}
-
-	// If there are changes, create a new revision and say that we should wait for it
-	waitForRevision := runtime.MaxGeneration
-	if changed {
-		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
-		if newRevisionErr != nil {
-			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
-		}
-		waitForRevision = newRevision.GetGeneration()
-	}
-
+	// Return the result back via API
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-		PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
-		PolicyChanged:    changed,                    // have any policy object in the store been changed or not
-		WaitForRevision:  waitForRevision,            // which revision to wait for
-		PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
-		EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
+		PolicyChanged:    changed,                // have any policy object in the store been changed or not
+		PolicyGeneration: policyGen,              // policy now has a new generation
+		WaitForRevision:  revisionGen,            // which revision to wait for
+		PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
+		EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
 	})
 
 	if changed {
@@ -341,33 +326,17 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		return
 	}
 
-	// Here we need to take mutex to handle policy and revision updates
-	api.policyAndRevisionUpdateMutex.Lock()
-	defer api.policyAndRevisionUpdateMutex.Unlock()
+	// Update policy
+	changed, policyGen, revisionGen := api.changePolicy(objects, user, desiredStateUpdated, true)
 
-	// Make object changes in the store
-	changed, policyData, err := api.store.DeleteFromPolicy(objects, user.Name)
-	if err != nil {
-		panic(fmt.Sprintf("error while deleting objects from policy: %s", err))
-	}
-
-	// If there are changes, create a new revision and say that we should wait for it
-	waitForRevision := runtime.MaxGeneration
-	if changed {
-		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
-		if newRevisionErr != nil {
-			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
-		}
-		waitForRevision = newRevision.GetGeneration()
-	}
-
+	// Return the result back via API
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-		PolicyGeneration: policyData.GetGeneration(), // policy now has a new generation
-		PolicyChanged:    changed,                    // have any policy object in the store been changed or not
-		WaitForRevision:  waitForRevision,            // which revision to wait for
-		PlanAsText:       actionPlan.AsText(),        // return action plan, so it can be printed by the client
-		EventLog:         eventLog.AsAPIEvents(),     // return policy resolution log
+		PolicyChanged:    changed,                // have any policy object in the store been changed or not
+		PolicyGeneration: policyGen,              // policy now has a new generation
+		WaitForRevision:  revisionGen,            // which revision to wait for
+		PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
+		EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
 	})
 
 	if changed {
@@ -375,4 +344,33 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		api.runDesiredStateEnforcement <- true
 	}
 
+}
+
+func (api *coreAPI) changePolicy(objects []lang.Base, user *lang.User, desiredStateUpdated *resolve.PolicyResolution, delete bool) (bool, runtime.Generation, runtime.Generation) {
+	// Make sure to take the mutex, before making any policy and revision changes
+	api.policyAndRevisionUpdateMutex.Lock()
+	defer api.policyAndRevisionUpdateMutex.Unlock()
+
+	// Make object changes in the store
+	var changed bool
+	var policyData *engine.PolicyData
+	var err error
+	if delete {
+		changed, policyData, err = api.store.DeleteFromPolicy(objects, user.Name)
+	} else {
+		changed, policyData, err = api.store.UpdatePolicy(objects, user.Name)
+	}
+	if err != nil {
+		panic(fmt.Sprintf("error while making changes to objects in the policy: %s", err))
+	}
+	// If there are changes, create a new revision and say that we should wait for it
+	revisionGen := runtime.MaxGeneration
+	if changed {
+		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
+		if newRevisionErr != nil {
+			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyData.GetGeneration()))
+		}
+		revisionGen = newRevision.GetGeneration()
+	}
+	return changed, policyData.GetGeneration(), revisionGen
 }

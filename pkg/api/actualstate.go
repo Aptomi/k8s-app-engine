@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
@@ -72,30 +73,37 @@ func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http
 		return
 	}
 
-	// Here we need to take mutex to handle policy and revision updates
-	api.policyAndRevisionUpdateMutex.Lock()
-	defer api.policyAndRevisionUpdateMutex.Unlock()
-
-	// If there are changes, create new special revision for enforcing state and say that we should wait for it
-	var waitForRevision = runtime.MaxGeneration
-	if actionPlan.NumberOfActions() > 0 {
-		// If there are changes, create a new revision and say that we should wait for it
-		newRevision, newRevisionErr := api.store.NewRevision(policyGen, desiredState, true)
-		if newRevisionErr != nil {
-			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
-		}
-		waitForRevision = newRevision.GetGeneration()
-	}
+	// Keep policy the same, but create another special revision for it to enforce the state
+	revisionGen := api.createStateEnforceRevision(policyGen, desiredState, actionPlan)
 
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 		PolicyGeneration: policyGen,                // policy didn't change
 		PolicyChanged:    false,                    // have any policy object in the store been changed or not
-		WaitForRevision:  waitForRevision,          // which revision to wait for
+		WaitForRevision:  revisionGen,              // which revision to wait for
 		PlanAsText:       actionPlan.AsText(),      // return action plan, so it can be printed by the client
 		EventLog:         resolveLog.AsAPIEvents(), // return policy resolution log
 	})
 
 	// signal to the channel that actual state has changed, that will trigger the enforcement right away
 	api.runDesiredStateEnforcement <- true
+}
+
+func (api *coreAPI) createStateEnforceRevision(policyGen runtime.Generation, desiredState *resolve.PolicyResolution, actionPlan *action.Plan) runtime.Generation {
+	// Here we need to take mutex to handle policy and revision updates
+	api.policyAndRevisionUpdateMutex.Lock()
+	defer api.policyAndRevisionUpdateMutex.Unlock()
+
+	// If there are changes, create new special revision for enforcing state and say that we should wait for it
+	var revisionGen = runtime.MaxGeneration
+	if actionPlan.NumberOfActions() > 0 {
+		// If there are changes, create a new revision and say that we should wait for it
+		newRevision, newRevisionErr := api.store.NewRevision(policyGen, desiredState, true)
+		if newRevisionErr != nil {
+			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
+		}
+		revisionGen = newRevision.GetGeneration()
+	}
+
+	return revisionGen
 }
