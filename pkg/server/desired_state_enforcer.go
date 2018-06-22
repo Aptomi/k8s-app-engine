@@ -6,11 +6,14 @@ import (
 
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
+	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/diff"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/event"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"runtime/debug"
 )
 
 func (server *Server) desiredStateEnforceLoop() error {
@@ -51,6 +54,41 @@ func (server *Server) desiredStateEnforceLoop() error {
 	}
 }
 
+func (server *Server) getRevisionForProcessing() (*engine.Revision, error) {
+	// we are processing revision sequentially, so let's get the first unprocessed revision from the database
+	revision, err := server.store.GetFirstUnprocessedRevision()
+	if err != nil {
+		return nil, fmt.Errorf("unable to load first unprocessed revision: %s", err)
+	}
+
+	// if there is an unprocessed revision, return it
+	if revision != nil {
+		log.Infof("(enforce-%d) Found unprocessed revision %d", server.desiredStateEnforcementIdx, revision.GetGeneration())
+		return revision, nil
+	}
+
+	// if there are no unprocessed revisions, let's get the last one and see if it was successful or not
+	_, policyGen, err := server.store.GetPolicy(runtime.LastGen)
+	if err != nil {
+		return nil, fmt.Errorf("unable to load latest policy: %s", err)
+	}
+	lastRevision, err := server.store.GetLastRevisionForPolicy(policyGen)
+	if err != nil {
+		return nil, fmt.Errorf("unable to load latest revision: %s", err)
+	}
+
+	// now, given that we retrieved the last revision, when do we need to retry it? in one of two cases:
+	// - it's either in error status (something really bad happened)
+	// - it completed, but some actions failed and they need to be retried
+	if lastRevision != nil && (lastRevision.Status == engine.RevisionStatusError || (lastRevision.Status == engine.RevisionStatusCompleted && lastRevision.Result.Failed > 0)) {
+		log.Infof("(enforce-%d) Found last revision %d which needs to be retried", server.desiredStateEnforcementIdx, lastRevision.GetGeneration())
+		return lastRevision, nil
+	}
+
+	// nothing to process
+	return nil, nil
+}
+
 func (server *Server) desiredStateEnforce() error {
 	start := time.Now()
 	server.desiredStateEnforcementIdx++
@@ -61,28 +99,25 @@ func (server *Server) desiredStateEnforce() error {
 
 		if err := recover(); err != nil {
 			log.Errorf("panic while enforcing desired state: %s", err)
+			log.Errorf(string(debug.Stack()))
 		}
 	}()
 
-	// load revision from the head of the queue for processing
-	revision, err := server.store.GetFirstUnprocessedRevision()
+	// get the revision for processing
+	revision, err := server.getRevisionForProcessing()
 	if err != nil {
-		return fmt.Errorf("unable to get first unprocessed revision: %s", err)
+		return fmt.Errorf("can't pick revision for processing: %s", err)
 	}
-
-	// if there is no revision, we have no work to do
 	if revision == nil {
 		return nil
 	}
 
-	// it this revision has been stuck before, we will need to retry it
-	if revision.Status != engine.RevisionStatusWaiting {
-		revision.Status = engine.RevisionStatusWaiting
-		revErr := server.store.UpdateRevision(revision)
-		if revErr != nil {
-			return fmt.Errorf("unable to save revision: %s", err)
-		}
-		log.Infof("(enforce-%d) took revision %d from the queue, but it's in progress. resetting to waiting state and reapplying changes", server.desiredStateEnforcementIdx)
+	// reset revision status and result
+	revision.Status = engine.RevisionStatusWaiting
+	revision.Result = &action.ApplyResult{}
+	revErr := server.store.UpdateRevision(revision)
+	if revErr != nil {
+		return fmt.Errorf("unable to update revision: %s", revErr)
 	}
 
 	// load the corresponding policy
@@ -139,13 +174,15 @@ func (server *Server) desiredStateEnforce() error {
 		return fmt.Errorf("error while saving revision with apply log: %s", saveErr)
 	}
 
-	log.Infof("(enforce-%d) Revision %d processed, %d component instances", server.desiredStateEnforcementIdx, revision.GetGeneration(), len(desiredState.ComponentInstanceMap))
+	log.Infof("(enforce-%d) Revision %d processed (actions: %d succeeded, %d failed, %d skipped)", server.desiredStateEnforcementIdx, revision.GetGeneration(), revision.Result.Success, revision.Result.Failed, revision.Result.Skipped)
 
-	// trigger enforcement again
-	server.runDesiredStateEnforcement <- true
-
-	// trigger actual state update
-	server.runActualStateUpdate <- true
+	// let's try again immediately until no actions were successfully applied
+	if revision.Result.Success > 0 {
+		// trigger enforcement again
+		server.runDesiredStateEnforcement <- true
+		// trigger actual state update
+		server.runActualStateUpdate <- true
+	}
 
 	return nil
 }
