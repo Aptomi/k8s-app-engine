@@ -1,13 +1,32 @@
 package lang
 
 import (
+	"sort"
+
+	"github.com/Aptomi/aptomi/pkg/lang/expression"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
+
+// Allows to define a role which spans across all namespaces (e.g. "domain admin")
+const namespaceAll = "*"
 
 // ACLRule defines which users have which roles in Aptomi. They should be configured by Aptomi domain admins in the
 // policy. ACLRules allow to pick groups of users and assign ACL roles to them (e.g. give access to a particular
 // namespace)
-type ACLRule = Rule
+type ACLRule struct {
+	runtime.TypeKind `yaml:",inline"`
+	Metadata         `validate:"required"`
+
+	// Weight defined for the rule. All rules are sorted in the order of increasing weight and applied in that order
+	Weight int `validate:"min=0"`
+
+	// Criteria - if it gets evaluated to true during policy resolution, then rules's actions will be executed.
+	// It's an optional field, so if it's nil then it is considered to be evaluated to true automatically
+	Criteria *Criteria `yaml:",omitempty" validate:"omitempty"`
+
+	// Actions define the set of actions that will be executed if Criteria gets evaluated to true
+	Actions *ACLRuleActions `validate:"required"`
+}
 
 // ACLRuleObject is an informational data structure with Kind and Constructor for ACLRule
 var ACLRuleObject = &runtime.Info{
@@ -18,8 +37,37 @@ var ACLRuleObject = &runtime.Info{
 	Constructor: func() runtime.Object { return &ACLRule{} },
 }
 
-// Allows to define a role which spans across all namespaces (e.g. "domain admin")
-const namespaceAll = "*"
+// Matches returns true if a rule matches
+func (aclRule *ACLRule) Matches(params *expression.Parameters, cache *expression.Cache) (bool, error) {
+	if aclRule.Criteria == nil {
+		return true, nil
+	}
+	return aclRule.Criteria.allows(params, cache)
+}
+
+type aclRuleSorter []*ACLRule
+
+func (rs aclRuleSorter) Len() int {
+	return len(rs)
+}
+
+func (rs aclRuleSorter) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
+}
+
+func (rs aclRuleSorter) Less(i, j int) bool {
+	return rs[i].Weight < rs[j].Weight
+}
+
+// GetACLRulesSortedByWeight returns all rules sorted by their weight
+func GetACLRulesSortedByWeight(rules map[string]*ACLRule) []*ACLRule {
+	result := []*ACLRule{}
+	for _, rule := range rules {
+		result = append(result, rule)
+	}
+	sort.Sort(aclRuleSorter(result))
+	return result
+}
 
 // ACLRole is a struct for defining user roles and their privileges.
 // Aptomi has 4 built-in user roles: domain admin, namespace admin, service consumer, and nobody.

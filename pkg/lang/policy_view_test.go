@@ -97,7 +97,7 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 			},
 			Weight:   1000,
 			Criteria: &Criteria{RequireAll: []string{"role == 'custom'"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{NamespaceAdmin.ID: "test"},
 			},
 		},
@@ -126,7 +126,7 @@ func makeEmptyPolicyWithACL() *Policy {
 			},
 			Weight:   100,
 			Criteria: &Criteria{RequireAll: []string{"is_domain_admin"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{DomainAdmin.ID: namespaceAll},
 			},
 		},
@@ -139,7 +139,7 @@ func makeEmptyPolicyWithACL() *Policy {
 			},
 			Weight:   200,
 			Criteria: &Criteria{RequireAll: []string{"is_namespace_admin"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{NamespaceAdmin.ID: "main"},
 			},
 		},
@@ -152,7 +152,7 @@ func makeEmptyPolicyWithACL() *Policy {
 			},
 			Weight:   300,
 			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{ServiceConsumer.ID: "main"},
 			},
 		},

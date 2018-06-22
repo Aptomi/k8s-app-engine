@@ -20,8 +20,6 @@ var RuleObject = &runtime.Info{
 //
 // Rules can be used to set certain labels on certain conditions as well as perform certain actions (such as rejecting
 // dependencies, rejecting ingress traffic, etc)
-//
-// ACLRule is inherited from Rule, so the same mechanism is used for processing ACLs in Aptomi.
 type Rule struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         `validate:"required"`
@@ -48,10 +46,6 @@ type RuleActions struct {
 
 	// Ingress defines whether ingress traffic should be rejected
 	Ingress IngressAction `yaml:"ingress,omitempty" validate:"omitempty,allowReject"`
-
-	// AddRole field is only relevant for ACL rules (have to keep it in this class due to the lack of generics).
-	// Key in the map is role ID, while value is a set of comma-separated namespaces to which this role applies
-	AddRole map[string]string `yaml:"add-role,omitempty" validate:"omitempty,addRoleNS"`
 }
 
 // Matches returns true if a rule matches
@@ -76,7 +70,7 @@ func (rs ruleSorter) Less(i, j int) bool {
 	return rs[i].Weight < rs[j].Weight
 }
 
-// GetRulesSortedByWeight returns all rules sorted by weight
+// GetRulesSortedByWeight returns all rules sorted by their weight
 func GetRulesSortedByWeight(rules map[string]*Rule) []*Rule {
 	result := []*Rule{}
 	for _, rule := range rules {

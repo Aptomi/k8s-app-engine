@@ -75,6 +75,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 
 	// validators with context containing policy
 	result.RegisterStructValidation(validateRule, Rule{})
+	result.RegisterStructValidation(validateACLRule, ACLRule{})
 	result.RegisterStructValidation(validateCluster, Cluster{})
 	result.RegisterStructValidationCtx(validateService, Service{})
 	result.RegisterStructValidationCtx(validateDependency, Dependency{})
@@ -218,7 +219,7 @@ func (v *PolicyValidator) Validate() error {
 	}
 
 	// collect additional errors stored in context
-	for _, errStr := range v.ctx.Value(errorsKey).(*policyValidationError).errList {
+	for _, errStr := range v.ctx.Value(errorsKey).(*policyValidationError).errList { // nolint: errcheck
 		result.addError(errStr)
 	}
 
@@ -227,7 +228,7 @@ func (v *PolicyValidator) Validate() error {
 
 // adds validation error to the context
 func attachErrorToContext(ctx context.Context, level validator.FieldLevel, errMsg string) {
-	pve := ctx.Value(errorsKey).(*policyValidationError)
+	pve := ctx.Value(errorsKey).(*policyValidationError) // nolint: errcheck
 	pve.errList = append(pve.errList, errMsg)
 }
 
@@ -334,10 +335,10 @@ func validateLabels(ctx context.Context, fl validator.FieldLevel) bool {
 
 // checks if service is valid
 func validateService(ctx context.Context, sl validator.StructLevel) {
-	service := sl.Current().Addr().Interface().(*Service)
+	service := sl.Current().Addr().Interface().(*Service) // nolint: errcheck
 
 	// service should have either code or contract set in its components
-	policy := ctx.Value(policyKey).(*Policy)
+	policy := ctx.Value(policyKey).(*Policy) // nolint: errcheck
 	for _, component := range service.Components {
 		cnt := 0
 		if component.Code != nil {
@@ -390,8 +391,8 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 
 // checks if dependency is valid
 func validateDependency(ctx context.Context, sl validator.StructLevel) {
-	dependency := sl.Current().Addr().Interface().(*Dependency)
-	policy := ctx.Value(policyKey).(*Policy)
+	dependency := sl.Current().Addr().Interface().(*Dependency) // nolint: errcheck
+	policy := ctx.Value(policyKey).(*Policy)                    // nolint: errcheck
 
 	// dependency should point to an existing contract
 	obj, err := policy.GetObject(ContractObject.Kind, dependency.Contract, dependency.Namespace)
@@ -403,8 +404,8 @@ func validateDependency(ctx context.Context, sl validator.StructLevel) {
 
 // checks if contract is valid
 func validateContract(ctx context.Context, sl validator.StructLevel) {
-	contract := sl.Current().Addr().Interface().(*Contract)
-	policy := ctx.Value(policyKey).(*Policy)
+	contract := sl.Current().Addr().Interface().(*Contract) // nolint: errcheck
+	policy := ctx.Value(policyKey).(*Policy)                // nolint: errcheck
 
 	// every context should point to an existing service
 	for _, contractCtx := range contract.Contexts {
@@ -422,35 +423,35 @@ func validateContract(ctx context.Context, sl validator.StructLevel) {
 
 // checks if rule is valid
 func validateRule(sl validator.StructLevel) {
-	rule := sl.Current().Addr().Interface().(*Rule)
+	rule := sl.Current().Addr().Interface().(*Rule) // nolint: errcheck
 
-	// regular rule should have at least one of the actions set
-	if rule.GetKind() == RuleObject.Kind {
-		hasActions := false
-		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.ChangeLabels) > 0)
-		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Dependency) > 0)
-		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Ingress) > 0)
-		if !hasActions {
-			sl.ReportError(rule.Actions, "Actions", "", "ruleActions", "")
-		}
+	// rule should have at least one of the actions set
+	hasActions := false
+	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.ChangeLabels) > 0)
+	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Dependency) > 0)
+	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Ingress) > 0)
+	if !hasActions {
+		sl.ReportError(rule.Actions, "Actions", "", "ruleActions", "")
 		return
 	}
+}
+
+// checks if ACL rule is valid
+func validateACLRule(sl validator.StructLevel) {
+	rule := sl.Current().Addr().Interface().(*ACLRule) // nolint: errcheck
 
 	// ACL rule should have its action set
-	if rule.GetKind() == ACLRuleObject.Kind {
-		hasActions := false
-		hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.AddRole) > 0)
-		if !hasActions {
-			sl.ReportError(rule.Actions, "Actions.AddRole", "", "aclRuleActions", "")
-			return
-		}
+	hasActions := false
+	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.AddRole) > 0)
+	if !hasActions {
+		sl.ReportError(rule.Actions, "Actions.AddRole", "", "aclRuleActions", "")
 		return
 	}
 }
 
 // checks if cluster is valid
 func validateCluster(sl validator.StructLevel) {
-	cluster := sl.Current().Addr().Interface().(*Cluster)
+	cluster := sl.Current().Addr().Interface().(*Cluster) // nolint: errcheck
 	if cluster.Namespace != runtime.SystemNS {
 		sl.ReportError(cluster.Namespace, "Namespace", "", "systemNS", "")
 	}

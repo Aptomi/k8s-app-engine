@@ -1,9 +1,5 @@
 package lang
 
-import (
-	"strings"
-)
-
 // Reject is a special constant that is used in rule actions for rejecting dependencies, ingress traffic, etc
 const Reject = "reject"
 
@@ -20,15 +16,12 @@ type RuleActionResult struct {
 
 	ChangedLabelsOnLastApply bool
 	Labels                   *LabelSet
-
-	RoleMap map[string]map[string]bool
 }
 
 // NewRuleActionResult creates a new RuleActionResult
 func NewRuleActionResult(labels *LabelSet) *RuleActionResult {
 	return &RuleActionResult{
-		Labels:  labels,
-		RoleMap: make(map[string]map[string]bool),
+		Labels: labels,
 	}
 }
 
@@ -40,30 +33,5 @@ func (rule *Rule) ApplyActions(result *RuleActionResult) {
 	result.ChangedLabelsOnLastApply = false
 	if rule.Actions.ChangeLabels != nil {
 		result.ChangedLabelsOnLastApply = result.Labels.ApplyTransform(rule.Actions.ChangeLabels)
-	}
-
-	for roleID, namespaceList := range rule.Actions.AddRole {
-		role := ACLRolesMap[roleID]
-		if role == nil {
-			// skip non-existing roles
-			continue
-		}
-
-		nsMap := result.RoleMap[roleID]
-		if nsMap == nil {
-			nsMap = make(map[string]bool)
-			result.RoleMap[roleID] = nsMap
-		}
-
-		// mark all namespaces for the role
-		namespaces := strings.Split(namespaceList, ",")
-		for _, namespace := range namespaces {
-			nsMap[strings.TrimSpace(namespace)] = true
-		}
-
-		// if role covers all namespaces, mark it as well
-		if role.Privileges.AllNamespaces {
-			nsMap[namespaceAll] = true
-		}
 	}
 }

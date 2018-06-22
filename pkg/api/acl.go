@@ -28,7 +28,7 @@ func (api *coreAPI) handleUserRoles(writer http.ResponseWriter, request *http.Re
 	if systemNamespace != nil {
 		aclResolver = lang.NewACLResolver(systemNamespace.ACLRules)
 	} else {
-		aclResolver = lang.NewACLResolver(make(map[string]*lang.Rule))
+		aclResolver = lang.NewACLResolver(make(map[string]*lang.ACLRule))
 	}
 
 	data := make(map[string]map[string]map[string]bool)

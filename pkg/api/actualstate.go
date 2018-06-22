@@ -20,7 +20,7 @@ func isDomainAdmin(user *lang.User, policy *lang.Policy) bool {
 	if systemNamespace != nil {
 		aclResolver = lang.NewACLResolver(systemNamespace.ACLRules)
 	} else {
-		aclResolver = lang.NewACLResolver(make(map[string]*lang.Rule))
+		aclResolver = lang.NewACLResolver(make(map[string]*lang.ACLRule))
 	}
 
 	roleMap, errRoleMap := aclResolver.GetUserRoleMap(user)

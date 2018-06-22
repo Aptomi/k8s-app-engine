@@ -33,7 +33,7 @@ func (privileges testCaseObjPrivileges) print(t *testing.T, testCase aclTestCase
 }
 
 func runACLTests(testCases []aclTestCase, rules []*ACLRule, t *testing.T) {
-	aclRules := make(map[string]*Rule)
+	aclRules := make(map[string]*ACLRule)
 	for _, rule := range rules {
 		aclRules[rule.GetName()] = rule
 	}
@@ -70,7 +70,7 @@ func TestAclResolver(t *testing.T) {
 			},
 			Weight:   100,
 			Criteria: &Criteria{RequireAll: []string{"is_domain_admin"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{DomainAdmin.ID: namespaceAll},
 			},
 		},
@@ -83,7 +83,7 @@ func TestAclResolver(t *testing.T) {
 			},
 			Weight:   200,
 			Criteria: &Criteria{RequireAll: []string{"is_namespace_admin"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{NamespaceAdmin.ID: "main"},
 			},
 		},
@@ -96,7 +96,7 @@ func TestAclResolver(t *testing.T) {
 			},
 			Weight:   300,
 			Criteria: &Criteria{RequireAll: []string{"is_consumer"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{ServiceConsumer.ID: "main1, main2 ,main3,main4"},
 			},
 		},
@@ -109,7 +109,7 @@ func TestAclResolver(t *testing.T) {
 			},
 			Weight:   400,
 			Criteria: &Criteria{RequireAll: []string{"true"}},
-			Actions: &RuleActions{
+			Actions: &ACLRuleActions{
 				AddRole: map[string]string{"unknown-role": "some-value"},
 			},
 		},

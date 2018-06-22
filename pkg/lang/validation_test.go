@@ -230,8 +230,8 @@ func makeRule(weight int, expr string, actionNum int, actionKey string) *Rule {
 	return rule
 }
 
-func makeACLRule(actionNum int) *Rule {
-	rule := &Rule{
+func makeACLRule(actionNum int) *ACLRule {
+	rule := &ACLRule{
 		TypeKind: ACLRuleObject.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
@@ -246,14 +246,14 @@ func makeACLRule(actionNum int) *Rule {
 	}
 	switch actionNum {
 	case 0:
-		rule.Actions = &RuleActions{AddRole: map[string]string{DomainAdmin.ID: namespaceAll, ServiceConsumer.ID: "main1, main2 ,main3,main4"}}
+		rule.Actions = &ACLRuleActions{AddRole: map[string]string{DomainAdmin.ID: namespaceAll, ServiceConsumer.ID: "main1, main2 ,main3,main4"}}
 	case Empty:
-		rule.Actions = &RuleActions{}
+		rule.Actions = &ACLRuleActions{}
 	case Nil:
 		// no actions defined, nil
 	case Invalid:
 		// invalid action tied to an unknown role
-		rule.Actions = &RuleActions{AddRole: map[string]string{"unknown": "main1"}}
+		rule.Actions = &ACLRuleActions{AddRole: map[string]string{"unknown": "main1"}}
 	}
 
 	return rule

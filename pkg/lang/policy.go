@@ -50,7 +50,7 @@ func (policy *Policy) getCachedACLResolver() *ACLResolver {
 		if systemNamespace != nil {
 			policy.aclResolver = NewACLResolver(systemNamespace.ACLRules)
 		} else {
-			policy.aclResolver = NewACLResolver(make(map[string]*Rule))
+			policy.aclResolver = NewACLResolver(make(map[string]*ACLRule))
 		}
 	}
 	return policy.aclResolver

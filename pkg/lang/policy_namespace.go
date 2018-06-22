@@ -15,7 +15,7 @@ type PolicyNamespace struct {
 	Contracts    map[string]*Contract   `validate:"dive"`
 	Clusters     map[string]*Cluster    `validate:"dive"`
 	Rules        map[string]*Rule       `validate:"dive"`
-	ACLRules     map[string]*Rule       `validate:"dive"`
+	ACLRules     map[string]*ACLRule    `validate:"dive"`
 	Dependencies map[string]*Dependency `validate:"dive"`
 }
 
@@ -27,7 +27,7 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 		Contracts:    make(map[string]*Contract),
 		Clusters:     make(map[string]*Cluster),
 		Rules:        make(map[string]*Rule),
-		ACLRules:     make(map[string]*Rule),
+		ACLRules:     make(map[string]*ACLRule),
 		Dependencies: make(map[string]*Dependency),
 	}
 }
@@ -35,15 +35,12 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	switch kind := obj.GetKind(); kind {
 	case ServiceObject.Kind:
-		policyNamespace.Services[obj.GetName()] = obj.(*Service)
+		policyNamespace.Services[obj.GetName()] = obj.(*Service) // nolint: errcheck
 	case ContractObject.Kind:
-		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract)
+		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract) // nolint: errcheck
 	case ClusterObject.Kind:
 		// cluster is a special object, which we don't allow to update certain parts of (e.g. type and config)
-		clusterUpdated, ok := obj.(*Cluster)
-		if !ok {
-			panic(fmt.Sprintf("can't cast cluster %s to *lang.Cluster", clusterUpdated.GetName()))
-		}
+		clusterUpdated := obj.(*Cluster) // nolint: errcheck
 		clusterExisting, present := policyNamespace.Clusters[obj.GetName()]
 		if present {
 			// we can't really use reflect.DeepEqual here, because it treats nil and empty maps differently
@@ -61,13 +58,13 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 				return fmt.Errorf("modification of cluster type or config is not allowed: %s needs to be deleted first", obj.GetName())
 			}
 		}
-		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster)
+		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster) // nolint: errcheck
 	case RuleObject.Kind:
-		policyNamespace.Rules[obj.GetName()] = obj.(*Rule)
+		policyNamespace.Rules[obj.GetName()] = obj.(*Rule) // nolint: errcheck
 	case ACLRuleObject.Kind:
-		policyNamespace.ACLRules[obj.GetName()] = obj.(*Rule)
+		policyNamespace.ACLRules[obj.GetName()] = obj.(*ACLRule) // nolint: errcheck
 	case DependencyObject.Kind:
-		policyNamespace.Dependencies[obj.GetName()] = obj.(*Dependency)
+		policyNamespace.Dependencies[obj.GetName()] = obj.(*Dependency) // nolint: errcheck
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
 	}

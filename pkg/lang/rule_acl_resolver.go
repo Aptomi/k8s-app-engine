@@ -10,15 +10,15 @@ import (
 // ACLResolver is a struct which allows to perform ACL resolution, allowing to retrieve user privileges for the
 // objects they access
 type ACLResolver struct {
-	rules        []*ACLRule
+	aclRules     []*ACLRule
 	cache        *expression.Cache
 	roleMapCache sync.Map
 }
 
 // NewACLResolver creates a new ACLResolver
-func NewACLResolver(rules map[string]*Rule) *ACLResolver {
+func NewACLResolver(aclRules map[string]*ACLRule) *ACLResolver {
 	return &ACLResolver{
-		rules:        GetRulesSortedByWeight(rules),
+		aclRules:     GetACLRulesSortedByWeight(aclRules),
 		cache:        expression.NewCache(),
 		roleMapCache: sync.Map{},
 	}
@@ -53,25 +53,25 @@ func (resolver *ACLResolver) GetUserRoleMap(user *User) (map[string]map[string]b
 		return roleMapCached.(map[string]map[string]bool), nil
 	}
 
-	result := NewRuleActionResult(NewLabelSet(make(map[string]string)))
+	roleMap := make(map[string]map[string]bool)
 	if user.DomainAdmin {
 		// this user is explicitly specified as domain admin
-		result.RoleMap[DomainAdmin.ID] = make(map[string]bool)
-		result.RoleMap[DomainAdmin.ID][namespaceAll] = true
+		roleMap[DomainAdmin.ID] = make(map[string]bool)
+		roleMap[DomainAdmin.ID][namespaceAll] = true
 	} else {
 		// we need to run this user through ACL list
 		params := expression.NewParams(user.Labels, nil)
-		for _, rule := range resolver.rules {
+		for _, rule := range resolver.aclRules {
 			matched, err := rule.Matches(params, resolver.cache)
 			if err != nil {
 				return nil, fmt.Errorf("unable to resolve role for user '%s': %s", user.Name, err)
 			}
 			if matched {
-				rule.ApplyActions(result)
+				rule.ApplyActions(roleMap)
 			}
 		}
 	}
 
-	resolver.roleMapCache.Store(user.Name, result.RoleMap)
-	return result.RoleMap, nil
+	resolver.roleMapCache.Store(user.Name, roleMap)
+	return roleMap, nil
 }
