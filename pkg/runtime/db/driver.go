@@ -8,7 +8,6 @@ import (
 type Driver interface {
 	GetName() string
 	Open(dataSourceName string) (Store, error)
-	Close() error
 }
 
 var (
@@ -42,7 +41,7 @@ func Open(name string, dataSourceName string) (Store, error) {
 
 	if driver, exists := drivers[name]; exists {
 		return driver.Open(dataSourceName)
-	} else {
-		return nil, fmt.Errorf("can't find driver: %s", name)
 	}
+
+	return nil, fmt.Errorf("can't find driver: %s", name)
 }
