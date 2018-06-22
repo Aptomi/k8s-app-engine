@@ -38,8 +38,8 @@ type ResourceRegistry struct {
 // NewResourceRegistry creates new ResourceRegistry
 func NewResourceRegistry() *ResourceRegistry {
 	return &ResourceRegistry{
-		make(map[string][]string),
-		make(map[string]ResourceTypeHandler),
+		headers:  make(map[string][]string),
+		handlers: make(map[string]ResourceTypeHandler),
 	}
 }
 

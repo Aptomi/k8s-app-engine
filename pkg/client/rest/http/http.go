@@ -35,7 +35,7 @@ func NewClient(cfg *config.Client) Client {
 	}
 	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(api.Objects...))
 
-	return &httpClient{contentTypeHandler, client, cfg}
+	return &httpClient{contentType: contentTypeHandler, http: client, cfg: cfg}
 }
 
 func (client *httpClient) GET(path string, expected *runtime.Info) (runtime.Object, error) {

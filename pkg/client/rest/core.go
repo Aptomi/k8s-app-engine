@@ -13,29 +13,29 @@ type coreClient struct {
 
 // New returns new instance of the Core API client http rest implementation
 func New(cfg *config.Client, httpClient http.Client) client.Core {
-	return &coreClient{cfg, httpClient}
+	return &coreClient{cfg: cfg, httpClient: httpClient}
 }
 
 func (client *coreClient) Policy() client.Policy {
-	return &policyClient{client.cfg, client.httpClient}
+	return &policyClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
 func (client *coreClient) Dependency() client.Dependency {
-	return &dependencyClient{client.cfg, client.httpClient}
+	return &dependencyClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
 func (client *coreClient) Revision() client.Revision {
-	return &revisionClient{client.cfg, client.httpClient}
+	return &revisionClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
 func (client *coreClient) State() client.State {
-	return &stateClient{client.cfg, client.httpClient}
+	return &stateClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
 func (client *coreClient) User() client.User {
-	return &userClient{client.cfg, client.httpClient}
+	return &userClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
 func (client *coreClient) Version() client.Version {
-	return &versionClient{client.cfg, client.httpClient}
+	return &versionClient{cfg: client.cfg, httpClient: client.httpClient}
 }

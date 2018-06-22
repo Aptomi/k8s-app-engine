@@ -32,7 +32,7 @@ func (hook *HookAPIEvents) Levels() []logrus.Level {
 
 // Fire processes a single log entry
 func (hook *HookAPIEvents) Fire(e *logrus.Entry) error {
-	apiEvent := &APIEvent{e.Time, e.Level.String(), e.Message}
+	apiEvent := &APIEvent{Time: e.Time, LogLevel: e.Level.String(), Message: e.Message}
 	hook.events = append(hook.events, apiEvent)
 	return nil
 }

@@ -11,10 +11,10 @@ var (
 // GetBuildInfo returns BuildInfo for aptomi
 func GetBuildInfo() *BuildInfo {
 	return &BuildInfo{
-		BuildInfoObject.GetTypeKind(),
-		gitVersion,
-		gitCommit,
-		buildDate,
+		TypeKind:   BuildInfoObject.GetTypeKind(),
+		GitVersion: gitVersion,
+		GitCommit:  gitCommit,
+		BuildDate:  buildDate,
 	}
 }
 

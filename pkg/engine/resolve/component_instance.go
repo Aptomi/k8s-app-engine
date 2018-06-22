@@ -98,7 +98,7 @@ type ComponentInstance struct {
 func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
 		TypeKind:             ComponentInstanceObject.GetTypeKind(),
-		Metadata:             &ComponentInstanceMetadata{cik},
+		Metadata:             &ComponentInstanceMetadata{Key: cik},
 		DependencyKeys:       make(map[string]int),
 		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  util.NestedParameterMap{},

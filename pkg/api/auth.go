@@ -50,8 +50,8 @@ func (api *coreAPI) handleLogin(writer http.ResponseWriter, request *http.Reques
 		api.contentType.WriteOne(writer, request, serverErr)
 	} else {
 		api.contentType.WriteOne(writer, request, &AuthSuccess{
-			AuthSuccessObject.GetTypeKind(),
-			api.newToken(user),
+			TypeKind: AuthSuccessObject.GetTypeKind(),
+			Token:    api.newToken(user),
 		})
 	}
 }

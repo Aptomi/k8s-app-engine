@@ -19,5 +19,5 @@ func (info *Info) New() Object {
 
 // GetTypeKind returns TypeKind instance for the object described by info
 func (info *Info) GetTypeKind() TypeKind {
-	return TypeKind{info.Kind}
+	return TypeKind{Kind: info.Kind}
 }

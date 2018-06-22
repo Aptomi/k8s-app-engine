@@ -116,7 +116,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 		// no error, do nothing (but we have to keep an empty default block)
 	}
 
-	api.contentType.WriteOne(writer, request, &dependencyResourcesWrapper{resources})
+	api.contentType.WriteOne(writer, request, &dependencyResourcesWrapper{Resources: resources})
 }
 
 func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lang.Policy, plugins plugin.Registry) (plugin.CodePlugin, error) {

@@ -31,7 +31,7 @@ func NewContentTypeHandler(reg *runtime.Registry) *ContentTypeHandler {
 	codecs[YAML] = yaml.NewCodec(reg)
 	codecs[JSON] = yaml.NewJSONCodec(reg)
 
-	return &ContentTypeHandler{codecs}
+	return &ContentTypeHandler{codecs: codecs}
 }
 
 // GetCodecByContentType returns runtime codec for provided content type that should be used

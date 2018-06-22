@@ -16,5 +16,5 @@ type ServerError struct {
 
 // NewServerError returns instance of the error based on the provided error
 func NewServerError(error string) *ServerError {
-	return &ServerError{ServerErrorObject.GetTypeKind(), error}
+	return &ServerError{TypeKind: ServerErrorObject.GetTypeKind(), Error: error}
 }

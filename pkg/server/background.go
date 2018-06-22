@@ -23,7 +23,7 @@ func (j *job) start() {
 }
 
 func (server *Server) runInBackground(name string, infinite bool, f func()) {
-	p := job{name, server.backgroundErrors, f, infinite}
+	p := job{name: name, errors: server.backgroundErrors, f: f, infinite: infinite}
 	go p.start()
 }
 
