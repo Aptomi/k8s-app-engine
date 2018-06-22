@@ -158,13 +158,13 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	// Add objects to the policy in a sorted order (e.g. make sure ACL Rules go first)
 	sort.Sort(apiObjectSorter(objects))
 	for _, obj := range objects {
-		errAdd := policyUpdated.AddObject(obj)
-		if errAdd != nil {
-			panic(fmt.Sprintf("error while adding updated object to policy: %s", errAdd))
-		}
 		errManage := policyUpdated.View(user).ManageObject(obj)
 		if errManage != nil {
 			panic(fmt.Sprintf("error while adding updated object to policy: %s", errManage))
+		}
+		errAdd := policyUpdated.AddObject(obj)
+		if errAdd != nil {
+			panic(fmt.Sprintf("error while adding updated object to policy: %s", errAdd))
 		}
 	}
 
