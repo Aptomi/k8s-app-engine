@@ -200,14 +200,14 @@ export async function getPolicyObjectsWithProperties (successFunc, errorFunc, ki
 
 // fetches status of all claims
 export function fetchClaimsStatus (objectList) {
-  const depIds = []
+  const claimIds = []
   for (const idx in objectList) {
     if (objectList[idx]['kind'] === 'claim') {
-      depIds.push(objectList[idx]['namespace'] + '^' + objectList[idx]['name'])
+      claimIds.push(objectList[idx]['namespace'] + '^' + objectList[idx]['name'])
     }
   }
 
-  const handler = ['policy', 'claim', 'status', 'deployed', depIds.join(',')].join('/')
+  const handler = ['policy', 'claim', 'status', 'deployed', claimIds.join(',')].join('/')
   callAPI(handler, sync, function (data) {
     for (const idx in objectList) {
       if (objectList[idx]['kind'] === 'claim') {
