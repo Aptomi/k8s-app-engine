@@ -71,9 +71,9 @@ func (api *coreAPI) serve(router *httprouter.Router) {
 	router.GET("/api/v1/policy/diagram/mode/:mode/gen/:gen", auth(api.handlePolicyDiagram))
 	router.GET("/api/v1/policy/diagram/compare/mode/:mode/gen/:gen/genBase/:genBase", auth(api.handlePolicyDiagramCompare))
 
-	// retrieve dependency along with its status
-	router.GET("/api/v1/policy/dependency/status/:queryFlag/:idList", auth(api.handleDependencyStatusGet))
-	router.GET("/api/v1/policy/dependency/resources/:ns/:name", auth(api.handleDependencyResourcesGet))
+	// retrieve claim along with its status
+	router.GET("/api/v1/policy/claim/status/:queryFlag/:idList", auth(api.handleClaimStatusGet))
+	router.GET("/api/v1/policy/claim/resources/:ns/:name", auth(api.handleClaimResourcesGet))
 
 	// retrieve revision (latest + by a given generation)
 	router.GET("/api/v1/revision", auth(api.handleRevisionGet))

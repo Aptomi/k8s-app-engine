@@ -12,7 +12,7 @@ import (
 // Core is the Core API client interface
 type Core interface {
 	Policy() Policy
-	Dependency() Dependency
+	Claim() Claim
 	Revision() Revision
 	State() State
 	User() User
@@ -26,9 +26,9 @@ type Policy interface {
 	Delete([]runtime.Object, bool, logrus.Level) (*api.PolicyUpdateResult, error)
 }
 
-// Dependency is the interface for managing Dependency
-type Dependency interface {
-	Status([]*lang.Dependency, api.DependencyQueryFlag) (*api.DependenciesStatus, error)
+// Claim is the interface for managing Claim
+type Claim interface {
+	Status([]*lang.Claim, api.ClaimQueryFlag) (*api.ClaimsStatus, error)
 }
 
 // Revision is the interface for getting Revisions

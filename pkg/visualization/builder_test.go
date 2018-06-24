@@ -22,7 +22,7 @@ func TestVisualizationDiagram(t *testing.T) {
 	// unit test policy resolved revision
 	eventLog := event.NewLog(logrus.WarnLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
-	resolutionNew := resolver.ResolveAllDependencies()
+	resolutionNew := resolver.ResolveAllClaims()
 	if !assert.Equal(t, 14, len(resolutionNew.ComponentInstanceMap), "Instances should be resolved") {
 		t.FailNow()
 	}
@@ -42,28 +42,28 @@ func TestVisualizationDiagram(t *testing.T) {
 	}
 
 	{
-		data := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault).GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Dependency resolution visualization: non-empty policy") {
+		data := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).ClaimResolution(ClaimResolutionCfgDefault).GetDataJSON()
+		if !assert.Condition(t, func() bool { return len(data) > 2000 }, "Claim resolution visualization: non-empty policy") {
 			debug(t, data)
 		}
 	}
 
 	{
-		empty := NewGraphBuilder(policyEmpty, resolutionEmpty, b.External()).DependencyResolution(DependencyResolutionCfgDefault)
-		full := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault)
+		empty := NewGraphBuilder(policyEmpty, resolutionEmpty, b.External()).ClaimResolution(ClaimResolutionCfgDefault)
+		full := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).ClaimResolution(ClaimResolutionCfgDefault)
 		full.CalcDelta(empty)
 		data := full.GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Dependency resolution visualization diff: empty -> non-empty (adding instances)") {
+		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Claim resolution visualization diff: empty -> non-empty (adding instances)") {
 			debug(t, data)
 		}
 	}
 
 	{
-		empty := NewGraphBuilder(policyEmpty, resolutionEmpty, b.External()).DependencyResolution(DependencyResolutionCfgDefault)
-		full := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).DependencyResolution(DependencyResolutionCfgDefault)
+		empty := NewGraphBuilder(policyEmpty, resolutionEmpty, b.External()).ClaimResolution(ClaimResolutionCfgDefault)
+		full := NewGraphBuilder(b.Policy(), resolutionNew, b.External()).ClaimResolution(ClaimResolutionCfgDefault)
 		empty.CalcDelta(full)
 		data := empty.GetDataJSON()
-		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Dependency resolution visualization diff: non-empty -> empty (removing instances)") {
+		if !assert.Condition(t, func() bool { return len(data) > 4500 }, "Claim resolution visualization diff: non-empty -> empty (removing instances)") {
 			debug(t, data)
 		}
 	}
@@ -97,7 +97,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 		contracts = append(contracts, contract)
 	}
 
-	// add dependencies i -> i+1 (0 -> 1, 1 -> 2)
+	// add component dependencies i -> i+1 (0 -> 1, 1 -> 2)
 	for i := 0; i < 2; i++ {
 		b.AddServiceComponent(services[i], b.ContractComponent(contracts[i+1]))
 	}
@@ -106,9 +106,9 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
-	// several dependencies
+	// several claims
 	for i := 0; i < 5; i++ {
-		b.AddDependency(b.AddUser(), contracts[i%len(contracts)])
+		b.AddClaim(b.AddUser(), contracts[i%len(contracts)])
 	}
 
 	return b

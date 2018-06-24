@@ -10,8 +10,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given dependency
-// It gets incrementally populated with data, as policy evaluation goes on for a given dependency
+// This is a special internal structure that gets used by the engine, while we traverse the policy graph for a given claim
+// It gets incrementally populated with data, as policy evaluation goes on for a given claim
 type resolutionNode struct {
 	// pointer to the policy resolver
 	resolver *PolicyResolver
@@ -25,13 +25,13 @@ type resolutionNode struct {
 	// new instance of PolicyResolution, where resolution resolution will be stored
 	resolution *PolicyResolution
 
-	// depth we are currently on (as we are traversing policy graph), with initial dependency being on depth 0
+	// depth we are currently on (as we are traversing policy graph), with initial claim being on depth 0
 	depth int
 
-	// reference to initial dependency
-	dependency *lang.Dependency
+	// reference to initial claim
+	claim *lang.Claim
 
-	// reference to user who requested this dependency
+	// reference to user who requested this claim
 	user *lang.User
 
 	// reference to the namespace & contract we are currently resolving
@@ -89,26 +89,26 @@ func (resolver *PolicyResolver) newResolutionNode() *resolutionNode {
 	}
 }
 
-// Initialized a newly created resolution node as a starting point for resolving a particular dependency.
-// Adds dependency and user labels into it.
-func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, dependency *lang.Dependency) {
-	// populate user, dependency
-	node.dependency = dependency
-	user := resolver.externalData.UserLoader.LoadUserByName(dependency.User)
+// Initialized a newly created resolution node as a starting point for resolving a particular claim.
+// Adds claim and user labels into it.
+func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, claim *lang.Claim) {
+	// populate user, claim
+	node.claim = claim
+	user := resolver.externalData.UserLoader.LoadUserByName(claim.User)
 	node.user = user
 
-	// start with the namespace & contract specified in the dependency
-	node.namespace = dependency.Namespace
-	node.contractName = dependency.Contract
+	// start with the namespace & contract specified in the claim
+	node.namespace = claim.Namespace
+	node.contractName = claim.Contract
 
-	// create a starting set of labels, combining user labels and dependency labels
-	node.labels = lang.NewLabelSet(dependency.Labels)
+	// create a starting set of labels, combining user labels and claim labels
+	node.labels = lang.NewLabelSet(claim.Labels)
 	if user != nil {
 		node.labels.AddLabels(user.Labels)
 	}
 }
 
-// Creates a new resolution node (as we are processing dependency on another service)
+// Creates a new resolution node (as we are processing claim on another service)
 func (node *resolutionNode) createChildNode() *resolutionNode {
 	eventLog := event.NewLog(node.eventLog.GetLevel(), node.eventLog.GetScope())
 	return &resolutionNode{
@@ -118,9 +118,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 
 		resolution: node.resolution,
 
-		depth:      node.depth + 1,
-		dependency: node.dependency,
-		user:       node.user,
+		depth: node.depth + 1,
+		claim: node.claim,
+		user:  node.user,
 
 		// we take the current component we are iterating over, and get its contract name
 		namespace:    node.namespace,
@@ -141,7 +141,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 }
 
 // As the resolution goes on, this method is called when objects become resolved and available in the context
-// Right now we only call it for dependency, contract, and service
+// Right now we only call it for claim, contract, and service
 func (node *resolutionNode) objectResolved(object runtime.Storable) {
 	node.eventLog.AddFixedField(object.GetKind()+"Id", runtime.KeyForStorable(object))
 }
@@ -309,9 +309,9 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 		if matched {
 			rule.ApplyActions(result)
 
-			// if a dependency has been rejected, handle it right away and return that we cannot resolve it
-			if result.RejectDependency {
-				return node.errorDependencyNotAllowedByRules()
+			// if a claim has been rejected, handle it right away and return that we cannot resolve it
+			if result.RejectClaim {
+				return node.errorClaimNotAllowedByRules()
 			}
 			if result.ChangedLabelsOnLastApply {
 				node.logLabels(result.Labels, "after transform")

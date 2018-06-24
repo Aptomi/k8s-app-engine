@@ -89,14 +89,14 @@ func checkApplyComponentCreateFail(t *testing.T, failAsPanic bool) {
 
 func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	/*
-		Step 1: actual = empty, desired = test policy, check = dependency update/create times
+		Step 1: actual = empty, desired = test policy, check = claim update/create times
 	*/
 
 	// Create initial empty policy & resolution data
 	empty := newTestData(t, builder.NewPolicyBuilder())
 	actualState := empty.resolution()
 
-	// Generate policy and resolve all dependencies in policy
+	// Generate policy and resolve all claims in policy
 	desired := newTestData(t, makePolicyBuilder())
 
 	// Apply to update component times in actual state
@@ -121,9 +121,9 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	key := resolve.NewComponentInstanceKey(cluster, "k8ns", contract, contract.Contexts[0], nil, service, service.Components[0])
 	keyService := key.GetParentServiceKey()
 
-	// Check that original dependency was resolved successfully
-	dependency := desired.policy().GetObjectsByKind(lang.DependencyObject.Kind)[0].(*lang.Dependency) // nolint: errcheck
-	assert.True(t, desired.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
+	// Check that original claim was resolved successfully
+	claim := desired.policy().GetObjectsByKind(lang.ClaimObject.Kind)[0].(*lang.Claim) // nolint: errcheck
+	assert.True(t, desired.resolution().GetClaimResolution(claim).Resolved, "Original claim should be resolved successfully")
 
 	// Check creation/update times
 	times1 := getTimes(t, key.GetKey(), actualState)
@@ -131,20 +131,20 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	assert.Equal(t, times1.updated, times1.updated, "Update time should be equal to creation time")
 
 	/*
-		Step 2: desired = add a dependency, check = component update/create times remained the same in actual state
+		Step 2: desired = add a claim, check = component update/create times remained the same in actual state
 	*/
 
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
 
-	// Add another dependency (with the same label, so code parameters won't change), resolve, calculate difference against prev resolution data
+	// Add another claim (with the same label, so code parameters won't change), resolve, calculate difference against prev resolution data
 	desiredNext := newTestData(t, makePolicyBuilder())
-	dependencyNew := desiredNext.pBuilder.AddDependency(desiredNext.pBuilder.AddUser(), contract)
-	dependencyNew.Labels["param"] = "value1"
+	claimNew := desiredNext.pBuilder.AddClaim(desiredNext.pBuilder.AddUser(), contract)
+	claimNew.Labels["param"] = "value1"
 
-	// Check that both dependencies were resolved successfully
-	assert.True(t, desiredNext.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
-	assert.True(t, desiredNext.resolution().GetDependencyResolution(dependencyNew).Resolved, "Additional dependency should be resolved successfully")
+	// Check that both claims were resolved successfully
+	assert.True(t, desiredNext.resolution().GetClaimResolution(claim).Resolved, "Original claim should be resolved successfully")
+	assert.True(t, desiredNext.resolution().GetClaimResolution(claimNew).Resolved, "Additional claim should be resolved successfully")
 
 	// Apply to update component times in actual state
 	applier = NewEngineApply(
@@ -161,10 +161,10 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Check that policy apply finished with expected results
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 2, Failed: 0, Skipped: 0})
 
-	// Check creation/update times for the original dependency
+	// Check creation/update times for the original claim
 	times2 := getTimes(t, key.GetKey(), actualState)
 	assert.Equal(t, times1.created, times2.created, "Creation time should be preserved (i.e. remain the same)")
-	assert.True(t, times2.updated.After(times1.updated), "Update time should be changed (because new dependency is attached to a component)")
+	assert.True(t, times2.updated.After(times1.updated), "Update time should be changed (because new claim is attached to a component)")
 
 	/*
 		Step 3: desired = update user label, check = component update time changed
@@ -177,8 +177,8 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 
 	// Update labels, re-evaluate and see that component instance has changed
 	desiredNextAfterUpdate := newTestData(t, desiredNext.pBuilder)
-	for _, dependency := range desiredNextAfterUpdate.policy().GetObjectsByKind(lang.DependencyObject.Kind) {
-		dependency.(*lang.Dependency).Labels["param"] = "value2"
+	for _, claim := range desiredNextAfterUpdate.policy().GetObjectsByKind(lang.ClaimObject.Kind) {
+		claim.(*lang.Claim).Labels["param"] = "value2"
 	}
 
 	// Apply to update component times in actual state
@@ -196,9 +196,9 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Check that policy apply finished with expected results
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 2, Failed: 0, Skipped: 0})
 
-	// Check that both dependencies were resolved successfully
-	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyResolution(dependency).Resolved, "Original dependency should be resolved successfully")
-	assert.True(t, desiredNextAfterUpdate.resolution().GetDependencyResolution(dependencyNew).Resolved, "Additional dependency should be resolved successfully")
+	// Check that both claims were resolved successfully
+	assert.True(t, desiredNextAfterUpdate.resolution().GetClaimResolution(claim).Resolved, "Original claim should be resolved successfully")
+	assert.True(t, desiredNextAfterUpdate.resolution().GetClaimResolution(claimNew).Resolved, "Additional claim should be resolved successfully")
 
 	// Check creation/update times for component
 	componentTimesUpdated := getTimes(t, key.GetKey(), actualState)
@@ -309,9 +309,9 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
-	// add dependency
-	dependency := b.AddDependency(b.AddUser(), contract)
-	dependency.Labels["param"] = "value1"
+	// add claim
+	claim := b.AddClaim(b.AddUser(), contract)
+	claim.Labels["param"] = "value1"
 
 	return b
 }
@@ -320,11 +320,11 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 	t.Helper()
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
-	result := resolver.ResolveAllDependencies()
+	result := resolver.ResolveAllClaims()
 
-	dependencies := b.Policy().GetObjectsByKind(lang.DependencyObject.Kind)
-	for _, d := range dependencies {
-		if !assert.True(t, result.GetDependencyResolution(d.(*lang.Dependency)).Resolved, "Dependency resolution status should be correct for %v", d) {
+	claims := b.Policy().GetObjectsByKind(lang.ClaimObject.Kind)
+	for _, claim := range claims {
+		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)
 			eventLog.Save(hook)
 			t.FailNow()

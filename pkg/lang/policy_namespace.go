@@ -10,25 +10,25 @@ import (
 // PolicyNamespace describes a specific namespace within Aptomi policy.
 // All policy objects get placed in the appropriate maps and structs within PolicyNamespace.
 type PolicyNamespace struct {
-	Name         string                 `validate:"identifier"`
-	Services     map[string]*Service    `validate:"dive"`
-	Contracts    map[string]*Contract   `validate:"dive"`
-	Clusters     map[string]*Cluster    `validate:"dive"`
-	Rules        map[string]*Rule       `validate:"dive"`
-	ACLRules     map[string]*ACLRule    `validate:"dive"`
-	Dependencies map[string]*Dependency `validate:"dive"`
+	Name      string               `validate:"identifier"`
+	Services  map[string]*Service  `validate:"dive"`
+	Contracts map[string]*Contract `validate:"dive"`
+	Clusters  map[string]*Cluster  `validate:"dive"`
+	Rules     map[string]*Rule     `validate:"dive"`
+	ACLRules  map[string]*ACLRule  `validate:"dive"`
+	Claims    map[string]*Claim    `validate:"dive"`
 }
 
 // NewPolicyNamespace creates a new PolicyNamespace
 func NewPolicyNamespace(name string) *PolicyNamespace {
 	return &PolicyNamespace{
-		Name:         name,
-		Services:     make(map[string]*Service),
-		Contracts:    make(map[string]*Contract),
-		Clusters:     make(map[string]*Cluster),
-		Rules:        make(map[string]*Rule),
-		ACLRules:     make(map[string]*ACLRule),
-		Dependencies: make(map[string]*Dependency),
+		Name:      name,
+		Services:  make(map[string]*Service),
+		Contracts: make(map[string]*Contract),
+		Clusters:  make(map[string]*Cluster),
+		Rules:     make(map[string]*Rule),
+		ACLRules:  make(map[string]*ACLRule),
+		Claims:    make(map[string]*Claim),
 	}
 }
 
@@ -63,8 +63,8 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 		policyNamespace.Rules[obj.GetName()] = obj.(*Rule) // nolint: errcheck
 	case ACLRuleObject.Kind:
 		policyNamespace.ACLRules[obj.GetName()] = obj.(*ACLRule) // nolint: errcheck
-	case DependencyObject.Kind:
-		policyNamespace.Dependencies[obj.GetName()] = obj.(*Dependency) // nolint: errcheck
+	case ClaimObject.Kind:
+		policyNamespace.Claims[obj.GetName()] = obj.(*Claim) // nolint: errcheck
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
 	}
@@ -98,9 +98,9 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 			delete(policyNamespace.ACLRules, obj.GetName())
 			return true
 		}
-	case DependencyObject.Kind:
-		if _, exist := policyNamespace.Dependencies[obj.GetName()]; exist {
-			delete(policyNamespace.Dependencies, obj.GetName())
+	case ClaimObject.Kind:
+		if _, exist := policyNamespace.Claims[obj.GetName()]; exist {
+			delete(policyNamespace.Claims, obj.GetName())
 			return true
 		}
 	}
@@ -131,9 +131,9 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 		for _, rule := range policyNamespace.ACLRules {
 			result = append(result, rule)
 		}
-	case DependencyObject.Kind:
-		for _, dependency := range policyNamespace.Dependencies {
-			result = append(result, dependency)
+	case ClaimObject.Kind:
+		for _, claim := range policyNamespace.Claims {
+			result = append(result, claim)
 		}
 	default:
 		panic(fmt.Sprintf("not supported by PolicyNamespace.getObjectsByKind(): unknown kind %s", kind))
@@ -165,8 +165,8 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 		if result, ok = policyNamespace.ACLRules[name]; !ok {
 			return nil, nil
 		}
-	case DependencyObject.Kind:
-		if result, ok = policyNamespace.Dependencies[name]; !ok {
+	case ClaimObject.Kind:
+		if result, ok = policyNamespace.Claims[name]; !ok {
 			return nil, nil
 		}
 	default:

@@ -167,13 +167,13 @@
         color: {background: 'rgb(19,132,186)', border: 'darkslategrey'},
         shape: 'box'
       },
-      dependency: {
+      claim: {
         size: 25,
         shape: 'circularImage',
         image: '/static/img/user-icon-circle.png',
         color: {background: 'white', border: 'lightgray'}
       },
-      dependencyNotResolved: {
+      claimNotResolved: {
         size: 25,
         shape: 'circularImage',
         image: '/static/img/user-icon-circle.png',

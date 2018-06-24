@@ -15,15 +15,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type dependencyResourcesWrapper struct {
+type claimResourcesWrapper struct {
 	Resources plugin.Resources
 }
 
-func (g *dependencyResourcesWrapper) GetKind() string {
-	return "dependencyResources"
+func (g *claimResourcesWrapper) GetKind() string {
+	return "claimResources"
 }
 
-func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (api *coreAPI) handleClaimResourcesGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	gen := runtime.LastGen
 	policy, _, err := api.store.GetPolicy(gen)
 	if err != nil {
@@ -31,7 +31,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 	}
 
 	ns := params.ByName("ns")
-	kind := lang.DependencyObject.Kind
+	kind := lang.ClaimObject.Kind
 	name := params.ByName("name")
 
 	obj, err := policy.GetObject(kind, name, ns)
@@ -42,21 +42,21 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 		api.contentType.WriteOneWithStatus(writer, request, nil, http.StatusNotFound)
 	}
 
-	// once dependency is loaded, we need to find its state in the actual state
-	dependency := obj.(*lang.Dependency) // nolint: errcheck
+	// once claim is loaded, we need to find its state in the actual state
+	claim := obj.(*lang.Claim) // nolint: errcheck
 	actualState, err := api.store.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("Can't load actual state to get endpoints: %s", err))
 	}
 
 	plugins := api.pluginRegistryFactory()
-	depKey := runtime.KeyForStorable(dependency)
+	depKey := runtime.KeyForStorable(claim)
 	resources := make(plugin.Resources)
 	rMergeMutex := sync.Mutex{}
 	var wg sync.WaitGroup
 	errors := make(chan error, 1)
 	for _, instance := range actualState.ComponentInstanceMap {
-		if _, ok := instance.DependencyKeys[depKey]; ok {
+		if _, ok := instance.ClaimKeys[depKey]; ok {
 			// if component instance is not code, skip it
 			if !instance.IsCode {
 				continue
@@ -116,7 +116,7 @@ func (api *coreAPI) handleDependencyResourcesGet(writer http.ResponseWriter, req
 		// no error, do nothing (but we have to keep an empty default block)
 	}
 
-	api.contentType.WriteOne(writer, request, &dependencyResourcesWrapper{Resources: resources})
+	api.contentType.WriteOne(writer, request, &claimResourcesWrapper{Resources: resources})
 }
 
 func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lang.Policy, plugins plugin.Registry) (plugin.CodePlugin, error) {

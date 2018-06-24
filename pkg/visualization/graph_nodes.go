@@ -10,27 +10,27 @@ import (
 )
 
 /*
-	Dependency
+	Claim
 */
-type dependencyNode struct {
-	dependency *lang.Dependency
-	b          *GraphBuilder
+type claimNode struct {
+	claim *lang.Claim
+	b     *GraphBuilder
 }
 
-func (n dependencyNode) getGroup() string {
-	dResolution := n.b.resolution.GetDependencyResolution(n.dependency)
+func (n claimNode) getGroup() string {
+	dResolution := n.b.resolution.GetClaimResolution(n.claim)
 	if dResolution.Resolved {
-		return "dependency"
+		return "claim"
 	}
-	return "dependencyNotResolved"
+	return "claimNotResolved"
 }
 
-func (n dependencyNode) getID() string {
-	return runtime.KeyForStorable(n.dependency)
+func (n claimNode) getID() string {
+	return runtime.KeyForStorable(n.claim)
 }
 
-func (n dependencyNode) getLabel() string {
-	return n.dependency.Metadata.Namespace + "/" + n.dependency.Name
+func (n claimNode) getLabel() string {
+	return n.claim.Metadata.Namespace + "/" + n.claim.Name
 }
 
 /*

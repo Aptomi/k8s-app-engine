@@ -19,7 +19,7 @@ var RuleObject = &runtime.Info{
 // Rule is a generic mechanism for defining rules in Aptomi.
 //
 // Rules can be used to set certain labels on certain conditions as well as perform certain actions (such as rejecting
-// dependencies, rejecting ingress traffic, etc)
+// claims, rejecting ingress traffic, etc)
 type Rule struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         `validate:"required"`
@@ -41,8 +41,8 @@ type RuleActions struct {
 	// ChangeLabels defines how labels should be transformed
 	ChangeLabels LabelOperations `yaml:"change-labels,omitempty" validate:"omitempty,labelOperations"`
 
-	// Dependency defines whether dependency should be rejected
-	Dependency DependencyAction `yaml:"dependency,omitempty" validate:"omitempty,allowReject"`
+	// Claim defines whether claim should be rejected
+	Claim ClaimAction `yaml:"claim,omitempty" validate:"omitempty,allowReject"`
 
 	// Ingress defines whether ingress traffic should be rejected
 	Ingress IngressAction `yaml:"ingress,omitempty" validate:"omitempty,allowReject"`

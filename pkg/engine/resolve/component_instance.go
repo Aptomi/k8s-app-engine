@@ -52,8 +52,8 @@ type ComponentInstance struct {
 	// Error means that a critical error happened with a component (e.g. conflict of parameters)
 	Error error
 
-	// DependencyKeys is a list of dependency keys which are keeping this component instantiated (if dependency resolves to this component directly, then the value is 0. otherwise it's depth in policy resolution)
-	DependencyKeys map[string]int
+	// ClaimKeys is a list of claim keys which are keeping this component instantiated (if claim resolves to this component directly, then the value is 0. otherwise it's depth in policy resolution)
+	ClaimKeys map[string]int
 
 	// IsCode means the component is code
 	IsCode bool
@@ -99,7 +99,7 @@ func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
 		TypeKind:             ComponentInstanceObject.GetTypeKind(),
 		Metadata:             &ComponentInstanceMetadata{Key: cik},
-		DependencyKeys:       make(map[string]int),
+		ClaimKeys:            make(map[string]int),
 		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),
 		CalculatedDiscovery:  util.NestedParameterMap{},
 		CalculatedCodeParams: util.NestedParameterMap{},
@@ -134,8 +134,8 @@ func (instance *ComponentInstance) GetRunningTime() time.Duration {
 	return time.Since(instance.CreatedAt)
 }
 
-func (instance *ComponentInstance) addDependency(dependencyKey string, depth int) {
-	instance.DependencyKeys[dependencyKey] = depth
+func (instance *ComponentInstance) addClaim(claimKey string, depth int) {
+	instance.ClaimKeys[claimKey] = depth
 }
 
 func (instance *ComponentInstance) addRuleInformation(result *lang.RuleActionResult) {
@@ -200,9 +200,9 @@ func (instance *ComponentInstance) UpdateTimes(createdAt time.Time, updatedAt ti
 // appendData gets called to append data for two existing component instances, both of which have been already processed
 // and populated with data
 func (instance *ComponentInstance) appendData(ops *ComponentInstance) {
-	// Combine dependencies which are keeping this component instantiated
-	for dependencyKey, depth := range ops.DependencyKeys {
-		instance.addDependency(dependencyKey, depth)
+	// Combine claims which are keeping this component instantiated
+	for claimKey, depth := range ops.ClaimKeys {
+		instance.addClaim(claimKey, depth)
 	}
 
 	// Transfer IsCode bool

@@ -146,8 +146,8 @@ func TestAclResolver(t *testing.T) {
 				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
 				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
 				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
-				{obj: &Dependency{TypeKind: DependencyObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Dependency{TypeKind: DependencyObject.GetTypeKind(), Metadata: Metadata{Namespace: "main2"}}, expected: fullAccess},
+				{obj: &Claim{TypeKind: ClaimObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Claim{TypeKind: ClaimObject.GetTypeKind(), Metadata: Metadata{Namespace: "main2"}}, expected: fullAccess},
 			},
 		},
 		{

@@ -6,46 +6,46 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// DependencyResolutionCfg defines graph generation parameters for DependencyResolution
-type DependencyResolutionCfg struct {
+// ClaimResolutionCfg defines graph generation parameters for ClaimResolution
+type ClaimResolutionCfg struct {
 	showTrivialContracts bool
 	showContracts        bool
 }
 
-// DependencyResolutionCfgDefault is default graph generation parameters for DependencyResolution
-var DependencyResolutionCfgDefault = &DependencyResolutionCfg{
+// ClaimResolutionCfgDefault is default graph generation parameters for ClaimResolution
+var ClaimResolutionCfgDefault = &ClaimResolutionCfg{
 	showTrivialContracts: true,
 	showContracts:        false,
 }
 
-// DependencyResolutionWithFunc produces policy resolution graph by tracing every dependency and displaying what got allocated,
+// ClaimResolutionWithFunc produces policy resolution graph by tracing every claim and displaying what got allocated,
 // which checking that instances exist (e.g. in actual state)
-func (b *GraphBuilder) DependencyResolutionWithFunc(cfg *DependencyResolutionCfg, exists func(*resolve.ComponentInstance) bool) *Graph {
-	// trace all dependencies
-	for _, dependencyObj := range b.policy.GetObjectsByKind(lang.DependencyObject.Kind) {
-		dependency := dependencyObj.(*lang.Dependency) // nolint: errcheck
-		b.traceDependencyResolution("", dependency, nil, 0, cfg, exists)
+func (b *GraphBuilder) ClaimResolutionWithFunc(cfg *ClaimResolutionCfg, exists func(*resolve.ComponentInstance) bool) *Graph {
+	// trace all claims
+	for _, claimObj := range b.policy.GetObjectsByKind(lang.ClaimObject.Kind) {
+		claim := claimObj.(*lang.Claim) // nolint: errcheck
+		b.traceClaimResolution("", claim, nil, 0, cfg, exists)
 	}
 	return b.graph
 }
 
-// DependencyResolution produces policy resolution graph by tracing every dependency and displaying what got allocated
-func (b *GraphBuilder) DependencyResolution(cfg *DependencyResolutionCfg) *Graph {
-	return b.DependencyResolutionWithFunc(cfg, func(*resolve.ComponentInstance) bool { return true })
+// ClaimResolution produces policy resolution graph by tracing every claim and displaying what got allocated
+func (b *GraphBuilder) ClaimResolution(cfg *ClaimResolutionCfg) *Graph {
+	return b.ClaimResolutionWithFunc(cfg, func(*resolve.ComponentInstance) bool { return true })
 }
 
-func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang.Dependency, last graphNode, level int, cfg *DependencyResolutionCfg, exists func(*resolve.ComponentInstance) bool) {
+func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, last graphNode, level int, cfg *ClaimResolutionCfg, exists func(*resolve.ComponentInstance) bool) {
 	var edgesOut map[string]bool
 	if len(keySrc) <= 0 {
-		// create a dependency node
-		depNode := dependencyNode{dependency: dependency, b: b}
-		b.graph.addNode(depNode, 0)
-		last = depNode
+		// create a claim node
+		cNode := claimNode{claim: claim, b: b}
+		b.graph.addNode(cNode, 0)
+		last = cNode
 		level++
 
 		// add an outgoing edge to its corresponding service instance
 		edgesOut = make(map[string]bool)
-		dResolution := b.resolution.GetDependencyResolution(dependency)
+		dResolution := b.resolution.GetClaimResolution(claim)
 		if dResolution.Resolved {
 			edgesOut[dResolution.ComponentInstanceKey] = true
 		}
@@ -58,9 +58,9 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 	for keyDst := range edgesOut {
 		instanceCurrent := b.resolution.ComponentInstanceMap[keyDst]
 
-		// check that instance contains our dependency
-		depKey := runtime.KeyForStorable(dependency)
-		if _, found := instanceCurrent.DependencyKeys[depKey]; !found {
+		// check that instance contains our claim
+		depKey := runtime.KeyForStorable(claim)
+		if _, found := instanceCurrent.ClaimKeys[depKey]; !found {
 			continue
 		}
 
@@ -99,19 +99,19 @@ func (b *GraphBuilder) traceDependencyResolution(keySrc string, dependency *lang
 				b.graph.addEdge(newEdge(ctrNode, svcInstNode, instanceCurrent.Metadata.Key.ContextNameWithKeys))
 
 				// continue tracing
-				b.traceDependencyResolution(keyDst, dependency, svcInstNode, level+2, cfg, exists)
+				b.traceClaimResolution(keyDst, claim, svcInstNode, level+2, cfg, exists)
 			} else {
 				// skip contract, show just 'last' -> 'serviceInstance' -> (continue)
 				b.graph.addNode(svcInstNode, level)
 				b.graph.addEdge(newEdge(last, svcInstNode, ""))
 
 				// continue tracing
-				b.traceDependencyResolution(keyDst, dependency, svcInstNode, level+1, cfg, exists)
+				b.traceClaimResolution(keyDst, claim, svcInstNode, level+1, cfg, exists)
 			}
 		} else {
 			// if it's a component, we don't need to show any additional nodes, let's just continue
 			// though, we could introduce additional flag which allows to render components, if needed
-			b.traceDependencyResolution(keyDst, dependency, last, level, cfg, exists)
+			b.traceClaimResolution(keyDst, claim, last, level, cfg, exists)
 		}
 	}
 }

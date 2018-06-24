@@ -26,25 +26,25 @@ func TestDiffEmpty(t *testing.T) {
 	verifyDiff(t, diff, 0, 0, 0, 0, 0)
 }
 
-func TestDiffComponentCreationAndAttachDependency(t *testing.T) {
+func TestDiffComponentCreationAndAttachClaim(t *testing.T) {
 	b := makePolicyBuilder()
 	resolvedPrev := resolvePolicy(t, b)
 
-	// add dependency
-	d1 := b.AddDependency(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
-	d1.Labels["param"] = "value1"
+	// add claim
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should contain instantiated component
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, 2, 0, 0, 2, 0)
 
-	// add another dependency
-	d2 := b.AddDependency(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
-	d2.Labels["param"] = "value1"
+	// add another claim
+	c2 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c2.Labels["param"] = "value1"
 	resolvedNextAgain := resolvePolicy(t, b)
 
-	// component should not be instantiated again (it's already there), just new dependency should be attached
+	// component should not be instantiated again (it's already there), just new claim should be attached
 	diffAgain := NewPolicyResolutionDiff(resolvedNextAgain, resolvedNext)
 	verifyDiff(t, diffAgain, 0, 0, 0, 2, 0)
 }
@@ -53,17 +53,17 @@ func TestDiffComponentUpdate(t *testing.T) {
 	b := makePolicyBuilder()
 	resolvedPrev := resolvePolicy(t, b)
 
-	// add dependency
-	d1 := b.AddDependency(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
-	d1.Labels["param"] = "value1"
+	// add claim
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should contain instantiated component
 	diff := NewPolicyResolutionDiff(resolvedNext, resolvedPrev)
 	verifyDiff(t, diff, 2, 0, 0, 2, 0)
 
-	// update dependency
-	d1.Labels["param"] = "value2"
+	// update claim
+	c1.Labels["param"] = "value2"
 	resolvedNextAgain := resolvePolicy(t, b)
 
 	// component should be updated
@@ -75,9 +75,9 @@ func TestDiffComponentDelete(t *testing.T) {
 	b := makePolicyBuilder()
 	resolvedPrev := resolvePolicy(t, b)
 
-	// add dependency
-	d1 := b.AddDependency(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
-	d1.Labels["param"] = "value1"
+	// add claim
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
 	// diff should contain instantiated component
@@ -136,17 +136,17 @@ func makePolicyBuilderWithServiceSharing() *builder.PolicyBuilder {
 	contract2 := b.AddContract(service2, b.CriteriaTrue())
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
 
-	// make first service one per dependency, and they all will share the second service
-	contract1.Contexts[0].Allocation.Keys = []string{"{{ .Dependency.ID }}"}
+	// make first service one per claim, and they all will share the second service
+	contract1.Contexts[0].Allocation.Keys = []string{"{{ .Claim.ID }}"}
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
-	// add dependencies
-	b.AddDependency(b.AddUser(), contract1)
-	b.AddDependency(b.AddUser(), contract1)
-	b.AddDependency(b.AddUser(), contract1)
+	// add claims
+	b.AddClaim(b.AddUser(), contract1)
+	b.AddClaim(b.AddUser(), contract1)
+	b.AddClaim(b.AddUser(), contract1)
 
 	return b
 }
@@ -155,11 +155,11 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 	t.Helper()
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
-	result := resolver.ResolveAllDependencies()
+	result := resolver.ResolveAllClaims()
 
-	dependencies := builder.Policy().GetObjectsByKind(lang.DependencyObject.Kind)
-	for _, d := range dependencies {
-		if !assert.True(t, result.GetDependencyResolution(d.(*lang.Dependency)).Resolved, "Dependency resolution status should be correct for %v", d) {
+	claims := builder.Policy().GetObjectsByKind(lang.ClaimObject.Kind)
+	for _, claim := range claims {
+		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)
 			eventLog.Save(hook)
 			t.FailNow()
@@ -168,7 +168,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 	return result
 }
 
-func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachDependency int, componentDetachDependency int) {
+func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate int, componentDestruct int, componentUpdate int, componentAttachClaim int, componentDetachClaim int) {
 	t.Helper()
 	cnt := struct {
 		create    int
@@ -188,9 +188,9 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 			cnt.delete++
 		case *component.UpdateAction:
 			cnt.update++
-		case *component.AttachDependencyAction:
+		case *component.AttachClaimAction:
 			cnt.attach++
-		case *component.DetachDependencyAction:
+		case *component.DetachClaimAction:
 			cnt.detach++
 		case *component.EndpointsAction:
 			cnt.endpoints++
@@ -206,8 +206,8 @@ func verifyDiff(t *testing.T, diff *PolicyResolutionDiff, componentInstantiate i
 	ok := assert.Equal(t, componentInstantiate, cnt.create, "Diff: component instantiations")
 	ok = ok && assert.Equal(t, componentDestruct, cnt.delete, "Diff: component destructions")
 	ok = ok && assert.Equal(t, componentUpdate, cnt.update, "Diff: component updates")
-	ok = ok && assert.Equal(t, componentAttachDependency, cnt.attach, "Diff: dependencies attached to components")
-	ok = ok && assert.Equal(t, componentDetachDependency, cnt.detach, "Diff: dependencies removed from components")
+	ok = ok && assert.Equal(t, componentAttachClaim, cnt.attach, "Diff: claims attached to components")
+	ok = ok && assert.Equal(t, componentDetachClaim, cnt.detach, "Diff: claims removed from components")
 	ok = ok && assert.Equal(t, 0, cnt.endpoints, "Diff: component endpoint actions should never be generated here")
 
 	if !ok {

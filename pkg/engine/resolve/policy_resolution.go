@@ -34,10 +34,10 @@ func (resolution *PolicyResolution) GetComponentInstanceEntry(cik *ComponentInst
 	return resolution.ComponentInstanceMap[key]
 }
 
-// RecordResolved takes a component instance and adds a new dependency record into it
-func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, dependency *lang.Dependency, depth int, ruleResult *lang.RuleActionResult) {
+// RecordResolved takes a component instance and adds a new claim record into it
+func (resolution *PolicyResolution) RecordResolved(cik *ComponentInstanceKey, claim *lang.Claim, depth int, ruleResult *lang.RuleActionResult) {
 	instance := resolution.GetComponentInstanceEntry(cik)
-	instance.addDependency(runtime.KeyForStorable(dependency), depth)
+	instance.addClaim(runtime.KeyForStorable(claim), depth)
 	instance.addRuleInformation(ruleResult)
 }
 
@@ -80,27 +80,27 @@ func (resolution *PolicyResolution) AppendData(ops *PolicyResolution) {
 	}
 }
 
-// GetDependencyResolution returns resolution status for a particular dependency
-func (resolution *PolicyResolution) GetDependencyResolution(dependency *lang.Dependency) *DependencyResolution {
-	dKey := runtime.KeyForStorable(dependency)
+// GetClaimResolution returns resolution status for a particular claim
+func (resolution *PolicyResolution) GetClaimResolution(claim *lang.Claim) *ClaimResolution {
+	claimKey := runtime.KeyForStorable(claim)
 
 	var dError error
 	var dComponentKey string
 	for _, instance := range resolution.ComponentInstanceMap {
-		if depth, found := instance.DependencyKeys[dKey]; found {
-			// see if dependency components have errors
+		if depth, found := instance.ClaimKeys[claimKey]; found {
+			// see if claim components have errors
 			if dError == nil {
 				dError = instance.Error
 			}
 
-			// if it's a service at depth 0, we have found the service instance to which our dependency resolved
+			// if it's a service at depth 0, we have found the service instance to which our claim resolved
 			if depth == 0 && instance.Metadata.Key.IsService() {
 				dComponentKey = instance.Metadata.Key.GetKey()
 			}
 		}
 	}
 
-	return newDependencyResolution(dError == nil && len(dComponentKey) > 0, dComponentKey)
+	return newClaimResolution(dError == nil && len(dComponentKey) > 0, dComponentKey)
 }
 
 // Validate checks that the state is valid, meaning that all objects references are valid and all components are valid

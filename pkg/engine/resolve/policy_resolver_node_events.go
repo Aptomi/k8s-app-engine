@@ -11,28 +11,28 @@ import (
 )
 
 /*
-	Non-critical errors - if any of them occur, the corresponding dependency will not be fulfilled
-	and engine will move on to processing other dependencies
+	Non-critical errors - if any of them occur, the corresponding claim will not be fulfilled
+	and engine will move on to processing other claims
 */
 
 func (node *resolutionNode) errorUserDoesNotExist() error {
-	return fmt.Errorf("dependency '%s/%s' refers to non-existing user: %s", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User)
+	return fmt.Errorf("claim '%s/%s' refers to non-existing user: %s", node.claim.Metadata.Namespace, node.claim.Name, node.claim.User)
 }
 
-func (node *resolutionNode) errorDependencyNotAllowedByRules() error {
-	return fmt.Errorf("rules do not allow dependency '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
+func (node *resolutionNode) errorClaimNotAllowedByRules() error {
+	return fmt.Errorf("rules do not allow claim '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.claim.Metadata.Namespace, node.claim.Name, node.claim.User, node.claim.Contract, node.contractName, node.depth)
 }
 
 func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
-	return fmt.Errorf("user '%s' not allowed to consume service: %s", node.dependency.User, err)
+	return fmt.Errorf("user '%s' not allowed to consume service: %s", node.claim.User, err)
 }
 
 func (node *resolutionNode) errorTargetNotSet() error {
-	return fmt.Errorf("not sure where components should be deployed: label 'target' is not set (dependency '%s', contract '%s', service '%s')", node.dependency.Name, node.contract.Name, node.service.Name)
+	return fmt.Errorf("not sure where components should be deployed: label 'target' is not set (claim '%s', contract '%s', service '%s')", node.claim.Name, node.contract.Name, node.service.Name)
 }
 
 func (node *resolutionNode) errorClusterLookup(clusterName string, cause error) error {
-	return fmt.Errorf("cluster '%s' lookup error: %s (dependency '%s', contract '%s', service '%s')", clusterName, cause, node.dependency.Name, node.contract.Name, node.service.Name)
+	return fmt.Errorf("cluster '%s' lookup error: %s (claim '%s', contract '%s', service '%s')", clusterName, cause, node.claim.Name, node.contract.Name, node.service.Name)
 }
 
 func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
@@ -75,13 +75,13 @@ func (node *resolutionNode) errorServiceCycleDetected() error {
 	Event log - report debug/info/warning messages
 */
 
-func (node *resolutionNode) logStartResolvingDependency() {
+func (node *resolutionNode) logStartResolvingClaim() {
 	if node.depth == 0 {
-		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.NewEntry().Infof("Resolving top-level dependency '%s/%s' ('%s' -> '%s')", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract)
+		// at the top of the tree, when we resolve a root-level claim
+		node.eventLog.NewEntry().Infof("Resolving top-level claim '%s/%s' ('%s' -> '%s')", node.claim.Metadata.Namespace, node.claim.Name, node.claim.User, node.claim.Contract)
 	} else {
-		// recursively processing sub-dependencies
-		node.eventLog.NewEntry().Infof("Resolving dependency '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.dependency.Metadata.Namespace, node.dependency.Name, node.dependency.User, node.dependency.Contract, node.contractName, node.depth)
+		// recursively processing the rest of the tree
+		node.eventLog.NewEntry().Infof("Resolving claim '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.claim.Metadata.Namespace, node.claim.Name, node.claim.User, node.claim.Contract, node.contractName, node.depth)
 	}
 
 	node.logLabels(node.labels, "initial")
@@ -137,11 +137,11 @@ func (node *resolutionNode) logAllocationKeysSuccessfullyResolved(resolvedKeys [
 	}
 }
 
-func (node *resolutionNode) logResolvingDependencyOnComponent() {
+func (node *resolutionNode) logResolvingClaimOnComponent() {
 	if node.component.Code != nil {
-		node.eventLog.NewEntry().Infof("Processing dependency on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
+		node.eventLog.NewEntry().Infof("Processing claim on component with code: %s (%s)", node.component.Name, node.component.Code.Type)
 	} else if node.component.Contract != "" {
-		node.eventLog.NewEntry().Infof("Processing dependency on another contract: %s", node.component.Contract)
+		node.eventLog.NewEntry().Infof("Processing claim on another contract: %s", node.component.Contract)
 	} else {
 		node.eventLog.NewEntry().Warningf("Skipping unknown component (not code and not contract): %s", node.component.Name)
 	}
@@ -149,8 +149,8 @@ func (node *resolutionNode) logResolvingDependencyOnComponent() {
 
 func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstanceKey) {
 	if node.depth == 0 && cik.IsService() {
-		// at the top of the tree, when we resolve a root-level dependency
-		node.eventLog.NewEntry().Infof("Successfully resolved dependency '%s/%s' ('%s' -> '%s'): %s", node.dependency.Metadata.Namespace, node.dependency.Name, node.user.Name, node.dependency.Contract, cik.GetKey())
+		// at the top of the tree, when we resolve a root-level claim
+		node.eventLog.NewEntry().Infof("Successfully resolved claim '%s/%s' ('%s' -> '%s'): %s", node.claim.Metadata.Namespace, node.claim.Name, node.user.Name, node.claim.Contract, cik.GetKey())
 	} else if cik.IsService() {
 		// resolved service instance
 		node.eventLog.NewEntry().Infof("Successfully resolved service instance '%s' -> '%s': %s", node.user.Name, node.contract.Name, cik.GetKey())

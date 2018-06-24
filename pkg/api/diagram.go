@@ -68,12 +68,12 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	case "desired":
 		// show instances in desired state
 		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
-		graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+		graph = graphBuilder.ClaimResolution(visualization.ClaimResolutionCfgDefault)
 	case "actual":
 		// TODO: actual may not work correctly in all cases (e.g. after policy delete on a cluster which is not available, desired state has less components, these components are still in actual state but will not be shown on UI)
 		// show instances in actual state
 		graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
-		graph = graphBuilder.DependencyResolutionWithFunc(visualization.DependencyResolutionCfgDefault, func(instance *resolve.ComponentInstance) bool {
+		graph = graphBuilder.ClaimResolutionWithFunc(visualization.ClaimResolutionCfgDefault, func(instance *resolve.ComponentInstance) bool {
 			_, found := actualState.ComponentInstanceMap[instance.GetKey()]
 			return found
 		})
@@ -128,7 +128,7 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 			}
 
 			graphBuilder := visualization.NewGraphBuilder(policy, desiredState, api.externalData)
-			graph = graphBuilder.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+			graph = graphBuilder.ClaimResolution(visualization.ClaimResolutionCfgDefault)
 		}
 
 		// desired state (prev)
@@ -145,7 +145,7 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 			}
 
 			graphBuilderBase := visualization.NewGraphBuilder(policyBase, desiredStateBase, api.externalData)
-			graphBase = graphBuilderBase.DependencyResolution(visualization.DependencyResolutionCfgDefault)
+			graphBase = graphBuilderBase.ClaimResolution(visualization.ClaimResolutionCfgDefault)
 		}
 
 		// diff
@@ -173,7 +173,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 	}
 
 	var desiredState *resolve.PolicyResolution
-	if kind == lang.DependencyObject.Kind {
+	if kind == lang.ClaimObject.Kind {
 		// load revision
 		revision, err := api.store.GetLastRevisionForPolicy(policyGen)
 		if err != nil {

@@ -4,7 +4,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/Aptomi/aptomi/cmd/aptomictl/dependency"
+	"github.com/Aptomi/aptomi/cmd/aptomictl/claim"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/gen"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/login"
 	"github.com/Aptomi/aptomi/cmd/aptomictl/policy"
@@ -58,7 +58,7 @@ func init() {
 	// Add sub commands
 	Command.AddCommand(
 		login.NewCommand(Config, ConfigFile),
-		dependency.NewCommand(Config),
+		claim.NewCommand(Config),
 		policy.NewCommand(Config),
 		revision.NewCommand(Config),
 		state.NewCommand(Config),

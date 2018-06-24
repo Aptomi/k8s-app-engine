@@ -84,7 +84,7 @@
     ],
     [
       2.0,
-      "# So she deletes her dependency on the service `twitter_stats`"
+      "# So she deletes her claim on the service `twitter_stats`"
     ],
     [
       0.196838,
@@ -552,7 +552,7 @@
     ],
     [
       2.0,
-      "# Now, let’s say Bob deletes his dependency as well"
+      "# Now, let’s say Bob deletes his claim as well"
     ],
     [
       0.182358,
@@ -896,7 +896,7 @@
     ],
     [
       2.0,
-      "# But `analytics_pipeline` service has no more consumers as both dependencies have been deleted. So Aptomi terminated it as well"
+      "# But `analytics_pipeline` service has no more consumers as both claims have been deleted. So Aptomi terminated it as well"
     ],
     [
       0.206492,

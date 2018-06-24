@@ -2,7 +2,7 @@
   <div>
     <div class="box">
       <div class="box-header">
-        <h3 class="box-title">Endpoints: <b>{{ dependency.namespace }} / {{ dependency.kind }} / {{ dependency.name }}</b></h3>
+        <h3 class="box-title">Endpoints: <b>{{ claim.namespace }} / {{ claim.kind }} / {{ claim.name }}</b></h3>
       </div>
       <div class="box-body table-responsive no-padding">
         <table class="table table-hover">
@@ -46,7 +46,7 @@
       this.fetchData()
     },
     props: {
-      'dependency': {
+      'claim': {
         type: Object,
         validator: function (value) {
           return true
@@ -55,7 +55,7 @@
     },
     methods: {
       fetchData () {
-        this.endpoints = this.dependency['status']['endpoints']
+        this.endpoints = this.claim['status']['endpoints']
       }
     }
   }

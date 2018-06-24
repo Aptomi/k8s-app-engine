@@ -1,16 +1,16 @@
-package dependency
+package claim
 
 import (
 	"github.com/Aptomi/aptomi/pkg/config"
 	"github.com/spf13/cobra"
 )
 
-// NewCommand returns cobra command for dependency subcommand
+// NewCommand returns cobra command for claim subcommand
 func NewCommand(cfg *config.Client) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "dependency",
-		Short: "Dependency subcommand",
-		Long:  "Dependency subcommand long",
+		Use:   "claim",
+		Short: "Claim subcommand",
+		Long:  "Claim subcommand long",
 	}
 
 	cmd.AddCommand(

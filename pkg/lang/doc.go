@@ -4,8 +4,8 @@
 // Cluster - individual cluster where containers get deployed (e.g. k8s cluster).
 // Contract - contract for a service (e.g. database).
 // Context - a set of contexts, defining how contract can be fulfilled (e.g. MariaDB, MySQL, SQLite).
-// Service - specific service implementation (set of containers to run, and dependencies on other services).
-// Dependency - service use declaration, which triggers instantiation of a service .
+// Service - specific service implementation (set of containers to run, and dependencies on other contracts).
+// Claim - service use declaration, which triggers instantiation of a service.
 // Rule - rules which constitute policy, allowing to change labels and perform actions during policy resolution.
 // ACLRule - rules which define user roles for accessing Aptomi namespaces.
 //

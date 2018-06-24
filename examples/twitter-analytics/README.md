@@ -96,7 +96,7 @@ this in the Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/bro
 
     * Aptomi enforced that `analytics pipeline` will be shared by all consumers. See [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State
 
-    * Service endpoints are available under [Dependencies](http://localhost:27866/#/objects/dependencies) in Aptomi UI
+    * Service endpoints are available under [Claims](http://localhost:27866/#/objects/claims) in Aptomi UI
         * `tweeviz` available in *alice_dev* and *bob_dev* over HTTP with fake Twitter data source
         * `tweeviz` available in *prod* over HTTP with real-time Twitter data (assuming you have followed the step to configure Twitter tokens)
 
@@ -109,7 +109,7 @@ First, create an application in the [Twitter Application Management Console](htt
 Next, generate keys and access tokens for it:
     ![Twitter Create Tokens](twitter-create-tokens.png)
 
-Once done, upload the updated *production* dependency with Twitter tokens into Aptomi:
+Once done, upload the updated *production* claim with Twitter tokens into Aptomi:
 
 ```
     cp ~/.aptomi/examples/twitter-analytics/policy/john-prod-{ts.yaml,ts-changed.yaml}
@@ -121,7 +121,7 @@ Now, if you open the HTTP endpoint for the *production* instance of `tweeviz`, y
 
 # Terminating all deployed services
 
-To delete all deployed instances of `twitter_stats` and `analytics_pipeline`, you must delete the corresponding dependencies which triggered their instantiation. Aptomi will handle the rest:
+To delete all deployed instances of `twitter_stats` and `analytics_pipeline`, you must delete the corresponding claims which triggered their instantiation. Aptomi will handle the rest:
 ```
 aptomictl login -u alice -p alice
 aptomictl policy delete --wait -f ~/.aptomi/examples/twitter-analytics/policy/alice-dev-ts.yaml

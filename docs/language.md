@@ -9,7 +9,7 @@
   - [Service](#service)
   - [Contract](#contract)
   - [Cluster](#cluster)
-  - [Dependency](#dependency)
+  - [Claim](#claim)
   - [Rule](#rule)
 - [Common constructs](#common-constructs)
   - [Labels](#labels)
@@ -50,13 +50,13 @@ Before using Aptomi for the first time, you must set up [access control rights](
 There are three built-in user roles in Aptomi:
 * **domain admin** - Has full access rights to all Aptomi namespaces, including the `system` namespace
   * Domain admins can change the global ACL, the global list of rules, and the global list of clusters, which all reside in the `system` namespace.
-  * Domain admins can define and publish services, contracts, dependencies, and rules in any namespace.
+  * Domain admins can define and publish services, contracts, claims, and rules in any namespace.
 * **namespace admin** - Has full access rights for a given list of Aptomi namespaces
   * Namespace admins can view, but not manage objects in the `system` namespace.
-  * Namespace admins can define and publish services, contracts, dependencies, and rules in a given set of Aptomi namespaces.
+  * Namespace admins can define and publish services, contracts, claims, and rules in a given set of Aptomi namespaces.
 * **service consumer** - Can only consume services in a given list of Aptomi namespaces
   * Service consumers have view-only access for all namespaces.
-  * Service consumers can declare dependencies, and therefore consume services, in a given list of Aptomi namespaces.
+  * Service consumers can only define and declare claims, and therefore consume services, in a given list of Aptomi namespaces.
 
 For example, the following YAML block would promote all users with the `global_ops == true` label into domain admins:
 ```yaml
@@ -117,7 +117,7 @@ When defining a **code component**, you must define the following fields:
       pluggable, and allows developers to use their favorite framework for packaging applications. Aptomi can support applications manifests defined via ksonnet, k8s YAMLs, and more!
 * `discovery` - Every component can expose arbitrary discovery information about itself, in the form of labels, to other components.
 * `dependencies` - Other components within the service which the current component depends on. Defining dependencies helps Aptomi process discovery information and propagate parameters
-  in the right order, and also allows you to control the correct instantiation/destruction order of application components.
+  in the right order, also allowing you to control the correct instantiation/destruction order of application components.
 
 For example, here is how you would define an application which consists of Wordpress and MySQL database components:
 ```yaml
@@ -182,7 +182,7 @@ Components can also have custom criteria defined and associated with them. If a 
 Once a service is defined, it has to be exposed through a [contract](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Contract).
 
 Contracts represent a consumable service. When someone wants to consume an instance of a service, it has to be done through a contract. When
-a service depends on another service instance, this dependency has to be a dependency on a contract as well.
+a service depends on another instance of a different service, it has to have a dependency on the corresponding contract as one of its components.
 
 A Contract can have a number of contexts, which define different implementations of that contract. Each context allows you to define the specific implementation and criteria under which it will be picked.
 This means that a contract will be fulfilled via one of the defined contexts at runtime, based on the defined criteria. Different parameters/services can be picked based on the type of environment (e.g. `dev` vs. `prod`), the properties of a consumer (e.g. which 'team' a consumer belongs to),
@@ -292,16 +292,16 @@ A typical definition of a k8s cluster looks like this:
       # put your kubeconfig for the cluster here
 ```
 
-## Dependency
+## Claim
 
 Defining a service and a contract only publishes a service into Aptomi, and does not trigger instantiation/deployment of that service.
-In order to request an instance, you must create a [Dependency](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Dependency) object in Aptomi.
+In order to request an instance, you must create a [Claim](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Claim) object in Aptomi.
 
-When creating a dependency, you must specify `who` (or `what`) is making a request, which `contract` is being requested, and what set of initial labels is passed to Aptomi.
+When creating a claim, you must specify a `contract` to instantiate, as well as the initial labels to pass to it.
 
 For example, here is how **Alice** would request a **wordpress**:
 ```yaml
-- kind: dependency
+- kind: claim
   metadata:
     namespace: main
     name: alice_uses_wordpress
@@ -325,7 +325,7 @@ The order in which the rules are processed and executed is as follows:
 
 A rule can have user-defined criteria and associated actions. If the criterion evaluates to true, then an action is executed. The list of supported actions is:
 * change-labels - change one or more labels
-* dependency - reject dependency and not allow instantiation
+* claim - reject claim and not allow instantiation
 
 The most commonly used rule action in Aptomi is to change a label. For example, by changing a system-level label called `target`, you can control which cluster and namespace the code will get deployed to. Deploying
 code without setting the `target` label will result in an error, because Aptomi won't have a way of knowing where the code should be deployed.
@@ -346,7 +346,7 @@ For example, the following rule will tell Aptomi to always deploy services with 
         target: cluster-us-east
 ```
 
-Here is another example of a rule, which prohibits users from the `dev` team from instantiating any `blog` services. Even if those users try to declare a dependency, it will not be fulfilled by Aptomi:
+Here is another example of a rule, which prohibits users from the `dev` team from instantiating any `blog` services. Even if those users try to declare a claim, it will not be fulfilled by Aptomi:
 ```yaml
 - kind: rule
   metadata:
@@ -358,12 +358,12 @@ Here is another example of a rule, which prohibits users from the `dev` team fro
       - team == 'dev'
       - service.Labels.blog == true
   actions:
-    dependency: reject
+    claim: reject
 ```
 
 # Common constructs
 ## Labels
-Policy processing in Aptomi is based entirely on labels. When a dependency is requested, an initial set of labels is formed by combining the labels of the requester (e.g. user labels) and a given dependency. Throughout processing,
+Policy processing in Aptomi is based entirely on labels. When a claim is defined, an initial set of labels is formed by combining the labels of the requester (e.g. user labels) and a given claim. Throughout processing,
 these labels can be transformed using `change-labels` directives, and accessed at any time in expressions and templates.
 
 One way of leveraging this, for example, would be to:
@@ -433,7 +433,7 @@ You can reference the following variables in your text templates:
 
 * `{{ .Labels }}` - the current set of labels, e.g.:
   * `{{ .Labels.labelName }}` will return the value of label with name `labelName`
-* `{{ .User}}` - the current user who requested a dependency
+* `{{ .User}}` - the current user who defined a claim
   * `{{ .User.Name }}` - name of the user
   * `{{ .User.Secrets }}` - a map of user secrets
   * `{{ .User.Labels }}` - a map of user labels
@@ -448,7 +448,7 @@ Sometimes you will want to specify an absolute path to an object located in a di
 
 For example, the following code would tells Aptomi to look for a wordpress contract defined in the **same** namespace (in this case, `main`):
 ```yaml
-- kind: dependency
+- kind: claim
   metadata:
     namespace: main
     name: alice_uses_wordpress
@@ -458,7 +458,7 @@ For example, the following code would tells Aptomi to look for a wordpress contr
 
 While this code would tell Aptomi to look for a wordpress contract in a **given** namespace (in this case, `specialns`):
 ```yaml
-- kind: dependency
+- kind: claim
   metadata:
     namespace: main
     name: alice_uses_wordpress

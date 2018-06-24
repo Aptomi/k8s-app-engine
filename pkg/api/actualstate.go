@@ -57,7 +57,7 @@ func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http
 
 	// See that would happen if we reset the actual state, calculate resolution log and action plan
 	resolveLog := event.NewLog(logrus.InfoLevel, "api-state-enforce").AddConsoleHook(api.logLevel)
-	desiredState := resolve.NewPolicyResolver(policy, api.externalData, resolveLog).ResolveAllDependencies()
+	desiredState := resolve.NewPolicyResolver(policy, api.externalData, resolveLog).ResolveAllClaims()
 	actionPlan := diff.NewPolicyResolutionDiff(desiredState, resolve.NewPolicyResolution()).ActionPlan
 
 	// If we are in noop mode, just return expected changes in a form of an action plan

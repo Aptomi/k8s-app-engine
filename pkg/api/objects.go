@@ -10,7 +10,7 @@ import (
 var (
 	// Objects is a list of all objects used in API
 	Objects = runtime.AppendAll([]*runtime.Info{
-		DependenciesStatusObject,
+		ClaimsStatusObject,
 		PolicyUpdateResultObject,
 		AuthSuccessObject,
 		AuthRequestObject,

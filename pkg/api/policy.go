@@ -207,7 +207,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 
 	// Process policy changes, calculate resolution log and action plan
 	eventLog := event.NewLog(logLevel, "api-policy-update").AddConsoleHook(api.logLevel)
-	desiredStateUpdated := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
+	desiredStateUpdated := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllClaims()
 	err = desiredStateUpdated.Validate(policyUpdated)
 	if err != nil {
 		panic(fmt.Sprintf("policy change cannon be made: %s", err))
@@ -305,7 +305,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 
 	// Process policy changes, calculate and return resolution log + action plan
 	eventLog := event.NewLog(logLevel, "api-policy-delete").AddConsoleHook(api.logLevel)
-	desiredStateUpdated := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllDependencies()
+	desiredStateUpdated := resolve.NewPolicyResolver(policyUpdated, api.externalData, eventLog).ResolveAllClaims()
 	err = desiredStateUpdated.Validate(policyUpdated)
 	if err != nil {
 		panic(fmt.Sprintf("policy change cannon be made: %s", err))

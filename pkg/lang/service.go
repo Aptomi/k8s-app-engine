@@ -22,7 +22,7 @@ var ServiceObject = &runtime.Info{
 // teams define service-specific consumption rules of how others can consume their services.
 //
 // Service typically consists of one or more components. Each component can either be pointer to the code (e.g.
-// docker container image with metadata that needs to be started/managed) or it can be dependency on another\
+// docker container image with metadata that needs to be started/managed) or it can be dependency on another
 // contract (which will get fulfilled by Aptomi)
 type Service struct {
 	runtime.TypeKind `yaml:",inline"`
@@ -52,9 +52,9 @@ type ServiceComponent struct {
 	// into the service. It's an optional field, so if it's nil then it is considered to be true automatically
 	Criteria *Criteria `yaml:",omitempty" validate:"omitempty"`
 
-	// Contract, if not empty, denoted that the component points to another contract as a dependency. Meaning that
-	// a service needs to have another service running as its dependency (e.g. 'wordpress' service needs a 'database'
-	// contract). This dependency will be fulfilled at policy resolution time.
+	// Contract, if not empty, denoted that the component points to another contract. Meaning that
+	// a service needs to have another contract instantiated and running (e.g. 'wordpress' service needs a 'database'
+	// contract). This will be fulfilled at policy resolution time.
 	Contract string `yaml:"contract,omitempty" validate:"omitempty"`
 
 	// Code, if not empty, means that component is a code that can be instantiated with certain parameters (e.g. docker
@@ -64,8 +64,8 @@ type ServiceComponent struct {
 	// Discovery is a map of discovery parameters that this component exposes to other services
 	Discovery util.NestedParameterMap `yaml:"discovery,omitempty" validate:"omitempty,templateNestedMap"`
 
-	// Dependencies is cross-component dependencies within a service. Component may need other components within that
-	// service to run, before it gets instantiated
+	// Dependencies represent cross-component dependencies within a given service. Component may need other components
+	// within that service to exist, before it gets instantiated
 	Dependencies []string `yaml:"dependencies,omitempty" validate:"dive,identifier"`
 }
 
@@ -108,7 +108,7 @@ func (service *Service) dfsComponentSort(u *ServiceComponent, colors map[string]
 	for _, vName := range u.Dependencies {
 		v, exists := service.GetComponentsMap()[vName]
 		if !exists {
-			return fmt.Errorf("service '%s' has a dependency on non-existing component '%s'", service.Name, vName)
+			return fmt.Errorf("service '%s' has a claim on non-existing component '%s'", service.Name, vName)
 		}
 		if vColor, ok := colors[v.Name]; !ok {
 			// not visited yet -> visit and exit if a cycle was found or another error occurred

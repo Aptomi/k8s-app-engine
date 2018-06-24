@@ -640,7 +640,7 @@
     ],
     [
       2.0,
-      "# Start a staging instance of ‘twitter_stats’ by declaring a dependency from consumer Alice"
+      "# Start a staging instance of ‘twitter_stats’ by declaring a claim from consumer Alice"
     ],
     [
       1.64732,
@@ -880,7 +880,7 @@
     ],
     [
       0.373224,
-      "# Start another staging instance of ‘twitter_stats’ by declaring a dependency  from consumer Bob"
+      "# Start another staging instance of ‘twitter_stats’ by declaring a claim from consumer Bob"
     ],
     [
       0.676744,
@@ -1460,7 +1460,7 @@
     ],
     [
       2.0,
-      "# Now let’s start production instance of ‘twitter_stats’ by declaring another dependency"
+      "# Now let’s start production instance of ‘twitter_stats’ by declaring another claim"
     ],
     [
       0.685273,

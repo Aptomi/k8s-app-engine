@@ -56,10 +56,10 @@ func (builder *PolicyBuilder) SwitchNamespace(namespace string) {
 	builder.namespace = namespace
 }
 
-// AddDependency creates a new dependency and adds it to the policy
-func (builder *PolicyBuilder) AddDependency(user *lang.User, contract *lang.Contract) *lang.Dependency {
-	result := &lang.Dependency{
-		TypeKind: lang.DependencyObject.GetTypeKind(),
+// AddClaim creates a new claim and adds it to the policy
+func (builder *PolicyBuilder) AddClaim(user *lang.User, contract *lang.Contract) *lang.Claim {
+	result := &lang.Claim{
+		TypeKind: lang.ClaimObject.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -243,8 +243,8 @@ func (builder *PolicyBuilder) AddServiceComponent(service *lang.Service, compone
 	return component
 }
 
-// AddComponentDependency adds a component dependency on another component
-func (builder *PolicyBuilder) AddComponentDependency(component *lang.ServiceComponent, dependsOn *lang.ServiceComponent) {
+// AddComponentClaim adds a component claim on another component
+func (builder *PolicyBuilder) AddComponentClaim(component *lang.ServiceComponent, dependsOn *lang.ServiceComponent) {
 	component.Dependencies = append(component.Dependencies, dependsOn.Name)
 }
 

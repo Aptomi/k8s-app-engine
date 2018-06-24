@@ -20,8 +20,8 @@ func (client *coreClient) Policy() client.Policy {
 	return &policyClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
-func (client *coreClient) Dependency() client.Dependency {
-	return &dependencyClient{cfg: client.cfg, httpClient: client.httpClient}
+func (client *coreClient) Claim() client.Claim {
+	return &claimClient{cfg: client.cfg, httpClient: client.httpClient}
 }
 
 func (client *coreClient) Revision() client.Revision {

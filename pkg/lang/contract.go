@@ -19,7 +19,7 @@ var ContractObject = &runtime.Info{
 // implementations. For example, contract can be a 'database', with specific service contexts represented
 // by 'MySQL', 'MariaDB', 'SQLite'.
 //
-// When dependencies get declared, they always get declared on a contract (not on a specific service).
+// When claims get declared, they always get declared on a contract (not on a specific service).
 type Contract struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         `validate:"required"`

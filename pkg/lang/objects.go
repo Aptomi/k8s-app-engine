@@ -7,7 +7,7 @@ var (
 	PolicyObjects = []*runtime.Info{
 		ServiceObject,
 		ContractObject,
-		DependencyObject,
+		ClaimObject,
 		ClusterObject,
 		RuleObject,
 		ACLRuleObject,

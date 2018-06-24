@@ -13,7 +13,7 @@ import ShowServices from 'pages/objects/ShowServices.vue'
 import ShowContracts from 'pages/objects/ShowContracts.vue'
 import ShowClusters from 'pages/objects/ShowClusters.vue'
 import ShowRules from 'pages/objects/ShowRules.vue'
-import ShowDependencies from 'pages/objects/ShowDependencies.vue'
+import ShowClaims from 'pages/objects/ShowClaims.vue'
 import ShowUserRoles from 'pages/objects/ShowUserRoles.vue'
 import ShowCatalog from 'pages/objects/ShowCatalog.vue'
 import ShowAuditLog from 'pages/deployment/ShowAuditLog.vue'
@@ -49,9 +49,9 @@ const router = new Router({
           component: ShowContracts
         },
         {
-          path: 'dependencies',
-          name: 'ShowDependencies',
-          component: ShowDependencies
+          path: 'claims',
+          name: 'ShowClaims',
+          component: ShowClaims
         },
         {
           path: 'rules',

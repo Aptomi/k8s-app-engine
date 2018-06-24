@@ -151,11 +151,11 @@ do
     change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
     change_policy apply "-f ${POLICY_DIR}/policy/carol-dev-ts.yaml"
 
-    # upgrade prod dependency
+    # upgrade prod claim
     sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
     change_policy apply "-f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml"
 
-    # delete all dependencies
+    # delete all claims
     change_policy delete "-f ${POLICY_DIR}/policy/john-prod-ts.yaml"
     change_policy delete "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml"
     change_policy delete "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"

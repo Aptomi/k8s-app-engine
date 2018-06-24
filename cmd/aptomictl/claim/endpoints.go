@@ -1,4 +1,4 @@
-package dependency
+package claim
 
 import (
 	"fmt"
@@ -19,8 +19,8 @@ func newEndpointsCommand(cfg *config.Client) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "endpoints",
-		Short: "dependency endpoints",
-		Long:  "dependency endpoints",
+		Short: "claim endpoints",
+		Long:  "claim endpoints",
 
 		Run: func(cmd *cobra.Command, args []string) {
 			allObjects, err := io.ReadLangObjects(paths)
@@ -28,42 +28,42 @@ func newEndpointsCommand(cfg *config.Client) *cobra.Command {
 				panic(fmt.Sprintf("error while reading policy files: %s", err))
 			}
 
-			dependencies := []*lang.Dependency{}
+			claims := []*lang.Claim{}
 			for _, obj := range allObjects {
-				if d, ok := obj.(*lang.Dependency); ok {
-					dependencies = append(dependencies, d)
+				if d, ok := obj.(*lang.Claim); ok {
+					claims = append(claims, d)
 				}
 			}
 
-			printEndpoints(cfg, dependencies)
+			printEndpoints(cfg, claims)
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files/dirs with dependency files")
+	cmd.Flags().StringSliceVarP(&paths, "policyPaths", "f", make([]string, 0), "Paths to files/dirs with claim files")
 	return cmd
 }
 
 // TODO: ideally we should use common.Format() here to support writing into json and yaml, but it doesn't blend too well with maps and sorted keys
-func printEndpoints(cfg *config.Client, dependencies []*lang.Dependency) {
-	result, errAPI := rest.New(cfg, http.NewClient(cfg)).Dependency().Status(dependencies, api.DependencyQueryDeploymentStatusOnly)
+func printEndpoints(cfg *config.Client, claims []*lang.Claim) {
+	result, errAPI := rest.New(cfg, http.NewClient(cfg)).Claim().Status(claims, api.ClaimQueryDeploymentStatusOnly)
 	if errAPI != nil {
-		panic(fmt.Sprintf("error while requesting dependency status: %s", errAPI))
+		panic(fmt.Sprintf("error while requesting claim status: %s", errAPI))
 	}
 
 	table := uitable.New()
 	table.MaxColWidth = 120
 	table.Wrap = true
-	table.AddRow("DEPENDENCY", "COMPONENT", "ENDPOINT TYPE", "ENDPOINT URL")
+	table.AddRow("CLAIM", "COMPONENT", "ENDPOINT TYPE", "ENDPOINT URL")
 	for _, dKey := range util.GetSortedStringKeys(result.Status) {
 		first := true
 		for _, cKey := range util.GetSortedStringKeys(result.Status[dKey].Endpoints) {
 			for _, eType := range util.GetSortedStringKeys(result.Status[dKey].Endpoints[cKey]) {
-				depKeyStr := ""
+				claimKeyStr := ""
 				if first {
-					depKeyStr = dKey
+					claimKeyStr = dKey
 					first = false
 				}
-				table.AddRow(depKeyStr, cKey, eType, result.Status[dKey].Endpoints[cKey][eType])
+				table.AddRow(claimKeyStr, cKey, eType, result.Status[dKey].Endpoints[cKey][eType])
 			}
 		}
 	}

@@ -37,10 +37,10 @@
 - kind: rule
   metadata:
     namespace: system
-    name: reject_dependency_for_mobile_dev_users
+    name: no_access_for_mobile_dev_users
   weight: 1000
   criteria:
     require-all:
       - team == 'mobile-dev'
   actions:
-    dependency: reject
+    claim: reject

@@ -71,33 +71,33 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 	// Get action graph node for a given component key
 	node := diff.ActionPlan.GetActionGraphNode(key)
 
-	// Get previous dependency keys
-	var depKeysPrev map[string]int
+	// Get previous claim keys
+	var claimKeysPrev map[string]int
 	prevInstance := diff.Prev.ComponentInstanceMap[key]
 	if prevInstance != nil {
-		depKeysPrev = prevInstance.DependencyKeys
+		claimKeysPrev = prevInstance.ClaimKeys
 	}
 
-	// Get next dependency keys
-	var depKeysNext map[string]int
+	// Get next claim keys
+	var claimKeysNext map[string]int
 	nextInstance := diff.Next.ComponentInstanceMap[key]
 	if nextInstance != nil {
-		depKeysNext = nextInstance.DependencyKeys
+		claimKeysNext = nextInstance.ClaimKeys
 	}
 
 	/*
 		First of all, let's see if a component needs to be destructed. If so, destruct it and don't proceed to any further actions.
 	*/
 
-	// See if a dependency needs to be detached from a component
-	for dependencyID := range depKeysPrev {
-		if _, found := depKeysNext[dependencyID]; !found {
-			node.AddAction(component.NewDetachDependencyAction(key, dependencyID), diff.Prev, true)
+	// See if a claim needs to be detached from a component
+	for claimKey := range claimKeysPrev {
+		if _, found := claimKeysNext[claimKey]; !found {
+			node.AddAction(component.NewDetachClaimAction(key, claimKey), diff.Prev, true)
 		}
 	}
 
 	// See if a component needs to be destructed
-	if len(depKeysPrev) > 0 && len(depKeysNext) <= 0 {
+	if len(claimKeysPrev) > 0 && len(claimKeysNext) <= 0 {
 		node.AddAction(component.NewDeleteAction(key, prevInstance.CalculatedCodeParams), diff.Prev, true)
 		return // exit right away
 	}
@@ -110,12 +110,12 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 	isCodeComponent := (prevInstance != nil && prevInstance.IsCode) || (nextInstance != nil && nextInstance.IsCode)
 
 	// See if a component needs to be instantiated
-	if len(depKeysPrev) <= 0 && len(depKeysNext) > 0 {
+	if len(claimKeysPrev) <= 0 && len(claimKeysNext) > 0 {
 		node.AddAction(component.NewCreateAction(key, nextInstance.CalculatedCodeParams), diff.Prev, true)
 	}
 
 	// See if a component needs to be updated
-	if isCodeComponent && len(depKeysPrev) > 0 && len(depKeysNext) > 0 {
+	if isCodeComponent && len(claimKeysPrev) > 0 && len(claimKeysNext) > 0 {
 		sameParams := prevInstance.CalculatedCodeParams.DeepEqual(nextInstance.CalculatedCodeParams)
 		if !sameParams {
 			node.AddAction(component.NewUpdateAction(key, prevInstance.CalculatedCodeParams, nextInstance.CalculatedCodeParams), diff.Prev, true)
@@ -129,10 +129,10 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 		}
 	}
 
-	// See if a dependency needs to be attached to a component
-	for dependencyID, depth := range depKeysNext {
-		if _, found := depKeysPrev[dependencyID]; !found {
-			node.AddAction(component.NewAttachDependencyAction(key, dependencyID, depth), diff.Prev, true)
+	// See if a claim needs to be attached to a component
+	for claimKey, depth := range claimKeysNext {
+		if _, found := claimKeysPrev[claimKey]; !found {
+			node.AddAction(component.NewAttachClaimAction(key, claimKey, depth), diff.Prev, true)
 		}
 	}
 }

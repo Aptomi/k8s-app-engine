@@ -308,7 +308,7 @@
     ],
     [
       2.0,
-      "# Once tokens have been created at https://apps.twitter.com, let’s copy a dependency and edit it"
+      "# Once tokens have been created at https://apps.twitter.com, let’s copy a claim and edit it"
     ],
     [
       0.396017,
@@ -412,7 +412,7 @@
     ],
     [
       0.002099,
-      "\u001b[1;1H\u001b[93m- \u001b[m\u001b[1m\u001b[96mkind\u001b[m\u001b[38;5;224m:\u001b[m dependency\r\n  \u001b[1m\u001b[96mmetadata\u001b[m\u001b[38;5;224m:\u001b[m\r\n    \u001b[1m\u001b[96mnamespace\u001b[m\u001b[38;5;224m:\u001b[m main\r\n    \u001b[1m\u001b[96mname\u001b[m\u001b[38;5;224m:\u001b[m prod\r\n  \u001b[1m\u001b[96muser\u001b[m\u001b[38;5;224m:\u001b[m John\r\n  \u001b[1m\u001b[96mcontract\u001b[m\u001b[38;5;224m:\u001b[m twitter_stats\r\n  \u001b[1m\u001b[96mlabels\u001b[m\u001b[38;5;224m:\u001b[m\r\n   \u001b[96m # Version of visualization code (container image tag)\u001b[m\r\n    \u001b[1m\u001b[96mtsvisimage\u001b[m\u001b[38;5;224m:\u001b[m demo11\r\n   \u001b[96m # Twitter / Location of tweets (San Francisco, Boston, New York)\u001b[m\r\n    \u001b[1m\u001b[96mlocations\u001b[m\u001b[38;5;224m:\u001b[m \u001b[95m-71.4415\u001b[m,\u001b[95m41.9860\u001b[m,\u001b[95m-70.4747\u001b[m,\u001b[95m42.9041\u001b[m,\u001b[95m-122.75\u001b[m,\u001b[95m36.8\u001b[m,\u001b[95m-121.75\u001b[m,\u001b[95m37.8\u001b[m,-74,\u001b[95m40\u001b[m,-73,\u001b[95m41\u001b[m\r\n   \u001b[96m # Twitter / Tokens\u001b[m\r\n    \u001b[1m\u001b[96mappKey\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n    \u001b[1m\u001b[96mappSecret\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n    \u001b[1m\u001b[96mtokenKey\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n    \u001b[1m\u001b[96mtokenSecret\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n\u001b[94m~                                   "
+      "\u001b[1;1H\u001b[93m- \u001b[m\u001b[1m\u001b[96mkind\u001b[m\u001b[38;5;224m:\u001b[m claim\r\n  \u001b[1m\u001b[96mmetadata\u001b[m\u001b[38;5;224m:\u001b[m\r\n    \u001b[1m\u001b[96mnamespace\u001b[m\u001b[38;5;224m:\u001b[m main\r\n    \u001b[1m\u001b[96mname\u001b[m\u001b[38;5;224m:\u001b[m prod\r\n  \u001b[1m\u001b[96muser\u001b[m\u001b[38;5;224m:\u001b[m John\r\n  \u001b[1m\u001b[96mcontract\u001b[m\u001b[38;5;224m:\u001b[m twitter_stats\r\n  \u001b[1m\u001b[96mlabels\u001b[m\u001b[38;5;224m:\u001b[m\r\n   \u001b[96m # Version of visualization code (container image tag)\u001b[m\r\n    \u001b[1m\u001b[96mtsvisimage\u001b[m\u001b[38;5;224m:\u001b[m demo11\r\n   \u001b[96m # Twitter / Location of tweets (San Francisco, Boston, New York)\u001b[m\r\n    \u001b[1m\u001b[96mlocations\u001b[m\u001b[38;5;224m:\u001b[m \u001b[95m-71.4415\u001b[m,\u001b[95m41.9860\u001b[m,\u001b[95m-70.4747\u001b[m,\u001b[95m42.9041\u001b[m,\u001b[95m-122.75\u001b[m,\u001b[95m36.8\u001b[m,\u001b[95m-121.75\u001b[m,\u001b[95m37.8\u001b[m,-74,\u001b[95m40\u001b[m,-73,\u001b[95m41\u001b[m\r\n   \u001b[96m # Twitter / Tokens\u001b[m\r\n    \u001b[1m\u001b[96mappKey\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n    \u001b[1m\u001b[96mappSecret\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n    \u001b[1m\u001b[96mtokenKey\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n    \u001b[1m\u001b[96mtokenSecret\u001b[m\u001b[38;5;224m:\u001b[m PUT-YOUR-DATA-HERE\r\n\u001b[94m~                                   "
     ],
     [
       5.1e-05,
@@ -1024,7 +1024,7 @@
     ],
     [
       0.354375,
-      "# Now, let’s import the updated dependency into Aptomi"
+      "# Now, let’s import the updated claim into Aptomi"
     ],
     [
       0.921715,

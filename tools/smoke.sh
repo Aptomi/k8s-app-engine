@@ -48,7 +48,7 @@ function stop_server() {
     kill ${SERVER_PID} &>/dev/null || true
 
     # there should only be several errors in the server log (one related to alice not having permissions, and another one related to carol not having rights to instantiate services)
-    errors=$(grep "error" "${CONF_DIR}/server.log" | grep -v "doesn't have ACL permissions to manage object" | grep -v "do not allow dependency" || true)
+    errors=$(grep "error" "${CONF_DIR}/server.log" | grep -v "doesn't have ACL permissions to manage object" | grep -v "do not allow claim" || true)
     if [ "$errors" != "" ]; then
         echo "Found unexpected errors"
         echo "$errors"
@@ -169,9 +169,9 @@ function change_policy() {
     check_policy_version ${expectedVersion}
 }
 
-function check_dependencies() {
+function check_claims() {
     files="$1"
-    aptomictl --config ${CONF_DIR} dependency status --wait ${files}
+    aptomictl --config ${CONF_DIR} claim status --wait ${files}
 }
 
 login alice
@@ -196,46 +196,46 @@ change_policy apply "-f ${POLICY_DIR}/policy/twitter_stats" 4
 
 login john
 change_policy apply "-f ${POLICY_DIR}/policy/john-prod-ts.yaml" 5
-check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml"
+check_claims "-f ${POLICY_DIR}/policy/john-prod-ts.yaml"
 
 login alice
 change_policy apply "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 6
-check_dependencies "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml"
+check_claims "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml"
 
 login bob
 change_policy apply "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml" 7
-check_dependencies "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
+check_claims "-f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
 
-check_policy 3 ".Objects.social.dependency | length"
-check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
+check_policy 3 ".Objects.social.claim | length"
+check_claims "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
 
-# delete Alice's dependency
+# delete Alice's claim
 login alice
 change_policy delete "-f ${POLICY_DIR}/policy/alice-dev-ts.yaml" 8
-check_policy 2 ".Objects.social.dependency | length"
+check_policy 2 ".Objects.social.claim | length"
 
-# upgrade prod dependency
+# upgrade prod claim
 sed -e 's/demo11/demo12/g' ${POLICY_DIR}/policy/john-prod-ts.yaml > ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml
 login john
 change_policy apply "-f ${POLICY_DIR_TMP}/john-prod-ts-changed.yaml" 9
 
-# apply Carol's dependency
+# apply Carol's claim
 login carol
 change_policy apply "-f ${POLICY_DIR}/policy/carol-dev-ts.yaml" 10
-check_policy 3 ".Objects.social.dependency | length"
+check_policy 3 ".Objects.social.claim | length"
 
-# delete all dependencies
+# delete all claims
 login sam
 change_policy delete "-f \"${POLICY_DIR}/policy/*-ts.yaml\"" 11
-check_policy 0 ".Objects.social.dependency | length"
+check_policy 0 ".Objects.social.claim | length"
 
 # delete the rest of the objects
 login sam
 change_policy delete "-f ${POLICY_DIR}/policy" 12
 check_policy 0 ".Objects.platform.contract | length"
 check_policy 0 ".Objects.social.contract | length"
-check_policy 0 ".Objects.platform.dependency | length"
-check_policy 0 ".Objects.social.dependency | length"
+check_policy 0 ".Objects.platform.claim | length"
+check_policy 0 ".Objects.social.claim | length"
 check_policy 0 ".Objects.platform.rule | length"
 check_policy 0 ".Objects.social.rule | length"
 check_policy 0 ".Objects.platform.service | length"
@@ -248,9 +248,9 @@ login sam
 change_policy apply "-f ${POLICY_DIR}/policy" 13
 
 # check object counts
-check_policy 4 ".Objects.social.dependency | length"
+check_policy 4 ".Objects.social.claim | length"
 check_policy 5 ".Objects.platform.contract | length"
-check_policy 0 ".Objects.platform.dependency | length"
+check_policy 0 ".Objects.platform.claim | length"
 check_policy 5 ".Objects.platform.service | length"
 check_policy 1 ".Objects.social.contract | length"
 check_policy 1 ".Objects.social.service | length"
@@ -260,8 +260,8 @@ check_policy 2 ".Objects.social.rule | length"
 check_policy 3 ".Objects.system.aclrule | length"
 check_policy 1 ".Objects.system.cluster | length"
 
-# check dependencies
-check_dependencies "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
+# check claims
+check_claims "-f ${POLICY_DIR}/policy/john-prod-ts.yaml -f ${POLICY_DIR}/policy/alice-dev-ts.yaml -f ${POLICY_DIR}/policy/bob-dev-ts.yaml"
 
 sleep 1
 

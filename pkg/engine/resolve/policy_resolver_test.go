@@ -28,27 +28,27 @@ func TestPolicyResolverSimple(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependency (should be resolved to the first context)
-	d1 := b.AddDependency(b.AddUser(), contract)
-	d1.Labels["label1"] = "value1"
+	// add claim (should be resolved to the first context)
+	c1 := b.AddClaim(b.AddUser(), contract)
+	c1.Labels["label1"] = "value1"
 
-	// add dependency (should be resolved to the second context)
-	d2 := b.AddDependency(b.AddUser(), contract)
-	d2.Labels["label2"] = "value2"
+	// add claim (should be resolved to the second context)
+	c2 := b.AddClaim(b.AddUser(), contract)
+	c2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, []verifyDependency{
-		{d: d1, resolved: true},
-		{d: d2, resolved: true},
+	resolution := resolvePolicy(t, b, []verifyClaim{
+		{claim: c1, resolved: true},
+		{claim: c2, resolved: true},
 	})
 
 	// check instance 1
 	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component, resolution)
-	assert.Equal(t, 1, len(instance1.DependencyKeys), "Instance should be referenced by one dependency")
+	assert.Equal(t, 1, len(instance1.ClaimKeys), "Instance should be referenced by one claim")
 
 	// check instance 2
 	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[1], nil, service, component, resolution)
-	assert.Equal(t, 1, len(instance2.DependencyKeys), "Instance should be referenced by one dependency")
+	assert.Equal(t, 1, len(instance2.ClaimKeys), "Instance should be referenced by one claim")
 }
 
 func TestPolicyResolverComponentWithCriteria(t *testing.T) {
@@ -74,31 +74,31 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependency (should be resolved to use components 1 and 2, but not 3)
-	d1 := b.AddDependency(b.AddUser(), contract)
-	d1.Labels["param2"] = "value2"
+	// add claim (should be resolved to use components 1 and 2, but not 3)
+	c1 := b.AddClaim(b.AddUser(), contract)
+	c1.Labels["param2"] = "value2"
 
-	// add dependency (should be resolved to use components 1 and 3, but not 2)
-	d2 := b.AddDependency(b.AddUser(), contract)
-	d1.Labels["param3"] = "value3"
+	// add claim (should be resolved to use components 1 and 3, but not 2)
+	c2 := b.AddClaim(b.AddUser(), contract)
+	c1.Labels["param3"] = "value3"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, []verifyDependency{
-		{d: d1, resolved: true},
-		{d: d2, resolved: true},
+	resolution := resolvePolicy(t, b, []verifyClaim{
+		{claim: c1, resolved: true},
+		{claim: c2, resolved: true},
 	})
 
 	// check component 1
 	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component1, resolution)
-	assert.Equal(t, 2, len(instance1.DependencyKeys), "Component 1 instance should be used by both dependencies")
+	assert.Equal(t, 2, len(instance1.ClaimKeys), "Component 1 instance should be used by both claims")
 
 	// check component 2
 	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component2, resolution)
-	assert.Equal(t, 1, len(instance2.DependencyKeys), "Component 2 instance should be used by only one dependency")
+	assert.Equal(t, 1, len(instance2.ClaimKeys), "Component 2 instance should be used by only one claim")
 
 	// check component 3
 	instance3 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, service, component3, resolution)
-	assert.Equal(t, 1, len(instance3.DependencyKeys), "Component 3 instance should be used by only one dependency")
+	assert.Equal(t, 1, len(instance3.ClaimKeys), "Component 3 instance should be used by only one claim")
 }
 
 func TestPolicyResolverMultipleNS(t *testing.T) {
@@ -123,13 +123,13 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 	// ns1/service1 -> depends on -> ns2/contract2
 	b.AddServiceComponent(service1, b.ContractComponent(contract2))
 
-	// create dependency in ns3 on ns1/contract1 (it's created on behalf of domain admin, who can for sure consume services from all namespaces)
+	// create claim in ns3 on ns1/contract1 (it's created on behalf of domain admin, who can for sure consume services from all namespaces)
 	b.SwitchNamespace("ns3")
-	d := b.AddDependency(b.AddUserDomainAdmin(), contract1)
+	claim := b.AddClaim(b.AddUserDomainAdmin(), contract1)
 
 	// policy resolution should be completed successfully
-	resolvePolicy(t, b, []verifyDependency{
-		{d: d, resolved: true},
+	resolvePolicy(t, b, []verifyClaim{
+		{claim: claim, resolved: true},
 	})
 }
 
@@ -147,19 +147,19 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependency with full labels (should be resolved successfully)
-	d1 := b.AddDependency(b.AddUser(), contract1)
-	d1.Labels["label1"] = "value1"
-	d1.Labels["label2"] = "value2"
+	// add claim with full labels (should be resolved successfully)
+	c1 := b.AddClaim(b.AddUser(), contract1)
+	c1.Labels["label1"] = "value1"
+	c1.Labels["label2"] = "value2"
 
-	// add dependency with partial labels (should not resolved)
-	d2 := b.AddDependency(b.AddUser(), contract1)
-	d2.Labels["label1"] = "value1"
+	// add claim with partial labels (should not resolved)
+	c2 := b.AddClaim(b.AddUser(), contract1)
+	c2.Labels["label1"] = "value1"
 
 	// policy resolution should be completed successfully
-	resolvePolicy(t, b, []verifyDependency{
-		{d: d1, resolved: true},
-		{d: d2, resolved: false, logMessage: "unable to find matching context"},
+	resolvePolicy(t, b, []verifyClaim{
+		{claim: c1, resolved: true},
+		{claim: c2, resolved: false, logMessage: "unable to find matching context"},
 	})
 }
 
@@ -185,23 +185,23 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependency with labels 'label1', 'label2' and 'label3'
-	dependency := b.AddDependency(b.AddUser(), contract1)
-	dependency.Labels["label1"] = "value1"
-	dependency.Labels["label2"] = "value2"
-	dependency.Labels["label3"] = "value3"
+	// add claim with labels 'label1', 'label2' and 'label3'
+	claim := b.AddClaim(b.AddUser(), contract1)
+	claim.Labels["label1"] = "value1"
+	claim.Labels["label2"] = "value2"
+	claim.Labels["label3"] = "value3"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, []verifyDependency{
-		{d: dependency, resolved: true},
+	resolution := resolvePolicy(t, b, []verifyClaim{
+		{claim: claim, resolved: true},
 	})
 
 	// check labels for the end service (service2/contract2)
 	serviceInstance := getInstanceByParams(t, cluster, "k8ns", contract2, contract2.Contexts[0], nil, service2, nil, resolution)
 	labels := serviceInstance.CalculatedLabels.Labels
 
-	assert.Equal(t, "value1", labels["label1"], "Label 'label1=value1' should be carried from dependency all the way through the policy")
-	assert.Equal(t, "value2", labels["label2"], "Label 'label2=value2' should be carried from dependency all the way through the policy")
+	assert.Equal(t, "value1", labels["label1"], "Label 'label1=value1' should be carried from claim all the way through the policy")
+	assert.Equal(t, "value2", labels["label2"], "Label 'label2=value2' should be carried from claim all the way through the policy")
 	assert.NotContains(t, labels, "label3", "Label 'label3' should be removed")
 
 	assert.Equal(t, "labelValue1", labels["labelExtra1"], "Label 'labelExtra1' should be added on contract match")
@@ -243,12 +243,12 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependencies which feed conflicting labels into a given component
-	dependency := b.AddDependency(b.AddUser(), contract)
+	// add claims which feed conflicting labels into a given component
+	claim := b.AddClaim(b.AddUser(), contract)
 
 	// policy should be resolved successfully
-	resolution := resolvePolicy(t, b, []verifyDependency{
-		{d: dependency, resolved: true},
+	resolution := resolvePolicy(t, b, []verifyClaim{
+		{claim: claim, resolved: true},
 	})
 
 	// check discovery parameters of component 1
@@ -269,16 +269,16 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	assert.Equal(t, 5, instance2.CalculatedCodeParams.GetNestedMap("nested").GetNestedMap("param")["nameInt"], "Code parameter should be calculated correctly (int)")
 }
 
-func TestPolicyResolverDependencyWithNonExistingUser(t *testing.T) {
+func TestPolicyResolverClaimWithNonExistingUser(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	service := b.AddService()
 	contract := b.AddContract(service, b.CriteriaTrue())
 	user := &lang.User{Name: "non-existing-user-123456789"}
-	dependency := b.AddDependency(user, contract)
+	claim := b.AddClaim(user, contract)
 
-	// dependency declared by non-existing consumer should result in dependency error
-	resolvePolicy(t, b, []verifyDependency{
-		{d: dependency, resolved: false, logMessage: "non-existing user"},
+	// claim declared by non-existing consumer should result in claim error
+	resolvePolicy(t, b, []verifyClaim{
+		{claim: claim, resolved: false, logMessage: "non-existing user"},
 	})
 }
 
@@ -297,16 +297,16 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependencies which feed conflicting labels into a given component
-	d1 := b.AddDependency(b.AddUser(), contract)
-	d1.Labels["deplabel"] = "1"
-	d2 := b.AddDependency(b.AddUser(), contract)
-	d2.Labels["deplabel"] = "2"
+	// add claims which feed conflicting labels into a given component
+	c1 := b.AddClaim(b.AddUser(), contract)
+	c1.Labels["deplabel"] = "1"
+	c2 := b.AddClaim(b.AddUser(), contract)
+	c2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting code parameters should result in an error
-	resolvePolicy(t, b, []verifyDependency{
-		{d: d1, resolved: false, logMessage: "conflicting code parameters"},
-		{d: d2, resolved: false, logMessage: "conflicting code parameters"},
+	resolvePolicy(t, b, []verifyClaim{
+		{claim: c1, resolved: false, logMessage: "conflicting code parameters"},
+		{claim: c2, resolved: false, logMessage: "conflicting code parameters"},
 	})
 }
 
@@ -326,16 +326,16 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependencies which feed conflicting labels into a given component
-	d1 := b.AddDependency(b.AddUser(), contract)
-	d1.Labels["deplabel"] = "1"
-	d2 := b.AddDependency(b.AddUser(), contract)
-	d2.Labels["deplabel"] = "2"
+	// add claims which feed conflicting labels into a given component
+	c1 := b.AddClaim(b.AddUser(), contract)
+	c1.Labels["deplabel"] = "1"
+	c2 := b.AddClaim(b.AddUser(), contract)
+	c2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting discovery parameters should result in an error
-	resolvePolicy(t, b, []verifyDependency{
-		{d: d1, resolved: false, logMessage: "conflicting discovery parameters"},
-		{d: d2, resolved: false, logMessage: "conflicting discovery parameters"},
+	resolvePolicy(t, b, []verifyClaim{
+		{claim: c1, resolved: false, logMessage: "conflicting discovery parameters"},
+		{claim: c2, resolved: false, logMessage: "conflicting discovery parameters"},
 	})
 }
 
@@ -358,12 +358,12 @@ func TestPolicyResolverServiceLoop(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add dependency
-	dependency := b.AddDependency(b.AddUser(), contract1)
+	// add claim
+	claim := b.AddClaim(b.AddUser(), contract1)
 
-	// policy resolution with service dependency cycle should should result in an error
-	resolvePolicy(t, b, []verifyDependency{
-		{d: dependency, resolved: false, logMessage: "service cycle detected"},
+	// policy resolution with service cycle should should result in an error
+	resolvePolicy(t, b, []verifyClaim{
+		{claim: claim, resolved: false, logMessage: "service cycle detected"},
 	})
 }
 
@@ -386,21 +386,21 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	b.AddRule(b.Criteria("label1 == 'value1'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster1.Name)))
 	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster2.Name)))
 
-	// add dependencies
-	d1 := b.AddDependency(b.AddUser(), contract)
-	d1.Labels["label1"] = "value1"
-	d2 := b.AddDependency(b.AddUser(), contract)
-	d2.Labels["label2"] = "value2"
+	// add claims
+	c1 := b.AddClaim(b.AddUser(), contract)
+	c1.Labels["label1"] = "value1"
+	c2 := b.AddClaim(b.AddUser(), contract)
+	c2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
-	resolution := resolvePolicy(t, b, []verifyDependency{
-		{d: d1, resolved: true},
-		{d: d2, resolved: true},
+	resolution := resolvePolicy(t, b, []verifyClaim{
+		{claim: c1, resolved: true},
+		{claim: c2, resolved: true},
 	})
 
-	// check that both dependencies got resolved and got placed in different clusters
-	instance1 := resolution.ComponentInstanceMap[resolution.GetDependencyResolution(d1).ComponentInstanceKey]
-	instance2 := resolution.ComponentInstanceMap[resolution.GetDependencyResolution(d2).ComponentInstanceKey]
+	// check that both claims got resolved and got placed in different clusters
+	instance1 := resolution.ComponentInstanceMap[resolution.GetClaimResolution(c1).ComponentInstanceKey]
+	instance2 := resolution.ComponentInstanceMap[resolution.GetClaimResolution(c2).ComponentInstanceKey]
 	assert.Equal(t, cluster1.Name, instance1.CalculatedLabels.Labels[lang.LabelTarget], "Cluster should be set correctly via rules")
 	assert.Equal(t, cluster2.Name, instance2.CalculatedLabels.Labels[lang.LabelTarget], "Cluster should be set correctly via rules")
 }
@@ -418,26 +418,26 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// add multiple dependencies
-	dExpected := []verifyDependency{}
+	// add multiple claims
+	expected := []verifyClaim{}
 	for i := 0; i < 10; i++ {
-		dependency := b.AddDependency(b.AddUser(), contract)
-		dExpected = append(dExpected, verifyDependency{
-			d: dependency, resolved: false, logMessage: "panic from mock user loader",
+		claim := b.AddClaim(b.AddUser(), contract)
+		expected = append(expected, verifyClaim{
+			claim: claim, resolved: false, logMessage: "panic from mock user loader",
 		})
 	}
 
 	// policy resolution should result in an error
-	resolvePolicy(t, b, dExpected)
+	resolvePolicy(t, b, expected)
 }
 
 func TestPolicyResolverAllocationKeys(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
 	tc := map[string]bool{
-		"fixedValue":           true,
-		"{{ .User.Name }}":     false,
-		"{{ .Dependency.ID }}": false,
+		"fixedValue":       true,
+		"{{ .User.Name }}": false,
+		"{{ .Claim.ID }}":  false,
 	}
 
 	for allocationKey, sameInstance := range tc {
@@ -450,28 +450,28 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 		// add rule to set cluster
 		cluster := b.AddCluster()
 		b.AddRule(b.Criteria(
-			"Service.Namespace == 'main' && Dependency.Namespace == 'main'",
+			"Service.Namespace == 'main' && Claim.Namespace == 'main'",
 			"true",
 			"false",
 		), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-		// add dependency (should be resolved to the first context)
-		d1 := b.AddDependency(b.AddUser(), contract)
+		// add claim (should be resolved to the first context)
+		c1 := b.AddClaim(b.AddUser(), contract)
 
-		// add dependency (should be resolved to the second context)
-		d2 := b.AddDependency(b.AddUser(), contract)
+		// add claim (should be resolved to the second context)
+		c2 := b.AddClaim(b.AddUser(), contract)
 
 		// policy resolution should be completed successfully
-		resolution := resolvePolicy(t, b, []verifyDependency{
-			{d: d1, resolved: true},
-			{d: d2, resolved: true},
+		resolution := resolvePolicy(t, b, []verifyClaim{
+			{claim: c1, resolved: true},
+			{claim: c2, resolved: true},
 		})
 
-		// make sure dependencies point to different instances
+		// make sure claims point to different instances
 		if sameInstance {
-			assert.Equal(t, resolution.GetDependencyResolution(d1).ComponentInstanceKey, resolution.GetDependencyResolution(d2).ComponentInstanceKey, "Dependencies should point to same instance")
+			assert.Equal(t, resolution.GetClaimResolution(c1).ComponentInstanceKey, resolution.GetClaimResolution(c2).ComponentInstanceKey, "Claims should point to same instance")
 		} else {
-			assert.NotEqual(t, resolution.GetDependencyResolution(d1).ComponentInstanceKey, resolution.GetDependencyResolution(d2).ComponentInstanceKey, "Dependencies should point to different instances")
+			assert.NotEqual(t, resolution.GetClaimResolution(c1).ComponentInstanceKey, resolution.GetClaimResolution(c2).ComponentInstanceKey, "Claims should point to different instances")
 		}
 	}
 }
@@ -480,22 +480,22 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 	Helpers
 */
 
-type verifyDependency struct {
-	d          *lang.Dependency
+type verifyClaim struct {
+	claim      *lang.Claim
 	resolved   bool
 	logMessage string
 }
 
-func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expected []verifyDependency) *PolicyResolution {
+func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expected []verifyClaim) *PolicyResolution {
 	t.Helper()
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
-	result := resolver.ResolveAllDependencies()
+	result := resolver.ResolveAllClaims()
 
-	// check status of all dependencies
+	// check status of all claims
 	for _, check := range expected {
 		// check status first
-		if !assert.Equal(t, check.resolved, result.GetDependencyResolution(check.d).Resolved, "Dependency resolution status should be correct for %v", check.d) {
+		if !assert.Equal(t, check.resolved, result.GetClaimResolution(check.claim).Resolved, "Claim resolution status should be correct for %v", check.claim) {
 			// print log into stdout and exit
 			hook := event.NewHookConsole(logrus.DebugLevel)
 			eventLog.Save(hook)

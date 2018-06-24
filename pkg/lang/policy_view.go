@@ -66,10 +66,10 @@ func (view *PolicyView) ManageObject(obj Base) error {
 }
 
 // CanConsume returns if user has permissions to consume a given service.
-// If a user can declare a dependency in a given namespace, then he can essentially can consume the service
+// If a user can declare a claim in a given namespace, then he can essentially can consume the service
 func (view *PolicyView) CanConsume(service *Service) (bool, error) {
-	obj := &Dependency{
-		TypeKind: DependencyObject.GetTypeKind(),
+	obj := &Claim{
+		TypeKind: ClaimObject.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: service.GetNamespace(),
 		},

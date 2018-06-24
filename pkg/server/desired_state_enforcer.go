@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"runtime/debug"
+
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
@@ -13,7 +15,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
-	"runtime/debug"
 )
 
 func (server *Server) desiredStateEnforceLoop() error {

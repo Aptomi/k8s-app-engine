@@ -43,7 +43,7 @@ type PolicyResolver struct {
 	templateCache *template.Cache
 
 	/*
-		Calculated objects (aggregated over all dependencies)
+		Calculated objects (aggregated over all claims)
 	*/
 
 	combineMutex sync.Mutex
@@ -74,30 +74,30 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLo
 	}
 }
 
-// ResolveAllDependencies takes policy as input and calculates PolicyResolution (desired state) as output.
+// ResolveAllClaims takes policy as input and calculates PolicyResolution (desired state) as output.
 //
 // The method resolves all recorded claims for consuming contracts ("instantiate <contract> with <labels>"), calculating
 // which components have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
 // it can be rendered by the engine diff/apply by deploying and configuring required components in the cloud.
 //
-// As a result, status of every dependency will be stored in resolution state.
-func (resolver *PolicyResolver) ResolveAllDependencies() *PolicyResolution {
+// As a result, status of every claim will be stored in resolution state.
+func (resolver *PolicyResolver) ResolveAllClaims() *PolicyResolution {
 	// Allocate semaphore, making sure we don't run more than MaxConcurrentGoRoutines go routines at the same time
 	var semaphore = make(chan int, MaxConcurrentGoRoutines)
 	var wg sync.WaitGroup
-	dependencies := resolver.policy.GetObjectsByKind(lang.DependencyObject.Kind)
+	claims := resolver.policy.GetObjectsByKind(lang.ClaimObject.Kind)
 
-	// Resolve every declared dependency
-	for _, d := range dependencies {
-		// Start go routine for resolving a given dependency
+	// Resolve every declared claim
+	for _, claim := range claims {
+		// Start go routine for resolving a given claim
 		wg.Add(1)
 		semaphore <- 1
-		go func(d *lang.Dependency) {
+		go func(c *lang.Claim) {
 			defer wg.Done()
-			node, resolveErr := resolver.resolveDependency(d)
+			node, resolveErr := resolver.resolveClaim(c)
 			resolver.combineData(node, resolveErr)
 			<-semaphore
-		}(d.(*lang.Dependency))
+		}(claim.(*lang.Claim))
 	}
 
 	// Wait for all go routines to end
@@ -113,8 +113,8 @@ func (resolver *PolicyResolver) ResolveAllDependencies() *PolicyResolution {
 	return resolver.resolution
 }
 
-// Resolves a single dependency and returns an error if it cannot be resolved
-func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *resolutionNode, resolveErr error) {
+// Resolves a single claim and returns an error if it cannot be resolved
+func (resolver *PolicyResolver) resolveClaim(claim *lang.Claim) (node *resolutionNode, resolveErr error) {
 	// make sure we are converting panics into errors
 	defer func() {
 		if err := recover(); err != nil {
@@ -127,7 +127,7 @@ func (resolver *PolicyResolver) resolveDependency(d *lang.Dependency) (node *res
 	node = resolver.newResolutionNode()
 
 	// populate resolution node with data (e.g. construct initial set of labels)
-	resolver.initResolutionNode(node, d)
+	resolver.initResolutionNode(node, claim)
 
 	// resolve it
 	resolveErr = resolver.resolveNode(node)
@@ -156,8 +156,8 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 }
 
-// Evaluate evaluates and resolves a single dependency ("<user> needs <service> with <labels>") and calculates component allocations
-// Returns error only if there is an issue with the given dependency and it cannot be resolved
+// Evaluate evaluates and resolves a single claim ("<user> needs <service> with <labels>") and calculates component allocations
+// Returns error only if there is an issue with the given claim and it cannot be resolved
 func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr error) {
 	recursiveError := false
 
@@ -177,9 +177,9 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	// Error variable that we will be reusing
 	var err error
 
-	// Indicate that we are starting to resolve dependency
-	node.objectResolved(node.dependency)
-	node.logStartResolvingDependency()
+	// Indicate that we are starting to resolve claim
+	node.objectResolved(node.claim)
+	node.logStartResolvingClaim()
 
 	// Locate the user
 	err = node.checkUserExists()
@@ -282,8 +282,8 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 			return err
 		}
 
-		// Print information that we are starting to resolve dependency (on code, or on service)
-		node.logResolvingDependencyOnComponent()
+		// Print information that we are starting to resolve claim (on code, or on service)
+		node.logResolvingClaimOnComponent()
 
 		if node.component.Code != nil {
 			// Evaluate code params
@@ -292,10 +292,10 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 				return err
 			}
 		} else if node.component.Contract != "" {
-			// Create a child node for dependency resolution
+			// Create a child node for claim resolution
 			nodeNext := node.createChildNode()
 
-			// Resolve dependency on another contract recursively
+			// Resolve claim on another contract recursively
 			err := resolver.resolveNode(nodeNext)
 
 			// Combine event logs first
@@ -310,12 +310,12 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 
 		// Record usage of a given component instance
 		node.logInstanceSuccessfullyResolved(node.componentKey)
-		node.resolution.RecordResolved(node.componentKey, node.dependency, node.depth, ruleResult)
+		node.resolution.RecordResolved(node.componentKey, node.claim, node.depth, ruleResult)
 	}
 
 	// Mark note as resolved and record usage of a given service instance
 	node.logInstanceSuccessfullyResolved(node.serviceKey)
-	node.resolution.RecordResolved(node.serviceKey, node.dependency, node.depth, ruleResult)
+	node.resolution.RecordResolved(node.serviceKey, node.claim, node.depth, ruleResult)
 
 	return nil
 }

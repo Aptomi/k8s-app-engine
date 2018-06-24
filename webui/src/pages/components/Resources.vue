@@ -2,7 +2,7 @@
   <div>
     <div class="box">
       <div class="box-header">
-        <h3 class="box-title">Resources: <b>{{ dependency.namespace }} / {{ dependency.kind }} / {{ dependency.name }}</b></h3>
+        <h3 class="box-title">Resources: <b>{{ claim.namespace }} / {{ claim.kind }} / {{ claim.name }}</b></h3>
       </div>
       <!-- /.box-header -->
       <div class="overlay" v-if="loading">
@@ -60,7 +60,7 @@
       this.fetchData()
     },
     props: {
-      'dependency': {
+      'claim': {
         type: Object,
         validator: function (value) {
           return true
@@ -68,7 +68,7 @@
       }
     },
     watch: {
-      'dependency': 'fetchData'
+      'claim': 'fetchData'
     },
     methods: {
       fetchData () {
@@ -86,7 +86,7 @@
           this.error = err
         }, this)
 
-        getResources(this.dependency, fetchSuccess, fetchError)
+        getResources(this.claim, fetchSuccess, fetchError)
       }
     }
   }

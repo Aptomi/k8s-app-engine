@@ -12,8 +12,8 @@ var (
 		component.CreateActionObject,
 		component.UpdateActionObject,
 		component.DeleteActionObject,
-		component.AttachDependencyActionObject,
-		component.DetachDependencyActionObject,
+		component.AttachClaimActionObject,
+		component.DetachClaimActionObject,
 		component.EndpointsActionObject,
 	}
 

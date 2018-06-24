@@ -1,4 +1,4 @@
-- kind: dependency
+- kind: claim
   metadata:
     namespace: social
     name: prod

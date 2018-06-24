@@ -91,13 +91,13 @@
                         <span>{{ k }}</span>
                       </div>
                     </div>
-                    <div v-else-if="aType === 'dependency'">
+                    <div v-else-if="aType === 'claim'">
                       <div v-if="aData === 'reject'">
                         <span class="label label-danger">{{ aType }}</span>
                         <span>{{ aData }}</span>
                       </div>
                       <div v-else>
-                        <span class="label label-danger">Unknown dependency action</span>
+                        <span class="label label-danger">Unknown claim action</span>
                       </div>
                     </div>
                     <div v-else>

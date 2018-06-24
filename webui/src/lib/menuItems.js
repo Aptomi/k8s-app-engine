@@ -28,9 +28,9 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Instances',
+        name: 'Claims',
         router: {
-          name: 'ShowDependencies'
+          name: 'ShowClaims'
         }
       },
       {

@@ -60,16 +60,16 @@ func BenchmarkEngineMedium(b *testing.B) {
 }
 
 type PolicyGenerator struct {
-	random                    *rand.Rand
-	labels                    int
-	services                  int
-	serviceCodeComponents     int
-	codeParams                int
-	serviceDependencyMaxChain int
-	contextsPerContract       int
-	rules                     int
-	users                     int
-	dependencies              int
+	random                *rand.Rand
+	labels                int
+	services              int
+	serviceCodeComponents int
+	codeParams            int
+	serviceClaimMaxChain  int
+	contextsPerContract   int
+	rules                 int
+	users                 int
+	claims                int
 
 	generatedUserLabels map[string]string
 	generatedLabelKeys  []string
@@ -79,19 +79,19 @@ type PolicyGenerator struct {
 	externalData      *external.Data
 }
 
-func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceDependencyMaxChain, contextsPerContract, rules, users, dependencies int) *PolicyGenerator {
+func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceClaimMaxChain, contextsPerContract, rules, users, claims int) *PolicyGenerator {
 	result := &PolicyGenerator{
-		random:                    rand.New(rand.NewSource(randSeed)),
-		labels:                    labels,
-		services:                  services,
-		serviceCodeComponents:     serviceCodeComponents,
-		codeParams:                codeParams,
-		serviceDependencyMaxChain: serviceDependencyMaxChain,
-		contextsPerContract:       contextsPerContract,
-		rules:                     rules,
-		users:                     users,
-		dependencies:              dependencies,
-		policy:                    lang.NewPolicy(),
+		random:                rand.New(rand.NewSource(randSeed)),
+		labels:                labels,
+		services:              services,
+		serviceCodeComponents: serviceCodeComponents,
+		codeParams:            codeParams,
+		serviceClaimMaxChain:  serviceClaimMaxChain,
+		contextsPerContract:   contextsPerContract,
+		rules:                 rules,
+		users:                 users,
+		claims:                claims,
+		policy:                lang.NewPolicy(),
 	}
 	return result
 }
@@ -109,8 +109,8 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	// generate rules
 	gen.makeRules()
 
-	// generate dependencies
-	gen.makeDependencies()
+	// generate claims
+	gen.makeClaims()
 
 	// generate cluster
 	gen.makeCluster()
@@ -121,11 +121,11 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 		NewSecretLoaderImpl(),
 	)
 
-	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Dependencies = %d, Users = %d\n",
+	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Claims = %d, Users = %d\n",
 		len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind)),
 		maxChainLen,
 		len(gen.policy.GetObjectsByKind(lang.ContractObject.Kind))*gen.contextsPerContract,
-		len(gen.policy.GetObjectsByKind(lang.DependencyObject.Kind)),
+		len(gen.policy.GetObjectsByKind(lang.ClaimObject.Kind)),
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
 
@@ -156,7 +156,7 @@ func (gen *PolicyGenerator) makeServices() int {
 		gen.generatedServices[i] = gen.makeService()
 	}
 
-	// add some dependencies
+	// add some dependencies between services
 	cnt := make([]int, gen.services)
 	maxChainLen := 0
 	for i := 0; i < gen.services; i++ {
@@ -165,11 +165,11 @@ func (gen *PolicyGenerator) makeServices() int {
 		}
 
 		// see if we have exceeded the max chain length
-		if cnt[i]+1 > gen.serviceDependencyMaxChain {
+		if cnt[i]+1 > gen.serviceClaimMaxChain {
 			continue
 		}
 
-		// try to add at most one dependency from each service
+		// try to add at most one claim from each service
 		j := gen.random.Intn(gen.services)
 		if j <= i {
 			continue
@@ -239,12 +239,12 @@ func (gen *PolicyGenerator) makeRules() {
 				RequireAll: []string{"service.Name == 'some-name-" + strconv.Itoa(i) + "'"},
 			},
 			Actions: &lang.RuleActions{
-				Dependency: lang.DependencyAction("reject"),
+				Claim: lang.ClaimAction("reject"),
 			},
 		})
 	}
 
-	// generate rule which allows all dependencies
+	// generate rule which specifies placement for all claims
 	gen.addObject(&lang.Rule{
 		TypeKind: lang.RuleObject.GetTypeKind(),
 		Metadata: lang.Metadata{
@@ -308,18 +308,18 @@ func (gen *PolicyGenerator) makeContracts() {
 	}
 }
 
-func (gen *PolicyGenerator) makeDependencies() {
-	for i := 0; i < gen.dependencies; i++ {
-		dependency := &lang.Dependency{
-			TypeKind: lang.DependencyObject.GetTypeKind(),
+func (gen *PolicyGenerator) makeClaims() {
+	for i := 0; i < gen.claims; i++ {
+		claim := &lang.Claim{
+			TypeKind: lang.ClaimObject.GetTypeKind(),
 			Metadata: lang.Metadata{
 				Namespace: "main",
-				Name:      "dependency-" + strconv.Itoa(i),
+				Name:      "claim-" + strconv.Itoa(i),
 			},
 			User:     "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
 			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.services)),
 		}
-		gen.addObject(dependency)
+		gen.addObject(claim)
 	}
 }
 
@@ -398,7 +398,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 
 	timeStart := time.Now()
 
-	// resolve all dependencies and apply actions
+	// resolve all claims and apply actions
 	actualState := resolvePolicyBenchmark(b, lang.NewPolicy(), externalData, false)
 	desiredState := resolvePolicyBenchmark(b, desiredPolicy, externalData, true)
 
@@ -416,12 +416,11 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
 	timeCheckpoint := time.Now()
-	depCnt := len(desiredPolicy.GetObjectsByKind(lang.DependencyObject.Kind))
-	fmt.Printf("[%s] Time = %s, resolving %d dependencies and %d component instances\n", testName, time.Since(timeStart).String(), depCnt, len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, resolving %d claims and %d component instances\n", testName, time.Since(timeStart).String(), len(desiredPolicy.GetObjectsByKind(lang.ClaimObject.Kind)), len(actualState.ComponentInstanceMap))
 
-	// now, remove all dependencies and apply actions
-	for _, dependency := range desiredPolicy.GetObjectsByKind(lang.DependencyObject.Kind) {
-		desiredPolicy.RemoveObject(dependency)
+	// now, remove all claims and apply actions
+	for _, claim := range desiredPolicy.GetObjectsByKind(lang.ClaimObject.Kind) {
+		desiredPolicy.RemoveObject(claim)
 	}
 	desiredState = resolvePolicyBenchmark(b, desiredPolicy, externalData, false)
 	actions = diff.NewPolicyResolutionDiff(desiredState, actualState).ActionPlan
@@ -437,7 +436,7 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	)
 	_ = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
-	fmt.Printf("[%s] Time = %s, deleting all dependencies and component instances\n", testName, time.Since(timeCheckpoint))
+	fmt.Printf("[%s] Time = %s, deleting all claims and component instances\n", testName, time.Since(timeCheckpoint))
 }
 
 func applyAndCheckBenchmark(b *testing.B, apply *EngineApply, expectedResult action.ApplyResult) *resolve.PolicyResolution {
@@ -464,22 +463,22 @@ func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *ext
 	b.Helper()
 	eventLog := event.NewLog(logrus.DebugLevel, "test-resolve")
 	resolver := resolve.NewPolicyResolver(policy, externalData, eventLog)
-	result := resolver.ResolveAllDependencies()
+	result := resolver.ResolveAllClaims()
 	t := &testing.T{}
 
-	dependencies := policy.GetObjectsByKind(lang.DependencyObject.Kind)
-	for _, d := range dependencies {
-		if !assert.True(t, result.GetDependencyResolution(d.(*lang.Dependency)).Resolved, "Dependency resolution status should be correct for %v", d) {
+	claims := policy.GetObjectsByKind(lang.ClaimObject.Kind)
+	for _, claim := range claims {
+		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)
 			eventLog.Save(hook)
 			b.Fatal("policy resolution error")
 		}
 	}
 
-	if expectedNonEmpty != (len(dependencies) > 0) {
+	if expectedNonEmpty != (len(claims) > 0) {
 		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
-		b.Fatal("no dependencies resolved")
+		b.Fatal("no claims resolved")
 	}
 
 	return result

@@ -62,8 +62,8 @@ func TestPolicyValidationService(t *testing.T) {
 		makeServiceComponents(1, "", Invalid-1, 0),
 		makeServiceComponents(1, contract.Name, Nil, Invalid),
 		duplicateNames(makeServiceComponents(10, "", 1, 1)),
-		dependenciesInvalid(makeServiceComponents(10, "", 1, 1)),
-		dependenciesCycle(makeServiceComponents(10, "", 1, 1)),
+		claimsInvalid(makeServiceComponents(10, "", 1, 1)),
+		claimsCycle(makeServiceComponents(10, "", 1, 1)),
 	}
 	for _, components := range componentTestsFail {
 		service := makeService("service", Empty)
@@ -103,15 +103,15 @@ func TestPolicyValidationContract(t *testing.T) {
 	})
 }
 
-func TestPolicyValidationDependency(t *testing.T) {
-	// Dependency should point to an existing contract
+func TestPolicyValidationClaim(t *testing.T) {
+	// Claim should point to an existing contract
 	runValidationTests(t, ResSuccess, false, []Base{
 		makeContract("contract", 0, ""),
-		makeDependency("contract"),
+		makeClaim("contract"),
 	})
 	runValidationTests(t, ResFailure, false, []Base{
 		makeContract("contract", 0, ""),
-		makeDependency("contract-unknown"),
+		makeClaim("contract-unknown"),
 	})
 }
 
@@ -218,7 +218,7 @@ func makeRule(weight int, expr string, actionNum int, actionKey string) *Rule {
 	case 0:
 		rule.Actions = &RuleActions{ChangeLabels: NewLabelOperationsSetSingleLabel(actionKey, "value")}
 	case 1:
-		rule.Actions = &RuleActions{Dependency: DependencyAction(actionKey)}
+		rule.Actions = &RuleActions{Claim: ClaimAction(actionKey)}
 	case 2:
 		rule.Actions = &RuleActions{Ingress: IngressAction(actionKey)}
 	case Empty:
@@ -286,7 +286,7 @@ func makeContract(name string, labelOpsNum int, pointToService string) *Contract
 				Name: "context",
 				Allocation: &Allocation{
 					Service: pointToService,
-					Keys:    []string{"simple", "{{ .Dependency.ID }}"},
+					Keys:    []string{"simple", "{{ .Claim.ID }}"},
 				},
 			},
 		}
@@ -337,17 +337,17 @@ func makeService(name string, labelNum int) *Service {
 	return service
 }
 
-func makeDependency(contract string) *Dependency {
-	dependency := &Dependency{
-		TypeKind: DependencyObject.GetTypeKind(),
+func makeClaim(contract string) *Claim {
+	claim := &Claim{
+		TypeKind: ClaimObject.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
-			Name:      "dependency",
+			Name:      "claim",
 		},
 		User:     "user",
 		Contract: contract,
 	}
-	return dependency
+	return claim
 }
 
 func makeServiceComponents(count int, contract string, codeNum int, discoveryNum int) []*ServiceComponent {
@@ -419,14 +419,14 @@ func duplicateNames(components []*ServiceComponent) []*ServiceComponent {
 	return components
 }
 
-func dependenciesInvalid(components []*ServiceComponent) []*ServiceComponent {
+func claimsInvalid(components []*ServiceComponent) []*ServiceComponent {
 	for _, component := range components {
 		component.Dependencies = []string{"invalid"}
 	}
 	return components
 }
 
-func dependenciesCycle(components []*ServiceComponent) []*ServiceComponent {
+func claimsCycle(components []*ServiceComponent) []*ServiceComponent {
 	for _, component := range components {
 		component.Dependencies = []string{component.Name}
 	}

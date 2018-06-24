@@ -34,7 +34,7 @@ func checkMatch(t *testing.T, expectedValue bool, component *ServiceComponent, p
 func TestServiceComponentsTopologicalSort(t *testing.T) {
 	checkTopologicalSort(t, makeNormalService(), []string{"component4", "component1", "component2", "component3"}, false)
 	checkTopologicalSort(t, makeCyclicService(), nil, true)
-	checkTopologicalSort(t, makeBadComponentDependencyService(), nil, true)
+	checkTopologicalSort(t, makeBadComponentClaimService(), nil, true)
 }
 func toStringArray(components []*ServiceComponent) []string {
 	result := []string{}
@@ -87,7 +87,7 @@ func makeCyclicService() *Service {
 		TypeKind: ServiceObject.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
-			Name:      "badcomponentdependency",
+			Name:      "badcomponentclaim",
 		},
 		Components: []*ServiceComponent{
 			{
@@ -110,7 +110,7 @@ func makeCyclicService() *Service {
 	}
 }
 
-func makeBadComponentDependencyService() *Service {
+func makeBadComponentClaimService() *Service {
 	return &Service{
 		TypeKind: ServiceObject.GetTypeKind(),
 		Metadata: Metadata{

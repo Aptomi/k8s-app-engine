@@ -14,8 +14,8 @@ func (b *GraphBuilder) Object(obj runtime.Object) *Graph {
 	if contract, ok := obj.(*lang.Contract); ok {
 		b.traceContract(contract, nil, "", 0, PolicyCfgDefault)
 	}
-	if dependency, ok := obj.(*lang.Dependency); ok {
-		b.traceDependencyResolution("", dependency, nil, 0, DependencyResolutionCfgDefault, func(*resolve.ComponentInstance) bool { return true })
+	if claim, ok := obj.(*lang.Claim); ok {
+		b.traceClaimResolution("", claim, nil, 0, ClaimResolutionCfgDefault, func(*resolve.ComponentInstance) bool { return true })
 	}
 	return b.graph
 }

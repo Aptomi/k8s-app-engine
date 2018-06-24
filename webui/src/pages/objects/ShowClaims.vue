@@ -31,7 +31,7 @@
           <table class="table table-hover">
             <tbody>
               <tr>
-                <td>No Instances Defined</td>
+                <td>No Claims Defined</td>
               </tr>
             </tbody>
           </table>
@@ -44,7 +44,7 @@
       <div class="col-xs-12">
         <div class="box">
           <div class="box-header">
-            <h3 class="box-title">Instances: <b>{{ ns }}</b></h3>
+            <h3 class="box-title">Claims: <b>{{ ns }}</b></h3>
           </div>
           <div class="box-body table-responsive no-padding">
             <table class="table table-hover">
@@ -115,7 +115,7 @@
     methods: {
       showEndpoints (obj) {
         this.$modal.show(endpoints, {
-          dependency: obj
+          claim: obj
         }, {
           width: '60%',
           height: 'auto'
@@ -132,7 +132,7 @@
       },
       showResources (obj) {
         this.$modal.show(resources, {
-          dependency: obj
+          claim: obj
         }, {
           width: '80%',
           height: 'auto'
@@ -162,7 +162,7 @@
           this.error = err
         }, this)
 
-        getPolicyObjectsWithProperties(fetchSuccess, fetchError, 'dependency')
+        getPolicyObjectsWithProperties(fetchSuccess, fetchError, 'claim')
       }
     }
   }

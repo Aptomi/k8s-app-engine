@@ -189,8 +189,8 @@ export async function getPolicyObjectsWithProperties (successFunc, errorFunc, ki
       fetchObjectProperties(objectList[idx])
     }
 
-    // 3. fetch status for all dependencies
-    fetchDependenciesStatus(objectList)
+    // 3. fetch status for all claims
+    fetchClaimsStatus(objectList)
 
     successFunc(objectList)
   }, function (err) {
@@ -198,19 +198,19 @@ export async function getPolicyObjectsWithProperties (successFunc, errorFunc, ki
   })
 }
 
-// fetches status of all dependencies
-export function fetchDependenciesStatus (objectList) {
+// fetches status of all claims
+export function fetchClaimsStatus (objectList) {
   const depIds = []
   for (const idx in objectList) {
-    if (objectList[idx]['kind'] === 'dependency') {
+    if (objectList[idx]['kind'] === 'claim') {
       depIds.push(objectList[idx]['namespace'] + '^' + objectList[idx]['name'])
     }
   }
 
-  const handler = ['policy', 'dependency', 'status', 'deployed', depIds.join(',')].join('/')
+  const handler = ['policy', 'claim', 'status', 'deployed', depIds.join(',')].join('/')
   callAPI(handler, sync, function (data) {
     for (const idx in objectList) {
-      if (objectList[idx]['kind'] === 'dependency') {
+      if (objectList[idx]['kind'] === 'claim') {
         const key = [objectList[idx]['namespace'], objectList[idx]['kind'], objectList[idx]['name']].join('/')
         if (key in data['status'] && data['status'][key]['found']) {
           objectList[idx]['status'] = data['status'][key]
@@ -221,17 +221,17 @@ export function fetchDependenciesStatus (objectList) {
     }
   }, function (err) {
     for (const idx in objectList) {
-      if (objectList[idx]['kind'] === 'dependency') {
+      if (objectList[idx]['kind'] === 'claim') {
         objectList[idx]['status_error'] = err
       }
     }
   })
 }
 
-// loads dependency deployment status
+// loads claim deployment status
 export async function getResources (d, successFunc, errorFunc) {
   await makeDelay()
-  const handler = ['policy', 'dependency', 'resources', d['metadata']['namespace'], d['metadata']['name']].join('/')
+  const handler = ['policy', 'claim', 'resources', d['metadata']['namespace'], d['metadata']['name']].join('/')
   callAPI(handler, async, function (data) {
     successFunc(data['resources'])
   }, function (err) {

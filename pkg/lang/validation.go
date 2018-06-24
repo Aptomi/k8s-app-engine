@@ -78,7 +78,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 	result.RegisterStructValidation(validateACLRule, ACLRule{})
 	result.RegisterStructValidation(validateCluster, Cluster{})
 	result.RegisterStructValidationCtx(validateService, Service{})
-	result.RegisterStructValidationCtx(validateDependency, Dependency{})
+	result.RegisterStructValidationCtx(validateClaim, Claim{})
 	result.RegisterStructValidationCtx(validateContract, Contract{})
 
 	// context
@@ -378,26 +378,26 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 		sl.ReportError(err.Error(), "Components", "", "topologicalSort", "")
 	}
 
-	// dependencies should point to existing components
+	// dependencies between service components should be valid
 	for _, component := range service.Components {
-		for _, dependencyName := range component.Dependencies {
-			if _, exists := componentNames[dependencyName]; !exists {
-				sl.ReportError(dependencyName, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, dependencyName), "", "exists", "")
+		for _, componentName := range component.Dependencies {
+			if _, exists := componentNames[componentName]; !exists {
+				sl.ReportError(componentName, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, componentName), "", "exists", "")
 				return
 			}
 		}
 	}
 }
 
-// checks if dependency is valid
-func validateDependency(ctx context.Context, sl validator.StructLevel) {
-	dependency := sl.Current().Addr().Interface().(*Dependency) // nolint: errcheck
-	policy := ctx.Value(policyKey).(*Policy)                    // nolint: errcheck
+// checks if claim is valid
+func validateClaim(ctx context.Context, sl validator.StructLevel) {
+	claim := sl.Current().Addr().Interface().(*Claim) // nolint: errcheck
+	policy := ctx.Value(policyKey).(*Policy)          // nolint: errcheck
 
-	// dependency should point to an existing contract
-	obj, err := policy.GetObject(ContractObject.Kind, dependency.Contract, dependency.Namespace)
+	// claim should point to an existing contract
+	obj, err := policy.GetObject(ContractObject.Kind, claim.Contract, claim.Namespace)
 	if obj == nil || err != nil {
-		sl.ReportError(dependency.Contract, fmt.Sprintf("Contract[%s/%s]", dependency.Namespace, dependency.Contract), "", "exists", "")
+		sl.ReportError(claim.Contract, fmt.Sprintf("Contract[%s/%s]", claim.Namespace, claim.Contract), "", "exists", "")
 		return
 	}
 }
@@ -428,7 +428,7 @@ func validateRule(sl validator.StructLevel) {
 	// rule should have at least one of the actions set
 	hasActions := false
 	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.ChangeLabels) > 0)
-	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Dependency) > 0)
+	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Claim) > 0)
 	hasActions = hasActions || (rule.Actions != nil && len(rule.Actions.Ingress) > 0)
 	if !hasActions {
 		sl.ReportError(rule.Actions, "Actions", "", "ruleActions", "")

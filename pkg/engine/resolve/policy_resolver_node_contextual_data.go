@@ -40,8 +40,8 @@ func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Par
 	return expression.NewParams(
 		node.labels.Labels,
 		map[string]interface{}{
-			"Service":    node.proxyService(node.service),
-			"Dependency": node.proxyDependency(node.dependency),
+			"Service": node.proxyService(node.service),
+			"Claim":   node.proxyClaim(node.claim),
 		},
 	)
 }
@@ -55,13 +55,13 @@ func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Par
 func (node *resolutionNode) getContextualDataForContextAllocationTemplate() *template.Parameters {
 	return template.NewParams(
 		struct {
-			User       interface{}
-			Dependency interface{}
-			Labels     interface{}
+			User   interface{}
+			Claim  interface{}
+			Labels interface{}
 		}{
-			User:       node.proxyUser(node.user),
-			Dependency: node.proxyDependency(node.dependency),
-			Labels:     node.labels.Labels,
+			User:   node.proxyUser(node.user),
+			Claim:  node.proxyClaim(node.claim),
+			Labels: node.labels.Labels,
 		},
 	)
 }
@@ -112,14 +112,14 @@ func (node *resolutionNode) proxyUser(user *lang.User) interface{} {
 	}
 }
 
-// How dependency is visible from the policy language
-func (node *resolutionNode) proxyDependency(dependency *lang.Dependency) interface{} {
+// How claim is visible from the policy language
+func (node *resolutionNode) proxyClaim(claim *lang.Claim) interface{} {
 	result := struct {
 		lang.Metadata
 		ID interface{}
 	}{
-		Metadata: dependency.Metadata,
-		ID:       runtime.KeyForStorable(dependency),
+		Metadata: claim.Metadata,
+		ID:       runtime.KeyForStorable(claim),
 	}
 	return result
 }
