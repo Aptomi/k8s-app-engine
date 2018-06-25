@@ -56,30 +56,30 @@ func (n contractNode) getLabel() string {
 }
 
 /*
-	Service
+	Bundle
 */
-type serviceNode struct {
-	service *lang.Service
+type bundleNode struct {
+	bundle *lang.Bundle
 }
 
-func (n serviceNode) getGroup() string {
-	return "service"
+func (n bundleNode) getGroup() string {
+	return "bundle"
 }
 
-func (n serviceNode) getID() string {
-	return runtime.KeyForStorable(n.service)
+func (n bundleNode) getID() string {
+	return runtime.KeyForStorable(n.bundle)
 }
 
-func (n serviceNode) getLabel() string {
-	return n.service.Name
+func (n bundleNode) getLabel() string {
+	return n.bundle.Name
 }
 
 /*
 	Component
 */
 type componentNode struct {
-	service   *lang.Service
-	component *lang.ServiceComponent
+	bundle    *lang.Bundle
+	component *lang.BundleComponent
 }
 
 func (n componentNode) getGroup() string {
@@ -87,7 +87,7 @@ func (n componentNode) getGroup() string {
 }
 
 func (n componentNode) getID() string {
-	return runtime.KeyForStorable(n.service) + "-" + n.component.Name
+	return runtime.KeyForStorable(n.bundle) + "-" + n.component.Name
 }
 
 func (n componentNode) getLabel() string {
@@ -95,26 +95,26 @@ func (n componentNode) getLabel() string {
 }
 
 /*
-	Service Instance
+	Bundle Instance
 */
-type serviceInstanceNode struct {
+type bundleInstanceNode struct {
 	instance *resolve.ComponentInstance
-	service  *lang.Service
+	bundle   *lang.Bundle
 }
 
-func (n serviceInstanceNode) getGroup() string {
-	return "serviceInstance"
+func (n bundleInstanceNode) getGroup() string {
+	return "bundleInstance"
 }
 
-func (n serviceInstanceNode) getID() string {
+func (n bundleInstanceNode) getID() string {
 	return n.instance.GetKey()
 }
 
-func (n serviceInstanceNode) getLabel() string {
+func (n bundleInstanceNode) getLabel() string {
 	result := fmt.Sprintf(
 		`<b>%s</b>
 				context: <i>%s</i>`,
-		html.EscapeString(n.service.Name),
+		html.EscapeString(n.bundle.Name),
 		html.EscapeString(n.instance.Metadata.Key.ContextName),
 	)
 

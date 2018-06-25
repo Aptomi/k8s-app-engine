@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	serviceName = "aptomi"
+	prometheusSvcName = "aptomi"
 )
 
 // Server is Aptomi server. It serves UI front-end, API calls, as well as does policy resolution & continuous state enforcement
@@ -230,7 +230,7 @@ func (server *Server) startHTTPServer() {
 
 	// todo write to logrus
 	handler = handlers.CombinedLoggingHandler(os.Stdout, handler) // todo(slukjanov): make it at least somehow configurable - for example, select file to write to with rotation
-	handler = middleware.NewMetricsHandler(serviceName, handler)
+	handler = middleware.NewMetricsHandler(prometheusSvcName, handler)
 	handler = middleware.NewPanicHandler(handler)
 	// todo(slukjanov): add configurable handlers.ProxyHeaders to f behind the nginx or any other proxy
 	// todo(slukjanov): add compression handler and compress by default in client

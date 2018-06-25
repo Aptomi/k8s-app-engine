@@ -77,14 +77,14 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)
 	}
 
-	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleObject.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, nil, err
 	}
-	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName] // nolint: errcheck
+	component := bundleObj.(*lang.Bundle).GetComponentsMap()[instance.Metadata.Key.ComponentName] // nolint: errcheck
 
 	if component == nil {
-		return nil, nil, fmt.Errorf("retrieving endpoints for service instance is not supported")
+		return nil, nil, fmt.Errorf("retrieving endpoints for bundle instance is not supported")
 	}
 
 	// endpoints could be calculated only for components with code

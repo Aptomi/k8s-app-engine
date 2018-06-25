@@ -19,7 +19,7 @@ import (
 // io wait time in policy processing (goroutines are mostly busy doing calculations as opposed to waiting).
 var MaxConcurrentGoRoutines = sysruntime.NumCPU()
 
-// PolicyResolver is a core of Aptomi for policy resolution and translating all service consumption declarations
+// PolicyResolver is a core of Aptomi for policy resolution and translating all claims
 // into a single PolicyResolution object which represents desired state of components running in a cloud.
 type PolicyResolver struct {
 	/*
@@ -156,7 +156,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 	}
 }
 
-// Evaluate evaluates and resolves a single claim ("<user> needs <service> with <labels>") and calculates component allocations
+// Evaluate evaluates and resolves a single claim, as well as calculates component allocations.
 // Returns error only if there is an issue with the given claim and it cannot be resolved
 func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr error) {
 	recursiveError := false
@@ -169,7 +169,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 				node.eventLog.NewEntry().Error(printCauseDetailsOnDebug(resolveErr, node.eventLog))
 			}
 
-			// Log that service or component instance cannot be resolved
+			// Log that bundle or component instance cannot be resolved
 			node.logCannotResolveInstance()
 		}
 	}()
@@ -192,7 +192,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	node.namespace = node.contract.Namespace
 	node.objectResolved(node.contract)
 
-	// Process service and transform labels
+	// Process bundle and transform labels
 	node.transformLabels(node.labels, node.contract.ChangeLabels)
 
 	// Match the context
@@ -201,12 +201,12 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		return err
 	}
 
-	// Check that service, which current context is implemented with, exists
-	node.service, err = node.getMatchedService(resolver.policy)
+	// Check that bundle, which current context is implemented with, exists
+	node.bundle, err = node.getMatchedBundle(resolver.policy)
 	if err != nil {
 		return err
 	}
-	node.objectResolved(node.service)
+	node.objectResolved(node.bundle)
 
 	// Process context and transform labels
 	node.transformLabels(node.labels, node.context.ChangeLabels)
@@ -217,37 +217,37 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		return err
 	}
 
-	// Process global rules before processing service key and dependent component keys
+	// Process global rules before processing bundle key and dependent component keys
 	ruleResult, err := node.processRules()
 	if err != nil {
 		return err
 	}
-	// Create service key
-	node.serviceKey, err = node.createComponentKey(nil)
+	// Create bundle key
+	node.bundleKey, err = node.createComponentKey(nil)
 	if err != nil {
 		return err
 	}
 
-	// Check if we've been there already and therefore hit a service cycle
-	cycle := util.ContainsString(node.path, node.serviceKey.GetKey())
-	node.path = append(node.path, node.serviceKey.GetKey())
+	// Check if we've been there already and therefore hit a bundle cycle
+	cycle := util.ContainsString(node.path, node.bundleKey.GetKey())
+	node.path = append(node.path, node.bundleKey.GetKey())
 	if cycle {
-		return node.errorServiceCycleDetected()
+		return node.errorBundleCycleDetected()
 	}
 
-	// Store labels for service
-	node.resolution.RecordLabels(node.serviceKey, node.labels)
+	// Store labels for bundle
+	node.resolution.RecordLabels(node.bundleKey, node.labels)
 
-	// Store edge (last component instance -> service instance)
-	node.resolution.StoreEdge(node.arrivalKey, node.serviceKey)
+	// Store edge (last component instance -> bundle instance)
+	node.resolution.StoreEdge(node.arrivalKey, node.bundleKey)
 
 	// Now, sort all components in topological order (it should always succeed, as policy has been validated)
-	componentsOrdered, err := node.service.GetComponentsSortedTopologically()
+	componentsOrdered, err := node.bundle.GetComponentsSortedTopologically()
 	if err != nil {
 		return err
 	}
 
-	// Iterate over all service components and resolve them recursively
+	// Iterate over all bundle components and resolve them recursively
 	// Note that discovery variables can refer to other variables announced by dependents in the discovery tree
 	for _, node.component = range componentsOrdered {
 		// Check if component criteria holds
@@ -267,8 +267,8 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 			return err
 		}
 
-		// Store edge (service instance -> component instance)
-		node.resolution.StoreEdge(node.serviceKey, node.componentKey)
+		// Store edge (bundle instance -> component instance)
+		node.resolution.StoreEdge(node.bundleKey, node.componentKey)
 
 		// Calculate and store labels for component
 		node.resolution.RecordLabels(node.componentKey, node.labels)
@@ -282,7 +282,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 			return err
 		}
 
-		// Print information that we are starting to resolve claim (on code, or on service)
+		// Print information that we are starting to resolve claim (on code, or on bundle)
 		node.logResolvingClaimOnComponent()
 
 		if node.component.Code != nil {
@@ -313,9 +313,9 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		node.resolution.RecordResolved(node.componentKey, node.claim, node.depth, ruleResult)
 	}
 
-	// Mark note as resolved and record usage of a given service instance
-	node.logInstanceSuccessfullyResolved(node.serviceKey)
-	node.resolution.RecordResolved(node.serviceKey, node.claim, node.depth, ruleResult)
+	// Mark note as resolved and record usage of a given bundle instance
+	node.logInstanceSuccessfullyResolved(node.bundleKey)
+	node.resolution.RecordResolved(node.bundleKey, node.claim, node.depth, ruleResult)
 
 	return nil
 }

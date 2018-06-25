@@ -77,7 +77,7 @@ func NewPolicyValidator(policy *Policy) *PolicyValidator {
 	result.RegisterStructValidation(validateRule, Rule{})
 	result.RegisterStructValidation(validateACLRule, ACLRule{})
 	result.RegisterStructValidation(validateCluster, Cluster{})
-	result.RegisterStructValidationCtx(validateService, Service{})
+	result.RegisterStructValidationCtx(validateBundle, Bundle{})
 	result.RegisterStructValidationCtx(validateClaim, Claim{})
 	result.RegisterStructValidationCtx(validateContract, Contract{})
 
@@ -333,13 +333,13 @@ func validateLabels(ctx context.Context, fl validator.FieldLevel) bool {
 	return true
 }
 
-// checks if service is valid
-func validateService(ctx context.Context, sl validator.StructLevel) {
-	service := sl.Current().Addr().Interface().(*Service) // nolint: errcheck
+// checks if bundle is valid
+func validateBundle(ctx context.Context, sl validator.StructLevel) {
+	bundle := sl.Current().Addr().Interface().(*Bundle) // nolint: errcheck
 
-	// service should have either code or contract set in its components
+	// bundle should have either code or contract set in its components
 	policy := ctx.Value(policyKey).(*Policy) // nolint: errcheck
-	for _, component := range service.Components {
+	for _, component := range bundle.Components {
 		cnt := 0
 		if component.Code != nil {
 			cnt++
@@ -354,9 +354,9 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 
 		// if contract is set, it should point to an existing contract
 		if len(component.Contract) > 0 {
-			obj, err := policy.GetObject(ContractObject.Kind, component.Contract, service.Namespace)
+			obj, err := policy.GetObject(ContractObject.Kind, component.Contract, bundle.Namespace)
 			if obj == nil || err != nil {
-				sl.ReportError(component.Contract, fmt.Sprintf("Component[%s].Contract[%s/%s]", component.Name, service.Namespace, component.Contract), "", "exists", "")
+				sl.ReportError(component.Contract, fmt.Sprintf("Component[%s].Contract[%s/%s]", component.Name, bundle.Namespace, component.Contract), "", "exists", "")
 				return
 			}
 		}
@@ -364,7 +364,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 
 	// components should not have duplicate names
 	componentNames := make(map[string]bool)
-	for _, component := range service.Components {
+	for _, component := range bundle.Components {
 		if _, exists := componentNames[component.Name]; exists {
 			sl.ReportError(component.Name, fmt.Sprintf("Component[%s].Name", component.Name), "", "unique", "")
 			return
@@ -373,13 +373,13 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 	}
 
 	// components should not have cycles
-	_, err := service.GetComponentsSortedTopologically()
+	_, err := bundle.GetComponentsSortedTopologically()
 	if err != nil {
 		sl.ReportError(err.Error(), "Components", "", "topologicalSort", "")
 	}
 
-	// dependencies between service components should be valid
-	for _, component := range service.Components {
+	// dependencies between bundle components should be valid
+	for _, component := range bundle.Components {
 		for _, componentName := range component.Dependencies {
 			if _, exists := componentNames[componentName]; !exists {
 				sl.ReportError(componentName, fmt.Sprintf("Component[%s].Dependencies[%s]", component.Name, componentName), "", "exists", "")
@@ -407,15 +407,15 @@ func validateContract(ctx context.Context, sl validator.StructLevel) {
 	contract := sl.Current().Addr().Interface().(*Contract) // nolint: errcheck
 	policy := ctx.Value(policyKey).(*Policy)                // nolint: errcheck
 
-	// every context should point to an existing service
+	// every context should point to an existing bundle
 	for _, contractCtx := range contract.Contexts {
-		serviceName := ""
+		bundleName := ""
 		if contractCtx.Allocation != nil {
-			serviceName = contractCtx.Allocation.Service
+			bundleName = contractCtx.Allocation.Bundle
 		}
-		obj, err := policy.GetObject(ServiceObject.Kind, serviceName, contract.Namespace)
+		obj, err := policy.GetObject(BundleObject.Kind, bundleName, contract.Namespace)
 		if obj == nil || err != nil {
-			sl.ReportError(serviceName, fmt.Sprintf("Contexts[%s].Service[%s/%s]", contractCtx.Name, contract.Namespace, serviceName), "", "exists", "")
+			sl.ReportError(bundleName, fmt.Sprintf("Contexts[%s].Bundle[%s/%s]", contractCtx.Name, contract.Namespace, bundleName), "", "exists", "")
 			return
 		}
 	}

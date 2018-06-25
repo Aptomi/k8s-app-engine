@@ -1,5 +1,5 @@
 # Definition of Twitter Stats service
-- kind: service
+- kind: bundle
   metadata:
     namespace: social
     name: twitter_stats
@@ -31,7 +31,7 @@
             deployChart: false
             addresses:
               kafka: "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
-            topic: "tweepub-{{ .Discovery.Service.InstanceId }}"
+            topic: "tweepub-{{ .Discovery.Bundle.InstanceId }}"
 
       dependencies:
         - analytics_pipeline
@@ -51,7 +51,7 @@
           kafka:
             addresses:
               kafka:  "{{ .Discovery.analytics_pipeline.kafka.kafka.url }}"
-            topic: "tweepub-{{ .Discovery.Service.InstanceId }}"
+            topic: "tweepub-{{ .Discovery.Bundle.InstanceId }}"
 
           spark:
             deployChart: false
@@ -62,7 +62,7 @@
           hdfs:
             addresses:
               namenode: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
-            path: "/twitter-{{ .Discovery.Service.InstanceId }}/results"
+            path: "/twitter-{{ .Discovery.Bundle.InstanceId }}/results"
       dependencies:
         - analytics_pipeline
 
@@ -86,7 +86,7 @@
           hdfs:
             addresses:
               namenode: "{{ .Discovery.analytics_pipeline.hdfs.hdfs.url }}"
-            path: "/twitter-{{ .Discovery.Service.InstanceId }}"
+            path: "/twitter-{{ .Discovery.Bundle.InstanceId }}"
 
       dependencies:
         - analytics_pipeline
@@ -109,7 +109,7 @@
         set:
           message_stream: 'realtime'
       allocation:
-        service: twitter_stats
+        bundle: twitter_stats
 
     # Twitter Stats 'dev' implementation:
     # - generates a constant stream of test messages (without connecting to Twitter Streaming API)
@@ -122,6 +122,6 @@
         set:
           message_stream: 'development'
       allocation:
-        service: twitter_stats
+        bundle: twitter_stats
         keys:
           - "{{ .User.Name }}"

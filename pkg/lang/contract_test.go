@@ -50,7 +50,7 @@ func evalKeys(t *testing.T, context *Context, params *template.Parameters, expec
 	}
 }
 
-func TestServiceContextMatching(t *testing.T) {
+func TestBundleContextMatching(t *testing.T) {
 	context := &Context{
 		Name: "context",
 		Criteria: &Criteria{
@@ -107,7 +107,7 @@ func TestServiceContextMatching(t *testing.T) {
 	matchContext(t, context, paramsMatch, paramsDoesntMatch, nil)
 }
 
-func TestServiceContextRequireAnyFails(t *testing.T) {
+func TestBundleContextRequireAnyFails(t *testing.T) {
 	context := &Context{
 		Name: "special-not-matched",
 		Criteria: &Criteria{
@@ -133,7 +133,7 @@ func TestServiceContextRequireAnyFails(t *testing.T) {
 	matchContext(t, context, nil, paramsDoesntMatch, nil)
 }
 
-func TestServiceContextRequireNone(t *testing.T) {
+func TestBundleContextRequireNone(t *testing.T) {
 	context := &Context{
 		Name: "special-not-matched",
 		Criteria: &Criteria{
@@ -162,7 +162,7 @@ func TestServiceContextRequireNone(t *testing.T) {
 	matchContext(t, context, paramsMatch, paramsDoesntMatch, nil)
 }
 
-func TestServiceContextRequireAnyEmpty(t *testing.T) {
+func TestBundleContextRequireAnyEmpty(t *testing.T) {
 	context := &Context{
 		Name: "special-matched",
 		Criteria: &Criteria{
@@ -182,7 +182,7 @@ func TestServiceContextRequireAnyEmpty(t *testing.T) {
 	matchContext(t, context, paramsMatch, nil, nil)
 }
 
-func TestServiceContextEmptyCriteria(t *testing.T) {
+func TestBundleContextEmptyCriteria(t *testing.T) {
 	context := &Context{}
 	paramsMatch := []*expression.Parameters{
 		expression.NewParams(
@@ -220,7 +220,7 @@ func makeInvalidContexts() []*Context {
 	}
 }
 
-func TestServiceContextInvalidCriteria(t *testing.T) {
+func TestBundleContextInvalidCriteria(t *testing.T) {
 	contexts := makeInvalidContexts()
 	paramsError := []*expression.Parameters{
 		expression.NewParams(
@@ -236,14 +236,14 @@ func TestServiceContextInvalidCriteria(t *testing.T) {
 	}
 }
 
-func TestServiceContextKeyResolution(t *testing.T) {
+func TestBundleContextKeyResolution(t *testing.T) {
 	context := &Context{
 		Name: "context",
 		Criteria: &Criteria{
 			RequireAll: []string{"true"},
 		},
 		Allocation: &Allocation{
-			Service: "test",
+			Bundle: "test",
 			Keys: []string{
 				"{{.User.Name}}",
 			},

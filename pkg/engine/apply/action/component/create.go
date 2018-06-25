@@ -76,14 +76,14 @@ func (a *CreateAction) processDeployment(context *action.Context) (*resolve.Comp
 		panic(fmt.Sprintf("component instance not found in desired state: %s", a.ComponentKey))
 	}
 
-	serviceObj, err := context.DesiredPolicy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleObject.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, err
 	}
-	component := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName] // nolint: errcheck
+	component := bundleObj.(*lang.Bundle).GetComponentsMap()[instance.Metadata.Key.ComponentName] // nolint: errcheck
 
 	if component == nil {
-		// If this is a service instance, do nothing and proceed to object creation
+		// If this is a bundle instance, do nothing and proceed to object creation
 		return instance, nil
 	}
 

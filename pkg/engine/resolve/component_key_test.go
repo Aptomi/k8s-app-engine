@@ -19,27 +19,27 @@ func TestComponentKeyCopy(t *testing.T) {
 	{
 		key := makeKey(true)
 		keyCopy := key.MakeCopy()
-		assert.Equal(t, key.GetKey(), keyCopy.GetKey(), "Service key (root) should be copied successfully")
+		assert.Equal(t, key.GetKey(), keyCopy.GetKey(), "Bundle key (root) should be copied successfully")
 	}
 }
 
 func TestComponentKeyParent(t *testing.T) {
 	{
 		key := makeKey(false)
-		keyParent := key.GetParentServiceKey()
+		keyParent := key.GetParentBundleKey()
 		k1 := strings.Split(key.GetKey(), componentInstanceKeySeparator)
 		k2 := strings.Split(keyParent.GetKey(), componentInstanceKeySeparator)
 		assert.Equal(t, len(k1), len(k2), "Component key and its parent should have the same number of parts")
 		for i := 0; i < len(k1)-1; i++ {
-			assert.Equal(t, k1[i], k2[i], "Parent for component key should have the same parts, except point to a service")
+			assert.Equal(t, k1[i], k2[i], "Parent for component key should have the same parts, except point to a bundle")
 		}
-		assert.Equal(t, componentRootName, k2[len(k2)-1], "Parent for component key should have the same parts, except point to a service")
+		assert.Equal(t, componentRootName, k2[len(k2)-1], "Parent for component key should have the same parts, except point to a bundle")
 	}
 
 	{
 		key := makeKey(true)
-		keyParent := key.GetParentServiceKey()
-		assert.Equal(t, key.GetKey(), keyParent.GetKey(), "Parent for service key (root) should point to itself")
+		keyParent := key.GetParentBundleKey()
+		assert.Equal(t, key.GetKey(), keyParent.GetKey(), "Parent for bundle key (root) should point to itself")
 	}
 }
 
@@ -55,21 +55,21 @@ func TestComponentKeyUnsafe(t *testing.T) {
 
 func makeKey(root bool) *ComponentInstanceKey {
 	b := builder.NewPolicyBuilder()
-	service := b.AddService()
+	bundle := b.AddBundle()
 
-	var component *lang.ServiceComponent
+	var component *lang.BundleComponent
 	if !root {
-		component = b.AddServiceComponent(service, b.CodeComponent(nil, nil))
+		component = b.AddBundleComponent(bundle, b.CodeComponent(nil, nil))
 	}
 
-	contract := b.AddContract(service, b.CriteriaTrue())
+	contract := b.AddContract(bundle, b.CriteriaTrue())
 	key := NewComponentInstanceKey(
 		b.AddCluster(),
 		"suffix",
 		contract,
 		contract.Contexts[0],
 		[]string{"x", "y", "z"},
-		service,
+		bundle,
 		component,
 	)
 	return key

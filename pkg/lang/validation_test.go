@@ -25,50 +25,50 @@ func displayErrorMessages() bool {
 	return false
 }
 
-func TestPolicyValidationService(t *testing.T) {
-	// Service (Identifiers & Labels)
+func TestPolicyValidationBundle(t *testing.T) {
+	// Bundle (Identifiers & Labels)
 	runValidationTests(t, ResSuccess, true, []Base{
-		makeService("test", 0),
-		makeService("good_name", Empty),
-		makeService("excellent-name_239", Nil),
+		makeBundle("test", 0),
+		makeBundle("good_name", Empty),
+		makeBundle("excellent-name_239", Nil),
 	})
 	runValidationTests(t, ResFailure, true, []Base{
-		makeService("_invalid", 0),
-		makeService("12-invalid", 0),
-		makeService("invalid-n#ame_239", 0),
-		makeService("invalid-n$ame_239", 0),
-		makeService("valid", Invalid),
+		makeBundle("_invalid", 0),
+		makeBundle("12-invalid", 0),
+		makeBundle("invalid-n#ame_239", 0),
+		makeBundle("invalid-n$ame_239", 0),
+		makeBundle("valid", Invalid),
 	})
 
-	// Service Components
+	// Bundle Components
 	contract := makeContract("contract", 0, "")
-	componentTestsPass := [][]*ServiceComponent{
-		makeServiceComponents(1, contract.Name, Nil, 0),
-		makeServiceComponents(2, contract.Name, Nil, 0),
-		makeServiceComponents(3, "", 0, 1),
-		makeServiceComponents(4, "", 1, 1),
+	componentTestsPass := [][]*BundleComponent{
+		makeBundleComponents(1, contract.Name, Nil, 0),
+		makeBundleComponents(2, contract.Name, Nil, 0),
+		makeBundleComponents(3, "", 0, 1),
+		makeBundleComponents(4, "", 1, 1),
 	}
 	for _, components := range componentTestsPass {
-		service := makeService("service", Empty)
-		service.Components = components
-		runValidationTests(t, ResSuccess, false, []Base{service, contract})
+		bundle := makeBundle("bundle", Empty)
+		bundle.Components = components
+		runValidationTests(t, ResSuccess, false, []Base{bundle, contract})
 	}
-	componentTestsFail := [][]*ServiceComponent{
-		makeServiceComponents(1, contract.Name+"extra", Nil, 0),
-		makeServiceComponents(1, contract.Name, Empty, 0),
-		makeServiceComponents(1, "", Empty, 0),
-		makeServiceComponents(1, "", Nil, 0),
-		makeServiceComponents(1, "", Invalid, 0),
-		makeServiceComponents(1, "", Invalid-1, 0),
-		makeServiceComponents(1, contract.Name, Nil, Invalid),
-		duplicateNames(makeServiceComponents(10, "", 1, 1)),
-		claimsInvalid(makeServiceComponents(10, "", 1, 1)),
-		claimsCycle(makeServiceComponents(10, "", 1, 1)),
+	componentTestsFail := [][]*BundleComponent{
+		makeBundleComponents(1, contract.Name+"extra", Nil, 0),
+		makeBundleComponents(1, contract.Name, Empty, 0),
+		makeBundleComponents(1, "", Empty, 0),
+		makeBundleComponents(1, "", Nil, 0),
+		makeBundleComponents(1, "", Invalid, 0),
+		makeBundleComponents(1, "", Invalid-1, 0),
+		makeBundleComponents(1, contract.Name, Nil, Invalid),
+		duplicateNames(makeBundleComponents(10, "", 1, 1)),
+		claimsInvalid(makeBundleComponents(10, "", 1, 1)),
+		claimsCycle(makeBundleComponents(10, "", 1, 1)),
 	}
 	for _, components := range componentTestsFail {
-		service := makeService("service", Empty)
-		service.Components = components
-		runValidationTests(t, ResFailure, false, []Base{service, contract})
+		bundle := makeBundle("bundle", Empty)
+		bundle.Components = components
+		runValidationTests(t, ResFailure, false, []Base{bundle, contract})
 	}
 }
 
@@ -85,21 +85,21 @@ func TestPolicyValidationContract(t *testing.T) {
 		makeContract("valid", Invalid, ""),
 	})
 
-	// Contract should point to an existing service
+	// Contract should point to an existing bundle
 	runValidationTests(t, ResSuccess, false, []Base{
-		makeService("service", Empty),
-		makeContract("test1", 0, "service"),
-		makeContract("test2", 1, "service"),
+		makeBundle("bundle", Empty),
+		makeContract("test1", 0, "bundle"),
+		makeContract("test2", 1, "bundle"),
 	})
 	runValidationTests(t, ResFailure, false, []Base{
-		makeService("service", Empty),
-		makeContract("test1", 0, "service-unknown"),
+		makeBundle("bundle", Empty),
+		makeContract("test1", 0, "bundle-unknown"),
 	})
 
 	// Check allocation keys
 	runValidationTests(t, ResFailure, false, []Base{
-		makeService("service", Empty),
-		invalidAllocationKeys(makeContract("test1", 0, "service")),
+		makeBundle("bundle", Empty),
+		invalidAllocationKeys(makeContract("test1", 0, "bundle")),
 	})
 }
 
@@ -259,7 +259,7 @@ func makeACLRule(actionNum int) *ACLRule {
 	return rule
 }
 
-func makeContract(name string, labelOpsNum int, pointToService string) *Contract {
+func makeContract(name string, labelOpsNum int, pointToBundle string) *Contract {
 	contract := &Contract{
 		TypeKind: ContractObject.GetTypeKind(),
 		Metadata: Metadata{
@@ -280,13 +280,13 @@ func makeContract(name string, labelOpsNum int, pointToService string) *Contract
 		contract.ChangeLabels = LabelOperations{"invalidOperation": map[string]string{"a": "a"}}
 	}
 
-	if len(pointToService) > 0 {
+	if len(pointToBundle) > 0 {
 		contract.Contexts = []*Context{
 			{
 				Name: "context",
 				Allocation: &Allocation{
-					Service: pointToService,
-					Keys:    []string{"simple", "{{ .Claim.ID }}"},
+					Bundle: pointToBundle,
+					Keys:   []string{"simple", "{{ .Claim.ID }}"},
 				},
 			},
 		}
@@ -314,9 +314,9 @@ func makeCluster(clusterType, ns string) *Cluster {
 	}
 }
 
-func makeService(name string, labelNum int) *Service {
-	service := &Service{
-		TypeKind: ServiceObject.GetTypeKind(),
+func makeBundle(name string, labelNum int) *Bundle {
+	bundle := &Bundle{
+		TypeKind: BundleObject.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      name,
@@ -324,17 +324,17 @@ func makeService(name string, labelNum int) *Service {
 	}
 	switch labelNum {
 	case 0:
-		service.Labels = map[string]string{"name": "value"}
+		bundle.Labels = map[string]string{"name": "value"}
 	case Empty:
 		// no labels defined, empty
-		service.Labels = make(map[string]string)
+		bundle.Labels = make(map[string]string)
 	case Nil:
 		// no labels defined, nil
 	case Invalid:
 		// invalid labels
-		service.Labels = map[string]string{"$@#$%^&": "value"}
+		bundle.Labels = map[string]string{"$@#$%^&": "value"}
 	}
-	return service
+	return bundle
 }
 
 func makeClaim(contract string) *Claim {
@@ -350,10 +350,10 @@ func makeClaim(contract string) *Claim {
 	return claim
 }
 
-func makeServiceComponents(count int, contract string, codeNum int, discoveryNum int) []*ServiceComponent {
-	result := make([]*ServiceComponent, count)
+func makeBundleComponents(count int, contract string, codeNum int, discoveryNum int) []*BundleComponent {
+	result := make([]*BundleComponent, count)
 	for i := 0; i < count; i++ {
-		component := &ServiceComponent{
+		component := &BundleComponent{
 			Name: "component-" + strconv.Itoa(i),
 		}
 		if len(contract) > 0 {
@@ -412,21 +412,21 @@ func makeServiceComponents(count int, contract string, codeNum int, discoveryNum
 	return result
 }
 
-func duplicateNames(components []*ServiceComponent) []*ServiceComponent {
+func duplicateNames(components []*BundleComponent) []*BundleComponent {
 	for _, component := range components {
 		component.Name = "name"
 	}
 	return components
 }
 
-func claimsInvalid(components []*ServiceComponent) []*ServiceComponent {
+func claimsInvalid(components []*BundleComponent) []*BundleComponent {
 	for _, component := range components {
 		component.Dependencies = []string{"invalid"}
 	}
 	return components
 }
 
-func claimsCycle(components []*ServiceComponent) []*ServiceComponent {
+func claimsCycle(components []*BundleComponent) []*BundleComponent {
 	for _, component := range components {
 		component.Dependencies = []string{component.Name}
 	}

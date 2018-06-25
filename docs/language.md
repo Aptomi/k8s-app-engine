@@ -6,7 +6,7 @@
 - [Concepts](#concepts)
 - [Objects](#objects)
   - [ACL](#acl)
-  - [Service](#service)
+  - [Bundle](#bundle)
   - [Contract](#contract)
   - [Cluster](#cluster)
   - [Claim](#claim)
@@ -33,9 +33,9 @@ When defining any object in Aptomi, you must specify the following essential met
 * `metadata.namespace` - Which namespace the object is defined in
 * `metadata.name` - The name of the object, which must be unique within the given namespace and the given object kind
 
-The following example illustrates the proper definition of a wordpress `service` object in the `main` namespace.
+The following example illustrates a simple definition of a wordpress `bundle` object in the `main` namespace.
 ```yaml
-- kind: service
+- kind: bundle
   metadata:
     namespace: main
     name: wordpress
@@ -50,10 +50,10 @@ Before using Aptomi for the first time, you must set up [access control rights](
 There are three built-in user roles in Aptomi:
 * **domain admin** - Has full access rights to all Aptomi namespaces, including the `system` namespace
   * Domain admins can change the global ACL, the global list of rules, and the global list of clusters, which all reside in the `system` namespace.
-  * Domain admins can define and publish services, contracts, claims, and rules in any namespace.
+  * Domain admins can define and publish bundles, contracts, claims, and rules in any namespace.
 * **namespace admin** - Has full access rights for a given list of Aptomi namespaces
   * Namespace admins can view, but not manage objects in the `system` namespace.
-  * Namespace admins can define and publish services, contracts, claims, and rules in a given set of Aptomi namespaces.
+  * Namespace admins can define and publish bundles, contracts, claims, and rules in a given set of Aptomi namespaces.
 * **service consumer** - Can only consume services in a given list of Aptomi namespaces
   * Service consumers have view-only access for all namespaces.
   * Service consumers can only define and declare claims, and therefore consume services, in a given list of Aptomi namespaces.
@@ -100,28 +100,28 @@ Finally, this example would make all users with the `org == dev` label into serv
       service-consumer: main
 ```
 
-## Service
+## Bundle
 
-A [Service](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Service) is an entity that you would use to define the structure of your application and its dependencies.
+A [Bundle](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Bundle) is an entity that you would use to define the structure of your application and its dependencies.
 
-Services consist of one of more [components](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#ServiceComponent) which correspond to the components of your application.
-Every component can be either a piece of code that needs to be deployed/instantiated or a reference to another instantiated service. This way, you can construct your application from
+Bundles consist of one of more [components](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#BundleComponent) which correspond to the components of your application.
+Every component can be either a piece of code that needs to be deployed/instantiated or a reference to another contract. This way, you can construct your application from
 the code that you own, and leverage services which may be owned by someone else in the organization.
 
-A Service can have also have labels attached to it. You can refer to those labels with expressions, which is a practice typically employed when writing rules.
+A Bundle can have also have labels attached to it. You can refer to those labels with expressions, which is a practice typically employed when writing rules.
 
 When defining a **code component**, you must define the following fields:
-* `name` - The component name, which must be unique within the service
+* `name` - The component name, which must be unique within the bundle
 * `code` - The section which describes the application component that needs to be instantiated and managed
     * `type` - Right now, the only supported code type is [helm](https://helm.sh/), which is the Helm package manager for k8s. However, Aptomi is completely
       pluggable, and allows developers to use their favorite framework for packaging applications. Aptomi can support applications manifests defined via ksonnet, k8s YAMLs, and more!
 * `discovery` - Every component can expose arbitrary discovery information about itself, in the form of labels, to other components.
-* `dependencies` - Other components within the service which the current component depends on. Defining dependencies helps Aptomi process discovery information and propagate parameters
+* `dependencies` - Other components within the bundle which the current component depends on. Defining dependencies helps Aptomi process discovery information and propagate parameters
   in the right order, also allowing you to control the correct instantiation/destruction order of application components.
 
 For example, here is how you would define an application which consists of Wordpress and MySQL database components:
 ```yaml
-- kind: service
+- kind: bundle
   metadata:
     namespace: main
     name: wordpress
@@ -161,9 +161,9 @@ For Helm plugin, you need to provide the following parameters under the `params`
 
 Every parameter under the `params` section can be either a fixed value or an expression that refers to various labels.
 
-Components can also have custom criteria defined and associated with them. If a specified criterion evaluates to true, the component is then included into a service. Otherwise, it will be excluded from processing. For example:
+Components can also have custom criteria defined and associated with them. If a specified criterion evaluates to true, the component is then included into a bundle. Otherwise, it will be excluded from processing. For example:
 ```yaml
-- kind: service
+- kind: bundle
   metadata:
     namespace: main
     name: wordpress
@@ -179,18 +179,18 @@ Components can also have custom criteria defined and associated with them. If a 
 ```
 
 ## Contract
-Once a service is defined, it has to be exposed through a [contract](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Contract).
+Once a bundle is defined, it has to be exposed through a [contract](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Contract).
 
-Contracts represent a consumable service. When someone wants to consume an instance of a service, it has to be done through a contract. When
-a service depends on another instance of a different service, it has to have a dependency on the corresponding contract as one of its components.
+Contracts represent a consumable bundle. When someone wants to consume an instance of a bundle, it has to be done through a contract. When
+a bundle depends on another instance of a different bundle, it has to have a dependency on the corresponding contract as one of its components.
 
 A Contract can have a number of contexts, which define different implementations of that contract. Each context allows you to define the specific implementation and criteria under which it will be picked.
-This means that a contract will be fulfilled via one of the defined contexts at runtime, based on the defined criteria. Different parameters/services can be picked based on the type of environment (e.g. `dev` vs. `prod`), the properties of a consumer (e.g. which 'team' a consumer belongs to),
-the time of day, or any other user-defined labels/properties. A contract can also control whether the service instance will be dedicated or shared.
+This means that a contract will be fulfilled via one of the defined contexts at runtime, based on the defined criteria. Different parameters/bundles can be picked based on the type of environment (e.g. `dev` vs. `prod`), the properties of a consumer (e.g. which 'team' a consumer belongs to),
+the time of day, or any other user-defined labels/properties. A contract can also control whether the bundle instance will be dedicated or shared.
 
 For example, a team responsible for running databases can define a contract for `sql-database` and its specific implementations. In the code-snippet below, we see two contexts defined for the `sql-database` context:
-* `dev` - For people from the 'dev' team, which will be implemented via instantiating the `sqlite` service.
-* `prod` - For people outside of the 'dev' team, which will be implemented via instantiating the `mysql` service.
+* `dev` - For people from the 'dev' team, which will be implemented via instantiating the `sqlite` bundle.
+* `prod` - For people outside of the 'dev' team, which will be implemented via instantiating the `mysql` bundle.
 ```yaml
 - kind: contract
   metadata:
@@ -203,20 +203,20 @@ For example, a team responsible for running databases can define a contract for 
         require-all:
           - team == 'dev'
       allocation:
-        service: sqlite
+        bundle: sqlite
 
     - name: prod
       criteria:
         require-none:
           - team == 'dev'
       allocation:
-        service: mysql
+        bundle: mysql
 ```
 
-In the example shown below, the team who runs the wordpress application wants to rely on an external database, and have modified their service definition to
+In the example shown below, the team who runs the wordpress application wants to rely on an external database, and have modified their bundle definition to
 use a special **contract component**, which points to a contract instead of the code:
 ```yaml
-- kind: service
+- kind: bundle
   metadata:
     namespace: main
     name: wordpress
@@ -241,8 +241,8 @@ use a special **contract component**, which points to a contract instead of the 
       contract: sql-database
 ```
 
-If you don't need the power of contracts and want your service to be instantiated directly, you can create a contract which maps 1-to-1 to
-the corresponding service, while keeping the criteria empty (i.e. always true). An example of this is shown below:
+If you don't need the power of contracts and want your bundle to be instantiated directly, you can create a contract which maps 1-to-1 to
+the corresponding bundle, while keeping the criteria empty (i.e. always true). An example of this is shown below:
 ```yaml
 - kind: contract
   metadata:
@@ -252,11 +252,11 @@ the corresponding service, while keeping the criteria empty (i.e. always true). 
   contexts:
     - name: primary
       allocation:
-        service: mysql
+        bundle: mysql
 ```
 
 In order to control service dedication/sharing, you can use a special `keys` field inside an allocation.
-For example, the following YAML block specifies that each team will receive its own dedicated instance of the `mysql` service:
+For example, the following YAML block specifies that each team will receive its own dedicated instance of the `mysql` bundle:
 ```yaml
 - kind: contract
   metadata:
@@ -266,12 +266,12 @@ For example, the following YAML block specifies that each team will receive its 
   contexts:
     - name: primary
       allocation:
-        service: mysql
+        bundle: mysql
         keys:
           - "{{ .User.Labels.Team }}"
 ```
 
-When fulfilling a contract, Aptomi will process all contexts within that contract one-by-one, and find the first matching context. Once a context is selected, labels will be changed according to the `change-labels` section, and service allocation will be done according to the corresponding `allocation` section within the selected context.
+When fulfilling a contract, Aptomi will process all contexts within that contract one-by-one, and find the first matching context. Once a context is selected, labels will be changed according to the `change-labels` section, and bundle allocation will be done according to the corresponding `allocation` section within the selected context.
 
 ## Cluster
 
@@ -294,7 +294,7 @@ A typical definition of a k8s cluster looks like this:
 
 ## Claim
 
-Defining a service and a contract only publishes a service into Aptomi, and does not trigger instantiation/deployment of that service.
+Defining a bundle and a contract only publishes a service into Aptomi, and does not trigger instantiation/deployment of that service.
 In order to request an instance, you must create a [Claim](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Claim) object in Aptomi.
 
 When creating a claim, you must specify a `contract` to instantiate, as well as the initial labels to pass to it.
@@ -330,33 +330,33 @@ A rule can have user-defined criteria and associated actions. If the criterion e
 The most commonly used rule action in Aptomi is to change a label. For example, by changing a system-level label called `target`, you can control which cluster and namespace the code will get deployed to. Deploying
 code without setting the `target` label will result in an error, because Aptomi won't have a way of knowing where the code should be deployed.
 
-For example, the following rule will tell Aptomi to always deploy services with the `blog` label to the cluster named `cluster-us-east`:
+For example, the following rule will tell Aptomi to always deploy bundles with the `blog` label to the cluster named `cluster-us-east`:
 ```yaml
 - kind: rule
   metadata:
     namespace: main
-    name: blog_services_get_deployed_to_us_east
+    name: blog_bundles_get_deployed_to_us_east
   weight: 10
   criteria:
     require-all:
-      - service.Labels.blog == true
+      - bundle.Labels.blog == true
   actions:
     change-labels:
       set:
         target: cluster-us-east
 ```
 
-Here is another example of a rule, which prohibits users from the `dev` team from instantiating any `blog` services. Even if those users try to declare a claim, it will not be fulfilled by Aptomi:
+Here is another example of a rule, which prohibits users from the `dev` team from instantiating any `blog` bundles. Even if those users try to declare a claim, it will not be fulfilled by Aptomi:
 ```yaml
 - kind: rule
   metadata:
     namespace: main
-    name: dev_teams_cannot_instantiate_blog_services
+    name: dev_teams_cannot_instantiate_blog_bundles
   weight: 20
   criteria:
     require-all:
       - team == 'dev'
-      - service.Labels.blog == true
+      - bundle.Labels.blog == true
   actions:
     claim: reject
 ```
@@ -367,11 +367,11 @@ Policy processing in Aptomi is based entirely on labels. When a claim is defined
 these labels can be transformed using `change-labels` directives, and accessed at any time in expressions and templates.
 
 One way of leveraging this, for example, would be to:
-* Define a service, a contract, and two contexts.
+* Define a bundle, a contract, and two contexts.
 * Set the `replicas` label to have a value of `1` in the dev context.
 * Set the `replicas` label to have a value of `3` in the production context.
 * Use the `replicas` label in the service to configure it appropriately.
-* This way, Aptomi would be able to provision different instances of the same service with different settings.
+* This way, Aptomi would be able to provision different instances of the same bundle with different settings.
 
 The following code illustrates how one would use [change-labels](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#LabelOperations) to achieve the above objectives:
 ```yaml
@@ -389,7 +389,7 @@ The following code illustrates how one would use [change-labels](https://godoc.o
         set:
           replicas: 1
       allocation:
-        service: myservice
+        bundle: mybundle
 
     - name: prod
       criteria:
@@ -399,7 +399,7 @@ The following code illustrates how one would use [change-labels](https://godoc.o
         set:
           replicas: 3
       allocation:
-        service: myservice
+        bundle: mybundle
 ```
 
 ## Expressions
@@ -407,7 +407,7 @@ All expressions used in Aptomi should follow the [Knetic/govaluate](https://gith
 
 You can reference the following variables in expressions:
 * labels - You can reference any label by specifying its name, e.g. `team` will return the value of a label with the name 'team'.
-* services - You can reference a service which is currently being processed. Since it's an object, you can go down and look into its properties, e.g. `service.Name` or `service.Labels.blog`
+* bundles - You can reference a bundle which is currently being processed. Since it's an object, you can go down and look into its properties, e.g. `bundle.Name` or `bundle.Labels.blog`
 
 ## Criteria
 [Criteria](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Criteria) allow you to define complex matching expressions in your policy.
@@ -425,9 +425,9 @@ It's also possible to have empty criteria without any clauses (or even omit the 
 ## Templates
 All text templates used in Aptomi should follow the [text/template](https://golang.org/pkg/text/template/) syntax guidelines, and must evaluate to a string.
 
-The most common use of text templates in Aptomi is to define the code & discovery parameters inside a service:
+The most common use of text templates in Aptomi is to define the code & discovery parameters inside a bundle:
 * **code parameters** - Pass parameters into Helm charts, substituting variables with calculated label values
-* **discovery parameters** - Components can expose their discovery parameters to other services/components, substituting variables with calculated label values
+* **discovery parameters** - Components can expose their discovery parameters to other bundles/components, substituting variables with calculated label values
 
 You can reference the following variables in your text templates:
 
@@ -440,7 +440,7 @@ You can reference the following variables in your text templates:
 * `{{ .Discovery }}` - a set of discovery parameters
   * `{{ .Discovery.instance }}` - a unique human-readable deployment name of the current component instance to be deployed
   * `{{ .Discovery.instanceid }}` - a unique hash of the current component instance to be deployed
-  * `{{ .Discovery.service.instanceid }}` - a unique hash of the current service instance to be deployed
+  * `{{ .Discovery.Bundle.instanceid }}` - a unique hash of the current bundle instance to be deployed
   * `{{ .Discovery.component1.[...].componentN.propertyName }}` - you can traverse component graph to get the value of 'propertyName' from discovery properties exposed by an particular component
 
 ## Namespace references
@@ -466,9 +466,9 @@ While this code would tell Aptomi to look for a wordpress contract in a **given*
   contract: specialns/wordpress
 ```
 
-You can also use the same syntax to create a service, which depends on a contract published in a different namespace (i.e. `dbns`) by another team:
+You can also use the same syntax to create a bundle, which depends on a contract published in a different namespace (i.e. `dbns`) by another team:
 ```yaml
-- kind: service
+- kind: bundle
   metadata:
     namespace: main
     name: wordpress

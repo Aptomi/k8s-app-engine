@@ -7,7 +7,7 @@ type APIPolicy struct {
 
 // APIPolicyNamespace is a PolicyNamespace representation for API filtered for specific user
 type APIPolicyNamespace struct {
-	Services  map[string]*Service
+	Bundles   map[string]*Bundle
 	Contracts map[string]*Contract
 	Clusters  map[string]*Cluster
 	Rules     map[string]*Rule

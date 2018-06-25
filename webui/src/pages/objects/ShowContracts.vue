@@ -63,7 +63,7 @@
                 </td>
                 <td>
                   <div v-for="c in d.contexts">
-                      <obj-with-icon :prefix="c.name + ' -> '" kind="service" :obj="{name: c.allocation.service}"/>
+                      <obj-with-icon :prefix="c.name + ' -> '" kind="bundle" :obj="{name: c.allocation.bundle}"/>
                   </div>
                 </td>
                 <td>

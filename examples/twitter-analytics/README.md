@@ -18,8 +18,8 @@ These services have different owners, who can fully control how their services g
 User  | Role
 ------|-------
 Sam   | Domain admin for Aptomi
-Frank | Owner of `analytics_pipeline` service and its deployments
-John  | Owner of `twitter_stats` service and its deployments
+Frank | Owner of `analytics_pipeline`
+John  | Owner of `twitter_stats`
 Alice, Bob, Carol | Developers and users of `twitter_stats`
 
 This example illustrates a few important things that Aptomi does:
@@ -96,7 +96,7 @@ this in the Aptomi UI under [Policy Browser](http://localhost:27866/#/policy/bro
 
     * Aptomi enforced that `analytics pipeline` will be shared by all consumers. See [Policy Browser](http://localhost:27866/#/policy/browse) -> Desired State
 
-    * Service endpoints are available under [Claims](http://localhost:27866/#/objects/claims) in Aptomi UI
+    * Endpoints of the deployed services are available under [Claims](http://localhost:27866/#/objects/claims) in Aptomi UI
         * `tweeviz` available in *alice_dev* and *bob_dev* over HTTP with fake Twitter data source
         * `tweeviz` available in *prod* over HTTP with real-time Twitter data (assuming you have followed the step to configure Twitter tokens)
 

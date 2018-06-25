@@ -9,7 +9,7 @@ import auth from 'lib/auth'
 
 // Aptomi pages
 import Login from 'pages/auth/Login.vue'
-import ShowServices from 'pages/objects/ShowServices.vue'
+import ShowBundles from 'pages/objects/ShowBundles.vue'
 import ShowContracts from 'pages/objects/ShowContracts.vue'
 import ShowClusters from 'pages/objects/ShowClusters.vue'
 import ShowRules from 'pages/objects/ShowRules.vue'
@@ -31,7 +31,7 @@ const router = new Router({
     {
       path: '/',
       name: 'Home',
-      redirect: '/objects/services'
+      redirect: '/objects/bundles'
     },
     {
       path: '/objects',
@@ -39,9 +39,9 @@ const router = new Router({
       component: Passthrough,
       children: [
         {
-          path: 'services',
-          name: 'ShowServices',
-          component: ShowServices
+          path: 'bundles',
+          name: 'ShowBundles',
+          component: ShowBundles
         },
         {
           path: 'contracts',

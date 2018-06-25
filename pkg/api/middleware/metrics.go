@@ -15,12 +15,12 @@ type prometheusHandler struct {
 }
 
 // NewMetricsHandler returns middleware that collects HTTP req/resp specific metrics
-func NewMetricsHandler(serviceName string, handler http.Handler) http.Handler {
+func NewMetricsHandler(svcName string, handler http.Handler) http.Handler {
 	requests := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name:        "http_requests_total",
 			Help:        "Number of processed HTTP requests labeled with status code, method and HTTP path.",
-			ConstLabels: prometheus.Labels{"service": serviceName},
+			ConstLabels: prometheus.Labels{"service": svcName},
 		},
 		[]string{"code", "method", "path"},
 	)
@@ -29,7 +29,7 @@ func NewMetricsHandler(serviceName string, handler http.Handler) http.Handler {
 	duration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:        "http_request_duration_seconds",
 		Help:        "Duration of the HTTP request processing labeled with status code, method and HTTP path.",
-		ConstLabels: prometheus.Labels{"service": serviceName},
+		ConstLabels: prometheus.Labels{"service": svcName},
 		Buckets:     []float64{.01, .05, .1, .5, 1, 2.5, 5, 10, 20, 30, 50},
 	},
 		[]string{"code", "method", "path"},
@@ -39,7 +39,7 @@ func NewMetricsHandler(serviceName string, handler http.Handler) http.Handler {
 	responseSize := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name:        "http_response_size_bytes",
 		Help:        "Size of the HTTP response labeled with status code, method and HTTP path.",
-		ConstLabels: prometheus.Labels{"service": serviceName},
+		ConstLabels: prometheus.Labels{"service": svcName},
 		Buckets:     prometheus.ExponentialBuckets(100, 10, 5),
 	},
 		[]string{"code", "method", "path"},

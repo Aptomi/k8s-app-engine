@@ -1,14 +1,14 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: "redis-slave-{{ .Discovery.Service.InstanceId }}"
+  name: "redis-slave-{{ .Discovery.Bundle.InstanceId }}"
 spec:
   selector:
     matchLabels:
       app: redis
       role: slave
       tier: backend
-      instance: "{{ .Discovery.Service.InstanceId }}"
+      instance: "{{ .Discovery.Bundle.InstanceId }}"
   replicas: 2
   template:
     metadata:
@@ -16,7 +16,7 @@ spec:
         app: redis
         role: slave
         tier: backend
-        instance: "{{ .Discovery.Service.InstanceId }}"
+        instance: "{{ .Discovery.Bundle.InstanceId }}"
     spec:
       containers:
       - name: slave
@@ -29,6 +29,6 @@ spec:
         - name: GET_HOSTS_FROM
           value: env
         - name: REDIS_MASTER_SERVICE_HOST
-          value: "redis-master-{{ .Discovery.Service.InstanceId }}"
+          value: "redis-master-{{ .Discovery.Bundle.InstanceId }}"
         ports:
         - containerPort: 6379

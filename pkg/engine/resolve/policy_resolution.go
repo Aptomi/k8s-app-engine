@@ -9,9 +9,8 @@ import (
 )
 
 // PolicyResolution contains resolution data for the policy. It essentially represents the desired state calculated
-// by policy resolver. It contains a calculated map of component instances with their data, information about
-// resolved service consumption declarations, as well as processing order to components in which they have to be
-// instantiated/updated/deleted.
+// by policy resolver. It contains a calculated map of component instances with their data, with information about
+// resolved claims.
 type PolicyResolution struct {
 	// Resolved component instances: componentKey -> componentInstance
 	ComponentInstanceMap map[string]*ComponentInstance
@@ -93,8 +92,8 @@ func (resolution *PolicyResolution) GetClaimResolution(claim *lang.Claim) *Claim
 				dError = instance.Error
 			}
 
-			// if it's a service at depth 0, we have found the service instance to which our claim resolved
-			if depth == 0 && instance.Metadata.Key.IsService() {
+			// if it's a bundle at depth 0, we have found the bundle instance to which our claim resolved
+			if depth == 0 && instance.Metadata.Key.IsBundle() {
 				dComponentKey = instance.Metadata.Key.GetKey()
 			}
 		}
@@ -104,7 +103,7 @@ func (resolution *PolicyResolution) GetClaimResolution(claim *lang.Claim) *Claim
 }
 
 // Validate checks that the state is valid, meaning that all objects references are valid and all components are valid
-//  - it takes all the instances and verifies that all services exist, all clusters exist, etc
+//  - it takes all the instances and verifies that all bundles exist, all clusters exist, etc
 //  - it also verifies that there are no components with global errors (e.g. conflicting code/discovery params)
 func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 	// component instances must not have global errors (e.g. conflicting code/discovery params)
@@ -139,20 +138,20 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 			return fmt.Errorf("context '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ContractName, componentKey.ContextName, componentKey.GetKey())
 		}
 
-		// verify that service exists
-		serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, componentKey.ServiceName, componentKey.Namespace)
-		if serviceObj == nil || err != nil {
-			// component instance points to non-existing service, meaning this component instance is now orphan
-			return fmt.Errorf("service '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.GetKey())
+		// verify that bundle exists
+		bundleObj, err := policy.GetObject(lang.BundleObject.Kind, componentKey.BundleName, componentKey.Namespace)
+		if bundleObj == nil || err != nil {
+			// component instance points to non-existing bundle, meaning this component instance is now orphan
+			return fmt.Errorf("bundle '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.BundleName, componentKey.GetKey())
 		}
 
 		if componentKey.ComponentName != componentRootName {
-			// verify that component within a service exists
-			service := serviceObj.(*lang.Service) // nolint: errcheck
-			component, found := service.GetComponentsMap()[componentKey.ComponentName]
+			// verify that component within a bundle exists
+			bundle := bundleObj.(*lang.Bundle) // nolint: errcheck
+			component, found := bundle.GetComponentsMap()[componentKey.ComponentName]
 			if component == nil || !found {
-				// component instance points to non-existing component within a service, meaning this component instance is now orphan
-				return fmt.Errorf("component '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.ComponentName, componentKey.GetKey())
+				// component instance points to non-existing component within a bundle, meaning this component instance is now orphan
+				return fmt.Errorf("component '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.BundleName, componentKey.ComponentName, componentKey.GetKey())
 			}
 		}
 

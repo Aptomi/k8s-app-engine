@@ -1,5 +1,5 @@
 # Definition of Kafka service
-- kind: service
+- kind: bundle
   metadata:
     namespace: platform
     name: kafka
@@ -41,4 +41,4 @@
     - name: platform
 
       allocation:
-        service: kafka
+        bundle: kafka

@@ -92,8 +92,8 @@ func TestDiffComponentDelete(t *testing.T) {
 	verifyDiff(t, diffAgain, 0, 2, 0, 0, 2)
 }
 
-func TestDiffComponentWithServiceSharing(t *testing.T) {
-	b := makePolicyBuilderWithServiceSharing()
+func TestDiffComponentWithBundleSharing(t *testing.T) {
+	b := makePolicyBuilderWithBundleSharing()
 	resolvedNext := resolvePolicy(t, b)
 	resolvedEmpty := resolvePolicy(t, builder.NewPolicyBuilder())
 
@@ -109,15 +109,15 @@ func TestDiffComponentWithServiceSharing(t *testing.T) {
 func makePolicyBuilder() *builder.PolicyBuilder {
 	b := builder.NewPolicyBuilder()
 
-	// create a service
-	service := b.AddService()
-	b.AddServiceComponent(service,
+	// create a bundle
+	bundle := b.AddBundle()
+	b.AddBundleComponent(bundle,
 		b.CodeComponent(
 			util.NestedParameterMap{"param": "{{ .Labels.param }}"},
 			nil,
 		),
 	)
-	b.AddContract(service, b.CriteriaTrue())
+	b.AddContract(bundle, b.CriteriaTrue())
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
@@ -126,17 +126,17 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 	return b
 }
 
-func makePolicyBuilderWithServiceSharing() *builder.PolicyBuilder {
+func makePolicyBuilderWithBundleSharing() *builder.PolicyBuilder {
 	b := builder.NewPolicyBuilder()
 
-	// create a service, which depends on another service
-	service1 := b.AddService()
-	contract1 := b.AddContract(service1, b.CriteriaTrue())
-	service2 := b.AddService()
-	contract2 := b.AddContract(service2, b.CriteriaTrue())
-	b.AddServiceComponent(service1, b.ContractComponent(contract2))
+	// create a bundle, which depends on another bundle
+	bundle1 := b.AddBundle()
+	contract1 := b.AddContract(bundle1, b.CriteriaTrue())
+	bundle2 := b.AddBundle()
+	contract2 := b.AddContract(bundle2, b.CriteriaTrue())
+	b.AddBundleComponent(bundle1, b.ContractComponent(contract2))
 
-	// make first service one per claim, and they all will share the second service
+	// make first bundle one per claim, and they all will share the second bundle
 	contract1.Contexts[0].Allocation.Keys = []string{"{{ .Claim.ID }}"}
 
 	// add rule to set cluster

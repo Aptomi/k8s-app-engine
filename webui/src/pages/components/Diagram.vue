@@ -123,10 +123,10 @@
       }
     },
     groups: {
-      service: {
+      bundle: {
         size: 25,
         shape: 'circularImage',
-        image: '/static/img/service-icon-circle.png',
+        image: '/static/img/bundle-icon-circle.png',
         color: {background: 'white', border: 'lightgray'}
       },
       contract: {
@@ -159,7 +159,7 @@
         image: '/static/img/k8s-icon.png',
         color: {background: 'white', border: 'rgb(66,136,251)'}
       },
-      serviceInstance: {
+      bundleInstance: {
         font: {
           color: 'black',
           multi: 'html'

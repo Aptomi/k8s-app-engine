@@ -27,13 +27,13 @@ type ComponentInstanceMetadata struct {
 // AllowIngres is an special key, which is used in DataForPlugins to indicate whether ingress traffic should be allowed for a given component instance
 const AllowIngres = "allow_ingress"
 
-// ComponentInstance is an instance of a particular code component within a service, which indicate that this component
+// ComponentInstance is an instance of a particular code component within a bundle, which indicate that this component
 // has to be instantiated and configured in a certain cluster. Policy resolver produces a map of component instances
 // and their parameters in desired state (PolicyResolution) as result of policy resolution.
 //
-// When a service gets instantiated, a special "root" component instance gets created with component name
+// When a bundle gets instantiated, a special "root" component instance gets created with component name
 // set to Metadata.Key.ComponentName == componentRootName. Then all "child" component instances get created, one
-// per service component with type code.
+// per bundle component with type code.
 //
 // Every ComponentInstance contains full information about for a given component instance - who is consuming this
 // instance, labels, code params, discovery params, in & out graph edges (what component instances we depend on,
@@ -90,7 +90,7 @@ type ComponentInstance struct {
 	// EndpointsUpToDate is true if endpoints are up to date and false otherwise
 	EndpointsUpToDate bool
 
-	// Endpoints represents all URLs that could be used to access deployed service
+	// Endpoints represents all URLs that could be used to access deployed bundle
 	Endpoints map[string]string
 }
 

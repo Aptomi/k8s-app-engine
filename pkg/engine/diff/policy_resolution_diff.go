@@ -106,7 +106,7 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 		Now, let's see if a component needs to be created or updated.
 	*/
 
-	// See if it's a service or component
+	// See if it's a bundle or component
 	isCodeComponent := (prevInstance != nil && prevInstance.IsCode) || (nextInstance != nil && nextInstance.IsCode)
 
 	// See if a component needs to be instantiated
@@ -120,12 +120,12 @@ func (diff *PolicyResolutionDiff) buildActions(key string) { // nolint: gocyclo
 		if !sameParams {
 			node.AddAction(component.NewUpdateAction(key, prevInstance.CalculatedCodeParams, nextInstance.CalculatedCodeParams), diff.Prev, true)
 
-			// indicate that a parent service component instance gets updated as well
-			// this is required for adjusting update/creation times of a service with changed component
-			// this may produce duplicate "update" actions for the parent service
-			serviceKey := nextInstance.Metadata.Key.GetParentServiceKey().GetKey()
-			serviceNode := diff.ActionPlan.GetActionGraphNode(serviceKey)
-			serviceNode.AddAction(component.NewUpdateAction(serviceKey, util.NestedParameterMap{}, util.NestedParameterMap{}), diff.Prev, true)
+			// indicate that a parent bundle component instance gets updated as well
+			// this is required for adjusting update/creation times of a bundle with changed component
+			// this may produce duplicate "update" actions for the parent bundle
+			bundleKey := nextInstance.Metadata.Key.GetParentBundleKey().GetKey()
+			bundleNode := diff.ActionPlan.GetActionGraphNode(bundleKey)
+			bundleNode.AddAction(component.NewUpdateAction(bundleKey, util.NestedParameterMap{}, util.NestedParameterMap{}), diff.Prev, true)
 		}
 	}
 

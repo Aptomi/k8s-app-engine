@@ -23,20 +23,20 @@ func (node *resolutionNode) errorClaimNotAllowedByRules() error {
 	return fmt.Errorf("rules do not allow claim '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.claim.Metadata.Namespace, node.claim.Name, node.claim.User, node.claim.Contract, node.contractName, node.depth)
 }
 
-func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
-	return fmt.Errorf("user '%s' not allowed to consume service: %s", node.claim.User, err)
+func (node *resolutionNode) userNotAllowedToConsumeBundle(err error) error {
+	return fmt.Errorf("user '%s' not allowed to consume bundle: %s", node.claim.User, err)
 }
 
 func (node *resolutionNode) errorTargetNotSet() error {
-	return fmt.Errorf("not sure where components should be deployed: label 'target' is not set (claim '%s', contract '%s', service '%s')", node.claim.Name, node.contract.Name, node.service.Name)
+	return fmt.Errorf("not sure where components should be deployed: label 'target' is not set (claim '%s', contract '%s', bundle '%s')", node.claim.Name, node.contract.Name, node.bundle.Name)
 }
 
 func (node *resolutionNode) errorClusterLookup(clusterName string, cause error) error {
-	return fmt.Errorf("cluster '%s' lookup error: %s (claim '%s', contract '%s', service '%s')", clusterName, cause, node.claim.Name, node.contract.Name, node.service.Name)
+	return fmt.Errorf("cluster '%s' lookup error: %s (claim '%s', contract '%s', bundle '%s')", clusterName, cause, node.claim.Name, node.contract.Name, node.bundle.Name)
 }
 
-func (node *resolutionNode) errorServiceIsNotInSameNamespaceAsContract(service *lang.Service) error {
-	return fmt.Errorf("service '%s' is not in the same namespace as contract '%s'", runtime.KeyForStorable(service), runtime.KeyForStorable(node.contract))
+func (node *resolutionNode) errorBundleIsNotInSameNamespaceAsContract(bundle *lang.Bundle) error {
+	return fmt.Errorf("bundle '%s' is not in the same namespace as contract '%s'", runtime.KeyForStorable(bundle), runtime.KeyForStorable(node.contract))
 }
 
 func (node *resolutionNode) errorWhenTestingContext(context *lang.Context, cause error) error {
@@ -47,12 +47,12 @@ func (node *resolutionNode) errorContextNotMatched() error {
 	return fmt.Errorf("unable to find matching context within contract: '%s'", node.contract.Name)
 }
 
-func (node *resolutionNode) errorWhenTestingComponent(component *lang.ServiceComponent, cause error) error {
-	return fmt.Errorf("error while checking component criteria '%s' for service '%s': %s", component.Name, node.service.Name, printCauseDetailsOnDebug(cause, node.eventLog))
+func (node *resolutionNode) errorWhenTestingComponent(component *lang.BundleComponent, cause error) error {
+	return fmt.Errorf("error while checking component criteria '%s' for bundle '%s': %s", component.Name, node.bundle.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenProcessingRule(rule *lang.Rule, cause error) error {
-	return fmt.Errorf("error while processing rule '%s' on contract '%s', context '%s', service '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.service.Name, printCauseDetailsOnDebug(cause, node.eventLog))
+	return fmt.Errorf("error while processing rule '%s' on contract '%s', context '%s', bundle '%s': %s", rule.Name, node.contract.Name, node.context.Name, node.bundle.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error {
@@ -60,15 +60,15 @@ func (node *resolutionNode) errorWhenResolvingAllocationKeys(cause error) error 
 }
 
 func (node *resolutionNode) errorWhenProcessingCodeParams(cause error) error {
-	return fmt.Errorf("error when processing code params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, printCauseDetailsOnDebug(cause, node.eventLog))
+	return fmt.Errorf("error when processing code params for bundle '%s', contract '%s', context '%s', component '%s': %s", node.bundle.Name, node.contract.Name, node.context.Name, node.component.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
 func (node *resolutionNode) errorWhenProcessingDiscoveryParams(cause error) error {
-	return fmt.Errorf("error when processing discovery params for service '%s', contract '%s', context '%s', component '%s': %s", node.service.Name, node.contract.Name, node.context.Name, node.component.Name, printCauseDetailsOnDebug(cause, node.eventLog))
+	return fmt.Errorf("error when processing discovery params for bundle '%s', contract '%s', context '%s', component '%s': %s", node.bundle.Name, node.contract.Name, node.context.Name, node.component.Name, printCauseDetailsOnDebug(cause, node.eventLog))
 }
 
-func (node *resolutionNode) errorServiceCycleDetected() error {
-	return fmt.Errorf("error when processing policy, service cycle detected: %s", node.path)
+func (node *resolutionNode) errorBundleCycleDetected() error {
+	return fmt.Errorf("error when processing policy, bundle cycle detected: %s", node.path)
 }
 
 /*
@@ -99,8 +99,8 @@ func (node *resolutionNode) logContractFound(contract *lang.Contract) {
 	node.eventLog.NewEntry().Debugf("Contract found in policy: '%s'", contract.Name)
 }
 
-func (node *resolutionNode) logServiceFound(service *lang.Service) {
-	node.eventLog.NewEntry().Debugf("Service found in policy: '%s'", service.Name)
+func (node *resolutionNode) logBundleFound(bundle *lang.Bundle) {
+	node.eventLog.NewEntry().Debugf("Bundle found in policy: '%s'", bundle.Name)
 }
 
 func (node *resolutionNode) logStartMatchingContexts() {
@@ -115,8 +115,8 @@ func (node *resolutionNode) logContextMatched(contextMatched *lang.Context) {
 	node.eventLog.NewEntry().Infof("Found matching context within contract '%s': %s", node.contract.Name, contextMatched.Name)
 }
 
-func (node *resolutionNode) logComponentNotMatched(component *lang.ServiceComponent) {
-	node.eventLog.NewEntry().Infof("Component criteria evaluated to 'false', excluding it from processing: service '%s', component '%s'", node.service.Name, node.component.Name)
+func (node *resolutionNode) logComponentNotMatched(component *lang.BundleComponent) {
+	node.eventLog.NewEntry().Infof("Component criteria evaluated to 'false', excluding it from processing: bundle '%s', component '%s'", node.bundle.Name, node.component.Name)
 }
 
 func (node *resolutionNode) logTestedContextCriteria(context *lang.Context, matched bool) {
@@ -148,12 +148,12 @@ func (node *resolutionNode) logResolvingClaimOnComponent() {
 }
 
 func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstanceKey) {
-	if node.depth == 0 && cik.IsService() {
+	if node.depth == 0 && cik.IsBundle() {
 		// at the top of the tree, when we resolve a root-level claim
 		node.eventLog.NewEntry().Infof("Successfully resolved claim '%s/%s' ('%s' -> '%s'): %s", node.claim.Metadata.Namespace, node.claim.Name, node.user.Name, node.claim.Contract, cik.GetKey())
-	} else if cik.IsService() {
-		// resolved service instance
-		node.eventLog.NewEntry().Infof("Successfully resolved service instance '%s' -> '%s': %s", node.user.Name, node.contract.Name, cik.GetKey())
+	} else if cik.IsBundle() {
+		// resolved bundle instance
+		node.eventLog.NewEntry().Infof("Successfully resolved bundle instance '%s' -> '%s': %s", node.user.Name, node.contract.Name, cik.GetKey())
 	} else {
 		// resolved component instance
 		node.eventLog.NewEntry().Infof("Successfully resolved component instance '%s' -> '%s' (component '%s'): %s", node.user.Name, node.contract.Name, node.component.Name, cik.GetKey())
@@ -161,19 +161,19 @@ func (node *resolutionNode) logInstanceSuccessfullyResolved(cik *ComponentInstan
 }
 
 func (node *resolutionNode) logCannotResolveInstance() {
-	if node.service == nil {
+	if node.bundle == nil {
 		node.eventLog.NewEntry().Warningf("Cannot resolve instance: contract '%s'", node.contractName)
 	} else if node.component == nil {
-		node.eventLog.NewEntry().Warningf("Cannot resolve instance: contract '%s', service '%s'", node.contractName, node.service.Name)
+		node.eventLog.NewEntry().Warningf("Cannot resolve instance: contract '%s', bundle '%s'", node.contractName, node.bundle.Name)
 	} else {
-		node.eventLog.NewEntry().Warningf("Cannot resolve instance: contract '%s', service '%s', component '%s'", node.contractName, node.service.Name, node.component.Name)
+		node.eventLog.NewEntry().Warningf("Cannot resolve instance: contract '%s', bundle '%s', component '%s'", node.contractName, node.bundle.Name, node.component.Name)
 	}
 }
 
 func (resolver *PolicyResolver) logComponentParams(instance *ComponentInstance) {
-	serviceObj, err := resolver.policy.GetObject(lang.ServiceObject.Kind, instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace)
+	bundleObj, err := resolver.policy.GetObject(lang.BundleObject.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
-		panic(fmt.Sprintf("error while getting service '%s/%s' from the policy: %s", instance.Metadata.Key.ServiceName, instance.Metadata.Key.Namespace, err))
+		panic(fmt.Sprintf("error while getting bundle '%s/%s' from the policy: %s", instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace, err))
 	}
 
 	// if there is a conflict (e.g. components have different code params), turn this into an error
@@ -181,7 +181,7 @@ func (resolver *PolicyResolver) logComponentParams(instance *ComponentInstance) 
 		resolver.eventLog.NewEntry().Error(printCauseDetailsOnDebug(instance.Error, resolver.eventLog))
 	}
 
-	code := serviceObj.(*lang.Service).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
+	code := bundleObj.(*lang.Bundle).GetComponentsMap()[instance.Metadata.Key.ComponentName].Code
 	if code != nil {
 		cs := spew.ConfigState{Indent: "\t"}
 

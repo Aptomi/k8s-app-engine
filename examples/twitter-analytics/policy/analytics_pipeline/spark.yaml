@@ -1,5 +1,5 @@
 # Definition of Spark service
-- kind: service
+- kind: bundle
   metadata:
     namespace: platform
     name: spark
@@ -31,7 +31,7 @@
             deployChart: false
             addresses:
               zookeeper: "{{ .Discovery.zookeeper.zookeeper.url }}"
-            path: "/{{ .Discovery.Service.InstanceId }}"
+            path: "/{{ .Discovery.Bundle.InstanceId }}"
 
       dependencies:
         - zookeeper
@@ -47,4 +47,4 @@
     - name: platform
 
       allocation:
-        service: spark
+        bundle: spark

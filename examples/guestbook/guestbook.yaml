@@ -1,5 +1,5 @@
 # Definition of Guestbook service
-- kind: service
+- kind: bundle
   metadata:
     namespace: social
     name: guestbook
@@ -40,6 +40,6 @@
   contexts:
     - name: personal
       allocation:
-        service: guestbook
+        bundle: guestbook
         keys:
           - "{{ .User.Name }}"

@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "redis-slave-{{ .Discovery.Service.InstanceId }}"
+  name: "redis-slave-{{ .Discovery.Bundle.InstanceId }}"
   labels:
     app: redis
     role: slave
     tier: backend
-    instance: "{{ .Discovery.Service.InstanceId }}"
+    instance: "{{ .Discovery.Bundle.InstanceId }}"
 spec:
   ports:
   - port: 6379
@@ -14,4 +14,4 @@ spec:
     app: redis
     role: slave
     tier: backend
-    instance: "{{ .Discovery.Service.InstanceId }}"
+    instance: "{{ .Discovery.Bundle.InstanceId }}"

@@ -22,7 +22,7 @@ func (server *Server) desiredStateEnforceLoop() error {
 		prometheus.CounterOpts{
 			Name:        "aptomi_desired_state_enforcements_total",
 			Help:        "Total number of completed desired state enforcements",
-			ConstLabels: prometheus.Labels{"service": serviceName},
+			ConstLabels: prometheus.Labels{"service": prometheusSvcName},
 		},
 	)
 	prometheus.MustRegister(server.desiredStateEnforcements)
@@ -31,7 +31,7 @@ func (server *Server) desiredStateEnforceLoop() error {
 	server.desiredStateEnforcementDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name:        "aptomi_desired_state_enforcement_duration_seconds",
 		Help:        "Duration of the completed desired state enforcements",
-		ConstLabels: prometheus.Labels{"service": serviceName},
+		ConstLabels: prometheus.Labels{"service": prometheusSvcName},
 		Buckets:     []float64{.1, 1, 10, 20, 30, 60, 120, 180, 300, 600},
 	},
 	)

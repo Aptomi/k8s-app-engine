@@ -73,12 +73,12 @@ func (builder *PolicyBuilder) AddClaim(user *lang.User, contract *lang.Contract)
 	return result
 }
 
-// AddUser creates a new user who can consume services from the 'main' namespace and adds it to the policy
+// AddUser creates a new user who can consume bundles from the 'main' namespace and adds it to the policy
 func (builder *PolicyBuilder) AddUser() *lang.User {
 	result := &lang.User{
 		Name:        util.RandomID(builder.random, idLength),
 		Labels:      map[string]string{},
-		DomainAdmin: true, // this will ensure that this user can consume services
+		DomainAdmin: true, // this will ensure that this user can consume bundles
 	}
 	builder.users.AddUser(result)
 	return result
@@ -94,10 +94,10 @@ func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
 	return builder.AddUser()
 }
 
-// AddService creates a new service and adds it to the policy
-func (builder *PolicyBuilder) AddService() *lang.Service {
-	result := &lang.Service{
-		TypeKind: lang.ServiceObject.GetTypeKind(),
+// AddBundle creates a new bundle and adds it to the policy
+func (builder *PolicyBuilder) AddBundle() *lang.Bundle {
+	result := &lang.Bundle{
+		TypeKind: lang.BundleObject.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -107,8 +107,8 @@ func (builder *PolicyBuilder) AddService() *lang.Service {
 	return result
 }
 
-// AddContract creates a new contract for a given service and adds it to the policy
-func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.Criteria) *lang.Contract {
+// AddContract creates a new contract for a given bundle and adds it to the policy
+func (builder *PolicyBuilder) AddContract(bundle *lang.Bundle, criteria *lang.Criteria) *lang.Contract {
 	result := &lang.Contract{
 		TypeKind: lang.ContractObject.GetTypeKind(),
 		Metadata: lang.Metadata{
@@ -119,7 +119,7 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 			Name:     util.RandomID(builder.random, idLength),
 			Criteria: criteria,
 			Allocation: &lang.Allocation{
-				Service: service.Name,
+				Bundle: bundle.Name,
 			},
 		}},
 	}
@@ -127,8 +127,8 @@ func (builder *PolicyBuilder) AddContract(service *lang.Service, criteria *lang.
 	return result
 }
 
-// AddContractMultipleContexts creates contract with multiple contexts for a given service and adds it to the policy
-func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service, criteriaArray ...*lang.Criteria) *lang.Contract {
+// AddContractMultipleContexts creates contract with multiple contexts for a given bundle and adds it to the policy
+func (builder *PolicyBuilder) AddContractMultipleContexts(bundle *lang.Bundle, criteriaArray ...*lang.Criteria) *lang.Contract {
 	result := &lang.Contract{
 		TypeKind: lang.ContractObject.GetTypeKind(),
 		Metadata: lang.Metadata{
@@ -142,7 +142,7 @@ func (builder *PolicyBuilder) AddContractMultipleContexts(service *lang.Service,
 				Name:     util.RandomID(builder.random, idLength),
 				Criteria: criteria,
 				Allocation: &lang.Allocation{
-					Service: service.Name,
+					Bundle: bundle.Name,
 				},
 			},
 		)
@@ -210,16 +210,16 @@ func (builder *PolicyBuilder) AllocationKeys(key ...string) []string {
 	return key
 }
 
-// UnknownComponent creates an unknown component for a service (not code and not contract)
-func (builder *PolicyBuilder) UnknownComponent() *lang.ServiceComponent {
-	return &lang.ServiceComponent{
+// UnknownComponent creates an unknown component for a bundle (not code and not contract)
+func (builder *PolicyBuilder) UnknownComponent() *lang.BundleComponent {
+	return &lang.BundleComponent{
 		Name: util.RandomID(builder.random, idLength),
 	}
 }
 
-// CodeComponent creates a new code component for a service
-func (builder *PolicyBuilder) CodeComponent(codeParams util.NestedParameterMap, discoveryParams util.NestedParameterMap) *lang.ServiceComponent {
-	return &lang.ServiceComponent{
+// CodeComponent creates a new code component for a bundle
+func (builder *PolicyBuilder) CodeComponent(codeParams util.NestedParameterMap, discoveryParams util.NestedParameterMap) *lang.BundleComponent {
+	return &lang.BundleComponent{
 		Name: util.RandomID(builder.random, idLength),
 		Code: &lang.Code{
 			Type:   "helm",
@@ -229,22 +229,22 @@ func (builder *PolicyBuilder) CodeComponent(codeParams util.NestedParameterMap, 
 	}
 }
 
-// ContractComponent creates a new contract component for a service
-func (builder *PolicyBuilder) ContractComponent(contract *lang.Contract) *lang.ServiceComponent {
-	return &lang.ServiceComponent{
+// ContractComponent creates a new contract component for a bundle
+func (builder *PolicyBuilder) ContractComponent(contract *lang.Contract) *lang.BundleComponent {
+	return &lang.BundleComponent{
 		Name:     util.RandomID(builder.random, idLength),
 		Contract: contract.Namespace + "/" + contract.Name,
 	}
 }
 
-// AddServiceComponent adds a given service component to the service
-func (builder *PolicyBuilder) AddServiceComponent(service *lang.Service, component *lang.ServiceComponent) *lang.ServiceComponent {
-	service.Components = append(service.Components, component)
+// AddBundleComponent adds a given bundle component to the bundle
+func (builder *PolicyBuilder) AddBundleComponent(bundle *lang.Bundle, component *lang.BundleComponent) *lang.BundleComponent {
+	bundle.Components = append(bundle.Components, component)
 	return component
 }
 
 // AddComponentClaim adds a component claim on another component
-func (builder *PolicyBuilder) AddComponentClaim(component *lang.ServiceComponent, dependsOn *lang.ServiceComponent) {
+func (builder *PolicyBuilder) AddComponentClaim(component *lang.BundleComponent, dependsOn *lang.BundleComponent) {
 	component.Dependencies = append(component.Dependencies, dependsOn.Name)
 }
 

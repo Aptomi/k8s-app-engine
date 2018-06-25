@@ -117,9 +117,9 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Get key to a component
 	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)    // nolint: errcheck
 	contract := desired.policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract) // nolint: errcheck
-	service := desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service)    // nolint: errcheck
-	key := resolve.NewComponentInstanceKey(cluster, "k8ns", contract, contract.Contexts[0], nil, service, service.Components[0])
-	keyService := key.GetParentServiceKey()
+	bundle := desired.policy().GetObjectsByKind(lang.BundleObject.Kind)[0].(*lang.Bundle)       // nolint: errcheck
+	key := resolve.NewComponentInstanceKey(cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, bundle.Components[0])
+	keyBundle := key.GetParentBundleKey()
 
 	// Check that original claim was resolved successfully
 	claim := desired.policy().GetObjectsByKind(lang.ClaimObject.Kind)[0].(*lang.Claim) // nolint: errcheck
@@ -170,7 +170,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 		Step 3: desired = update user label, check = component update time changed
 	*/
 	componentTimes := getTimes(t, key.GetKey(), actualState)
-	serviceTimes := getTimes(t, keyService.GetKey(), actualState)
+	bundleTimes := getTimes(t, keyBundle.GetKey(), actualState)
 
 	// Sleep a little bit to introduce time delay
 	time.Sleep(25 * time.Millisecond)
@@ -205,10 +205,10 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	assert.Equal(t, componentTimes.created, componentTimesUpdated.created, "Creation time for component should be preserved (i.e. remain the same)")
 	assert.True(t, componentTimesUpdated.updated.After(componentTimes.updated), "Update time for component should be changed (because component code param is changed)")
 
-	// Check creation/update times for service
-	serviceTimesUpdated := getTimes(t, keyService.GetKey(), actualState)
-	assert.Equal(t, serviceTimes.created, serviceTimesUpdated.created, "Creation time for parent service should be preserved (i.e. remain the same)")
-	assert.True(t, serviceTimesUpdated.updated.After(serviceTimes.updated), "Update time for parent service should be changed (because component code param is changed)")
+	// Check creation/update times for bundle
+	bundleTimesUpdated := getTimes(t, keyBundle.GetKey(), actualState)
+	assert.Equal(t, bundleTimes.created, bundleTimesUpdated.created, "Creation time for parent bundle should be preserved (i.e. remain the same)")
+	assert.True(t, bundleTimesUpdated.updated.After(bundleTimes.updated), "Update time for parent bundle should be changed (because component code param is changed)")
 }
 
 func TestDeletePolicyObjectsWhileComponentInstancesAreStillRunningFails(t *testing.T) {
@@ -292,9 +292,9 @@ func (td *testData) external() *external.Data {
 func makePolicyBuilder() *builder.PolicyBuilder {
 	b := builder.NewPolicyBuilder()
 
-	// create a service
-	service := b.AddService()
-	b.AddServiceComponent(service,
+	// create a bundle
+	bundle := b.AddBundle()
+	b.AddBundleComponent(bundle,
 		b.CodeComponent(
 			util.NestedParameterMap{
 				"param": "{{ .Labels.param }}",
@@ -303,7 +303,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 			nil,
 		),
 	)
-	contract := b.AddContract(service, b.CriteriaTrue())
+	contract := b.AddContract(bundle, b.CriteriaTrue())
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()

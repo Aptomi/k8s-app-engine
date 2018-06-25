@@ -42,9 +42,9 @@ type resolutionNode struct {
 	// reference to the current set of labels
 	labels *lang.LabelSet
 
-	// reference to the context & the corresponding service that were matched
+	// reference to the context & the corresponding bundle that were matched
 	context *lang.Context
-	service *lang.Service
+	bundle  *lang.Bundle
 
 	// reference to the allocation keys that were resolved
 	allocationKeysResolved []string
@@ -54,13 +54,13 @@ type resolutionNode struct {
 	discoveryTreeNode util.NestedParameterMap
 
 	// reference to the current component in discovery tree
-	component *lang.ServiceComponent
+	component *lang.BundleComponent
 
 	// reference to the current component key
 	componentKey *ComponentInstanceKey
 
-	// reference to the current service key
-	serviceKey *ComponentInstanceKey
+	// reference to the current bundle key
+	bundleKey *ComponentInstanceKey
 
 	// reference to the last key we arrived with, so we can reconstruct graph edges between keys
 	arrivalKey *ComponentInstanceKey
@@ -108,7 +108,7 @@ func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, claim *
 	}
 }
 
-// Creates a new resolution node (as we are processing claim on another service)
+// Creates a new resolution node (as we are processing claim on another bundle)
 func (node *resolutionNode) createChildNode() *resolutionNode {
 	eventLog := event.NewLog(node.eventLog.GetLevel(), node.eventLog.GetScope())
 	return &resolutionNode{
@@ -141,7 +141,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 }
 
 // As the resolution goes on, this method is called when objects become resolved and available in the context
-// Right now we only call it for claim, contract, and service
+// Right now we only call it for claim, contract, and bundle
 func (node *resolutionNode) objectResolved(object runtime.Storable) {
 	node.eventLog.AddFixedField(object.GetKind()+"Id", runtime.KeyForStorable(object))
 }
@@ -167,7 +167,7 @@ func (node *resolutionNode) getContract(policy *lang.Policy) *lang.Contract {
 
 // Helper to get a matched context
 func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Context, error) {
-	// Locate the list of contexts for service
+	// Locate the list of contexts for bundle
 	node.logStartMatchingContexts()
 
 	// Find matching context
@@ -195,29 +195,29 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 	return contextMatched, nil
 }
 
-// Helper to get a matched service
-func (node *resolutionNode) getMatchedService(policy *lang.Policy) (*lang.Service, error) {
-	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, node.context.Allocation.Service, node.namespace)
-	if serviceObj == nil || err != nil {
-		panic(fmt.Sprintf("Can't get service '%s/%s': %s", node.namespace, node.context.Allocation.Service, err))
+// Helper to get a matched bundle
+func (node *resolutionNode) getMatchedBundle(policy *lang.Policy) (*lang.Bundle, error) {
+	bundleObj, err := policy.GetObject(lang.BundleObject.Kind, node.context.Allocation.Bundle, node.namespace)
+	if bundleObj == nil || err != nil {
+		panic(fmt.Sprintf("Can't get bundle '%s/%s': %s", node.namespace, node.context.Allocation.Bundle, err))
 	}
 
-	service := serviceObj.(*lang.Service) // nolint: errcheck
+	bundle := bundleObj.(*lang.Bundle) // nolint: errcheck
 
-	// Service should be located in the same namespace as contract
-	if service.Namespace != node.contract.Namespace {
-		return nil, node.errorServiceIsNotInSameNamespaceAsContract(service)
+	// Bundle should be located in the same namespace as contract
+	if bundle.Namespace != node.contract.Namespace {
+		return nil, node.errorBundleIsNotInSameNamespaceAsContract(bundle)
 	}
 
 	// User should have access to consume the service according to the ACL
 	userView := node.resolver.policy.View(node.user)
-	canConsume, err := userView.CanConsume(service)
+	canConsume, err := userView.CanConsume(bundle)
 	if !canConsume {
-		return nil, node.userNotAllowedToConsumeService(err)
+		return nil, node.userNotAllowedToConsumeBundle(err)
 	}
 
-	node.logServiceFound(service)
-	return service, nil
+	node.logBundleFound(bundle)
+	return bundle, nil
 }
 
 // Helper to resolve allocation keys
@@ -233,7 +233,7 @@ func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string
 }
 
 // checks if component criteria holds or not (i.e. whether component should be included or excluded from processing)
-func (node *resolutionNode) componentMatches(component *lang.ServiceComponent) (bool, error) {
+func (node *resolutionNode) componentMatches(component *lang.BundleComponent) (bool, error) {
 	contextualData := node.getContextualDataForComponentCriteria()
 	matched, err := component.Matches(contextualData, node.resolver.expressionCache)
 	if err != nil {
@@ -247,7 +247,7 @@ func (node *resolutionNode) componentMatches(component *lang.ServiceComponent) (
 }
 
 // createComponentKey creates a component key
-func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent) (*ComponentInstanceKey, error) {
+func (node *resolutionNode) createComponentKey(component *lang.BundleComponent) (*ComponentInstanceKey, error) {
 	targetLabel := node.labels.Labels[lang.LabelTarget]
 	if len(targetLabel) <= 0 {
 		return nil, node.errorTargetNotSet()
@@ -281,7 +281,7 @@ func (node *resolutionNode) createComponentKey(component *lang.ServiceComponent)
 		node.contract,
 		node.context,
 		node.allocationKeysResolved,
-		node.service,
+		node.bundle,
 		component,
 	), nil
 }

@@ -1,5 +1,5 @@
 # Definition of Analytics Pipeline service
-- kind: service
+- kind: bundle
   metadata:
     namespace: platform
     name: analytics_pipeline
@@ -26,4 +26,4 @@
     - name: platform
 
       allocation:
-        service: analytics_pipeline
+        bundle: analytics_pipeline

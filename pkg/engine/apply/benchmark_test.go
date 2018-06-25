@@ -60,38 +60,38 @@ func BenchmarkEngineMedium(b *testing.B) {
 }
 
 type PolicyGenerator struct {
-	random                *rand.Rand
-	labels                int
-	services              int
-	serviceCodeComponents int
-	codeParams            int
-	serviceClaimMaxChain  int
-	contextsPerContract   int
-	rules                 int
-	users                 int
-	claims                int
+	random               *rand.Rand
+	labels               int
+	bundles              int
+	bundleCodeComponents int
+	codeParams           int
+	bundleClaimMaxChain  int
+	contextsPerContract  int
+	rules                int
+	users                int
+	claims               int
 
 	generatedUserLabels map[string]string
 	generatedLabelKeys  []string
 
-	generatedServices []*lang.Service
-	policy            *lang.Policy
-	externalData      *external.Data
+	generatedBundles []*lang.Bundle
+	policy           *lang.Policy
+	externalData     *external.Data
 }
 
-func NewPolicyGenerator(randSeed int64, labels, services, serviceCodeComponents, codeParams, serviceClaimMaxChain, contextsPerContract, rules, users, claims int) *PolicyGenerator {
+func NewPolicyGenerator(randSeed int64, labels, bundles, bundleCodeComponents, codeParams, bundleClaimMaxChain, contextsPerContract, rules, users, claims int) *PolicyGenerator {
 	result := &PolicyGenerator{
-		random:                rand.New(rand.NewSource(randSeed)),
-		labels:                labels,
-		services:              services,
-		serviceCodeComponents: serviceCodeComponents,
-		codeParams:            codeParams,
-		serviceClaimMaxChain:  serviceClaimMaxChain,
-		contextsPerContract:   contextsPerContract,
-		rules:                 rules,
-		users:                 users,
-		claims:                claims,
-		policy:                lang.NewPolicy(),
+		random:               rand.New(rand.NewSource(randSeed)),
+		labels:               labels,
+		bundles:              bundles,
+		bundleCodeComponents: bundleCodeComponents,
+		codeParams:           codeParams,
+		bundleClaimMaxChain:  bundleClaimMaxChain,
+		contextsPerContract:  contextsPerContract,
+		rules:                rules,
+		users:                users,
+		claims:               claims,
+		policy:               lang.NewPolicy(),
 	}
 	return result
 }
@@ -100,8 +100,8 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	// pre-generate the list of labels
 	gen.makeUserLabels()
 
-	// generate services
-	maxChainLen := gen.makeServices()
+	// generate bundles
+	maxChainLen := gen.makeBundles()
 
 	// generate contracts
 	gen.makeContracts()
@@ -121,8 +121,8 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 		NewSecretLoaderImpl(),
 	)
 
-	fmt.Printf("Generated policy. Services = %d (max chain %d), Contexts = %d, Claims = %d, Users = %d\n",
-		len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind)),
+	fmt.Printf("Generated policy. Bundles = %d (max chain %d), Contexts = %d, Claims = %d, Users = %d\n",
+		len(gen.policy.GetObjectsByKind(lang.BundleObject.Kind)),
 		maxChainLen,
 		len(gen.policy.GetObjectsByKind(lang.ContractObject.Kind))*gen.contextsPerContract,
 		len(gen.policy.GetObjectsByKind(lang.ClaimObject.Kind)),
@@ -150,27 +150,27 @@ func (gen *PolicyGenerator) makeUserLabels() {
 	}
 }
 
-func (gen *PolicyGenerator) makeServices() int {
-	gen.generatedServices = make([]*lang.Service, gen.services)
-	for i := 0; i < gen.services; i++ {
-		gen.generatedServices[i] = gen.makeService()
+func (gen *PolicyGenerator) makeBundles() int {
+	gen.generatedBundles = make([]*lang.Bundle, gen.bundles)
+	for i := 0; i < gen.bundles; i++ {
+		gen.generatedBundles[i] = gen.makeBundle()
 	}
 
-	// add some dependencies between services
-	cnt := make([]int, gen.services)
+	// add some dependencies between bundles
+	cnt := make([]int, gen.bundles)
 	maxChainLen := 0
-	for i := 0; i < gen.services; i++ {
+	for i := 0; i < gen.bundles; i++ {
 		if maxChainLen < cnt[i] {
 			maxChainLen = cnt[i]
 		}
 
 		// see if we have exceeded the max chain length
-		if cnt[i]+1 > gen.serviceClaimMaxChain {
+		if cnt[i]+1 > gen.bundleClaimMaxChain {
 			continue
 		}
 
-		// try to add at most one claim from each service
-		j := gen.random.Intn(gen.services)
+		// try to add at most one claim from each bundle
+		j := gen.random.Intn(gen.bundles)
 		if j <= i {
 			continue
 		}
@@ -179,28 +179,28 @@ func (gen *PolicyGenerator) makeServices() int {
 			cnt[j] = cnt[i] + 1
 		}
 
-		component := &lang.ServiceComponent{
+		component := &lang.BundleComponent{
 			Name:     "dep-" + strconv.Itoa(i),
 			Contract: "contract-" + strconv.Itoa(j),
 		}
-		gen.generatedServices[i].Components = append(gen.generatedServices[i].Components, component)
+		gen.generatedBundles[i].Components = append(gen.generatedBundles[i].Components, component)
 	}
 	return maxChainLen
 }
 
-func (gen *PolicyGenerator) makeService() *lang.Service {
-	id := len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind))
+func (gen *PolicyGenerator) makeBundle() *lang.Bundle {
+	id := len(gen.policy.GetObjectsByKind(lang.BundleObject.Kind))
 
-	service := &lang.Service{
-		TypeKind: lang.ServiceObject.GetTypeKind(),
+	bundle := &lang.Bundle{
+		TypeKind: lang.BundleObject.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: "main",
-			Name:      "service-" + strconv.Itoa(id),
+			Name:      "bundle-" + strconv.Itoa(id),
 		},
-		Components: []*lang.ServiceComponent{},
+		Components: []*lang.BundleComponent{},
 	}
 
-	for i := 0; i < gen.serviceCodeComponents; i++ {
+	for i := 0; i < gen.bundleCodeComponents; i++ {
 		labelName := gen.generatedLabelKeys[gen.random.Intn(len(gen.generatedLabelKeys))]
 
 		params := util.NestedParameterMap{}
@@ -211,18 +211,18 @@ func (gen *PolicyGenerator) makeService() *lang.Service {
 			params[name] = value
 		}
 
-		component := &lang.ServiceComponent{
+		component := &lang.BundleComponent{
 			Name: "component-" + strconv.Itoa(i),
 			Code: &lang.Code{
 				Type:   "helm",
 				Params: params,
 			},
 		}
-		service.Components = append(service.Components, component)
+		bundle.Components = append(bundle.Components, component)
 	}
 
-	gen.addObject(service)
-	return service
+	gen.addObject(bundle)
+	return bundle
 }
 
 func (gen *PolicyGenerator) makeRules() {
@@ -236,7 +236,7 @@ func (gen *PolicyGenerator) makeRules() {
 			},
 			Weight: i,
 			Criteria: &lang.Criteria{
-				RequireAll: []string{"service.Name == 'some-name-" + strconv.Itoa(i) + "'"},
+				RequireAll: []string{"bundle.Name == 'some-name-" + strconv.Itoa(i) + "'"},
 			},
 			Actions: &lang.RuleActions{
 				Claim: lang.ClaimAction("reject"),
@@ -262,7 +262,7 @@ func (gen *PolicyGenerator) makeRules() {
 }
 
 func (gen *PolicyGenerator) makeContracts() {
-	for i := 0; i < gen.services; i++ {
+	for i := 0; i < gen.bundles; i++ {
 		contract := &lang.Contract{
 			TypeKind: lang.ContractObject.GetTypeKind(),
 			Metadata: lang.Metadata{
@@ -285,7 +285,7 @@ func (gen *PolicyGenerator) makeContracts() {
 					},
 				},
 				Allocation: &lang.Allocation{
-					Service: "service-" + strconv.Itoa(i),
+					Bundle: "bundle-" + strconv.Itoa(i),
 				},
 			}
 			contract.Contexts = append(contract.Contexts, context)
@@ -298,12 +298,12 @@ func (gen *PolicyGenerator) makeContracts() {
 				RequireAll: []string{"true"},
 			},
 			Allocation: &lang.Allocation{
-				Service: "service-" + strconv.Itoa(i),
+				Bundle: "bundle-" + strconv.Itoa(i),
 			},
 		}
 		contract.Contexts = append(contract.Contexts, context)
 
-		// add service contract to the policy
+		// add bundle contract to the policy
 		gen.addObject(contract)
 	}
 }
@@ -317,7 +317,7 @@ func (gen *PolicyGenerator) makeClaims() {
 				Name:      "claim-" + strconv.Itoa(i),
 			},
 			User:     "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
-			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.services)),
+			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.bundles)),
 		}
 		gen.addObject(claim)
 	}

@@ -11,7 +11,7 @@ import (
 // All policy objects get placed in the appropriate maps and structs within PolicyNamespace.
 type PolicyNamespace struct {
 	Name      string               `validate:"identifier"`
-	Services  map[string]*Service  `validate:"dive"`
+	Bundles   map[string]*Bundle   `validate:"dive"`
 	Contracts map[string]*Contract `validate:"dive"`
 	Clusters  map[string]*Cluster  `validate:"dive"`
 	Rules     map[string]*Rule     `validate:"dive"`
@@ -23,7 +23,7 @@ type PolicyNamespace struct {
 func NewPolicyNamespace(name string) *PolicyNamespace {
 	return &PolicyNamespace{
 		Name:      name,
-		Services:  make(map[string]*Service),
+		Bundles:   make(map[string]*Bundle),
 		Contracts: make(map[string]*Contract),
 		Clusters:  make(map[string]*Cluster),
 		Rules:     make(map[string]*Rule),
@@ -34,8 +34,8 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 
 func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	switch kind := obj.GetKind(); kind {
-	case ServiceObject.Kind:
-		policyNamespace.Services[obj.GetName()] = obj.(*Service) // nolint: errcheck
+	case BundleObject.Kind:
+		policyNamespace.Bundles[obj.GetName()] = obj.(*Bundle) // nolint: errcheck
 	case ContractObject.Kind:
 		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract) // nolint: errcheck
 	case ClusterObject.Kind:
@@ -73,9 +73,9 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 
 func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 	switch kind := obj.GetKind(); kind {
-	case ServiceObject.Kind:
-		if _, exist := policyNamespace.Services[obj.GetName()]; exist {
-			delete(policyNamespace.Services, obj.GetName())
+	case BundleObject.Kind:
+		if _, exist := policyNamespace.Bundles[obj.GetName()]; exist {
+			delete(policyNamespace.Bundles, obj.GetName())
 			return true
 		}
 	case ContractObject.Kind:
@@ -111,9 +111,9 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 	var result []Base
 	switch kind {
-	case ServiceObject.Kind:
-		for _, service := range policyNamespace.Services {
-			result = append(result, service)
+	case BundleObject.Kind:
+		for _, bundle := range policyNamespace.Bundles {
+			result = append(result, bundle)
 		}
 	case ContractObject.Kind:
 		for _, contract := range policyNamespace.Contracts {
@@ -145,8 +145,8 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 	var ok bool
 	var result Base
 	switch kind {
-	case ServiceObject.Kind:
-		if result, ok = policyNamespace.Services[name]; !ok {
+	case BundleObject.Kind:
+		if result, ok = policyNamespace.Bundles[name]; !ok {
 			return nil, nil
 		}
 	case ContractObject.Kind:

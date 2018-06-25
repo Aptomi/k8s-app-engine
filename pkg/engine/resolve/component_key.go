@@ -14,7 +14,7 @@ const componentInstanceKeySeparator = "#"
 // componentUnresolvedName is placeholder for unresolved entries
 const componentUnresolvedName = "unknown"
 
-// componentRootName is a name of component for service entry (which in turn consists of components)
+// componentRootName is a name of component for bundle entry (which in turn consists of components)
 const componentRootName = "root"
 
 // ComponentInstanceKey is a key for component instance. During policy resolution every component instance gets
@@ -24,9 +24,9 @@ const componentRootName = "root"
 // Currently, component keys are formed from multiple parameters as follows.
 // Cluster gets included as a part of the key (components running on different clusters must have different keys).
 // Namespace gets included as a part of the key (components from different namespaces must have different keys).
-// Contract, Context (with allocation keys), Service get included as a part of the key (Service must be within the same namespace as Contract).
-// ComponentName gets included as a part of the key. For service-level component instances, ComponentName is
-// set to componentRootName, while for all component instances within a service an actual Component.Name is used.
+// Contract, Context (with allocation keys), Bundle get included as a part of the key (Bundle must be within the same namespace as Contract).
+// ComponentName gets included as a part of the key. For bundle-level component instances, ComponentName is
+// set to componentRootName, while for all component instances within a bundle an actual Component.Name is used.
 type ComponentInstanceKey struct {
 	// cached version of component key
 	key string
@@ -40,12 +40,12 @@ type ComponentInstanceKey struct {
 	ContextName         string // mandatory
 	KeysResolved        string // mandatory
 	ContextNameWithKeys string // calculated
-	ServiceName         string // determined from the context (included into key for readability)
+	BundleName          string // determined from the context (included into key for readability)
 	ComponentName       string // component name
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, service *lang.Service, component *lang.ServiceComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
 	keysResolved := strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
 	contextNameWithKeys := contextName
@@ -64,7 +64,7 @@ func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contrac
 		ContextName:         contextName,
 		KeysResolved:        keysResolved,
 		ContextNameWithKeys: contextNameWithKeys,
-		ServiceName:         getServiceNameUnsafe(service),
+		BundleName:          getBundleNameUnsafe(bundle),
 		ComponentName:       getComponentNameUnsafe(component),
 	}
 }
@@ -84,24 +84,24 @@ func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	}
 }
 
-// IsService returns 'true' if it's a contract instance key and we can't go up anymore. And it will return 'false' if it's a component instance key
-func (cik *ComponentInstanceKey) IsService() bool {
+// IsBundle returns 'true' if it's a contract instance key and we can't go up anymore. And it will return 'false' if it's a component instance key
+func (cik *ComponentInstanceKey) IsBundle() bool {
 	return cik.ComponentName == componentRootName
 }
 
-// IsComponent returns 'true' if it's a component instance key and we can go up to the corresponding service. And it will return 'false' if it's a service instance key
+// IsComponent returns 'true' if it's a component instance key and we can go up to the corresponding bundle. And it will return 'false' if it's a bundle instance key
 func (cik *ComponentInstanceKey) IsComponent() bool {
 	return cik.ComponentName != componentRootName
 }
 
-// GetParentServiceKey returns a key for the parent service, replacing componentName with componentRootName
-func (cik *ComponentInstanceKey) GetParentServiceKey() *ComponentInstanceKey {
+// GetParentBundleKey returns a key for the parent bundle, replacing componentName with componentRootName
+func (cik *ComponentInstanceKey) GetParentBundleKey() *ComponentInstanceKey {
 	if cik.ComponentName == componentRootName {
 		return cik
 	}
-	serviceCik := cik.MakeCopy()
-	serviceCik.ComponentName = componentRootName
-	return serviceCik
+	bundleCik := cik.MakeCopy()
+	bundleCik.ComponentName = componentRootName
+	return bundleCik
 }
 
 // GetKey returns a string key
@@ -182,18 +182,18 @@ func getContextNameUnsafe(context *lang.Context) string {
 	return context.Name
 }
 
-// If service has not been resolved yet and we need a key, generate one
-// Otherwise use service name
-func getServiceNameUnsafe(service *lang.Service) string {
-	if service == nil {
+// If bundle has not been resolved yet and we need a key, generate one
+// Otherwise use bundle name
+func getBundleNameUnsafe(bundle *lang.Bundle) string {
+	if bundle == nil {
 		return componentUnresolvedName
 	}
-	return service.Name
+	return bundle.Name
 }
 
 // If component has not been resolved yet and we need a key, generate one
 // Otherwise use component name
-func getComponentNameUnsafe(component *lang.ServiceComponent) string {
+func getComponentNameUnsafe(component *lang.BundleComponent) string {
 	if component == nil {
 		return componentRootName
 	}

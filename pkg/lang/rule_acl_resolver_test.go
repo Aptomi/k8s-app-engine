@@ -123,7 +123,7 @@ func TestAclResolver(t *testing.T) {
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
 				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: fullAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: fullAccess},
+				{obj: &Bundle{TypeKind: BundleObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: fullAccess},
 			},
 		},
 		{
@@ -133,8 +133,8 @@ func TestAclResolver(t *testing.T) {
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
 				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: fullAccess},
+				{obj: &Bundle{TypeKind: BundleObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: BundleObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: fullAccess},
 			},
 		},
 		{
@@ -144,8 +144,8 @@ func TestAclResolver(t *testing.T) {
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
 				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: BundleObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: BundleObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
 				{obj: &Claim{TypeKind: ClaimObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
 				{obj: &Claim{TypeKind: ClaimObject.GetTypeKind(), Metadata: Metadata{Namespace: "main2"}}, expected: fullAccess},
 			},

@@ -81,25 +81,25 @@ func debug(t *testing.T, data []byte) {
 func makePolicyBuilder() *builder.PolicyBuilder {
 	b := builder.NewPolicyBuilder()
 
-	// three services
-	services := []*lang.Service{}
+	// three bundles
+	bundles := []*lang.Bundle{}
 	contracts := []*lang.Contract{}
 	for i := 0; i < 3; i++ {
-		service := b.AddService()
-		contract := b.AddContract(service, b.CriteriaTrue())
+		bundle := b.AddBundle()
+		contract := b.AddContract(bundle, b.CriteriaTrue())
 
 		// three components each
 		for j := 0; j < 3; j++ {
-			b.AddServiceComponent(service, b.CodeComponent(util.NestedParameterMap{"debug": "{{ .Labels.target }}"}, nil))
+			b.AddBundleComponent(bundle, b.CodeComponent(util.NestedParameterMap{"debug": "{{ .Labels.target }}"}, nil))
 		}
 
-		services = append(services, service)
+		bundles = append(bundles, bundle)
 		contracts = append(contracts, contract)
 	}
 
 	// add component dependencies i -> i+1 (0 -> 1, 1 -> 2)
 	for i := 0; i < 2; i++ {
-		b.AddServiceComponent(services[i], b.ContractComponent(contracts[i+1]))
+		b.AddBundleComponent(bundles[i], b.ContractComponent(contracts[i+1]))
 	}
 
 	// one cluster

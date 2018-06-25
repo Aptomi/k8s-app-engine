@@ -7,14 +7,14 @@ import (
 
 // PolicyCfg defines graph generation parameters for Policy
 type PolicyCfg struct {
-	showServiceComponentsOnlyForTopLevel bool
-	showServiceComponents                bool
+	showBundleComponentsOnlyForTopLevel bool
+	showBundleComponents                bool
 }
 
 // PolicyCfgDefault is default graph generation parameters for Policy
 var PolicyCfgDefault = &PolicyCfg{
-	showServiceComponentsOnlyForTopLevel: true,
-	showServiceComponents:                true,
+	showBundleComponentsOnlyForTopLevel: true,
+	showBundleComponents:                true,
 }
 
 // Policy produces just a policy graph without showing any resolution data
@@ -38,15 +38,15 @@ func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 
 func (b *GraphBuilder) calcContractDegIn(contractFrom *lang.Contract, contractDegIn map[string]int) {
 	for _, context := range contractFrom.Contexts {
-		serviceObj, errService := b.policy.GetObject(lang.ServiceObject.Kind, context.Allocation.Service, contractFrom.Namespace)
-		if errService != nil {
+		bundleObj, errBundle := b.policy.GetObject(lang.BundleObject.Kind, context.Allocation.Bundle, contractFrom.Namespace)
+		if errBundle != nil {
 			continue
 		}
-		service := serviceObj.(*lang.Service) // nolint: errcheck
+		bundle := bundleObj.(*lang.Bundle) // nolint: errcheck
 
-		for _, component := range service.Components {
+		for _, component := range bundle.Components {
 			if len(component.Contract) > 0 {
-				contractObjNew, errContract := b.policy.GetObject(lang.ContractObject.Kind, component.Contract, service.Namespace)
+				contractObjNew, errContract := b.policy.GetObject(lang.ContractObject.Kind, component.Contract, bundle.Namespace)
 				if errContract != nil {
 					continue
 				}

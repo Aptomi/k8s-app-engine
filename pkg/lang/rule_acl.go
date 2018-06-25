@@ -141,7 +141,7 @@ var DomainAdmin = &ACLRole{
 	Privileges: &Privileges{
 		AllNamespaces: true,
 		NamespaceObjects: map[string]*Privilege{
-			ServiceObject.Kind:  fullAccess,
+			BundleObject.Kind:   fullAccess,
 			ContractObject.Kind: fullAccess,
 			ClaimObject.Kind:    fullAccess,
 			RuleObject.Kind:     fullAccess,
@@ -160,7 +160,7 @@ var NamespaceAdmin = &ACLRole{
 	Name: "Namespace Admin",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			ServiceObject.Kind:  fullAccess,
+			BundleObject.Kind:   fullAccess,
 			ContractObject.Kind: fullAccess,
 			ClaimObject.Kind:    fullAccess,
 			RuleObject.Kind:     fullAccess,
@@ -179,7 +179,7 @@ var ServiceConsumer = &ACLRole{
 	Name: "Service Consumer",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			ServiceObject.Kind:  viewAccess,
+			BundleObject.Kind:   viewAccess,
 			ContractObject.Kind: viewAccess,
 			ClaimObject.Kind:    fullAccess,
 			RuleObject.Kind:     viewAccess,
@@ -198,7 +198,7 @@ var nobody = &ACLRole{
 	Name: "Nobody",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			ServiceObject.Kind:  viewAccess,
+			BundleObject.Kind:   viewAccess,
 			ContractObject.Kind: viewAccess,
 			ClaimObject.Kind:    viewAccess,
 			RuleObject.Kind:     viewAccess,

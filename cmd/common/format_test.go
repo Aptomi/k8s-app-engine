@@ -65,8 +65,8 @@ func makePolicyUpdateResult(policyChanged bool) *api.PolicyUpdateResult {
 		&lang.Contract{Metadata: lang.Metadata{Name: "contract", Namespace: "ns"}},
 		&lang.Context{Name: "context"},
 		[]string{"keysresolved"},
-		&lang.Service{Metadata: lang.Metadata{Name: "service"}},
-		&lang.ServiceComponent{Name: "component"},
+		&lang.Bundle{Metadata: lang.Metadata{Name: "bundle"}},
+		&lang.BundleComponent{Name: "component"},
 	)
 
 	paramsPrev := util.NestedParameterMap{"name": "valuePrev"}

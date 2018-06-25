@@ -1,14 +1,14 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: "redis-master-{{ .Discovery.Service.InstanceId }}"
+  name: "redis-master-{{ .Discovery.Bundle.InstanceId }}"
 spec:
   selector:
     matchLabels:
       app: redis
       role: master
       tier: backend
-      instance: "{{ .Discovery.Service.InstanceId }}"
+      instance: "{{ .Discovery.Bundle.InstanceId }}"
   replicas: 1
   template:
     metadata:
@@ -16,7 +16,7 @@ spec:
         app: redis
         role: master
         tier: backend
-        instance: "{{ .Discovery.Service.InstanceId }}"
+        instance: "{{ .Discovery.Bundle.InstanceId }}"
     spec:
       containers:
       - name: master

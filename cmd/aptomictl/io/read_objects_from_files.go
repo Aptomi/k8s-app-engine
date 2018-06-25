@@ -98,8 +98,8 @@ FILES:
 			}
 			objectFile[key] = file
 
-			if service, serviceOk := obj.(*lang.Service); serviceOk {
-				for _, component := range service.Components {
+			if bundle, bundleOk := obj.(*lang.Bundle); bundleOk {
+				for _, component := range bundle.Components {
 					if component.Code == nil || component.Code.Params == nil {
 						continue
 					}

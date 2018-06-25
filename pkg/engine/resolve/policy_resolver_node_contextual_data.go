@@ -40,8 +40,8 @@ func (node *resolutionNode) getContextualDataForRuleExpression() *expression.Par
 	return expression.NewParams(
 		node.labels.Labels,
 		map[string]interface{}{
-			"Service": node.proxyService(node.service),
-			"Claim":   node.proxyClaim(node.claim),
+			"Bundle": node.proxyBundle(node.bundle),
+			"Claim":  node.proxyClaim(node.claim),
 		},
 	)
 }
@@ -88,14 +88,14 @@ func (node *resolutionNode) getContextualDataForCodeDiscoveryTemplate() *templat
 	Proxy functions
 */
 
-// How service is visible from the policy language
-func (node *resolutionNode) proxyService(service *lang.Service) interface{} {
+// How bundle is visible from the policy language
+func (node *resolutionNode) proxyBundle(bundle *lang.Bundle) interface{} {
 	return struct {
 		lang.Metadata
 		Labels interface{}
 	}{
-		Metadata: service.Metadata,
-		Labels:   service.Labels,
+		Metadata: bundle.Metadata,
+		Labels:   bundle.Labels,
 	}
 }
 
@@ -144,14 +144,14 @@ func (node *resolutionNode) proxyDiscovery(discoveryTree util.NestedParameterMap
 	// special case to announce own component ID
 	result["InstanceId"] = util.HashFnv(cik.GetKey())
 
-	// expose parent service information as well
+	// expose parent bundle information as well
 	if cik.IsComponent() {
-		serviceCik := cik.GetParentServiceKey()
-		result["Service"] = util.NestedParameterMap{
-			// announce instance of the enclosing service
-			"Instance": util.EscapeName(serviceCik.GetDeployName()),
-			// announce instance of the enclosing service instance ID
-			"InstanceId": util.HashFnv(serviceCik.GetKey()),
+		bundleCik := cik.GetParentBundleKey()
+		result["Bundle"] = util.NestedParameterMap{
+			// announce instance of the enclosing bundle
+			"Instance": util.EscapeName(bundleCik.GetDeployName()),
+			// announce instance of the enclosing bundle instance ID
+			"InstanceId": util.HashFnv(bundleCik.GetKey()),
 		}
 	}
 
