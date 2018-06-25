@@ -1,4 +1,4 @@
-# Definition of Twitter Stats service
+# Twitter Stats bundle
 - kind: bundle
   metadata:
     namespace: social
@@ -7,7 +7,7 @@
   components:
 
     - name: analytics_pipeline
-      contract: platform/analytics_pipeline
+      service: platform/analytics_pipeline
 
     # Publisher (Twitter Streaming API -> kafka)
     - name: tweepub
@@ -91,8 +91,8 @@
       dependencies:
         - analytics_pipeline
 
-# Contract for Twitter Stats
-- kind: contract
+# Twitter Stats service
+- kind: service
   metadata:
     namespace: social
     name: twitter_stats

@@ -232,8 +232,8 @@ check_policy 0 ".Objects.social.claim | length"
 # delete the rest of the objects
 login sam
 change_policy delete "-f ${POLICY_DIR}/policy" 12
-check_policy 0 ".Objects.platform.contract | length"
-check_policy 0 ".Objects.social.contract | length"
+check_policy 0 ".Objects.platform.service | length"
+check_policy 0 ".Objects.social.service | length"
 check_policy 0 ".Objects.platform.claim | length"
 check_policy 0 ".Objects.social.claim | length"
 check_policy 0 ".Objects.platform.rule | length"
@@ -249,10 +249,10 @@ change_policy apply "-f ${POLICY_DIR}/policy" 13
 
 # check object counts
 check_policy 4 ".Objects.social.claim | length"
-check_policy 5 ".Objects.platform.contract | length"
+check_policy 5 ".Objects.platform.service | length"
 check_policy 0 ".Objects.platform.claim | length"
 check_policy 5 ".Objects.platform.bundle | length"
-check_policy 1 ".Objects.social.contract | length"
+check_policy 1 ".Objects.social.service | length"
 check_policy 1 ".Objects.social.bundle | length"
 check_policy 1 ".Objects.platform.rule | length"
 check_policy 1 ".Objects.system.rule | length"

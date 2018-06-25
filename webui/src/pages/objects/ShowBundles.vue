@@ -62,8 +62,8 @@
                   <obj-with-icon :obj="d"/>
                 </td>
                 <td>
-                  <div v-for="c in d.components" v-if="c.contract != null">
-                    <obj-with-icon kind="contract" :obj="c"/>
+                  <div v-for="c in d.components" v-if="c.service != null">
+                    <obj-with-icon kind="service" :obj="c"/>
                   </div>
                 </td>
                 <td>

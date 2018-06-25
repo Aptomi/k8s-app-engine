@@ -1,4 +1,4 @@
-# Definition of HDFS service
+# HDFS bundle
 - kind: bundle
   metadata:
     namespace: platform
@@ -20,8 +20,8 @@
             replicas: 1
             antiAffinity: "soft"
 
-# Contract for HDFS
-- kind: contract
+# HDFS service
+- kind: service
   metadata:
     namespace: platform
     name: hdfs

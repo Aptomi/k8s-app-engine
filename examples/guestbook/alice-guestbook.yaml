@@ -3,6 +3,6 @@
     namespace: social
     name: alice_guestbook
   user: Alice
-  contract: guestbook
+  service: guestbook
   labels:
     target: k8s-example.west

@@ -62,12 +62,12 @@ func makeKey(root bool) *ComponentInstanceKey {
 		component = b.AddBundleComponent(bundle, b.CodeComponent(nil, nil))
 	}
 
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 	key := NewComponentInstanceKey(
 		b.AddCluster(),
 		"suffix",
-		contract,
-		contract.Contexts[0],
+		service,
+		service.Contexts[0],
 		[]string{"x", "y", "z"},
 		bundle,
 		component,

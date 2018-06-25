@@ -117,25 +117,25 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 	for _, instance := range resolution.ComponentInstanceMap {
 		componentKey := instance.Metadata.Key
 
-		// verify that contract exists
-		contractObj, err := policy.GetObject(lang.ContractObject.Kind, componentKey.ContractName, componentKey.Namespace)
-		if contractObj == nil || err != nil {
-			// component instance points to non-existing contract, meaning this component instance is now orphan
-			return fmt.Errorf("contract '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ContractName, componentKey.GetKey())
+		// verify that service exists
+		serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, componentKey.ServiceName, componentKey.Namespace)
+		if serviceObj == nil || err != nil {
+			// component instance points to non-existing service, meaning this component instance is now orphan
+			return fmt.Errorf("service '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.GetKey())
 		}
 
-		// verify that context within a contract exists
-		contract := contractObj.(*lang.Contract) // nolint: errcheck
+		// verify that context within a service exists
+		service := serviceObj.(*lang.Service) // nolint: errcheck
 		contextExists := false
-		for _, context := range contract.Contexts {
+		for _, context := range service.Contexts {
 			if context.Name == componentKey.ContextName {
 				contextExists = true
 				break
 			}
 		}
 		if !contextExists {
-			// component instance points to non-existing context within a contract, meaning this component instance is now orphan
-			return fmt.Errorf("context '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ContractName, componentKey.ContextName, componentKey.GetKey())
+			// component instance points to non-existing context within a service, meaning this component instance is now orphan
+			return fmt.Errorf("context '%s/%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.ContextName, componentKey.GetKey())
 		}
 
 		// verify that bundle exists

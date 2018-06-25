@@ -1,4 +1,4 @@
-# Definition of Guestbook service
+# Guestbook bundle
 - kind: bundle
   metadata:
     namespace: social
@@ -30,8 +30,8 @@
       dependencies:
         - redis-master
 
-# Contract for GuestBook
-- kind: contract
+# GuestBook service
+- kind: service
   metadata:
     namespace: social
     name: guestbook

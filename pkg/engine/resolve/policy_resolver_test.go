@@ -16,10 +16,10 @@ import (
 func TestPolicyResolverSimple(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
-	// create a bundle with two contexts within a contract
+	// create a bundle with two contexts within a service
 	bundle := b.AddBundle()
 	component := b.AddBundleComponent(bundle, b.CodeComponent(nil, nil))
-	contract := b.AddContractMultipleContexts(bundle,
+	service := b.AddServiceMultipleContexts(bundle,
 		b.Criteria("label1 == 'value1'", "true", "false"),
 		b.Criteria("label2 == 'value2'", "true", "false"),
 	)
@@ -29,11 +29,11 @@ func TestPolicyResolverSimple(t *testing.T) {
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claim (should be resolved to the first context)
-	c1 := b.AddClaim(b.AddUser(), contract)
+	c1 := b.AddClaim(b.AddUser(), service)
 	c1.Labels["label1"] = "value1"
 
 	// add claim (should be resolved to the second context)
-	c2 := b.AddClaim(b.AddUser(), contract)
+	c2 := b.AddClaim(b.AddUser(), service)
 	c2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
@@ -43,11 +43,11 @@ func TestPolicyResolverSimple(t *testing.T) {
 	})
 
 	// check instance 1
-	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, component, resolution)
+	instance1 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[0], nil, bundle, component, resolution)
 	assert.Equal(t, 1, len(instance1.ClaimKeys), "Instance should be referenced by one claim")
 
 	// check instance 2
-	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[1], nil, bundle, component, resolution)
+	instance2 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[1], nil, bundle, component, resolution)
 	assert.Equal(t, 1, len(instance2.ClaimKeys), "Instance should be referenced by one claim")
 }
 
@@ -56,7 +56,7 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 
 	// create a bundle with conditional components
 	bundle := b.AddBundle()
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 
 	component1 := b.CodeComponent(nil, nil)
 	component1.Criteria = b.CriteriaTrue()
@@ -75,11 +75,11 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claim (should be resolved to use components 1 and 2, but not 3)
-	c1 := b.AddClaim(b.AddUser(), contract)
+	c1 := b.AddClaim(b.AddUser(), service)
 	c1.Labels["param2"] = "value2"
 
 	// add claim (should be resolved to use components 1 and 3, but not 2)
-	c2 := b.AddClaim(b.AddUser(), contract)
+	c2 := b.AddClaim(b.AddUser(), service)
 	c1.Labels["param3"] = "value3"
 
 	// policy resolution should be completed successfully
@@ -89,15 +89,15 @@ func TestPolicyResolverComponentWithCriteria(t *testing.T) {
 	})
 
 	// check component 1
-	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, component1, resolution)
+	instance1 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[0], nil, bundle, component1, resolution)
 	assert.Equal(t, 2, len(instance1.ClaimKeys), "Component 1 instance should be used by both claims")
 
 	// check component 2
-	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, component2, resolution)
+	instance2 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[0], nil, bundle, component2, resolution)
 	assert.Equal(t, 1, len(instance2.ClaimKeys), "Component 2 instance should be used by only one claim")
 
 	// check component 3
-	instance3 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, component3, resolution)
+	instance3 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[0], nil, bundle, component3, resolution)
 	assert.Equal(t, 1, len(instance3.ClaimKeys), "Component 3 instance should be used by only one claim")
 }
 
@@ -110,22 +110,22 @@ func TestPolicyResolverMultipleNS(t *testing.T) {
 	b.SwitchNamespace("ns1")
 	bundle1 := b.AddBundle()
 	b.AddBundleComponent(bundle1, b.CodeComponent(nil, nil))
-	contract1 := b.AddContract(bundle1, b.CriteriaTrue())
+	service1 := b.AddService(bundle1, b.CriteriaTrue())
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// create objects in ns2
 	b.SwitchNamespace("ns2")
 	bundle2 := b.AddBundle()
 	b.AddBundleComponent(bundle2, b.CodeComponent(nil, nil))
-	contract2 := b.AddContract(bundle2, b.CriteriaTrue())
+	service2 := b.AddService(bundle2, b.CriteriaTrue())
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
-	// ns1/bundle1 -> depends on -> ns2/contract2
-	b.AddBundleComponent(bundle1, b.ContractComponent(contract2))
+	// ns1/bundle1 -> depends on -> ns2/service2
+	b.AddBundleComponent(bundle1, b.ServiceComponent(service2))
 
-	// create claim in ns3 on ns1/contract1 (it's created on behalf of domain admin, who can for sure consume bundles from all namespaces)
+	// create claim in ns3 on ns1/service1 (it's created on behalf of domain admin, who can for sure consume bundles from all namespaces)
 	b.SwitchNamespace("ns3")
-	claim := b.AddClaim(b.AddUserDomainAdmin(), contract1)
+	claim := b.AddClaim(b.AddUserDomainAdmin(), service1)
 
 	// policy resolution should be completed successfully
 	resolvePolicy(t, b, []verifyClaim{
@@ -138,22 +138,22 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 
 	// create a bundle, which depends on another bundle
 	bundle1 := b.AddBundle()
-	contract1 := b.AddContract(bundle1, b.Criteria("label1 == 'value1'", "true", "false"))
+	service1 := b.AddService(bundle1, b.Criteria("label1 == 'value1'", "true", "false"))
 	bundle2 := b.AddBundle()
-	contract2 := b.AddContract(bundle2, b.Criteria("label2 == 'value2'", "true", "false"))
-	b.AddBundleComponent(bundle1, b.ContractComponent(contract2))
+	service2 := b.AddService(bundle2, b.Criteria("label2 == 'value2'", "true", "false"))
+	b.AddBundleComponent(bundle1, b.ServiceComponent(service2))
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claim with full labels (should be resolved successfully)
-	c1 := b.AddClaim(b.AddUser(), contract1)
+	c1 := b.AddClaim(b.AddUser(), service1)
 	c1.Labels["label1"] = "value1"
 	c1.Labels["label2"] = "value2"
 
 	// add claim with partial labels (should not resolved)
-	c2 := b.AddClaim(b.AddUser(), contract1)
+	c2 := b.AddClaim(b.AddUser(), service1)
 	c2.Labels["label1"] = "value1"
 
 	// policy resolution should be completed successfully
@@ -166,27 +166,27 @@ func TestPolicyResolverPartialMatching(t *testing.T) {
 func TestPolicyResolverCalculatedLabels(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 
-	// first contract adds a label 'labelExtra1'
+	// first service adds a label 'labelExtra1'
 	bundle1 := b.AddBundle()
-	contract1 := b.AddContract(bundle1, b.Criteria("label1 == 'value1'", "true", "false"))
-	contract1.ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra1", "labelValue1")
+	service1 := b.AddService(bundle1, b.Criteria("label1 == 'value1'", "true", "false"))
+	service1.ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra1", "labelValue1")
 
-	// second contract adds a label 'labelExtra2' and removes 'label3'
+	// second service adds a label 'labelExtra2' and removes 'label3'
 	bundle2 := b.AddBundle()
-	contract2 := b.AddContract(bundle2, b.Criteria("label2 == 'value2'", "true", "false"))
-	contract2.ChangeLabels = lang.NewLabelOperations(
+	service2 := b.AddService(bundle2, b.Criteria("label2 == 'value2'", "true", "false"))
+	service2.ChangeLabels = lang.NewLabelOperations(
 		map[string]string{"labelExtra2": "labelValue2"},
 		map[string]string{"label3": ""},
 	)
-	contract2.Contexts[0].ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra3", "labelValue3")
-	b.AddBundleComponent(bundle1, b.ContractComponent(contract2))
+	service2.Contexts[0].ChangeLabels = lang.NewLabelOperationsSetSingleLabel("labelExtra3", "labelValue3")
+	b.AddBundleComponent(bundle1, b.ServiceComponent(service2))
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claim with labels 'label1', 'label2' and 'label3'
-	claim := b.AddClaim(b.AddUser(), contract1)
+	claim := b.AddClaim(b.AddUser(), service1)
 	claim.Labels["label1"] = "value1"
 	claim.Labels["label2"] = "value2"
 	claim.Labels["label3"] = "value3"
@@ -196,16 +196,16 @@ func TestPolicyResolverCalculatedLabels(t *testing.T) {
 		{claim: claim, resolved: true},
 	})
 
-	// check labels for the end bundle (bundle2/contract2)
-	bundleInstance := getInstanceByParams(t, cluster, "k8ns", contract2, contract2.Contexts[0], nil, bundle2, nil, resolution)
+	// check labels for the end bundle (bundle2/service2)
+	bundleInstance := getInstanceByParams(t, cluster, "k8ns", service2, service2.Contexts[0], nil, bundle2, nil, resolution)
 	labels := bundleInstance.CalculatedLabels.Labels
 
 	assert.Equal(t, "value1", labels["label1"], "Label 'label1=value1' should be carried from claim all the way through the policy")
 	assert.Equal(t, "value2", labels["label2"], "Label 'label2=value2' should be carried from claim all the way through the policy")
 	assert.NotContains(t, labels, "label3", "Label 'label3' should be removed")
 
-	assert.Equal(t, "labelValue1", labels["labelExtra1"], "Label 'labelExtra1' should be added on contract match")
-	assert.Equal(t, "labelValue2", labels["labelExtra2"], "Label 'labelExtra2' should be added on contract match")
+	assert.Equal(t, "labelValue1", labels["labelExtra1"], "Label 'labelExtra1' should be added on service match")
+	assert.Equal(t, "labelValue2", labels["labelExtra2"], "Label 'labelExtra2' should be added on service match")
 	assert.Equal(t, "labelValue3", labels["labelExtra3"], "Label 'labelExtra3' should be added on context match")
 
 	assert.Equal(t, cluster.Name, labels[lang.LabelTarget], "Label 'cluster' should be set")
@@ -239,12 +239,12 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	b.AddBundleComponent(bundle, component1)
 	b.AddBundleComponent(bundle, component2)
 
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claims which feed conflicting labels into a given component
-	claim := b.AddClaim(b.AddUser(), contract)
+	claim := b.AddClaim(b.AddUser(), service)
 
 	// policy should be resolved successfully
 	resolution := resolvePolicy(t, b, []verifyClaim{
@@ -252,11 +252,11 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 	})
 
 	// check discovery parameters of component 1
-	instance1 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, component1, resolution)
+	instance1 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[0], nil, bundle, component1, resolution)
 	assert.Regexp(t, "^component1-(.+)$", instance1.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// check discovery parameters of component 2
-	instance2 := getInstanceByParams(t, cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, component2, resolution)
+	instance2 := getInstanceByParams(t, cluster, "k8ns", service, service.Contexts[0], nil, bundle, component2, resolution)
 	assert.Regexp(t, "^component2-(.+)$", instance2.CalculatedDiscovery["url"], "Discovery parameter should be calculated correctly")
 
 	// check code parameters of component 2
@@ -272,9 +272,9 @@ func TestPolicyResolverCodeAndDiscoveryParams(t *testing.T) {
 func TestPolicyResolverClaimWithNonExistingUser(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	bundle := b.AddBundle()
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 	user := &lang.User{Name: "non-existing-user-123456789"}
-	claim := b.AddClaim(user, contract)
+	claim := b.AddClaim(user, service)
 
 	// claim declared by non-existing consumer should result in claim error
 	resolvePolicy(t, b, []verifyClaim{
@@ -293,14 +293,14 @@ func TestPolicyResolverConflictingCodeParams(t *testing.T) {
 			nil,
 		),
 	)
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claims which feed conflicting labels into a given component
-	c1 := b.AddClaim(b.AddUser(), contract)
+	c1 := b.AddClaim(b.AddUser(), service)
 	c1.Labels["deplabel"] = "1"
-	c2 := b.AddClaim(b.AddUser(), contract)
+	c2 := b.AddClaim(b.AddUser(), service)
 	c2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting code parameters should result in an error
@@ -322,14 +322,14 @@ func TestPolicyResolverConflictingDiscoveryParams(t *testing.T) {
 		),
 	)
 
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claims which feed conflicting labels into a given component
-	c1 := b.AddClaim(b.AddUser(), contract)
+	c1 := b.AddClaim(b.AddUser(), service)
 	c1.Labels["deplabel"] = "1"
-	c2 := b.AddClaim(b.AddUser(), contract)
+	c2 := b.AddClaim(b.AddUser(), service)
 	c2.Labels["deplabel"] = "2"
 
 	// policy resolution with conflicting discovery parameters should result in an error
@@ -344,22 +344,22 @@ func TestPolicyResolverBundleLoop(t *testing.T) {
 
 	// create 3 bundles
 	bundle1 := b.AddBundle()
-	contract1 := b.AddContract(bundle1, b.CriteriaTrue())
+	service1 := b.AddService(bundle1, b.CriteriaTrue())
 	bundle2 := b.AddBundle()
-	contract2 := b.AddContract(bundle2, b.CriteriaTrue())
+	service2 := b.AddService(bundle2, b.CriteriaTrue())
 	bundle3 := b.AddBundle()
-	contract3 := b.AddContract(bundle3, b.CriteriaTrue())
+	service3 := b.AddService(bundle3, b.CriteriaTrue())
 
 	// create bundle-level cycle
-	b.AddBundleComponent(bundle1, b.ContractComponent(contract2))
-	b.AddBundleComponent(bundle2, b.ContractComponent(contract3))
-	b.AddBundleComponent(bundle3, b.ContractComponent(contract1))
+	b.AddBundleComponent(bundle1, b.ServiceComponent(service2))
+	b.AddBundleComponent(bundle2, b.ServiceComponent(service3))
+	b.AddBundleComponent(bundle3, b.ServiceComponent(service1))
 
 	cluster := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 	// add claim
-	claim := b.AddClaim(b.AddUser(), contract1)
+	claim := b.AddClaim(b.AddUser(), service1)
 
 	// policy resolution with bundle cycle should should result in an error
 	resolvePolicy(t, b, []verifyClaim{
@@ -378,7 +378,7 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 			nil,
 		),
 	)
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 
 	// add rules, which say to deploy to different clusters based on label value
 	cluster1 := b.AddCluster()
@@ -387,9 +387,9 @@ func TestPolicyResolverPickClusterViaRules(t *testing.T) {
 	b.AddRule(b.Criteria("label2 == 'value2'", "true", "false"), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster2.Name)))
 
 	// add claims
-	c1 := b.AddClaim(b.AddUser(), contract)
+	c1 := b.AddClaim(b.AddUser(), service)
 	c1.Labels["label1"] = "value1"
-	c2 := b.AddClaim(b.AddUser(), contract)
+	c2 := b.AddClaim(b.AddUser(), service)
 	c2.Labels["label2"] = "value2"
 
 	// policy resolution should be completed successfully
@@ -409,10 +409,10 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 	b := builder.NewPolicyBuilder()
 	b.PanicWhenLoadingUsers()
 
-	// create a bundle with two contexts within a contract
+	// create a bundle with two contexts within a service
 	bundle := b.AddBundle()
 	b.AddBundleComponent(bundle, b.CodeComponent(nil, nil))
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 
 	// add rule to set cluster
 	cluster := b.AddCluster()
@@ -421,7 +421,7 @@ func TestPolicyResolverInternalPanic(t *testing.T) {
 	// add multiple claims
 	expected := []verifyClaim{}
 	for i := 0; i < 10; i++ {
-		claim := b.AddClaim(b.AddUser(), contract)
+		claim := b.AddClaim(b.AddUser(), service)
 		expected = append(expected, verifyClaim{
 			claim: claim, resolved: false, logMessage: "panic from mock user loader",
 		})
@@ -441,11 +441,11 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 	}
 
 	for allocationKey, sameInstance := range tc {
-		// create a bundle and a contract
+		// create a bundle and a service
 		bundle := b.AddBundle()
 		b.AddBundleComponent(bundle, b.CodeComponent(nil, nil))
-		contract := b.AddContract(bundle, b.CriteriaTrue())
-		contract.Contexts[0].Allocation.Keys = b.AllocationKeys(allocationKey)
+		service := b.AddService(bundle, b.CriteriaTrue())
+		service.Contexts[0].Allocation.Keys = b.AllocationKeys(allocationKey)
 
 		// add rule to set cluster
 		cluster := b.AddCluster()
@@ -456,10 +456,10 @@ func TestPolicyResolverAllocationKeys(t *testing.T) {
 		), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, cluster.Name)))
 
 		// add claim (should be resolved to the first context)
-		c1 := b.AddClaim(b.AddUser(), contract)
+		c1 := b.AddClaim(b.AddUser(), service)
 
 		// add claim (should be resolved to the second context)
-		c2 := b.AddClaim(b.AddUser(), contract)
+		c2 := b.AddClaim(b.AddUser(), service)
 
 		// policy resolution should be completed successfully
 		resolution := resolvePolicy(t, b, []verifyClaim{
@@ -517,9 +517,9 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expected []veri
 	return result
 }
 
-func getInstanceByParams(t *testing.T, cluster *lang.Cluster, namespace string, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByParams(t *testing.T, cluster *lang.Cluster, namespace string, service *lang.Service, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent, resolution *PolicyResolution) *ComponentInstance {
 	t.Helper()
-	key := NewComponentInstanceKey(cluster, namespace, contract, context, allocationKeysResolved, bundle, component)
+	key := NewComponentInstanceKey(cluster, namespace, service, context, allocationKeysResolved, bundle, component)
 	instance, ok := resolution.ComponentInstanceMap[key.GetKey()]
 	if !assert.True(t, ok, "Component instance '%s' should be present in resolution data", key.GetKey()) {
 		t.FailNow()

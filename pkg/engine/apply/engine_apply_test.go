@@ -115,10 +115,10 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	actualState = applyAndCheck(t, applier, action.ApplyResult{Success: 4, Failed: 0, Skipped: 0})
 
 	// Get key to a component
-	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster)    // nolint: errcheck
-	contract := desired.policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract) // nolint: errcheck
-	bundle := desired.policy().GetObjectsByKind(lang.BundleObject.Kind)[0].(*lang.Bundle)       // nolint: errcheck
-	key := resolve.NewComponentInstanceKey(cluster, "k8ns", contract, contract.Contexts[0], nil, bundle, bundle.Components[0])
+	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster) // nolint: errcheck
+	service := desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service) // nolint: errcheck
+	bundle := desired.policy().GetObjectsByKind(lang.BundleObject.Kind)[0].(*lang.Bundle)    // nolint: errcheck
+	key := resolve.NewComponentInstanceKey(cluster, "k8ns", service, service.Contexts[0], nil, bundle, bundle.Components[0])
 	keyBundle := key.GetParentBundleKey()
 
 	// Check that original claim was resolved successfully
@@ -139,7 +139,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 
 	// Add another claim (with the same label, so code parameters won't change), resolve, calculate difference against prev resolution data
 	desiredNext := newTestData(t, makePolicyBuilder())
-	claimNew := desiredNext.pBuilder.AddClaim(desiredNext.pBuilder.AddUser(), contract)
+	claimNew := desiredNext.pBuilder.AddClaim(desiredNext.pBuilder.AddUser(), service)
 	claimNew.Labels["param"] = "value1"
 
 	// Check that both claims were resolved successfully
@@ -303,14 +303,14 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 			nil,
 		),
 	)
-	contract := b.AddContract(bundle, b.CriteriaTrue())
+	service := b.AddService(bundle, b.CriteriaTrue())
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
 	// add claim
-	claim := b.AddClaim(b.AddUser(), contract)
+	claim := b.AddClaim(b.AddUser(), service)
 	claim.Labels["param"] = "value1"
 
 	return b

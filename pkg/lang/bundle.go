@@ -23,7 +23,7 @@ var BundleObject = &runtime.Info{
 //
 // Bundle typically consists of one or more components. Each component can either be pointer to the code (e.g.
 // docker container image with metadata that needs to be started/managed) or it can be dependency on another
-// contract (which will get fulfilled by Aptomi)
+// service (which will get fulfilled by Aptomi)
 type Bundle struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         `validate:"required"`
@@ -52,10 +52,10 @@ type BundleComponent struct {
 	// into the bundle. It's an optional field, so if it's nil then it is considered to be true automatically
 	Criteria *Criteria `yaml:",omitempty" validate:"omitempty"`
 
-	// Contract, if not empty, denoted that the component points to another contract. Meaning that
-	// a bundle needs to have another contract instantiated and running (e.g. 'wordpress' bundle needs a 'database'
-	// contract). This will be fulfilled at policy resolution time.
-	Contract string `yaml:"contract,omitempty" validate:"omitempty"`
+	// Service, if not empty, denoted that the component points to another service. Meaning that
+	// a bundle needs to have another service instantiated and running (e.g. 'wordpress' bundle needs a 'database'
+	// service). This will be fulfilled at policy resolution time.
+	Service string `yaml:"service,omitempty" validate:"omitempty"`
 
 	// Code, if not empty, means that component is a code that can be instantiated with certain parameters (e.g. docker
 	// container image)

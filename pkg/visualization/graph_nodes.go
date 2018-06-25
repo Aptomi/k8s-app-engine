@@ -34,24 +34,24 @@ func (n claimNode) getLabel() string {
 }
 
 /*
-	Contract
+	Service
 */
-type contractNode struct {
-	contract *lang.Contract
+type serviceNode struct {
+	service *lang.Service
 }
 
-func (n contractNode) getGroup() string {
-	return "contract"
+func (n serviceNode) getGroup() string {
+	return "service"
 }
 
-func (n contractNode) getID() string {
-	return runtime.KeyForStorable(n.contract)
+func (n serviceNode) getID() string {
+	return runtime.KeyForStorable(n.service)
 }
 
-func (n contractNode) getLabel() string {
+func (n serviceNode) getLabel() string {
 	return fmt.Sprintf(
-		`contract: <b>%s</b>`,
-		html.EscapeString(n.contract.Name),
+		`service: <b>%s</b>`,
+		html.EscapeString(n.service.Name),
 	)
 }
 

@@ -6,40 +6,40 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// ContractObject is an informational data structure with Kind and Constructor for Contract
-var ContractObject = &runtime.Info{
-	Kind:        "contract",
+// ServiceObject is an informational data structure with Kind and Constructor for Service
+var ServiceObject = &runtime.Info{
+	Kind:        "service",
 	Storable:    true,
 	Versioned:   true,
 	Deletable:   true,
-	Constructor: func() runtime.Object { return &Contract{} },
+	Constructor: func() runtime.Object { return &Service{} },
 }
 
-// Contract is an object, which allows you to define a contract for a bundle, as well as a set of specific
-// implementations. For example, contract can be a 'database', with specific bundle contexts implemented
+// Service is an object, which allows you to define a service for a bundle, as well as a set of specific
+// implementations. For example, service can be a 'database', with specific bundle contexts implemented
 // by 'MySQL', 'MariaDB', 'SQLite'.
 //
-// When claims get declared, they always get declared on a contract (not on a specific bundle).
-type Contract struct {
+// When claims get declared, they always get declared on a service (not on a specific bundle).
+type Service struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         `validate:"required"`
 
 	// ChangeLabels defines how current set of labels will get changed/transformed in case
-	// the contract gets matched
+	// the service gets matched
 	ChangeLabels LabelOperations `yaml:"change-labels,omitempty" validate:"labelOperations"`
 
-	// Contexts contains an ordered list of contexts within a contract. When allocating an instance, Aptomi will pick
+	// Contexts contains an ordered list of contexts within a service. When allocating an instance, Aptomi will pick
 	// and instantiate the first context which matches the criteria
 	Contexts []*Context `validate:"dive"`
 }
 
-// Context represents a single context within a contract.
+// Context represents a single context within a service.
 // It's essentially a bundle instance for a given of class of use cases, a given set of consumers, etc.
 type Context struct {
 	// Name defines context name in the policy
 	Name string `validate:"identifier"`
 
-	// Criteria - if it gets evaluated to true during policy resolution, then contract
+	// Criteria - if it gets evaluated to true during policy resolution, then service
 	// will get fulfilled by allocating this context. It's an optional field, so if it's nil then
 	// it is considered to be evaluated to true automatically
 	Criteria *Criteria `validate:"omitempty"`

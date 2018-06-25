@@ -66,7 +66,7 @@ type PolicyGenerator struct {
 	bundleCodeComponents int
 	codeParams           int
 	bundleClaimMaxChain  int
-	contextsPerContract  int
+	contextsPerService   int
 	rules                int
 	users                int
 	claims               int
@@ -79,7 +79,7 @@ type PolicyGenerator struct {
 	externalData     *external.Data
 }
 
-func NewPolicyGenerator(randSeed int64, labels, bundles, bundleCodeComponents, codeParams, bundleClaimMaxChain, contextsPerContract, rules, users, claims int) *PolicyGenerator {
+func NewPolicyGenerator(randSeed int64, labels, bundles, bundleCodeComponents, codeParams, bundleClaimMaxChain, contextsPerService, rules, users, claims int) *PolicyGenerator {
 	result := &PolicyGenerator{
 		random:               rand.New(rand.NewSource(randSeed)),
 		labels:               labels,
@@ -87,7 +87,7 @@ func NewPolicyGenerator(randSeed int64, labels, bundles, bundleCodeComponents, c
 		bundleCodeComponents: bundleCodeComponents,
 		codeParams:           codeParams,
 		bundleClaimMaxChain:  bundleClaimMaxChain,
-		contextsPerContract:  contextsPerContract,
+		contextsPerService:   contextsPerService,
 		rules:                rules,
 		users:                users,
 		claims:               claims,
@@ -103,8 +103,8 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	// generate bundles
 	maxChainLen := gen.makeBundles()
 
-	// generate contracts
-	gen.makeContracts()
+	// generate services
+	gen.makeServices()
 
 	// generate rules
 	gen.makeRules()
@@ -124,7 +124,7 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	fmt.Printf("Generated policy. Bundles = %d (max chain %d), Contexts = %d, Claims = %d, Users = %d\n",
 		len(gen.policy.GetObjectsByKind(lang.BundleObject.Kind)),
 		maxChainLen,
-		len(gen.policy.GetObjectsByKind(lang.ContractObject.Kind))*gen.contextsPerContract,
+		len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind))*gen.contextsPerService,
 		len(gen.policy.GetObjectsByKind(lang.ClaimObject.Kind)),
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
@@ -180,8 +180,8 @@ func (gen *PolicyGenerator) makeBundles() int {
 		}
 
 		component := &lang.BundleComponent{
-			Name:     "dep-" + strconv.Itoa(i),
-			Contract: "contract-" + strconv.Itoa(j),
+			Name:    "dep-" + strconv.Itoa(i),
+			Service: "service-" + strconv.Itoa(j),
 		}
 		gen.generatedBundles[i].Components = append(gen.generatedBundles[i].Components, component)
 	}
@@ -261,19 +261,19 @@ func (gen *PolicyGenerator) makeRules() {
 	})
 }
 
-func (gen *PolicyGenerator) makeContracts() {
+func (gen *PolicyGenerator) makeServices() {
 	for i := 0; i < gen.bundles; i++ {
-		contract := &lang.Contract{
-			TypeKind: lang.ContractObject.GetTypeKind(),
+		service := &lang.Service{
+			TypeKind: lang.ServiceObject.GetTypeKind(),
 			Metadata: lang.Metadata{
 				Namespace: "main",
-				Name:      "contract-" + strconv.Itoa(i),
+				Name:      "service-" + strconv.Itoa(i),
 			},
 			Contexts: []*lang.Context{},
 		}
 
 		// generate non-matching contexts
-		for j := 0; j < gen.contextsPerContract-1; j++ {
+		for j := 0; j < gen.contextsPerService-1; j++ {
 			context := &lang.Context{
 				Name: "context-" + util.RandomID(gen.random, 20),
 				Criteria: &lang.Criteria{
@@ -288,7 +288,7 @@ func (gen *PolicyGenerator) makeContracts() {
 					Bundle: "bundle-" + strconv.Itoa(i),
 				},
 			}
-			contract.Contexts = append(contract.Contexts, context)
+			service.Contexts = append(service.Contexts, context)
 		}
 
 		// generate matching context
@@ -301,10 +301,10 @@ func (gen *PolicyGenerator) makeContracts() {
 				Bundle: "bundle-" + strconv.Itoa(i),
 			},
 		}
-		contract.Contexts = append(contract.Contexts, context)
+		service.Contexts = append(service.Contexts, context)
 
-		// add bundle contract to the policy
-		gen.addObject(contract)
+		// add service to the policy
+		gen.addObject(service)
 	}
 }
 
@@ -316,8 +316,8 @@ func (gen *PolicyGenerator) makeClaims() {
 				Namespace: "main",
 				Name:      "claim-" + strconv.Itoa(i),
 			},
-			User:     "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
-			Contract: "contract-" + strconv.Itoa(gen.random.Intn(gen.bundles)),
+			User:    "user-" + strconv.Itoa(gen.random.Intn(gen.users)),
+			Service: "service-" + strconv.Itoa(gen.random.Intn(gen.bundles)),
 		}
 		gen.addObject(claim)
 	}

@@ -1,4 +1,4 @@
-# Definition of Spark service
+# Spark bundle
 - kind: bundle
   metadata:
     namespace: platform
@@ -7,7 +7,7 @@
   components:
 
     - name: zookeeper
-      contract: zookeeper
+      service: zookeeper
 
     - name: spark
       discovery:
@@ -36,8 +36,8 @@
       dependencies:
         - zookeeper
 
-# Contract for Spark
-- kind: contract
+# Spark service
+- kind: service
   metadata:
     namespace: platform
     name: spark

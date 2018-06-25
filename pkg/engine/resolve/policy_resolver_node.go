@@ -34,10 +34,10 @@ type resolutionNode struct {
 	// reference to user who requested this claim
 	user *lang.User
 
-	// reference to the namespace & contract we are currently resolving
-	namespace    string
-	contractName string
-	contract     *lang.Contract
+	// reference to the namespace & service we are currently resolving
+	namespace   string
+	serviceName string
+	service     *lang.Service
 
 	// reference to the current set of labels
 	labels *lang.LabelSet
@@ -97,9 +97,9 @@ func (resolver *PolicyResolver) initResolutionNode(node *resolutionNode, claim *
 	user := resolver.externalData.UserLoader.LoadUserByName(claim.User)
 	node.user = user
 
-	// start with the namespace & contract specified in the claim
+	// start with the namespace & service specified in the claim
 	node.namespace = claim.Namespace
-	node.contractName = claim.Contract
+	node.serviceName = claim.Service
 
 	// create a starting set of labels, combining user labels and claim labels
 	node.labels = lang.NewLabelSet(claim.Labels)
@@ -122,9 +122,9 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 		claim: node.claim,
 		user:  node.user,
 
-		// we take the current component we are iterating over, and get its contract name
-		namespace:    node.namespace,
-		contractName: node.component.Contract,
+		// we take the current component we are iterating over, and get its service name
+		namespace:   node.namespace,
+		serviceName: node.component.Service,
 
 		// proceed with the current set of labels
 		labels: lang.NewLabelSet(node.labels.Labels),
@@ -141,7 +141,7 @@ func (node *resolutionNode) createChildNode() *resolutionNode {
 }
 
 // As the resolution goes on, this method is called when objects become resolved and available in the context
-// Right now we only call it for claim, contract, and bundle
+// Right now we only call it for claim, service, and bundle
 func (node *resolutionNode) objectResolved(object runtime.Storable) {
 	node.eventLog.AddFixedField(object.GetKind()+"Id", runtime.KeyForStorable(object))
 }
@@ -154,15 +154,15 @@ func (node *resolutionNode) checkUserExists() error {
 	return nil
 }
 
-// Helper to get a contract
-func (node *resolutionNode) getContract(policy *lang.Policy) *lang.Contract {
-	contractObj, err := policy.GetObject(lang.ContractObject.Kind, node.contractName, node.namespace)
-	if contractObj == nil || err != nil {
-		panic(fmt.Sprintf("Can't get contract '%s/%s': %s", node.namespace, node.contractName, err))
+// Helper to get a service
+func (node *resolutionNode) getService(policy *lang.Policy) *lang.Service {
+	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, node.serviceName, node.namespace)
+	if serviceObj == nil || err != nil {
+		panic(fmt.Sprintf("Can't get service '%s/%s': %s", node.namespace, node.serviceName, err))
 	}
-	contract := contractObj.(*lang.Contract) // nolint: errcheck
-	node.logContractFound(contract)
-	return contract
+	service := serviceObj.(*lang.Service) // nolint: errcheck
+	node.logServiceFound(service)
+	return service
 }
 
 // Helper to get a matched context
@@ -173,7 +173,7 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 	// Find matching context
 	contextualData := node.getContextualDataForContextExpression()
 	var contextMatched *lang.Context
-	for _, context := range node.contract.Contexts {
+	for _, context := range node.service.Contexts {
 		// Check if context matches (based on criteria)
 		matched, err := context.Matches(contextualData, node.resolver.expressionCache)
 		if err != nil {
@@ -204,9 +204,9 @@ func (node *resolutionNode) getMatchedBundle(policy *lang.Policy) (*lang.Bundle,
 
 	bundle := bundleObj.(*lang.Bundle) // nolint: errcheck
 
-	// Bundle should be located in the same namespace as contract
-	if bundle.Namespace != node.contract.Namespace {
-		return nil, node.errorBundleIsNotInSameNamespaceAsContract(bundle)
+	// Bundle should be located in the same namespace as service
+	if bundle.Namespace != node.service.Namespace {
+		return nil, node.errorBundleIsNotInSameNamespaceAsService(bundle)
 	}
 
 	// User should have access to consume the service according to the ACL
@@ -278,7 +278,7 @@ func (node *resolutionNode) createComponentKey(component *lang.BundleComponent) 
 	return NewComponentInstanceKey(
 		cluster,
 		target.Suffix,
-		node.contract,
+		node.service,
 		node.context,
 		node.allocationKeysResolved,
 		node.bundle,

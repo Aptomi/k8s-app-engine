@@ -88,14 +88,14 @@
         image: '/static/img/bundle-icon-circle.png',
         color: {background: 'white', border: 'lightgray'}
       },
-      contract: {
+      service: {
         font: {
           color: 'rgb(220,213,31)',
           multi: 'html'
         },
         size: 25,
         shape: 'circularImage',
-        image: '/static/img/contract-icon.png',
+        image: '/static/img/service-icon.png',
         color: {background: 'rgb(164,253,74)', border: 'rgb(220,213,31)'}
       },
       componenthelm: {

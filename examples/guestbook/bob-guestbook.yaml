@@ -3,6 +3,6 @@
     namespace: social
     name: bob_guestbook
   user: Bob
-  contract: guestbook
+  service: guestbook
   labels:
     target: k8s-example.west

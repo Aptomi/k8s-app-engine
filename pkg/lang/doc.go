@@ -2,10 +2,10 @@
 //
 // Let's start with policy objects.
 // Cluster - individual cluster where containers get deployed (e.g. k8s cluster).
-// Contract - contract for a bundle (e.g. database).
-// Context - a set of contexts, defining how contract can be fulfilled (e.g. MariaDB, MySQL, SQLite).
-// Bundle - specific bundle implementation (set of containers to run, and dependencies on other contracts).
-// Claim - triggers instantiation of a contract.
+// Service - service for a bundle (e.g. database).
+// Context - a set of contexts, defining how service can be fulfilled (e.g. MariaDB, MySQL, SQLite).
+// Bundle - specific bundle implementation (set of containers to run, and dependencies on other services).
+// Claim - triggers instantiation of a service.
 // Rule - rules which constitute policy, allowing to change labels and perform actions during policy resolution.
 // ACLRule - rules which define user roles for accessing Aptomi namespaces.
 //

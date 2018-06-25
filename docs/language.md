@@ -7,7 +7,7 @@
 - [Objects](#objects)
   - [ACL](#acl)
   - [Bundle](#bundle)
-  - [Contract](#contract)
+  - [Service](#service)
   - [Cluster](#cluster)
   - [Claim](#claim)
   - [Rule](#rule)
@@ -50,10 +50,10 @@ Before using Aptomi for the first time, you must set up [access control rights](
 There are three built-in user roles in Aptomi:
 * **domain admin** - Has full access rights to all Aptomi namespaces, including the `system` namespace
   * Domain admins can change the global ACL, the global list of rules, and the global list of clusters, which all reside in the `system` namespace.
-  * Domain admins can define and publish bundles, contracts, claims, and rules in any namespace.
+  * Domain admins can define and publish bundles, services, claims, and rules in any namespace.
 * **namespace admin** - Has full access rights for a given list of Aptomi namespaces
   * Namespace admins can view, but not manage objects in the `system` namespace.
-  * Namespace admins can define and publish bundles, contracts, claims, and rules in a given set of Aptomi namespaces.
+  * Namespace admins can define and publish bundles, services, claims, and rules in a given set of Aptomi namespaces.
 * **service consumer** - Can only consume services in a given list of Aptomi namespaces
   * Service consumers have view-only access for all namespaces.
   * Service consumers can only define and declare claims, and therefore consume services, in a given list of Aptomi namespaces.
@@ -105,7 +105,7 @@ Finally, this example would make all users with the `org == dev` label into serv
 A [Bundle](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Bundle) is an entity that you would use to define the structure of your application and its dependencies.
 
 Bundles consist of one of more [components](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#BundleComponent) which correspond to the components of your application.
-Every component can be either a piece of code that needs to be deployed/instantiated or a reference to another contract. This way, you can construct your application from
+Every component can be either a piece of code that needs to be deployed/instantiated or a reference to another service. This way, you can construct your application from
 the code that you own, and leverage services which may be owned by someone else in the organization.
 
 A Bundle can have also have labels attached to it. You can refer to those labels with expressions, which is a practice typically employed when writing rules.
@@ -178,21 +178,21 @@ Components can also have custom criteria defined and associated with them. If a 
       ...
 ```
 
-## Contract
-Once a bundle is defined, it has to be exposed through a [contract](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Contract).
+## Service
+Once a bundle is defined, it has to be exposed through a [service](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Service).
 
-Contracts represent a consumable bundle. When someone wants to consume an instance of a bundle, it has to be done through a contract. When
-a bundle depends on another instance of a different bundle, it has to have a dependency on the corresponding contract as one of its components.
+Services represent a consumable bundle. When someone wants to consume an instance of a bundle, it has to be done through a service. When
+a bundle depends on another instance of a different bundle, it has to have a dependency on the corresponding service as one of its components.
 
-A Contract can have a number of contexts, which define different implementations of that contract. Each context allows you to define the specific implementation and criteria under which it will be picked.
-This means that a contract will be fulfilled via one of the defined contexts at runtime, based on the defined criteria. Different parameters/bundles can be picked based on the type of environment (e.g. `dev` vs. `prod`), the properties of a consumer (e.g. which 'team' a consumer belongs to),
-the time of day, or any other user-defined labels/properties. A contract can also control whether the bundle instance will be dedicated or shared.
+A Service can have a number of contexts, which define different implementations of that service. Each context allows you to define the specific implementation and criteria under which it will be picked.
+This means that a service will be fulfilled via one of the defined contexts at runtime, based on the defined criteria. Different parameters/bundles can be picked based on the type of environment (e.g. `dev` vs. `prod`), the properties of a consumer (e.g. which 'team' a consumer belongs to),
+the time of day, or any other user-defined labels/properties. A service can also control whether the bundle instance will be dedicated or shared.
 
-For example, a team responsible for running databases can define a contract for `sql-database` and its specific implementations. In the code-snippet below, we see two contexts defined for the `sql-database` context:
+For example, a team responsible for running databases can define a service for `sql-database` and its specific implementations. In the code-snippet below, we see two contexts defined for the `sql-database` context:
 * `dev` - For people from the 'dev' team, which will be implemented via instantiating the `sqlite` bundle.
 * `prod` - For people outside of the 'dev' team, which will be implemented via instantiating the `mysql` bundle.
 ```yaml
-- kind: contract
+- kind: service
   metadata:
     namespace: main
     name: sql-database
@@ -214,7 +214,7 @@ For example, a team responsible for running databases can define a contract for 
 ```
 
 In the example shown below, the team who runs the wordpress application wants to rely on an external database, and have modified their bundle definition to
-use a special **contract component**, which points to a contract instead of the code:
+use a special **service component**, which points to a service instead of the code:
 ```yaml
 - kind: bundle
   metadata:
@@ -238,13 +238,13 @@ use a special **contract component**, which points to a contract instead of the 
         - db_component
 
     - name: db_component
-      contract: sql-database
+      service: sql-database
 ```
 
-If you don't need the power of contracts and want your bundle to be instantiated directly, you can create a contract which maps 1-to-1 to
+If you don't need the power of services and want your bundle to be instantiated directly, you can create a service which maps 1-to-1 to
 the corresponding bundle, while keeping the criteria empty (i.e. always true). An example of this is shown below:
 ```yaml
-- kind: contract
+- kind: service
   metadata:
     namespace: main
     name: mysql
@@ -258,7 +258,7 @@ the corresponding bundle, while keeping the criteria empty (i.e. always true). A
 In order to control service dedication/sharing, you can use a special `keys` field inside an allocation.
 For example, the following YAML block specifies that each team will receive its own dedicated instance of the `mysql` bundle:
 ```yaml
-- kind: contract
+- kind: service
   metadata:
     namespace: main
     name: mysql
@@ -271,7 +271,7 @@ For example, the following YAML block specifies that each team will receive its 
           - "{{ .User.Labels.Team }}"
 ```
 
-When fulfilling a contract, Aptomi will process all contexts within that contract one-by-one, and find the first matching context. Once a context is selected, labels will be changed according to the `change-labels` section, and bundle allocation will be done according to the corresponding `allocation` section within the selected context.
+When fulfilling a service, Aptomi will process all contexts within that service one-by-one, and find the first matching context. Once a context is selected, labels will be changed according to the `change-labels` section, and bundle allocation will be done according to the corresponding `allocation` section within the selected context.
 
 ## Cluster
 
@@ -294,10 +294,10 @@ A typical definition of a k8s cluster looks like this:
 
 ## Claim
 
-Defining a bundle and a contract only publishes a service into Aptomi, and does not trigger instantiation/deployment of that service.
+Defining a bundle and a service only publishes a service into Aptomi, and does not trigger instantiation/deployment of that service.
 In order to request an instance, you must create a [Claim](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#Claim) object in Aptomi.
 
-When creating a claim, you must specify a `contract` to instantiate, as well as the initial labels to pass to it.
+When creating a claim, you must specify a `service` to instantiate, as well as the initial labels to pass to it.
 
 For example, here is how **Alice** would request a **wordpress**:
 ```yaml
@@ -306,7 +306,7 @@ For example, here is how **Alice** would request a **wordpress**:
     namespace: main
     name: alice_uses_wordpress
   user: Alice
-  contract: wordpress
+  service: wordpress
   labels:
       label1: value1
 ```
@@ -367,7 +367,7 @@ Policy processing in Aptomi is based entirely on labels. When a claim is defined
 these labels can be transformed using `change-labels` directives, and accessed at any time in expressions and templates.
 
 One way of leveraging this, for example, would be to:
-* Define a bundle, a contract, and two contexts.
+* Define a bundle, a service, and two contexts.
 * Set the `replicas` label to have a value of `1` in the dev context.
 * Set the `replicas` label to have a value of `3` in the production context.
 * Use the `replicas` label in the service to configure it appropriately.
@@ -375,7 +375,7 @@ One way of leveraging this, for example, would be to:
 
 The following code illustrates how one would use [change-labels](https://godoc.org/github.com/Aptomi/aptomi/pkg/lang#LabelOperations) to achieve the above objectives:
 ```yaml
-- kind: contract
+- kind: service
   metadata:
     namespace: main
     name: myservice
@@ -446,27 +446,27 @@ You can reference the following variables in your text templates:
 ## Namespace references
 Sometimes you will want to specify an absolute path to an object located in a different namespace.
 
-For example, the following code would tells Aptomi to look for a wordpress contract defined in the **same** namespace (in this case, `main`):
+For example, the following code would tells Aptomi to look for a wordpress service defined in the **same** namespace (in this case, `main`):
 ```yaml
 - kind: claim
   metadata:
     namespace: main
     name: alice_uses_wordpress
   user: Alice
-  contract: wordpress
+  service: wordpress
 ```
 
-While this code would tell Aptomi to look for a wordpress contract in a **given** namespace (in this case, `specialns`):
+While this code would tell Aptomi to look for a wordpress service in a **given** namespace (in this case, `specialns`):
 ```yaml
 - kind: claim
   metadata:
     namespace: main
     name: alice_uses_wordpress
   user: Alice
-  contract: specialns/wordpress
+  service: specialns/wordpress
 ```
 
-You can also use the same syntax to create a bundle, which depends on a contract published in a different namespace (i.e. `dbns`) by another team:
+You can also use the same syntax to create a bundle, which depends on a service published in a different namespace (i.e. `dbns`) by another team:
 ```yaml
 - kind: bundle
   metadata:
@@ -484,5 +484,5 @@ You can also use the same syntax to create a bundle, which depends on a contract
         - db_component
 
     - name: db_component
-      contract: dbns/sql-database
+      service: dbns/sql-database
 ```

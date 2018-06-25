@@ -52,7 +52,7 @@
               <tr>
                 <th>Name</th>
                 <th>User</th>
-                <th>Contract</th>
+                <th>Service</th>
                 <th>State</th>
                 <th>Action</th>
               </tr>
@@ -64,7 +64,7 @@
                 </td>
                 <td v-if="!d.error">{{d.user}}</td>
                 <td v-else><span class="label label-danger center">Error</span></td>
-                <td v-if="!d.error">{{d.contract}}</td>
+                <td v-if="!d.error">{{d.service}}</td>
                 <td v-else><span class="label label-danger center">Error</span></td>
                 <td v-if="!d.status_error">
                   <span class="label label-success" v-if="d['status']['deployed']">Deployed</span>

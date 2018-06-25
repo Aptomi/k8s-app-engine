@@ -157,8 +157,8 @@ func TestAclResolver(t *testing.T) {
 			expected:  false,
 			objectPrivileges: []testCaseObjPrivileges{
 				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
-				{obj: &Contract{TypeKind: ContractObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Contract{TypeKind: ContractObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
+				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
 			},
 		},
 	}

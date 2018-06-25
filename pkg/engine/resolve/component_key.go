@@ -24,7 +24,7 @@ const componentRootName = "root"
 // Currently, component keys are formed from multiple parameters as follows.
 // Cluster gets included as a part of the key (components running on different clusters must have different keys).
 // Namespace gets included as a part of the key (components from different namespaces must have different keys).
-// Contract, Context (with allocation keys), Bundle get included as a part of the key (Bundle must be within the same namespace as Contract).
+// Service, Context (with allocation keys), Bundle get included as a part of the key (Bundle must be within the same namespace as Service).
 // ComponentName gets included as a part of the key. For bundle-level component instances, ComponentName is
 // set to componentRootName, while for all component instances within a bundle an actual Component.Name is used.
 type ComponentInstanceKey struct {
@@ -35,8 +35,8 @@ type ComponentInstanceKey struct {
 	ClusterNameSpace    string // mandatory
 	ClusterName         string // mandatory
 	TargetSuffix        string // mandatory
-	Namespace           string // determined from the contract
-	ContractName        string // mandatory
+	Namespace           string // determined from the service
+	ServiceName         string // mandatory
 	ContextName         string // mandatory
 	KeysResolved        string // mandatory
 	ContextNameWithKeys string // calculated
@@ -45,7 +45,7 @@ type ComponentInstanceKey struct {
 }
 
 // NewComponentInstanceKey creates a new ComponentInstanceKey
-func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contract *lang.Contract, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent) *ComponentInstanceKey {
+func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, service *lang.Service, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent) *ComponentInstanceKey {
 	contextName := getContextNameUnsafe(context)
 	keysResolved := strings.Join(allocationKeysResolved, componentInstanceKeySeparator)
 	contextNameWithKeys := contextName
@@ -59,8 +59,8 @@ func NewComponentInstanceKey(cluster *lang.Cluster, targetSuffix string, contrac
 		ClusterNameSpace:    getClusterNamespaceUnsafe(cluster),
 		ClusterName:         getClusterNameUnsafe(cluster),
 		TargetSuffix:        targetSuffix,
-		Namespace:           getContractNamespaceUnsafe(contract),
-		ContractName:        getContractNameUnsafe(contract),
+		Namespace:           getServiceNamespaceUnsafe(service),
+		ServiceName:         getServiceNameUnsafe(service),
 		ContextName:         contextName,
 		KeysResolved:        keysResolved,
 		ContextNameWithKeys: contextNameWithKeys,
@@ -76,7 +76,7 @@ func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 		ClusterName:         cik.ClusterName,
 		TargetSuffix:        cik.TargetSuffix,
 		Namespace:           cik.Namespace,
-		ContractName:        cik.ContractName,
+		ServiceName:         cik.ServiceName,
 		ContextName:         cik.ContextName,
 		KeysResolved:        cik.KeysResolved,
 		ContextNameWithKeys: cik.ContextNameWithKeys,
@@ -84,7 +84,7 @@ func (cik *ComponentInstanceKey) MakeCopy() *ComponentInstanceKey {
 	}
 }
 
-// IsBundle returns 'true' if it's a contract instance key and we can't go up anymore. And it will return 'false' if it's a component instance key
+// IsBundle returns 'true' if it's a bundle instance key and we can't go up anymore. And it will return 'false' if it's a component instance key
 func (cik *ComponentInstanceKey) IsBundle() bool {
 	return cik.ComponentName == componentRootName
 }
@@ -113,7 +113,7 @@ func (cik ComponentInstanceKey) GetKey() string {
 				cik.ClusterName,
 				cik.TargetSuffix,
 				cik.Namespace,
-				cik.ContractName,
+				cik.ServiceName,
 				cik.ContextNameWithKeys,
 				cik.ComponentName,
 			}, componentInstanceKeySeparator)
@@ -155,22 +155,22 @@ func getClusterNamespaceUnsafe(cluster *lang.Cluster) string {
 	return cluster.Namespace
 }
 
-// If contract has not been resolved yet and we need a key, generate one
-// Otherwise use contract name
-func getContractNameUnsafe(contract *lang.Contract) string {
-	if contract == nil {
+// If service has not been resolved yet and we need a key, generate one
+// Otherwise use service name
+func getServiceNameUnsafe(service *lang.Service) string {
+	if service == nil {
 		return componentUnresolvedName
 	}
-	return contract.Name
+	return service.Name
 }
 
-// If contract has not been resolved yet and we need a key, generate one
-// Otherwise use contract namespace
-func getContractNamespaceUnsafe(contract *lang.Contract) string {
-	if contract == nil {
+// If service has not been resolved yet and we need a key, generate one
+// Otherwise use service namespace
+func getServiceNamespaceUnsafe(service *lang.Service) string {
+	if service == nil {
 		return componentUnresolvedName
 	}
-	return contract.Namespace
+	return service.Namespace
 }
 
 // If context has not been resolved yet and we need a key, generate one

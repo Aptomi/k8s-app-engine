@@ -8,14 +8,14 @@ import (
 
 // ClaimResolutionCfg defines graph generation parameters for ClaimResolution
 type ClaimResolutionCfg struct {
-	showTrivialContracts bool
-	showContracts        bool
+	showTrivialServices bool
+	showServices        bool
 }
 
 // ClaimResolutionCfgDefault is default graph generation parameters for ClaimResolution
 var ClaimResolutionCfgDefault = &ClaimResolutionCfg{
-	showTrivialContracts: true,
-	showContracts:        false,
+	showTrivialServices: true,
+	showServices:        false,
 }
 
 // ClaimResolutionWithFunc produces policy resolution graph by tracing every claim and displaying what got allocated,
@@ -70,14 +70,14 @@ func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, la
 		}
 
 		if instanceCurrent.Metadata.Key.IsBundle() {
-			// if it's a bundle, then create a contract node
-			contractObj, errContract := b.policy.GetObject(lang.ContractObject.Kind, instanceCurrent.Metadata.Key.ContractName, instanceCurrent.Metadata.Key.Namespace)
-			if errContract != nil {
-				b.graph.addNode(errorNode{err: errContract}, level)
+			// if it's a bundle, then create a service node
+			serviceObj, errService := b.policy.GetObject(lang.ServiceObject.Kind, instanceCurrent.Metadata.Key.ServiceName, instanceCurrent.Metadata.Key.Namespace)
+			if errService != nil {
+				b.graph.addNode(errorNode{err: errService}, level)
 				continue
 			}
-			contract := contractObj.(*lang.Contract) // nolint: errcheck
-			ctrNode := contractNode{contract: contract}
+			service := serviceObj.(*lang.Service) // nolint: errcheck
+			ctrNode := serviceNode{service: service}
 
 			// then create a bundle instance node
 			bundleObj, errBundle := b.policy.GetObject(lang.BundleObject.Kind, instanceCurrent.Metadata.Key.BundleName, instanceCurrent.Metadata.Key.Namespace)
@@ -88,10 +88,10 @@ func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, la
 			bundle := bundleObj.(*lang.Bundle) // nolint: errcheck
 			svcInstNode := bundleInstanceNode{instance: instanceCurrent, bundle: bundle}
 
-			// let's see if we need to show last -> contract -> bundleInstance, or skip contract all together
-			trivialContract := len(contract.Contexts) <= 1
-			if cfg.showContracts && (!trivialContract || cfg.showTrivialContracts) {
-				// show 'last' -> 'contract' -> 'bundleInstance' -> (continue)
+			// let's see if we need to show last -> service -> bundleInstance, or skip service all together
+			trivialService := len(service.Contexts) <= 1
+			if cfg.showServices && (!trivialService || cfg.showTrivialServices) {
+				// show 'last' -> 'service' -> 'bundleInstance' -> (continue)
 				b.graph.addNode(ctrNode, level)
 				b.graph.addEdge(newEdge(last, ctrNode, ""))
 
@@ -101,7 +101,7 @@ func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, la
 				// continue tracing
 				b.traceClaimResolution(keyDst, claim, svcInstNode, level+2, cfg, exists)
 			} else {
-				// skip contract, show just 'last' -> 'bundleInstance' -> (continue)
+				// skip service, show just 'last' -> 'bundleInstance' -> (continue)
 				b.graph.addNode(svcInstNode, level)
 				b.graph.addEdge(newEdge(last, svcInstNode, ""))
 

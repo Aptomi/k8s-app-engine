@@ -3,7 +3,7 @@
     namespace: social
     name: bob_dev
   user: Bob
-  contract: twitter_stats
+  service: twitter_stats
   labels:
     # Version of visualization code (container image tag)
     tsvisimage: demo11

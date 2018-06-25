@@ -6,7 +6,7 @@ var (
 	// PolicyObjects is the list of informational data for all policy objects
 	PolicyObjects = []*runtime.Info{
 		BundleObject,
-		ContractObject,
+		ServiceObject,
 		ClaimObject,
 		ClusterObject,
 		RuleObject,

@@ -20,9 +20,9 @@ module.exports = [
       {
         type: 'item',
         icon: 'fa fa-circle-o',
-        name: 'Contracts',
+        name: 'Services',
         router: {
-          name: 'ShowContracts'
+          name: 'ShowServices'
         }
       },
       {

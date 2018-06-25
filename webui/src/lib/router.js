@@ -10,7 +10,7 @@ import auth from 'lib/auth'
 // Aptomi pages
 import Login from 'pages/auth/Login.vue'
 import ShowBundles from 'pages/objects/ShowBundles.vue'
-import ShowContracts from 'pages/objects/ShowContracts.vue'
+import ShowServices from 'pages/objects/ShowServices.vue'
 import ShowClusters from 'pages/objects/ShowClusters.vue'
 import ShowRules from 'pages/objects/ShowRules.vue'
 import ShowClaims from 'pages/objects/ShowClaims.vue'
@@ -44,9 +44,9 @@ const router = new Router({
           component: ShowBundles
         },
         {
-          path: 'contracts',
-          name: 'ShowContracts',
-          component: ShowContracts
+          path: 'services',
+          name: 'ShowServices',
+          component: ShowServices
         },
         {
           path: 'claims',

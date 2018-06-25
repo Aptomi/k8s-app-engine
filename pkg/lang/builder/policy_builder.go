@@ -57,16 +57,16 @@ func (builder *PolicyBuilder) SwitchNamespace(namespace string) {
 }
 
 // AddClaim creates a new claim and adds it to the policy
-func (builder *PolicyBuilder) AddClaim(user *lang.User, contract *lang.Contract) *lang.Claim {
+func (builder *PolicyBuilder) AddClaim(user *lang.User, service *lang.Service) *lang.Claim {
 	result := &lang.Claim{
 		TypeKind: lang.ClaimObject.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
-		User:     strings.ToUpper(user.Name), // we can refer to user using any case, since user name is not case sensitive
-		Contract: contract.Namespace + "/" + contract.Name,
-		Labels:   make(map[string]string),
+		User:    strings.ToUpper(user.Name), // we can refer to user using any case, since user name is not case sensitive
+		Service: service.Namespace + "/" + service.Name,
+		Labels:  make(map[string]string),
 	}
 
 	builder.addObject(builder.domainAdminView, result)
@@ -107,10 +107,10 @@ func (builder *PolicyBuilder) AddBundle() *lang.Bundle {
 	return result
 }
 
-// AddContract creates a new contract for a given bundle and adds it to the policy
-func (builder *PolicyBuilder) AddContract(bundle *lang.Bundle, criteria *lang.Criteria) *lang.Contract {
-	result := &lang.Contract{
-		TypeKind: lang.ContractObject.GetTypeKind(),
+// AddService creates a new service for a given bundle and adds it to the policy
+func (builder *PolicyBuilder) AddService(bundle *lang.Bundle, criteria *lang.Criteria) *lang.Service {
+	result := &lang.Service{
+		TypeKind: lang.ServiceObject.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -127,10 +127,10 @@ func (builder *PolicyBuilder) AddContract(bundle *lang.Bundle, criteria *lang.Cr
 	return result
 }
 
-// AddContractMultipleContexts creates contract with multiple contexts for a given bundle and adds it to the policy
-func (builder *PolicyBuilder) AddContractMultipleContexts(bundle *lang.Bundle, criteriaArray ...*lang.Criteria) *lang.Contract {
-	result := &lang.Contract{
-		TypeKind: lang.ContractObject.GetTypeKind(),
+// AddServiceMultipleContexts creates service with multiple contexts for a given bundle and adds it to the policy
+func (builder *PolicyBuilder) AddServiceMultipleContexts(bundle *lang.Bundle, criteriaArray ...*lang.Criteria) *lang.Service {
+	result := &lang.Service{
+		TypeKind: lang.ServiceObject.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -210,7 +210,7 @@ func (builder *PolicyBuilder) AllocationKeys(key ...string) []string {
 	return key
 }
 
-// UnknownComponent creates an unknown component for a bundle (not code and not contract)
+// UnknownComponent creates an unknown component for a bundle (not code and not service)
 func (builder *PolicyBuilder) UnknownComponent() *lang.BundleComponent {
 	return &lang.BundleComponent{
 		Name: util.RandomID(builder.random, idLength),
@@ -229,11 +229,11 @@ func (builder *PolicyBuilder) CodeComponent(codeParams util.NestedParameterMap, 
 	}
 }
 
-// ContractComponent creates a new contract component for a bundle
-func (builder *PolicyBuilder) ContractComponent(contract *lang.Contract) *lang.BundleComponent {
+// ServiceComponent creates a new service component for a bundle
+func (builder *PolicyBuilder) ServiceComponent(service *lang.Service) *lang.BundleComponent {
 	return &lang.BundleComponent{
-		Name:     util.RandomID(builder.random, idLength),
-		Contract: contract.Namespace + "/" + contract.Name,
+		Name:    util.RandomID(builder.random, idLength),
+		Service: service.Namespace + "/" + service.Name,
 	}
 }
 

@@ -10,25 +10,25 @@ import (
 // PolicyNamespace describes a specific namespace within Aptomi policy.
 // All policy objects get placed in the appropriate maps and structs within PolicyNamespace.
 type PolicyNamespace struct {
-	Name      string               `validate:"identifier"`
-	Bundles   map[string]*Bundle   `validate:"dive"`
-	Contracts map[string]*Contract `validate:"dive"`
-	Clusters  map[string]*Cluster  `validate:"dive"`
-	Rules     map[string]*Rule     `validate:"dive"`
-	ACLRules  map[string]*ACLRule  `validate:"dive"`
-	Claims    map[string]*Claim    `validate:"dive"`
+	Name     string              `validate:"identifier"`
+	Bundles  map[string]*Bundle  `validate:"dive"`
+	Services map[string]*Service `validate:"dive"`
+	Clusters map[string]*Cluster `validate:"dive"`
+	Rules    map[string]*Rule    `validate:"dive"`
+	ACLRules map[string]*ACLRule `validate:"dive"`
+	Claims   map[string]*Claim   `validate:"dive"`
 }
 
 // NewPolicyNamespace creates a new PolicyNamespace
 func NewPolicyNamespace(name string) *PolicyNamespace {
 	return &PolicyNamespace{
-		Name:      name,
-		Bundles:   make(map[string]*Bundle),
-		Contracts: make(map[string]*Contract),
-		Clusters:  make(map[string]*Cluster),
-		Rules:     make(map[string]*Rule),
-		ACLRules:  make(map[string]*ACLRule),
-		Claims:    make(map[string]*Claim),
+		Name:     name,
+		Bundles:  make(map[string]*Bundle),
+		Services: make(map[string]*Service),
+		Clusters: make(map[string]*Cluster),
+		Rules:    make(map[string]*Rule),
+		ACLRules: make(map[string]*ACLRule),
+		Claims:   make(map[string]*Claim),
 	}
 }
 
@@ -36,8 +36,8 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	switch kind := obj.GetKind(); kind {
 	case BundleObject.Kind:
 		policyNamespace.Bundles[obj.GetName()] = obj.(*Bundle) // nolint: errcheck
-	case ContractObject.Kind:
-		policyNamespace.Contracts[obj.GetName()] = obj.(*Contract) // nolint: errcheck
+	case ServiceObject.Kind:
+		policyNamespace.Services[obj.GetName()] = obj.(*Service) // nolint: errcheck
 	case ClusterObject.Kind:
 		// cluster is a special object, which we don't allow to update certain parts of (e.g. type and config)
 		clusterUpdated := obj.(*Cluster) // nolint: errcheck
@@ -78,9 +78,9 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 			delete(policyNamespace.Bundles, obj.GetName())
 			return true
 		}
-	case ContractObject.Kind:
-		if _, exist := policyNamespace.Contracts[obj.GetName()]; exist {
-			delete(policyNamespace.Contracts, obj.GetName())
+	case ServiceObject.Kind:
+		if _, exist := policyNamespace.Services[obj.GetName()]; exist {
+			delete(policyNamespace.Services, obj.GetName())
 			return true
 		}
 	case ClusterObject.Kind:
@@ -115,9 +115,9 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 		for _, bundle := range policyNamespace.Bundles {
 			result = append(result, bundle)
 		}
-	case ContractObject.Kind:
-		for _, contract := range policyNamespace.Contracts {
-			result = append(result, contract)
+	case ServiceObject.Kind:
+		for _, service := range policyNamespace.Services {
+			result = append(result, service)
 		}
 	case ClusterObject.Kind:
 		for _, cluster := range policyNamespace.Clusters {
@@ -149,8 +149,8 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 		if result, ok = policyNamespace.Bundles[name]; !ok {
 			return nil, nil
 		}
-	case ContractObject.Kind:
-		if result, ok = policyNamespace.Contracts[name]; !ok {
+	case ServiceObject.Kind:
+		if result, ok = policyNamespace.Services[name]; !ok {
 			return nil, nil
 		}
 	case ClusterObject.Kind:

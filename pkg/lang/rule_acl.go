@@ -141,10 +141,10 @@ var DomainAdmin = &ACLRole{
 	Privileges: &Privileges{
 		AllNamespaces: true,
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:   fullAccess,
-			ContractObject.Kind: fullAccess,
-			ClaimObject.Kind:    fullAccess,
-			RuleObject.Kind:     fullAccess,
+			BundleObject.Kind:  fullAccess,
+			ServiceObject.Kind: fullAccess,
+			ClaimObject.Kind:   fullAccess,
+			RuleObject.Kind:    fullAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: fullAccess,
@@ -160,10 +160,10 @@ var NamespaceAdmin = &ACLRole{
 	Name: "Namespace Admin",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:   fullAccess,
-			ContractObject.Kind: fullAccess,
-			ClaimObject.Kind:    fullAccess,
-			RuleObject.Kind:     fullAccess,
+			BundleObject.Kind:  fullAccess,
+			ServiceObject.Kind: fullAccess,
+			ClaimObject.Kind:   fullAccess,
+			RuleObject.Kind:    fullAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: viewAccess,
@@ -179,10 +179,10 @@ var ServiceConsumer = &ACLRole{
 	Name: "Service Consumer",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:   viewAccess,
-			ContractObject.Kind: viewAccess,
-			ClaimObject.Kind:    fullAccess,
-			RuleObject.Kind:     viewAccess,
+			BundleObject.Kind:  viewAccess,
+			ServiceObject.Kind: viewAccess,
+			ClaimObject.Kind:   fullAccess,
+			RuleObject.Kind:    viewAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: viewAccess,
@@ -198,10 +198,10 @@ var nobody = &ACLRole{
 	Name: "Nobody",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:   viewAccess,
-			ContractObject.Kind: viewAccess,
-			ClaimObject.Kind:    viewAccess,
-			RuleObject.Kind:     viewAccess,
+			BundleObject.Kind:  viewAccess,
+			ServiceObject.Kind: viewAccess,
+			ClaimObject.Kind:   viewAccess,
+			RuleObject.Kind:    viewAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
 			ClusterObject.Kind: viewAccess,

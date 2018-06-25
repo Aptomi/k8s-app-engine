@@ -76,7 +76,7 @@ func NewPolicyResolver(policy *lang.Policy, externalData *external.Data, eventLo
 
 // ResolveAllClaims takes policy as input and calculates PolicyResolution (desired state) as output.
 //
-// The method resolves all recorded claims for consuming contracts ("instantiate <contract> with <labels>"), calculating
+// The method resolves all recorded claims for consuming services ("instantiate <service> with <labels>"), calculating
 // which components have to be allocated and with which parameters. Once PolicyResolution (desired state) is calculated,
 // it can be rendered by the engine diff/apply by deploying and configuring required components in the cloud.
 //
@@ -187,13 +187,13 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		return err
 	}
 
-	// Locate the contract (it should be always be present, as policy has been validated)
-	node.contract = node.getContract(resolver.policy)
-	node.namespace = node.contract.Namespace
-	node.objectResolved(node.contract)
+	// Locate the service (it should be always be present, as policy has been validated)
+	node.service = node.getService(resolver.policy)
+	node.namespace = node.service.Namespace
+	node.objectResolved(node.service)
 
 	// Process bundle and transform labels
-	node.transformLabels(node.labels, node.contract.ChangeLabels)
+	node.transformLabels(node.labels, node.service.ChangeLabels)
 
 	// Match the context
 	node.context, err = node.getMatchedContext(resolver.policy)
@@ -291,11 +291,11 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 			if err != nil {
 				return err
 			}
-		} else if node.component.Contract != "" {
+		} else if node.component.Service != "" {
 			// Create a child node for claim resolution
 			nodeNext := node.createChildNode()
 
-			// Resolve claim on another contract recursively
+			// Resolve claim on another service recursively
 			err := resolver.resolveNode(nodeNext)
 
 			// Combine event logs first

@@ -83,10 +83,10 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 	// three bundles
 	bundles := []*lang.Bundle{}
-	contracts := []*lang.Contract{}
+	services := []*lang.Service{}
 	for i := 0; i < 3; i++ {
 		bundle := b.AddBundle()
-		contract := b.AddContract(bundle, b.CriteriaTrue())
+		service := b.AddService(bundle, b.CriteriaTrue())
 
 		// three components each
 		for j := 0; j < 3; j++ {
@@ -94,12 +94,12 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 		}
 
 		bundles = append(bundles, bundle)
-		contracts = append(contracts, contract)
+		services = append(services, service)
 	}
 
 	// add component dependencies i -> i+1 (0 -> 1, 1 -> 2)
 	for i := 0; i < 2; i++ {
-		b.AddBundleComponent(bundles[i], b.ContractComponent(contracts[i+1]))
+		b.AddBundleComponent(bundles[i], b.ServiceComponent(services[i+1]))
 	}
 
 	// one cluster
@@ -108,7 +108,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 
 	// several claims
 	for i := 0; i < 5; i++ {
-		b.AddClaim(b.AddUser(), contracts[i%len(contracts)])
+		b.AddClaim(b.AddUser(), services[i%len(services)])
 	}
 
 	return b

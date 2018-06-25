@@ -31,7 +31,7 @@ func TestDiffComponentCreationAndAttachClaim(t *testing.T) {
 	resolvedPrev := resolvePolicy(t, b)
 
 	// add claim
-	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
 	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
@@ -40,7 +40,7 @@ func TestDiffComponentCreationAndAttachClaim(t *testing.T) {
 	verifyDiff(t, diff, 2, 0, 0, 2, 0)
 
 	// add another claim
-	c2 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c2 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
 	c2.Labels["param"] = "value1"
 	resolvedNextAgain := resolvePolicy(t, b)
 
@@ -54,7 +54,7 @@ func TestDiffComponentUpdate(t *testing.T) {
 	resolvedPrev := resolvePolicy(t, b)
 
 	// add claim
-	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
 	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
@@ -76,7 +76,7 @@ func TestDiffComponentDelete(t *testing.T) {
 	resolvedPrev := resolvePolicy(t, b)
 
 	// add claim
-	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ContractObject.Kind)[0].(*lang.Contract))
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
 	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
@@ -117,7 +117,7 @@ func makePolicyBuilder() *builder.PolicyBuilder {
 			nil,
 		),
 	)
-	b.AddContract(bundle, b.CriteriaTrue())
+	b.AddService(bundle, b.CriteriaTrue())
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
@@ -131,22 +131,22 @@ func makePolicyBuilderWithBundleSharing() *builder.PolicyBuilder {
 
 	// create a bundle, which depends on another bundle
 	bundle1 := b.AddBundle()
-	contract1 := b.AddContract(bundle1, b.CriteriaTrue())
+	service1 := b.AddService(bundle1, b.CriteriaTrue())
 	bundle2 := b.AddBundle()
-	contract2 := b.AddContract(bundle2, b.CriteriaTrue())
-	b.AddBundleComponent(bundle1, b.ContractComponent(contract2))
+	service2 := b.AddService(bundle2, b.CriteriaTrue())
+	b.AddBundleComponent(bundle1, b.ServiceComponent(service2))
 
 	// make first bundle one per claim, and they all will share the second bundle
-	contract1.Contexts[0].Allocation.Keys = []string{"{{ .Claim.ID }}"}
+	service1.Contexts[0].Allocation.Keys = []string{"{{ .Claim.ID }}"}
 
 	// add rule to set cluster
 	clusterObj := b.AddCluster()
 	b.AddRule(b.CriteriaTrue(), b.RuleActions(lang.NewLabelOperationsSetSingleLabel(lang.LabelTarget, clusterObj.Name)))
 
 	// add claims
-	b.AddClaim(b.AddUser(), contract1)
-	b.AddClaim(b.AddUser(), contract1)
-	b.AddClaim(b.AddUser(), contract1)
+	b.AddClaim(b.AddUser(), service1)
+	b.AddClaim(b.AddUser(), service1)
+	b.AddClaim(b.AddUser(), service1)
 
 	return b
 }
