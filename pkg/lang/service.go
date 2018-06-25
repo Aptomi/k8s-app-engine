@@ -42,7 +42,7 @@ type Context struct {
 	// Criteria - if it gets evaluated to true during policy resolution, then service
 	// will get fulfilled by allocating this context. It's an optional field, so if it's nil then
 	// it is considered to be evaluated to true automatically
-	Criteria *Criteria `validate:"omitempty"`
+	Criteria *Criteria `yaml:",omitempty" validate:"omitempty"`
 
 	// ChangeLabels defines how current set of labels will get changed/transformed in case
 	// the context gets matched
