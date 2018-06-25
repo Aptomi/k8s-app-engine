@@ -21,6 +21,8 @@ Aptomi also provides contextual **visibility** into teams and services, allowing
 
 [![What is Aptomi](images/aptomi-overview-ng.png)](https://www.youtube.com/watch?v=j4DVtZvMqGg)
 
+You can also read this [blog post](https://superuser.openstack.org/articles/aptomi-application-delivery-engine-k8s/) about the project.
+
 ## Demos
 
 ### Asciinema
@@ -32,6 +34,7 @@ Aptomi also provides contextual **visibility** into teams and services, allowing
 
 ### Youtube
 * Detailed Demo - http://www.youtube.com/watch?v=HL4RwoBnuTc
+* OpenDev CI/CD 2018 (Vancouver) - https://www.youtube.com/watch?v=GVB3kKocKi4 
 
 ## Table of contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
