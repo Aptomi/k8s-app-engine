@@ -21,10 +21,6 @@ Aptomi also provides contextual **visibility** into teams and services, allowing
 
 [![What is Aptomi](images/aptomi-overview-ng.png)](https://www.youtube.com/watch?v=j4DVtZvMqGg)
 
-## Service Model 
-
-[![Aptomi Service Model](images/aptomi-service-model-ng.png)](https://www.youtube.com/watch?v=wHEcpkPCkpk)
-
 ## Demos
 
 ### Asciinema
