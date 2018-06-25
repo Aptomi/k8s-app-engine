@@ -23,8 +23,8 @@ func (node *resolutionNode) errorClaimNotAllowedByRules() error {
 	return fmt.Errorf("rules do not allow claim '%s/%s' ('%s' -> '%s'): processing '%s', tree depth %d", node.claim.Metadata.Namespace, node.claim.Name, node.claim.User, node.claim.Service, node.serviceName, node.depth)
 }
 
-func (node *resolutionNode) userNotAllowedToConsumeBundle(err error) error {
-	return fmt.Errorf("user '%s' not allowed to consume bundle: %s", node.claim.User, err)
+func (node *resolutionNode) userNotAllowedToConsumeService(err error) error {
+	return fmt.Errorf("user '%s' not allowed to consume service '%s': %s", node.claim.User, node.serviceName, err)
 }
 
 func (node *resolutionNode) errorTargetNotSet() error {

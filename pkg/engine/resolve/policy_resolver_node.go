@@ -155,14 +155,22 @@ func (node *resolutionNode) checkUserExists() error {
 }
 
 // Helper to get a service
-func (node *resolutionNode) getService(policy *lang.Policy) *lang.Service {
+func (node *resolutionNode) getService(policy *lang.Policy) (*lang.Service, error) {
 	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, node.serviceName, node.namespace)
 	if serviceObj == nil || err != nil {
 		panic(fmt.Sprintf("Can't get service '%s/%s': %s", node.namespace, node.serviceName, err))
 	}
 	service := serviceObj.(*lang.Service) // nolint: errcheck
+
+	// User should have permissions to consume the service according to the ACL
+	userView := node.resolver.policy.View(node.user)
+	canConsume, err := userView.CanConsume(service)
+	if !canConsume {
+		return nil, node.userNotAllowedToConsumeService(err)
+	}
+
 	node.logServiceFound(service)
-	return service
+	return service, nil
 }
 
 // Helper to get a matched context
@@ -207,13 +215,6 @@ func (node *resolutionNode) getMatchedBundle(policy *lang.Policy) (*lang.Bundle,
 	// Bundle should be located in the same namespace as service
 	if bundle.Namespace != node.service.Namespace {
 		return nil, node.errorBundleIsNotInSameNamespaceAsService(bundle)
-	}
-
-	// User should have access to consume the service according to the ACL
-	userView := node.resolver.policy.View(node.user)
-	canConsume, err := userView.CanConsume(bundle)
-	if !canConsume {
-		return nil, node.userNotAllowedToConsumeBundle(err)
 	}
 
 	node.logBundleFound(bundle)

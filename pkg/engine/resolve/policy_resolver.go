@@ -158,7 +158,7 @@ func (resolver *PolicyResolver) combineData(node *resolutionNode, resolutionErr 
 
 // Evaluate evaluates and resolves a single claim, as well as calculates component allocations.
 // Returns error only if there is an issue with the given claim and it cannot be resolved
-func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr error) {
+func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr error) { // nolint: gocyclo
 	recursiveError := false
 
 	// if this function returns an error, it needs to be logged
@@ -187,8 +187,13 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 		return err
 	}
 
-	// Locate the service (it should be always be present, as policy has been validated)
-	node.service = node.getService(resolver.policy)
+	// Locate the service (it should be always be present, as policy has been validated. but user
+	// may or may not have permissions to consume it)
+	node.service, err = node.getService(resolver.policy)
+	if err != nil {
+		return err
+	}
+
 	node.namespace = node.service.Namespace
 	node.objectResolved(node.service)
 

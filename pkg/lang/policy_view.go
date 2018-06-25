@@ -65,13 +65,13 @@ func (view *PolicyView) ManageObject(obj Base) error {
 	return nil
 }
 
-// CanConsume returns if user has permissions to consume a given bundle.
-// If a user can declare a claim in a given namespace, then he can essentially can consume the bundle
-func (view *PolicyView) CanConsume(bundle *Bundle) (bool, error) {
+// CanConsume returns if user has permissions to consume a given service.
+// If a user can declare a claim in a given namespace, then he can essentially can consume the service
+func (view *PolicyView) CanConsume(service *Service) (bool, error) {
 	obj := &Claim{
 		TypeKind: ClaimObject.GetTypeKind(),
 		Metadata: Metadata{
-			Namespace: bundle.GetNamespace(),
+			Namespace: service.GetNamespace(),
 		},
 	}
 	privilege, err := view.Resolver.GetUserPrivileges(view.User, obj)
@@ -79,7 +79,7 @@ func (view *PolicyView) CanConsume(bundle *Bundle) (bool, error) {
 		return false, err
 	}
 	if !privilege.Manage {
-		return false, fmt.Errorf("user '%s' doesn't have ACL permissions to consume bundle '%s/%s'", view.User.Name, bundle.GetNamespace(), bundle.GetName())
+		return false, fmt.Errorf("user '%s' doesn't have ACL permissions to consume service '%s/%s'", view.User.Name, service.GetNamespace(), service.GetName())
 	}
 	return true, nil
 }
