@@ -496,7 +496,7 @@ function example_run_line() {
 
 function upload_example() {
     log_sub "Uploading example"
-    example_run_line "sam" "twitter-analytics/policy/rules"
+    example_run_line "admin" "twitter-analytics/policy/rules"
     example_run_line "sam" "twitter-analytics/policy/clusters/clusters.yaml.template"
     example_run_line "frank" "twitter-analytics/policy/analytics_pipeline"
     example_run_line "john" "twitter-analytics/policy/twitter_stats"
