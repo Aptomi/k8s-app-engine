@@ -50,18 +50,18 @@ func AppendAllTypes(all ...[]*TypeInfo) []*TypeInfo {
 }
 
 // Append adds specified list of object TypeInfo into the registry
-func (reg *Types) Append(infos ...*TypeInfo) *Types {
+func (types *Types) Append(infos ...*TypeInfo) *Types {
 	for _, info := range infos {
-		reg.validateInfo(info)
-		reg.Kinds[info.Kind] = info
+		types.validateInfo(info)
+		types.Kinds[info.Kind] = info
 	}
 
-	return reg
+	return types
 }
 
 // Get looks up object informational structure given its kind
-func (reg *Types) Get(kind Kind) *TypeInfo {
-	info, exist := reg.Kinds[kind]
+func (types *Types) Get(kind Kind) *TypeInfo {
+	info, exist := types.Kinds[kind]
 	if !exist {
 		panic(fmt.Sprintf("Kind '%s' isn't registered", kind))
 	}
@@ -69,13 +69,13 @@ func (reg *Types) Get(kind Kind) *TypeInfo {
 	return info
 }
 
-func (reg *Types) validateInfo(info *TypeInfo) {
+func (types *Types) validateInfo(info *TypeInfo) {
 	kind := info.Kind
 	if len(kind) == 0 {
 		panic(fmt.Sprintf("Kind can't be empty"))
 	}
 
-	if _, exist := reg.Kinds[kind]; exist {
+	if _, exist := types.Kinds[kind]; exist {
 		panic(fmt.Sprintf("Kind can't be duplicated: %s", kind))
 	}
 

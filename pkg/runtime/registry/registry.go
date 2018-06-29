@@ -9,7 +9,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// Interface represents main object store interface that covers database operations for all objects
+// Interface represents main object registry interface that covers database operations for all objects
 type Interface interface {
 	PolicyRegistry
 	RevisionRegistry

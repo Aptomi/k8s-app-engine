@@ -11,8 +11,8 @@ import (
 )
 
 // GetPolicyData retrieves PolicyData given its generation
-func (ds *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
-	dataObj, err := ds.store.GetGen(engine.PolicyDataKey, gen)
+func (reg *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
+	dataObj, err := reg.store.GetGen(engine.PolicyDataKey, gen)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (ds *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.Policy
 
 // getPolicyFromData() returns Policy converted from PolicyData.
 // if PolicyData is nil, it will return nil
-func (ds *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*lang.Policy, runtime.Generation, error) {
+func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*lang.Policy, runtime.Generation, error) {
 	if policyData == nil {
 		return nil, runtime.LastGen, nil
 	}
@@ -38,7 +38,7 @@ func (ds *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*la
 		for ns, kindNameGen := range policyData.Objects {
 			for kind, nameGen := range kindNameGen {
 				for name, gen := range nameGen {
-					obj, errStore := ds.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
+					obj, errStore := reg.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
 					if errStore != nil {
 						return nil, 0, errStore
 					}
@@ -59,26 +59,26 @@ func (ds *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*la
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
 // if there is no policy yet (Aptomi not initialized), it will return nil
-func (ds *defaultRegistry) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
-	policyData, err := ds.GetPolicyData(gen)
+func (reg *defaultRegistry) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
+	policyData, err := reg.GetPolicyData(gen)
 	if err != nil {
 		return nil, runtime.LastGen, err
 	}
-	return ds.getPolicyFromData(policyData)
+	return reg.getPolicyFromData(policyData)
 }
 
-// UpdatePolicy updates a list of changed objects in the underlying data store
-func (ds *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
+// UpdatePolicy updates a list of changed objects in the underlying data registry
+func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
 	// we should process only a single policy update request at once
-	ds.policyChangeLock.Lock()
-	defer ds.policyChangeLock.Unlock()
+	reg.policyChangeLock.Lock()
+	defer reg.policyChangeLock.Unlock()
 
-	policyData, err := ds.GetPolicyData(runtime.LastGen)
+	policyData, err := reg.GetPolicyData(runtime.LastGen)
 	if err != nil {
 		return false, nil, err
 	}
 	if policyData == nil {
-		panic(fmt.Sprintf("cannot retrieve last policy from the store, policyData is nil"))
+		panic(fmt.Sprintf("cannot retrieve last policy from the registry, policyData is nil"))
 	}
 
 	changed := false
@@ -88,7 +88,7 @@ func (ds *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy 
 		}
 
 		var changedObj bool
-		changedObj, err = ds.store.Save(updatedObj)
+		changedObj, err = reg.store.Save(updatedObj)
 		if err != nil {
 			return false, nil, err
 		}
@@ -104,7 +104,7 @@ func (ds *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy 
 		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
-		_, err = ds.store.Save(policyData)
+		_, err = reg.store.Save(policyData)
 		if err != nil {
 			return false, nil, err
 		}
@@ -114,7 +114,7 @@ func (ds *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy 
 }
 
 // InitPolicy initializes policy (on the first run of Aptomi)
-func (ds *defaultRegistry) InitPolicy() error {
+func (reg *defaultRegistry) InitPolicy() error {
 	// create and save
 	initialPolicyData := &engine.PolicyData{
 		TypeKind: engine.PolicyDataObject.GetTypeKind(),
@@ -127,23 +127,23 @@ func (ds *defaultRegistry) InitPolicy() error {
 	}
 
 	// save policy data
-	_, err := ds.store.Save(initialPolicyData)
+	_, err := reg.store.Save(initialPolicyData)
 	if err != nil {
 		return err
 	}
 
 	// create a new revision as well
-	_, err = ds.NewRevision(initialPolicyData.GetGeneration(), resolve.NewPolicyResolution(), false)
+	_, err = reg.NewRevision(initialPolicyData.GetGeneration(), resolve.NewPolicyResolution(), false)
 	return err
 }
 
 // DeleteFromPolicy deletes provided objects from policy
-func (ds *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
+func (reg *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
 	// we should process only a single policy update request at once
-	ds.policyChangeLock.Lock()
-	defer ds.policyChangeLock.Unlock()
+	reg.policyChangeLock.Lock()
+	defer reg.policyChangeLock.Unlock()
 
-	policyData, err := ds.GetPolicyData(runtime.LastGen)
+	policyData, err := reg.GetPolicyData(runtime.LastGen)
 	if err != nil {
 		return false, nil, err
 	}
@@ -156,7 +156,7 @@ func (ds *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy str
 
 		if !obj.IsDeleted() {
 			obj.SetDeleted(true)
-			_, err = ds.store.Save(obj)
+			_, err = reg.store.Save(obj)
 			if err != nil {
 				return false, nil, fmt.Errorf("error while setting deleted=true for %s: %s", runtime.KeyForStorable(obj), err)
 			}
@@ -168,7 +168,7 @@ func (ds *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy str
 		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
-		_, err = ds.store.Save(policyData)
+		_, err = reg.store.Save(policyData)
 		if err != nil {
 			return false, nil, err
 		}

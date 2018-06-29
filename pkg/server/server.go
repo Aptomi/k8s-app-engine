@@ -74,7 +74,7 @@ func NewServer(cfg *config.Server) *Server {
 func (server *Server) Start() {
 	// Init server
 	server.initProfiling()
-	server.initStore()
+	server.initRegistry()
 	server.initExternalData()
 	server.initPluginRegistryFactory()
 	server.initPolicyOnFirstRun()
@@ -164,7 +164,7 @@ func (server *Server) initProfiling() {
 	}
 }
 
-func (server *Server) initStore() {
+func (server *Server) initRegistry() {
 	//types := runtime.NewTypes().Append(registry.Types...)
 	//b := bolt.NewGenericStore(types)
 	//err := b.Open(server.cfg.DB)
