@@ -1,5 +1,5 @@
-hash: f81186d5bf7910e9405d26bb4126d072ca76cf9a5d8132bdce39eeb1afb0e10a
-updated: 2018-06-19T00:26:40.017871-07:00
+hash: 12e6f9d6bab4d7fb46e17db5b295887aabf4b7e8e72fa9da1f290f45e86cad9a
+updated: 2018-06-28T01:44:00.723949-07:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -15,6 +15,10 @@ imports:
   version: b26d9c308763d68093482582cea63d69be07a0f0
 - name: github.com/coreos/bbolt
   version: 48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d
+- name: github.com/coreos/etcd
+  version: 33245c6b5b49130ca99280408fadfab01aac0e48
+  subpackages:
+  - clientv3
 - name: github.com/d4l3k/messagediff
   version: 29f32d820d112dbd66e58492a6ffb7cc3106312b
 - name: github.com/davecgh/go-spew
