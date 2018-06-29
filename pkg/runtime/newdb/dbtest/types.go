@@ -1,20 +1,20 @@
 package dbtest
 
 import (
-	"github.com/Aptomi/aptomi/pkg/runtime/db"
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 type TestObj struct {
 }
 
-func (*TestObj) GetKind() newdb.Kind {
+func (*TestObj) GetKind() runtime.Kind {
 	return "test"
 }
 
-func (*TestObj) GetKey() newdb.Key {
+func (*TestObj) GetKey() runtime.Key {
 	return "key"
 }
 
-func init() {
-	newdb.RegisterType(&TestObj{})
-}
+//func init() {
+//	newdb.RegisterType(&TestObj{})
+//}
