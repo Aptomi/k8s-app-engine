@@ -2,6 +2,8 @@ package newdb
 
 import (
 	"fmt"
+
+	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 // list of participating values for specific index
@@ -49,7 +51,7 @@ func (indexScope IndexScope) String() string {
 	return indexScopes[indexScope-1]
 }
 
-type IndexValue func(storable Storable) []byte
+type IndexValue func(storable runtime.Storable) []byte
 
 type Index struct {
 	Field string
@@ -57,7 +59,7 @@ type Index struct {
 	Scope IndexScope
 }
 
-func (index *Index) Key(objectKey Key, fieldValue interface{}) string {
+func (index *Index) Key(objectKey runtime.Key, fieldValue interface{}) string {
 	key := index.Scope.String() + "/"
 
 	if len(objectKey) == 0 {

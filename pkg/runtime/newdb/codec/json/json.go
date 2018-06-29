@@ -3,7 +3,7 @@ package json
 import (
 	"encoding/json"
 
-	"github.com/Aptomi/aptomi/pkg/runtime/db"
+	"github.com/Aptomi/aptomi/pkg/runtime/newdb"
 )
 
 var Codec newdb.Codec = &codec{}

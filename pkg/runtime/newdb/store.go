@@ -1,18 +1,22 @@
 package newdb
 
+import (
+	"github.com/Aptomi/aptomi/pkg/runtime"
+)
+
 type Store interface {
 	Close() error
 
-	Save(storable Storable, opts ...SaveOpt) error
-	Find(kind Kind, opts ...FindOpt) Finder
-	Delete(kind Kind, opts ...DeleteOpt) Deleter
+	Save(storable runtime.Storable, opts ...SaveOpt) error
+	Find(kind runtime.Kind, opts ...FindOpt) Finder
+	Delete(kind runtime.Kind, opts ...DeleteOpt) Deleter
 }
 
 // Save
 
 type SaveOpts struct {
 	inPlace   bool
-	forcedGen Generation
+	forcedGen runtime.Generation
 }
 
 type SaveOpt func(opts *SaveOpts)
@@ -20,15 +24,15 @@ type SaveOpt func(opts *SaveOpts)
 // Find
 
 type Finder interface {
-	First(Storable) error
-	Last(Storable) error
-	List([]Storable) error
+	First(runtime.Storable) error
+	Last(runtime.Storable) error
+	List([]runtime.Storable) error
 }
 
 type FindOpts struct {
 	findGen   bool
-	key       Key
-	gen       Generation
+	key       runtime.Key
+	gen       runtime.Generation
 	condition FieldEq
 }
 

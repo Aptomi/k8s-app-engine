@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Aptomi/aptomi/pkg/runtime/db"
+	"github.com/Aptomi/aptomi/pkg/runtime/newdb"
 	etcd "github.com/coreos/etcd/clientv3"
 )
 
@@ -31,7 +31,7 @@ func (d *driver) Config() newdb.Config {
 }
 
 func (d *driver) Store(cfg newdb.Config) (newdb.Store, error) {
-	client, err := etcd.New(etcd.Config{
+	_, err := etcd.New(etcd.Config{
 		Endpoints:   []string{"localhost:2379"},
 		DialTimeout: 5 * time.Second,
 	})
@@ -39,5 +39,5 @@ func (d *driver) Store(cfg newdb.Config) (newdb.Store, error) {
 		return nil, fmt.Errorf("error while creating store using driver %s and config %s: %s", d.Name(), d.Config(), err)
 	}
 
-	return &store{client: client}, nil
+	return nil, nil
 }
