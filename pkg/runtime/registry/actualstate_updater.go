@@ -1,17 +1,25 @@
-package core
+package registry
 
 import (
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
+func (ds *defaultStore) NewActualStateUpdater(actualState *resolve.PolicyResolution) actual.StateUpdater {
+	return &actualStateUpdater{
+		store:       ds.store,
+		actualState: actualState,
+	}
+}
+
 type actualStateUpdater struct {
-	store       store.Generic
+	store       registry.Generic
 	mutex       sync.Mutex
 	actualState *resolve.PolicyResolution
 }

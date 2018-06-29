@@ -1,11 +1,10 @@
-package core
+package registry
 
 import (
 	"sync"
 
 	"github.com/Aptomi/aptomi/pkg/engine/actual"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
 // defaultStore is the generic store implementation that is the glue layer for saving
@@ -16,15 +15,8 @@ type defaultStore struct {
 }
 
 // NewStore returns default implementation of generic store
-func NewStore(store store.Generic) store.Core {
+func NewStore(store store.Generic) store.Interface {
 	return &defaultStore{
 		store: store,
-	}
-}
-
-func (ds *defaultStore) NewActualStateUpdater(actualState *resolve.PolicyResolution) actual.StateUpdater {
-	return &actualStateUpdater{
-		store:       ds.store,
-		actualState: actualState,
 	}
 }

@@ -1,4 +1,4 @@
-package store
+package registry
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine"
@@ -8,5 +8,5 @@ import (
 
 var (
 	// Objects represents list of all storable objects
-	Objects = runtime.AppendAll(engine.Objects, lang.PolicyObjects)
+	Objects = runtime.AppendAllTypes(engine.Objects, lang.PolicyObjects)
 )
