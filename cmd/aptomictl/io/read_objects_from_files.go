@@ -17,7 +17,7 @@ import (
 
 // ReadLangObjects scans the provided files/dirs/stdin, finds Aptomi lang objects, parses and returns them
 func ReadLangObjects(policyPaths []string) ([]runtime.Object, error) {
-	policyTypes := runtime.NewTypes().Append(lang.PolicyObjects...)
+	policyTypes := runtime.NewTypes().Append(lang.PolicyTypes...)
 	codec := codec.NewYAMLCodec(policyTypes)
 
 	if len(policyPaths) == 1 && policyPaths[0] == "-" {

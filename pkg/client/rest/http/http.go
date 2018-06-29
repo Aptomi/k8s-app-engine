@@ -33,7 +33,7 @@ func NewClient(cfg *config.Client) Client {
 	client := &http.Client{
 		Timeout: cfg.HTTP.Timeout,
 	}
-	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewTypes().Append(api.Objects...))
+	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewTypes().Append(api.Types...))
 
 	return &httpClient{contentType: contentTypeHandler, http: client, cfg: cfg}
 }

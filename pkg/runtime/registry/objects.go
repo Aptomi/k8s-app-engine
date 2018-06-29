@@ -8,5 +8,5 @@ import (
 
 var (
 	// Types represents list of all storable objects
-	Types = runtime.AppendAllTypes(engine.Objects, lang.PolicyObjects)
+	Types = runtime.AppendAllTypes(engine.Types, lang.PolicyTypes)
 )

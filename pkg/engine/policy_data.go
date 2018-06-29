@@ -23,7 +23,7 @@ type PolicyData struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         PolicyDataMetadata
 
-	// Objects stores all policy objects in map: namespace -> kind -> name -> generation
+	// Types stores all policy objects in map: namespace -> kind -> name -> generation
 	Objects map[string]map[string]map[string]runtime.Generation
 }
 

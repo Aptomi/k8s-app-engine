@@ -37,7 +37,7 @@ func TestPolicy_AddObjectIdempotent(t *testing.T) {
 	_, policyUpdated := makePolicyWithObjects()
 
 	// add objects from one to another
-	for _, pObjType := range PolicyObjects {
+	for _, pObjType := range PolicyTypes {
 		objects := policy.GetObjectsByKind(pObjType.Kind)
 		for _, obj := range objects {
 			err := policyUpdated.AddObject(obj)
@@ -46,7 +46,7 @@ func TestPolicy_AddObjectIdempotent(t *testing.T) {
 	}
 
 	// after addition, policy should stay the same
-	for _, pObjType := range PolicyObjects {
+	for _, pObjType := range PolicyTypes {
 		objects := policy.GetObjectsByKind(pObjType.Kind)
 		objectsUpdated := policyUpdated.GetObjectsByKind(pObjType.Kind)
 		assert.Equal(t, len(objects), len(objectsUpdated), "Policy should stay the same after calling AddObject() on the existing %s", pObjType.Kind)
@@ -59,7 +59,7 @@ func TestPolicy_RemoveObject(t *testing.T) {
 	_, policyUpdated := makePolicyWithObjects()
 
 	// delete objects from the updated policy
-	for _, pObjType := range PolicyObjects {
+	for _, pObjType := range PolicyTypes {
 		objects := policy.GetObjectsByKind(pObjType.Kind)
 		for _, obj := range objects {
 			assert.True(t, policyUpdated.RemoveObject(obj), "RemoveObject() should return true when removing an existing object")
@@ -67,13 +67,13 @@ func TestPolicy_RemoveObject(t *testing.T) {
 	}
 
 	// after removal, policy should be empty
-	for _, pObjType := range PolicyObjects {
+	for _, pObjType := range PolicyTypes {
 		objectsUpdated := policyUpdated.GetObjectsByKind(pObjType.Kind)
 		assert.Zero(t, len(objectsUpdated), "Policy should contain 0 %s objects after RemoveObject() is called", pObjType.Kind)
 	}
 
 	// try to delete objects once again from the empty policy
-	for _, pObjType := range PolicyObjects {
+	for _, pObjType := range PolicyTypes {
 		objects := policy.GetObjectsByKind(pObjType.Kind)
 		for _, obj := range objects {
 			assert.False(t, policyUpdated.RemoveObject(obj), "RemoveObject() should return false when removing a non-existing object")
