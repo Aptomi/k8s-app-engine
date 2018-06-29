@@ -19,6 +19,8 @@ type Storable interface {
 }
 
 type Interface interface {
+	// todo add Close()
+
 	Save(storable Storable, opts ...SaveOpt) error
 	Find(kind Kind, opts ...FindOpt) Finder
 	Delete(kind Kind, opts ...DeleteOpt) Deleter
@@ -36,9 +38,9 @@ type SaveOpt func(opts *SaveOpts)
 // Find
 
 type Finder interface {
-	First() (Storable, error)
-	Last() (Storable, error)
-	List() ([]Storable, error)
+	First(Storable) error
+	Last(Storable) error
+	List([]Storable) error
 }
 
 type FindOpts struct {
