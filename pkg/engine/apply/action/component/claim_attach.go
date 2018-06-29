@@ -7,19 +7,11 @@ import (
 
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// AttachClaimActionObject is an informational data structure with Kind and Constructor for the action
-var AttachClaimActionObject = &runtime.TypeInfo{
-	Kind:        "action-component-claim-attach",
-	Constructor: func() runtime.Object { return &AttachClaimAction{} },
-}
-
 // AttachClaimAction is a action which gets called when a consumer is added to an existing component
 type AttachClaimAction struct {
-	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 	ClaimKey     string
@@ -29,8 +21,7 @@ type AttachClaimAction struct {
 // NewAttachClaimAction creates new AttachClaimAction
 func NewAttachClaimAction(componentKey string, claimKey string, depth int) *AttachClaimAction {
 	return &AttachClaimAction{
-		TypeKind:     AttachClaimActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(AttachClaimActionObject.Kind, componentKey, claimKey),
+		Metadata:     action.NewMetadata("action-component-claim-attach", componentKey, claimKey),
 		ComponentKey: componentKey,
 		ClaimKey:     claimKey,
 		Depth:        depth,

@@ -7,19 +7,11 @@ import (
 
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// DetachClaimActionObject is an informational data structure with Kind and Constructor for the action
-var DetachClaimActionObject = &runtime.TypeInfo{
-	Kind:        "action-component-claim-detach",
-	Constructor: func() runtime.Object { return &DetachClaimAction{} },
-}
-
 // DetachClaimAction is a action which gets called when a consumer is removed from an existing component
 type DetachClaimAction struct {
-	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 	ClaimKey     string
@@ -28,7 +20,7 @@ type DetachClaimAction struct {
 // NewDetachClaimAction creates new DetachClaimAction
 func NewDetachClaimAction(componentKey string, claimKey string) *DetachClaimAction {
 	return &DetachClaimAction{
-		Metadata:     action.NewMetadata(DetachClaimActionObject.Kind, componentKey, claimKey),
+		Metadata:     action.NewMetadata("action-component-claim-detach", componentKey, claimKey),
 		ComponentKey: componentKey,
 		ClaimKey:     claimKey,
 	}

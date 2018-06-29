@@ -9,19 +9,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// EndpointsActionObject is an informational data structure with Kind and Constructor for the action
-var EndpointsActionObject = &runtime.TypeInfo{
-	Kind:        "action-component-endpoints",
-	Constructor: func() runtime.Object { return &EndpointsAction{} },
-}
-
 // EndpointsAction is a action which gets called when a new component changed (created or updated) and endpoints should be updated
 type EndpointsAction struct {
-	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 }
@@ -29,8 +21,7 @@ type EndpointsAction struct {
 // NewEndpointsAction creates new EndpointsAction
 func NewEndpointsAction(componentKey string) *EndpointsAction {
 	return &EndpointsAction{
-		TypeKind:     EndpointsActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(EndpointsActionObject.Kind, componentKey),
+		Metadata:     action.NewMetadata("action-component-endpoints", componentKey),
 		ComponentKey: componentKey,
 	}
 }
