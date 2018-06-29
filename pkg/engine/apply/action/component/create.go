@@ -9,19 +9,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// CreateActionObject is an informational data structure with Kind and Constructor for the action
-var CreateActionObject = &runtime.TypeInfo{
-	Kind:        "action-component-create",
-	Constructor: func() runtime.Object { return &CreateAction{} },
-}
-
 // CreateAction is a action which gets called when a new component needs to be instantiated (i.e. new instance of code to be deployed to the cloud)
 type CreateAction struct {
-	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 	Params       util.NestedParameterMap
@@ -30,8 +22,7 @@ type CreateAction struct {
 // NewCreateAction creates new CreateAction
 func NewCreateAction(componentKey string, params util.NestedParameterMap) *CreateAction {
 	return &CreateAction{
-		TypeKind:     CreateActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(CreateActionObject.Kind, componentKey),
+		Metadata:     action.NewMetadata("action-component-create", componentKey),
 		ComponentKey: componentKey,
 		Params:       params,
 	}

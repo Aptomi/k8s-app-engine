@@ -9,19 +9,11 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/plugin"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// DeleteActionObject is an informational data structure with Kind and Constructor for the action
-var DeleteActionObject = &runtime.TypeInfo{
-	Kind:        "action-component-delete",
-	Constructor: func() runtime.Object { return &DeleteAction{} },
-}
-
 // DeleteAction is a action which gets called when an existing component needs to be destroyed (i.e. existing instance of code needs to be terminated in the cloud)
 type DeleteAction struct {
-	runtime.TypeKind `yaml:",inline"`
 	*action.Metadata
 	ComponentKey string
 	Params       util.NestedParameterMap
@@ -30,8 +22,7 @@ type DeleteAction struct {
 // NewDeleteAction creates new DeleteAction
 func NewDeleteAction(componentKey string, params util.NestedParameterMap) *DeleteAction {
 	return &DeleteAction{
-		TypeKind:     DeleteActionObject.GetTypeKind(),
-		Metadata:     action.NewMetadata(DeleteActionObject.Kind, componentKey),
+		Metadata:     action.NewMetadata("action-component-delete", componentKey),
 		ComponentKey: componentKey,
 		Params:       params,
 	}

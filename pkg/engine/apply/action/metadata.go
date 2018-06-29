@@ -8,6 +8,7 @@ import (
 
 // Metadata is an object metadata for all state update actions
 type Metadata struct {
+	Kind string
 	Name string
 }
 
@@ -16,18 +17,19 @@ func NewMetadata(kind string, keys ...string) *Metadata {
 	keysStr := strings.Join(keys, runtime.KeySeparator)
 	name := strings.Join([]string{kind, keysStr}, runtime.KeySeparator)
 	return &Metadata{
+		Kind: kind,
 		Name: name,
 	}
+}
+
+// GetKind return an action kind
+func (meta *Metadata) GetKind() string {
+	return meta.Kind
 }
 
 // GetName returns an action name
 func (meta *Metadata) GetName() string {
 	return meta.Name
-}
-
-// GetNamespace returns a namespace for an action (it's always a system namespace)
-func (meta *Metadata) GetNamespace() string {
-	return runtime.SystemNS
 }
 
 func (meta *Metadata) String() string {
