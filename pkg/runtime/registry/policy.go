@@ -12,18 +12,17 @@ import (
 
 // GetPolicyData retrieves PolicyData given its generation
 func (reg *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
-	dataObj, err := reg.store.GetGen(engine.PolicyDataKey, gen)
+	var policyData *engine.PolicyData
+	// todo add WithKey (thing about replacing with some flag in Info) and WithGen(gen)
+	err := reg.store.Find(engine.PolicyDataObject.Kind).Last(policyData)
 	if err != nil {
 		return nil, err
 	}
-	if dataObj == nil {
+	if policyData == nil {
 		return nil, nil
 	}
-	data, ok := dataObj.(*engine.PolicyData)
-	if !ok {
-		return nil, fmt.Errorf("unexpected type while getting PolicyData from DB")
-	}
-	return data, nil
+
+	return policyData, nil
 }
 
 // getPolicyFromData() returns Policy converted from PolicyData.
@@ -35,17 +34,17 @@ func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*l
 
 	policy := lang.NewPolicy()
 	if policyData.Objects != nil {
-		for ns, kindNameGen := range policyData.Objects {
+		for _ /*ns*/, kindNameGen := range policyData.Objects {
 			for kind, nameGen := range kindNameGen {
-				for name, gen := range nameGen {
-					obj, errStore := reg.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
+				for range /*name, gen := */ nameGen {
+					var langObj lang.Base
+					//obj, errStore := reg.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
+					// todo add WithKey and WithGen
+					errStore := reg.store.Find(kind).Last(langObj)
 					if errStore != nil {
 						return nil, 0, errStore
 					}
-					langObj, ok := obj.(lang.Base)
-					if !ok {
-						return nil, 0, fmt.Errorf("can't cast obj %s to lang.Base", runtime.KeyForStorable(obj))
-					}
+
 					errPolicy := policy.AddObject(langObj)
 					if errPolicy != nil {
 						return nil, runtime.LastGen, errPolicy
@@ -88,7 +87,8 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 		}
 
 		var changedObj bool
-		changedObj, err = reg.store.Save(updatedObj)
+		// todo think about changedObj flag - should we do it in db layer?
+		err = reg.store.Save(updatedObj)
 		if err != nil {
 			return false, nil, err
 		}
@@ -104,7 +104,7 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
-		_, err = reg.store.Save(policyData)
+		err = reg.store.Save(policyData)
 		if err != nil {
 			return false, nil, err
 		}
@@ -127,7 +127,7 @@ func (reg *defaultRegistry) InitPolicy() error {
 	}
 
 	// save policy data
-	_, err := reg.store.Save(initialPolicyData)
+	err := reg.store.Save(initialPolicyData)
 	if err != nil {
 		return err
 	}
@@ -156,7 +156,7 @@ func (reg *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy st
 
 		if !obj.IsDeleted() {
 			obj.SetDeleted(true)
-			_, err = reg.store.Save(obj)
+			err = reg.store.Save(obj)
 			if err != nil {
 				return false, nil, fmt.Errorf("error while setting deleted=true for %s: %s", runtime.KeyForStorable(obj), err)
 			}
@@ -168,7 +168,7 @@ func (reg *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy st
 		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
-		_, err = reg.store.Save(policyData)
+		err = reg.store.Save(policyData)
 		if err != nil {
 			return false, nil, err
 		}

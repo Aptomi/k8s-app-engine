@@ -4,22 +4,21 @@ import (
 	"fmt"
 
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
-	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
 func (reg *defaultRegistry) GetActualState() (*resolve.PolicyResolution, error) {
 	actualState := resolve.NewPolicyResolution()
 
-	instances, err := reg.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
+	//instances, err := reg.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
+	var instances []*resolve.ComponentInstance
+	err := reg.store.Find(resolve.ComponentInstanceObject.Kind).List(&instances)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting all component instances: %s", err)
 	}
 
-	for _, instanceObj := range instances {
-		if instance, ok := instanceObj.(*resolve.ComponentInstance); ok {
-			key := instance.GetKey()
-			actualState.ComponentInstanceMap[key] = instance
-		}
+	for _, instance := range instances {
+		key := instance.GetKey()
+		actualState.ComponentInstanceMap[key] = instance
 	}
 
 	return actualState, nil
