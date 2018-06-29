@@ -13,11 +13,11 @@ type userClient struct {
 
 func (client *userClient) Login(username, password string) (*api.AuthSuccess, error) {
 	authReq := &api.AuthRequest{
-		TypeKind: api.AuthRequestObject.GetTypeKind(),
+		TypeKind: api.AuthRequestType.GetTypeKind(),
 		Username: username,
 		Password: password,
 	}
-	authSuccess, err := client.httpClient.POST("/user/login", api.AuthSuccessObject, authReq)
+	authSuccess, err := client.httpClient.POST("/user/login", api.AuthSuccessType, authReq)
 	if err != nil {
 		return nil, err
 	}

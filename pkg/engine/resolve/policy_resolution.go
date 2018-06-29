@@ -139,7 +139,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		}
 
 		// verify that bundle exists
-		bundleObj, err := policy.GetObject(lang.BundleObject.Kind, componentKey.BundleName, componentKey.Namespace)
+		bundleObj, err := policy.GetObject(lang.BundleType.Kind, componentKey.BundleName, componentKey.Namespace)
 		if bundleObj == nil || err != nil {
 			// component instance points to non-existing bundle, meaning this component instance is now orphan
 			return fmt.Errorf("bundle '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.BundleName, componentKey.GetKey())

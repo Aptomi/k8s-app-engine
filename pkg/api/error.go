@@ -2,8 +2,8 @@ package api
 
 import "github.com/Aptomi/aptomi/pkg/runtime"
 
-// ServerErrorObject contains Info for the Error type
-var ServerErrorObject = &runtime.Info{
+// ServerErrorObject contains TypeInfo for the Error type
+var ServerErrorObject = &runtime.TypeInfo{
 	Kind:        "error",
 	Constructor: func() runtime.Object { return &ServerError{} },
 }

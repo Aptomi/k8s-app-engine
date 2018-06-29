@@ -12,7 +12,7 @@ import (
 )
 
 // AttachClaimActionObject is an informational data structure with Kind and Constructor for the action
-var AttachClaimActionObject = &runtime.Info{
+var AttachClaimActionObject = &runtime.TypeInfo{
 	Kind:        "action-component-claim-attach",
 	Constructor: func() runtime.Object { return &AttachClaimAction{} },
 }

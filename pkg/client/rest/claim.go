@@ -23,7 +23,7 @@ func (client *claimClient) Status(claims []*lang.Claim, queryFlag api.ClaimQuery
 		claimIds = append(claimIds, claim.GetNamespace()+"^"+claim.GetName())
 	}
 
-	response, err := client.httpClient.GET(fmt.Sprintf("/policy/claim/status/%s/%s", queryFlag, strings.Join(claimIds, ",")), api.ClaimsStatusObject)
+	response, err := client.httpClient.GET(fmt.Sprintf("/policy/claim/status/%s/%s", queryFlag, strings.Join(claimIds, ",")), api.ClaimsStatusType)
 	if err != nil {
 		return nil, err
 	}

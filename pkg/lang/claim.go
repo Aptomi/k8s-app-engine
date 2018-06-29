@@ -4,8 +4,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// ClaimObject is an informational data structure with Kind and Constructor for Claim
-var ClaimObject = &runtime.Info{
+// ClaimType is an informational data structure with Kind and Constructor for Claim
+var ClaimType = &runtime.TypeInfo{
 	Kind:        "claim",
 	Storable:    true,
 	Versioned:   true,

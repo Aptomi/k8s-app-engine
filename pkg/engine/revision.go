@@ -8,8 +8,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// RevisionObject is Info for Revision
-var RevisionObject = &runtime.Info{
+// RevisionObject is TypeInfo for Revision
+var RevisionObject = &runtime.TypeInfo{
 	Kind:        "revision",
 	Storable:    true,
 	Versioned:   true,

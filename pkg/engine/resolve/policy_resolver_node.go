@@ -205,7 +205,7 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 
 // Helper to get a matched bundle
 func (node *resolutionNode) getMatchedBundle(policy *lang.Policy) (*lang.Bundle, error) {
-	bundleObj, err := policy.GetObject(lang.BundleObject.Kind, node.context.Allocation.Bundle, node.namespace)
+	bundleObj, err := policy.GetObject(lang.BundleType.Kind, node.context.Allocation.Bundle, node.namespace)
 	if bundleObj == nil || err != nil {
 		panic(fmt.Sprintf("Can't get bundle '%s/%s': %s", node.namespace, node.context.Allocation.Bundle, err))
 	}

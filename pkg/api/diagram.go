@@ -173,7 +173,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 	}
 
 	var desiredState *resolve.PolicyResolution
-	if kind == lang.ClaimObject.Kind {
+	if kind == lang.ClaimType.Kind {
 		// load revision
 		revision, err := api.store.GetLastRevisionForPolicy(policyGen)
 		if err != nil {

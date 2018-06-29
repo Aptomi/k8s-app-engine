@@ -59,7 +59,7 @@ func (builder *PolicyBuilder) SwitchNamespace(namespace string) {
 // AddClaim creates a new claim and adds it to the policy
 func (builder *PolicyBuilder) AddClaim(user *lang.User, service *lang.Service) *lang.Claim {
 	result := &lang.Claim{
-		TypeKind: lang.ClaimObject.GetTypeKind(),
+		TypeKind: lang.ClaimType.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -97,7 +97,7 @@ func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
 // AddBundle creates a new bundle and adds it to the policy
 func (builder *PolicyBuilder) AddBundle() *lang.Bundle {
 	result := &lang.Bundle{
-		TypeKind: lang.BundleObject.GetTypeKind(),
+		TypeKind: lang.BundleType.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),

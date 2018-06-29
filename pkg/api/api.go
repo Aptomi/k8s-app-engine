@@ -15,7 +15,7 @@ import (
 
 type coreAPI struct {
 	contentType                  *codec.ContentTypeHandler
-	store                        store.Core
+	store                        registry.Interface
 	externalData                 *external.Data
 	pluginRegistryFactory        plugin.RegistryFactory
 	secret                       string
@@ -25,8 +25,8 @@ type coreAPI struct {
 }
 
 // Serve initializes everything needed by REST API and registers all API endpoints in the provided http router
-func Serve(router *httprouter.Router, store store.Core, externalData *external.Data, pluginRegistryFactory plugin.RegistryFactory, secret string, logLevel logrus.Level, runDesiredStateEnforcement chan bool) {
-	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(Objects...))
+func Serve(router *httprouter.Router, store registry.Interface, externalData *external.Data, pluginRegistryFactory plugin.RegistryFactory, secret string, logLevel logrus.Level, runDesiredStateEnforcement chan bool) {
+	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewTypes().Append(Objects...))
 	api := &coreAPI{
 		contentType:                contentTypeHandler,
 		store:                      store,

@@ -13,8 +13,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// AuthSuccessObject contains Info for the AuthSuccess type
-var AuthSuccessObject = &runtime.Info{
+// AuthSuccessType contains TypeInfo for the AuthSuccess type
+var AuthSuccessType = &runtime.TypeInfo{
 	Kind:        "auth-success",
 	Constructor: func() runtime.Object { return &AuthSuccess{} },
 }
@@ -25,8 +25,8 @@ type AuthSuccess struct {
 	Token            string
 }
 
-// AuthRequestObject contains Info for the AuthRequest type
-var AuthRequestObject = &runtime.Info{
+// AuthRequestType contains TypeInfo for the AuthRequest type
+var AuthRequestType = &runtime.TypeInfo{
 	Kind:        "auth-request",
 	Constructor: func() runtime.Object { return &AuthRequest{} },
 }
@@ -50,7 +50,7 @@ func (api *coreAPI) handleLogin(writer http.ResponseWriter, request *http.Reques
 		api.contentType.WriteOne(writer, request, serverErr)
 	} else {
 		api.contentType.WriteOne(writer, request, &AuthSuccess{
-			TypeKind: AuthSuccessObject.GetTypeKind(),
+			TypeKind: AuthSuccessType.GetTypeKind(),
 			Token:    api.newToken(user),
 		})
 	}

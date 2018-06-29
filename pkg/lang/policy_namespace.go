@@ -34,7 +34,7 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 
 func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	switch kind := obj.GetKind(); kind {
-	case BundleObject.Kind:
+	case BundleType.Kind:
 		policyNamespace.Bundles[obj.GetName()] = obj.(*Bundle) // nolint: errcheck
 	case ServiceObject.Kind:
 		policyNamespace.Services[obj.GetName()] = obj.(*Service) // nolint: errcheck
@@ -63,7 +63,7 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 		policyNamespace.Rules[obj.GetName()] = obj.(*Rule) // nolint: errcheck
 	case ACLRuleObject.Kind:
 		policyNamespace.ACLRules[obj.GetName()] = obj.(*ACLRule) // nolint: errcheck
-	case ClaimObject.Kind:
+	case ClaimType.Kind:
 		policyNamespace.Claims[obj.GetName()] = obj.(*Claim) // nolint: errcheck
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
@@ -73,7 +73,7 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 
 func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 	switch kind := obj.GetKind(); kind {
-	case BundleObject.Kind:
+	case BundleType.Kind:
 		if _, exist := policyNamespace.Bundles[obj.GetName()]; exist {
 			delete(policyNamespace.Bundles, obj.GetName())
 			return true
@@ -98,7 +98,7 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 			delete(policyNamespace.ACLRules, obj.GetName())
 			return true
 		}
-	case ClaimObject.Kind:
+	case ClaimType.Kind:
 		if _, exist := policyNamespace.Claims[obj.GetName()]; exist {
 			delete(policyNamespace.Claims, obj.GetName())
 			return true
@@ -111,7 +111,7 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 	var result []Base
 	switch kind {
-	case BundleObject.Kind:
+	case BundleType.Kind:
 		for _, bundle := range policyNamespace.Bundles {
 			result = append(result, bundle)
 		}
@@ -131,7 +131,7 @@ func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 		for _, rule := range policyNamespace.ACLRules {
 			result = append(result, rule)
 		}
-	case ClaimObject.Kind:
+	case ClaimType.Kind:
 		for _, claim := range policyNamespace.Claims {
 			result = append(result, claim)
 		}
@@ -145,7 +145,7 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 	var ok bool
 	var result Base
 	switch kind {
-	case BundleObject.Kind:
+	case BundleType.Kind:
 		if result, ok = policyNamespace.Bundles[name]; !ok {
 			return nil, nil
 		}
@@ -165,7 +165,7 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 		if result, ok = policyNamespace.ACLRules[name]; !ok {
 			return nil, nil
 		}
-	case ClaimObject.Kind:
+	case ClaimType.Kind:
 		if result, ok = policyNamespace.Claims[name]; !ok {
 			return nil, nil
 		}

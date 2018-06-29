@@ -22,7 +22,7 @@ var ClaimResolutionCfgDefault = &ClaimResolutionCfg{
 // which checking that instances exist (e.g. in actual state)
 func (b *GraphBuilder) ClaimResolutionWithFunc(cfg *ClaimResolutionCfg, exists func(*resolve.ComponentInstance) bool) *Graph {
 	// trace all claims
-	for _, claimObj := range b.policy.GetObjectsByKind(lang.ClaimObject.Kind) {
+	for _, claimObj := range b.policy.GetObjectsByKind(lang.ClaimType.Kind) {
 		claim := claimObj.(*lang.Claim) // nolint: errcheck
 		b.traceClaimResolution("", claim, nil, 0, cfg, exists)
 	}
@@ -80,7 +80,7 @@ func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, la
 			ctrNode := serviceNode{service: service}
 
 			// then create a bundle instance node
-			bundleObj, errBundle := b.policy.GetObject(lang.BundleObject.Kind, instanceCurrent.Metadata.Key.BundleName, instanceCurrent.Metadata.Key.Namespace)
+			bundleObj, errBundle := b.policy.GetObject(lang.BundleType.Kind, instanceCurrent.Metadata.Key.BundleName, instanceCurrent.Metadata.Key.Namespace)
 			if errBundle != nil {
 				b.graph.addNode(errorNode{err: errBundle}, level)
 				continue

@@ -8,7 +8,7 @@ import (
 )
 
 // DesiredStateObject is an informational data structure with Kind and Constructor for DesiredState
-var DesiredStateObject = &runtime.Info{
+var DesiredStateObject = &runtime.TypeInfo{
 	Kind:        "desired-state",
 	Storable:    true,
 	Versioned:   false,

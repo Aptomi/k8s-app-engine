@@ -14,7 +14,7 @@ import (
 )
 
 // DeleteActionObject is an informational data structure with Kind and Constructor for the action
-var DeleteActionObject = &runtime.Info{
+var DeleteActionObject = &runtime.TypeInfo{
 	Kind:        "action-component-delete",
 	Constructor: func() runtime.Object { return &DeleteAction{} },
 }
@@ -76,7 +76,7 @@ func (a *DeleteAction) processDeployment(context *action.Context) (*resolve.Comp
 		panic(fmt.Sprintf("component instance not found in actual state: %s", a.ComponentKey))
 	}
 
-	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleObject.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, err
 	}

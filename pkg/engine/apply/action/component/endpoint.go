@@ -14,7 +14,7 @@ import (
 )
 
 // EndpointsActionObject is an informational data structure with Kind and Constructor for the action
-var EndpointsActionObject = &runtime.Info{
+var EndpointsActionObject = &runtime.TypeInfo{
 	Kind:        "action-component-endpoints",
 	Constructor: func() runtime.Object { return &EndpointsAction{} },
 }
@@ -77,7 +77,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)
 	}
 
-	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleObject.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 // PolicyDataObject is an informational data structure with Kind and Constructor for PolicyData
-var PolicyDataObject = &runtime.Info{
+var PolicyDataObject = &runtime.TypeInfo{
 	Kind:        "policy",
 	Storable:    true,
 	Versioned:   true,

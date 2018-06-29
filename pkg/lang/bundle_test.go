@@ -56,7 +56,7 @@ func checkTopologicalSort(t *testing.T, bundle *Bundle, expectedComponents []str
 
 func makeNormalBundle() *Bundle {
 	return &Bundle{
-		TypeKind: BundleObject.GetTypeKind(),
+		TypeKind: BundleType.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "normal",
@@ -84,7 +84,7 @@ func makeNormalBundle() *Bundle {
 
 func makeCyclicBundle() *Bundle {
 	return &Bundle{
-		TypeKind: BundleObject.GetTypeKind(),
+		TypeKind: BundleType.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "badcomponentclaim",
@@ -112,7 +112,7 @@ func makeCyclicBundle() *Bundle {
 
 func makeBadComponentClaimBundle() *Bundle {
 	return &Bundle{
-		TypeKind: BundleObject.GetTypeKind(),
+		TypeKind: BundleType.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "cyclic",

@@ -117,12 +117,12 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 	// Get key to a component
 	cluster := desired.policy().GetObjectsByKind(lang.ClusterObject.Kind)[0].(*lang.Cluster) // nolint: errcheck
 	service := desired.policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service) // nolint: errcheck
-	bundle := desired.policy().GetObjectsByKind(lang.BundleObject.Kind)[0].(*lang.Bundle)    // nolint: errcheck
+	bundle := desired.policy().GetObjectsByKind(lang.BundleType.Kind)[0].(*lang.Bundle)      // nolint: errcheck
 	key := resolve.NewComponentInstanceKey(cluster, "k8ns", service, service.Contexts[0], nil, bundle, bundle.Components[0])
 	keyBundle := key.GetParentBundleKey()
 
 	// Check that original claim was resolved successfully
-	claim := desired.policy().GetObjectsByKind(lang.ClaimObject.Kind)[0].(*lang.Claim) // nolint: errcheck
+	claim := desired.policy().GetObjectsByKind(lang.ClaimType.Kind)[0].(*lang.Claim) // nolint: errcheck
 	assert.True(t, desired.resolution().GetClaimResolution(claim).Resolved, "Original claim should be resolved successfully")
 
 	// Check creation/update times
@@ -177,7 +177,7 @@ func TestDiffHasUpdatedComponentsAndCheckTimes(t *testing.T) {
 
 	// Update labels, re-evaluate and see that component instance has changed
 	desiredNextAfterUpdate := newTestData(t, desiredNext.pBuilder)
-	for _, claim := range desiredNextAfterUpdate.policy().GetObjectsByKind(lang.ClaimObject.Kind) {
+	for _, claim := range desiredNextAfterUpdate.policy().GetObjectsByKind(lang.ClaimType.Kind) {
 		claim.(*lang.Claim).Labels["param"] = "value2"
 	}
 
@@ -322,7 +322,7 @@ func resolvePolicy(t *testing.T, b *builder.PolicyBuilder) *resolve.PolicyResolu
 	resolver := resolve.NewPolicyResolver(b.Policy(), b.External(), eventLog)
 	result := resolver.ResolveAllClaims()
 
-	claims := b.Policy().GetObjectsByKind(lang.ClaimObject.Kind)
+	claims := b.Policy().GetObjectsByKind(lang.ClaimType.Kind)
 	for _, claim := range claims {
 		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)

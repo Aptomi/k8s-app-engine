@@ -4,10 +4,10 @@ import "github.com/Aptomi/aptomi/pkg/runtime"
 
 var (
 	// PolicyObjects is the list of informational data for all policy objects
-	PolicyObjects = []*runtime.Info{
-		BundleObject,
+	PolicyObjects = []*runtime.TypeInfo{
+		BundleType,
 		ServiceObject,
-		ClaimObject,
+		ClaimType,
 		ClusterObject,
 		RuleObject,
 		ACLRuleObject,

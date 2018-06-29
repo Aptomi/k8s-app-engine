@@ -124,10 +124,10 @@ func (gen *PolicyGenerator) makePolicyAndExternalData() (*lang.Policy, *external
 	)
 
 	fmt.Printf("Generated policy. Bundles = %d (max chain %d), Contexts = %d, Claims = %d, Users = %d\n",
-		len(gen.policy.GetObjectsByKind(lang.BundleObject.Kind)),
+		len(gen.policy.GetObjectsByKind(lang.BundleType.Kind)),
 		maxChainLen,
 		len(gen.policy.GetObjectsByKind(lang.ServiceObject.Kind))*gen.contextsPerService,
-		len(gen.policy.GetObjectsByKind(lang.ClaimObject.Kind)),
+		len(gen.policy.GetObjectsByKind(lang.ClaimType.Kind)),
 		len(gen.externalData.UserLoader.LoadUsersAll().Users),
 	)
 
@@ -191,10 +191,10 @@ func (gen *PolicyGenerator) makeBundles() int {
 }
 
 func (gen *PolicyGenerator) makeBundle() *lang.Bundle {
-	id := len(gen.policy.GetObjectsByKind(lang.BundleObject.Kind))
+	id := len(gen.policy.GetObjectsByKind(lang.BundleType.Kind))
 
 	bundle := &lang.Bundle{
-		TypeKind: lang.BundleObject.GetTypeKind(),
+		TypeKind: lang.BundleType.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: "main",
 			Name:      "bundle-" + strconv.Itoa(id),
@@ -313,7 +313,7 @@ func (gen *PolicyGenerator) makeServices() {
 func (gen *PolicyGenerator) makeClaims() {
 	for i := 0; i < gen.claims; i++ {
 		claim := &lang.Claim{
-			TypeKind: lang.ClaimObject.GetTypeKind(),
+			TypeKind: lang.ClaimType.GetTypeKind(),
 			Metadata: lang.Metadata{
 				Namespace: "main",
 				Name:      "claim-" + strconv.Itoa(i),
@@ -418,10 +418,10 @@ func RunEngine(b *testing.B, testName string, desiredPolicy *lang.Policy, extern
 	actualState = applyAndCheckBenchmark(b, applier, action.ApplyResult{Success: applier.actionPlan.NumberOfActions(), Failed: 0, Skipped: 0})
 
 	timeCheckpoint := time.Now()
-	fmt.Printf("[%s] Time = %s, resolving %d claims and %d component instances\n", testName, time.Since(timeStart).String(), len(desiredPolicy.GetObjectsByKind(lang.ClaimObject.Kind)), len(actualState.ComponentInstanceMap))
+	fmt.Printf("[%s] Time = %s, resolving %d claims and %d component instances\n", testName, time.Since(timeStart).String(), len(desiredPolicy.GetObjectsByKind(lang.ClaimType.Kind)), len(actualState.ComponentInstanceMap))
 
 	// now, remove all claims and apply actions
-	for _, claim := range desiredPolicy.GetObjectsByKind(lang.ClaimObject.Kind) {
+	for _, claim := range desiredPolicy.GetObjectsByKind(lang.ClaimType.Kind) {
 		desiredPolicy.RemoveObject(claim)
 	}
 	desiredState = resolvePolicyBenchmark(b, desiredPolicy, externalData, false)
@@ -468,7 +468,7 @@ func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *ext
 	result := resolver.ResolveAllClaims()
 	t := &testing.T{}
 
-	claims := policy.GetObjectsByKind(lang.ClaimObject.Kind)
+	claims := policy.GetObjectsByKind(lang.ClaimType.Kind)
 	for _, claim := range claims {
 		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)

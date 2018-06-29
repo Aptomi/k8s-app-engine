@@ -23,6 +23,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/k8s"
 	"github.com/Aptomi/aptomi/pkg/plugin/k8sraw"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/registry"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
@@ -43,7 +44,7 @@ type Server struct {
 	backgroundErrors chan string
 
 	externalData *external.Data
-	store        store.Core
+	store        registry.Interface
 
 	httpServer *http.Server
 
@@ -167,8 +168,8 @@ func (server *Server) initProfiling() {
 }
 
 func (server *Server) initStore() {
-	registry := runtime.NewRegistry().Append(store.Objects...)
-	b := bolt.NewGenericStore(registry)
+	types := runtime.NewTypes().Append(registry.Types...)
+	b := bolt.NewGenericStore(types)
 	err := b.Open(server.cfg.DB)
 	if err != nil {
 		panic(fmt.Sprintf("Can't open object store: %s", err))

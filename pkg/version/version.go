@@ -19,7 +19,7 @@ func GetBuildInfo() *BuildInfo {
 }
 
 // BuildInfoObject is an informational data structure with Kind and Constructor for Version
-var BuildInfoObject = &runtime.Info{
+var BuildInfoObject = &runtime.TypeInfo{
 	Kind:        "version",
 	Constructor: func() runtime.Object { return &BuildInfo{} },
 }

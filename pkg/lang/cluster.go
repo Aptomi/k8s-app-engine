@@ -8,7 +8,7 @@ import (
 )
 
 // ClusterObject is an informational data structure with Kind and Constructor for Cluster
-var ClusterObject = &runtime.Info{
+var ClusterObject = &runtime.TypeInfo{
 	Kind:        "cluster",
 	Storable:    true,
 	Versioned:   true,
