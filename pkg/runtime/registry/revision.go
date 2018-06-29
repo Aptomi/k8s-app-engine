@@ -61,8 +61,7 @@ func (reg *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution
 
 // UpdateRevision updates specified Revision in the registry without creating new generation
 func (reg *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
-	// todo add WithInPlace
-	err := reg.store.Save(revision)
+	err := reg.store.Save(revision, store.WithReplace())
 	if err != nil {
 		return fmt.Errorf("error while updating revision: %s", err)
 	}
