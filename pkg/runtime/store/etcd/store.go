@@ -7,14 +7,16 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	etcd "github.com/coreos/etcd/clientv3"
+	etcdconc "github.com/coreos/etcd/clientv3/concurrency"
 )
 
 type etcdStore struct {
 	client *etcd.Client
+	types  *runtime.Types
 	codec  store.Codec
 }
 
-func New( /* todo config */ codec store.Codec) (store.Interface, error) {
+func New( /* todo config */ types *runtime.Types, codec store.Codec) (store.Interface, error) {
 	client, err := etcd.New(etcd.Config{
 		Endpoints:   []string{"localhost:2379"},
 		DialTimeout: 5 * time.Second,
@@ -27,6 +29,7 @@ func New( /* todo config */ codec store.Codec) (store.Interface, error) {
 
 	return &etcdStore{
 		client: client,
+		types:  types,
 		codec:  codec,
 	}, nil
 }
@@ -37,8 +40,20 @@ func (s *etcdStore) Close() error {
 
 // todo need to rework keys to not include kind or to start with kind at least
 
-func (s *etcdStore) Save(storable runtime.Storable, opts ...store.SaveOpt) error {
-	panic("implement me")
+func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
+	_ = s.types.Get(newStorable.GetKind())
+
+	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
+		data, cErr := s.codec.Marshal(newStorable)
+		if cErr != nil {
+			return cErr
+		}
+		stm.Put(runtime.KeyForStorable(newStorable), string(data))
+
+		return nil
+	})
+
+	return err
 }
 
 func (s *etcdStore) Find(kind runtime.Kind, opts ...store.FindOpt) store.Finder {
