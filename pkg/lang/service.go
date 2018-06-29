@@ -7,7 +7,7 @@ import (
 )
 
 // ServiceObject is an informational data structure with Kind and Constructor for Service
-var ServiceObject = &runtime.Info{
+var ServiceObject = &runtime.TypeInfo{
 	Kind:        "service",
 	Storable:    true,
 	Versioned:   true,

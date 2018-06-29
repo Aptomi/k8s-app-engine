@@ -9,8 +9,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// BundleObject is an informational data structure with Kind and Constructor for Bundle
-var BundleObject = &runtime.Info{
+// BundleType is an informational data structure with Kind and Constructor for Bundle
+var BundleType = &runtime.TypeInfo{
 	Kind:        "bundle",
 	Storable:    true,
 	Versioned:   true,

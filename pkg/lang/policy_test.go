@@ -12,7 +12,7 @@ func TestPolicy_AddObjectAndGetObjectsByKind(t *testing.T) {
 	namespace, policy := makePolicyWithObjects()
 
 	// retrieve objects
-	for _, kind := range []string{BundleObject.Kind, ServiceObject.Kind, RuleObject.Kind, ClaimObject.Kind} {
+	for _, kind := range []string{BundleType.Kind, ServiceObject.Kind, RuleObject.Kind, ClaimType.Kind} {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
@@ -113,7 +113,7 @@ func makePolicyWithObjects() (string, *Policy) {
 	policy := NewPolicy()
 	for i := 0; i < 10; i++ {
 		addObject(policy, &Bundle{
-			TypeKind: BundleObject.GetTypeKind(),
+			TypeKind: BundleType.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: namespace,
 				Name:      "bundle" + strconv.Itoa(i),
@@ -142,7 +142,7 @@ func makePolicyWithObjects() (string, *Policy) {
 			},
 		})
 		addObject(policy, &Claim{
-			TypeKind: ClaimObject.GetTypeKind(),
+			TypeKind: ClaimType.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: namespace,
 				Name:      "claim" + strconv.Itoa(i),

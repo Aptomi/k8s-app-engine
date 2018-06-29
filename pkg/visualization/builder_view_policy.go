@@ -38,7 +38,7 @@ func (b *GraphBuilder) Policy(cfg *PolicyCfg) *Graph {
 
 func (b *GraphBuilder) calcServiceDegIn(serviceFrom *lang.Service, serviceDegIn map[string]int) {
 	for _, context := range serviceFrom.Contexts {
-		bundleObj, errBundle := b.policy.GetObject(lang.BundleObject.Kind, context.Allocation.Bundle, serviceFrom.Namespace)
+		bundleObj, errBundle := b.policy.GetObject(lang.BundleType.Kind, context.Allocation.Bundle, serviceFrom.Namespace)
 		if errBundle != nil {
 			continue
 		}

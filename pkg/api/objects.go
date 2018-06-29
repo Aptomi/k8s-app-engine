@@ -9,11 +9,11 @@ import (
 
 var (
 	// Objects is a list of all objects used in API
-	Objects = runtime.AppendAll([]*runtime.Info{
-		ClaimsStatusObject,
+	Objects = runtime.AppendAllTypes([]*runtime.TypeInfo{
+		ClaimsStatusType,
 		PolicyUpdateResultObject,
-		AuthSuccessObject,
-		AuthRequestObject,
+		AuthSuccessType,
+		AuthRequestType,
 		ServerErrorObject,
 		version.BuildInfoObject,
 	}, lang.PolicyObjects, engine.Objects)

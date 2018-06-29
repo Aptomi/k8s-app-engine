@@ -12,7 +12,7 @@ import (
 )
 
 // ComponentInstanceObject is an informational data structure with Kind and Constructor for component instance object
-var ComponentInstanceObject = &runtime.Info{
+var ComponentInstanceObject = &runtime.TypeInfo{
 	Kind:        "component-instance",
 	Storable:    true,
 	Versioned:   false,

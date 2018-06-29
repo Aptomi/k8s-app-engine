@@ -18,7 +18,7 @@ type panicHandler struct {
 
 // NewPanicHandler returns HTTP handler for Panics processing
 func NewPanicHandler(handler http.Handler) http.Handler {
-	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewRegistry().Append(api.ServerErrorObject))
+	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewTypes().Append(api.ServerErrorObject))
 	return &panicHandler{handler: handler, contentType: contentTypeHandler}
 }
 

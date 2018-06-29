@@ -316,7 +316,7 @@ func makeCluster(clusterType, ns string) *Cluster {
 
 func makeBundle(name string, labelNum int) *Bundle {
 	bundle := &Bundle{
-		TypeKind: BundleObject.GetTypeKind(),
+		TypeKind: BundleType.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      name,
@@ -339,7 +339,7 @@ func makeBundle(name string, labelNum int) *Bundle {
 
 func makeClaim(service string) *Claim {
 	claim := &Claim{
-		TypeKind: ClaimObject.GetTypeKind(),
+		TypeKind: ClaimType.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "claim",

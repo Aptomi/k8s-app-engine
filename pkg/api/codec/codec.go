@@ -26,7 +26,7 @@ type ContentTypeHandler struct {
 }
 
 // NewContentTypeHandler returns instance of ContentTypeHandler for provided runtime registry
-func NewContentTypeHandler(reg *runtime.Registry) *ContentTypeHandler {
+func NewContentTypeHandler(reg *runtime.Types) *ContentTypeHandler {
 	codecs := make(map[string]runtime.Codec)
 	codecs[YAML] = yaml.NewCodec(reg)
 	codecs[JSON] = yaml.NewJSONCodec(reg)

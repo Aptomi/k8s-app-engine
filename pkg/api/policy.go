@@ -66,7 +66,7 @@ func (api *coreAPI) handlePolicyObjectGet(writer http.ResponseWriter, request *h
 }
 
 // PolicyUpdateResultObject is an informational data structure with Kind and Constructor for PolicyUpdateResult
-var PolicyUpdateResultObject = &runtime.Info{
+var PolicyUpdateResultObject = &runtime.TypeInfo{
 	Kind:        "policy-update-result",
 	Constructor: func() runtime.Object { return &PolicyUpdateResult{} },
 }

@@ -14,7 +14,7 @@ import (
 )
 
 // UpdateActionObject is an informational data structure with Kind and Constructor for the action
-var UpdateActionObject = &runtime.Info{
+var UpdateActionObject = &runtime.TypeInfo{
 	Kind:        "action-component-update",
 	Constructor: func() runtime.Object { return &DeleteAction{} },
 }
@@ -87,7 +87,7 @@ func (a *UpdateAction) processDeployment(context *action.Context) (*resolve.Comp
 		return nil, fmt.Errorf("component instance not found desired state: %s", a.ComponentKey)
 	}
 
-	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleObject.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, err
 	}

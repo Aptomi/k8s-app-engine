@@ -29,7 +29,7 @@ type ACLRule struct {
 }
 
 // ACLRuleObject is an informational data structure with Kind and Constructor for ACLRule
-var ACLRuleObject = &runtime.Info{
+var ACLRuleObject = &runtime.TypeInfo{
 	Kind:        "aclrule",
 	Storable:    true,
 	Versioned:   true,
@@ -141,9 +141,9 @@ var DomainAdmin = &ACLRole{
 	Privileges: &Privileges{
 		AllNamespaces: true,
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:  fullAccess,
+			BundleType.Kind:    fullAccess,
 			ServiceObject.Kind: fullAccess,
-			ClaimObject.Kind:   fullAccess,
+			ClaimType.Kind:     fullAccess,
 			RuleObject.Kind:    fullAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
@@ -160,9 +160,9 @@ var NamespaceAdmin = &ACLRole{
 	Name: "Namespace Admin",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:  fullAccess,
+			BundleType.Kind:    fullAccess,
 			ServiceObject.Kind: fullAccess,
-			ClaimObject.Kind:   fullAccess,
+			ClaimType.Kind:     fullAccess,
 			RuleObject.Kind:    fullAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
@@ -179,9 +179,9 @@ var ServiceConsumer = &ACLRole{
 	Name: "Service Consumer",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:  viewAccess,
+			BundleType.Kind:    viewAccess,
 			ServiceObject.Kind: viewAccess,
-			ClaimObject.Kind:   fullAccess,
+			ClaimType.Kind:     fullAccess,
 			RuleObject.Kind:    viewAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
@@ -198,9 +198,9 @@ var nobody = &ACLRole{
 	Name: "Nobody",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleObject.Kind:  viewAccess,
+			BundleType.Kind:    viewAccess,
 			ServiceObject.Kind: viewAccess,
-			ClaimObject.Kind:   viewAccess,
+			ClaimType.Kind:     viewAccess,
 			RuleObject.Kind:    viewAccess,
 		},
 		GlobalObjects: map[string]*Privilege{

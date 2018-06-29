@@ -157,7 +157,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllClaims()
 
-	claims := builder.Policy().GetObjectsByKind(lang.ClaimObject.Kind)
+	claims := builder.Policy().GetObjectsByKind(lang.ClaimType.Kind)
 	for _, claim := range claims {
 		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)

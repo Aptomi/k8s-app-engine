@@ -413,7 +413,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 		if serviceCtx.Allocation != nil {
 			bundleName = serviceCtx.Allocation.Bundle
 		}
-		obj, err := policy.GetObject(BundleObject.Kind, bundleName, service.Namespace)
+		obj, err := policy.GetObject(BundleType.Kind, bundleName, service.Namespace)
 		if obj == nil || err != nil {
 			sl.ReportError(bundleName, fmt.Sprintf("Contexts[%s].Bundle[%s/%s]", serviceCtx.Name, service.Namespace, bundleName), "", "exists", "")
 			return

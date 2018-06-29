@@ -32,7 +32,7 @@ func (b *GraphBuilder) traceService(service *lang.Service, last graphNode, lastL
 	for _, context := range service.Contexts {
 		// service -> [context] as edge label -> bundle
 		// lookup the corresponding bundle
-		bundleObj, errBundle := b.policy.GetObject(lang.BundleObject.Kind, context.Allocation.Bundle, service.Namespace)
+		bundleObj, errBundle := b.policy.GetObject(lang.BundleType.Kind, context.Allocation.Bundle, service.Namespace)
 		if errBundle != nil {
 			b.graph.addNode(errorNode{err: errBundle}, level)
 			continue

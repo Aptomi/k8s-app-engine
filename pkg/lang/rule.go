@@ -8,7 +8,7 @@ import (
 )
 
 // RuleObject is an informational data structure with Kind and Constructor for Rule
-var RuleObject = &runtime.Info{
+var RuleObject = &runtime.TypeInfo{
 	Kind:        "rule",
 	Storable:    true,
 	Versioned:   true,

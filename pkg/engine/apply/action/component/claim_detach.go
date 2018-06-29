@@ -12,7 +12,7 @@ import (
 )
 
 // DetachClaimActionObject is an informational data structure with Kind and Constructor for the action
-var DetachClaimActionObject = &runtime.Info{
+var DetachClaimActionObject = &runtime.TypeInfo{
 	Kind:        "action-component-claim-detach",
 	Constructor: func() runtime.Object { return &DetachClaimAction{} },
 }
