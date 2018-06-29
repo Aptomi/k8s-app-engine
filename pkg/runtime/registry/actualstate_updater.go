@@ -132,5 +132,5 @@ func (updater *actualStateUpdater) save(obj runtime.Storable) error {
 }
 
 func (updater *actualStateUpdater) delete(key string) error {
-	return updater.store.Delete(resolve.TypeComponentInstance.Kind, store.WithKey(key)).One()
+	return updater.store.Delete(resolve.TypeComponentInstance.Kind, key)
 }
