@@ -1,7 +1,10 @@
 package etcd
 
 import (
+	"context"
+	"encoding/binary"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -41,14 +44,55 @@ func (s *etcdStore) Close() error {
 // todo need to rework keys to not include kind or to start with kind at least
 
 func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
-	_ = s.types.Get(newStorable.GetKind())
+	info := s.types.Get(newStorable.GetKind())
+	key := "/" + runtime.KeyForStorable(newStorable)
+
+	if !info.Versioned {
+		data, err := s.codec.Marshal(newStorable)
+		if err != nil {
+			return err
+		}
+		_, err = s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastGen.String(), string(data))
+		return err
+	}
 
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
+		gen := runtime.FirstGen
+		// get index for last gen
+		lastGenRaw := stm.Get("/index" + key)
+		if lastGenRaw != "" {
+			gen = runtime.Generation(binary.BigEndian.Uint64([]byte(lastGenRaw)))
+
+			currObjRaw := stm.Get("/object" + key + "@" + gen.String())
+			if currObjRaw == "" {
+				// todo better handle
+				panic("invalid last gen index (pointing to non existing generation): " + key)
+			}
+			currObj := info.New().(runtime.Storable)
+			err := s.codec.Unmarshal([]byte(currObjRaw), currObj)
+			if err != nil {
+				return err
+			}
+
+			if !reflect.DeepEqual(currObj, newStorable) {
+				gen = gen.Next()
+			} else { // todo if not force new version
+				return nil
+			}
+		}
+
+		// todo make wrapper that will panic as it's ok to panic if can't marshal/unmarshal data
+		// todo just have defer recover at the beginning of each function...
+		newStorable.SetGeneration(gen)
 		data, cErr := s.codec.Marshal(newStorable)
 		if cErr != nil {
 			return cErr
 		}
-		stm.Put(runtime.KeyForStorable(newStorable), string(data))
+		stm.Put("/object"+key+"@"+gen.String(), string(data))
+
+		buf := make([]byte, 8)
+		binary.BigEndian.PutUint64(buf, uint64(gen))
+		stm.Put("/index"+key, string(buf))
 
 		return nil
 	})
