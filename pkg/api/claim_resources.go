@@ -25,7 +25,7 @@ func (g *claimResourcesWrapper) GetKind() string {
 
 func (api *coreAPI) handleClaimResourcesGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	gen := runtime.LastGen
-	policy, _, err := api.store.GetPolicy(gen)
+	policy, _, err := api.registry.GetPolicy(gen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
@@ -44,7 +44,7 @@ func (api *coreAPI) handleClaimResourcesGet(writer http.ResponseWriter, request 
 
 	// once claim is loaded, we need to find its state in the actual state
 	claim := obj.(*lang.Claim) // nolint: errcheck
-	actualState, err := api.store.GetActualState()
+	actualState, err := api.registry.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("Can't load actual state to get endpoints: %s", err))
 	}

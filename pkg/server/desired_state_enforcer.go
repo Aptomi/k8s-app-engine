@@ -57,7 +57,7 @@ func (server *Server) desiredStateEnforceLoop() error {
 
 func (server *Server) getRevisionForProcessing() (*engine.Revision, error) {
 	// we are processing revision sequentially, so let's get the first unprocessed revision from the database
-	revision, err := server.store.GetFirstUnprocessedRevision()
+	revision, err := server.registry.GetFirstUnprocessedRevision()
 	if err != nil {
 		return nil, fmt.Errorf("unable to load first unprocessed revision: %s", err)
 	}
@@ -69,11 +69,11 @@ func (server *Server) getRevisionForProcessing() (*engine.Revision, error) {
 	}
 
 	// if there are no unprocessed revisions, let's get the last one and see if it was successful or not
-	_, policyGen, err := server.store.GetPolicy(runtime.LastGen)
+	_, policyGen, err := server.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load latest policy: %s", err)
 	}
-	lastRevision, err := server.store.GetLastRevisionForPolicy(policyGen)
+	lastRevision, err := server.registry.GetLastRevisionForPolicy(policyGen)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load latest revision: %s", err)
 	}
@@ -116,25 +116,25 @@ func (server *Server) desiredStateEnforce() error {
 	// reset revision status and result
 	revision.Status = engine.RevisionStatusWaiting
 	revision.Result = &action.ApplyResult{}
-	revErr := server.store.UpdateRevision(revision)
+	revErr := server.registry.UpdateRevision(revision)
 	if revErr != nil {
 		return fmt.Errorf("unable to update revision: %s", revErr)
 	}
 
 	// load the corresponding policy
-	policy, policyGen, err := server.store.GetPolicy(revision.PolicyGen)
+	policy, policyGen, err := server.registry.GetPolicy(revision.PolicyGen)
 	if err != nil {
 		return fmt.Errorf("error while getting policy: %s", err)
 	}
 
 	// load desired state
-	desiredState, err := server.store.GetDesiredState(revision)
+	desiredState, err := server.registry.GetDesiredState(revision)
 	if err != nil {
 		return fmt.Errorf("can't load desired state from revision: %s", err)
 	}
 
 	// load the actual state
-	actualState, err := server.store.GetActualState()
+	actualState, err := server.registry.GetActualState()
 	if err != nil {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
@@ -165,12 +165,12 @@ func (server *Server) desiredStateEnforce() error {
 	// apply
 	pluginRegistry := server.enforcerPluginRegistryFactory()
 	applyLog := event.NewLog(log.DebugLevel, fmt.Sprintf("enforce-%d-apply", server.desiredStateEnforcementIdx)).AddConsoleHook(server.cfg.GetLogLevel())
-	applier := apply.NewEngineApply(policy, desiredState, server.store.NewActualStateUpdater(actualState), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.store.NewRevisionResultUpdater(revision))
+	applier := apply.NewEngineApply(policy, desiredState, server.registry.NewActualStateUpdater(actualState), server.externalData, pluginRegistry, stateDiff.ActionPlan, applyLog, server.registry.NewRevisionResultUpdater(revision))
 	_, _ = applier.Apply(server.cfg.Enforcer.MaxConcurrentActions)
 
 	// save apply log
 	revision.ApplyLog = applyLog.AsAPIEvents()
-	saveErr := server.store.UpdateRevision(revision)
+	saveErr := server.registry.UpdateRevision(revision)
 	if saveErr != nil {
 		return fmt.Errorf("error while saving revision with apply log: %s", saveErr)
 	}

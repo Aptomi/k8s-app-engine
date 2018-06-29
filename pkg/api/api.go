@@ -7,7 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/external"
 	"github.com/Aptomi/aptomi/pkg/plugin"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
+	"github.com/Aptomi/aptomi/pkg/runtime/registry"
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
@@ -15,7 +15,7 @@ import (
 
 type coreAPI struct {
 	contentType                  *codec.ContentTypeHandler
-	store                        registry.Interface
+	registry                     registry.Interface
 	externalData                 *external.Data
 	pluginRegistryFactory        plugin.RegistryFactory
 	secret                       string
@@ -29,7 +29,7 @@ func Serve(router *httprouter.Router, store registry.Interface, externalData *ex
 	contentTypeHandler := codec.NewContentTypeHandler(runtime.NewTypes().Append(Objects...))
 	api := &coreAPI{
 		contentType:                contentTypeHandler,
-		store:                      store,
+		registry:                   store,
 		externalData:               externalData,
 		pluginRegistryFactory:      pluginRegistryFactory,
 		secret:                     secret,
