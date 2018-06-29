@@ -22,7 +22,7 @@ var ClaimResolutionCfgDefault = &ClaimResolutionCfg{
 // which checking that instances exist (e.g. in actual state)
 func (b *GraphBuilder) ClaimResolutionWithFunc(cfg *ClaimResolutionCfg, exists func(*resolve.ComponentInstance) bool) *Graph {
 	// trace all claims
-	for _, claimObj := range b.policy.GetObjectsByKind(lang.ClaimType.Kind) {
+	for _, claimObj := range b.policy.GetObjectsByKind(lang.TypeClaim.Kind) {
 		claim := claimObj.(*lang.Claim) // nolint: errcheck
 		b.traceClaimResolution("", claim, nil, 0, cfg, exists)
 	}
@@ -71,7 +71,7 @@ func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, la
 
 		if instanceCurrent.Metadata.Key.IsBundle() {
 			// if it's a bundle, then create a service node
-			serviceObj, errService := b.policy.GetObject(lang.ServiceObject.Kind, instanceCurrent.Metadata.Key.ServiceName, instanceCurrent.Metadata.Key.Namespace)
+			serviceObj, errService := b.policy.GetObject(lang.TypeService.Kind, instanceCurrent.Metadata.Key.ServiceName, instanceCurrent.Metadata.Key.Namespace)
 			if errService != nil {
 				b.graph.addNode(errorNode{err: errService}, level)
 				continue
@@ -80,7 +80,7 @@ func (b *GraphBuilder) traceClaimResolution(keySrc string, claim *lang.Claim, la
 			ctrNode := serviceNode{service: service}
 
 			// then create a bundle instance node
-			bundleObj, errBundle := b.policy.GetObject(lang.BundleType.Kind, instanceCurrent.Metadata.Key.BundleName, instanceCurrent.Metadata.Key.Namespace)
+			bundleObj, errBundle := b.policy.GetObject(lang.TypeBundle.Kind, instanceCurrent.Metadata.Key.BundleName, instanceCurrent.Metadata.Key.Namespace)
 			if errBundle != nil {
 				b.graph.addNode(errorNode{err: errBundle}, level)
 				continue

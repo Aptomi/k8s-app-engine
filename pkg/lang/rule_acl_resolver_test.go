@@ -63,7 +63,7 @@ func TestAclResolver(t *testing.T) {
 	var rules = []*ACLRule{
 		// domain admins
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "is_domain_admin",
@@ -76,7 +76,7 @@ func TestAclResolver(t *testing.T) {
 		},
 		// namespace admins for 'main' namespace
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "is_namespace_admin",
@@ -89,7 +89,7 @@ func TestAclResolver(t *testing.T) {
 		},
 		// service consumers for 'main2' namespace
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "is_consumer",
@@ -102,7 +102,7 @@ func TestAclResolver(t *testing.T) {
 		},
 		// bogus rule
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "some_bogus_rule",
@@ -122,8 +122,8 @@ func TestAclResolver(t *testing.T) {
 			namespace: namespaceAll,
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
-				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: fullAccess},
-				{obj: &Bundle{TypeKind: BundleType.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: fullAccess},
+				{obj: &Cluster{TypeKind: TypeCluster.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: fullAccess},
+				{obj: &Bundle{TypeKind: TypeBundle.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: fullAccess},
 			},
 		},
 		{
@@ -132,9 +132,9 @@ func TestAclResolver(t *testing.T) {
 			namespace: "main",
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
-				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
-				{obj: &Bundle{TypeKind: BundleType.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Bundle{TypeKind: BundleType.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: fullAccess},
+				{obj: &Cluster{TypeKind: TypeCluster.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: TypeBundle.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: TypeBundle.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: fullAccess},
 			},
 		},
 		{
@@ -143,11 +143,11 @@ func TestAclResolver(t *testing.T) {
 			namespace: "main2",
 			expected:  true,
 			objectPrivileges: []testCaseObjPrivileges{
-				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
-				{obj: &Bundle{TypeKind: BundleType.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Bundle{TypeKind: BundleType.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
-				{obj: &Claim{TypeKind: ClaimType.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Claim{TypeKind: ClaimType.GetTypeKind(), Metadata: Metadata{Namespace: "main2"}}, expected: fullAccess},
+				{obj: &Cluster{TypeKind: TypeCluster.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: TypeBundle.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Bundle{TypeKind: TypeBundle.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
+				{obj: &Claim{TypeKind: TypeClaim.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Claim{TypeKind: TypeClaim.GetTypeKind(), Metadata: Metadata{Namespace: "main2"}}, expected: fullAccess},
 			},
 		},
 		{
@@ -156,9 +156,9 @@ func TestAclResolver(t *testing.T) {
 			namespace: "main",
 			expected:  false,
 			objectPrivileges: []testCaseObjPrivileges{
-				{obj: &Cluster{TypeKind: ClusterObject.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
-				{obj: &Service{TypeKind: ServiceObject.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
+				{obj: &Cluster{TypeKind: TypeCluster.GetTypeKind(), Metadata: Metadata{Namespace: runtime.SystemNS}}, expected: viewAccess},
+				{obj: &Service{TypeKind: TypeService.GetTypeKind(), Metadata: Metadata{Namespace: "somens"}}, expected: viewAccess},
+				{obj: &Service{TypeKind: TypeService.GetTypeKind(), Metadata: Metadata{Namespace: "main"}}, expected: viewAccess},
 			},
 		},
 	}

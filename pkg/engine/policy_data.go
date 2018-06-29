@@ -7,8 +7,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// PolicyDataObject is an informational data structure with Kind and Constructor for PolicyData
-var PolicyDataObject = &runtime.TypeInfo{
+// TypePolicyData is an informational data structure with Kind and Constructor for PolicyData
+var TypePolicyData = &runtime.TypeInfo{
 	Kind:        "policy",
 	Storable:    true,
 	Versioned:   true,
@@ -16,7 +16,7 @@ var PolicyDataObject = &runtime.TypeInfo{
 }
 
 // PolicyDataKey is the default key for the policy object (there is only one policy exists but with multiple generations)
-var PolicyDataKey = runtime.KeyFromParts(runtime.SystemNS, PolicyDataObject.Kind, runtime.EmptyName)
+var PolicyDataKey = runtime.KeyFromParts(runtime.SystemNS, TypePolicyData.Kind, runtime.EmptyName)
 
 // PolicyData is a struct which contains references to a generation for each object included into the policy
 type PolicyData struct {

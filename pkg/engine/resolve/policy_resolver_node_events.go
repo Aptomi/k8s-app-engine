@@ -171,7 +171,7 @@ func (node *resolutionNode) logCannotResolveInstance() {
 }
 
 func (resolver *PolicyResolver) logComponentParams(instance *ComponentInstance) {
-	bundleObj, err := resolver.policy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := resolver.policy.GetObject(lang.TypeBundle.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting bundle '%s/%s' from the policy: %s", instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace, err))
 	}

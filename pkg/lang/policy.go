@@ -74,7 +74,7 @@ func (policy *Policy) AddObject(obj Base) error {
 	err := policyNamespace.addObject(obj)
 
 	// if we just added ACLRule, we need to invalidate cached aclResolver
-	if obj.GetKind() == ACLRuleObject.Kind {
+	if obj.GetKind() == TypeACLRule.Kind {
 		policy.invalidateCachedACLResolver()
 	}
 

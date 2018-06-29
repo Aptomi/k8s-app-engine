@@ -31,7 +31,7 @@ func (api *coreAPI) handleClaimResourcesGet(writer http.ResponseWriter, request 
 	}
 
 	ns := params.ByName("ns")
-	kind := lang.ClaimType.Kind
+	kind := lang.TypeClaim.Kind
 	name := params.ByName("name")
 
 	obj, err := policy.GetObject(kind, name, ns)
@@ -120,7 +120,7 @@ func (api *coreAPI) handleClaimResourcesGet(writer http.ResponseWriter, request 
 }
 
 func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lang.Policy, plugins plugin.Registry) (plugin.CodePlugin, error) {
-	bundleObj, err := policy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := policy.GetObject(lang.TypeBundle.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func pluginForComponentInstance(instance *resolve.ComponentInstance, policy *lan
 		return nil, nil
 	}
 
-	clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
+	clusterObj, err := policy.GetObject(lang.TypeCluster.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
 		return nil, err
 	}

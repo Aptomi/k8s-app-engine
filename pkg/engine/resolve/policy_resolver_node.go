@@ -156,7 +156,7 @@ func (node *resolutionNode) checkUserExists() error {
 
 // Helper to get a service
 func (node *resolutionNode) getService(policy *lang.Policy) (*lang.Service, error) {
-	serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, node.serviceName, node.namespace)
+	serviceObj, err := policy.GetObject(lang.TypeService.Kind, node.serviceName, node.namespace)
 	if serviceObj == nil || err != nil {
 		panic(fmt.Sprintf("Can't get service '%s/%s': %s", node.namespace, node.serviceName, err))
 	}
@@ -205,7 +205,7 @@ func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Contex
 
 // Helper to get a matched bundle
 func (node *resolutionNode) getMatchedBundle(policy *lang.Policy) (*lang.Bundle, error) {
-	bundleObj, err := policy.GetObject(lang.BundleType.Kind, node.context.Allocation.Bundle, node.namespace)
+	bundleObj, err := policy.GetObject(lang.TypeBundle.Kind, node.context.Allocation.Bundle, node.namespace)
 	if bundleObj == nil || err != nil {
 		panic(fmt.Sprintf("Can't get bundle '%s/%s': %s", node.namespace, node.context.Allocation.Bundle, err))
 	}

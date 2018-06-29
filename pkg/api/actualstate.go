@@ -63,7 +63,7 @@ func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http
 	// If we are in noop mode, just return expected changes in a form of an action plan
 	if noop {
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+			TypeKind:         TypePolicyUpdateResult.GetTypeKind(),
 			PolicyGeneration: policyGen,                // policy generation didn't change
 			PolicyChanged:    false,                    // policy has not been updated in the registry
 			WaitForRevision:  runtime.MaxGeneration,    // nothing to wait for
@@ -77,7 +77,7 @@ func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http
 	revisionGen := api.createStateEnforceRevision(policyGen, desiredState, actionPlan)
 
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+		TypeKind:         TypePolicyUpdateResult.GetTypeKind(),
 		PolicyGeneration: policyGen,                // policy didn't change
 		PolicyChanged:    false,                    // have any policy object in the registry been changed or not
 		WaitForRevision:  revisionGen,              // which revision to wait for

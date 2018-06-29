@@ -22,7 +22,7 @@ func (stateEnforce *stateEnforceObj) GetKind() runtime.Kind {
 }
 
 func (client *stateClient) Reset(noop bool) (*api.PolicyUpdateResult, error) {
-	revision, err := client.httpClient.POST(fmt.Sprintf("/state/enforce/noop/%t", noop), api.PolicyUpdateResultObject, &stateEnforceObj{})
+	revision, err := client.httpClient.POST(fmt.Sprintf("/state/enforce/noop/%t", noop), api.TypePolicyUpdateResult, &stateEnforceObj{})
 	if err != nil {
 		return nil, err
 	}

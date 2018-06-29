@@ -6,8 +6,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// ServiceObject is an informational data structure with Kind and Constructor for Service
-var ServiceObject = &runtime.TypeInfo{
+// TypeService is an informational data structure with Kind and Constructor for Service
+var TypeService = &runtime.TypeInfo{
 	Kind:        "service",
 	Storable:    true,
 	Versioned:   true,

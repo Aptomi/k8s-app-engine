@@ -2,8 +2,8 @@ package api
 
 import "github.com/Aptomi/aptomi/pkg/runtime"
 
-// ServerErrorObject contains TypeInfo for the Error type
-var ServerErrorObject = &runtime.TypeInfo{
+// TypeServerError contains TypeInfo for the Error type
+var TypeServerError = &runtime.TypeInfo{
 	Kind:        "error",
 	Constructor: func() runtime.Object { return &ServerError{} },
 }
@@ -16,5 +16,5 @@ type ServerError struct {
 
 // NewServerError returns instance of the error based on the provided error
 func NewServerError(error string) *ServerError {
-	return &ServerError{TypeKind: ServerErrorObject.GetTypeKind(), Error: error}
+	return &ServerError{TypeKind: TypeServerError.GetTypeKind(), Error: error}
 }

@@ -65,8 +65,8 @@ func (api *coreAPI) handlePolicyObjectGet(writer http.ResponseWriter, request *h
 	api.contentType.WriteOne(writer, request, obj)
 }
 
-// PolicyUpdateResultObject is an informational data structure with Kind and Constructor for PolicyUpdateResult
-var PolicyUpdateResultObject = &runtime.TypeInfo{
+// TypePolicyUpdateResult is an informational data structure with Kind and Constructor for PolicyUpdateResult
+var TypePolicyUpdateResult = &runtime.TypeInfo{
 	Kind:        "policy-update-result",
 	Constructor: func() runtime.Object { return &PolicyUpdateResult{} },
 }
@@ -120,7 +120,7 @@ func (rs apiObjectSorter) Less(i, j int) bool {
 
 func (rs apiObjectSorter) Weight(obj lang.Base) int { // nolint: interfacer
 	// ACL rules have to come in the first place
-	if obj.GetKind() == lang.ACLRuleObject.Kind {
+	if obj.GetKind() == lang.TypeACLRule.Kind {
 		return 0
 	}
 
@@ -218,7 +218,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	// If we are in noop mode, just return expected changes in a form of an action plan
 	if noop {
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+			TypeKind:         TypePolicyUpdateResult.GetTypeKind(),
 			PolicyGeneration: policyGen,              // policy generation didn't change
 			PolicyChanged:    false,                  // policy has not been updated in the registry
 			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
@@ -233,7 +233,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 
 	// Return the result back via API
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+		TypeKind:         TypePolicyUpdateResult.GetTypeKind(),
 		PolicyChanged:    changed,                // have any policy object in the registry been changed or not
 		PolicyGeneration: policyGen,              // policy now has a new generation
 		WaitForRevision:  revisionGen,            // which revision to wait for
@@ -316,7 +316,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	// If we are in noop mode, just return expected changes in a form of an action plan
 	if noop {
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+			TypeKind:         TypePolicyUpdateResult.GetTypeKind(),
 			PolicyGeneration: policyGen,              // policy generation didn't change
 			PolicyChanged:    false,                  // policy has not been updated in the registry
 			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
@@ -331,7 +331,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 
 	// Return the result back via API
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
-		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
+		TypeKind:         TypePolicyUpdateResult.GetTypeKind(),
 		PolicyChanged:    changed,                // have any policy object in the registry been changed or not
 		PolicyGeneration: policyGen,              // policy now has a new generation
 		WaitForRevision:  revisionGen,            // which revision to wait for

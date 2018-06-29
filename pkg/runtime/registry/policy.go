@@ -14,7 +14,7 @@ import (
 func (reg *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
 	var policyData *engine.PolicyData
 	// todo add WithKey (thing about replacing with some flag in Info) and WithGen(gen)
-	err := reg.store.Find(engine.PolicyDataObject.Kind).Last(policyData)
+	err := reg.store.Find(engine.TypePolicyData.Kind).Last(policyData)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 func (reg *defaultRegistry) InitPolicy() error {
 	// create and save
 	initialPolicyData := &engine.PolicyData{
-		TypeKind: engine.PolicyDataObject.GetTypeKind(),
+		TypeKind: engine.TypePolicyData.GetTypeKind(),
 		Metadata: engine.PolicyDataMetadata{
 			Generation: runtime.FirstGen,
 			UpdatedAt:  time.Now(),

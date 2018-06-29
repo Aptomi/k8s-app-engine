@@ -69,7 +69,7 @@ func (view *PolicyView) ManageObject(obj Base) error {
 // If a user can declare a claim in a given namespace, then he can essentially can consume the service
 func (view *PolicyView) CanConsume(service *Service) (bool, error) {
 	obj := &Claim{
-		TypeKind: ClaimType.GetTypeKind(),
+		TypeKind: TypeClaim.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: service.GetNamespace(),
 		},

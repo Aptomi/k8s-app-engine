@@ -85,7 +85,7 @@ func (resolver *PolicyResolver) ResolveAllClaims() *PolicyResolution {
 	// Allocate semaphore, making sure we don't run more than MaxConcurrentGoRoutines go routines at the same time
 	var semaphore = make(chan int, MaxConcurrentGoRoutines)
 	var wg sync.WaitGroup
-	claims := resolver.policy.GetObjectsByKind(lang.ClaimType.Kind)
+	claims := resolver.policy.GetObjectsByKind(lang.TypeClaim.Kind)
 
 	// Resolve every declared claim
 	for _, claim := range claims {

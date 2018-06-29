@@ -200,7 +200,7 @@ func validatePolicy(t *testing.T, result int, objects []Base, policy *Policy) {
 
 func makeRule(weight int, expr string, actionNum int, actionKey string) *Rule {
 	rule := &Rule{
-		TypeKind: RuleObject.GetTypeKind(),
+		TypeKind: TypeRule.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "rule",
@@ -232,7 +232,7 @@ func makeRule(weight int, expr string, actionNum int, actionKey string) *Rule {
 
 func makeACLRule(actionNum int) *ACLRule {
 	rule := &ACLRule{
-		TypeKind: ACLRuleObject.GetTypeKind(),
+		TypeKind: TypeACLRule.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "rule",
@@ -261,7 +261,7 @@ func makeACLRule(actionNum int) *ACLRule {
 
 func makeService(name string, labelOpsNum int, pointToBundle string) *Service {
 	service := &Service{
-		TypeKind: ServiceObject.GetTypeKind(),
+		TypeKind: TypeService.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      name,
@@ -304,7 +304,7 @@ func invalidAllocationKeys(service *Service) *Service {
 
 func makeCluster(clusterType, ns string) *Cluster {
 	return &Cluster{
-		TypeKind: ClusterObject.GetTypeKind(),
+		TypeKind: TypeCluster.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: ns,
 			Name:      "cluster",
@@ -316,7 +316,7 @@ func makeCluster(clusterType, ns string) *Cluster {
 
 func makeBundle(name string, labelNum int) *Bundle {
 	bundle := &Bundle{
-		TypeKind: BundleType.GetTypeKind(),
+		TypeKind: TypeBundle.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      name,
@@ -339,7 +339,7 @@ func makeBundle(name string, labelNum int) *Bundle {
 
 func makeClaim(service string) *Claim {
 	claim := &Claim{
-		TypeKind: ClaimType.GetTypeKind(),
+		TypeKind: TypeClaim.GetTypeKind(),
 		Metadata: Metadata{
 			Namespace: "main",
 			Name:      "claim",

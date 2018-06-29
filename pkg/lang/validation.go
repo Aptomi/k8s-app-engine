@@ -354,7 +354,7 @@ func validateBundle(ctx context.Context, sl validator.StructLevel) {
 
 		// if service is set, it should point to an existing service
 		if len(component.Service) > 0 {
-			obj, err := policy.GetObject(ServiceObject.Kind, component.Service, bundle.Namespace)
+			obj, err := policy.GetObject(TypeService.Kind, component.Service, bundle.Namespace)
 			if obj == nil || err != nil {
 				sl.ReportError(component.Service, fmt.Sprintf("Component[%s].Service[%s/%s]", component.Name, bundle.Namespace, component.Service), "", "exists", "")
 				return
@@ -395,7 +395,7 @@ func validateClaim(ctx context.Context, sl validator.StructLevel) {
 	policy := ctx.Value(policyKey).(*Policy)          // nolint: errcheck
 
 	// claim should point to an existing service
-	obj, err := policy.GetObject(ServiceObject.Kind, claim.Service, claim.Namespace)
+	obj, err := policy.GetObject(TypeService.Kind, claim.Service, claim.Namespace)
 	if obj == nil || err != nil {
 		sl.ReportError(claim.Service, fmt.Sprintf("Service[%s/%s]", claim.Namespace, claim.Service), "", "exists", "")
 		return
@@ -413,7 +413,7 @@ func validateService(ctx context.Context, sl validator.StructLevel) {
 		if serviceCtx.Allocation != nil {
 			bundleName = serviceCtx.Allocation.Bundle
 		}
-		obj, err := policy.GetObject(BundleType.Kind, bundleName, service.Namespace)
+		obj, err := policy.GetObject(TypeBundle.Kind, bundleName, service.Namespace)
 		if obj == nil || err != nil {
 			sl.ReportError(bundleName, fmt.Sprintf("Contexts[%s].Bundle[%s/%s]", serviceCtx.Name, service.Namespace, bundleName), "", "exists", "")
 			return

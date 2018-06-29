@@ -68,7 +68,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 		return nil, nil, fmt.Errorf("component instance not found in actual state: %s", a.ComponentKey)
 	}
 
-	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.TypeBundle.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -83,7 +83,7 @@ func (a *EndpointsAction) processEndpoints(context *action.Context) (*resolve.Co
 		return nil, nil, fmt.Errorf("retrieving endpoints for non-code components is not supported")
 	}
 
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.TypeCluster.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
 		return nil, nil, err
 	}

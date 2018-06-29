@@ -8,9 +8,9 @@ import (
 var (
 	// Objects is the list of informational objects for all objects in the engine
 	Objects = runtime.AppendAllTypes([]*runtime.TypeInfo{
-		PolicyDataObject,
-		RevisionObject,
-		DesiredStateObject,
-		resolve.ComponentInstanceObject,
+		TypePolicyData,
+		TypeRevision,
+		TypeDesiredState,
+		resolve.TypeComponentInstance,
 	})
 )

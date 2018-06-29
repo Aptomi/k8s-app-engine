@@ -8,8 +8,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// RevisionObject is TypeInfo for Revision
-var RevisionObject = &runtime.TypeInfo{
+// TypeRevision is TypeInfo for Revision
+var TypeRevision = &runtime.TypeInfo{
 	Kind:        "revision",
 	Storable:    true,
 	Versioned:   true,
@@ -17,7 +17,7 @@ var RevisionObject = &runtime.TypeInfo{
 }
 
 // RevisionKey is the default key for the Revision object (there is only one Revision exists but with multiple generations)
-var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, RevisionObject.Kind, runtime.EmptyName)
+var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, TypeRevision.Kind, runtime.EmptyName)
 
 const (
 	// RevisionStatusWaiting represents Revision status when it has been created, but apply haven't started yet
@@ -52,7 +52,7 @@ type Revision struct {
 // NewRevision creates a new revision
 func NewRevision(gen runtime.Generation, policyGen runtime.Generation, recalculateAll bool) *Revision {
 	return &Revision{
-		TypeKind: RevisionObject.GetTypeKind(),
+		TypeKind: TypeRevision.GetTypeKind(),
 		Metadata: runtime.GenerationMetadata{
 			Generation: gen,
 		},

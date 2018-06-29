@@ -30,8 +30,8 @@ const (
 	ClaimQueryDeploymentStatusAndReadiness ClaimQueryFlag = "ready"
 )
 
-// ClaimsStatusType is an informational data structure with Kind and Constructor for ClaimsStatus
-var ClaimsStatusType = &runtime.TypeInfo{
+// TypeClaimsStatus is an informational data structure with Kind and Constructor for ClaimsStatus
+var TypeClaimsStatus = &runtime.TypeInfo{
 	Kind:        "claims-status",
 	Constructor: func() runtime.Object { return &ClaimsStatus{} },
 }
@@ -83,14 +83,14 @@ func (api *coreAPI) handleClaimStatusGet(writer http.ResponseWriter, request *ht
 
 	// initialize result
 	result := &ClaimsStatus{
-		TypeKind: ClaimsStatusType.GetTypeKind(),
+		TypeKind: TypeClaimsStatus.GetTypeKind(),
 		Status:   make(map[string]*ClaimStatus),
 	}
 	for _, claimID := range claimIds {
 		parts := strings.Split(claimID, "^")
-		cObj, err := policy.GetObject(lang.ClaimType.Kind, parts[1], parts[0])
+		cObj, err := policy.GetObject(lang.TypeClaim.Kind, parts[1], parts[0])
 		if cObj == nil || err != nil {
-			claimKey := runtime.KeyFromParts(parts[0], lang.ClaimType.Kind, parts[1])
+			claimKey := runtime.KeyFromParts(parts[0], lang.TypeClaim.Kind, parts[1])
 			result.Status[claimKey] = &ClaimStatus{
 				Found:     false,
 				Deployed:  false,

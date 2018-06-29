@@ -53,7 +53,7 @@ func newClusterCommand(cfg *config.Client) *cobra.Command {
 			}
 
 			cluster := lang.Cluster{
-				TypeKind: lang.ClusterObject.GetTypeKind(),
+				TypeKind: lang.TypeCluster.GetTypeKind(),
 				Metadata: lang.Metadata{
 					Name:      clusterName,
 					Namespace: "system",

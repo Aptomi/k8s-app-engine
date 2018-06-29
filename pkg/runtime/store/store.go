@@ -26,8 +26,9 @@ type SaveOpt func(opts *SaveOpts)
 
 type Finder interface {
 	First(runtime.Storable) error
+	// Todo replace First/Last with One() and add some FindOpt to determine First or Last
 	Last(runtime.Storable) error
-	List([]runtime.Storable) error
+	List(interface{}) error
 }
 
 type FindOpts struct {

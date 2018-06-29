@@ -5,12 +5,12 @@ import "github.com/Aptomi/aptomi/pkg/runtime"
 var (
 	// PolicyObjects is the list of informational data for all policy objects
 	PolicyObjects = []*runtime.TypeInfo{
-		BundleType,
-		ServiceObject,
-		ClaimType,
-		ClusterObject,
-		RuleObject,
-		ACLRuleObject,
+		TypeBundle,
+		TypeService,
+		TypeClaim,
+		TypeCluster,
+		TypeRule,
+		TypeACLRule,
 	}
 
 	policyObjectsMap = make(map[runtime.Kind]bool)

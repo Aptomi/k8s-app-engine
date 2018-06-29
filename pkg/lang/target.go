@@ -52,7 +52,7 @@ func (target *Target) GetCluster(policy *Policy, currentNs string) (*Cluster, er
 	var err error
 	if len(target.ClusterNamespace) > 0 {
 		// in specified namespace
-		clusterObj, err = policy.GetObject(ClusterObject.Kind, target.ClusterName, target.ClusterNamespace)
+		clusterObj, err = policy.GetObject(TypeCluster.Kind, target.ClusterName, target.ClusterNamespace)
 		if err != nil {
 			return nil, err
 		}
@@ -62,14 +62,14 @@ func (target *Target) GetCluster(policy *Policy, currentNs string) (*Cluster, er
 		}
 	} else {
 		// in current namespace
-		clusterObj, err = policy.GetObject(ClusterObject.Kind, target.ClusterName, currentNs)
+		clusterObj, err = policy.GetObject(TypeCluster.Kind, target.ClusterName, currentNs)
 		if err != nil {
 			return nil, err
 		}
 
 		// in system namespace
 		if clusterObj == nil {
-			clusterObj, err = policy.GetObject(ClusterObject.Kind, target.ClusterName, runtime.SystemNS)
+			clusterObj, err = policy.GetObject(TypeCluster.Kind, target.ClusterName, runtime.SystemNS)
 			if err != nil {
 				return nil, err
 			}

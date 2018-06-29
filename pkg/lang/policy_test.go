@@ -12,7 +12,7 @@ func TestPolicy_AddObjectAndGetObjectsByKind(t *testing.T) {
 	namespace, policy := makePolicyWithObjects()
 
 	// retrieve objects
-	for _, kind := range []string{BundleType.Kind, ServiceObject.Kind, RuleObject.Kind, ClaimType.Kind} {
+	for _, kind := range []string{TypeBundle.Kind, TypeService.Kind, TypeRule.Kind, TypeClaim.Kind} {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
@@ -21,7 +21,7 @@ func TestPolicy_AddObjectAndGetObjectsByKind(t *testing.T) {
 		}
 	}
 
-	for _, kind := range []string{ClusterObject.Kind} {
+	for _, kind := range []string{TypeCluster.Kind} {
 		assert.Equal(t, 10, len(policy.GetObjectsByKind(kind)), "Number of '%s' objects in the policy should be correct", kind)
 
 		for i := 0; i < 10; i++ {
@@ -113,21 +113,21 @@ func makePolicyWithObjects() (string, *Policy) {
 	policy := NewPolicy()
 	for i := 0; i < 10; i++ {
 		addObject(policy, &Bundle{
-			TypeKind: BundleType.GetTypeKind(),
+			TypeKind: TypeBundle.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: namespace,
 				Name:      "bundle" + strconv.Itoa(i),
 			},
 		})
 		addObject(policy, &Service{
-			TypeKind: ServiceObject.GetTypeKind(),
+			TypeKind: TypeService.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: namespace,
 				Name:      "service" + strconv.Itoa(i),
 			},
 		})
 		addObject(policy, &Cluster{
-			TypeKind: ClusterObject.GetTypeKind(),
+			TypeKind: TypeCluster.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "cluster" + strconv.Itoa(i),
@@ -135,14 +135,14 @@ func makePolicyWithObjects() (string, *Policy) {
 			Type: "kubernetes",
 		})
 		addObject(policy, &Rule{
-			TypeKind: RuleObject.GetTypeKind(),
+			TypeKind: TypeRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: namespace,
 				Name:      "rule" + strconv.Itoa(i),
 			},
 		})
 		addObject(policy, &Claim{
-			TypeKind: ClaimType.GetTypeKind(),
+			TypeKind: TypeClaim.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: namespace,
 				Name:      "claim" + strconv.Itoa(i),
