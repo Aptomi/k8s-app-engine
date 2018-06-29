@@ -20,41 +20,43 @@ import (
 )
 
 func BenchmarkEngineSmall(b *testing.B) {
-	// small policy
-	smallPolicy, smallExternalData := NewPolicyGenerator(
-		239,
-		30,
-		50,
-		6,
-		6,
-		4,
-		2,
-		25,
-		100,
-		500,
-	).makePolicyAndExternalData()
-
 	for i := 0; i < b.N; i++ {
+		// create small policy
+		smallPolicy, smallExternalData := NewPolicyGenerator(
+			239,
+			30,
+			50,
+			6,
+			6,
+			4,
+			2,
+			25,
+			100,
+			500,
+		).makePolicyAndExternalData()
+
+		// run tests on small policy
 		RunEngine(b, "small", smallPolicy, smallExternalData)
 	}
 }
 
 func BenchmarkEngineMedium(b *testing.B) {
-	// medium policy
-	mediumPolicy, mediumExternalData := NewPolicyGenerator(
-		239,
-		30,
-		100,
-		6,
-		6,
-		4,
-		2,
-		25,
-		10000,
-		2000,
-	).makePolicyAndExternalData()
-
 	for i := 0; i < b.N; i++ {
+		// medium policy
+		mediumPolicy, mediumExternalData := NewPolicyGenerator(
+			239,
+			30,
+			100,
+			6,
+			6,
+			4,
+			2,
+			25,
+			10000,
+			2000,
+		).makePolicyAndExternalData()
+
+		// run tests on medium policy
 		RunEngine(b, "medium", mediumPolicy, mediumExternalData)
 	}
 }
@@ -478,6 +480,8 @@ func resolvePolicyBenchmark(b *testing.B, policy *lang.Policy, externalData *ext
 	if expectedNonEmpty != (len(claims) > 0) {
 		hook := event.NewHookConsole(logrus.DebugLevel)
 		eventLog.Save(hook)
+		fmt.Println(expectedNonEmpty)
+		fmt.Println(len(claims))
 		b.Fatal("no claims resolved")
 	}
 
