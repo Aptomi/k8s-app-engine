@@ -114,10 +114,8 @@ func storableKeyForComponent(componentKey string) string {
 }
 
 func (updater *actualStateUpdater) loadComponentInstance(key string) (*resolve.ComponentInstance, error) {
-	//obj, err := updater.store.Get(storableKeyForComponent(key))
 	var instance *resolve.ComponentInstance
-	// todo add WithKey(storableKeyForComponent(key))
-	err := updater.store.Find(resolve.TypeComponentInstance.Kind).Last(instance)
+	err := updater.store.Find(resolve.TypeComponentInstance.Kind, store.WithKey(storableKeyForComponent(key))).One(instance)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +132,5 @@ func (updater *actualStateUpdater) save(obj runtime.Storable) error {
 }
 
 func (updater *actualStateUpdater) delete(key string) error {
-	// todo add WithKey(key)
-	return updater.store.Delete(resolve.TypeComponentInstance.Kind).One()
+	return updater.store.Delete(resolve.TypeComponentInstance.Kind, store.WithKey(key)).One()
 }
