@@ -9,8 +9,8 @@ import (
 )
 
 // GetRevision returns Revision for specified generation
-func (ds *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revision, error) {
-	dataObj, err := ds.store.GetGen(engine.RevisionKey, gen)
+func (reg *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revision, error) {
+	dataObj, err := reg.store.GetGen(engine.RevisionKey, gen)
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +27,8 @@ func (ds *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revision
 }
 
 // NewRevision creates a new revision and saves it to the database
-func (ds *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
-	currRevision, err := ds.GetRevision(runtime.LastGen)
+func (reg *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
+	currRevision, err := reg.GetRevision(runtime.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting last revision: %s", err)
 	}
@@ -44,14 +44,14 @@ func (ds *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution 
 	revision := engine.NewRevision(gen, policyGen, recalculateAll)
 
 	// save revision
-	_, err = ds.store.Save(revision)
+	_, err = reg.store.Save(revision)
 	if err != nil {
 		return nil, fmt.Errorf("error while saving new revision: %s", err)
 	}
 
 	// save desired state
 	desiredState := engine.NewDesiredState(revision, resolution)
-	_, err = ds.store.Save(desiredState)
+	_, err = reg.store.Save(desiredState)
 	if err != nil {
 		return nil, fmt.Errorf("error while saving desired state for new revision: %s", err)
 	}
@@ -59,9 +59,9 @@ func (ds *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution 
 	return revision, nil
 }
 
-// UpdateRevision updates specified Revision in the store without creating new generation
-func (ds *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
-	_, err := ds.store.Update(revision)
+// UpdateRevision updates specified Revision in the registry without creating new generation
+func (reg *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
+	_, err := reg.store.Update(revision)
 	if err != nil {
 		return fmt.Errorf("error while updating revision: %s", err)
 	}
@@ -70,9 +70,9 @@ func (ds *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
 }
 
 // GetLastRevisionForPolicy returns last revision for specified policy generation in chronological order
-func (ds *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
+func (reg *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
-	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
+	revisionObjs, err := reg.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
 		return nil, err
 	}
@@ -94,9 +94,9 @@ func (ds *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generation
 }
 
 // GetAllRevisionsForPolicy returns all revisions for the specified policy generation
-func (ds *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
+func (reg *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
-	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
+	revisionObjs, err := reg.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +113,9 @@ func (ds *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generation
 }
 
 // GetFirstUnprocessedRevision returns the last revision which has not beed processed by the engine yet
-func (ds *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, error) {
+func (reg *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
-	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
+	revisionObjs, err := reg.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
 		return nil, err
 	}
@@ -138,14 +138,14 @@ func (ds *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, erro
 }
 
 // GetDesiredState returns desired state associated with the revision
-func (ds *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
-	obj, err := ds.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.DesiredStateObject.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
+func (reg *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
+	obj, err := reg.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.DesiredStateObject.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
 	if err != nil {
 		return nil, err
 	}
 	desiredState, ok := obj.(*engine.DesiredState)
 	if !ok {
-		return nil, fmt.Errorf("tried to load desired state from the store, but loaded %v", desiredState)
+		return nil, fmt.Errorf("tried to load desired state from the registry, but loaded %v", desiredState)
 	}
 
 	return &desiredState.Resolution, nil

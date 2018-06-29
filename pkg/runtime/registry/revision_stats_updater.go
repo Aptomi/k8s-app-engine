@@ -8,21 +8,20 @@ import (
 
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/apply/action"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
 // RevisionResultUpdaterImpl is a default thread-safe implementation of ApplyResultUpdater
 type RevisionResultUpdaterImpl struct {
-	store    registry.Interface
+	registry Interface
 	revision *engine.Revision
 	mutex    sync.Mutex
 }
 
 // NewRevisionResultUpdater creates a new default thread-safe implementation of RevisionResultUpdaterImpl, which also
 // saves revision on every action
-func (ds *defaultRegistry) NewRevisionResultUpdater(revision *engine.Revision) action.ApplyResultUpdater {
+func (reg *defaultRegistry) NewRevisionResultUpdater(revision *engine.Revision) action.ApplyResultUpdater {
 	return &RevisionResultUpdaterImpl{
-		store:    ds,
+		registry: reg,
 		revision: revision,
 	}
 }
@@ -66,7 +65,7 @@ func (updater *RevisionResultUpdaterImpl) Done() *action.ApplyResult {
 func (updater *RevisionResultUpdaterImpl) save() {
 	updater.mutex.Lock()
 	defer updater.mutex.Unlock()
-	err := updater.store.UpdateRevision(updater.revision)
+	err := updater.registry.UpdateRevision(updater.revision)
 	if err != nil {
 		panic(fmt.Sprintf("error while saving revision %s: %s", updater.revision.GetGeneration(), err))
 	}

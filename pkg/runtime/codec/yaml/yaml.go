@@ -9,23 +9,23 @@ import (
 )
 
 type yamlCodec struct {
-	registry *runtime.Types
-	json     bool
+	types *runtime.Types
+	json  bool
 }
 
-// NewCodec returns instance of the YAML runtime codec for provided object registry
-func NewCodec(registry *runtime.Types) runtime.Codec {
+// NewCodec returns instance of the YAML runtime codec for provided object types
+func NewCodec(types *runtime.Types) runtime.Codec {
 	return &yamlCodec{
-		registry: registry,
-		json:     false,
+		types: types,
+		json:  false,
 	}
 }
 
-// NewJSONCodec returns instance of the JSON runtime codec for provided object registry
-func NewJSONCodec(registry *runtime.Types) runtime.Codec {
+// NewJSONCodec returns instance of the JSON runtime codec for provided object types
+func NewJSONCodec(types *runtime.Types) runtime.Codec {
 	return &yamlCodec{
-		registry: registry,
-		json:     true,
+		types: types,
+		json:  true,
 	}
 }
 
@@ -128,7 +128,7 @@ func (cod *yamlCodec) decodeRaw(single map[interface{}]interface{}, data []byte)
 		return nil, fmt.Errorf("empty kind")
 	}
 
-	info := cod.registry.Get(kind)
+	info := cod.types.Get(kind)
 	if info == nil {
 		return nil, fmt.Errorf("unknown kind: %s", kind)
 	}

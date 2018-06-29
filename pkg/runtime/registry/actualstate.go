@@ -7,10 +7,10 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-func (ds *defaultRegistry) GetActualState() (*resolve.PolicyResolution, error) {
+func (reg *defaultRegistry) GetActualState() (*resolve.PolicyResolution, error) {
 	actualState := resolve.NewPolicyResolution()
 
-	instances, err := ds.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
+	instances, err := reg.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
 	if err != nil {
 		return nil, fmt.Errorf("error while getting all component instances: %s", err)
 	}

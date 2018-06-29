@@ -11,9 +11,9 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
-func (ds *defaultRegistry) NewActualStateUpdater(actualState *resolve.PolicyResolution) actual.StateUpdater {
+func (reg *defaultRegistry) NewActualStateUpdater(actualState *resolve.PolicyResolution) actual.StateUpdater {
 	return &actualStateUpdater{
-		store:       ds.store,
+		store:       reg.store,
 		actualState: actualState,
 	}
 }
@@ -24,7 +24,7 @@ type actualStateUpdater struct {
 	actualState *resolve.PolicyResolution
 }
 
-// GetComponentInstance returns component instance by key from the underlying store
+// GetComponentInstance returns component instance by key from the underlying registry
 func (updater *actualStateUpdater) GetComponentInstance(key string) *resolve.ComponentInstance {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
@@ -33,7 +33,7 @@ func (updater *actualStateUpdater) GetComponentInstance(key string) *resolve.Com
 	return updater.actualState.ComponentInstanceMap[key]
 }
 
-// CreateComponentInstance creates a new component instance in the actual state, as well as in the underlying store (with appropriate synchronization)
+// CreateComponentInstance creates a new component instance in the actual state, as well as in the underlying registry (with appropriate synchronization)
 func (updater *actualStateUpdater) CreateComponentInstance(instance *resolve.ComponentInstance) error {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
@@ -43,7 +43,7 @@ func (updater *actualStateUpdater) CreateComponentInstance(instance *resolve.Com
 	instance.CreatedAt = time.Now()
 	instance.UpdatedAt = time.Now()
 
-	// save component instance in the actual state store
+	// save component instance in the actual state registry
 	err := updater.save(instance)
 	if err != nil {
 		return err
@@ -55,13 +55,13 @@ func (updater *actualStateUpdater) CreateComponentInstance(instance *resolve.Com
 	return nil
 }
 
-// UpdateComponentInstance updates an existing component instance in the actual state, as well as in the underlying store by calling function makeChanges (with appropriate synchronization)
+// UpdateComponentInstance updates an existing component instance in the actual state, as well as in the underlying registry by calling function makeChanges (with appropriate synchronization)
 func (updater *actualStateUpdater) UpdateComponentInstance(key string, makeChanges func(instance *resolve.ComponentInstance)) error {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
 	defer updater.mutex.Unlock()
 
-	// load instance from the store
+	// load instance from the registry
 	instance, err := updater.loadComponentInstance(key)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (updater *actualStateUpdater) UpdateComponentInstance(key string, makeChang
 	// update component instance
 	makeChanges(instance)
 
-	// save component instance in the actual state store
+	// save component instance in the actual state registry
 	err = updater.save(instance)
 	if err != nil {
 		return err
@@ -85,13 +85,13 @@ func (updater *actualStateUpdater) UpdateComponentInstance(key string, makeChang
 	return nil
 }
 
-// DeleteComponentInstance deletes an existing component instance from the actual state, as well as from the underlying store (with appropriate synchronization)
+// DeleteComponentInstance deletes an existing component instance from the actual state, as well as from the underlying registry (with appropriate synchronization)
 func (updater *actualStateUpdater) DeleteComponentInstance(key string) error {
 	// make sure all changes to actual state are synchronized
 	updater.mutex.Lock()
 	defer updater.mutex.Unlock()
 
-	// delete an existing component from the actual state store
+	// delete an existing component from the actual state registry
 	err := updater.delete(storableKeyForComponent(key))
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func (updater *actualStateUpdater) loadComponentInstance(key string) (*resolve.C
 	}
 	instance, ok := obj.(*resolve.ComponentInstance)
 	if !ok {
-		return nil, fmt.Errorf("tried to load component instance from the store, but loaded %v", instance)
+		return nil, fmt.Errorf("tried to load component instance from the registry, but loaded %v", instance)
 	}
 	return instance, nil
 }
