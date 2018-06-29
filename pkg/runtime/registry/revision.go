@@ -9,7 +9,7 @@ import (
 )
 
 // GetRevision returns Revision for specified generation
-func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, error) {
+func (ds *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revision, error) {
 	dataObj, err := ds.store.GetGen(engine.RevisionKey, gen)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (ds *defaultStore) GetRevision(gen runtime.Generation) (*engine.Revision, e
 }
 
 // NewRevision creates a new revision and saves it to the database
-func (ds *defaultStore) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
+func (ds *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
 	currRevision, err := ds.GetRevision(runtime.LastGen)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting last revision: %s", err)
@@ -60,7 +60,7 @@ func (ds *defaultStore) NewRevision(policyGen runtime.Generation, resolution *re
 }
 
 // UpdateRevision updates specified Revision in the store without creating new generation
-func (ds *defaultStore) UpdateRevision(revision *engine.Revision) error {
+func (ds *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
 	_, err := ds.store.Update(revision)
 	if err != nil {
 		return fmt.Errorf("error while updating revision: %s", err)
@@ -70,7 +70,7 @@ func (ds *defaultStore) UpdateRevision(revision *engine.Revision) error {
 }
 
 // GetLastRevisionForPolicy returns last revision for specified policy generation in chronological order
-func (ds *defaultStore) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
+func (ds *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
@@ -94,7 +94,7 @@ func (ds *defaultStore) GetLastRevisionForPolicy(policyGen runtime.Generation) (
 }
 
 // GetAllRevisionsForPolicy returns all revisions for the specified policy generation
-func (ds *defaultStore) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
+func (ds *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
@@ -113,7 +113,7 @@ func (ds *defaultStore) GetAllRevisionsForPolicy(policyGen runtime.Generation) (
 }
 
 // GetFirstUnprocessedRevision returns the last revision which has not beed processed by the engine yet
-func (ds *defaultStore) GetFirstUnprocessedRevision() (*engine.Revision, error) {
+func (ds *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	revisionObjs, err := ds.store.ListGenerations(engine.RevisionKey)
 	if err != nil {
@@ -138,7 +138,7 @@ func (ds *defaultStore) GetFirstUnprocessedRevision() (*engine.Revision, error) 
 }
 
 // GetDesiredState returns desired state associated with the revision
-func (ds *defaultStore) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
+func (ds *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
 	obj, err := ds.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.DesiredStateObject.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
 	if err != nil {
 		return nil, err

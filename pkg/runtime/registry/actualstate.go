@@ -7,7 +7,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-func (ds *defaultStore) GetActualState() (*resolve.PolicyResolution, error) {
+func (ds *defaultRegistry) GetActualState() (*resolve.PolicyResolution, error) {
 	actualState := resolve.NewPolicyResolution()
 
 	instances, err := ds.store.List(runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, ""))
