@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/Aptomi/aptomi/pkg/api/codec"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 	"github.com/Aptomi/aptomi/pkg/util"
 	log "github.com/sirupsen/logrus"
 	yamlv2 "gopkg.in/yaml.v2"
@@ -18,7 +18,7 @@ import (
 // ReadLangObjects scans the provided files/dirs/stdin, finds Aptomi lang objects, parses and returns them
 func ReadLangObjects(policyPaths []string) ([]runtime.Object, error) {
 	policyTypes := runtime.NewTypes().Append(lang.PolicyObjects...)
-	codec := yaml.NewCodec(policyTypes)
+	codec := codec.NewYAMLCodec(policyTypes)
 
 	if len(policyPaths) == 1 && policyPaths[0] == "-" {
 		return readLangObjectsFromStdin(codec)
@@ -29,7 +29,7 @@ func ReadLangObjects(policyPaths []string) ([]runtime.Object, error) {
 	return nil, fmt.Errorf("policy file path is not specified")
 }
 
-func readLangObjectsFromStdin(codec runtime.Codec) ([]runtime.Object, error) {
+func readLangObjectsFromStdin(codec codec.Interface) ([]runtime.Object, error) {
 	log.Info("Applying policy from stdin")
 	data, readErr := ioutil.ReadAll(os.Stdin)
 	if readErr != nil {
@@ -54,7 +54,7 @@ func readLangObjectsFromStdin(codec runtime.Codec) ([]runtime.Object, error) {
 	return objects, nil
 }
 
-func readLangObjectsFromFiles(policyPaths []string, codec runtime.Codec) ([]runtime.Object, error) {
+func readLangObjectsFromFiles(policyPaths []string, codec codec.Interface) ([]runtime.Object, error) {
 	files, err := findPolicyFiles(policyPaths)
 	if err != nil {
 		return nil, fmt.Errorf("error while searching for policy files: %s", err)

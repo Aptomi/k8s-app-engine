@@ -1,4 +1,4 @@
-package yaml
+package codec
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ type yamlCodec struct {
 	json  bool
 }
 
-// NewCodec returns instance of the YAML runtime codec for provided object types
-func NewCodec(types *runtime.Types) runtime.Codec {
+// NewYAMLCodec returns instance of the YAML runtime codec for provided object types
+func NewYAMLCodec(types *runtime.Types) Interface {
 	return &yamlCodec{
 		types: types,
 		json:  false,
@@ -22,15 +22,15 @@ func NewCodec(types *runtime.Types) runtime.Codec {
 }
 
 // NewJSONCodec returns instance of the JSON runtime codec for provided object types
-func NewJSONCodec(types *runtime.Types) runtime.Codec {
+func NewJSONCodec(types *runtime.Types) Interface {
 	return &yamlCodec{
 		types: types,
 		json:  true,
 	}
 }
 
-// yamlCodec implements runtime.Codec
-var _ runtime.Codec = &yamlCodec{}
+// yamlCodec implements Interface
+var _ Interface = &yamlCodec{}
 
 func (cod *yamlCodec) EncodeOne(obj runtime.Object) ([]byte, error) {
 	return cod.encode(obj)
