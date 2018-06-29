@@ -6,8 +6,13 @@ import (
 )
 
 type Driver interface {
-	GetName() string
-	Open(dataSourceName string) (Store, error)
+	Name() string
+	Config() Config
+	Store(cfg Config) (Store, error)
+}
+
+type Config interface {
+	fmt.Stringer
 }
 
 var (
@@ -23,7 +28,7 @@ func RegisterDriver(driver Driver) {
 		panic("db: can't register nil driver")
 	}
 
-	name := driver.GetName()
+	name := driver.Name()
 	if len(name) == 0 {
 		panic(fmt.Sprintf("db: can't register driver with empty name: %T", driver))
 	}
@@ -35,13 +40,24 @@ func RegisterDriver(driver Driver) {
 	drivers[name] = driver
 }
 
-func Open(name string, dataSourceName string) (Store, error) {
+func GetDriverConfig(name string) (Config, error) {
 	driversMu.RLock()
 	defer driversMu.RUnlock()
 
 	if driver, exists := drivers[name]; exists {
-		return driver.Open(dataSourceName)
+		return driver.Config(), nil
 	}
 
-	return nil, fmt.Errorf("can't find driver: %s", name)
+	return nil, fmt.Errorf("can't find driver to get config: %s", name)
+}
+
+func New(name string, cfg Config) (Store, error) {
+	driversMu.RLock()
+	defer driversMu.RUnlock()
+
+	if driver, exists := drivers[name]; exists {
+		return driver.Store(cfg)
+	}
+
+	return nil, fmt.Errorf("can't find driver to create store: %s", name)
 }

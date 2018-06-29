@@ -21,7 +21,7 @@ type Versioned interface {
 
 type TypeInfo interface {
 	Kind() Kind
-	Indexes() map[string]Index
+	Indexes() map[string]*Index
 	IsVersioned() bool
 	//New() Storable
 	//NewSlice() []Storable
@@ -84,16 +84,22 @@ func GetAllInfos() map[Kind]TypeInfo {
 
 func buildTypeInfo(storable Storable, indexes []*Index) TypeInfo {
 	// todo verify object, indexes and fill in the type info object
+	indexesMap := make(map[string]*Index)
+	for _, index := range indexes {
+		indexesMap[index.Field] = index
+	}
+
 	return &reflectTypeInfo{
-		kind: storable.GetKind(),
-		// indexes: indexes,
+		kind:    storable.GetKind(),
+		indexes: indexesMap,
+		// todo
 		// isVersioned: isVersioned,
 	}
 }
 
 type reflectTypeInfo struct {
 	kind        Kind
-	indexes     map[string]Index
+	indexes     map[string]*Index
 	isVersioned bool
 }
 
@@ -101,7 +107,7 @@ func (info *reflectTypeInfo) Kind() Kind {
 	return info.kind
 }
 
-func (info *reflectTypeInfo) Indexes() map[string]Index {
+func (info *reflectTypeInfo) Indexes() map[string]*Index {
 	return info.indexes
 }
 
