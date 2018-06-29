@@ -6,14 +6,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
 // GetRevision returns Revision for specified generation
 func (reg *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revision, error) {
-	//dataObj, err := reg.store.GetGen(engine.RevisionKey, gen)
+	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
 	var revision *engine.Revision
-	// todo add WithGen
-	err := reg.store.Find(engine.TypeRevision.Kind).Last(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithGen(gen)).One(revision)
 	if err != nil {
 		return nil, err
 	}
@@ -73,10 +73,8 @@ func (reg *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
 // GetLastRevisionForPolicy returns last revision for specified policy generation in chronological order
 func (reg *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
-	//revisionObjs, err := reg.store.ListGenerations(engine.RevisionKey)
 	var revision *engine.Revision
-	// todo add WithFieldEq("PolicyGen", policyGen)
-	err := reg.store.Find(engine.TypeRevision.Kind).Last(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen), store.WithGetLast()).One(revision)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +86,7 @@ func (reg *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generatio
 func (reg *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	var revisions []*engine.Revision
-	// todo add WithFieldEq("PolicyGen", policyGen)
-	err := reg.store.Find(engine.TypeRevision.Kind).List(&revisions)
+	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen)).List(&revisions)
 	if err != nil {
 		return nil, err
 	}
@@ -100,11 +97,8 @@ func (reg *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generatio
 // GetFirstUnprocessedRevision returns the last revision which has not beed processed by the engine yet
 func (reg *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
-	//revisionObjs, err := reg.store.ListGenerations(engine.RevisionKey)
 	var revision *engine.Revision
-	// todo add WithFieldEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress)
-	// todo support multiple values in WithFieldEq
-	err := reg.store.Find(engine.TypeRevision.Kind).First(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress), store.WithGetFirst()).One(revision)
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +108,10 @@ func (reg *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, err
 
 // GetDesiredState returns desired state associated with the revision
 func (reg *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
-	//obj, err := reg.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
-	var desiredState *engine.DesiredState
 	// todo make desired state versioned same as revision (forceSpecificVersion on save)
-	// todo WithGen(revision.Gen)
-	err := reg.store.Find(engine.TypeDesiredState.Kind).Last(desiredState)
+	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
+	var desiredState *engine.DesiredState
+	err := reg.store.Find(engine.TypeDesiredState.Kind, store.WithKey(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))).One(desiredState)
 	if err != nil {
 		return nil, err
 	}

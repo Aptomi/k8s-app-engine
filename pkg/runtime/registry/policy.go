@@ -8,13 +8,14 @@ import (
 	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/lang"
 	"github.com/Aptomi/aptomi/pkg/runtime"
+	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
 // GetPolicyData retrieves PolicyData given its generation
 func (reg *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
+	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
 	var policyData *engine.PolicyData
-	// todo add WithKey (thing about replacing with some flag in Info) and WithGen(gen)
-	err := reg.store.Find(engine.TypePolicyData.Kind).Last(policyData)
+	err := reg.store.Find(engine.TypePolicyData.Kind, store.WithKey(engine.PolicyDataKey), store.WithGen(gen)).One(policyData)
 	if err != nil {
 		return nil, err
 	}
@@ -34,13 +35,11 @@ func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*l
 
 	policy := lang.NewPolicy()
 	if policyData.Objects != nil {
-		for _ /*ns*/, kindNameGen := range policyData.Objects {
+		for ns, kindNameGen := range policyData.Objects {
 			for kind, nameGen := range kindNameGen {
-				for range /*name, gen := */ nameGen {
+				for name, gen := range nameGen {
 					var langObj lang.Base
-					//obj, errStore := reg.store.GetGen(runtime.KeyFromParts(ns, kind, name), gen)
-					// todo add WithKey and WithGen
-					errStore := reg.store.Find(kind).Last(langObj)
+					errStore := reg.store.Find(kind, store.WithKey(runtime.KeyFromParts(ns, kind, name)), store.WithGen(gen)).One(langObj)
 					if errStore != nil {
 						return nil, 0, errStore
 					}
@@ -53,6 +52,7 @@ func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*l
 			}
 		}
 	}
+
 	return policy, policyData.GetGeneration(), nil
 }
 
@@ -63,6 +63,7 @@ func (reg *defaultRegistry) GetPolicy(gen runtime.Generation) (*lang.Policy, run
 	if err != nil {
 		return nil, runtime.LastGen, err
 	}
+
 	return reg.getPolicyFromData(policyData)
 }
 
