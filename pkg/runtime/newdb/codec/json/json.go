@@ -6,7 +6,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/db"
 )
 
-var Codec db.Codec = &codec{}
+var Codec newdb.Codec = &codec{}
 
 type codec struct {
 }

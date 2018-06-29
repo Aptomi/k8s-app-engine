@@ -1,4 +1,4 @@
-package core
+package registry
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 // RevisionResultUpdaterImpl is a default thread-safe implementation of ApplyResultUpdater
 type RevisionResultUpdaterImpl struct {
-	store    store.Core
+	store    registry.Interface
 	revision *engine.Revision
 	mutex    sync.Mutex
 }

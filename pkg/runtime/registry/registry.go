@@ -1,4 +1,4 @@
-package store
+package registry
 
 import (
 	"github.com/Aptomi/aptomi/pkg/engine"
@@ -9,15 +9,15 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// Core represents main object store interface that covers database operations for all objects
-type Core interface {
-	Policy
-	Revision
-	ActualState
+// Interface represents main object store interface that covers database operations for all objects
+type Interface interface {
+	PolicyRegistry
+	RevisionRegistry
+	ActualStateRegistry
 }
 
-// Policy represents database operations for Policy object
-type Policy interface {
+// PolicyRegistry represents database operations for Policy object
+type PolicyRegistry interface {
 	GetPolicy(runtime.Generation) (*lang.Policy, runtime.Generation, error)
 	GetPolicyData(runtime.Generation) (*engine.PolicyData, error)
 	InitPolicy() error
@@ -25,8 +25,8 @@ type Policy interface {
 	DeleteFromPolicy(deleted []lang.Base, performedBy string) (changed bool, data *engine.PolicyData, err error)
 }
 
-// Revision represents database operations for Revision object
-type Revision interface {
+// RevisionRegistry represents database operations for Revision object
+type RevisionRegistry interface {
 	NewRevision(policyGen runtime.Generation, desiredState *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error)
 	GetDesiredState(*engine.Revision) (*resolve.PolicyResolution, error)
 	GetRevision(gen runtime.Generation) (*engine.Revision, error)
@@ -37,8 +37,8 @@ type Revision interface {
 	GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error)
 }
 
-// ActualState represents database operations for the actual state handling
-type ActualState interface {
+// ActualStateRegistry represents database operations for the actual state handling
+type ActualStateRegistry interface {
 	GetActualState() (*resolve.PolicyResolution, error)
 	NewActualStateUpdater(*resolve.PolicyResolution) actual.StateUpdater
 }

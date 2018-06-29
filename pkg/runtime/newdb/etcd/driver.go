@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	db.RegisterDriver(&driver{})
+	newdb.RegisterDriver(&driver{})
 }
 
 type config struct {
@@ -26,11 +26,11 @@ func (d *driver) Name() string {
 	return "etcd"
 }
 
-func (d *driver) Config() db.Config {
+func (d *driver) Config() newdb.Config {
 	return &config{}
 }
 
-func (d *driver) Store(cfg db.Config) (db.Store, error) {
+func (d *driver) Store(cfg newdb.Config) (newdb.Store, error) {
 	client, err := etcd.New(etcd.Config{
 		Endpoints:   []string{"localhost:2379"},
 		DialTimeout: 5 * time.Second,

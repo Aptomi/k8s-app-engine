@@ -6,6 +6,7 @@ import (
 
 	"github.com/Aptomi/aptomi/pkg/runtime/db"
 	"github.com/Aptomi/aptomi/pkg/runtime/db/codec/json"
+	"github.com/Aptomi/aptomi/pkg/runtime/newdb"
 	etcd "github.com/coreos/etcd/clientv3"
 	conc "github.com/coreos/etcd/clientv3/concurrency"
 )
@@ -18,8 +19,8 @@ func (s *store) Close() error {
 	return s.client.Close()
 }
 
-func (s *store) Save(new db.Storable, inPlace bool) error {
-	info := db.GetInfoFor(new)
+func (s *store) Save(new newdb.Storable, inPlace bool) error {
+	info := newdb.GetInfoFor(new)
 	key := new.GetKey()
 
 	// todo seems like we don't need to check response.Success as it's already checked inside the STM
@@ -33,8 +34,8 @@ func (s *store) Save(new db.Storable, inPlace bool) error {
 		// 7. - remove old value from indexes if needed
 		// 8. - add new value to indexes if needed
 
-		lastGen := parseIndexSingleGen([]byte(stm.Get(indexPath(info, db.LastGenIndex, key, nil))))
-		if lastGen == db.LastOrEmptyGen {
+		lastGen := parseIndexSingleGen([]byte(stm.Get(indexPath(info, newdb.LastGenIndex, key, nil))))
+		if lastGen == newdb.LastOrEmptyGen {
 			// creating new object
 		}
 		current := parseObject([]byte(stm.Get(key + "@" + lastGen.String())))
@@ -48,11 +49,11 @@ func (s *store) Save(new db.Storable, inPlace bool) error {
 	return err
 }
 
-func (s *store) Delete(storable db.Storable, key string) error {
+func (s *store) Delete(storable newdb.Storable, key string) error {
 	panic("implement me")
 }
 
-func (s *store) Get(result db.Storable, key string) error {
+func (s *store) Get(result newdb.Storable, key string) error {
 	// need to benchmark two gets (last version index + object itself) gets from DB vs sorted get on 10000 version of one object
 	// todo replace with two gets, even with second get inside tx it's ~30 times faster then sort
 	s.client.Get(context.TODO(), "key@", etcd.WithPrefix(), etcd.WithSort(etcd.SortByKey, etcd.SortDescend), etcd.WithLimit(1))
@@ -60,7 +61,7 @@ func (s *store) Get(result db.Storable, key string) error {
 	panic("implement me")
 }
 
-func (s *store) List(result []db.Storable, query ...*db.Query) error {
+func (s *store) List(result []newdb.Storable, query ...*newdb.Query) error {
 	panic("implement me")
 }
 
@@ -69,24 +70,24 @@ const (
 	indexPrefix  = "i"
 )
 
-func objectPath(info db.TypeInfo, key db.Key, gen db.Generation) string {
+func objectPath(info newdb.TypeInfo, key newdb.Key, gen newdb.Generation) string {
 	return objectPrefix + "/" + info.Kind() + "/" + key + "/" + gen.String()
 }
 
-func indexPath(info db.TypeInfo, index *db.Index, key db.Key, value interface{}) string {
+func indexPath(info newdb.TypeInfo, index *newdb.Index, key newdb.Key, value interface{}) string {
 	//todo
 	return indexPrefix + "/" + info.Kind() + "/" + index.Key(key, value)
 }
 
-func parseIndexSingleGen(data []byte) db.Generation {
+func parseIndexSingleGen(data []byte) newdb.Generation {
 	if len(data) == 0 {
-		return db.LastOrEmptyGen
+		return newdb.LastOrEmptyGen
 	}
 
-	return db.Generation(binary.BigEndian.Uint64(data))
+	return newdb.Generation(binary.BigEndian.Uint64(data))
 }
 
-func parseObject(data []byte, result db.Storable) error {
+func parseObject(data []byte, result newdb.Storable) error {
 	// todo
 	return json.Codec.Unmarshal(data, result)
 }

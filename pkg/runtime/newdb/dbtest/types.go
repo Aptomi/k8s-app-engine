@@ -7,14 +7,14 @@ import (
 type TestObj struct {
 }
 
-func (*TestObj) GetKind() db.Kind {
+func (*TestObj) GetKind() newdb.Kind {
 	return "test"
 }
 
-func (*TestObj) GetKey() db.Key {
+func (*TestObj) GetKey() newdb.Key {
 	return "key"
 }
 
 func init() {
-	db.RegisterType(&TestObj{})
+	newdb.RegisterType(&TestObj{})
 }

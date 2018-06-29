@@ -1,4 +1,4 @@
-package db
+package newdb
 
 type Codec interface {
 	Marshal(value interface{}) ([]byte, error)
