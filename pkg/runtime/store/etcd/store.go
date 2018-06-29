@@ -83,7 +83,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 
 		// todo make wrapper that will panic as it's ok to panic if can't marshal/unmarshal data
 		// todo just have defer recover at the beginning of each function...
-		newStorable.SetGeneration(gen)
+		newStorable.(runtime.Versioned).SetGeneration(gen)
 		data, cErr := s.codec.Marshal(newStorable)
 		if cErr != nil {
 			return cErr
@@ -100,6 +100,22 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 	return err
 }
 
+/*
+Current Find use cases:
+
+* Find(resolve.TypeComponentInstance.Kind).List(&instances)
+* Find(resolve.TypeComponentInstance.Kind, store.WithKey(storableKeyForComponent(key))).One(instance)
+* Find(resolve.TypeComponentInstance.Kind).List(&instances)
+* Find(engine.TypePolicyData.Kind, store.WithKey(engine.PolicyDataKey), store.WithGen(gen)).One(policyData)
+* Find(kind, store.WithKey(runtime.KeyFromParts(ns, kind, name)), store.WithGen(gen)).One(langObj)
+* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithGen(gen)).One(revision)
+* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen), store.WithGetLast()).One(revision)
+* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen)).List(&revisions)
+* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress), store.WithGetFirst()).One(revision)
+ *Find(engine.TypeDesiredState.Kind, store.WithKey(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))).One(desiredState)
+
+*/
+
 func (s *etcdStore) Find(kind runtime.Kind, opts ...store.FindOpt) store.Finder {
 	// todo next 3 lines could be extracted to the common code
 	findOpts := &store.FindOpts{}
@@ -110,24 +126,20 @@ func (s *etcdStore) Find(kind runtime.Kind, opts ...store.FindOpt) store.Finder 
 	return &finder{s, kind, findOpts}
 }
 
-func (s *etcdStore) Delete(kind runtime.Kind, opts ...store.DeleteOpt) store.Deleter {
-	panic("implement me")
-}
-
 type finder struct {
 	*etcdStore
 	kind runtime.Kind
 	*store.FindOpts
 }
 
-func (f *finder) First(runtime.Storable) error {
-	panic("implement me")
-}
-
-func (f *finder) Last(runtime.Storable) error {
+func (f *finder) One(runtime.Storable) error {
 	panic("implement me")
 }
 
 func (f *finder) List(interface{}) error {
+	panic("implement me")
+}
+
+func (s *etcdStore) Delete(kind runtime.Kind, key runtime.Key) error {
 	panic("implement me")
 }

@@ -9,7 +9,7 @@ type Interface interface {
 
 	Save(storable runtime.Storable, opts ...SaveOpt) error
 	Find(kind runtime.Kind, opts ...FindOpt) Finder
-	Delete(kind runtime.Kind, opts ...DeleteOpt) Deleter
+	Delete(kind runtime.Kind, key runtime.Key) error
 }
 
 // Save
@@ -25,9 +25,7 @@ type SaveOpt func(opts *SaveOpts)
 // Find
 
 type Finder interface {
-	First(runtime.Storable) error
-	// Todo replace First/Last with One() and add some FindOpt to determine First or Last
-	Last(runtime.Storable) error
+	One(runtime.Storable) error
 	List(interface{}) error
 }
 
@@ -40,25 +38,37 @@ type FindOpts struct {
 
 type FindOpt func(opts *FindOpts)
 
-func WhereEq(name string, value interface{}) FindOpt {
+func WithKey(key runtime.Key) FindOpt {
 	return func(opts *FindOpts) {
-		opts.condition = FieldEq{name, value}
+		opts.key = key
+	}
+}
+
+func WithGen(gen runtime.Generation) FindOpt {
+	return func(opts *FindOpts) {
+		opts.gen = gen
+	}
+}
+
+func WithWhereEq(name string, values ...interface{}) FindOpt {
+	return func(opts *FindOpts) {
+		opts.condition = FieldEq{name, values}
+	}
+}
+
+func WithGetLast() FindOpt {
+	return func(opts *FindOpts) {
+		// todo
+	}
+}
+
+func WithGetFirst() FindOpt {
+	return func(opts *FindOpts) {
+		// todo
 	}
 }
 
 type FieldEq struct {
-	name  string
-	value interface{}
+	name   string
+	values []interface{}
 }
-
-// Delete
-
-type Deleter interface {
-	One() error
-	All() (int, error)
-}
-
-type DeleteOpts struct {
-}
-
-type DeleteOpt func(opts *DeleteOpts)
