@@ -3,8 +3,8 @@ package lang
 import "github.com/Aptomi/aptomi/pkg/runtime"
 
 var (
-	// PolicyObjects is the list of informational data for all policy objects
-	PolicyObjects = []*runtime.TypeInfo{
+	// PolicyTypes is the list of informational data for all policy objects
+	PolicyTypes = []*runtime.TypeInfo{
 		TypeBundle,
 		TypeService,
 		TypeClaim,
@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	for _, obj := range PolicyObjects {
+	for _, obj := range PolicyTypes {
 		policyObjectsMap[obj.Kind] = true
 	}
 }

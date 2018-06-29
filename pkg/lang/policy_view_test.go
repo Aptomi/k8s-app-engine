@@ -13,7 +13,7 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 
 	// get the list of objects
 	objList := []Base{}
-	for _, obj := range PolicyObjects {
+	for _, obj := range PolicyTypes {
 		objList = append(objList, policyWithObjects.GetObjectsByKind(obj.Kind)...)
 	}
 	assert.NotEmpty(t, objList, "Object list should not be empty")

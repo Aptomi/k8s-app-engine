@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	// Objects is the list of informational objects for all objects in the engine
-	Objects = runtime.AppendAllTypes([]*runtime.TypeInfo{
+	// Types is the list of informational objects for all objects in the engine
+	Types = runtime.AppendAllTypes([]*runtime.TypeInfo{
 		TypePolicyData,
 		TypeRevision,
 		TypeDesiredState,

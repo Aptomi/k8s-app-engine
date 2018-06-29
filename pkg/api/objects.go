@@ -8,13 +8,13 @@ import (
 )
 
 var (
-	// Objects is a list of all objects used in API
-	Objects = runtime.AppendAllTypes([]*runtime.TypeInfo{
+	// Types is a list of all objects used in API
+	Types = runtime.AppendAllTypes([]*runtime.TypeInfo{
 		TypeClaimsStatus,
 		TypePolicyUpdateResult,
 		TypeAuthSuccess,
 		TypeAuthRequest,
 		TypeServerError,
 		version.TypeBuildInfo,
-	}, lang.PolicyObjects, engine.Objects)
+	}, lang.PolicyTypes, engine.Types)
 )
