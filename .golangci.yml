@@ -37,6 +37,8 @@ linters:
   disable:
     # enable to optimize struct size in memory
     - maligned
+#   todo: enable lll and switch to 120 as more appropriate line length limit
+    - lll
 
 issues:
   exclude-use-default: false
