@@ -65,3 +65,7 @@ import:
   version: release-1.10
 - package: k8s.io/apiserver
   version: release-1.10
+- package: github.com/coreos/etcd
+  version: ^3.3.8
+  subpackages:
+  - clientv3
