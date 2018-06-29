@@ -35,6 +35,8 @@ func (s *etcdStore) Close() error {
 	return s.client.Close()
 }
 
+// todo need to rework keys to not include kind or to start with kind at least
+
 func (s *etcdStore) Save(storable runtime.Storable, opts ...store.SaveOpt) error {
 	panic("implement me")
 }
