@@ -11,7 +11,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 )
 
-func (ds *defaultStore) NewActualStateUpdater(actualState *resolve.PolicyResolution) actual.StateUpdater {
+func (ds *defaultRegistry) NewActualStateUpdater(actualState *resolve.PolicyResolution) actual.StateUpdater {
 	return &actualStateUpdater{
 		store:       ds.store,
 		actualState: actualState,
@@ -19,7 +19,7 @@ func (ds *defaultStore) NewActualStateUpdater(actualState *resolve.PolicyResolut
 }
 
 type actualStateUpdater struct {
-	store       registry.Generic
+	store       store.Interface
 	mutex       sync.Mutex
 	actualState *resolve.PolicyResolution
 }

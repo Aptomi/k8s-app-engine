@@ -11,7 +11,7 @@ import (
 )
 
 // GetPolicyData retrieves PolicyData given its generation
-func (ds *defaultStore) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
+func (ds *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
 	dataObj, err := ds.store.GetGen(engine.PolicyDataKey, gen)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (ds *defaultStore) GetPolicyData(gen runtime.Generation) (*engine.PolicyDat
 
 // getPolicyFromData() returns Policy converted from PolicyData.
 // if PolicyData is nil, it will return nil
-func (ds *defaultStore) getPolicyFromData(policyData *engine.PolicyData) (*lang.Policy, runtime.Generation, error) {
+func (ds *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*lang.Policy, runtime.Generation, error) {
 	if policyData == nil {
 		return nil, runtime.LastGen, nil
 	}
@@ -59,7 +59,7 @@ func (ds *defaultStore) getPolicyFromData(policyData *engine.PolicyData) (*lang.
 
 // GetPolicy retrieves PolicyData based on its generation and then converts it to Policy
 // if there is no policy yet (Aptomi not initialized), it will return nil
-func (ds *defaultStore) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
+func (ds *defaultRegistry) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
 	policyData, err := ds.GetPolicyData(gen)
 	if err != nil {
 		return nil, runtime.LastGen, err
@@ -68,7 +68,7 @@ func (ds *defaultStore) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime
 }
 
 // UpdatePolicy updates a list of changed objects in the underlying data store
-func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
+func (ds *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
 	// we should process only a single policy update request at once
 	ds.policyChangeLock.Lock()
 	defer ds.policyChangeLock.Unlock()
@@ -114,7 +114,7 @@ func (ds *defaultStore) UpdatePolicy(updatedObjects []lang.Base, performedBy str
 }
 
 // InitPolicy initializes policy (on the first run of Aptomi)
-func (ds *defaultStore) InitPolicy() error {
+func (ds *defaultRegistry) InitPolicy() error {
 	// create and save
 	initialPolicyData := &engine.PolicyData{
 		TypeKind: engine.PolicyDataObject.GetTypeKind(),
@@ -138,7 +138,7 @@ func (ds *defaultStore) InitPolicy() error {
 }
 
 // DeleteFromPolicy deletes provided objects from policy
-func (ds *defaultStore) DeleteFromPolicy(deleted []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
+func (ds *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy string) (bool, *engine.PolicyData, error) {
 	// we should process only a single policy update request at once
 	ds.policyChangeLock.Lock()
 	defer ds.policyChangeLock.Unlock()

@@ -20,7 +20,7 @@ type RevisionResultUpdaterImpl struct {
 
 // NewRevisionResultUpdater creates a new default thread-safe implementation of RevisionResultUpdaterImpl, which also
 // saves revision on every action
-func (ds *defaultStore) NewRevisionResultUpdater(revision *engine.Revision) action.ApplyResultUpdater {
+func (ds *defaultRegistry) NewRevisionResultUpdater(revision *engine.Revision) action.ApplyResultUpdater {
 	return &RevisionResultUpdaterImpl{
 		store:    ds,
 		revision: revision,
