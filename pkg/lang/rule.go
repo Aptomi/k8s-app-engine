@@ -7,8 +7,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// RuleObject is an informational data structure with Kind and Constructor for Rule
-var RuleObject = &runtime.TypeInfo{
+// TypeRule is an informational data structure with Kind and Constructor for Rule
+var TypeRule = &runtime.TypeInfo{
 	Kind:        "rule",
 	Storable:    true,
 	Versioned:   true,

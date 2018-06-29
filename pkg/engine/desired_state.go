@@ -7,8 +7,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// DesiredStateObject is an informational data structure with Kind and Constructor for DesiredState
-var DesiredStateObject = &runtime.TypeInfo{
+// TypeDesiredState is an informational data structure with Kind and Constructor for DesiredState
+var TypeDesiredState = &runtime.TypeInfo{
 	Kind:        "desired-state",
 	Storable:    true,
 	Versioned:   false,
@@ -26,7 +26,7 @@ type DesiredState struct {
 // NewDesiredState creates new DesiredState instance from revision and policy resolution
 func NewDesiredState(revision *Revision, resolution *resolve.PolicyResolution) *DesiredState {
 	return &DesiredState{
-		TypeKind:    DesiredStateObject.GetTypeKind(),
+		TypeKind:    TypeDesiredState.GetTypeKind(),
 		RevisionGen: revision.GetGeneration(),
 		Resolution:  *resolution,
 	}

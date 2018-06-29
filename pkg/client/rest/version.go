@@ -15,7 +15,7 @@ type versionClient struct {
 }
 
 func (client *versionClient) Show() (*version.BuildInfo, error) {
-	response, err := client.httpClient.GET("/version", version.BuildInfoObject)
+	response, err := client.httpClient.GET("/version", version.TypeBuildInfo)
 	if err != nil {
 		return nil, err
 	}

@@ -31,7 +31,7 @@ func TestDiffComponentCreationAndAttachClaim(t *testing.T) {
 	resolvedPrev := resolvePolicy(t, b)
 
 	// add claim
-	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.TypeService.Kind)[0].(*lang.Service))
 	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
@@ -40,7 +40,7 @@ func TestDiffComponentCreationAndAttachClaim(t *testing.T) {
 	verifyDiff(t, diff, 2, 0, 0, 2, 0)
 
 	// add another claim
-	c2 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
+	c2 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.TypeService.Kind)[0].(*lang.Service))
 	c2.Labels["param"] = "value1"
 	resolvedNextAgain := resolvePolicy(t, b)
 
@@ -54,7 +54,7 @@ func TestDiffComponentUpdate(t *testing.T) {
 	resolvedPrev := resolvePolicy(t, b)
 
 	// add claim
-	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.TypeService.Kind)[0].(*lang.Service))
 	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
@@ -76,7 +76,7 @@ func TestDiffComponentDelete(t *testing.T) {
 	resolvedPrev := resolvePolicy(t, b)
 
 	// add claim
-	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.ServiceObject.Kind)[0].(*lang.Service))
+	c1 := b.AddClaim(b.AddUser(), b.Policy().GetObjectsByKind(lang.TypeService.Kind)[0].(*lang.Service))
 	c1.Labels["param"] = "value1"
 	resolvedNext := resolvePolicy(t, b)
 
@@ -157,7 +157,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder) *resolve.Policy
 	resolver := resolve.NewPolicyResolver(builder.Policy(), builder.External(), eventLog)
 	result := resolver.ResolveAllClaims()
 
-	claims := builder.Policy().GetObjectsByKind(lang.ClaimType.Kind)
+	claims := builder.Policy().GetObjectsByKind(lang.TypeClaim.Kind)
 	for _, claim := range claims {
 		if !assert.True(t, result.GetClaimResolution(claim.(*lang.Claim)).Resolved, "Claim resolution status should be correct for %v", claim) {
 			hook := event.NewHookConsole(logrus.DebugLevel)

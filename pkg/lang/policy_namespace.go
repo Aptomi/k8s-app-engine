@@ -34,11 +34,11 @@ func NewPolicyNamespace(name string) *PolicyNamespace {
 
 func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 	switch kind := obj.GetKind(); kind {
-	case BundleType.Kind:
+	case TypeBundle.Kind:
 		policyNamespace.Bundles[obj.GetName()] = obj.(*Bundle) // nolint: errcheck
-	case ServiceObject.Kind:
+	case TypeService.Kind:
 		policyNamespace.Services[obj.GetName()] = obj.(*Service) // nolint: errcheck
-	case ClusterObject.Kind:
+	case TypeCluster.Kind:
 		// cluster is a special object, which we don't allow to update certain parts of (e.g. type and config)
 		clusterUpdated := obj.(*Cluster) // nolint: errcheck
 		clusterExisting, present := policyNamespace.Clusters[obj.GetName()]
@@ -59,11 +59,11 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 			}
 		}
 		policyNamespace.Clusters[obj.GetName()] = obj.(*Cluster) // nolint: errcheck
-	case RuleObject.Kind:
+	case TypeRule.Kind:
 		policyNamespace.Rules[obj.GetName()] = obj.(*Rule) // nolint: errcheck
-	case ACLRuleObject.Kind:
+	case TypeACLRule.Kind:
 		policyNamespace.ACLRules[obj.GetName()] = obj.(*ACLRule) // nolint: errcheck
-	case ClaimType.Kind:
+	case TypeClaim.Kind:
 		policyNamespace.Claims[obj.GetName()] = obj.(*Claim) // nolint: errcheck
 	default:
 		return fmt.Errorf("not supported by PolicyNamespace.addObject(): unknown kind %s", kind)
@@ -73,32 +73,32 @@ func (policyNamespace *PolicyNamespace) addObject(obj Base) error {
 
 func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 	switch kind := obj.GetKind(); kind {
-	case BundleType.Kind:
+	case TypeBundle.Kind:
 		if _, exist := policyNamespace.Bundles[obj.GetName()]; exist {
 			delete(policyNamespace.Bundles, obj.GetName())
 			return true
 		}
-	case ServiceObject.Kind:
+	case TypeService.Kind:
 		if _, exist := policyNamespace.Services[obj.GetName()]; exist {
 			delete(policyNamespace.Services, obj.GetName())
 			return true
 		}
-	case ClusterObject.Kind:
+	case TypeCluster.Kind:
 		if _, exist := policyNamespace.Clusters[obj.GetName()]; exist {
 			delete(policyNamespace.Clusters, obj.GetName())
 			return true
 		}
-	case RuleObject.Kind:
+	case TypeRule.Kind:
 		if _, exist := policyNamespace.Rules[obj.GetName()]; exist {
 			delete(policyNamespace.Rules, obj.GetName())
 			return true
 		}
-	case ACLRuleObject.Kind:
+	case TypeACLRule.Kind:
 		if _, exist := policyNamespace.ACLRules[obj.GetName()]; exist {
 			delete(policyNamespace.ACLRules, obj.GetName())
 			return true
 		}
-	case ClaimType.Kind:
+	case TypeClaim.Kind:
 		if _, exist := policyNamespace.Claims[obj.GetName()]; exist {
 			delete(policyNamespace.Claims, obj.GetName())
 			return true
@@ -111,27 +111,27 @@ func (policyNamespace *PolicyNamespace) removeObject(obj Base) bool {
 func (policyNamespace *PolicyNamespace) getObjectsByKind(kind string) []Base {
 	var result []Base
 	switch kind {
-	case BundleType.Kind:
+	case TypeBundle.Kind:
 		for _, bundle := range policyNamespace.Bundles {
 			result = append(result, bundle)
 		}
-	case ServiceObject.Kind:
+	case TypeService.Kind:
 		for _, service := range policyNamespace.Services {
 			result = append(result, service)
 		}
-	case ClusterObject.Kind:
+	case TypeCluster.Kind:
 		for _, cluster := range policyNamespace.Clusters {
 			result = append(result, cluster)
 		}
-	case RuleObject.Kind:
+	case TypeRule.Kind:
 		for _, rule := range policyNamespace.Rules {
 			result = append(result, rule)
 		}
-	case ACLRuleObject.Kind:
+	case TypeACLRule.Kind:
 		for _, rule := range policyNamespace.ACLRules {
 			result = append(result, rule)
 		}
-	case ClaimType.Kind:
+	case TypeClaim.Kind:
 		for _, claim := range policyNamespace.Claims {
 			result = append(result, claim)
 		}
@@ -145,27 +145,27 @@ func (policyNamespace *PolicyNamespace) getObject(kind string, name string) (run
 	var ok bool
 	var result Base
 	switch kind {
-	case BundleType.Kind:
+	case TypeBundle.Kind:
 		if result, ok = policyNamespace.Bundles[name]; !ok {
 			return nil, nil
 		}
-	case ServiceObject.Kind:
+	case TypeService.Kind:
 		if result, ok = policyNamespace.Services[name]; !ok {
 			return nil, nil
 		}
-	case ClusterObject.Kind:
+	case TypeCluster.Kind:
 		if result, ok = policyNamespace.Clusters[name]; !ok {
 			return nil, nil
 		}
-	case RuleObject.Kind:
+	case TypeRule.Kind:
 		if result, ok = policyNamespace.Rules[name]; !ok {
 			return nil, nil
 		}
-	case ACLRuleObject.Kind:
+	case TypeACLRule.Kind:
 		if result, ok = policyNamespace.ACLRules[name]; !ok {
 			return nil, nil
 		}
-	case ClaimType.Kind:
+	case TypeClaim.Kind:
 		if result, ok = policyNamespace.Claims[name]; !ok {
 			return nil, nil
 		}

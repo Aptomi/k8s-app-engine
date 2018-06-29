@@ -110,14 +110,14 @@ func (updater *actualStateUpdater) GetUpdatedActualState() *resolve.PolicyResolu
 
 func storableKeyForComponent(componentKey string) string {
 	// todo no more need to have namespace and kind in it? at least namespace?
-	return runtime.KeyFromParts(runtime.SystemNS, resolve.ComponentInstanceObject.Kind, componentKey)
+	return runtime.KeyFromParts(runtime.SystemNS, resolve.TypeComponentInstance.Kind, componentKey)
 }
 
 func (updater *actualStateUpdater) loadComponentInstance(key string) (*resolve.ComponentInstance, error) {
 	//obj, err := updater.store.Get(storableKeyForComponent(key))
 	var instance *resolve.ComponentInstance
 	// todo add WithKey(storableKeyForComponent(key))
-	err := updater.store.Find(resolve.ComponentInstanceObject.Kind).Last(instance)
+	err := updater.store.Find(resolve.TypeComponentInstance.Kind).Last(instance)
 	if err != nil {
 		return nil, err
 	}
@@ -135,5 +135,5 @@ func (updater *actualStateUpdater) save(obj runtime.Storable) error {
 
 func (updater *actualStateUpdater) delete(key string) error {
 	// todo add WithKey(key)
-	return updater.store.Delete(resolve.ComponentInstanceObject.Kind).One()
+	return updater.store.Delete(resolve.TypeComponentInstance.Kind).One()
 }

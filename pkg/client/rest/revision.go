@@ -17,7 +17,7 @@ type revisionClient struct {
 }
 
 func (client *revisionClient) Show(gen runtime.Generation) (*engine.Revision, error) {
-	response, err := client.httpClient.GET(fmt.Sprintf("/revision/gen/%d", gen), engine.RevisionObject)
+	response, err := client.httpClient.GET(fmt.Sprintf("/revision/gen/%d", gen), engine.TypeRevision)
 	if err != nil {
 		return nil, err
 	}

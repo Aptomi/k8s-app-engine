@@ -7,8 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// ClusterObject is an informational data structure with Kind and Constructor for Cluster
-var ClusterObject = &runtime.TypeInfo{
+// TypeCluster is an informational data structure with Kind and Constructor for Cluster
+var TypeCluster = &runtime.TypeInfo{
 	Kind:        "cluster",
 	Storable:    true,
 	Versioned:   true,

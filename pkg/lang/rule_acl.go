@@ -28,8 +28,8 @@ type ACLRule struct {
 	Actions *ACLRuleActions `validate:"required"`
 }
 
-// ACLRuleObject is an informational data structure with Kind and Constructor for ACLRule
-var ACLRuleObject = &runtime.TypeInfo{
+// TypeACLRule is an informational data structure with Kind and Constructor for ACLRule
+var TypeACLRule = &runtime.TypeInfo{
 	Kind:        "aclrule",
 	Storable:    true,
 	Versioned:   true,
@@ -141,15 +141,15 @@ var DomainAdmin = &ACLRole{
 	Privileges: &Privileges{
 		AllNamespaces: true,
 		NamespaceObjects: map[string]*Privilege{
-			BundleType.Kind:    fullAccess,
-			ServiceObject.Kind: fullAccess,
-			ClaimType.Kind:     fullAccess,
-			RuleObject.Kind:    fullAccess,
+			TypeBundle.Kind:  fullAccess,
+			TypeService.Kind: fullAccess,
+			TypeClaim.Kind:   fullAccess,
+			TypeRule.Kind:    fullAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
-			ClusterObject.Kind: fullAccess,
-			RuleObject.Kind:    fullAccess,
-			ACLRuleObject.Kind: fullAccess,
+			TypeCluster.Kind: fullAccess,
+			TypeRule.Kind:    fullAccess,
+			TypeACLRule.Kind: fullAccess,
 		},
 	},
 }
@@ -160,15 +160,15 @@ var NamespaceAdmin = &ACLRole{
 	Name: "Namespace Admin",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleType.Kind:    fullAccess,
-			ServiceObject.Kind: fullAccess,
-			ClaimType.Kind:     fullAccess,
-			RuleObject.Kind:    fullAccess,
+			TypeBundle.Kind:  fullAccess,
+			TypeService.Kind: fullAccess,
+			TypeClaim.Kind:   fullAccess,
+			TypeRule.Kind:    fullAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
-			ClusterObject.Kind: viewAccess,
-			RuleObject.Kind:    viewAccess,
-			ACLRuleObject.Kind: viewAccess,
+			TypeCluster.Kind: viewAccess,
+			TypeRule.Kind:    viewAccess,
+			TypeACLRule.Kind: viewAccess,
 		},
 	},
 }
@@ -179,15 +179,15 @@ var ServiceConsumer = &ACLRole{
 	Name: "Service Consumer",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleType.Kind:    viewAccess,
-			ServiceObject.Kind: viewAccess,
-			ClaimType.Kind:     fullAccess,
-			RuleObject.Kind:    viewAccess,
+			TypeBundle.Kind:  viewAccess,
+			TypeService.Kind: viewAccess,
+			TypeClaim.Kind:   fullAccess,
+			TypeRule.Kind:    viewAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
-			ClusterObject.Kind: viewAccess,
-			RuleObject.Kind:    viewAccess,
-			ACLRuleObject.Kind: viewAccess,
+			TypeCluster.Kind: viewAccess,
+			TypeRule.Kind:    viewAccess,
+			TypeACLRule.Kind: viewAccess,
 		},
 	},
 }
@@ -198,15 +198,15 @@ var nobody = &ACLRole{
 	Name: "Nobody",
 	Privileges: &Privileges{
 		NamespaceObjects: map[string]*Privilege{
-			BundleType.Kind:    viewAccess,
-			ServiceObject.Kind: viewAccess,
-			ClaimType.Kind:     viewAccess,
-			RuleObject.Kind:    viewAccess,
+			TypeBundle.Kind:  viewAccess,
+			TypeService.Kind: viewAccess,
+			TypeClaim.Kind:   viewAccess,
+			TypeRule.Kind:    viewAccess,
 		},
 		GlobalObjects: map[string]*Privilege{
-			ClusterObject.Kind: viewAccess,
-			RuleObject.Kind:    viewAccess,
-			ACLRuleObject.Kind: viewAccess,
+			TypeCluster.Kind: viewAccess,
+			TypeRule.Kind:    viewAccess,
+			TypeACLRule.Kind: viewAccess,
 		},
 	},
 }

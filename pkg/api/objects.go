@@ -10,11 +10,11 @@ import (
 var (
 	// Objects is a list of all objects used in API
 	Objects = runtime.AppendAllTypes([]*runtime.TypeInfo{
-		ClaimsStatusType,
-		PolicyUpdateResultObject,
-		AuthSuccessType,
-		AuthRequestType,
-		ServerErrorObject,
-		version.BuildInfoObject,
+		TypeClaimsStatus,
+		TypePolicyUpdateResult,
+		TypeAuthSuccess,
+		TypeAuthRequest,
+		TypeServerError,
+		version.TypeBuildInfo,
 	}, lang.PolicyObjects, engine.Objects)
 )

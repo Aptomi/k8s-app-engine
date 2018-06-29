@@ -11,15 +11,15 @@ var (
 // GetBuildInfo returns BuildInfo for aptomi
 func GetBuildInfo() *BuildInfo {
 	return &BuildInfo{
-		TypeKind:   BuildInfoObject.GetTypeKind(),
+		TypeKind:   TypeBuildInfo.GetTypeKind(),
 		GitVersion: gitVersion,
 		GitCommit:  gitCommit,
 		BuildDate:  buildDate,
 	}
 }
 
-// BuildInfoObject is an informational data structure with Kind and Constructor for Version
-var BuildInfoObject = &runtime.TypeInfo{
+// TypeBuildInfo is an informational data structure with Kind and Constructor for Version
+var TypeBuildInfo = &runtime.TypeInfo{
 	Kind:        "version",
 	Constructor: func() runtime.Object { return &BuildInfo{} },
 }

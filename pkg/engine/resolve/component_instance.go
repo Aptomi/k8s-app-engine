@@ -11,8 +11,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
-// ComponentInstanceObject is an informational data structure with Kind and Constructor for component instance object
-var ComponentInstanceObject = &runtime.TypeInfo{
+// TypeComponentInstance is an informational data structure with Kind and Constructor for component instance object
+var TypeComponentInstance = &runtime.TypeInfo{
 	Kind:        "component-instance",
 	Storable:    true,
 	Versioned:   false,
@@ -97,7 +97,7 @@ type ComponentInstance struct {
 // Creates a new component instance
 func newComponentInstance(cik *ComponentInstanceKey) *ComponentInstance {
 	return &ComponentInstance{
-		TypeKind:             ComponentInstanceObject.GetTypeKind(),
+		TypeKind:             TypeComponentInstance.GetTypeKind(),
 		Metadata:             &ComponentInstanceMetadata{Key: cik},
 		ClaimKeys:            make(map[string]int),
 		CalculatedLabels:     lang.NewLabelSet(make(map[string]string)),

@@ -67,7 +67,7 @@ func TestPolicyViewCommonObjects(t *testing.T) {
 	for i := 0; i < len(users); i++ {
 		policyView := policy.View(users[i])
 		for _, obj := range objList {
-			if obj.GetKind() == ServiceObject.Kind {
+			if obj.GetKind() == TypeService.Kind {
 				service := obj.(*Service) // nolint: errcheck
 				if _, err := policyView.CanConsume(service); err != nil {
 					errCntConsume[i]++
@@ -90,7 +90,7 @@ func TestPolicyViewManageACLRules(t *testing.T) {
 	errCnt := []int{0, 0, 0}
 	customRules := []*ACLRule{
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "custom_" + NamespaceAdmin.ID,
@@ -119,7 +119,7 @@ func makeEmptyPolicyWithACL() *Policy {
 	var aclRules = []*ACLRule{
 		// domain admins
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "is_domain_admin",
@@ -132,7 +132,7 @@ func makeEmptyPolicyWithACL() *Policy {
 		},
 		// namespace admins for 'main' namespace
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "is_namespace_admin",
@@ -145,7 +145,7 @@ func makeEmptyPolicyWithACL() *Policy {
 		},
 		// service consumers for 'main' namespace
 		{
-			TypeKind: ACLRuleObject.GetTypeKind(),
+			TypeKind: TypeACLRule.GetTypeKind(),
 			Metadata: Metadata{
 				Namespace: runtime.SystemNS,
 				Name:      "is_consumer",

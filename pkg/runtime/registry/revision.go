@@ -13,7 +13,7 @@ func (reg *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revisio
 	//dataObj, err := reg.store.GetGen(engine.RevisionKey, gen)
 	var revision *engine.Revision
 	// todo add WithGen
-	err := reg.store.Find(engine.RevisionObject.Kind).Last(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind).Last(revision)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (reg *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generatio
 	//revisionObjs, err := reg.store.ListGenerations(engine.RevisionKey)
 	var revision *engine.Revision
 	// todo add WithFieldEq("PolicyGen", policyGen)
-	err := reg.store.Find(engine.RevisionObject.Kind).Last(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind).Last(revision)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (reg *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generatio
 	// TODO: this method is slow, needs indexes
 	var revisions []*engine.Revision
 	// todo add WithFieldEq("PolicyGen", policyGen)
-	err := reg.store.Find(engine.RevisionObject.Kind).List(&revisions)
+	err := reg.store.Find(engine.TypeRevision.Kind).List(&revisions)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (reg *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, err
 	var revision *engine.Revision
 	// todo add WithFieldEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress)
 	// todo support multiple values in WithFieldEq
-	err := reg.store.Find(engine.RevisionObject.Kind).First(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind).First(revision)
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +114,11 @@ func (reg *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, err
 
 // GetDesiredState returns desired state associated with the revision
 func (reg *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve.PolicyResolution, error) {
-	//obj, err := reg.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.DesiredStateObject.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
+	//obj, err := reg.store.Get(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))
 	var desiredState *engine.DesiredState
 	// todo make desired state versioned same as revision (forceSpecificVersion on save)
 	// todo WithGen(revision.Gen)
-	err := reg.store.Find(engine.DesiredStateObject.Kind).Last(desiredState)
+	err := reg.store.Find(engine.TypeDesiredState.Kind).Last(desiredState)
 	if err != nil {
 		return nil, err
 	}

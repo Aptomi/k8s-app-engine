@@ -67,7 +67,7 @@ func (a *CreateAction) processDeployment(context *action.Context) (*resolve.Comp
 		panic(fmt.Sprintf("component instance not found in desired state: %s", a.ComponentKey))
 	}
 
-	bundleObj, err := context.DesiredPolicy.GetObject(lang.BundleType.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
+	bundleObj, err := context.DesiredPolicy.GetObject(lang.TypeBundle.Kind, instance.Metadata.Key.BundleName, instance.Metadata.Key.Namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (a *CreateAction) processDeployment(context *action.Context) (*resolve.Comp
 	// Instantiate code component
 	context.EventLog.NewEntry().Infof("Deploying new component instance: %s", instance.GetKey())
 
-	clusterObj, err := context.DesiredPolicy.GetObject(lang.ClusterObject.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
+	clusterObj, err := context.DesiredPolicy.GetObject(lang.TypeCluster.Kind, instance.Metadata.Key.ClusterName, instance.Metadata.Key.ClusterNameSpace)
 	if err != nil {
 		return nil, err
 	}

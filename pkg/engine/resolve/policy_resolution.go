@@ -118,7 +118,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		componentKey := instance.Metadata.Key
 
 		// verify that service exists
-		serviceObj, err := policy.GetObject(lang.ServiceObject.Kind, componentKey.ServiceName, componentKey.Namespace)
+		serviceObj, err := policy.GetObject(lang.TypeService.Kind, componentKey.ServiceName, componentKey.Namespace)
 		if serviceObj == nil || err != nil {
 			// component instance points to non-existing service, meaning this component instance is now orphan
 			return fmt.Errorf("service '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ServiceName, componentKey.GetKey())
@@ -139,7 +139,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		}
 
 		// verify that bundle exists
-		bundleObj, err := policy.GetObject(lang.BundleType.Kind, componentKey.BundleName, componentKey.Namespace)
+		bundleObj, err := policy.GetObject(lang.TypeBundle.Kind, componentKey.BundleName, componentKey.Namespace)
 		if bundleObj == nil || err != nil {
 			// component instance points to non-existing bundle, meaning this component instance is now orphan
 			return fmt.Errorf("bundle '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.BundleName, componentKey.GetKey())
@@ -156,7 +156,7 @@ func (resolution *PolicyResolution) Validate(policy *lang.Policy) error {
 		}
 
 		// verify that cluster exists
-		clusterObj, err := policy.GetObject(lang.ClusterObject.Kind, componentKey.ClusterName, componentKey.ClusterNameSpace)
+		clusterObj, err := policy.GetObject(lang.TypeCluster.Kind, componentKey.ClusterName, componentKey.ClusterNameSpace)
 		if clusterObj == nil || err != nil {
 			// component instance points to non-existing cluster, meaning this component instance is now orphan
 			return fmt.Errorf("cluster '%s/%s' can only be deleted after it's no longer in use. still used by: %s", componentKey.Namespace, componentKey.ClusterName, componentKey.GetKey())

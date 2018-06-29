@@ -59,7 +59,7 @@ func (builder *PolicyBuilder) SwitchNamespace(namespace string) {
 // AddClaim creates a new claim and adds it to the policy
 func (builder *PolicyBuilder) AddClaim(user *lang.User, service *lang.Service) *lang.Claim {
 	result := &lang.Claim{
-		TypeKind: lang.ClaimType.GetTypeKind(),
+		TypeKind: lang.TypeClaim.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -97,7 +97,7 @@ func (builder *PolicyBuilder) AddUserDomainAdmin() *lang.User {
 // AddBundle creates a new bundle and adds it to the policy
 func (builder *PolicyBuilder) AddBundle() *lang.Bundle {
 	result := &lang.Bundle{
-		TypeKind: lang.BundleType.GetTypeKind(),
+		TypeKind: lang.TypeBundle.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -110,7 +110,7 @@ func (builder *PolicyBuilder) AddBundle() *lang.Bundle {
 // AddService creates a new service for a given bundle and adds it to the policy
 func (builder *PolicyBuilder) AddService(bundle *lang.Bundle, criteria *lang.Criteria) *lang.Service {
 	result := &lang.Service{
-		TypeKind: lang.ServiceObject.GetTypeKind(),
+		TypeKind: lang.TypeService.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -130,7 +130,7 @@ func (builder *PolicyBuilder) AddService(bundle *lang.Bundle, criteria *lang.Cri
 // AddServiceMultipleContexts creates service with multiple contexts for a given bundle and adds it to the policy
 func (builder *PolicyBuilder) AddServiceMultipleContexts(bundle *lang.Bundle, criteriaArray ...*lang.Criteria) *lang.Service {
 	result := &lang.Service{
-		TypeKind: lang.ServiceObject.GetTypeKind(),
+		TypeKind: lang.TypeService.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
@@ -155,12 +155,12 @@ func (builder *PolicyBuilder) AddServiceMultipleContexts(bundle *lang.Bundle, cr
 // AddRule creates a new rule and adds it to the policy
 func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.RuleActions) *lang.Rule {
 	result := &lang.Rule{
-		TypeKind: lang.RuleObject.GetTypeKind(),
+		TypeKind: lang.TypeRule.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: builder.namespace,
 			Name:      util.RandomID(builder.random, idLength),
 		},
-		Weight:   len(builder.policy.GetObjectsByKind(lang.RuleObject.Kind)),
+		Weight:   len(builder.policy.GetObjectsByKind(lang.TypeRule.Kind)),
 		Criteria: criteria,
 		Actions:  actions,
 	}
@@ -171,7 +171,7 @@ func (builder *PolicyBuilder) AddRule(criteria *lang.Criteria, actions *lang.Rul
 // AddCluster creates a new cluster and adds it to the policy
 func (builder *PolicyBuilder) AddCluster() *lang.Cluster {
 	result := &lang.Cluster{
-		TypeKind: lang.ClusterObject.GetTypeKind(),
+		TypeKind: lang.TypeCluster.GetTypeKind(),
 		Metadata: lang.Metadata{
 			Namespace: runtime.SystemNS,
 			Name:      util.RandomID(builder.random, idLength),
