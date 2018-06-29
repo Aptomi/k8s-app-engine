@@ -1,20 +1,38 @@
 package etcd
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
+	etcd "github.com/coreos/etcd/clientv3"
 )
 
 type etcdStore struct {
+	client *etcd.Client
+	codec  store.Codec
 }
 
-func New( /* todo config */ ) store.Interface {
-	// todo connect to db
-	return &etcdStore{}
+func New( /* todo config */ codec store.Codec) (store.Interface, error) {
+	client, err := etcd.New(etcd.Config{
+		Endpoints:   []string{"localhost:2379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error while connecting to etcd: %s", err)
+	}
+
+	// todo run compactor?
+
+	return &etcdStore{
+		client: client,
+		codec:  codec,
+	}, nil
 }
 
 func (s *etcdStore) Close() error {
-	panic("implement me")
+	return s.client.Close()
 }
 
 func (s *etcdStore) Save(storable runtime.Storable, opts ...store.SaveOpt) error {
