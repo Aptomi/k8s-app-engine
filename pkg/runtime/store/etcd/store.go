@@ -44,6 +44,7 @@ func (s *etcdStore) Close() error {
 // todo need to rework keys to not include kind or to start with kind at least
 
 func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
+	saveOpts := store.NewSaveOpts(opts)
 	info := s.types.Get(newStorable.GetKind())
 	key := "/" + runtime.KeyForStorable(newStorable)
 
@@ -63,21 +64,23 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		if lastGenRaw != "" {
 			gen = runtime.Generation(binary.BigEndian.Uint64([]byte(lastGenRaw)))
 
-			currObjRaw := stm.Get("/object" + key + "@" + gen.String())
-			if currObjRaw == "" {
-				// todo better handle
-				panic("invalid last gen index (pointing to non existing generation): " + key)
-			}
-			currObj := info.New().(runtime.Storable)
-			err := s.codec.Unmarshal([]byte(currObjRaw), currObj)
-			if err != nil {
-				return err
-			}
+			if !saveOpts.IsReplace() {
+				currObjRaw := stm.Get("/object" + key + "@" + gen.String())
+				if currObjRaw == "" {
+					// todo better handle
+					panic("invalid last gen index (pointing to non existing generation): " + key)
+				}
+				currObj := info.New().(runtime.Storable)
+				err := s.codec.Unmarshal([]byte(currObjRaw), currObj)
+				if err != nil {
+					return err
+				}
 
-			if !reflect.DeepEqual(currObj, newStorable) {
-				gen = gen.Next()
-			} else { // todo if not force new version
-				return nil
+				if !reflect.DeepEqual(currObj, newStorable) {
+					gen = gen.Next()
+				} else { // todo if not force new version
+					//just creating new version
+				}
 			}
 		}
 
@@ -117,11 +120,7 @@ Current Find use cases:
 */
 
 func (s *etcdStore) Find(kind runtime.Kind, opts ...store.FindOpt) store.Finder {
-	// todo next 3 lines could be extracted to the common code
-	findOpts := &store.FindOpts{}
-	for _, opt := range opts {
-		opt(findOpts)
-	}
+	findOpts := store.NewFindOpts(opts)
 
 	return &finder{s, kind, findOpts}
 }
