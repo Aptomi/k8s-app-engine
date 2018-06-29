@@ -38,7 +38,7 @@ func isDomainAdmin(user *lang.User, policy *lang.Policy) bool {
 
 func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	// Load current policy
-	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading latest policy: %s", err))
 	}
@@ -65,7 +65,7 @@ func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: policyGen,                // policy generation didn't change
-			PolicyChanged:    false,                    // policy has not been updated in the store
+			PolicyChanged:    false,                    // policy has not been updated in the registry
 			WaitForRevision:  runtime.MaxGeneration,    // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),      // return action plan, so it can be printed by the client
 			EventLog:         resolveLog.AsAPIEvents(), // return policy resolution log
@@ -79,7 +79,7 @@ func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 		PolicyGeneration: policyGen,                // policy didn't change
-		PolicyChanged:    false,                    // have any policy object in the store been changed or not
+		PolicyChanged:    false,                    // have any policy object in the registry been changed or not
 		WaitForRevision:  revisionGen,              // which revision to wait for
 		PlanAsText:       actionPlan.AsText(),      // return action plan, so it can be printed by the client
 		EventLog:         resolveLog.AsAPIEvents(), // return policy resolution log
@@ -98,7 +98,7 @@ func (api *coreAPI) createStateEnforceRevision(policyGen runtime.Generation, des
 	var revisionGen = runtime.MaxGeneration
 	if actionPlan.NumberOfActions() > 0 {
 		// If there are changes, create a new revision and say that we should wait for it
-		newRevision, newRevisionErr := api.store.NewRevision(policyGen, desiredState, true)
+		newRevision, newRevisionErr := api.registry.NewRevision(policyGen, desiredState, true)
 		if newRevisionErr != nil {
 			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyGen))
 		}

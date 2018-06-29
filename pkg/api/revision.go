@@ -16,7 +16,7 @@ func (api *coreAPI) handleRevisionGet(writer http.ResponseWriter, request *http.
 		gen = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	revision, err := api.store.GetRevision(runtime.ParseGeneration(gen))
+	revision, err := api.registry.GetRevision(runtime.ParseGeneration(gen))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested revision: %s", err))
 	}
@@ -43,7 +43,7 @@ func (api *coreAPI) handleRevisionsGetByPolicy(writer http.ResponseWriter, reque
 		policyGen = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	revisions, err := api.store.GetAllRevisionsForPolicy(runtime.ParseGeneration(policyGen))
+	revisions, err := api.registry.GetAllRevisionsForPolicy(runtime.ParseGeneration(policyGen))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested revisions: %s", err))
 	}

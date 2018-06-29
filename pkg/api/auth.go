@@ -132,7 +132,7 @@ func (api *coreAPI) checkToken(request *http.Request) error {
 		return fmt.Errorf("token refers to non-existing user: %s", claims.Name)
 	}
 
-	// store user into the request
+	// registry user into the request
 	newRequest := request.WithContext(context.WithValue(request.Context(), ctxUserKey, user))
 	*request = *newRequest
 

@@ -13,8 +13,8 @@ type defaultRegistry struct {
 	store            store.Interface
 }
 
-// NewStore returns default implementation of generic store
-func NewStore(store store.Interface) Interface {
+// New returns default implementation of generic store
+func New(store store.Interface) Interface {
 	return &defaultRegistry{
 		store: store,
 	}

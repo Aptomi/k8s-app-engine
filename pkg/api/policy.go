@@ -25,7 +25,7 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 		gen = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	policyData, err := api.store.GetPolicyData(runtime.ParseGeneration(gen))
+	policyData, err := api.registry.GetPolicyData(runtime.ParseGeneration(gen))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
@@ -45,7 +45,7 @@ func (api *coreAPI) handlePolicyObjectGet(writer http.ResponseWriter, request *h
 		gen = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	policy, _, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
+	policy, _, err := api.registry.GetPolicy(runtime.ParseGeneration(gen))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
@@ -133,25 +133,25 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Load the latest policy
-	_, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	_, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
 
 	// load the latest revision for the given policy
-	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	revision, err := api.registry.GetLastRevisionForPolicy(policyGen)
 	if err != nil {
-		panic(fmt.Sprintf("error while loading latest revision from the store: %s", err))
+		panic(fmt.Sprintf("error while loading latest revision from the registry: %s", err))
 	}
 
 	// load desired state
-	desiredState, err := api.store.GetDesiredState(revision)
+	desiredState, err := api.registry.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}
 
 	// Make a copy of the latest policy, so we can apply changes to it
-	policyUpdated, _, err := api.store.GetPolicy(policyGen)
+	policyUpdated, _, err := api.registry.GetPolicy(policyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -220,7 +220,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: policyGen,              // policy generation didn't change
-			PolicyChanged:    false,                  // policy has not been updated in the store
+			PolicyChanged:    false,                  // policy has not been updated in the registry
 			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
@@ -234,7 +234,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	// Return the result back via API
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-		PolicyChanged:    changed,                // have any policy object in the store been changed or not
+		PolicyChanged:    changed,                // have any policy object in the registry been changed or not
 		PolicyGeneration: policyGen,              // policy now has a new generation
 		WaitForRevision:  revisionGen,            // which revision to wait for
 		PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
@@ -253,25 +253,25 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Load the latest policy gen
-	_, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	_, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
 
 	// Load the latest revision for the given policy
-	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	revision, err := api.registry.GetLastRevisionForPolicy(policyGen)
 	if err != nil {
-		panic(fmt.Sprintf("error while loading latest revision from the store: %s", err))
+		panic(fmt.Sprintf("error while loading latest revision from the registry: %s", err))
 	}
 
 	// Load desired state
-	desiredState, err := api.store.GetDesiredState(revision)
+	desiredState, err := api.registry.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}
 
 	// Make a copy of the latest policy, so we can apply changes to it
-	policyUpdated, _, err := api.store.GetPolicy(policyGen)
+	policyUpdated, _, err := api.registry.GetPolicy(policyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -318,7 +318,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 		api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 			TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
 			PolicyGeneration: policyGen,              // policy generation didn't change
-			PolicyChanged:    false,                  // policy has not been updated in the store
+			PolicyChanged:    false,                  // policy has not been updated in the registry
 			WaitForRevision:  runtime.MaxGeneration,  // nothing to wait for
 			PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
 			EventLog:         eventLog.AsAPIEvents(), // return policy resolution log
@@ -332,7 +332,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	// Return the result back via API
 	api.contentType.WriteOne(writer, request, &PolicyUpdateResult{
 		TypeKind:         PolicyUpdateResultObject.GetTypeKind(),
-		PolicyChanged:    changed,                // have any policy object in the store been changed or not
+		PolicyChanged:    changed,                // have any policy object in the registry been changed or not
 		PolicyGeneration: policyGen,              // policy now has a new generation
 		WaitForRevision:  revisionGen,            // which revision to wait for
 		PlanAsText:       actionPlan.AsText(),    // return action plan, so it can be printed by the client
@@ -351,14 +351,14 @@ func (api *coreAPI) changePolicy(objects []lang.Base, user *lang.User, desiredSt
 	api.policyAndRevisionUpdateMutex.Lock()
 	defer api.policyAndRevisionUpdateMutex.Unlock()
 
-	// Make object changes in the store
+	// Make object changes in the registry
 	var changed bool
 	var policyData *engine.PolicyData
 	var err error
 	if delete {
-		changed, policyData, err = api.store.DeleteFromPolicy(objects, user.Name)
+		changed, policyData, err = api.registry.DeleteFromPolicy(objects, user.Name)
 	} else {
-		changed, policyData, err = api.store.UpdatePolicy(objects, user.Name)
+		changed, policyData, err = api.registry.UpdatePolicy(objects, user.Name)
 	}
 	if err != nil {
 		panic(fmt.Sprintf("error while making changes to objects in the policy: %s", err))
@@ -366,7 +366,7 @@ func (api *coreAPI) changePolicy(objects []lang.Base, user *lang.User, desiredSt
 	// If there are changes, create a new revision and say that we should wait for it
 	revisionGen := runtime.MaxGeneration
 	if changed {
-		newRevision, newRevisionErr := api.store.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
+		newRevision, newRevisionErr := api.registry.NewRevision(policyData.GetGeneration(), desiredStateUpdated, false)
 		if newRevisionErr != nil {
 			panic(fmt.Errorf("unable to create new revision for policy gen %d", policyData.GetGeneration()))
 		}

@@ -36,25 +36,25 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	}
 
 	// load policy by gen
-	policy, policyGen, err := api.store.GetPolicy(policyGen)
+	policy, policyGen, err := api.registry.GetPolicy(policyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
 
 	// load revision
-	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	revision, err := api.registry.GetLastRevisionForPolicy(policyGen)
 	if err != nil {
-		panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+		panic(fmt.Sprintf("error while loading revision from the registry: %s", err))
 	}
 
 	// load desired state
-	desiredState, err := api.store.GetDesiredState(revision)
+	desiredState, err := api.registry.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}
 
 	// load actual state
-	actualState, err := api.store.GetActualState()
+	actualState, err := api.registry.GetActualState()
 	if err != nil {
 		panic(fmt.Sprintf("can't load actual state: %s", err))
 	}
@@ -96,11 +96,11 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		genBase = strconv.Itoa(int(runtime.LastGen))
 	}
 
-	policy, policyGen, err := api.store.GetPolicy(runtime.ParseGeneration(gen))
+	policy, policyGen, err := api.registry.GetPolicy(runtime.ParseGeneration(gen))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
-	policyBase, policyBaseGen, err := api.store.GetPolicy(runtime.ParseGeneration(genBase))
+	policyBase, policyBaseGen, err := api.registry.GetPolicy(runtime.ParseGeneration(genBase))
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))
 	}
@@ -117,12 +117,12 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 	case "desired":
 		// desired state (next)
 		{
-			revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+			revision, err := api.registry.GetLastRevisionForPolicy(policyGen)
 			if err != nil {
-				panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+				panic(fmt.Sprintf("error while loading revision from the registry: %s", err))
 			}
 
-			desiredState, err := api.store.GetDesiredState(revision)
+			desiredState, err := api.registry.GetDesiredState(revision)
 			if err != nil {
 				panic(fmt.Sprintf("can't load desired from revision: %s", err))
 			}
@@ -134,12 +134,12 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 		// desired state (prev)
 		var graphBase *visualization.Graph
 		{
-			revisionBase, err := api.store.GetLastRevisionForPolicy(policyBaseGen)
+			revisionBase, err := api.registry.GetLastRevisionForPolicy(policyBaseGen)
 			if err != nil {
-				panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+				panic(fmt.Sprintf("error while loading revision from the registry: %s", err))
 			}
 
-			desiredStateBase, err := api.store.GetDesiredState(revisionBase)
+			desiredStateBase, err := api.registry.GetDesiredState(revisionBase)
 			if err != nil {
 				panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 			}
@@ -162,7 +162,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 	kind := params.ByName("kind")
 	name := params.ByName("name")
 
-	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting policy: %s", err))
 	}
@@ -175,13 +175,13 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 	var desiredState *resolve.PolicyResolution
 	if kind == lang.ClaimType.Kind {
 		// load revision
-		revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+		revision, err := api.registry.GetLastRevisionForPolicy(policyGen)
 		if err != nil {
-			panic(fmt.Sprintf("error while loading revision from the store: %s", err))
+			panic(fmt.Sprintf("error while loading revision from the registry: %s", err))
 		}
 
 		// load desired state
-		desiredState, err = api.store.GetDesiredState(revision)
+		desiredState, err = api.registry.GetDesiredState(revision)
 		if err != nil {
 			panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 		}

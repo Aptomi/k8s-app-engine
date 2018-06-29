@@ -24,9 +24,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/k8sraw"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/registry"
-	"github.com/Aptomi/aptomi/pkg/runtime/store"
-	"github.com/Aptomi/aptomi/pkg/runtime/store/core"
-	"github.com/Aptomi/aptomi/pkg/runtime/store/generic/bolt"
 	"github.com/Aptomi/aptomi/pkg/server/ui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
@@ -44,7 +41,7 @@ type Server struct {
 	backgroundErrors chan string
 
 	externalData *external.Data
-	store        registry.Interface
+	registry     registry.Interface
 
 	httpServer *http.Server
 
@@ -92,15 +89,15 @@ func (server *Server) Start() {
 }
 
 func (server *Server) initPolicyOnFirstRun() {
-	policy, _, err := server.store.GetPolicy(runtime.LastGen)
+	policy, _, err := server.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting latest policy: %s", err))
 	}
 
 	// if policy does not exist, let's create the first version (it should be created here, before we start the server)
 	if policy == nil {
-		log.Infof("Policy not found in the store (likely, it's a first run of Aptomi server). Initializing")
-		initErr := server.store.InitPolicy()
+		log.Infof("Policy not found in the registry (likely, it's a first run of Aptomi server). Initializing")
+		initErr := server.registry.InitPolicy()
 		if initErr != nil {
 			panic(fmt.Sprintf("error while creating empty policy: %s", initErr))
 		}
@@ -168,13 +165,14 @@ func (server *Server) initProfiling() {
 }
 
 func (server *Server) initStore() {
-	types := runtime.NewTypes().Append(registry.Types...)
-	b := bolt.NewGenericStore(types)
-	err := b.Open(server.cfg.DB)
-	if err != nil {
-		panic(fmt.Sprintf("Can't open object store: %s", err))
-	}
-	server.store = core.NewStore(b)
+	//types := runtime.NewTypes().Append(registry.Types...)
+	//b := bolt.NewGenericStore(types)
+	//err := b.Open(server.cfg.DB)
+	//if err != nil {
+	//	panic(fmt.Sprintf("Can't open object registry: %s", err))
+	//}
+	// todo replace with actual DB store
+	server.registry = registry.New(nil)
 }
 
 func (server *Server) initPluginRegistryFactory() {
@@ -224,7 +222,7 @@ func (server *Server) startHTTPServer() {
 		log.Warnf("The auth.secret not specified in config, using insecure default one")
 	}
 
-	api.Serve(router, server.store, server.externalData, server.enforcerPluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runDesiredStateEnforcement)
+	api.Serve(router, server.registry, server.externalData, server.enforcerPluginRegistryFactory, server.cfg.Auth.Secret, server.cfg.GetLogLevel(), server.runDesiredStateEnforcement)
 	server.serveUI(router)
 
 	var handler http.Handler = router

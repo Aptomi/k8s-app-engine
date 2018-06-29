@@ -47,18 +47,18 @@ func (server *Server) actualStateUpdate() error {
 	}()
 
 	// Get desired policy
-	desiredPolicy, _, err := server.store.GetPolicy(runtime.LastGen)
+	desiredPolicy, _, err := server.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
 		return fmt.Errorf("error while getting last policy: %s", err)
 	}
 
 	// if policy is not found, it means it somehow was not initialized correctly. let's return error
 	if desiredPolicy == nil {
-		return fmt.Errorf("last policy is nil, does not exist in the store")
+		return fmt.Errorf("last policy is nil, does not exist in the registry")
 	}
 
 	// Get actual state
-	actualState, err := server.store.GetActualState()
+	actualState, err := server.registry.GetActualState()
 	if err != nil {
 		return fmt.Errorf("error while getting actual state: %s", err)
 	}
@@ -67,7 +67,7 @@ func (server *Server) actualStateUpdate() error {
 	eventLog := event.NewLog(log.DebugLevel, fmt.Sprintf("update-%d", server.actualStateUpdateIdx)).AddConsoleHook(server.cfg.GetLogLevel())
 
 	// Load endpoints for all components
-	refreshEndpoints(desiredPolicy, actualState, server.store.NewActualStateUpdater(actualState), server.updaterPluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions, server.cfg.Updater.Noop)
+	refreshEndpoints(desiredPolicy, actualState, server.registry.NewActualStateUpdater(actualState), server.updaterPluginRegistryFactory(), eventLog, server.cfg.Updater.MaxConcurrentActions, server.cfg.Updater.Noop)
 
 	log.Infof("(update-%d) Actual state updated", server.actualStateUpdateIdx)
 

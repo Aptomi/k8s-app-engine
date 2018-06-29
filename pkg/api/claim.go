@@ -58,27 +58,27 @@ func (api *coreAPI) handleClaimStatusGet(writer http.ResponseWriter, request *ht
 	claimIds := strings.Split(params.ByName("idList"), ",")
 
 	// load the latest policy
-	policy, policyGen, err := api.store.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
 	if err != nil {
-		panic(fmt.Sprintf("error while loading latest policy from the store: %s", err))
+		panic(fmt.Sprintf("error while loading latest policy from the registry: %s", err))
 	}
 
 	// load the latest revision for the given policy
-	revision, err := api.store.GetLastRevisionForPolicy(policyGen)
+	revision, err := api.registry.GetLastRevisionForPolicy(policyGen)
 	if err != nil {
-		panic(fmt.Sprintf("error while loading latest revision from the store: %s", err))
+		panic(fmt.Sprintf("error while loading latest revision from the registry: %s", err))
 	}
 
 	// load desired state
-	desiredState, err := api.store.GetDesiredState(revision)
+	desiredState, err := api.registry.GetDesiredState(revision)
 	if err != nil {
 		panic(fmt.Sprintf("can't load desired state from revision: %s", err))
 	}
 
 	// load actual state
-	actualState, err := api.store.GetActualState()
+	actualState, err := api.registry.GetActualState()
 	if err != nil {
-		panic(fmt.Sprintf("can't load actual state from the store: %s", err))
+		panic(fmt.Sprintf("can't load actual state from the registry: %s", err))
 	}
 
 	// initialize result
