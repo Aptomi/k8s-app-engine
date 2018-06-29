@@ -21,7 +21,7 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 			Namespace: "some_namespace",
 			Name:      "some_name",
 		},
-		User:    "some_user",
+		User:    "some_user2",
 		Service: "some_service",
 		Labels:  map[string]string{},
 	}
