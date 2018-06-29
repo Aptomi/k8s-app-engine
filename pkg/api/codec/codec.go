@@ -6,8 +6,26 @@ import (
 	"net/http"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
-	"github.com/Aptomi/aptomi/pkg/runtime/codec/yaml"
 )
+
+// Encoder interface represents encoding of the runtime objects into bytes
+type Encoder interface {
+	EncodeOne(obj runtime.Object) ([]byte, error)
+	EncodeMany(objs []runtime.Object) ([]byte, error)
+}
+
+// Decoder interface represents decoding of the runtime objects from bytes
+type Decoder interface {
+	DecodeOne(data []byte) (runtime.Object, error)
+	DecodeOneOrMany(data []byte) ([]runtime.Object, error)
+}
+
+// Interface interface represents combination of Encoder and Decoder interfaces for both sides encoding/decoding of runtime
+// objects to/from bytes
+type Interface interface {
+	Encoder
+	Decoder
+}
 
 const (
 	// Default is the default content type
@@ -22,20 +40,20 @@ const (
 
 // ContentTypeHandler is a helper for working with Content-Type header and doing read/write for http requests/response
 type ContentTypeHandler struct {
-	codecs map[string]runtime.Codec
+	codecs map[string]Interface
 }
 
 // NewContentTypeHandler returns instance of ContentTypeHandler for provided runtime registry
 func NewContentTypeHandler(types *runtime.Types) *ContentTypeHandler {
-	codecs := make(map[string]runtime.Codec)
-	codecs[YAML] = yaml.NewCodec(types)
-	codecs[JSON] = yaml.NewJSONCodec(types)
+	codecs := make(map[string]Interface)
+	codecs[YAML] = NewYAMLCodec(types)
+	codecs[JSON] = NewJSONCodec(types)
 
 	return &ContentTypeHandler{codecs: codecs}
 }
 
 // GetCodecByContentType returns runtime codec for provided content type that should be used
-func (handler *ContentTypeHandler) GetCodecByContentType(contentType string) runtime.Codec {
+func (handler *ContentTypeHandler) GetCodecByContentType(contentType string) Interface {
 	codec, exist := handler.codecs[contentType]
 	if codec == nil || !exist {
 		return handler.codecs[Default]
@@ -45,7 +63,7 @@ func (handler *ContentTypeHandler) GetCodecByContentType(contentType string) run
 }
 
 // GetCodec returns runtime codec for specified http headers based on the content type
-func (handler *ContentTypeHandler) GetCodec(header http.Header) runtime.Codec {
+func (handler *ContentTypeHandler) GetCodec(header http.Header) Interface {
 	contentType := header.Get("Content-Type")
 	if len(contentType) == 0 {
 		contentType = Default
