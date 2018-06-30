@@ -43,6 +43,17 @@ func (s *etcdStore) Close() error {
 
 // todo need to rework keys to not include kind or to start with kind at least???
 
+// Save saves Storable object with specified options into Etcd and updates indexes when appropriate.
+// Workflow:
+// 1. for non-versioned object key is always static, just put object into etcd and no indexes need to be updated (only
+//    generation indexes currently exists)
+// 2. for versioned object all manipulations are done inside a single transaction to guarantee atomic operations
+//    (like index update, getting last existing generation or comparing with existing object), in addition to that
+//    generation set for the object is always ignored if "forceGenOrReplace" option isn't used
+// 3. if "replaceOrForceGen" option used, there should be non-zero generation set in the object, last generation will
+//    not be checked in that case and old object will be removed from indexes, while new one will be added to them
+// 4. default option is saving object with new generation if it differs from the last generation object (or first time
+//    created), so, it'll only require adding object to indexes
 func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
 	saveOpts := store.NewSaveOpts(opts)
 	info := s.types.Get(newStorable.GetKind())
@@ -54,15 +65,6 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		_, err := s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastGen.String(), string(data))
 		return err
 	}
-
-	/*
-		What is index? GenIndex is object key + optional field
-
-		* last gen used: for each key there should be last gen stored: key -> gen
-		* list revision gens for policy: key+policy -> gen1,gen2,gen3 (in case of revisions key is static)
-		* first / last revision gen for policy: just use list revision gen for policy index
-
-	*/
 
 	// todo prefetch all needed keys for STM to maximize performance (in fact it'll get all data in one first request)
 
@@ -77,8 +79,10 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 			}
 			gen = runtime.Generation(lastGen)
 
-			if !saveOpts.IsReplace() {
+			if !saveOpts.IsReplaceOrForceGen() {
 				currObjRaw := stm.Get("/object" + key + "@" + gen.String())
+
+				// todo it's an okay case, we just need to save for the first time
 				if currObjRaw == "" {
 					// todo better handle
 					panic("invalid last gen index (pointing to non existing generation): " + key)
@@ -86,6 +90,8 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				currObj := info.New().(runtime.Storable)
 				s.unmarshal([]byte(currObjRaw), currObj)
 
+				// todo replace deep equals with encoding objects (with same generations) and comparing bytes
+				// it should save current gen of second object, set it to first object generation, encode, compare bytes, return back generation
 				if !reflect.DeepEqual(currObj, newStorable) {
 					gen = gen.Next()
 				} else { // todo if not force new version
@@ -117,6 +123,8 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				data := s.marshal(valueList)
 
 				stm.Put(indexKey, string(data))
+			} else {
+				panic("only indexes with types store.IndexTypeLastGen and store.IndexTypeListGen are currently supported by Etcd store")
 			}
 		}
 
