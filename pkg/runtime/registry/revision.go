@@ -42,8 +42,6 @@ func (reg *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution
 	revision := engine.NewRevision(gen, policyGen, recalculateAll)
 
 	// save revision
-	// todo is there a chance that we'll create new revision with all the same data? and Save will not really create new version?
-	// todo add WithForceNewVersion?
 	err = reg.store.Save(revision)
 	if err != nil {
 		return nil, fmt.Errorf("error while saving new revision: %s", err)
@@ -110,6 +108,7 @@ func (reg *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve
 	// todo make desired state versioned same as revision (forceSpecificVersion on save)
 	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
 	var desiredState *engine.DesiredState
+	// todo switch desired state from name including revision gen to just static name with forced generation equal to revision gen
 	err := reg.store.Find(engine.TypeDesiredState.Kind, store.WithKey(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))).One(desiredState)
 	if err != nil {
 		return nil, err

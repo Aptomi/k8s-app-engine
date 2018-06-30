@@ -29,9 +29,7 @@ func Indexes(info *runtime.TypeInfo) map[string]*Index {
 
 		if info.Versioned {
 			indexes[LastGenIndex] = &Index{
-				Scope: IndexScopeGen,
-				Type:  IndexTypeLast,
-				Field: LastGenIndex,
+				Type: IndexTypeLastGen,
 			}
 		}
 
@@ -49,8 +47,7 @@ func Indexes(info *runtime.TypeInfo) map[string]*Index {
 				// todo cache reflection objects
 
 				indexes[f.Name] = &Index{
-					Scope:   IndexScopeGen,
-					Type:    IndexTypeList,
+					Type:    IndexTypeListGen,
 					Field:   f.Name,
 					fieldId: i,
 				}
@@ -64,15 +61,15 @@ func Indexes(info *runtime.TypeInfo) map[string]*Index {
 type IndexType int
 
 const (
-	IndexTypeUndef = iota
-	IndexTypeLast
-	IndexTypeList
+	IndexTypeUndef IndexType = iota
+	IndexTypeLastGen
+	IndexTypeListGen
 )
 
 func (indexType IndexType) String() string {
 	indexTypes := [...]string{
-		"last",
-		"list",
+		"lastgen",
+		"listgen",
 	}
 
 	if indexType < 1 || indexType > 2 {
@@ -82,31 +79,7 @@ func (indexType IndexType) String() string {
 	return indexTypes[indexType-1]
 }
 
-type IndexScope int
-
-const (
-	IndexScopeUndef = iota
-	IndexScopeGen
-	IndexScopeKey
-)
-
-func (indexScope IndexScope) String() string {
-	indexScopes := [...]string{
-		"gen",
-		"key",
-	}
-
-	if indexScope < 1 || indexScope > 2 {
-		panic(fmt.Sprintf("unknown index scope: %d", indexScope))
-	}
-
-	return indexScopes[indexScope-1]
-}
-
-type IndexValue func(storable runtime.Storable) []byte
-
 type Index struct {
-	Scope   IndexScope
 	Type    IndexType
 	Field   string
 	fieldId int
@@ -115,7 +88,7 @@ type Index struct {
 func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) string {
 	key := runtime.KeyForStorable(storable)
 
-	if index.Field == LastGenIndex {
+	if index.Type == IndexTypeLastGen {
 		return key
 	}
 
@@ -129,15 +102,8 @@ func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) strin
 }
 
 func (index *Index) KeyForValue(key runtime.Key, value interface{}, codec Codec) string {
-	if index.Field == LastGenIndex {
+	if index.Type == IndexTypeLastGen {
 		return key
-	}
-
-	if index.Scope != IndexScopeGen {
-		panic("only index scope gen is currently supported")
-	}
-	if index.Type != IndexTypeLast && index.Type != IndexTypeList {
-		panic("only index type last or list are currently supported")
 	}
 
 	key = "@" + index.Field + "@"

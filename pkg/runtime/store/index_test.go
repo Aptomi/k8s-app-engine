@@ -1,19 +1,15 @@
-package store
-
-// todo rename package to store_test
+package store_test
 
 import (
 	"testing"
 
 	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/runtime"
-
-	//"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestIndexes(t *testing.T) {
-	indexes := Indexes(engine.TypeRevision)
+	indexes := store.Indexes(engine.TypeRevision)
 	assert.NotNil(t, indexes)
 	assert.Len(t, indexes, 3)
 	assert.Contains(t, indexes, "PolicyGen")
