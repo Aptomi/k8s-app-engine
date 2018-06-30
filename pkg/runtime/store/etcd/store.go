@@ -41,20 +41,17 @@ func (s *etcdStore) Close() error {
 	return s.client.Close()
 }
 
-// todo need to rework keys to not include kind or to start with kind at least
+// todo need to rework keys to not include kind or to start with kind at least???
 
 func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
 	saveOpts := store.NewSaveOpts(opts)
 	info := s.types.Get(newStorable.GetKind())
-	indexes := store.Indexes(info)
+	indexes := store.IndexesFor(info)
 	key := "/" + runtime.KeyForStorable(newStorable)
 
 	if !info.Versioned {
-		data, err := s.codec.Marshal(newStorable)
-		if err != nil {
-			return err
-		}
-		_, err = s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastGen.String(), string(data))
+		data := s.marshal(newStorable)
+		_, err := s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastGen.String(), string(data))
 		return err
 	}
 
@@ -72,7 +69,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
 		gen := runtime.FirstGen
 		// get index for last gen
-		lastGenRaw := stm.Get("/index/" + store.IndexTypeLastGen.String() + key)
+		lastGenRaw := stm.Get("/index/" + indexes.KeyForStorable(store.LastGenIndex, newStorable, s.codec))
 		if lastGenRaw != "" {
 			lastGen, err := strconv.ParseUint(lastGenRaw, 10, 64)
 			if err != nil {
@@ -87,10 +84,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 					panic("invalid last gen index (pointing to non existing generation): " + key)
 				}
 				currObj := info.New().(runtime.Storable)
-				err := s.codec.Unmarshal([]byte(currObjRaw), currObj)
-				if err != nil {
-					return err
-				}
+				s.unmarshal([]byte(currObjRaw), currObj)
 
 				if !reflect.DeepEqual(currObj, newStorable) {
 					gen = gen.Next()
@@ -100,19 +94,14 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 			}
 		}
 
-		// todo make wrapper that will panic as it's ok to panic if can't marshal/unmarshal data
-		// todo just have defer recover at the beginning of each function...
 		newStorable.(runtime.Versioned).SetGeneration(gen)
-		data, cErr := s.codec.Marshal(newStorable)
-		if cErr != nil {
-			return cErr
-		}
+		data := s.marshal(newStorable)
 		stm.Put("/object"+key+"@"+gen.String(), string(data))
 
 		// process indexes
 
-		for _, index := range indexes {
-			indexKey := "/index/" + index.Type.String() + "/" + index.KeyForStorable(newStorable, s.codec)
+		for _, index := range indexes.List {
+			indexKey := "/index/" + index.KeyForStorable(newStorable, s.codec)
 			if index.Type == store.IndexTypeLastGen {
 				// replace format uint with just byte formatting
 				stm.Put(indexKey, strconv.FormatUint(uint64(gen), 10))
@@ -121,17 +110,11 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				valueList := &store.IndexValueList{}
 				valueListRaw := stm.Get(indexKey)
 				if valueListRaw != "" {
-					err := s.codec.Unmarshal([]byte(valueListRaw), &valueList)
-					if err != nil {
-						return err
-					}
+					s.unmarshal([]byte(valueListRaw), &valueList)
 				}
 				valueList.Add([]byte(strconv.FormatUint(uint64(gen), 10)))
 
-				data, err := s.codec.Marshal(valueList)
-				if err != nil {
-					return err
-				}
+				data := s.marshal(valueList)
 
 				stm.Put(indexKey, string(data))
 			}
