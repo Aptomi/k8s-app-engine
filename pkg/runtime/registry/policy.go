@@ -88,7 +88,7 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 		}
 
 		var changedObj bool
-		// todo think about changedObj flag - should we do it in db layer?
+		// todo think about changedObj flag - should we do it in db layer? there should be global lock for policy update anyway
 		err = reg.store.Save(updatedObj)
 		if err != nil {
 			return false, nil, err

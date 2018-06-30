@@ -3,7 +3,7 @@ package etcd_test
 import (
 	"testing"
 
-	"github.com/Aptomi/aptomi/pkg/lang"
+	"github.com/Aptomi/aptomi/pkg/engine"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/etcd"
@@ -11,27 +11,29 @@ import (
 )
 
 func TestEtcdStoreBaseFunctionality(t *testing.T) {
-	etcdStore, err := etcd.New(runtime.NewTypes().Append(lang.TypeClaim), store.NewJsonCodec())
+	etcdStore, err := etcd.New(runtime.NewTypes().Append(engine.TypeRevision), store.NewJsonCodec())
 	assert.NoError(t, err)
 	assert.NotNil(t, etcdStore)
 
-	claim := &lang.Claim{
-		TypeKind: lang.TypeClaim.GetTypeKind(),
-		Metadata: lang.Metadata{
-			Namespace: "some_namespace",
-			Name:      "some_name",
+	revision := &engine.Revision{
+		TypeKind: engine.TypeRevision.GetTypeKind(),
+		Metadata: runtime.GenerationMetadata{
+			Generation: 1,
 		},
-		User:    "some_user2",
-		Service: "some_service",
-		Labels:  map[string]string{},
+		PolicyGen: 42,
+		Status:    engine.RevisionStatusWaiting,
 	}
 
-	err = etcdStore.Save(claim)
+	err = etcdStore.Save(revision)
 	assert.NoError(t, err)
 
-	var loadedClaim *lang.Claim
-	err = etcdStore.Find(lang.TypeClaim.Kind /*, WithKey */).Last(loadedClaim)
+	revision.Status = engine.RevisionStatusCompleted
+	err = etcdStore.Save(revision)
 	assert.NoError(t, err)
 
-	assert.Equal(t, claim, loadedClaim)
+	var loadedRevision *engine.Revision
+	err = etcdStore.Find(engine.TypeRevision.Kind /*, WithKey */).One(loadedRevision)
+	assert.NoError(t, err)
+
+	assert.Equal(t, revision, loadedRevision)
 }

@@ -2,9 +2,9 @@ package etcd
 
 import (
 	"context"
-	"encoding/binary"
 	"fmt"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -67,12 +67,18 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 
 	*/
 
+	// todo prefetch all needed keys for STM to maximize performance (in fact it'll get all data in one first request)
+
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
 		gen := runtime.FirstGen
 		// get index for last gen
-		lastGenRaw := stm.Get("/index" + key)
+		lastGenRaw := stm.Get("/index/" + store.IndexTypeLastGen.String() + key)
 		if lastGenRaw != "" {
-			gen = runtime.Generation(binary.BigEndian.Uint64([]byte(lastGenRaw)))
+			lastGen, err := strconv.ParseUint(lastGenRaw, 10, 64)
+			if err != nil {
+				return err
+			}
+			gen = runtime.Generation(lastGen)
 
 			if !saveOpts.IsReplace() {
 				currObjRaw := stm.Get("/object" + key + "@" + gen.String())
@@ -106,9 +112,28 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		// process indexes
 
 		for _, index := range indexes {
-			if index.Type == store.IndexTypeLast {
-				// we will need to delete old value from old index if we want to support more Last indexes
-				//newIndexKey := index.KeyForStorable(newStorable, s.codec)
+			indexKey := "/index/" + index.Type.String() + "/" + index.KeyForStorable(newStorable, s.codec)
+			if index.Type == store.IndexTypeLastGen {
+				// replace format uint with just byte formatting
+				stm.Put(indexKey, strconv.FormatUint(uint64(gen), 10))
+			} else if index.Type == store.IndexTypeListGen {
+				// todo remove from old version in case of replace (b/c old one could become invalid like changed revision status)
+				valueList := &store.IndexValueList{}
+				valueListRaw := stm.Get(indexKey)
+				if valueListRaw != "" {
+					err := s.codec.Unmarshal([]byte(valueListRaw), &valueList)
+					if err != nil {
+						return err
+					}
+				}
+				valueList.Add([]byte(strconv.FormatUint(uint64(gen), 10)))
+
+				data, err := s.codec.Marshal(valueList)
+				if err != nil {
+					return err
+				}
+
+				stm.Put(indexKey, string(data))
 			}
 		}
 
