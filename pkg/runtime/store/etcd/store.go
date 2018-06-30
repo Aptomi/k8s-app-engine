@@ -46,6 +46,7 @@ func (s *etcdStore) Close() error {
 func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
 	saveOpts := store.NewSaveOpts(opts)
 	info := s.types.Get(newStorable.GetKind())
+	indexes := store.Indexes(info)
 	key := "/" + runtime.KeyForStorable(newStorable)
 
 	if !info.Versioned {
@@ -56,6 +57,15 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		_, err = s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastGen.String(), string(data))
 		return err
 	}
+
+	/*
+		What is index? GenIndex is object key + optional field
+
+		* last gen used: for each key there should be last gen stored: key -> gen
+		* list revision gens for policy: key+policy -> gen1,gen2,gen3 (in case of revisions key is static)
+		* first / last revision gen for policy: just use list revision gen for policy index
+
+	*/
 
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
 		gen := runtime.FirstGen
@@ -93,9 +103,14 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		}
 		stm.Put("/object"+key+"@"+gen.String(), string(data))
 
-		buf := make([]byte, 8)
-		binary.BigEndian.PutUint64(buf, uint64(gen))
-		stm.Put("/index"+key, string(buf))
+		// process indexes
+
+		for _, index := range indexes {
+			if index.Type == store.IndexTypeLast {
+				// we will need to delete old value from old index if we want to support more Last indexes
+				//newIndexKey := index.KeyForStorable(newStorable, s.codec)
+			}
+		}
 
 		return nil
 	})
@@ -106,12 +121,10 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 /*
 Current Find use cases:
 
-* Find(resolve.TypeComponentInstance.Kind).List(&instances)
-* Find(resolve.TypeComponentInstance.Kind, store.WithKey(storableKeyForComponent(key))).One(instance)
-* Find(resolve.TypeComponentInstance.Kind).List(&instances)
-* Find(engine.TypePolicyData.Kind, store.WithKey(engine.PolicyDataKey), store.WithGen(gen)).One(policyData)
-* Find(kind, store.WithKey(runtime.KeyFromParts(ns, kind, name)), store.WithGen(gen)).One(langObj)
-* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithGen(gen)).One(revision)
+* Find(kind).List
+* Find(kind, key).One (non-versioned, should set version to 0 and delegate to next)
+* Find(kind, key, gen).One (versioned)
+
 * Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen), store.WithGetLast()).One(revision)
 * Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen)).List(&revisions)
 * Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress), store.WithGetFirst()).One(revision)
@@ -122,13 +135,19 @@ Current Find use cases:
 func (s *etcdStore) Find(kind runtime.Kind, opts ...store.FindOpt) store.Finder {
 	findOpts := store.NewFindOpts(opts)
 
-	return &finder{s, kind, findOpts}
+	if findOpts.GetKey() == "" {
+		// todo handle as separated case to return all objects for specified kind
+	}
+
+	info := s.types.Get(kind)
+
+	return &finder{s, findOpts, info}
 }
 
 type finder struct {
 	*etcdStore
-	kind runtime.Kind
 	*store.FindOpts
+	info *runtime.TypeInfo
 }
 
 func (f *finder) One(runtime.Storable) error {

@@ -36,9 +36,9 @@ type Revision struct {
 	Metadata         runtime.GenerationMetadata
 
 	// Policy to which this revision is attached to
-	PolicyGen runtime.Generation
+	PolicyGen runtime.Generation `store:"gen_index"`
 
-	Status         string
+	Status         string `store:"gen_index"`
 	CreatedAt      time.Time
 	RecalculateAll bool
 
