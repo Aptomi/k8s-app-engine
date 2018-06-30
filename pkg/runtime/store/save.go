@@ -1,22 +1,13 @@
 package store
 
-import (
-	"github.com/Aptomi/aptomi/pkg/runtime"
-)
-
 type SaveOpt func(opts *SaveOpts)
 
 type SaveOpts struct {
-	replace  bool
-	forceGen runtime.Generation
+	replaceOrForceGen bool
 }
 
-func (opts *SaveOpts) IsReplace() bool {
-	return opts.replace
-}
-
-func (opts *SaveOpts) GetForceGen() runtime.Generation {
-	return opts.forceGen
+func (opts *SaveOpts) IsReplaceOrForceGen() bool {
+	return opts.replaceOrForceGen
 }
 
 func NewSaveOpts(opts []SaveOpt) *SaveOpts {
@@ -28,28 +19,12 @@ func NewSaveOpts(opts []SaveOpt) *SaveOpts {
 	return saveOpts
 }
 
-func WithReplace() SaveOpt {
+func WithReplaceOrForceGen() SaveOpt {
 	return func(opts *SaveOpts) {
-		if opts.forceGen != 0 {
-			panic("can't use WithReplace when WithForceGen already used (as it's implicitly allows replacement)")
-		}
-		if opts.replace {
-			panic("can't use WithReplace more then one time")
+		if opts.replaceOrForceGen {
+			panic("can't use WithReplaceOrForceGen more then one time")
 		}
 
-		opts.replace = true
-	}
-}
-
-func WithForceGen(gen runtime.Generation) SaveOpt {
-	return func(opts *SaveOpts) {
-		if opts.replace {
-			panic("can't use WithForceGen when WithReplace already used (as it's implicitly allows replacement)")
-		}
-		if opts.forceGen != 0 {
-			panic("can't use WithForceGen more then one time")
-		}
-
-		opts.forceGen = gen
+		opts.replaceOrForceGen = true
 	}
 }
