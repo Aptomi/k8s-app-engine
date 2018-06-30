@@ -13,22 +13,42 @@ import (
 
 var (
 	indexCacheMu = &sync.Mutex{}
-	indexCache   = map[runtime.Kind]map[string]*Index{}
+	indexCache   = map[runtime.Kind]*Indexes{}
 )
 
 const LastGenIndex = ""
 
-func Indexes(info *runtime.TypeInfo) map[string]*Index {
+type Indexes struct {
+	List map[string]*Index
+}
+
+func (indexes *Indexes) KeyForStorable(indexName string, storable runtime.Storable, codec Codec) string {
+	if index, exist := indexes.List[indexName]; exist {
+		return index.KeyForStorable(storable, codec)
+	} else {
+		panic(fmt.Sprintf("trying to access non-existing indexName for kind %s: %s", storable.GetKind(), indexName))
+	}
+}
+
+func (indexes *Indexes) KeyForValue(indexName string, key runtime.Key, value interface{}, codec Codec) string {
+	if index, exist := indexes.List[indexName]; exist {
+		return index.KeyForValue(key, value, codec)
+	} else {
+		panic(fmt.Sprintf("trying to access non-existing indexName for key %s: %s", key, indexName))
+	}
+}
+
+func IndexesFor(info *runtime.TypeInfo) *Indexes {
 	indexCacheMu.Lock()
 	defer indexCacheMu.Unlock()
 
 	indexes, exist := indexCache[info.Kind]
 	if !exist {
-		indexes = map[string]*Index{}
+		indexes = &Indexes{map[string]*Index{}}
 		indexCache[info.Kind] = indexes
 
 		if info.Versioned {
-			indexes[LastGenIndex] = &Index{
+			indexes.List[LastGenIndex] = &Index{
 				Type: IndexTypeLastGen,
 			}
 		}
@@ -46,7 +66,7 @@ func Indexes(info *runtime.TypeInfo) map[string]*Index {
 				// todo validate that field is accessible
 				// todo cache reflection objects
 
-				indexes[f.Name] = &Index{
+				indexes.List[f.Name] = &Index{
 					Type:    IndexTypeListGen,
 					Field:   f.Name,
 					fieldId: i,
@@ -89,7 +109,7 @@ func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) strin
 	key := runtime.KeyForStorable(storable)
 
 	if index.Type == IndexTypeLastGen {
-		return key
+		return index.KeyForValue(key, nil, codec)
 	}
 
 	t := reflect.ValueOf(storable)
@@ -102,11 +122,12 @@ func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) strin
 }
 
 func (index *Index) KeyForValue(key runtime.Key, value interface{}, codec Codec) string {
+	key = index.Type.String() + "/" + key
 	if index.Type == IndexTypeLastGen {
 		return key
 	}
 
-	key = "@" + index.Field + "@"
+	key += "/" + index.Field + "="
 
 	if valueStr, ok := value.(string); ok {
 		return key + valueStr
