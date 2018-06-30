@@ -1,9 +1,10 @@
 package store
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
-	"strconv"
+	"sort"
 	"strings"
 	"sync"
 
@@ -15,6 +16,8 @@ var (
 	indexCache   = map[runtime.Kind]map[string]*Index{}
 )
 
+const LastGenIndex = ""
+
 func Indexes(info *runtime.TypeInfo) map[string]*Index {
 	indexCacheMu.Lock()
 	defer indexCacheMu.Unlock()
@@ -22,12 +25,13 @@ func Indexes(info *runtime.TypeInfo) map[string]*Index {
 	indexes, exist := indexCache[info.Kind]
 	if !exist {
 		indexes = map[string]*Index{}
+		indexCache[info.Kind] = indexes
 
 		if info.Versioned {
-			indexes[""] = &Index{
+			indexes[LastGenIndex] = &Index{
 				Scope: IndexScopeGen,
 				Type:  IndexTypeLast,
-				Field: "",
+				Field: LastGenIndex,
 			}
 		}
 
@@ -111,11 +115,9 @@ type Index struct {
 func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) string {
 	key := runtime.KeyForStorable(storable)
 
-	if index.Field == "" {
+	if index.Field == LastGenIndex {
 		return key
 	}
-
-	key += "@" + index.Field + "@"
 
 	t := reflect.ValueOf(storable)
 	if t.Kind() == reflect.Ptr {
@@ -123,32 +125,22 @@ func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) strin
 	}
 	f := t.Field(index.fieldId)
 
-	// treat string separately
-	if f.Kind() == reflect.String {
-		return key + f.String()
-	}
-
-	//fmt.Println("fieldType", f.Type())
-
-	// treat generation as a special case
-	if reflect.TypeOf(runtime.FirstGen) == f.Type() {
-		return key + strconv.FormatUint(f.Uint(), 10)
-	}
-
-	data, err := codec.Marshal(f.Interface())
-	if err != nil {
-		panic(fmt.Sprintf("error marshalling index value %s.%s=%v", storable.GetKind(), index.Field, f.Interface()))
-	}
-
-	return key + string(data)
+	return index.KeyForValue(key, f.Interface(), codec)
 }
 
 func (index *Index) KeyForValue(key runtime.Key, value interface{}, codec Codec) string {
-	if index.Field == "" {
+	if index.Field == LastGenIndex {
 		return key
 	}
 
-	key += "@" + index.Field + "@"
+	if index.Scope != IndexScopeGen {
+		panic("only index scope gen is currently supported")
+	}
+	if index.Type != IndexTypeLast && index.Type != IndexTypeList {
+		panic("only index type last or list are currently supported")
+	}
+
+	key = "@" + index.Field + "@"
 
 	if valueStr, ok := value.(string); ok {
 		return key + valueStr
@@ -164,4 +156,46 @@ func (index *Index) KeyForValue(key runtime.Key, value interface{}, codec Codec)
 	}
 
 	return key + string(data)
+}
+
+type IndexValueList [][]byte
+
+func (list *IndexValueList) Add(value []byte) {
+	// binary search to get desired value index in the list
+	valueIndex := sort.Search(len(*list), func(index int) bool {
+		return bytes.Compare((*list)[index], value) >= 0
+	})
+
+	// value already present in the list
+	if valueIndex < len(*list) && bytes.Equal((*list)[valueIndex], value) {
+		return
+	}
+
+	// insert value into desired position
+	*list = append(*list, nil)
+	copy((*list)[valueIndex+1:], (*list)[valueIndex:])
+	(*list)[valueIndex] = value
+}
+
+func (list *IndexValueList) Remove(value []byte) {
+	// binary search to get value index in the list
+	valueIndex := sort.Search(len(*list), func(index int) bool {
+		return bytes.Compare((*list)[index], value) >= 0
+	})
+
+	// remove value from the list if exists
+	if valueIndex < len(*list) {
+		copy((*list)[valueIndex:], (*list)[valueIndex+1:])
+		(*list)[len(*list)-1] = nil
+		*list = (*list)[:len(*list)-1]
+	}
+}
+
+func (list *IndexValueList) Contains(value []byte) bool {
+	// binary search to get value index in the list
+	valueIndex := sort.Search(len(*list), func(index int) bool {
+		return bytes.Compare((*list)[index], value) >= 0
+	})
+
+	return valueIndex < len(*list) && bytes.Equal((*list)[valueIndex], value)
 }
