@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -66,59 +65,67 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		return err
 	}
 
+	newObj := newStorable.(runtime.Versioned)
 	// todo prefetch all needed keys for STM to maximize performance (in fact it'll get all data in one first request)
-
+	// todo consider unmarshal to the info.New() to support gob w/o need to register types?
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
-		gen := runtime.FirstGen
-		// get index for last gen
-		lastGenRaw := stm.Get("/index/" + indexes.KeyForStorable(store.LastGenIndex, newStorable, s.codec))
-		if lastGenRaw != "" {
-			lastGen, err := strconv.ParseUint(lastGenRaw, 10, 64)
-			if err != nil {
-				return err
+		// need to remove this obj from indexes
+		var prevObj runtime.Storable
+
+		if saveOpts.IsReplaceOrForceGen() {
+			newGen := newObj.GetGeneration()
+			if newGen == runtime.LastGen {
+				return fmt.Errorf("error while saving object %s with replaceOrForceGen option but with empty generation", key)
 			}
-			gen = runtime.Generation(lastGen)
+			// need to check if there is an object already exists with gen from the object, if yes - remove it from indexes
+			oldObjRaw := stm.Get("/object" + key + "@" + newGen.String())
+			if oldObjRaw != "" {
+				s.unmarshal([]byte(oldObjRaw), prevObj)
+			}
 
-			if !saveOpts.IsReplaceOrForceGen() {
-				currObjRaw := stm.Get("/object" + key + "@" + gen.String())
-
-				// todo it's an okay case, we just need to save for the first time
-				if currObjRaw == "" {
-					// todo better handle
-					panic("invalid last gen index (pointing to non existing generation): " + key)
+			// todo compare - if not changed - nothing to do
+		} else {
+			// need to get last gen using index, if exists - compare with, if different - increment revision and delete old from indexes
+			lastGenRaw := stm.Get("/index/" + indexes.KeyForStorable(store.LastGenIndex, newStorable, s.codec))
+			if lastGenRaw == "" {
+				newObj.SetGeneration(runtime.FirstGen)
+			} else {
+				lastGen := s.unmarshalGen(lastGenRaw)
+				oldObjRaw := stm.Get("/object" + key + "@" + lastGen.String())
+				if oldObjRaw == "" {
+					return fmt.Errorf("last gen index for %s seems to be corrupted: generation doesn't exist", key)
 				}
-				currObj := info.New().(runtime.Storable)
-				s.unmarshal([]byte(currObjRaw), currObj)
-
-				// todo replace deep equals with encoding objects (with same generations) and comparing bytes
-				// it should save current gen of second object, set it to first object generation, encode, compare bytes, return back generation
-				if !reflect.DeepEqual(currObj, newStorable) {
-					gen = gen.Next()
-				} else { // todo if not force new version
-					//just creating new version
+				s.unmarshal([]byte(oldObjRaw), prevObj)
+				if !reflect.DeepEqual(prevObj, newObj) {
+					newObj.SetGeneration(lastGen.Next())
+				} else {
+					newObj.SetGeneration(lastGen)
+					// nothing to do - object wasn't changed
+					return nil
 				}
 			}
 		}
 
-		newStorable.(runtime.Versioned).SetGeneration(gen)
-		data := s.marshal(newStorable)
-		stm.Put("/object"+key+"@"+gen.String(), string(data))
-
-		// process indexes
+		data := s.marshal(newObj)
+		newGen := newObj.GetGeneration()
+		stm.Put("/object"+key+"@"+newGen.String(), string(data))
 
 		for _, index := range indexes.List {
 			indexKey := "/index/" + index.KeyForStorable(newStorable, s.codec)
 			if index.Type == store.IndexTypeLastGen {
-				// replace format uint with just byte formatting
-				stm.Put(indexKey, strconv.FormatUint(uint64(gen), 10))
+				stm.Put(indexKey, s.marshalGen(newGen))
 			} else if index.Type == store.IndexTypeListGen {
-				// todo remove from old version in case of replace (b/c old one could become invalid like changed revision status)
+				if prevObj != nil {
+					// delete old obj from indexes
+				}
+
 				valueList := &store.IndexValueList{}
 				valueListRaw := stm.Get(indexKey)
 				if valueListRaw != "" {
 					s.unmarshal([]byte(valueListRaw), &valueList)
 				}
-				valueList.Add([]byte(strconv.FormatUint(uint64(gen), 10)))
+				// todo avoid marshaling gens for indexes by using special index value list type for gens
+				valueList.Add([]byte(s.marshalGen(newGen)))
 
 				data := s.marshal(valueList)
 
