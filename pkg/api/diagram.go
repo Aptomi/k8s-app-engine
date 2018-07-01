@@ -26,13 +26,13 @@ func (api *coreAPI) handlePolicyDiagram(writer http.ResponseWriter, request *htt
 	gen := params.ByName("gen")
 
 	if len(gen) == 0 {
-		gen = strconv.Itoa(int(runtime.LastGen))
+		gen = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	// see which policy generation we need to load
 	policyGen := runtime.ParseGeneration(gen)
 	if strings.ToLower(mode) == "actual" {
-		policyGen = runtime.LastGen
+		policyGen = runtime.LastOrEmptyGen
 	}
 
 	// load policy by gen
@@ -88,12 +88,12 @@ func (api *coreAPI) handlePolicyDiagramCompare(writer http.ResponseWriter, reque
 	mode := params.ByName("mode")
 	gen := params.ByName("gen")
 	if len(gen) == 0 {
-		gen = strconv.Itoa(int(runtime.LastGen))
+		gen = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	genBase := params.ByName("genBase")
 	if len(genBase) == 0 {
-		genBase = strconv.Itoa(int(runtime.LastGen))
+		genBase = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	policy, policyGen, err := api.registry.GetPolicy(runtime.ParseGeneration(gen))
@@ -162,7 +162,7 @@ func (api *coreAPI) handleObjectDiagram(writer http.ResponseWriter, request *htt
 	kind := params.ByName("kind")
 	name := params.ByName("name")
 
-	policy, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting policy: %s", err))
 	}

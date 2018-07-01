@@ -58,7 +58,7 @@ func (api *coreAPI) handleClaimStatusGet(writer http.ResponseWriter, request *ht
 	claimIds := strings.Split(params.ByName("idList"), ",")
 
 	// load the latest policy
-	policy, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading latest policy from the registry: %s", err))
 	}

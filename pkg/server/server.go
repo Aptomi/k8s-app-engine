@@ -89,7 +89,7 @@ func (server *Server) Start() {
 }
 
 func (server *Server) initPolicyOnFirstRun() {
-	policy, _, err := server.registry.GetPolicy(runtime.LastGen)
+	policy, _, err := server.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting latest policy: %s", err))
 	}

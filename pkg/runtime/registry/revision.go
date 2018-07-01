@@ -26,7 +26,7 @@ func (reg *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revisio
 
 // NewRevision creates a new revision and saves it to the database
 func (reg *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution *resolve.PolicyResolution, recalculateAll bool) (*engine.Revision, error) {
-	currRevision, err := reg.GetRevision(runtime.LastGen)
+	currRevision, err := reg.GetRevision(runtime.LastOrEmptyGen)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting last revision: %s", err)
 	}

@@ -61,7 +61,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 
 	if !info.Versioned {
 		data := s.marshal(newStorable)
-		_, err := s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastGen.String(), string(data))
+		_, err := s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastOrEmptyGen.String(), string(data))
 		return err
 	}
 
@@ -74,7 +74,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 
 		if saveOpts.IsReplaceOrForceGen() {
 			newGen := newObj.GetGeneration()
-			if newGen == runtime.LastGen {
+			if newGen == runtime.LastOrEmptyGen {
 				return fmt.Errorf("error while saving object %s with replaceOrForceGen option but with empty generation", key)
 			}
 			// need to check if there is an object already exists with gen from the object, if yes - remove it from indexes
