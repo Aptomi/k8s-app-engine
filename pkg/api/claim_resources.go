@@ -24,7 +24,7 @@ func (g *claimResourcesWrapper) GetKind() string {
 }
 
 func (api *coreAPI) handleClaimResourcesGet(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	gen := runtime.LastGen
+	gen := runtime.LastOrEmptyGen
 	policy, _, err := api.registry.GetPolicy(gen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting requested policy: %s", err))

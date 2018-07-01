@@ -18,7 +18,7 @@ func (g *userRolesWrapper) GetKind() string {
 }
 
 func (api *coreAPI) handleUserRoles(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	policy, _, err := api.registry.GetPolicy(runtime.LastGen)
+	policy, _, err := api.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while getting policy: %s", err))
 	}

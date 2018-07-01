@@ -38,7 +38,7 @@ func isDomainAdmin(user *lang.User, policy *lang.Policy) bool {
 
 func (api *coreAPI) handleStateEnforce(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	// Load current policy
-	policy, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
+	policy, policyGen, err := api.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading latest policy: %s", err))
 	}

@@ -22,7 +22,7 @@ func (api *coreAPI) handlePolicyGet(writer http.ResponseWriter, request *http.Re
 	gen := params.ByName("gen")
 
 	if len(gen) == 0 {
-		gen = strconv.Itoa(int(runtime.LastGen))
+		gen = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	policyData, err := api.registry.GetPolicyData(runtime.ParseGeneration(gen))
@@ -42,7 +42,7 @@ func (api *coreAPI) handlePolicyObjectGet(writer http.ResponseWriter, request *h
 	gen := params.ByName("gen")
 
 	if len(gen) == 0 {
-		gen = strconv.Itoa(int(runtime.LastGen))
+		gen = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	policy, _, err := api.registry.GetPolicy(runtime.ParseGeneration(gen))
@@ -133,7 +133,7 @@ func (api *coreAPI) handlePolicyUpdate(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Load the latest policy
-	_, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
+	_, policyGen, err := api.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}
@@ -253,7 +253,7 @@ func (api *coreAPI) handlePolicyDelete(writer http.ResponseWriter, request *http
 	user := api.getUserRequired(request)
 
 	// Load the latest policy gen
-	_, policyGen, err := api.registry.GetPolicy(runtime.LastGen)
+	_, policyGen, err := api.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		panic(fmt.Sprintf("error while loading current policy: %s", err))
 	}

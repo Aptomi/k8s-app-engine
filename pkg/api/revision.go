@@ -13,7 +13,7 @@ func (api *coreAPI) handleRevisionGet(writer http.ResponseWriter, request *http.
 	gen := params.ByName("gen")
 
 	if len(gen) == 0 {
-		gen = strconv.Itoa(int(runtime.LastGen))
+		gen = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	revision, err := api.registry.GetRevision(runtime.ParseGeneration(gen))
@@ -40,7 +40,7 @@ func (api *coreAPI) handleRevisionsGetByPolicy(writer http.ResponseWriter, reque
 	policyGen := params.ByName("policy")
 
 	if len(policyGen) == 0 {
-		policyGen = strconv.Itoa(int(runtime.LastGen))
+		policyGen = strconv.Itoa(int(runtime.LastOrEmptyGen))
 	}
 
 	revisions, err := api.registry.GetAllRevisionsForPolicy(runtime.ParseGeneration(policyGen))

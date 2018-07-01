@@ -69,7 +69,7 @@ func (server *Server) getRevisionForProcessing() (*engine.Revision, error) {
 	}
 
 	// if there are no unprocessed revisions, let's get the last one and see if it was successful or not
-	_, policyGen, err := server.registry.GetPolicy(runtime.LastGen)
+	_, policyGen, err := server.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load latest policy: %s", err)
 	}

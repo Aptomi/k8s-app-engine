@@ -47,7 +47,7 @@ func (server *Server) actualStateUpdate() error {
 	}()
 
 	// Get desired policy
-	desiredPolicy, _, err := server.registry.GetPolicy(runtime.LastGen)
+	desiredPolicy, _, err := server.registry.GetPolicy(runtime.LastOrEmptyGen)
 	if err != nil {
 		return fmt.Errorf("error while getting last policy: %s", err)
 	}

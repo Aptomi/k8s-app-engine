@@ -30,7 +30,7 @@ func (reg *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.Polic
 // if PolicyData is nil, it will return nil
 func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*lang.Policy, runtime.Generation, error) {
 	if policyData == nil {
-		return nil, runtime.LastGen, nil
+		return nil, runtime.LastOrEmptyGen, nil
 	}
 
 	policy := lang.NewPolicy()
@@ -46,7 +46,7 @@ func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*l
 
 					errPolicy := policy.AddObject(langObj)
 					if errPolicy != nil {
-						return nil, runtime.LastGen, errPolicy
+						return nil, runtime.LastOrEmptyGen, errPolicy
 					}
 				}
 			}
@@ -61,7 +61,7 @@ func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*l
 func (reg *defaultRegistry) GetPolicy(gen runtime.Generation) (*lang.Policy, runtime.Generation, error) {
 	policyData, err := reg.GetPolicyData(gen)
 	if err != nil {
-		return nil, runtime.LastGen, err
+		return nil, runtime.LastOrEmptyGen, err
 	}
 
 	return reg.getPolicyFromData(policyData)
@@ -73,7 +73,7 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 	reg.policyChangeLock.Lock()
 	defer reg.policyChangeLock.Unlock()
 
-	policyData, err := reg.GetPolicyData(runtime.LastGen)
+	policyData, err := reg.GetPolicyData(runtime.LastOrEmptyGen)
 	if err != nil {
 		return false, nil, err
 	}
@@ -144,7 +144,7 @@ func (reg *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy st
 	reg.policyChangeLock.Lock()
 	defer reg.policyChangeLock.Unlock()
 
-	policyData, err := reg.GetPolicyData(runtime.LastGen)
+	policyData, err := reg.GetPolicyData(runtime.LastOrEmptyGen)
 	if err != nil {
 		return false, nil, err
 	}
