@@ -80,6 +80,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 			// need to check if there is an object already exists with gen from the object, if yes - remove it from indexes
 			oldObjRaw := stm.Get("/object" + key + "@" + newGen.String())
 			if oldObjRaw != "" {
+				prevObj := info.New().(runtime.Storable)
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 			}
 
@@ -95,6 +96,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				if oldObjRaw == "" {
 					return fmt.Errorf("last gen index for %s seems to be corrupted: generation doesn't exist", key)
 				}
+				prevObj = info.New().(runtime.Storable)
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 				if !reflect.DeepEqual(prevObj, newObj) {
 					newObj.SetGeneration(lastGen.Next())
@@ -116,13 +118,13 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				stm.Put(indexKey, s.marshalGen(newGen))
 			} else if index.Type == store.IndexTypeListGen {
 				if prevObj != nil {
-					// delete old obj from indexes
+					// todo delete old obj from indexes
 				}
 
 				valueList := &store.IndexValueList{}
 				valueListRaw := stm.Get(indexKey)
 				if valueListRaw != "" {
-					s.unmarshal([]byte(valueListRaw), &valueList)
+					s.unmarshal([]byte(valueListRaw), valueList)
 				}
 				// todo avoid marshaling gens for indexes by using special index value list type for gens
 				valueList.Add([]byte(s.marshalGen(newGen)))
@@ -144,41 +146,55 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 /*
 Current Find use cases:
 
-* Find(kind).List
-* Find(kind, key).One (non-versioned, should set version to 0 and delegate to next)
-* Find(kind, key, gen).One (versioned)
+Non-versioned:
+* Find(kind, keyPrefix).List
+* Find(kind, key).One
 
-* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen), store.WithGetLast()).One(revision)
-* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen)).List(&revisions)
-* Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress), store.WithGetFirst()).One(revision)
- *Find(engine.TypeDesiredState.Kind, store.WithKey(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))).One(desiredState)
+Versioned:
+* Find(kind, key, gen).One
+* Find(kind, key, WithWhereEq).List
+* Find(kind, key, WithWhereEq, WithGetFirst).One
+* Find(kind, key, WithWhereEq, WithGetLast).One
 
 */
-
-func (s *etcdStore) Find(kind runtime.Kind, opts ...store.FindOpt) store.Finder {
+func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.FindOpt) error {
 	findOpts := store.NewFindOpts(opts)
-
-	if findOpts.GetKey() == "" {
-		// todo handle as separated case to return all objects for specified kind
-	}
-
 	info := s.types.Get(kind)
 
-	return &finder{s, findOpts, info}
-}
+	resultTypeSingle := reflect.TypeOf(info.New())
+	resultTypeList := reflect.PtrTo(reflect.SliceOf(resultTypeSingle))
 
-type finder struct {
-	*etcdStore
-	*store.FindOpts
-	info *runtime.TypeInfo
-}
+	resultList := false
 
-func (f *finder) One(runtime.Storable) error {
-	panic("implement me")
-}
+	resultType := reflect.TypeOf(result)
+	if resultType == resultTypeSingle {
+		// ok!
+	} else if resultType == resultTypeList {
+		// ok!
+		resultList = true
+	} else {
+		return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
+	}
 
-func (f *finder) List(interface{}) error {
-	panic("implement me")
+	v := reflect.ValueOf(result).Elem()
+	if resultList {
+		v.Set(reflect.Append(v, reflect.ValueOf(info.New())))
+		v.Set(reflect.Append(v, reflect.ValueOf(info.New())))
+	}
+
+	if !info.Versioned {
+		if findOpts.GetKey() != "" {
+			//resp, err := s.client.Get(context.TODO(), findOpts.GetKey())
+			//if err != nil {
+			//	return err
+			//}
+
+		}
+	}
+
+	// todo add more details
+	//panic(fmt.Sprintf("find query isn't supported"))
+	return nil
 }
 
 func (s *etcdStore) Delete(kind runtime.Kind, key runtime.Key) error {
