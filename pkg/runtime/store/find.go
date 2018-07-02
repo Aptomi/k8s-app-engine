@@ -8,6 +8,7 @@ type FindOpt func(opts *FindOpts)
 
 type FindOpts struct {
 	key           runtime.Key
+	keyPrefix     runtime.Key
 	gen           runtime.Generation
 	fieldEqName   string
 	fieldEqValues []interface{}
@@ -17,6 +18,10 @@ type FindOpts struct {
 
 func (opts *FindOpts) GetKey() runtime.Key {
 	return opts.key
+}
+
+func (opts *FindOpts) GetKeyPrefix() runtime.Key {
+	return opts.keyPrefix
 }
 
 func (opts *FindOpts) GetGen() runtime.Generation {
@@ -58,10 +63,26 @@ func WithKey(key runtime.Key) FindOpt {
 	}
 }
 
+func WithKeyPrefix(keyPrefix runtime.Key) FindOpt {
+	return func(opts *FindOpts) {
+		if opts.key != "" {
+			panic("can't use WithKeyPrefix with key specified")
+		}
+		if opts.keyPrefix != "" {
+			panic("can't use WithKeyPrefix more then one time")
+		}
+
+		opts.keyPrefix = keyPrefix
+	}
+}
+
 func WithGen(gen runtime.Generation) FindOpt {
 	return func(opts *FindOpts) {
 		if opts.key == "" {
 			panic("can't use WithGen without WithKey (key isn't set)")
+		}
+		if opts.keyPrefix != "" {
+			panic("can't use WithGen with key prefix specified")
 		}
 		if opts.gen != 0 {
 			panic("can't use WithGen more then one time")
@@ -78,6 +99,12 @@ func WithWhereEq(name string, values ...interface{}) FindOpt {
 		}
 		if len(values) == 0 {
 			panic("can't use WithWhereEq without at least single value")
+		}
+		if opts.key == "" {
+			panic("can't use WithWhereEq without specified key (it's only for searching generations now)")
+		}
+		if opts.keyPrefix != "" {
+			panic("can't use WithWhereEq with key prefix specified (it's only for searching generations now)")
 		}
 		if opts.fieldEqName != "" {
 			panic("can't use WithWhereEq more then one time")

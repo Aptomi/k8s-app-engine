@@ -8,11 +8,6 @@ type Interface interface {
 	Close() error
 
 	Save(storable runtime.Storable, opts ...SaveOpt) error
-	Find(kind runtime.Kind, opts ...FindOpt) Finder
+	Find(kind runtime.Kind, result interface{}, opts ...FindOpt) error
 	Delete(kind runtime.Kind, key runtime.Key) error
-}
-
-type Finder interface {
-	One(runtime.Storable) error
-	List(interface{}) error
 }

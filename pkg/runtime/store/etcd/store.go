@@ -54,6 +54,10 @@ func (s *etcdStore) Close() error {
 // 4. default option is saving object with new generation if it differs from the last generation object (or first time
 //    created), so, it'll only require adding object to indexes
 func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
+	if newStorable == nil {
+		return fmt.Errorf("can't save nil")
+	}
+
 	saveOpts := store.NewSaveOpts(opts)
 	info := s.types.Get(newStorable.GetKind())
 	indexes := store.IndexesFor(info)
@@ -80,7 +84,13 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 			// need to check if there is an object already exists with gen from the object, if yes - remove it from indexes
 			oldObjRaw := stm.Get("/object" + key + "@" + newGen.String())
 			if oldObjRaw != "" {
+				// todo avoid
 				prevObj := info.New().(runtime.Storable)
+				/*
+					add field require not nil val for unmarshal field into codec
+					if nil passed => create instance of desired object (w/o casting to storable) and pass to unmarshal
+					if not nil => error if incorrect type
+				*/
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 			}
 
@@ -96,6 +106,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				if oldObjRaw == "" {
 					return fmt.Errorf("last gen index for %s seems to be corrupted: generation doesn't exist", key)
 				}
+				// todo avoid
 				prevObj = info.New().(runtime.Storable)
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 				if !reflect.DeepEqual(prevObj, newObj) {
@@ -175,6 +186,9 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 	} else {
 		return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
 	}
+
+	// todo
+	// if findOpts.IsResultList != resultList => error
 
 	v := reflect.ValueOf(result).Elem()
 	if resultList {
