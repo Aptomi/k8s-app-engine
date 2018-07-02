@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"time"
+	"strings"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	etcd "github.com/coreos/etcd/clientv3"
 	etcdconc "github.com/coreos/etcd/clientv3/concurrency"
+	"github.com/coreos/etcd/clientv3/namespace"
 )
 
 type etcdStore struct {
@@ -18,13 +19,27 @@ type etcdStore struct {
 	codec  store.Codec
 }
 
-func New( /* todo config */ types *runtime.Types, codec store.Codec) (store.Interface, error) {
+func New(cfg Config, types *runtime.Types, codec store.Codec) (store.Interface, error) {
+	if len(cfg.Endpoints) == 0 {
+		cfg.Endpoints = []string{"localhost:2379"}
+	}
+
 	client, err := etcd.New(etcd.Config{
-		Endpoints:   []string{"localhost:2379"},
-		DialTimeout: 5 * time.Second,
+		Endpoints:            cfg.Endpoints,
+		DialTimeout:          dialTimeout,
+		DialKeepAliveTime:    keepaliveTime,
+		DialKeepAliveTimeout: keepaliveTimeout,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error while connecting to etcd: %s", err)
+	}
+
+	cfg.Prefix = strings.Trim(cfg.Prefix, "/")
+	if cfg.Prefix != "" {
+		cfg.Prefix = "/" + cfg.Prefix
+		client.KV = namespace.NewKV(client.KV, cfg.Prefix)
+		client.Lease = namespace.NewLease(client.Lease, cfg.Prefix)
+		client.Watcher = namespace.NewWatcher(client.Watcher, cfg.Prefix)
 	}
 
 	// todo run compactor?
