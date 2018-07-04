@@ -11,6 +11,7 @@ import (
 	etcd "github.com/coreos/etcd/clientv3"
 	etcdconc "github.com/coreos/etcd/clientv3/concurrency"
 	"github.com/coreos/etcd/clientv3/namespace"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type etcdStore struct {
@@ -172,15 +173,19 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 /*
 Current Find use cases:
 
-Non-versioned:
-* Find(kind, keyPrefix).List
-* Find(kind, key).One
+* Find(kind, keyPrefix)
+* Find(kind, key, gen)  (gen=0 for non-versioned)
+* Find(kind, key, WithWhereEq)
+* Find(kind, key, WithWhereEq, WithGetFirst)
+* Find(kind, key, WithWhereEq, WithGetLast)
 
-Versioned:
-* Find(kind, key, gen).One
-* Find(kind, key, WithWhereEq).List
-* Find(kind, key, WithWhereEq, WithGetFirst).One
-* Find(kind, key, WithWhereEq, WithGetLast).One
+\\ summary: keyPrefix OR key+gen OR key + whereEq+list/first/last
+
+Workflow:
+* validate parameters and result
+* identify requested list or one(first or last)
+* build list of keys that are result (could be just build key from parameters or use index)
+* based on requested list/first/last get corresponding element from the key list and query value for it
 
 */
 func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.FindOpt) error {
@@ -202,27 +207,39 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 		return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
 	}
 
-	// todo
-	// if findOpts.IsResultList != resultList => error
+	fmt.Println("findOpts: ", spew.Sdump(findOpts))
+	fmt.Println("resultList: ", resultList)
 
 	v := reflect.ValueOf(result).Elem()
-	if resultList {
-		v.Set(reflect.Append(v, reflect.ValueOf(info.New())))
-		v.Set(reflect.Append(v, reflect.ValueOf(info.New())))
+	if findOpts.GetKeyPrefix() != "" {
+		return s.findByKeyPrefix(findOpts, info, func(elem interface{}) {
+			// todo validate type of the elem
+			v.Set(reflect.Append(v, reflect.ValueOf(elem)))
+		})
+	} else if findOpts.GetKey() != "" && findOpts.GetFieldEqName() == "" {
+		return s.findByKey(findOpts, info, func(elem interface{}) {
+			// todo validate type of the elem
+			v.Set(reflect.ValueOf(elem))
+		})
+	} else {
+		return s.findByPredicate(findOpts, info, func(elem interface{}) {
+			// todo validate type of the elem
+			v.Set(reflect.Append(v, reflect.ValueOf(elem)))
+		})
 	}
+}
 
-	if !info.Versioned {
-		if findOpts.GetKey() != "" {
-			//resp, err := s.client.Get(context.TODO(), findOpts.GetKey())
-			//if err != nil {
-			//	return err
-			//}
+func (s *etcdStore) findByKeyPrefix(opts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+	return nil
+}
 
-		}
-	}
+func (s *etcdStore) findByKey(opts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+	return nil
+}
 
-	// todo add more details
-	//panic(fmt.Sprintf("find query isn't supported"))
+func (s *etcdStore) findByPredicate(opts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+	addToResult(info.New())
+	addToResult(info.New())
 	return nil
 }
 

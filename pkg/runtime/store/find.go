@@ -7,8 +7,8 @@ import (
 type FindOpt func(opts *FindOpts)
 
 type FindOpts struct {
-	key           runtime.Key
 	keyPrefix     runtime.Key
+	key           runtime.Key
 	gen           runtime.Generation
 	fieldEqName   string
 	fieldEqValues []interface{}
@@ -16,12 +16,12 @@ type FindOpts struct {
 	getFirst      bool
 }
 
-func (opts *FindOpts) GetKey() runtime.Key {
-	return opts.key
-}
-
 func (opts *FindOpts) GetKeyPrefix() runtime.Key {
 	return opts.keyPrefix
+}
+
+func (opts *FindOpts) GetKey() runtime.Key {
+	return opts.key
 }
 
 func (opts *FindOpts) GetGen() runtime.Generation {
