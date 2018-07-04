@@ -38,8 +38,13 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, loadedRevisions, 2)
 
-	var loadedRevision *engine.Revision
-	err = etcdStore.Find(engine.TypeRevision.Kind, loadedRevision, store.WithKey(engine.RevisionKey), store.WithGen(runtime.LastOrEmptyGen))
+	var loadedRevisionByLastGen *engine.Revision
+	err = etcdStore.Find(engine.TypeRevision.Kind, &loadedRevisionByLastGen, store.WithKey(engine.RevisionKey), store.WithGen(runtime.LastOrEmptyGen))
 	assert.NoError(t, err)
-	//assert.Equal(t, revision, loadedRevision)
+	assert.Equal(t, revision, loadedRevisionByLastGen)
+
+	var loadedRevisionBySpecificGen *engine.Revision
+	err = etcdStore.Find(engine.TypeRevision.Kind, &loadedRevisionBySpecificGen, store.WithKey(engine.RevisionKey), store.WithGen(2))
+	assert.NoError(t, err)
+	assert.Equal(t, revision, loadedRevisionBySpecificGen)
 }

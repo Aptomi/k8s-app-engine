@@ -81,7 +81,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 
 	if !info.Versioned {
 		data := s.marshal(newStorable)
-		_, err := s.client.Put(context.TODO(), "/object"+key+"@"+runtime.LastOrEmptyGen.String(), string(data))
+		_, err := s.client.KV.Put(context.TODO(), "/object"+key+"@"+runtime.LastOrEmptyGen.String(), string(data))
 		return err
 	}
 
@@ -192,8 +192,9 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 	findOpts := store.NewFindOpts(opts)
 	info := s.types.Get(kind)
 
-	resultTypeSingle := reflect.TypeOf(info.New())
-	resultTypeList := reflect.PtrTo(reflect.SliceOf(resultTypeSingle))
+	resultTypeElem := reflect.TypeOf(info.New())
+	resultTypeSingle := reflect.PtrTo(reflect.TypeOf(info.New()))
+	resultTypeList := reflect.PtrTo(reflect.SliceOf(resultTypeElem))
 
 	resultList := false
 
@@ -229,15 +230,72 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 	}
 }
 
-func (s *etcdStore) findByKeyPrefix(opts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+func (s *etcdStore) findByKeyPrefix(findOpts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+	if info.Versioned {
+		return fmt.Errorf("searching with key prefix is only supported for non versioned objects")
+	}
+
+	resp, err := s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKeyPrefix(), etcd.WithPrefix())
+	if err != nil {
+		return err
+	} else if resp.Count == 0 {
+		// not found
+	}
+
+	for _, kv := range resp.Kvs {
+		// todo avoid
+		elem := info.New()
+		s.unmarshal(kv.Value, elem)
+		addToResult(elem)
+	}
+
 	return nil
 }
 
-func (s *etcdStore) findByKey(opts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+func (s *etcdStore) findByKey(findOpts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+
+	if !info.Versioned && findOpts.GetGen() != runtime.LastOrEmptyGen {
+		return fmt.Errorf("requested specific version for non versioned object")
+	}
+
+	var data []byte
+
+	if !info.Versioned || findOpts.GetGen() != runtime.LastOrEmptyGen {
+		resp, respErr := s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKey()+"@"+findOpts.GetGen().String())
+		if respErr != nil {
+			return respErr
+		} else if resp.Count == 0 {
+			// not found
+		}
+		data = resp.Kvs[0].Value
+	} else {
+		indexes := store.IndexesFor(info)
+		// todo wrap into STM to ensure we're getting really last unchanged element / consider is it important? we can't delete generation, so, probably no need for STM here
+		resp, respErr := s.client.KV.Get(context.TODO(), "/index/"+indexes.KeyForValue(store.LastGenIndex, findOpts.GetKey(), nil, s.codec))
+		if respErr != nil {
+			return respErr
+		} else if resp.Count == 0 {
+			// not found
+		}
+		lastGen := s.unmarshalGen(string(resp.Kvs[0].Value))
+		resp, respErr = s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKey()+"@"+lastGen.String())
+		if respErr != nil {
+			return respErr
+		} else if resp.Count == 0 {
+			// not found
+		}
+		data = resp.Kvs[0].Value
+	}
+
+	result := info.New()
+	s.unmarshal(data, result)
+
+	addToResult(result)
+
 	return nil
 }
 
-func (s *etcdStore) findByPredicate(opts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+func (s *etcdStore) findByPredicate(findOpts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
 	addToResult(info.New())
 	addToResult(info.New())
 	return nil
