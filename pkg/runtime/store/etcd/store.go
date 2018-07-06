@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/Aptomi/aptomi/pkg/runtime"
@@ -101,7 +102,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 			oldObjRaw := stm.Get("/object" + key + "@" + newGen.String())
 			if oldObjRaw != "" {
 				// todo avoid
-				prevObj := info.New().(runtime.Storable)
+				prevObj = info.New().(runtime.Storable)
 				/*
 					add field require not nil val for unmarshal field into codec
 					if nil passed => create instance of desired object (w/o casting to storable) and pass to unmarshal
@@ -139,26 +140,21 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		newGen := newObj.GetGeneration()
 		stm.Put("/object"+key+"@"+newGen.String(), string(data))
 
+		if prevObj != nil && prevObj.(runtime.Versioned).GetGeneration() == newGen {
+			for _, index := range indexes.List {
+				indexKey := "/index/" + index.KeyForStorable(prevObj, s.codec)
+				if index.Type == store.IndexTypeListGen {
+					s.updateIndex(stm, indexKey, prevObj.(runtime.Versioned).GetGeneration(), true)
+				}
+			}
+		}
+
 		for _, index := range indexes.List {
 			indexKey := "/index/" + index.KeyForStorable(newStorable, s.codec)
 			if index.Type == store.IndexTypeLastGen {
 				stm.Put(indexKey, s.marshalGen(newGen))
 			} else if index.Type == store.IndexTypeListGen {
-				if prevObj != nil {
-					// todo delete old obj from indexes
-				}
-
-				valueList := &store.IndexValueList{}
-				valueListRaw := stm.Get(indexKey)
-				if valueListRaw != "" {
-					s.unmarshal([]byte(valueListRaw), valueList)
-				}
-				// todo avoid marshaling gens for indexes by using special index value list type for gens
-				valueList.Add([]byte(s.marshalGen(newGen)))
-
-				data := s.marshal(valueList)
-
-				stm.Put(indexKey, string(data))
+				s.updateIndex(stm, indexKey, newGen, false)
 			} else {
 				panic("only indexes with types store.IndexTypeLastGen and store.IndexTypeListGen are currently supported by Etcd store")
 			}
@@ -168,6 +164,23 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 	})
 
 	return err
+}
+
+func (s *etcdStore) updateIndex(stm etcdconc.STM, indexKey string, newGen runtime.Generation, delete bool) {
+	valueList := &store.IndexValueList{}
+	valueListRaw := stm.Get(indexKey)
+	if valueListRaw != "" {
+		s.unmarshal([]byte(valueListRaw), valueList)
+	}
+	// todo avoid marshaling gens for indexes by using special index value list type for gens
+	gen := []byte(s.marshalGen(newGen))
+	if delete {
+		valueList.Remove(gen)
+	} else {
+		valueList.Add(gen)
+	}
+	data := s.marshal(valueList)
+	stm.Put(indexKey, string(data))
 }
 
 /*
@@ -205,7 +218,8 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 		// ok!
 		resultList = true
 	} else {
-		return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
+		fmt.Printf("result should be %s or %s, but found: %s\n", resultTypeSingle, resultTypeList, resultType)
+		//return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
 	}
 
 	fmt.Println("findOpts: ", spew.Sdump(findOpts))
@@ -215,17 +229,30 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 	if findOpts.GetKeyPrefix() != "" {
 		return s.findByKeyPrefix(findOpts, info, func(elem interface{}) {
 			// todo validate type of the elem
+			// todo if !resultList
 			v.Set(reflect.Append(v, reflect.ValueOf(elem)))
 		})
 	} else if findOpts.GetKey() != "" && findOpts.GetFieldEqName() == "" {
 		return s.findByKey(findOpts, info, func(elem interface{}) {
 			// todo validate type of the elem
-			v.Set(reflect.ValueOf(elem))
+			if elem == nil {
+				v.Set(reflect.Zero(v.Type()))
+			} else {
+				v.Set(reflect.ValueOf(elem))
+			}
 		})
 	} else {
-		return s.findByPredicate(findOpts, info, func(elem interface{}) {
+		return s.findByFieldEq(findOpts, info, func(elem interface{}) {
 			// todo validate type of the elem
-			v.Set(reflect.Append(v, reflect.ValueOf(elem)))
+			if !resultList {
+				if elem == nil {
+					v.Set(reflect.Zero(v.Type()))
+				} else {
+					v.Set(reflect.ValueOf(elem))
+				}
+			} else {
+				v.Set(reflect.Append(v, reflect.ValueOf(elem)))
+			}
 		})
 	}
 }
@@ -238,8 +265,6 @@ func (s *etcdStore) findByKeyPrefix(findOpts *store.FindOpts, info *runtime.Type
 	resp, err := s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKeyPrefix(), etcd.WithPrefix())
 	if err != nil {
 		return err
-	} else if resp.Count == 0 {
-		// not found
 	}
 
 	for _, kv := range resp.Kvs {
@@ -264,43 +289,94 @@ func (s *etcdStore) findByKey(findOpts *store.FindOpts, info *runtime.TypeInfo, 
 		resp, respErr := s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKey()+"@"+findOpts.GetGen().String())
 		if respErr != nil {
 			return respErr
-		} else if resp.Count == 0 {
-			// not found
+		} else if resp.Count > 0 {
+			data = resp.Kvs[0].Value
 		}
-		data = resp.Kvs[0].Value
 	} else {
 		indexes := store.IndexesFor(info)
 		// todo wrap into STM to ensure we're getting really last unchanged element / consider is it important? we can't delete generation, so, probably no need for STM here
 		resp, respErr := s.client.KV.Get(context.TODO(), "/index/"+indexes.KeyForValue(store.LastGenIndex, findOpts.GetKey(), nil, s.codec))
 		if respErr != nil {
 			return respErr
-		} else if resp.Count == 0 {
-			// not found
+		} else if resp.Count > 0 {
+			lastGen := s.unmarshalGen(string(resp.Kvs[0].Value))
+			resp, respErr = s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKey()+"@"+lastGen.String())
+			if respErr != nil {
+				return respErr
+			} else if resp.Count > 0 {
+				data = resp.Kvs[0].Value
+			}
 		}
-		lastGen := s.unmarshalGen(string(resp.Kvs[0].Value))
-		resp, respErr = s.client.KV.Get(context.TODO(), "/object"+"/"+findOpts.GetKey()+"@"+lastGen.String())
-		if respErr != nil {
-			return respErr
-		} else if resp.Count == 0 {
-			// not found
-		}
-		data = resp.Kvs[0].Value
 	}
 
-	result := info.New()
-	s.unmarshal(data, result)
+	if data == nil {
+		addToResult(nil)
+	} else {
+		// todo avoid
+		result := info.New()
+		s.unmarshal(data, result)
 
-	addToResult(result)
+		addToResult(result)
+	}
 
 	return nil
 }
 
-func (s *etcdStore) findByPredicate(findOpts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
-	addToResult(info.New())
-	addToResult(info.New())
+func (s *etcdStore) findByFieldEq(findOpts *store.FindOpts, info *runtime.TypeInfo, addToResult func(interface{})) error {
+	indexes := store.IndexesFor(info)
+	resultGens := make([]runtime.Generation, 0)
+
+	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
+		for _, fieldValue := range findOpts.GetFieldEqValues() {
+			indexKey := "/index/" + indexes.KeyForValue(findOpts.GetFieldEqName(), findOpts.GetKey(), fieldValue, s.codec)
+			indexValue := stm.Get(indexKey)
+			if indexValue != "" {
+				valueList := &store.IndexValueList{}
+				s.unmarshal([]byte(indexValue), valueList)
+				for _, val := range *valueList {
+					resultGens = append(resultGens, s.unmarshalGen(string(val)))
+				}
+			}
+		}
+
+		sort.Slice(resultGens, func(i, j int) bool {
+			return resultGens[i] < resultGens[j]
+		})
+
+		if len(resultGens) > 0 {
+			if findOpts.IsGetFirst() {
+				resultGens = []runtime.Generation{resultGens[0]}
+			} else if findOpts.IsGetLast() {
+				resultGens = []runtime.Generation{resultGens[len(resultGens)-1]}
+			}
+			for _, gen := range resultGens {
+				data := stm.Get("/object" + "/" + findOpts.GetKey() + "@" + gen.String())
+				if data == "" {
+					return fmt.Errorf("index is invalid :(")
+				}
+				result := info.New()
+				s.unmarshal([]byte(data), result)
+				addToResult(result)
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (s *etcdStore) Delete(kind runtime.Kind, key runtime.Key) error {
-	panic("implement me")
+	info := s.types.Get(kind)
+
+	if info.Versioned {
+		return fmt.Errorf("versioned object couldn't be deleted using store.Delete, use deleted flag + store.Save instead")
+	}
+
+	_, err := s.client.KV.Delete(context.TODO(), "/object"+"/"+key+"@"+runtime.LastOrEmptyGen.String())
+
+	return err
 }
