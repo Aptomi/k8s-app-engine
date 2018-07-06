@@ -222,6 +222,7 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 		// ok!
 		resultList = true
 	} else {
+		// todo return back verification
 		fmt.Printf("result should be %s or %s, but found: %s\n", resultTypeSingle, resultTypeList, resultType)
 		//return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
 	}
