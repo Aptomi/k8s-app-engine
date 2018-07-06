@@ -115,7 +115,7 @@ func storableKeyForComponent(componentKey string) string {
 
 func (updater *actualStateUpdater) loadComponentInstance(key string) (*resolve.ComponentInstance, error) {
 	var instance *resolve.ComponentInstance
-	err := updater.store.Find(resolve.TypeComponentInstance.Kind, store.WithKey(storableKeyForComponent(key))).One(instance)
+	err := updater.store.Find(resolve.TypeComponentInstance.Kind, &instance, store.WithKey(storableKeyForComponent(key)))
 	if err != nil {
 		return nil, err
 	}
