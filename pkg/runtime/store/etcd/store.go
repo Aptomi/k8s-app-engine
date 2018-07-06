@@ -227,9 +227,6 @@ func (s *etcdStore) Find(kind runtime.Kind, result interface{}, opts ...store.Fi
 		//return fmt.Errorf("result should be %s or %s, but found: %s", resultTypeSingle, resultTypeList, resultType)
 	}
 
-	fmt.Println("findOpts: ", spew.Sdump(findOpts))
-	fmt.Println("resultList: ", resultList)
-
 	v := reflect.ValueOf(result).Elem()
 	if findOpts.GetKeyPrefix() != "" {
 		return s.findByKeyPrefix(findOpts, info, func(elem interface{}) {
