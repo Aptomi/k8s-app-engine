@@ -129,6 +129,8 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 				prevObj = info.New().(runtime.Storable)
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 				newObj.SetGeneration(lastGen)
+
+				// todo should we compare marshaled objects for safety?
 				if reflect.DeepEqual(prevObj, newObj) {
 					return nil
 				} else {
