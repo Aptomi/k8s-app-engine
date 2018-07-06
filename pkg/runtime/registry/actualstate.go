@@ -8,7 +8,7 @@ import (
 
 func (reg *defaultRegistry) GetActualState() (*resolve.PolicyResolution, error) {
 	var instances []*resolve.ComponentInstance
-	err := reg.store.Find(resolve.TypeComponentInstance.Kind).List(&instances)
+	err := reg.store.Find(resolve.TypeComponentInstance.Kind, &instances)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting all component instances: %s", err)
 	}

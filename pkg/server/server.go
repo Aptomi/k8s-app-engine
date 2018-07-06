@@ -24,6 +24,8 @@ import (
 	"github.com/Aptomi/aptomi/pkg/plugin/k8sraw"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/registry"
+	"github.com/Aptomi/aptomi/pkg/runtime/store"
+	"github.com/Aptomi/aptomi/pkg/runtime/store/etcd"
 	"github.com/Aptomi/aptomi/pkg/server/ui"
 	"github.com/gorilla/handlers"
 	"github.com/julienschmidt/httprouter"
@@ -172,7 +174,12 @@ func (server *Server) initRegistry() {
 	//	panic(fmt.Sprintf("Can't open object registry: %s", err))
 	//}
 	// todo replace with actual DB store
-	server.registry = registry.New(nil)
+	cfg := etcd.Config{}
+	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(registry.Types...), store.NewYamlCodec())
+	if err != nil {
+		panic(fmt.Sprintf("can't create etcd store: %s", err))
+	}
+	server.registry = registry.New(etcdStore)
 }
 
 func (server *Server) initPluginRegistryFactory() {

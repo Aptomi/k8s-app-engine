@@ -15,7 +15,7 @@ import (
 func (reg *defaultRegistry) GetPolicyData(gen runtime.Generation) (*engine.PolicyData, error) {
 	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
 	var policyData *engine.PolicyData
-	err := reg.store.Find(engine.TypePolicyData.Kind, store.WithKey(engine.PolicyDataKey), store.WithGen(gen)).One(policyData)
+	err := reg.store.Find(engine.TypePolicyData.Kind, &policyData, store.WithKey(engine.PolicyDataKey), store.WithGen(gen))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (reg *defaultRegistry) getPolicyFromData(policyData *engine.PolicyData) (*l
 			for kind, nameGen := range kindNameGen {
 				for name, gen := range nameGen {
 					var langObj lang.Base
-					errStore := reg.store.Find(kind, store.WithKey(runtime.KeyFromParts(ns, kind, name)), store.WithGen(gen)).One(langObj)
+					errStore := reg.store.Find(kind, &langObj, store.WithKey(runtime.KeyFromParts(ns, kind, name)), store.WithGen(gen))
 					if errStore != nil {
 						return nil, 0, errStore
 					}
@@ -87,7 +87,7 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 			return false, nil, fmt.Errorf("objects with deleted=true not supported while updating policy: %s", runtime.KeyForStorable(updatedObj))
 		}
 
-		var changedObj bool
+		var changedObj bool = true
 		// todo think about changedObj flag - should we do it in db layer? there should be global lock for policy update anyway
 		err = reg.store.Save(updatedObj)
 		if err != nil {

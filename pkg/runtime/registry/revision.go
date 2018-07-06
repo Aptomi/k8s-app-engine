@@ -13,7 +13,7 @@ import (
 func (reg *defaultRegistry) GetRevision(gen runtime.Generation) (*engine.Revision, error) {
 	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
 	var revision *engine.Revision
-	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithGen(gen)).One(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind, &revision, store.WithKey(engine.RevisionKey), store.WithGen(gen))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (reg *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
 func (reg *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generation) (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	var revision *engine.Revision
-	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen), store.WithGetLast()).One(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind, &revision, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen), store.WithGetLast())
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (reg *defaultRegistry) GetLastRevisionForPolicy(policyGen runtime.Generatio
 func (reg *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generation) ([]*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	var revisions []*engine.Revision
-	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen)).List(&revisions)
+	err := reg.store.Find(engine.TypeRevision.Kind, &revisions, store.WithKey(engine.RevisionKey), store.WithWhereEq("PolicyGen", policyGen))
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (reg *defaultRegistry) GetAllRevisionsForPolicy(policyGen runtime.Generatio
 func (reg *defaultRegistry) GetFirstUnprocessedRevision() (*engine.Revision, error) {
 	// TODO: this method is slow, needs indexes
 	var revision *engine.Revision
-	err := reg.store.Find(engine.TypeRevision.Kind, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress), store.WithGetFirst()).One(revision)
+	err := reg.store.Find(engine.TypeRevision.Kind, &revision, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress), store.WithGetFirst())
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (reg *defaultRegistry) GetDesiredState(revision *engine.Revision) (*resolve
 	// todo thing about replacing hardcoded key with some flag in Info that will show that there is a single object of that kind
 	var desiredState *engine.DesiredState
 	// todo switch desired state from name including revision gen to just static name with forced generation equal to revision gen
-	err := reg.store.Find(engine.TypeDesiredState.Kind, store.WithKey(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration())))).One(desiredState)
+	err := reg.store.Find(engine.TypeDesiredState.Kind, &desiredState, store.WithKey(runtime.KeyFromParts(runtime.SystemNS, engine.TypeDesiredState.Kind, engine.GetDesiredStateName(revision.GetGeneration()))))
 	if err != nil {
 		return nil, err
 	}
