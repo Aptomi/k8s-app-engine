@@ -26,13 +26,21 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 		Status:    engine.RevisionStatusWaiting,
 	}
 
-	err = etcdStore.Save(revision)
+	var changed bool
+	changed, err = etcdStore.Save(revision)
 	assert.NoError(t, err)
+	assert.True(t, changed)
 	assert.EqualValues(t, revision.GetGeneration(), 1)
 
 	revision.Status = engine.RevisionStatusCompleted
-	err = etcdStore.Save(revision)
+	changed, err = etcdStore.Save(revision)
 	assert.NoError(t, err)
+	assert.True(t, changed)
+	assert.EqualValues(t, revision.GetGeneration(), 2)
+
+	changed, err = etcdStore.Save(revision)
+	assert.NoError(t, err)
+	assert.False(t, changed)
 	assert.EqualValues(t, revision.GetGeneration(), 2)
 
 	var loadedRevisions []*engine.Revision
