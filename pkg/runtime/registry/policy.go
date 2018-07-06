@@ -87,9 +87,8 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 			return false, nil, fmt.Errorf("objects with deleted=true not supported while updating policy: %s", runtime.KeyForStorable(updatedObj))
 		}
 
-		var changedObj bool = true
-		// todo think about changedObj flag - should we do it in db layer? there should be global lock for policy update anyway
-		err = reg.store.Save(updatedObj)
+		var changedObj bool
+		changedObj, err = reg.store.Save(updatedObj)
 		if err != nil {
 			return false, nil, err
 		}
@@ -105,7 +104,7 @@ func (reg *defaultRegistry) UpdatePolicy(updatedObjects []lang.Base, performedBy
 		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
-		err = reg.store.Save(policyData)
+		_, err = reg.store.Save(policyData)
 		if err != nil {
 			return false, nil, err
 		}
@@ -128,7 +127,7 @@ func (reg *defaultRegistry) InitPolicy() error {
 	}
 
 	// save policy data
-	err := reg.store.Save(initialPolicyData)
+	_, err := reg.store.Save(initialPolicyData)
 	if err != nil {
 		return err
 	}
@@ -157,7 +156,7 @@ func (reg *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy st
 
 		if !obj.IsDeleted() {
 			obj.SetDeleted(true)
-			err = reg.store.Save(obj)
+			_, err = reg.store.Save(obj)
 			if err != nil {
 				return false, nil, fmt.Errorf("error while setting deleted=true for %s: %s", runtime.KeyForStorable(obj), err)
 			}
@@ -169,7 +168,7 @@ func (reg *defaultRegistry) DeleteFromPolicy(deleted []lang.Base, performedBy st
 		policyData.Metadata.UpdatedBy = performedBy
 
 		// save policy data
-		err = reg.store.Save(policyData)
+		_, err = reg.store.Save(policyData)
 		if err != nil {
 			return false, nil, err
 		}

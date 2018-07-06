@@ -42,14 +42,14 @@ func (reg *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution
 	revision := engine.NewRevision(gen, policyGen, recalculateAll)
 
 	// save revision
-	err = reg.store.Save(revision)
+	_, err = reg.store.Save(revision)
 	if err != nil {
 		return nil, fmt.Errorf("error while saving new revision: %s", err)
 	}
 
 	// save desired state
 	desiredState := engine.NewDesiredState(revision, resolution)
-	err = reg.store.Save(desiredState)
+	_, err = reg.store.Save(desiredState)
 	if err != nil {
 		return nil, fmt.Errorf("error while saving desired state for new revision: %s", err)
 	}
@@ -59,7 +59,7 @@ func (reg *defaultRegistry) NewRevision(policyGen runtime.Generation, resolution
 
 // UpdateRevision updates specified Revision in the registry without creating new generation
 func (reg *defaultRegistry) UpdateRevision(revision *engine.Revision) error {
-	err := reg.store.Save(revision, store.WithReplaceOrForceGen())
+	_, err := reg.store.Save(revision, store.WithReplaceOrForceGen())
 	if err != nil {
 		return fmt.Errorf("error while updating revision: %s", err)
 	}

@@ -70,9 +70,9 @@ func (s *etcdStore) Close() error {
 //    not be checked in that case and old object will be removed from indexes, while new one will be added to them
 // 4. default option is saving object with new generation if it differs from the last generation object (or first time
 //    created), so, it'll only require adding object to indexes
-func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) error {
+func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (bool, error) {
 	if newStorable == nil {
-		return fmt.Errorf("can't save nil")
+		return false, fmt.Errorf("can't save nil")
 	}
 
 	saveOpts := store.NewSaveOpts(opts)
@@ -83,9 +83,11 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 	if !info.Versioned {
 		data := s.marshal(newStorable)
 		_, err := s.client.KV.Put(context.TODO(), "/object"+key+"@"+runtime.LastOrEmptyGen.String(), string(data))
-		return err
+		// todo should it be true or false always?
+		return false, err
 	}
 
+	var newVersion bool
 	newObj := newStorable.(runtime.Versioned)
 	// todo prefetch all needed keys for STM to maximize performance (in fact it'll get all data in one first request)
 	// todo consider unmarshal to the info.New() to support gob w/o need to register types?
@@ -117,6 +119,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 			lastGenRaw := stm.Get("/index/" + indexes.KeyForStorable(store.LastGenIndex, newStorable, s.codec))
 			if lastGenRaw == "" {
 				newObj.SetGeneration(runtime.FirstGen)
+				newVersion = true
 			} else {
 				lastGen := s.unmarshalGen(lastGenRaw)
 				oldObjRaw := stm.Get("/object" + key + "@" + lastGen.String())
@@ -128,6 +131,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 				if !reflect.DeepEqual(prevObj, newObj) {
 					newObj.SetGeneration(lastGen.Next())
+					newVersion = true
 				} else {
 					newObj.SetGeneration(lastGen)
 					// nothing to do - object wasn't changed
@@ -163,7 +167,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) er
 		return nil
 	})
 
-	return err
+	return newVersion, err
 }
 
 func (s *etcdStore) updateIndex(stm etcdconc.STM, indexKey string, newGen runtime.Generation, delete bool) {
