@@ -12,7 +12,6 @@ import (
 	etcd "github.com/coreos/etcd/clientv3"
 	etcdconc "github.com/coreos/etcd/clientv3/concurrency"
 	"github.com/coreos/etcd/clientv3/namespace"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type etcdStore struct {
@@ -129,13 +128,12 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 				// todo avoid
 				prevObj = info.New().(runtime.Storable)
 				s.unmarshal([]byte(oldObjRaw), prevObj)
-				if !reflect.DeepEqual(prevObj, newObj) {
+				newObj.SetGeneration(lastGen)
+				if reflect.DeepEqual(prevObj, newObj) {
+					return nil
+				} else {
 					newObj.SetGeneration(lastGen.Next())
 					newVersion = true
-				} else {
-					newObj.SetGeneration(lastGen)
-					// nothing to do - object wasn't changed
-					return nil
 				}
 			}
 		}
