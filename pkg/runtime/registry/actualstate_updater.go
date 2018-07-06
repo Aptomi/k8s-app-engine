@@ -128,7 +128,8 @@ func (updater *actualStateUpdater) save(obj runtime.Storable) error {
 		return fmt.Errorf("only ComponentInstances could be updated using actual.StateUpdater, not: %T", obj)
 	}
 
-	return updater.store.Save(obj)
+	_, err := updater.store.Save(obj)
+	return err
 }
 
 func (updater *actualStateUpdater) delete(key string) error {

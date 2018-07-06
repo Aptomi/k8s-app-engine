@@ -7,7 +7,7 @@ import (
 type Interface interface {
 	Close() error
 
-	Save(storable runtime.Storable, opts ...SaveOpt) error
+	Save(storable runtime.Storable, opts ...SaveOpt) (bool, error)
 	Find(kind runtime.Kind, result interface{}, opts ...FindOpt) error
 	Delete(kind runtime.Kind, key runtime.Key) error
 }
