@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Codec interface {
@@ -24,6 +26,21 @@ func (c *jsonCodec) Marshal(value interface{}) ([]byte, error) {
 
 func (c *jsonCodec) Unmarshal(data []byte, value interface{}) error {
 	return json.Unmarshal(data, value)
+}
+
+type yamlCodec struct {
+}
+
+func NewYamlCodec() Codec {
+	return &yamlCodec{}
+}
+
+func (c *yamlCodec) Marshal(value interface{}) ([]byte, error) {
+	return yaml.Marshal(value)
+}
+
+func (c *yamlCodec) Unmarshal(data []byte, value interface{}) error {
+	return yaml.Unmarshal(data, value)
 }
 
 type gobCodec struct {
