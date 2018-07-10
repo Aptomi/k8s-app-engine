@@ -9,7 +9,6 @@ type TypeInfo struct {
 	Kind        Kind
 	Storable    bool
 	Versioned   bool
-	Deletable   bool
 	Constructor Constructor
 }
 

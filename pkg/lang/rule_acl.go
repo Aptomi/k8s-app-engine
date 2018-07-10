@@ -33,7 +33,6 @@ var TypeACLRule = &runtime.TypeInfo{
 	Kind:        "aclrule",
 	Storable:    true,
 	Versioned:   true,
-	Deletable:   true,
 	Constructor: func() runtime.Object { return &ACLRule{} },
 }
 

@@ -12,7 +12,6 @@ var TypeRule = &runtime.TypeInfo{
 	Kind:        "rule",
 	Storable:    true,
 	Versioned:   true,
-	Deletable:   true,
 	Constructor: func() runtime.Object { return &Rule{} },
 }
 

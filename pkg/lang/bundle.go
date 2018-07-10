@@ -14,7 +14,6 @@ var TypeBundle = &runtime.TypeInfo{
 	Kind:        "bundle",
 	Storable:    true,
 	Versioned:   true,
-	Deletable:   true,
 	Constructor: func() runtime.Object { return &Bundle{} },
 }
 

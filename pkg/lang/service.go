@@ -11,7 +11,6 @@ var TypeService = &runtime.TypeInfo{
 	Kind:        "service",
 	Storable:    true,
 	Versioned:   true,
-	Deletable:   true,
 	Constructor: func() runtime.Object { return &Service{} },
 }
 
