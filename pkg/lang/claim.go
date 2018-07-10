@@ -9,7 +9,6 @@ var TypeClaim = &runtime.TypeInfo{
 	Kind:        "claim",
 	Storable:    true,
 	Versioned:   true,
-	Deletable:   true,
 	Constructor: func() runtime.Object { return &Claim{} },
 }
 

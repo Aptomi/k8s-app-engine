@@ -12,7 +12,6 @@ var TypeCluster = &runtime.TypeInfo{
 	Kind:        "cluster",
 	Storable:    true,
 	Versioned:   true,
-	Deletable:   true,
 	Constructor: func() runtime.Object { return &Cluster{} },
 }
 
