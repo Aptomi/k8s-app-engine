@@ -12,8 +12,9 @@ import (
 func TestIndexes(t *testing.T) {
 	indexes := store.IndexesFor(engine.TypeRevision)
 	assert.NotNil(t, indexes)
-	assert.Len(t, indexes, 3)
-	assert.Contains(t, indexes, "PolicyGen")
+	assert.NotNil(t, indexes.List)
+	assert.Len(t, indexes.List, 3)
+	assert.Contains(t, indexes.List, "PolicyGen")
 	revision := &engine.Revision{
 		TypeKind: engine.TypeRevision.GetTypeKind(),
 		Status:   "some_status",
@@ -22,9 +23,9 @@ func TestIndexes(t *testing.T) {
 		},
 		PolicyGen: 42,
 	}
-	assert.Equal(t, "system/revision@PolicyGen@42", indexes.NameForStorable("PolicyGen", revision, store.NewJsonCodec()))
-	assert.Equal(t, "system/revision@Status@some_status", indexes.NameForStorable("Status", revision, store.NewJsonCodec()))
-	assert.Equal(t, "system/revision", indexes.NameForStorable(store.LastGenIndex, revision, store.NewJsonCodec()))
+	assert.Equal(t, "listgen/system/revision/PolicyGen=42", indexes.NameForStorable("PolicyGen", revision, store.NewJsonCodec()))
+	assert.Equal(t, "listgen/system/revision/Status=some_status", indexes.NameForStorable("Status", revision, store.NewJsonCodec()))
+	assert.Equal(t, "lastgen/system/revision", indexes.NameForStorable(store.LastGenIndex, revision, store.NewJsonCodec()))
 
-	assert.Equal(t, "system/revision@PolicyGen@42", indexes.NameForValue("PolicyGen", engine.RevisionKey, 42, store.NewJsonCodec()))
+	assert.Equal(t, "listgen/system/revision/PolicyGen=42", indexes.NameForValue("PolicyGen", engine.RevisionKey, 42, store.NewJsonCodec()))
 }
