@@ -38,6 +38,10 @@ func (indexes *Indexes) NameForValue(indexName string, key runtime.Key, value in
 	}
 }
 
+var noopValueTransform = func(val interface{}) interface{} {
+	return val
+}
+
 func IndexesFor(info *runtime.TypeInfo) *Indexes {
 	indexCacheMu.Lock()
 	defer indexCacheMu.Unlock()
@@ -65,9 +69,7 @@ func IndexesFor(info *runtime.TypeInfo) *Indexes {
 				// todo validate that field is accessible
 				transformer := info.IndexValueTransforms[f.Name]
 				if transformer == nil {
-					transformer = func(val interface{}) interface{} {
-						return val
-					}
+					transformer = noopValueTransform
 				}
 				indexes.List[f.Name] = &Index{
 					Type:           IndexTypeListGen,
@@ -127,14 +129,14 @@ func (index *Index) NameForStorable(storable runtime.Storable, codec Codec) stri
 }
 
 func (index *Index) NameForValue(key runtime.Key, value interface{}, codec Codec) string {
-	value = index.ValueTransform(value)
-	if value == nil {
-		return ""
-	}
-
 	key = index.Type.String() + "/" + key
 	if index.Type == IndexTypeLastGen {
 		return key
+	}
+
+	value = index.ValueTransform(value)
+	if value == nil {
+		return ""
 	}
 
 	key += "/" + index.Field + "="
