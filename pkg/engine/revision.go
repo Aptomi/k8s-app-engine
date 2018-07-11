@@ -8,17 +8,6 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
-// TypeRevision is TypeInfo for Revision
-var TypeRevision = &runtime.TypeInfo{
-	Kind:        "revision",
-	Storable:    true,
-	Versioned:   true,
-	Constructor: func() runtime.Object { return &Revision{} },
-}
-
-// RevisionKey is the default key for the Revision object (there is only one Revision exists but with multiple generations)
-var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, TypeRevision.Kind, runtime.EmptyName)
-
 const (
 	// RevisionStatusWaiting represents Revision status when it has been created, but apply haven't started yet
 	RevisionStatusWaiting = "waiting"
@@ -30,15 +19,34 @@ const (
 	RevisionStatusError = "error"
 )
 
+// RevisionKey is the default key for the Revision object (there is only one Revision exists but with multiple generations)
+var RevisionKey = runtime.KeyFromParts(runtime.SystemNS, TypeRevision.Kind, runtime.EmptyName)
+
+// TypeRevision is TypeInfo for Revision
+var TypeRevision = &runtime.TypeInfo{
+	Kind:        "revision",
+	Storable:    true,
+	Versioned:   true,
+	Constructor: func() runtime.Object { return &Revision{} },
+	IndexValueTransforms: map[string]runtime.ValueTransform{
+		"Status": func(val interface{}) interface{} {
+			if val.(string) == RevisionStatusCompleted {
+				return nil
+			}
+			return val
+		},
+	},
+}
+
 // Revision is a "milestone" in applying policy changes
 type Revision struct {
 	runtime.TypeKind `yaml:",inline"`
 	Metadata         runtime.GenerationMetadata
 
 	// Policy to which this revision is attached to
-	PolicyGen runtime.Generation `store:"gen_index"`
+	PolicyGen runtime.Generation `store:"index"`
 
-	Status         string `store:"gen_index"`
+	Status         string `store:"index"`
 	CreatedAt      time.Time
 	RecalculateAll bool
 

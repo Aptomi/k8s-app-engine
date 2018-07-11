@@ -6,14 +6,18 @@ import (
 
 // TypeInfo represents list of additional characteristics of the runtime object
 type TypeInfo struct {
-	Kind        Kind
-	Storable    bool
-	Versioned   bool
-	Constructor Constructor
+	Kind                 Kind
+	Storable             bool
+	Versioned            bool
+	Constructor          Constructor
+	IndexValueTransforms map[string]ValueTransform
 }
 
 // Constructor is a function to get instance of the specific object
 type Constructor func() Object
+
+// ValueTransform is a function to transform value
+type ValueTransform func(interface{}) interface{}
 
 // New creates a new instance of the specific object defined in TypeInfo
 func (info *TypeInfo) New() Object {

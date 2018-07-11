@@ -22,17 +22,17 @@ type Indexes struct {
 	List map[string]*Index
 }
 
-func (indexes *Indexes) KeyForStorable(indexName string, storable runtime.Storable, codec Codec) string {
+func (indexes *Indexes) NameForStorable(indexName string, storable runtime.Storable, codec Codec) string {
 	if index, exist := indexes.List[indexName]; exist {
-		return index.KeyForStorable(storable, codec)
+		return index.NameForStorable(storable, codec)
 	} else {
 		panic(fmt.Sprintf("trying to access non-existing indexName for kind %s: %s", storable.GetKind(), indexName))
 	}
 }
 
-func (indexes *Indexes) KeyForValue(indexName string, key runtime.Key, value interface{}, codec Codec) string {
+func (indexes *Indexes) NameForValue(indexName string, key runtime.Key, value interface{}, codec Codec) string {
 	if index, exist := indexes.List[indexName]; exist {
-		return index.KeyForValue(key, value, codec)
+		return index.NameForValue(key, value, codec)
 	} else {
 		panic(fmt.Sprintf("trying to access non-existing indexName for key %s: %s", key, indexName))
 	}
@@ -61,15 +61,19 @@ func IndexesFor(info *runtime.TypeInfo) *Indexes {
 			f := t.Field(i)
 			tag := f.Tag.Get("store")
 
-			// todo better tag, probably `index:"gen,list"`
-			if strings.Contains(tag, "gen_index") {
+			if strings.Contains(tag, "index") {
 				// todo validate that field is accessible
-				// todo cache reflection objects
-
+				transformer := info.IndexValueTransforms[f.Name]
+				if transformer == nil {
+					transformer = func(val interface{}) interface{} {
+						return val
+					}
+				}
 				indexes.List[f.Name] = &Index{
-					Type:     IndexTypeListGen,
-					Field:    f.Name,
-					rFieldId: i,
+					Type:           IndexTypeListGen,
+					Field:          f.Name,
+					ValueTransform: transformer,
+					rFieldId:       i,
 				}
 			}
 		}
@@ -100,16 +104,17 @@ func (indexType IndexType) String() string {
 }
 
 type Index struct {
-	Type     IndexType
-	Field    string
-	rFieldId int
+	Type           IndexType
+	Field          string
+	ValueTransform runtime.ValueTransform
+	rFieldId       int
 }
 
-func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) string {
+func (index *Index) NameForStorable(storable runtime.Storable, codec Codec) string {
 	key := runtime.KeyForStorable(storable)
 
 	if index.Type == IndexTypeLastGen {
-		return index.KeyForValue(key, nil, codec)
+		return index.NameForValue(key, nil, codec)
 	}
 
 	t := reflect.ValueOf(storable)
@@ -118,10 +123,15 @@ func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) strin
 	}
 	f := t.Field(index.rFieldId)
 
-	return index.KeyForValue(key, f.Interface(), codec)
+	return index.NameForValue(key, f.Interface(), codec)
 }
 
-func (index *Index) KeyForValue(key runtime.Key, value interface{}, codec Codec) string {
+func (index *Index) NameForValue(key runtime.Key, value interface{}, codec Codec) string {
+	value = index.ValueTransform(value)
+	if value == nil {
+		return ""
+	}
+
 	key = index.Type.String() + "/" + key
 	if index.Type == IndexTypeLastGen {
 		return key
