@@ -115,7 +115,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 			// todo compare - if not changed - nothing to do
 		} else {
 			// need to get last gen using index, if exists - compare with, if different - increment revision and delete old from indexes
-			lastGenRaw := stm.Get("/index/" + indexes.KeyForStorable(store.LastGenIndex, newStorable, s.codec))
+			lastGenRaw := stm.Get("/index/" + indexes.NameForStorable(store.LastGenIndex, newStorable, s.codec))
 			if lastGenRaw == "" {
 				newObj.SetGeneration(runtime.FirstGen)
 				newVersion = true
@@ -146,7 +146,11 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 
 		if prevObj != nil && prevObj.(runtime.Versioned).GetGeneration() == newGen {
 			for _, index := range indexes.List {
-				indexKey := "/index/" + index.KeyForStorable(prevObj, s.codec)
+				indexName := index.NameForStorable(prevObj, s.codec)
+				if indexName == "" {
+					continue
+				}
+				indexKey := "/index/" + indexName
 				if index.Type == store.IndexTypeListGen {
 					s.updateIndex(stm, indexKey, prevObj.(runtime.Versioned).GetGeneration(), true)
 				}
@@ -154,7 +158,11 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 		}
 
 		for _, index := range indexes.List {
-			indexKey := "/index/" + index.KeyForStorable(newStorable, s.codec)
+			indexName := index.NameForStorable(newStorable, s.codec)
+			if indexName == "" {
+				continue
+			}
+			indexKey := "/index/" + indexName
 			if index.Type == store.IndexTypeLastGen {
 				stm.Put(indexKey, s.marshalGen(newGen))
 			} else if index.Type == store.IndexTypeListGen {
@@ -297,7 +305,7 @@ func (s *etcdStore) findByKey(findOpts *store.FindOpts, info *runtime.TypeInfo, 
 	} else {
 		indexes := store.IndexesFor(info)
 		// todo wrap into STM to ensure we're getting really last unchanged element / consider is it important? we can't delete generation, so, probably no need for STM here
-		resp, respErr := s.client.KV.Get(context.TODO(), "/index/"+indexes.KeyForValue(store.LastGenIndex, findOpts.GetKey(), nil, s.codec))
+		resp, respErr := s.client.KV.Get(context.TODO(), "/index/"+indexes.NameForValue(store.LastGenIndex, findOpts.GetKey(), nil, s.codec))
 		if respErr != nil {
 			return respErr
 		} else if resp.Count > 0 {
@@ -330,7 +338,11 @@ func (s *etcdStore) findByFieldEq(findOpts *store.FindOpts, info *runtime.TypeIn
 
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
 		for _, fieldValue := range findOpts.GetFieldEqValues() {
-			indexKey := "/index/" + indexes.KeyForValue(findOpts.GetFieldEqName(), findOpts.GetKey(), fieldValue, s.codec)
+			indexName := indexes.NameForValue(findOpts.GetFieldEqName(), findOpts.GetKey(), fieldValue, s.codec)
+			if indexName == "" {
+				panic(fmt.Sprintf("can't find using index for which empty index name generated"))
+			}
+			indexKey := "/index/" + indexName
 			indexValue := stm.Get(indexKey)
 			if indexValue != "" {
 				valueList := &store.IndexValueList{}
