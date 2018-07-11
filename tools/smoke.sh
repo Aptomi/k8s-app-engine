@@ -29,19 +29,16 @@ POLICY_DIR_TMP=$(mktemp -d)
 cp -R examples/twitter-analytics/* $POLICY_DIR
 cp ${POLICY_DIR}/policy/clusters/clusters.{yaml.template,yaml}
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/util.sh
+
 function cleanup() {
     stop_server
     rm -rf ${CONF_DIR}
+    etcd::stop
 }
 
 trap cleanup EXIT
-
-function free_port() {
-    for port in $(seq 10000 11000); do
-        echo -ne "\035" | telnet 127.0.0.1 $port > /dev/null 2>&1;
-        [ $? -eq 1 ] && echo "$port" && break;
-    done
-}
 
 function stop_server() {
     echo "Stopping server..."
@@ -75,7 +72,9 @@ function stop_server() {
     fi
 }
 
-APTOMI_PORT=$(free_port)
+etcd::start
+
+APTOMI_PORT=$(util::free_port)
 
 cat >${CONF_DIR}/config.yaml <<EOL
 debug: ${DEBUG_MODE}
@@ -85,7 +84,9 @@ api:
   port: ${APTOMI_PORT}
 
 db:
-  connection: ${CONF_DIR}/db.bolt
+  prefix: smoke
+  endpoints:
+    - localhost:${ETCD_PORT}
 
 enforcer:
   disabled: false
