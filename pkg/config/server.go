@@ -3,6 +3,7 @@ package config
 import (
 	"time"
 
+	"github.com/Aptomi/aptomi/pkg/runtime/store/etcd"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,9 +43,8 @@ type UserSources struct {
 }
 
 // DB represents configs for DB
-type DB struct {
-	Connection string `validate:"required"`
-}
+// todo reconsider for better approach for plugin/backend specific configs
+type DB = etcd.Config
 
 // DesiredStateEnforcer represents config for desired state enforcer background process that periodically gets latest policy, calculating
 // difference between it and actual state and then applying calculated actions
