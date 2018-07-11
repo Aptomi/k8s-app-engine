@@ -32,7 +32,7 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 	assert.True(t, changed)
 	assert.EqualValues(t, revision.GetGeneration(), 1)
 
-	revision.Status = engine.RevisionStatusCompleted
+	revision.Status = engine.RevisionStatusInProgress
 	changed, err = etcdStore.Save(revision)
 	assert.NoError(t, err)
 	assert.True(t, changed)
@@ -44,14 +44,14 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 	assert.EqualValues(t, revision.GetGeneration(), 2)
 
 	var loadedRevisions []*engine.Revision
-	err = etcdStore.Find(engine.TypeRevision.Kind, &loadedRevisions, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusCompleted, engine.RevisionStatusWaiting))
+	err = etcdStore.Find(engine.TypeRevision.Kind, &loadedRevisions, store.WithKey(engine.RevisionKey), store.WithWhereEq("Status", engine.RevisionStatusWaiting, engine.RevisionStatusInProgress))
 	assert.NoError(t, err)
 	assert.Len(t, loadedRevisions, 2)
 	assert.NotNil(t, loadedRevisions[0])
 	assert.NotNil(t, loadedRevisions[1])
 	assert.Equal(t, engine.RevisionStatusWaiting, loadedRevisions[0].Status)
 	assert.EqualValues(t, 1, loadedRevisions[0].GetGeneration())
-	assert.Equal(t, engine.RevisionStatusCompleted, loadedRevisions[1].Status)
+	assert.Equal(t, engine.RevisionStatusInProgress, loadedRevisions[1].Status)
 	assert.EqualValues(t, 2, loadedRevisions[1].GetGeneration())
 
 	var loadedRevisionByLastGen *engine.Revision
