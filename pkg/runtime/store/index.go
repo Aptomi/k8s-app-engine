@@ -67,9 +67,9 @@ func IndexesFor(info *runtime.TypeInfo) *Indexes {
 				// todo cache reflection objects
 
 				indexes.List[f.Name] = &Index{
-					Type:    IndexTypeListGen,
-					Field:   f.Name,
-					fieldId: i,
+					Type:     IndexTypeListGen,
+					Field:    f.Name,
+					rFieldId: i,
 				}
 			}
 		}
@@ -100,9 +100,9 @@ func (indexType IndexType) String() string {
 }
 
 type Index struct {
-	Type    IndexType
-	Field   string
-	fieldId int
+	Type     IndexType
+	Field    string
+	rFieldId int
 }
 
 func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) string {
@@ -116,7 +116,7 @@ func (index *Index) KeyForStorable(storable runtime.Storable, codec Codec) strin
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	f := t.Field(index.fieldId)
+	f := t.Field(index.rFieldId)
 
 	return index.KeyForValue(key, f.Interface(), codec)
 }
