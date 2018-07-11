@@ -167,15 +167,7 @@ func (server *Server) initProfiling() {
 }
 
 func (server *Server) initRegistry() {
-	//types := runtime.NewTypes().Append(registry.Types...)
-	//b := bolt.NewGenericStore(types)
-	//err := b.Open(server.cfg.DB)
-	//if err != nil {
-	//	panic(fmt.Sprintf("Can't open object registry: %s", err))
-	//}
-	// todo replace with actual DB store
-	cfg := etcd.Config{}
-	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(registry.Types...), store.NewYamlCodec())
+	etcdStore, err := etcd.New(server.cfg.DB, runtime.NewTypes().Append(registry.Types...), store.NewYamlCodec())
 	if err != nil {
 		panic(fmt.Sprintf("can't create etcd store: %s", err))
 	}
