@@ -203,19 +203,3 @@ func (list *IndexValueList) Contains(value []byte) bool {
 
 	return valueIndex < len(*list) && bytes.Equal((*list)[valueIndex], value)
 }
-
-func (list *IndexValueList) First() []byte {
-	if len(*list) == 0 {
-		return nil
-	}
-
-	return (*list)[0]
-}
-
-func (list *IndexValueList) Last() []byte {
-	if len(*list) == 0 {
-		return nil
-	}
-
-	return (*list)[len(*list)-1]
-}
