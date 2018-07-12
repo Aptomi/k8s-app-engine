@@ -30,7 +30,7 @@ cp -R examples/twitter-analytics/* $POLICY_DIR
 cp ${POLICY_DIR}/policy/clusters/clusters.{yaml.template,yaml}
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source ${DIR}/util.sh
+source "${DIR}/util.sh"
 
 function cleanup() {
     stop_server
