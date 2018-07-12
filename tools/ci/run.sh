@@ -33,7 +33,6 @@ sudo rm -rf "${PWD}/.aptomi-install-cache"
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "${GIT_BRANCH}" == "master" ]]; then
     tools/publish-docker.sh
-
     tools/publish-charts.sh
 fi
 
