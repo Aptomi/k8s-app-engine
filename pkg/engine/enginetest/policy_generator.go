@@ -10,6 +10,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/util"
 )
 
+// PolicyGenerator is a helper to generate test policy used in unit tests
 type PolicyGenerator struct {
 	random               *rand.Rand
 	labels               int
@@ -30,6 +31,7 @@ type PolicyGenerator struct {
 	externalData     *external.Data
 }
 
+// NewPolicyGenerator creates new test policy generator
 func NewPolicyGenerator(randSeed int64, labels, bundles, bundleCodeComponents, codeParams, bundleClaimMaxChain, contextsPerService, rules, users, claims int) *PolicyGenerator {
 	result := &PolicyGenerator{
 		random:               rand.New(rand.NewSource(randSeed)),
@@ -47,6 +49,7 @@ func NewPolicyGenerator(randSeed int64, labels, bundles, bundleCodeComponents, c
 	return result
 }
 
+// MakePolicyAndExternalData returns newly generated test policy and external data
 func (gen *PolicyGenerator) MakePolicyAndExternalData() (*lang.Policy, *external.Data) {
 	// pre-generate the list of labels
 	gen.makeUserLabels()
@@ -68,8 +71,8 @@ func (gen *PolicyGenerator) MakePolicyAndExternalData() (*lang.Policy, *external
 
 	// every user will have the same set of labels
 	gen.externalData = external.NewData(
-		NewUserLoaderImpl(gen.users, gen.generatedUserLabels),
-		NewSecretLoaderImpl(),
+		newUserLoaderImpl(gen.users, gen.generatedUserLabels),
+		newSecretLoaderImpl(),
 	)
 
 	fmt.Printf("Generated policy. Bundles = %d (max chain %d), Contexts = %d, Claims = %d, Users = %d\n",
@@ -298,21 +301,21 @@ func (gen *PolicyGenerator) makeCluster() {
 	gen.addObject(cluster)
 }
 
-type UserLoaderImpl struct {
+type userLoaderImpl struct {
 	users  int
 	labels map[string]string
 
 	cachedUsers *lang.GlobalUsers
 }
 
-func NewUserLoaderImpl(users int, labels map[string]string) *UserLoaderImpl {
-	return &UserLoaderImpl{
+func newUserLoaderImpl(users int, labels map[string]string) *userLoaderImpl {
+	return &userLoaderImpl{
 		users:  users,
 		labels: labels,
 	}
 }
 
-func (loader *UserLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
+func (loader *userLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
 	if loader.cachedUsers == nil {
 		userMap := make(map[string]*lang.User)
 		for i := 0; i < loader.users; i++ {
@@ -328,25 +331,25 @@ func (loader *UserLoaderImpl) LoadUsersAll() *lang.GlobalUsers {
 	return loader.cachedUsers
 }
 
-func (loader *UserLoaderImpl) LoadUserByName(id string) *lang.User {
+func (loader *userLoaderImpl) LoadUserByName(id string) *lang.User {
 	return loader.LoadUsersAll().Users[id]
 }
 
-func (loader *UserLoaderImpl) Authenticate(userName, password string) (*lang.User, error) {
+func (loader *userLoaderImpl) Authenticate(userName, password string) (*lang.User, error) {
 	return nil, nil
 }
 
-func (loader *UserLoaderImpl) Summary() string {
+func (loader *userLoaderImpl) Summary() string {
 	return "Synthetic user loader"
 }
 
-type SecretLoaderImpl struct {
+type secretLoaderImpl struct {
 }
 
-func NewSecretLoaderImpl() *SecretLoaderImpl {
-	return &SecretLoaderImpl{}
+func newSecretLoaderImpl() *secretLoaderImpl {
+	return &secretLoaderImpl{}
 }
 
-func (loader *SecretLoaderImpl) LoadSecretsByUserName(string) map[string]string {
+func (loader *secretLoaderImpl) LoadSecretsByUserName(string) map[string]string {
 	return nil
 }
