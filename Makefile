@@ -122,7 +122,7 @@ HAS_GOLANGCI_LINT := $(shell command -v golangci-lint)
 .PHONY: prepare_golangci_lint
 prepare_golangci_lint:
 ifndef HAS_GOLANGCI_LINT
-	${GO} get -u -v gopkg.in/golangci/golangci-lint.v1/cmd/golangci-lint
+	${GO} get -u gopkg.in/golangci/golangci-lint.v1/cmd/golangci-lint
 endif
 
 .PHONY: toc
@@ -143,7 +143,7 @@ HAS_GLIDE := $(shell command -v glide)
 .PHONY: prepare_glide
 prepare_glide:
 ifndef HAS_GLIDE
-	${GO} get -u -v github.com/Masterminds/glide
+	${GO} get -u github.com/Masterminds/glide
 endif
 
 HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
@@ -151,7 +151,7 @@ HAS_GO_JUNIT_REPORT := $(shell command -v go-junit-report)
 .PHONY: prepare_go_junit_report
 prepare_go_junit_report:
 ifndef HAS_GO_JUNIT_REPORT
-	${GO} get -u -v github.com/jstemmer/go-junit-report
+	${GO} get -u github.com/jstemmer/go-junit-report
 endif
 
 HAS_GOVERALLS := $(shell command -v goveralls)
@@ -159,7 +159,7 @@ HAS_GOVERALLS := $(shell command -v goveralls)
 .PHONY: prepare_goveralls
 prepare_goveralls:
 ifndef HAS_GOVERALLS
-	${GO} get -u -v github.com/mattn/goveralls
+	${GO} get -u github.com/mattn/goveralls
 endif
 
 HAS_FILEBOX := $(shell command -v fileb0x)
@@ -167,7 +167,7 @@ HAS_FILEBOX := $(shell command -v fileb0x)
 .PHONY: prepare_filebox
 prepare_filebox:
 ifndef HAS_FILEBOX
-	${GO} get -u -v github.com/UnnoTed/fileb0x
+	${GO} get -u github.com/UnnoTed/fileb0x
 endif
 
 HAS_GORELEASER := $(shell command -v goreleaser)
@@ -175,7 +175,7 @@ HAS_GORELEASER := $(shell command -v goreleaser)
 .PHONY: prepare_goreleaser
 prepare_goreleaser:
 ifndef HAS_GORELEASER
-	${GO} get -u -v github.com/goreleaser/goreleaser
+	${GO} get -u github.com/goreleaser/goreleaser
 endif
 
 .PHONY: w-dep
