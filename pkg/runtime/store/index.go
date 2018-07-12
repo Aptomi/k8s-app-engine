@@ -28,18 +28,18 @@ type Indexes struct {
 func (indexes *Indexes) NameForStorable(indexName string, storable runtime.Storable, codec Codec) string {
 	if index, exist := indexes.List[indexName]; exist {
 		return index.NameForStorable(storable, codec)
-	} else {
-		panic(fmt.Sprintf("trying to access non-existing indexName for kind %s: %s", storable.GetKind(), indexName))
 	}
+
+	panic(fmt.Sprintf("trying to access non-existing indexName for kind %s: %s", storable.GetKind(), indexName))
 }
 
 // NameForValue returns index value name for specific index, key and value
 func (indexes *Indexes) NameForValue(indexName string, key runtime.Key, value interface{}, codec Codec) string {
 	if index, exist := indexes.List[indexName]; exist {
 		return index.NameForValue(key, value, codec)
-	} else {
-		panic(fmt.Sprintf("trying to access non-existing indexName for key %s: %s", key, indexName))
 	}
+
+	panic(fmt.Sprintf("trying to access non-existing indexName for key %s: %s", key, indexName))
 }
 
 var noopValueTransform = func(val interface{}) interface{} {
@@ -80,7 +80,7 @@ func IndexesFor(info *runtime.TypeInfo) *Indexes {
 					Type:           IndexTypeListGen,
 					Field:          f.Name,
 					ValueTransform: transformer,
-					rFieldId:       i,
+					rFieldID:       i,
 				}
 			}
 		}
@@ -89,11 +89,16 @@ func IndexesFor(info *runtime.TypeInfo) *Indexes {
 	return indexes
 }
 
+// IndexType is the type of index and it could be last or list
 type IndexType int
 
 const (
+	// IndexTypeUndef is an undefined index type to guarantee that index type is always explicitly defined
+	// todo consider do we really need it or just make last gen default
 	IndexTypeUndef IndexType = iota
+	// IndexTypeLastGen is index type that stores only last generation
 	IndexTypeLastGen
+	// IndexTypeListGen is index type that stores list of generations
 	IndexTypeListGen
 )
 
@@ -110,13 +115,15 @@ func (indexType IndexType) String() string {
 	return indexTypes[indexType-1]
 }
 
+// Index represents store index to optimize queries
 type Index struct {
 	Type           IndexType
 	Field          string
 	ValueTransform runtime.ValueTransform
-	rFieldId       int
+	rFieldID       int
 }
 
+// NameForStorable returns index value name for specific object
 func (index *Index) NameForStorable(storable runtime.Storable, codec Codec) string {
 	key := runtime.KeyForStorable(storable)
 
@@ -128,11 +135,12 @@ func (index *Index) NameForStorable(storable runtime.Storable, codec Codec) stri
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	f := t.Field(index.rFieldId)
+	f := t.Field(index.rFieldID)
 
 	return index.NameForValue(key, f.Interface(), codec)
 }
 
+// NameForValue returns index value name for specific key and value
 func (index *Index) NameForValue(key runtime.Key, value interface{}, codec Codec) string {
 	key = index.Type.String() + "/" + key
 	if index.Type == IndexTypeLastGen {
@@ -162,8 +170,11 @@ func (index *Index) NameForValue(key runtime.Key, value interface{}, codec Codec
 	return key + string(data)
 }
 
+// IndexValueList is a helper type to provide effective Add/Remove/Contains operations on the slice of values that are
+// byte slices. It stores values sorted and uses binary search for operations. Used to store keys/gens in indexes.
 type IndexValueList [][]byte
 
+// Add adds specified value to the IndexValueList
 func (list *IndexValueList) Add(value []byte) {
 	// binary search to get desired value index in the list
 	valueIndex := sort.Search(len(*list), func(index int) bool {
@@ -181,6 +192,7 @@ func (list *IndexValueList) Add(value []byte) {
 	(*list)[valueIndex] = value
 }
 
+// Remove removes specified value from the IndexValueList
 func (list *IndexValueList) Remove(value []byte) {
 	// binary search to get value index in the list
 	valueIndex := sort.Search(len(*list), func(index int) bool {
@@ -195,6 +207,7 @@ func (list *IndexValueList) Remove(value []byte) {
 	}
 }
 
+// Contains returns true if IndexValueList contains specified value
 func (list *IndexValueList) Contains(value []byte) bool {
 	// binary search to get value index in the list
 	valueIndex := sort.Search(len(*list), func(index int) bool {
