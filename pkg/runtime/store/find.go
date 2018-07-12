@@ -4,8 +4,10 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
+// FindOpt is a function that changes object find process options
 type FindOpt func(opts *FindOpts)
 
+// FindOpts is a list of object find process options
 type FindOpts struct {
 	keyPrefix     runtime.Key
 	key           runtime.Key
@@ -16,34 +18,42 @@ type FindOpts struct {
 	getFirst      bool
 }
 
+// GetKeyPrefix returns key prefix to find objects with keys prefixed by it
 func (opts *FindOpts) GetKeyPrefix() runtime.Key {
 	return opts.keyPrefix
 }
 
+// GetKey returns key to find objects with it
 func (opts *FindOpts) GetKey() runtime.Key {
 	return opts.key
 }
 
+// GetGen returns generation for find objects with specified key and this generation
 func (opts *FindOpts) GetGen() runtime.Generation {
 	return opts.gen
 }
 
+// GetFieldEqName returns name of the field to find object with this field equal to some value
 func (opts *FindOpts) GetFieldEqName() string {
 	return opts.fieldEqName
 }
 
+// GetFieldEqValues returns values for the specified field to find object with field equal to at least one of this values
 func (opts *FindOpts) GetFieldEqValues() []interface{} {
 	return opts.fieldEqValues
 }
 
+// IsGetFirst returns true if first result should be returned
 func (opts *FindOpts) IsGetFirst() bool {
 	return opts.getFirst
 }
 
+// IsGetLast returns true if last result should be returned
 func (opts *FindOpts) IsGetLast() bool {
 	return opts.getLast
 }
 
+// NewFindOpts creates FindOpts (object find process config) from list of FindOpt (object find process config modifiers)
 func NewFindOpts(opts []FindOpt) *FindOpts {
 	findOpts := &FindOpts{}
 	for _, opt := range opts {
@@ -53,6 +63,7 @@ func NewFindOpts(opts []FindOpt) *FindOpts {
 	return findOpts
 }
 
+// WithKey defines key to find objects with it
 func WithKey(key runtime.Key) FindOpt {
 	return func(opts *FindOpts) {
 		if opts.key != "" {
@@ -63,6 +74,7 @@ func WithKey(key runtime.Key) FindOpt {
 	}
 }
 
+// WithKeyPrefix defines key prefix to find objects with keys prefixed with it
 func WithKeyPrefix(keyPrefix runtime.Key) FindOpt {
 	return func(opts *FindOpts) {
 		if opts.key != "" {
@@ -76,6 +88,7 @@ func WithKeyPrefix(keyPrefix runtime.Key) FindOpt {
 	}
 }
 
+// WithGen defines generation to find object with it
 func WithGen(gen runtime.Generation) FindOpt {
 	return func(opts *FindOpts) {
 		if opts.key == "" {
@@ -92,6 +105,7 @@ func WithGen(gen runtime.Generation) FindOpt {
 	}
 }
 
+// WithWhereEq defines field name and values to find objects with this field equals to at least one of the specified values
 func WithWhereEq(name string, values ...interface{}) FindOpt {
 	return func(opts *FindOpts) {
 		if name == "" {
@@ -115,6 +129,7 @@ func WithWhereEq(name string, values ...interface{}) FindOpt {
 	}
 }
 
+// WithGetFirst defines that first result should be returned
 func WithGetFirst() FindOpt {
 	return func(opts *FindOpts) {
 		if opts.key == "" {
@@ -134,6 +149,7 @@ func WithGetFirst() FindOpt {
 	}
 }
 
+// WithGetLast defines that last result should be returned
 func WithGetLast() FindOpt {
 	return func(opts *FindOpts) {
 		if opts.key == "" {
