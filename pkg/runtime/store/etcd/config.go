@@ -11,6 +11,7 @@ var (
 	dialTimeout      = 10 * time.Second
 )
 
+// Config represents etcdv3 store configuration
 type Config struct {
 	Prefix    string
 	Endpoints []string

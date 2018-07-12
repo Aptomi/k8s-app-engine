@@ -16,12 +16,15 @@ var (
 	indexCache   = map[runtime.Kind]*Indexes{}
 )
 
+// LastGenIndex is the name of the index to get last generation for an object
 const LastGenIndex = ""
 
+// Indexes represents collection of indexes for specific object type
 type Indexes struct {
 	List map[string]*Index
 }
 
+// NameForStorable returns index value name for specific index and object
 func (indexes *Indexes) NameForStorable(indexName string, storable runtime.Storable, codec Codec) string {
 	if index, exist := indexes.List[indexName]; exist {
 		return index.NameForStorable(storable, codec)
@@ -30,6 +33,7 @@ func (indexes *Indexes) NameForStorable(indexName string, storable runtime.Stora
 	}
 }
 
+// NameForValue returns index value name for specific index, key and value
 func (indexes *Indexes) NameForValue(indexName string, key runtime.Key, value interface{}, codec Codec) string {
 	if index, exist := indexes.List[indexName]; exist {
 		return index.NameForValue(key, value, codec)
@@ -42,6 +46,7 @@ var noopValueTransform = func(val interface{}) interface{} {
 	return val
 }
 
+// IndexesFor returns (cached) collection of indexes for specified object typed
 func IndexesFor(info *runtime.TypeInfo) *Indexes {
 	indexCacheMu.Lock()
 	defer indexCacheMu.Unlock()
