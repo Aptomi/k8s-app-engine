@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Codec is store codec to Marshal/Unmarshal objects stored in database
 type Codec interface {
 	Marshal(value interface{}) ([]byte, error)
 	Unmarshal(data []byte, value interface{}) error
@@ -16,7 +17,8 @@ type Codec interface {
 type jsonCodec struct {
 }
 
-func NewJsonCodec() Codec {
+// NewJSONCodec returns instance of the store codec that is using JSON
+func NewJSONCodec() Codec {
 	return &jsonCodec{}
 }
 
@@ -31,7 +33,8 @@ func (c *jsonCodec) Unmarshal(data []byte, value interface{}) error {
 type yamlCodec struct {
 }
 
-func NewYamlCodec() Codec {
+// NewYAMLCodec returns instance of the store codec that is using YAML
+func NewYAMLCodec() Codec {
 	return &yamlCodec{}
 }
 
@@ -46,6 +49,7 @@ func (c *yamlCodec) Unmarshal(data []byte, value interface{}) error {
 type gobCodec struct {
 }
 
+// NewGobCodec returns instance of the store codec that is using gob
 func NewGobCodec() Codec {
 	return &gobCodec{}
 }
