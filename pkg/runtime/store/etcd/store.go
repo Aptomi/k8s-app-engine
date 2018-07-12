@@ -20,6 +20,7 @@ type etcdStore struct {
 	codec  store.Codec
 }
 
+// New creates etcdv3 store backend from provided config, types registry and codec
 func New(cfg Config, types *runtime.Types, codec store.Codec) (store.Interface, error) {
 	if len(cfg.Endpoints) == 0 {
 		cfg.Endpoints = []string{"localhost:2379"}
@@ -87,7 +88,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 	}
 
 	var newVersion bool
-	newObj := newStorable.(runtime.Versioned)
+	newObj := newStorable.(runtime.Versioned) // nolint: errcheck
 	// todo prefetch all needed keys for STM to maximize performance (in fact it'll get all data in one first request)
 	// todo consider unmarshal to the info.New() to support gob w/o need to register types?
 	_, err := etcdconc.NewSTM(s.client, func(stm etcdconc.STM) error {
@@ -103,7 +104,7 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 			oldObjRaw := stm.Get("/object" + key + "@" + newGen.String())
 			if oldObjRaw != "" {
 				// todo avoid
-				prevObj = info.New().(runtime.Storable)
+				prevObj = info.New().(runtime.Storable) // nolint: errcheck
 				/*
 					add field require not nil val for unmarshal field into codec
 					if nil passed => create instance of desired object (w/o casting to storable) and pass to unmarshal
@@ -126,17 +127,18 @@ func (s *etcdStore) Save(newStorable runtime.Storable, opts ...store.SaveOpt) (b
 					return fmt.Errorf("last gen index for %s seems to be corrupted: generation doesn't exist", key)
 				}
 				// todo avoid
-				prevObj = info.New().(runtime.Storable)
+				prevObj = info.New().(runtime.Storable) // nolint: errcheck
 				s.unmarshal([]byte(oldObjRaw), prevObj)
 				newObj.SetGeneration(lastGen)
 
 				// todo should we compare marshaled objects for safety?
 				if reflect.DeepEqual(prevObj, newObj) {
 					return nil
-				} else {
-					newObj.SetGeneration(lastGen.Next())
-					newVersion = true
 				}
+
+				// objects are different
+				newObj.SetGeneration(lastGen.Next())
+				newVersion = true
 			}
 		}
 

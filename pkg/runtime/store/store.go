@@ -4,6 +4,7 @@ import (
 	"github.com/Aptomi/aptomi/pkg/runtime"
 )
 
+// Interface represents API of the object storage
 type Interface interface {
 	Close() error
 
