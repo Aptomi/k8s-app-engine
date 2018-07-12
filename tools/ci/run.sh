@@ -30,11 +30,14 @@ tools/test-install.sh
 
 sudo rm -rf "${PWD}/.aptomi-install-cache"
 
-tools/publish-docker.sh
+GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "${GIT_BRANCH}" == "master" ]]; then
+    tools/publish-docker.sh
+
+    tools/publish-charts.sh
+fi
 
 docker rmi $(docker images --filter "dangling=true" -q --no-trunc) || true
 docker rmi $(docker images | grep "none" | awk '/ / { print $3 }') || true
-
-tools/publish-charts.sh
 
 popd
