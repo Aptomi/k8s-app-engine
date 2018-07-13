@@ -23,9 +23,9 @@ func TestIndexes(t *testing.T) {
 		},
 		PolicyGen: 42,
 	}
-	assert.Equal(t, "listgen/system/revision/PolicyGen=42", indexes.NameForStorable("PolicyGen", revision, store.NewJsonCodec()))
-	assert.Equal(t, "listgen/system/revision/Status=some_status", indexes.NameForStorable("Status", revision, store.NewJsonCodec()))
-	assert.Equal(t, "lastgen/system/revision", indexes.NameForStorable(store.LastGenIndex, revision, store.NewJsonCodec()))
+	assert.Equal(t, "listgen/system/revision/PolicyGen=42", indexes.NameForStorable("PolicyGen", revision, store.NewJSONCodec()))
+	assert.Equal(t, "listgen/system/revision/Status=some_status", indexes.NameForStorable("Status", revision, store.NewJSONCodec()))
+	assert.Equal(t, "lastgen/system/revision", indexes.NameForStorable(store.LastGenIndex, revision, store.NewJSONCodec()))
 
-	assert.Equal(t, "listgen/system/revision/PolicyGen=42", indexes.NameForValue("PolicyGen", engine.RevisionKey, 42, store.NewJsonCodec()))
+	assert.Equal(t, "listgen/system/revision/PolicyGen=42", indexes.NameForValue("PolicyGen", engine.RevisionKey, 42, store.NewJSONCodec()))
 }

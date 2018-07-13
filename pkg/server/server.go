@@ -167,7 +167,7 @@ func (server *Server) initProfiling() {
 }
 
 func (server *Server) initRegistry() {
-	etcdStore, err := etcd.New(server.cfg.DB, runtime.NewTypes().Append(registry.Types...), store.NewYamlCodec())
+	etcdStore, err := etcd.New(server.cfg.DB, runtime.NewTypes().Append(registry.Types...), store.NewYAMLCodec())
 	if err != nil {
 		panic(fmt.Sprintf("can't create etcd store: %s", err))
 	}
