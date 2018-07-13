@@ -52,9 +52,9 @@ test-race:
 .PHONY: alltest
 alltest: prepare_go_junit_report
 ifndef JENKINS_HOME
-	${GO} test -v ./...
+	tools/with_etcd.sh ${GO} test -v ./...
 else
-	${GO} test -v ./... 2>&1 | go-junit-report | tee junit.xml
+	tools/with_etcd.sh ${GO} test -v ./... 2>&1 | go-junit-report | tee junit.xml
 endif
 	${GO} test -bench . -count 1 ./pkg/engine/...
 	@echo "\nAll tests passed (unit, integration, benchmark)"
