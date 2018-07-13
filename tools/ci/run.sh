@@ -3,10 +3,6 @@ set -exou pipefail
 
 sudo rm -rf /usr/local/bin/*aptomi* /etc/aptomi /var/lib/aptomi ~/.aptomi
 
-hostname
-
-ls -la
-
 export PATH=$PATH:"$WORKSPACE"/bin
 export GOPATH="$WORKSPACE"
 export GOROOT=/usr/local/go
