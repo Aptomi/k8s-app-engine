@@ -53,7 +53,7 @@ func IndexesFor(info *runtime.TypeInfo) *Indexes {
 
 	indexes, exist := indexCache[info.Kind]
 	if !exist {
-		indexes = &Indexes{map[string]*Index{}}
+		indexes = &Indexes{List: map[string]*Index{}}
 		indexCache[info.Kind] = indexes
 
 		if info.Versioned {

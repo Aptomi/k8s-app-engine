@@ -22,9 +22,9 @@ type Versioned interface {
 	SetGeneration(gen Generation)
 }
 
-// todo remove deletable as it should be handled just outside of the storage, move it to lang.Base
 // Deletable extends Versioned with deleted marker to represent versioned objects that could be marked as deleted,
 // but then created again even with the same content. Best example of such objects is policy objects (and the only for now).
+// todo remove deletable as it should be handled just outside of the storage, move it to lang.Base
 type Deletable interface {
 	Versioned
 	IsDeleted() bool
