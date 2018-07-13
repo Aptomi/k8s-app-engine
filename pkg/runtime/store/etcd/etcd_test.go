@@ -1,6 +1,8 @@
 package etcd_test
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/Aptomi/aptomi/pkg/engine"
@@ -12,8 +14,15 @@ import (
 
 func TestEtcdStoreBaseFunctionality(t *testing.T) {
 	// todo create helper in future that'll allow to run any number of tests in parallel - some random constant generated on start + test name as prefix
-	cfg := etcd.Config{Prefix: t.Name()}
-	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(engine.TypeRevision), store.NewJsonCodec())
+	endpoints := os.Getenv("APTOMI_TEST_DB_ENDPOINTS")
+	if endpoints == "" {
+		endpoints = "127.0.0.1:2379"
+	}
+	cfg := etcd.Config{
+		Prefix:    t.Name(),
+		Endpoints: strings.Split(endpoints, ","),
+	}
+	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(engine.TypeRevision), store.NewJSONCodec())
 	assert.NoError(t, err)
 	assert.NotNil(t, etcdStore)
 
