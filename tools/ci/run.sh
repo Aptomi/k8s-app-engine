@@ -16,7 +16,7 @@ mkdir -p "$GOPATH/bin"
 pushd src/github.com/Aptomi/aptomi
 
 mkdir $WORKSPACE/_log
-make vendor &>$WORKSPACE/_log/vendor.txt
+make vendor &>"$WORKSPACE/_log/vendor.txt"
 
 tools/demo-ldap.sh
 
