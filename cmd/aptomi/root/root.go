@@ -43,7 +43,7 @@ func init() {
 	common.AddDefaultFlags(Command, envPrefix)
 
 	// add server-specific flags
-	common.AddStringFlag(Command, "db.connection", "db", "", "/var/lib/aptomi/db.bolt", envPrefix+"_DB_CONN", "DB connection string")
+	common.AddStringSliceFlag(Command, "db.endpoints", "db", "", []string{"127.0.0.1:2379"}, envPrefix+"_DB_ENDPOINTS", "DB endpoints")
 	common.AddStringFlag(Command, "ui.schema", "ui-schema", "", "http", envPrefix+"_SCHEMA", "Server UI schema")
 	common.AddBoolFlag(Command, "ui.enable", "ui", "", true, envPrefix+"_UI", "Enable server to serve UI")
 	common.AddDurationFlag(Command, "enforcer.interval", "enforcer-interval", "", 60*time.Second, envPrefix+"_ENFORCER_INTERVAL", "Desired state enforcer interval")
