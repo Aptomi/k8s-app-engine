@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Aptomi/aptomi/pkg/engine"
+	"github.com/Aptomi/aptomi/pkg/engine/resolve"
 	"github.com/Aptomi/aptomi/pkg/runtime"
 	"github.com/Aptomi/aptomi/pkg/runtime/store"
 	"github.com/Aptomi/aptomi/pkg/runtime/store/etcd"
@@ -23,7 +24,7 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 		Endpoints: strings.Split(endpoints, ","),
 	}
 	// todo test with all codecs
-	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(engine.TypeRevision), store.NewGobCodec())
+	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(engine.TypeRevision, resolve.TypeComponentInstance), store.NewGobCodec())
 	assert.NoError(t, err)
 	assert.NotNil(t, etcdStore)
 
@@ -77,4 +78,18 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 	err = etcdStore.Find(engine.TypeRevision.Kind, &loadedRevisionBySpecificGen, store.WithKey(engine.RevisionKey), store.WithGen(42))
 	assert.NoError(t, err)
 	assert.Nil(t, loadedRevisionBySpecificGen)
+
+	compInstance := &resolve.ComponentInstance{
+		TypeKind: resolve.TypeComponentInstance.GetTypeKind(),
+		Metadata: &resolve.ComponentInstanceMetadata{
+			Key: &resolve.ComponentInstanceKey{
+				ClusterNameSpace: "ns",
+			},
+		},
+		IsCode: true,
+	}
+
+	changed, err = etcdStore.Save(compInstance)
+	assert.NoError(t, err)
+	assert.False(t, changed)
 }
