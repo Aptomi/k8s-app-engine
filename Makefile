@@ -1,7 +1,7 @@
 GIT_VERSION=dev-$(shell git describe --tags --long --dirty)
 GIT_COMMIT=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-GOENV=CGO_ENABLED=0
+GOENV=env CGO_ENABLED=0
 GOFLAGS=-ldflags "-X github.com/Aptomi/aptomi/pkg/version.gitVersion=${GIT_VERSION} -X github.com/Aptomi/aptomi/pkg/version.gitCommit=${GIT_COMMIT} -X github.com/Aptomi/aptomi/pkg/version.buildDate=${BUILD_DATE}"
 GO=${GOENV} go
 
@@ -41,7 +41,7 @@ coverage-publish: prepare_goveralls
 
 .PHONY: test
 test:
-	${GO} test -short -v ./...
+	tools/with_etcd.sh ${GO} test -short -v ./...
 	@echo "\nAll unit tests passed"
 
 .PHONY: test-race
