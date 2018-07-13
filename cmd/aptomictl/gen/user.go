@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func newUserCommand(cfg *config.Client) *cobra.Command {
+func newUserCommand(_ *config.Client) *cobra.Command {
 	var username, password string
 
 	cmd := &cobra.Command{

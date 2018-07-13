@@ -57,14 +57,9 @@ func (p *Plugin) ensureTillerTunnel(eventLog *event.Log) error {
 		port := p.tillerTunnel.Local
 		p.tillerHost = fmt.Sprintf("localhost:%d", port)
 
-		helmClient, err := p.newClient()
-		if err != nil {
-			tunnelErr = fmt.Errorf("can't create helm client for just created k8s tunnel for cluster %s: %s", p.cluster.Name, err)
-			eventLog.NewEntry().Debugf("Retrying after error: %s", tunnelErr)
-			return false
-		}
+		helmClient := p.newClient()
 
-		_, err = helmClient.ListReleases(helm.ReleaseListLimit(1))
+		_, err := helmClient.ListReleases(helm.ReleaseListLimit(1))
 		if err != nil {
 			tunnelErr = fmt.Errorf("can't do helm list using just created k8s tunnel for cluster %s: %s", p.cluster.Name, err)
 			eventLog.NewEntry().Debugf("Retrying after error: %s", tunnelErr)

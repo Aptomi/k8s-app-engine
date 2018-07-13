@@ -106,10 +106,7 @@ func (p *Plugin) createOrUpdate(invocation *plugin.CodePluginInvocationParams, c
 		return err
 	}
 
-	helmClient, err := p.newClient()
-	if err != nil {
-		return err
-	}
+	helmClient := p.newClient()
 
 	chartPath, err := p.fetchChart(chartRepo, chartName, chartVersion)
 	if err != nil {
@@ -210,10 +207,7 @@ func (p *Plugin) Destroy(invocation *plugin.CodePluginInvocationParams) error {
 
 	releaseName := getReleaseName(invocation.DeployName)
 
-	helmClient, err := p.newClient()
-	if err != nil {
-		return err
-	}
+	helmClient := p.newClient()
 
 	invocation.EventLog.NewEntry().Infof("Deleting Helm release '%s'", releaseName)
 
@@ -232,10 +226,7 @@ func (p *Plugin) Endpoints(invocation *plugin.CodePluginInvocationParams) (map[s
 		return nil, err
 	}
 
-	helmClient, err := p.newClient()
-	if err != nil {
-		return nil, err
-	}
+	helmClient := p.newClient()
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
@@ -259,10 +250,7 @@ func (p *Plugin) Resources(invocation *plugin.CodePluginInvocationParams) (plugi
 		return nil, err
 	}
 
-	helmClient, err := p.newClient()
-	if err != nil {
-		return nil, err
-	}
+	helmClient := p.newClient()
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {
@@ -286,10 +274,7 @@ func (p *Plugin) Status(invocation *plugin.CodePluginInvocationParams) (bool, er
 		return false, err
 	}
 
-	helmClient, err := p.newClient()
-	if err != nil {
-		return false, err
-	}
+	helmClient := p.newClient()
 
 	namespace := invocation.PluginParams[plugin.ParamTargetSuffix]
 	if len(namespace) <= 0 {

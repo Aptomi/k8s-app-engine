@@ -201,7 +201,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	node.transformLabels(node.labels, node.service.ChangeLabels)
 
 	// Match the context
-	node.context, err = node.getMatchedContext(resolver.policy)
+	node.context, err = node.getMatchedContext()
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func (resolver *PolicyResolver) resolveNode(node *resolutionNode) (resolveErr er
 	node.transformLabels(node.labels, node.context.ChangeLabels)
 
 	// Resolve allocation keys for the context
-	node.allocationKeysResolved, err = node.resolveAllocationKeys(resolver.policy)
+	node.allocationKeysResolved, err = node.resolveAllocationKeys()
 	if err != nil {
 		return err
 	}

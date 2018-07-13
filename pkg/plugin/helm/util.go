@@ -9,8 +9,8 @@ import (
 	"k8s.io/helm/pkg/repo"
 )
 
-func (p *Plugin) newClient() (*helm.Client, error) {
-	return helm.NewClient(helm.Host(p.tillerHost)), nil
+func (p *Plugin) newClient() *helm.Client {
+	return helm.NewClient(helm.Host(p.tillerHost))
 }
 
 func getHelmReleaseInfo(params util.NestedParameterMap) (repository, name, version string, err error) {

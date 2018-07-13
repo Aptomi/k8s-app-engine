@@ -227,13 +227,13 @@ func (v *PolicyValidator) Validate() error {
 }
 
 // adds validation error to the context
-func attachErrorToContext(ctx context.Context, level validator.FieldLevel, errMsg string) {
+func attachErrorToContext(ctx context.Context, _ validator.FieldLevel, errMsg string) {
 	pve := ctx.Value(errorsKey).(*policyValidationError) // nolint: errcheck
 	pve.errList = append(pve.errList, errMsg)
 }
 
 // checks in a given field is a string, and it has a valid value (one of the values from a given string array)
-func validateInStringArray(ctx context.Context, expectedValues []string, fl validator.FieldLevel) bool {
+func validateInStringArray(_ context.Context, expectedValues []string, fl validator.FieldLevel) bool {
 	return util.ContainsString(expectedValues, fl.Field().String())
 }
 
