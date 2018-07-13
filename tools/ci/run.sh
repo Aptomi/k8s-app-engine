@@ -24,7 +24,7 @@ make lint
 DEBUG=yes make smoke
 
 source /jenkins/aptomi-coveralls.io
-make coverage-full coverage-publish
+#make coverage-full coverage-publish
 
 tools/test-install.sh
 
