@@ -33,6 +33,12 @@ func AddDurationFlag(command *cobra.Command, key, flagName, flagShorthand string
 	bindFlagEnv(command, key, flagName, env)
 }
 
+// AddStringSliceFlag adds string slice flag to provided cobra command and registers with provided env variable name
+func AddStringSliceFlag(command *cobra.Command, key, flagName, flagShorthand string, defaultValue []string, env, usage string) {
+	command.PersistentFlags().StringArrayP(flagName, flagShorthand, defaultValue, usage)
+	bindFlagEnv(command, key, flagName, env)
+}
+
 func bindFlagEnv(command *cobra.Command, key, flagName, env string) {
 	err := viper.BindPFlag(key, command.PersistentFlags().Lookup(flagName))
 	if err != nil {
