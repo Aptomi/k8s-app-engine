@@ -22,7 +22,8 @@ func TestEtcdStoreBaseFunctionality(t *testing.T) {
 		Prefix:    t.Name(),
 		Endpoints: strings.Split(endpoints, ","),
 	}
-	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(engine.TypeRevision), store.NewJSONCodec())
+	// todo test with all codecs
+	etcdStore, err := etcd.New(cfg, runtime.NewTypes().Append(engine.TypeRevision), store.NewGobCodec())
 	assert.NoError(t, err)
 	assert.NotNil(t, etcdStore)
 
