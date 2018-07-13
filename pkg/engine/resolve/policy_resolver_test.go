@@ -517,7 +517,7 @@ func resolvePolicy(t *testing.T, builder *builder.PolicyBuilder, expected []veri
 	return result
 }
 
-func getInstanceByParams(t *testing.T, cluster *lang.Cluster, namespace string, service *lang.Service, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent, resolution *PolicyResolution) *ComponentInstance {
+func getInstanceByParams(t *testing.T, cluster *lang.Cluster, namespace string, service *lang.Service, context *lang.Context, allocationKeysResolved []string, bundle *lang.Bundle, component *lang.BundleComponent, resolution *PolicyResolution) *ComponentInstance { // nolint: unparam
 	t.Helper()
 	key := NewComponentInstanceKey(cluster, namespace, service, context, allocationKeysResolved, bundle, component)
 	instance, ok := resolution.ComponentInstanceMap[key.GetKey()]

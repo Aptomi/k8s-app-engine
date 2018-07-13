@@ -13,7 +13,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd/api"
 )
 
-func newClusterCommand(cfg *config.Client) *cobra.Command {
+func newClusterCommand(_ *config.Client) *cobra.Command {
 	var sourceContext, clusterName, defaultNamespace string
 	var local bool
 

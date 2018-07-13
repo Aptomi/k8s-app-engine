@@ -174,7 +174,7 @@ func (node *resolutionNode) getService(policy *lang.Policy) (*lang.Service, erro
 }
 
 // Helper to get a matched context
-func (node *resolutionNode) getMatchedContext(policy *lang.Policy) (*lang.Context, error) {
+func (node *resolutionNode) getMatchedContext() (*lang.Context, error) {
 	// Locate the list of contexts for bundle
 	node.logStartMatchingContexts()
 
@@ -222,7 +222,7 @@ func (node *resolutionNode) getMatchedBundle(policy *lang.Policy) (*lang.Bundle,
 }
 
 // Helper to resolve allocation keys
-func (node *resolutionNode) resolveAllocationKeys(policy *lang.Policy) ([]string, error) {
+func (node *resolutionNode) resolveAllocationKeys() ([]string, error) {
 	// Resolve allocation keys (they can be dynamic, depending on user labels)
 	result, err := node.context.ResolveKeys(node.getContextualDataForContextAllocationTemplate(), node.resolver.templateCache)
 	if err != nil {
@@ -242,7 +242,7 @@ func (node *resolutionNode) componentMatches(component *lang.BundleComponent) (b
 		return false, node.errorWhenTestingComponent(component, err)
 	}
 	if !matched {
-		node.logComponentNotMatched(component)
+		node.logComponentNotMatched()
 	}
 	return matched, nil
 }
@@ -320,7 +320,7 @@ func (node *resolutionNode) processRulesWithinNamespace(policyNamespace *lang.Po
 		}
 	}
 
-	node.logRulesProcessingResult(policyNamespace, result)
+	node.logRulesProcessingResult(policyNamespace)
 	return nil
 }
 

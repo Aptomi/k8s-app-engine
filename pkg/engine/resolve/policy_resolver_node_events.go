@@ -115,7 +115,7 @@ func (node *resolutionNode) logContextMatched(contextMatched *lang.Context) {
 	node.eventLog.NewEntry().Infof("Found matching context within service '%s': %s", node.service.Name, contextMatched.Name)
 }
 
-func (node *resolutionNode) logComponentNotMatched(component *lang.BundleComponent) {
+func (node *resolutionNode) logComponentNotMatched() {
 	node.eventLog.NewEntry().Infof("Component criteria evaluated to 'false', excluding it from processing: bundle '%s', component '%s'", node.bundle.Name, node.component.Name)
 }
 
@@ -123,7 +123,7 @@ func (node *resolutionNode) logTestedContextCriteria(context *lang.Context, matc
 	node.eventLog.NewEntry().Debugf("Trying context '%s' within service '%s'. Matched = %t", context.Name, node.service.Name, matched)
 }
 
-func (node *resolutionNode) logRulesProcessingResult(policyNamespace *lang.PolicyNamespace, result *lang.RuleActionResult) {
+func (node *resolutionNode) logRulesProcessingResult(policyNamespace *lang.PolicyNamespace) {
 	node.eventLog.NewEntry().Debugf("Rules processed within namespace '%s' for context '%s' within service '%s'", policyNamespace.Name, node.context.Name, node.service.Name)
 }
 

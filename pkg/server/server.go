@@ -107,7 +107,7 @@ func (server *Server) initPolicyOnFirstRun() {
 }
 
 func (server *Server) initExternalData() {
-	var userLoaders []users.UserLoader
+	userLoaders := make([]users.UserLoader, 0)
 	for _, ldap := range server.cfg.Users.LDAP {
 		userLoaders = append(userLoaders, users.NewUserLoaderFromLDAP(ldap, server.cfg.DomainAdminOverrides))
 	}
