@@ -7,7 +7,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Aptomi/k8s-app-engine.svg)](https://github.com/Aptomi/k8s-app-engine/commits/master)
 [![Slack Status](https://img.shields.io/badge/slack-join_channel-ff69b4.svg)](http://slack.aptomi.io)
 
-Engine for development teams that simplifies the roll-out and operation of container-based applications on **Kubernetes**. It introduces a service-centric abstraction, which allows users to compose applications from multiple connected components. Aptomi supports components packaged using Helm, ksonnet, k8s YAMLs, and any other Kubernetes-friendly way!
+Engine for development teams that simplifies the roll-out and operation of container-based applications on **Kubernetes**. It introduces a service-centric abstraction, which allows users to compose applications from multiple connected components. It supports components packaged using Helm, ksonnet, k8s YAMLs, and any other Kubernetes-friendly way!
 
 This approach to **application delivery** becomes especially powerful in a **multi-team** setup, where components owned by different teams must be put together into a service. With ownership boundaries, Dev teams can specify **multi-cluster** and **multi-env** (e.g. dev, stage, prod) service behavior, as well as control the lifecycle and updates of their respective services.
 
